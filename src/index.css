@@ -1,0 +1,164 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@500;600;700&display=swap');
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --m3-primary: #0284c7;
+  --m3-primary-light: #e0f2fe;
+  --m3-primary-dark: #075985;
+  --m3-text: #1d1b20;
+  --m3-secondary: #49454f;
+  --m3-bg: #f8fafc;
+  --m3-sidebar: #f1f5f9;
+  --m3-border: #cbd5e1;
+  --m3-hover: #e2e8f0;
+  --m3-toolbar: #f1f5f9;
+  --m3-card: #ffffff;
+  --m3-input: #79747e;
+  
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --font-display: "Outfit", var(--font-sans);
+  --font-mono: "JetBrains Mono", monospace;
+}
+
+.dark {
+  --m3-primary: #38bdf8;
+  --m3-primary-light: #0c4a6e;
+  --m3-primary-dark: #082f49;
+  --m3-text: #E6E1E5;
+  --m3-secondary: #CAC4D0;
+  --m3-bg: #0f172a;
+  --m3-sidebar: #1e293b;
+  --m3-border: #334155;
+  --m3-hover: #0f172a;
+  --m3-toolbar: #1e293b;
+  --m3-card: #1C1B1F;
+  --m3-input: #938F99;
+}
+
+@theme {
+  --color-m3-primary: var(--m3-primary);
+  --color-m3-primary-light: var(--m3-primary-light);
+  --color-m3-primary-dark: var(--m3-primary-dark);
+  --color-m3-text: var(--m3-text);
+  --color-m3-secondary: var(--m3-secondary);
+  --color-m3-bg: var(--m3-bg);
+  --color-m3-sidebar: var(--m3-sidebar);
+  --color-m3-border: var(--m3-border);
+  --color-m3-hover: var(--m3-hover);
+  --color-m3-toolbar: var(--m3-toolbar);
+  --color-m3-card: var(--m3-card);
+  --color-m3-input: var(--m3-input);
+  
+  --font-sans: var(--font-sans);
+  --font-display: var(--font-display);
+  --font-mono: var(--font-mono);
+}
+
+/* Custom Scrollbars */
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--m3-border);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--m3-primary);
+}
+
+/* App Containers */
+body {
+  font-family: var(--font-sans);
+  background-color: var(--m3-bg);
+  color: var(--m3-text);
+  overflow: hidden;
+}
+
+/* Syntax Highlighting Overlay for ChordPro Editor */
+.chordpro-highlight mark {
+  background: transparent;
+}
+
+/* Print Stylesheet for High Quality PDFs */
+@media print {
+  body {
+    background: white !important;
+    color: black !important;
+    overflow: visible !important;
+    font-size: 12pt;
+  }
+  
+  /* Hide non-printable elements */
+  .no-print,
+  nav,
+  aside,
+  button,
+  .print-toggle-row,
+  .unsaved-dot {
+    display: none !important;
+  }
+
+  /* Full screen width for printed page content */
+  .print-page {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    background: transparent !important;
+  }
+
+  /* Song Page Break Rules */
+  .print-song-card {
+    page-break-after: always;
+    break-after: page;
+    margin-bottom: 2rem;
+    padding: 1rem 0;
+    border: none !important;
+  }
+
+  .print-song-card:last-child {
+    page-break-after: avoid;
+    break-after: auto;
+  }
+
+  /* Keep titles and their following notes or verses together */
+  h1, h2, h3 {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  /* Keep ChordPro verse blocks intact */
+  .song-verse-block {
+    page-break-inside: avoid;
+    break-inside: avoid;
+    margin-bottom: 1.5rem;
+  }
+
+  /* Ensure lyrics text is crisp and black */
+  .lyrics-line {
+    color: black !important;
+  }
+
+  /* Ensure printed chords are bold and readable */
+  .chord-label {
+    color: #0369a1 !important; /* Rich sky-700 in print */
+    font-weight: bold !important;
+  }
+}
