@@ -4,7 +4,7 @@
  */
 
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useOutletContext } from 'react-router-dom';
 import { useSongs } from '../../hooks/useSongs';
 import { useFolders } from '../../hooks/useFolders';
 import { Song } from '../../types';
@@ -25,11 +25,11 @@ import { Badge } from '../../components/common/Badge';
 
 interface SongsPageProps {
   hideHeader?: boolean;
-  searchQuery?: string;
-  sortBy?: 'title' | 'artist' | 'updatedAt';
-  sortOrder?: 'asc' | 'desc';
-  selectedKey?: string;
-  selectedTag?: string;
+  actualSearchQuery?: string;
+  actualSortBy?: 'title' | 'artist' | 'updatedAt';
+  actualSortOrder?: 'asc' | 'desc';
+  actualSelectedKey?: string;
+  actualSelectedTag?: string;
   searchFields?: {
     title: boolean;
     artist: boolean;
@@ -45,9 +45,17 @@ export const SongsPage: React.FC<SongsPageProps> = ({
   sortOrder: externalSortOrder,
   selectedKey,
   selectedTag,
-  searchFields
+  searchFields: externalSearchFields
 }) => {
   const navigate = useNavigate();
+  const context = useOutletContext<any>() || {};
+  const actualSearchQuery = externalSearchQuery ?? context.SearchQuery ?? '';
+  const actualSortBy = externalSortBy ?? context.SortBy ?? 'title';
+  const actualSortOrder = externalSortOrder ?? context.SortOrder ?? 'asc';
+  const actualSelectedKey = selectedKey ?? context.SelectedKey ?? '';
+  const actualSelectedTag = selectedTag ?? context.SelectedTag ?? '';
+  const actualSearchFields = externalSearchFields ?? context.SearchFields ?? { title: true, artist: true, content: true, tags: true };
+
 
   // Search, Filtering, Pagination, Sorting State
   const [internalSearchQuery, setInternalSearchQuery] = useState('');
@@ -63,7 +71,7 @@ export const SongsPage: React.FC<SongsPageProps> = ({
   // Reset page when filters change
   React.useEffect(() => {
     setPage(1);
-  }, [finalSearchQuery, finalSortBy, finalSortOrder, selectedKey, selectedTag, searchFields, selectedFolder]);
+  }, [finalSearchQuery, finalSortBy, finalSortOrder, actualSelectedKey, actualSelectedTag, actualSearchFields, selectedFolder]);
 
   const { songsQuery, createSong, deleteSong, renameSong, moveSong } = useSongs({
     search: finalSearchQuery,
@@ -72,9 +80,9 @@ export const SongsPage: React.FC<SongsPageProps> = ({
     sortOrder: finalSortOrder,
     page,
     limit: 20, // Increased limit for better library view
-    key: selectedKey || undefined,
-    tag: selectedTag || undefined,
-    searchFields: searchFields,
+    key: actualSelectedKey || undefined,
+    tag: actualSelectedTag || undefined,
+    searchFields: actualSearchFields,
   });
 
   const { foldersQuery } = useFolders();
