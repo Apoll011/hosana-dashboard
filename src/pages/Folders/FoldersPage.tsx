@@ -302,22 +302,6 @@ export const FoldersPage: React.FC = () => {
           </table>
         </div>
       )}
-
-      {/* Marquee rubberband drag selection box */}
-      {selectionBox && (
-        <div
-          style={{
-            position: 'fixed',
-            left: selectionBox.x,
-            top: selectionBox.y,
-            width: selectionBox.width,
-            height: selectionBox.height,
-            pointerEvents: 'none',
-            zIndex: 40,
-          }}
-          className="border border-[#0284c7] bg-[#0284c7]/20 rounded-lg shadow-xs backdrop-blur-[0.5px]"
-        />
-      )}
     </div>
   );
 };

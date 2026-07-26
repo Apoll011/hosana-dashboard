@@ -200,7 +200,7 @@ export const ServiceDetailPage: React.FC = () => {
     return (
       <div className="flex-1 flex flex-col items-center justify-center p-12 text-center">
         <h2 className="text-lg font-bold">Plano de Culto Não Encontrado</h2>
-        <Button variant="primary" icon={<ArrowLeft className="w-4 h-4" />} onClick={() => { window.history.length > 2 ? navigate(-1) : navigate('/services') }}>
+        <Button variant="primary" icon={<ArrowLeft className="w-4 h-4" />} onClick={() => navigate(-1)}>
           Voltar
         </Button>
       </div>
@@ -268,16 +268,8 @@ export const ServiceDetailPage: React.FC = () => {
 
   return (
     <div className="flex-1 flex flex-col p-4 sm:p-6 max-w-5xl w-full mx-auto space-y-6">
-      {/* Top Navigation */}
-      <div className="flex items-center justify-between">
-        <button
-          onClick={() => { window.history.length > 2 ? navigate(-1) : navigate('/services') }}
-          className="flex items-center gap-2 text-xs font-semibold text-slate-600 hover:text-slate-900 cursor-pointer"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          <span>Voltar aos Cultos</span>
-        </button>
-
+      {/* Date Badge */}
+      <div className="flex items-center justify-end">
         <Badge variant="sky">
           <Calendar className="w-3.5 h-3.5 mr-1" />
           {new Date(service.date).toLocaleDateString(undefined, {

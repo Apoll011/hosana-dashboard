@@ -4,6 +4,7 @@
  */
 
 import React, { useState } from 'react';
+import { useOutletContext } from 'react-router-dom';
 import { QRCodeSVG } from 'qrcode.react';
 import { useMusicians } from '../../hooks/useMusicians';
 import { MusicianToken } from '../../types';
@@ -25,6 +26,8 @@ interface MusiciansPageProps {
 
 export const MusiciansPage: React.FC<MusiciansPageProps> = ({ hideHeader }) => {
   const { showToast } = useSync();
+  const context = useOutletContext<any>() || {};
+  const actualHideHeader = hideHeader ?? context.hideHeader;
   const { tokensQuery, createToken, revokeToken, regenerateToken, deleteTokenPermanently } = useMusicians();
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -64,9 +67,9 @@ export const MusiciansPage: React.FC<MusiciansPageProps> = ({ hideHeader }) => {
   };
 
   return (
-    <div className={`flex-1 flex flex-col w-full mx-auto space-y-6 ${hideHeader ? 'p-6' : 'p-4 sm:p-6 max-w-7xl'}`}>
+    <div className={`flex-1 flex flex-col w-full mx-auto space-y-6 overflow-y-auto h-full ${hideHeader ? 'p-6' : 'p-4 sm:p-6 max-w-7xl'}`}>
       {/* Header Banner */}
-      {!hideHeader && (
+      {!actualHideHeader && (
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight flex items-center gap-2.5">

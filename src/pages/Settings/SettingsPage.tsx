@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useEffect, useRef } from 'react';
+import { useOutletContext } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { useSettings } from '../../hooks/useSettings';
 import { useSync } from '../../contexts/SyncContext';
@@ -28,6 +29,8 @@ interface SettingsPageProps {
 export const SettingsPage: React.FC<SettingsPageProps> = ({ hideHeader }) => {
   const queryClient = useQueryClient();
   const { showToast } = useSync();
+  const context = useOutletContext<any>() || {};
+  const actualHideHeader = hideHeader ?? context.hideHeader;
   const { darkMode, toggleDarkMode } = useTheme();
   const { settingsQuery, updateSettings, isUpdating } = useSettings();
 
@@ -142,9 +145,9 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ hideHeader }) => {
   }
 
   return (
-    <div className={`flex-1 flex flex-col w-full mx-auto space-y-6 ${hideHeader ? 'p-6' : 'p-4 sm:p-6 max-w-4xl'}`}>
+    <div className={`flex-1 flex flex-col w-full mx-auto space-y-6 overflow-y-auto h-full ${hideHeader ? 'p-6' : 'p-4 sm:p-6 max-w-4xl'}`}>
       {/* Header Banner */}
-      {!hideHeader && (
+      {!actualHideHeader && (
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight flex items-center gap-2.5">
