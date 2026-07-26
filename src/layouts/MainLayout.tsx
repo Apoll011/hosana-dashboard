@@ -360,9 +360,7 @@ export const MainLayout: React.FC = () => {
   // API Hooks
   const { foldersQuery, createFolder, renameFolder, moveFolder, deleteFolder } = useFolders();
 
-  const songParams = useMemo(() => ({
-    limit: 1000,
-  }), []);
+  const songParams = useMemo(() => ({}), []);
 
   const { songsQuery, renameSong, moveSong, deleteSong, updateBatchTags } = useSongs(songParams);
 
