@@ -9,7 +9,7 @@ import { QRCodeSVG } from 'qrcode.react';
 import { useMusicians } from '../../hooks/useMusicians';
 import { MusicianToken } from '../../types';
 import {
-  QrCode, Plus, Copy, Check, Trash2, ShieldAlert, Clock, Smartphone, Share2
+  QrCode, Plus, Copy, Check, Trash2, ShieldAlert, Clock, Smartphone, Share2, Lock
 } from 'lucide-react';
 import { Button } from '../../components/common/Button';
 import { Modal } from '../../components/common/Modal';
