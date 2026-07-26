@@ -47,8 +47,8 @@ export const SongEditorPage: React.FC = () => {
         <p className="text-sm text-slate-500 mt-1 mb-6">
           {error ? (error as Error).message : "O cântico solicitado não existe ou foi apagado."}
         </p>
-        <Button variant="primary" icon={<ArrowLeft className="w-4 h-4" />} onClick={() => navigate('/songs')}>
-          Voltar à Biblioteca de Cânticos
+        <Button variant="primary" icon={<ArrowLeft className="w-4 h-4" />} onClick={() => { window.history.length > 2 ? navigate(-1) : navigate('/folders') }}>
+          Voltar
         </Button>
       </div>
     );
@@ -74,7 +74,7 @@ export const SongEditorPage: React.FC = () => {
       <div className="h-16 bg-m3-sidebar/30 border-b border-m3-border flex items-center justify-between px-6 shrink-0 gap-4 transition-all duration-300">
         <div className="flex items-center gap-4 min-w-0">
           <button
-            onClick={() => navigate('/songs')}
+            onClick={() => { window.history.length > 2 ? navigate(-1) : navigate('/folders') }}
             className="group flex items-center gap-2 p-2 rounded-xl text-m3-secondary hover:text-m3-primary hover:bg-m3-primary/10 transition-all cursor-pointer shrink-0"
           >
             <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />

@@ -4,7 +4,7 @@
  */
 
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useOutletContext } from 'react-router-dom';
 import { useServices } from '../../hooks/useServices';
 import { Service } from '../../types';
 import {
@@ -23,8 +23,11 @@ interface ServicesPageProps {
   searchQuery?: string;
 }
 
-export const ServicesPage: React.FC<ServicesPageProps> = ({ hideHeader, searchQuery = '' }) => {
+export const ServicesPage: React.FC<ServicesPageProps> = ({ hideHeader, searchQuery: externalSearchQuery = '' }) => {
   const navigate = useNavigate();
+  const context = useOutletContext<any>() || {};
+  const actualSearchQuery = externalSearchQuery ?? context.searchQuery ?? '';
+
 
   const { servicesQuery, createService, deleteService } = useServices();
 
@@ -34,13 +37,13 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({ hideHeader, searchQu
   const services = servicesQuery.data || [];
   
   const filteredServices = React.useMemo(() => {
-    if (!searchQuery.trim()) return services;
-    const lowerQuery = searchQuery.toLowerCase();
+    if (!actualSearchQuery.trim()) return services;
+    const lowerQuery = actualSearchQuery.toLowerCase();
     return services.filter(service => 
       service.name.toLowerCase().includes(lowerQuery) || 
       (service.notes && service.notes.toLowerCase().includes(lowerQuery))
     );
-  }, [services, searchQuery]);
+  }, [services, actualSearchQuery]);
 
   const handleCreateServiceSubmit = async (data: { name: string; date: string; notes: string }) => {
     const newService = await createService({
