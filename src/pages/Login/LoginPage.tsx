@@ -10,6 +10,7 @@ import { httpClient } from '../../api/client';
 import { Layers, Lock, Mail, ArrowRight, ShieldCheck, AlertCircle } from 'lucide-react';
 import { Button } from '../../components/common/Button';
 import { Input } from '../../components/common/Input';
+import bg from '../../assets/images/background.webp';
 
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
@@ -47,7 +48,7 @@ export const LoginPage: React.FC = () => {
       {/* Background Image */}
       <div className="absolute inset-0 z-0">
         <img 
-          src="/src/assets/images/jesus-tomb-location-concept (1).webp" 
+          src={bg}
           alt="Background" 
           className="w-full h-full object-cover"
           referrerPolicy="no-referrer"
