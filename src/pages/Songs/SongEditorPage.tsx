@@ -73,18 +73,7 @@ export const SongEditorPage: React.FC = () => {
       {/* Top Breadcrumb Navigation */}
       <div className="h-16 bg-m3-sidebar/30 border-b border-m3-border flex items-center justify-between px-6 shrink-0 gap-4 transition-all duration-300">
         <div className="flex items-center gap-4 min-w-0">
-          <button
-            onClick={() => { window.history.length > 2 ? navigate(-1) : navigate('/folders') }}
-            className="group flex items-center gap-2 p-2 rounded-xl text-m3-secondary hover:text-m3-primary hover:bg-m3-primary/10 transition-all cursor-pointer shrink-0"
-          >
-            <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
-            <span className="hidden sm:inline font-black uppercase tracking-widest text-[10px]">Voltar</span>
-          </button>
-          <div className="h-6 w-px bg-m3-border/30 hidden sm:block" />
           <div className="flex flex-col min-w-0">
-            <h1 className="text-sm font-black text-m3-text truncate max-w-[120px] sm:max-w-sm">
-              {song.title}
-            </h1>
             <span className="text-[9px] font-bold text-m3-primary uppercase tracking-[0.2em] opacity-60">ChordPro Editor</span>
           </div>
         </div>
@@ -92,7 +81,7 @@ export const SongEditorPage: React.FC = () => {
         <div className="flex items-center gap-3 shrink-0">
           <button
             onClick={() => setShowPreview(!showPreview)}
-            className={`flex items-center gap-2 px-4 py-2.5 text-[10px] font-black uppercase tracking-widest rounded-2xl border transition-all cursor-pointer ${
+            className={`flex items-center gap-2 px-3 py-2 text-[10px] font-black uppercase tracking-widest rounded-xl border transition-all cursor-pointer ${
               showPreview 
                 ? 'bg-m3-primary/10 border-m3-primary/30 text-m3-primary' 
                 : 'bg-m3-card border-m3-border text-m3-secondary hover:bg-m3-hover'
@@ -108,7 +97,7 @@ export const SongEditorPage: React.FC = () => {
             icon={<Save className="w-4 h-4" />}
             isLoading={isUpdating}
             onClick={() => handleSave(song.id, content)}
-            className="rounded-2xl px-6 py-5 font-black uppercase tracking-widest text-[10px] shadow-lg shadow-m3-primary/20"
+            className="rounded-xl font-black uppercase tracking-widest text-[10px] shadow-lg shadow-m3-primary/20"
           >
             Guardar
           </Button>

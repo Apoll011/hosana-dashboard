@@ -49,12 +49,13 @@ export const SongsPage: React.FC<SongsPageProps> = ({
 }) => {
   const navigate = useNavigate();
   const context = useOutletContext<any>() || {};
-  const actualSearchQuery = externalSearchQuery ?? context.SearchQuery ?? '';
-  const actualSortBy = externalSortBy ?? context.SortBy ?? 'title';
-  const actualSortOrder = externalSortOrder ?? context.SortOrder ?? 'asc';
-  const actualSelectedKey = selectedKey ?? context.SelectedKey ?? '';
-  const actualSelectedTag = selectedTag ?? context.SelectedTag ?? '';
-  const actualSearchFields = externalSearchFields ?? context.SearchFields ?? { title: true, artist: true, content: true, tags: true };
+  const actualHideHeader = hideHeader ?? context.hideHeader;
+  const actualSearchQuery = externalSearchQuery ?? context.searchQuery ?? '';
+  const actualSortBy = externalSortBy ?? context.sortBy ?? 'title';
+  const actualSortOrder = externalSortOrder ?? context.sortOrder ?? 'asc';
+  const actualSelectedKey = selectedKey ?? context.selectedKey ?? '';
+  const actualSelectedTag = selectedTag ?? context.selectedTag ?? '';
+  const actualSearchFields = externalSearchFields ?? context.searchFields ?? { title: true, artist: true, content: true, tags: true };
 
 
   // Search, Filtering, Pagination, Sorting State
@@ -64,9 +65,15 @@ export const SongsPage: React.FC<SongsPageProps> = ({
   const [internalSortOrder, setInternalSortOrder] = useState<'asc' | 'desc'>('asc');
   const [page, setPage] = useState(1);
 
-  const finalSearchQuery = externalSearchQuery !== undefined ? externalSearchQuery : internalSearchQuery;
-  const finalSortBy = externalSortBy !== undefined ? externalSortBy : internalSortBy;
-  const finalSortOrder = externalSortOrder !== undefined ? externalSortOrder : internalSortOrder;
+  const finalSearchQuery = externalSearchQuery !== undefined 
+    ? externalSearchQuery 
+    : (context.searchQuery !== undefined ? context.searchQuery : internalSearchQuery);
+  const finalSortBy = externalSortBy !== undefined 
+    ? externalSortBy 
+    : (context.sortBy !== undefined ? context.sortBy : internalSortBy);
+  const finalSortOrder = externalSortOrder !== undefined 
+    ? externalSortOrder 
+    : (context.sortOrder !== undefined ? context.sortOrder : internalSortOrder);
 
   // Reset page when filters change
   React.useEffect(() => {
@@ -142,9 +149,9 @@ export const SongsPage: React.FC<SongsPageProps> = ({
   }, [deleteTarget, deleteSong]);
 
   return (
-    <div className={`flex-1 flex flex-col w-full mx-auto space-y-6 animate-in fade-in duration-500 ${hideHeader ? 'p-6' : 'p-4 sm:p-8 max-w-7xl'}`}>
+    <div className={`flex-1 flex flex-col w-full mx-auto space-y-6 animate-in fade-in duration-500 overflow-y-auto h-full ${hideHeader ? 'p-6' : 'p-4 sm:p-8 max-w-7xl'}`}>
       {/* Header Banner */}
-      {!hideHeader && (
+      {!actualHideHeader && (
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
           <div>
             <h1 className="text-3xl font-black text-m3-text tracking-tighter flex items-center gap-4">
@@ -181,7 +188,7 @@ export const SongsPage: React.FC<SongsPageProps> = ({
       )}
 
       {/* Search & Filters Toolbar */}
-      {!hideHeader && (
+      {!actualHideHeader && (
         <div className="flex flex-wrap items-center justify-between gap-3 p-4 bg-m3-sidebar/30 border border-m3-border rounded-[28px] shadow-lg shadow-black/5 transition-all">
           <div className="flex-1 min-w-[240px] max-w-lg">
             <Input

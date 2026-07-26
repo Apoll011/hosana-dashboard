@@ -251,6 +251,7 @@ export const MainLayout: React.FC = () => {
   const isMusiciansView = location.pathname.startsWith('/musicians');
   const isSettingsView = location.pathname.startsWith('/settings');
   const isExplorerView = location.pathname.startsWith('/folders') || (!isSongsView && !isSongEditorView && !isServicesView && !isServiceEditorView && !isMusiciansView && !isSettingsView);
+  const isEditorView = isSongEditorView || isServiceEditorView;
 
   // Plus Dropdown State
   const [isPlusMenuOpen, setIsPlusMenuOpen] = useState(false);
@@ -275,7 +276,8 @@ export const MainLayout: React.FC = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
   const { showToast } = useSync();
-  const { createService } = useServices();
+  const { servicesQuery, createService, deleteService } = useServices();
+  const allServices = useMemo(() => servicesQuery.data || [], [servicesQuery.data]);
 
   // Folder state: null = Root directory
   const [currentFolderId, setCurrentFolderId] = useState<string | null>(null);
@@ -463,6 +465,40 @@ export const MainLayout: React.FC = () => {
     }
     return trail;
   }, [currentFolderId, allFolders]);
+
+  const currentSongId = isSongEditorView ? location.pathname.split('/').pop() : null;
+  const currentSong = useMemo(() => allSongs.find(s => s.id === currentSongId), [allSongs, currentSongId]);
+
+  const songBreadcrumbs = useMemo(() => {
+    if (!currentSong || !currentSong.folderId) return [];
+    const trail: Folder[] = [];
+    let curr: Folder | undefined = allFolders.find((f) => f.id === currentSong.folderId);
+    const visited = new Set<string>();
+
+    while (curr && !visited.has(curr.id)) {
+      visited.add(curr.id);
+      trail.unshift(curr);
+      curr = curr.parentId ? allFolders.find((f) => f.id === curr?.parentId) : undefined;
+    }
+    return trail;
+  }, [currentSong, allFolders]);
+
+  const currentSongFileName = useMemo(() => {
+    if (!currentSong) return '';
+    let title = currentSong.title || '';
+    if (title.endsWith('.chordpro') || title.endsWith('.pro') || title.endsWith('.txt') || title.endsWith('.chopro')) {
+      return title;
+    }
+    let ext = '.chordpro';
+    if (currentSong.path) {
+      const match = currentSong.path.match(/\.[a-z0-9]+$/i);
+      if (match) ext = match[0];
+    }
+    return `${title}${ext}`;
+  }, [currentSong]);
+
+  const currentServiceId = isServiceEditorView ? location.pathname.split('/').pop() : null;
+  const currentService = useMemo(() => allServices.find(s => s.id === currentServiceId), [allServices, currentServiceId]);
 
   // Is searching or filtering active?
   const isSearchingOrFiltering = Boolean(
@@ -1081,392 +1117,512 @@ export const MainLayout: React.FC = () => {
 
   return (
     <>
-    <div className="flex-1 flex flex-col p-2 sm:p-4 md:p-0 h-full w-full mx-auto">
-      {/* Hidden File Input for Multiple ChordPro Uploads */}
-      <input
-        type="file"
-        ref={fileInputRef}
-        multiple
-        accept=".pro,.chordpro,.txt,.chopro"
-        onChange={handleChordProFileUpload}
-        className="hidden"
-      />
+    <div className="h-dvh max-h-dvh w-full flex flex-row overflow-hidden bg-m3-bg">
+      {/* Mobile Sidebar Overlay */}
+      {isSidebarOpen && (
+        <div 
+          className="md:hidden fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-40"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
 
-      {/* Explorador de Ficheiros Window Container */}
-      <div className="bg-m3-card border md:border-none border-m3-border rounded-[32px] md:rounded-none shadow-2xl md:shadow-none shadow-black/10 overflow-hidden flex flex-col flex-1 h-full transition-all duration-300">
-        
-        {/* Explorer Address Bar & Toolbar */}
-        <div className="p-3 sm:p-4 bg-m3-sidebar/40 border-b border-m3-border/50 flex flex-col md:flex-row items-center justify-between gap-3 sm:gap-4">
-          
-          {/* Navigation Controls & Address Bar */}
-          <div className="flex items-center gap-2 sm:gap-3 flex-1 w-full md:w-auto">
-            {/* Mobile Sidebar Toggle */}
-            <button
-              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-              className="md:hidden p-2.5 rounded-2xl border transition-all text-m3-primary border-m3-primary/30 hover:bg-m3-primary hover:text-white bg-m3-card cursor-pointer shadow-sm shrink-0"
-            >
-              <Menu className="w-4.5 h-4.5" />
-            </button>
-            {/* Up / Back Button */}
-            <button
-              onClick={() => handleSelectFolder(currentFolder?.parentId || null)}
-              disabled={currentFolderId === null}
-              title={
-                currentFolderId === null
-                  ? 'No Nível Raiz'
-                  : currentFolder?.parentId
-                  ? 'Subir um nível'
-                  : 'Subir para a pasta Raiz'
-              }
-              className={`p-2.5 rounded-2xl border transition-all ${
-                currentFolderId === null
-                  ? 'text-m3-secondary/30 bg-m3-bg border-m3-border/30 cursor-not-allowed opacity-50'
-                  : 'text-m3-primary border-m3-primary/30 hover:bg-m3-primary hover:text-white bg-m3-card cursor-pointer shadow-sm hover:shadow-m3-primary/20'
-              }`}
-            >
-              <CornerLeftUp className="w-4.5 h-4.5" />
-            </button>
-
-            {/* Address Path Bar */}
-            <div className="flex-1 flex items-center gap-2 px-4 py-2.5 bg-m3-bg border border-m3-border rounded-2xl text-[13px] overflow-x-auto select-none hide-scrollbar shadow-inner min-w-0">
-              <button
-                onClick={() => handleSelectFolder(null)}
-                className={`flex items-center gap-2 font-black uppercase tracking-widest transition-all cursor-pointer shrink-0 ${
-                  currentFolderId === null
-                    ? 'text-m3-primary'
-                    : 'text-m3-secondary hover:text-m3-text'
-                }`}
-              >
-                <HardDrive className={`w-4 h-4 ${currentFolderId === null ? 'text-m3-primary' : 'text-m3-secondary'}`} />
-                <span>Início</span>
-              </button>
-
-              {folderBreadcrumbs.map((folder, index) => {
-                const isLast = index === folderBreadcrumbs.length - 1;
-                return (
-                  <React.Fragment key={folder.id}>
-                    <ChevronRight className="w-3.5 h-3.5 text-m3-secondary/40 shrink-0" />
-                    {isLast ? (
-                      <div className="flex items-center gap-2 font-black text-m3-primary shrink-0 uppercase tracking-wide">
-                        <FolderOpen className="w-4 h-4" />
-                        <span>{folder.name}</span>
-                      </div>
-                    ) : (
-                      <button
-                        onClick={() => handleSelectFolder(folder.id)}
-                        className="flex items-center gap-2 font-bold text-m3-secondary hover:text-m3-text transition-all cursor-pointer shrink-0"
-                      >
-                        <FolderIcon className="w-4 h-4 opacity-70" />
-                        <span>{folder.name}</span>
-                      </button>
-                    )}
-                  </React.Fragment>
-                );
-              })}
-            </div>
-
-            {/* Plus Dropdown */}
-            <div className="relative shrink-0 ml-1" ref={plusMenuRef}>
-              <button
-                onClick={() => setIsPlusMenuOpen(!isPlusMenuOpen)}
-                className="w-10 h-10 rounded-2xl bg-m3-primary text-white flex items-center justify-center border border-m3-primary font-black text-lg shadow-xl shadow-m3-primary/20 hover:bg-m3-primary-dark hover:scale-105 active:scale-95 transition-all cursor-pointer"
-                title="Criar..."
-              >
-                <Plus className="w-5 h-5" />
-              </button>
-              {isPlusMenuOpen && (
-                <div className="absolute right-0 top-full mt-3 w-64 bg-m3-card border border-m3-border rounded-[24px] shadow-2xl z-50 p-2 space-y-1 animate-in fade-in slide-in-from-top-2 duration-200">
-                  <div className="px-4 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-m3-secondary opacity-60">
-                    Criar Novo
-                  </div>
-                  <button
-                    onClick={() => {
-                      setIsPlusMenuOpen(false);
-                      setIsCreateSongModalOpen(true);
-                    }}
-                    className="w-full flex items-center gap-4 px-4 py-3 text-xs font-bold text-m3-text hover:bg-m3-hover rounded-2xl transition-all cursor-pointer text-left group"
-                  >
-                    <div className="w-8 h-8 rounded-xl bg-m3-primary/10 text-m3-primary flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-                      <Music className="w-4 h-4" />
-                    </div>
-                    Novo Cântico
-                  </button>
-                  <button
-                    onClick={() => {
-                      setIsPlusMenuOpen(false);
-                      setIsCreateServiceModalOpen(true);
-                    }}
-                    className="w-full flex items-center gap-4 px-4 py-3 text-xs font-bold text-m3-text hover:bg-m3-hover rounded-2xl transition-all cursor-pointer text-left group"
-                  >
-                    <div className="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-                      <Calendar className="w-4 h-4" />
-                    </div>
-                    Novo Plano de Culto
-                  </button>
-                  <button
-                    onClick={() => {
-                      setIsPlusMenuOpen(false);
-                      setIsCreateModalOpen(true);
-                    }}
-                    className="w-full flex items-center gap-4 px-4 py-3 text-xs font-bold text-m3-text hover:bg-m3-hover rounded-2xl transition-all cursor-pointer text-left group"
-                  >
-                    <div className="w-8 h-8 rounded-xl bg-m3-primary-light/10 text-m3-primary flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-                      <FolderPlus className="w-4 h-4" />
-                    </div>
-                    Nova Pasta
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Search Filter, Sorting & View Mode Toggles */}
-          <div className="flex items-center gap-3 w-full md:w-auto overflow-x-auto hide-scrollbar pb-1 md:pb-0">
-            {/* Search Input */}
-            <div className="relative w-full sm:w-64">
-              <Input
-                placeholder={
-                  currentFolder
-                    ? `Pesquisar em "${currentFolder.name}"...`
-                    : "Pesquisar ficheiros..."
-                }
-                value={searchQuery}
-                onChange={(e) => handleSearchChange(e.target.value)}
-                icon={<Search className="w-4 h-4 text-m3-secondary" />}
-                className="py-2.5 text-sm pr-9 rounded-2xl"
-              />
-              {searchQuery && (
-                <button
-                  onClick={() => handleSearchChange('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-m3-secondary hover:text-m3-text hover:bg-m3-hover rounded-lg cursor-pointer transition-all"
-                  title="Limpar pesquisa"
-                >
-                  <X className="w-3.5 h-3.5" />
-                </button>
-              )}
-            </div>
-
-            {!(isServicesView || isServiceEditorView) && (
-              <>
-                {/* Filter Pop-Up Panel Trigger Button */}
-                <button
-                  onClick={() => {
-                    navigateBackToDrive();
-                    setIsFilterPanelOpen(true);
-                  }}
-                  className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl border text-xs font-black uppercase tracking-widest transition-all cursor-pointer relative ${
-                    activeFiltersCount > 0
-                      ? 'bg-m3-primary/10 border-m3-primary text-m3-primary shadow-lg shadow-m3-primary/10'
-                      : 'bg-m3-card border-m3-border text-m3-secondary hover:bg-m3-hover hover:text-m3-text hover:border-m3-primary/30'
-                  }`}
-                  title="Abrir Filtros Avançados"
-                >
-                  <Filter className="w-4 h-4" />
-                  <span className="hidden sm:inline">Filtros</span>
-                  {activeFiltersCount > 0 && (
-                    <span className="w-4.5 h-4.5 rounded-full bg-m3-primary text-white text-[10px] font-black flex items-center justify-center shadow-sm">
-                      {activeFiltersCount}
-                    </span>
-                  )}
-                </button>
-
-                {/* Sort Control Button */}
-                <div className="flex items-center gap-2 bg-m3-bg border border-m3-border rounded-2xl px-3 py-2 text-xs transition-all hover:border-m3-primary/30">
-                  <ArrowUpDown className="w-4 h-4 text-m3-secondary shrink-0" />
-                  <select
-                    value={`${sortBy}-${sortOrder}`}
-                    onChange={(e) => {
-                      const [sb, so] = e.target.value.split('-') as ['title' | 'artist' | 'updatedAt', 'asc' | 'desc'];
-                      handleSortChange(sb, so);
-                    }}
-                    className="bg-transparent font-bold text-m3-text focus:outline-none cursor-pointer text-[11px] uppercase tracking-wider"
-                    title="Organizar ficheiros"
-                  >
-                    <option value="title-asc">Nome (A-Z)</option>
-                    <option value="title-desc">Nome (Z-A)</option>
-                    <option value="artist-asc">Artista (A-Z)</option>
-                    <option value="updatedAt-desc">Data Recente</option>
-                  </select>
-                </div>
-
-                {/* View Mode Toggle */}
-                {!isSongsView && (
-                  <div className="flex items-center p-1 bg-m3-bg rounded-2xl border border-m3-border select-none shrink-0 shadow-inner">
-                    <button
-                      onClick={() => handleViewModeChange('grid')}
-                      title="Vista em Grelha"
-                      className={`p-2 rounded-xl transition-all cursor-pointer ${
-                        viewMode === 'grid'
-                          ? 'bg-m3-card text-m3-primary shadow-lg shadow-black/10'
-                          : 'text-m3-secondary hover:text-m3-text'
-                      }`}
-                    >
-                      <LayoutGrid className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => handleViewModeChange('list')}
-                      title="Vista em Lista"
-                      className={`p-2 rounded-xl transition-all cursor-pointer ${
-                        viewMode === 'list'
-                          ? 'bg-m3-card text-m3-primary shadow-lg shadow-black/10'
-                          : 'text-m3-secondary hover:text-m3-text'
-                      }`}
-                    >
-                      <List className="w-4 h-4" />
-                    </button>
-                  </div>
-                )}
-              </>
-            )}
-
-                      </div>
+      {/* Acesso Rápido Sidebar (Tree View) */}
+      <div className={`${isSidebarOpen ? 'flex absolute inset-y-0 left-0 z-50 bg-m3-sidebar shadow-2xl' : 'hidden'} md:flex md:static md:bg-m3-sidebar/30 w-72 md:w-64 border-r border-m3-border p-4 flex-col gap-1 select-none shrink-0 overflow-y-auto transition-all duration-300`}>
+        <div className="px-3 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-m3-secondary opacity-60">
+          Acesso Rápido
         </div>
 
-        {/* Explorer Split Workspace */}
-        <div className="flex-1 flex overflow-hidden relative">
-          
-          {/* Acesso Rápido Sidebar (Tree View) */}
-          
-          {/* Mobile Sidebar Overlay */}
-          {isSidebarOpen && (
-            <div 
-              className="md:hidden fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-40"
-              onClick={() => setIsSidebarOpen(false)}
-            />
-          )}
-          <div className={`${isSidebarOpen ? 'flex absolute inset-y-0 left-0 z-50 bg-m3-sidebar shadow-2xl' : 'hidden'} md:flex md:static md:bg-m3-sidebar/30 w-72 md:w-64 border-r border-m3-border p-4 flex-col gap-1 select-none shrink-0 overflow-y-auto transition-all duration-300`}>
-            
-            <div className="px-3 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-m3-secondary opacity-60">
-              Acesso Rápido
-            </div>
+        <button
+          onClick={() => {
+            setCurrentFolderId(null);
+            navigate('/folders');
+            if (window.innerWidth < 768) setIsSidebarOpen(false);
+          }}
+          className={`w-full flex items-center justify-between px-4 py-3 text-[13px] font-bold rounded-2xl transition-all cursor-pointer group ${
+            isExplorerView && currentFolderId === null
+              ? 'bg-m3-primary/10 text-m3-primary border border-m3-primary/20 shadow-sm'
+              : 'text-m3-secondary hover:bg-m3-hover hover:text-m3-text'
+          }`}
+        >
+          <div className="flex items-center gap-3">
+            <HardDrive className={`w-4.5 h-4.5 ${isExplorerView && currentFolderId === null ? 'text-m3-primary' : 'text-m3-secondary'}`} />
+            <span>O Meu Drive</span>
+          </div>
+          <Badge variant={isExplorerView && currentFolderId === null ? 'sky' : 'slate'}>{rootSongsCount}</Badge>
+        </button>
 
-            <button
-              onClick={() => {
-                setCurrentFolderId(null);
-                navigate('/folders');
+        <button
+          onClick={() => {
+            navigate('/songs');
+            if (window.innerWidth < 768) setIsSidebarOpen(false);
+          }}
+          className={`w-full flex items-center justify-between px-4 py-3 text-[13px] font-bold rounded-2xl transition-all cursor-pointer group ${
+            isSongsView
+              ? 'bg-m3-primary/10 text-m3-primary border border-m3-primary/20 shadow-sm'
+              : 'text-m3-secondary hover:bg-m3-hover hover:text-m3-text'
+          }`}
+        >
+          <div className="flex items-center gap-3">
+            <Music className="w-4.5 h-4.5 text-m3-primary" />
+            <span>Biblioteca</span>
+          </div>
+          <Badge variant={isSongsView ? 'sky' : 'slate'}>{allSongs.length}</Badge>
+        </button>
+
+        <button
+          onClick={() => {
+            navigate('/services');
+            if (window.innerWidth < 768) setIsSidebarOpen(false);
+          }}
+          className={`w-full flex items-center px-4 py-3 text-[13px] font-bold rounded-2xl transition-all cursor-pointer group ${
+            isServicesView
+              ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 shadow-sm'
+              : 'text-m3-secondary hover:bg-m3-hover hover:text-m3-text'
+          }`}
+        >
+          <div className="flex items-center gap-3">
+            <CheckSquare className="w-4.5 h-4.5 text-emerald-500" />
+            <span>Cultos</span>
+          </div>
+        </button>
+
+        <div className="mt-6 px-3 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-m3-secondary opacity-60">
+          Diretórios ({allFolders.length})
+        </div>
+
+        {/* Hierarchical Folder Tree */}
+        <div className="flex-1 overflow-y-auto flex flex-col gap-1 pr-1 custom-scrollbar">
+          {folderTree.map((node) => (
+            <FolderTreeItem
+              key={node.folder.id}
+              node={node}
+              currentFolderId={currentFolderId}
+              onSelectFolder={(id) => {
+                handleSelectFolder(id);
+                if (window.innerWidth < 768) setIsSidebarOpen(false);
               }}
-              className={`w-full flex items-center justify-between px-4 py-3 text-[13px] font-bold rounded-2xl transition-all cursor-pointer group ${
-                isExplorerView && currentFolderId === null
-                  ? 'bg-m3-primary/10 text-m3-primary border border-m3-primary/20 shadow-sm'
-                  : 'text-m3-secondary hover:bg-m3-hover hover:text-m3-text'
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <HardDrive className={`w-4.5 h-4.5 ${isExplorerView && currentFolderId === null ? 'text-m3-primary' : 'text-m3-secondary'}`} />
-                <span>O Meu Drive</span>
-              </div>
-              <Badge variant={isExplorerView && currentFolderId === null ? 'sky' : 'slate'}>{rootSongsCount}</Badge>
-            </button>
+              onContextMenu={handleContextMenu}
+              expandedFolderIds={expandedFolderIds}
+              toggleExpand={toggleExpand}
+            />
+          ))}
+        </div>
 
+        {/* User Dropdown at bottom of sidebar */}
+        {user && (
+          <div className="mt-2 pt-2 border-t border-slate-200 dark:border-slate-800 relative shrink-0" ref={userMenuRef}>
             <button
-              onClick={() => navigate('/songs')}
-              className={`w-full flex items-center justify-between px-4 py-3 text-[13px] font-bold rounded-2xl transition-all cursor-pointer group ${
-                isSongsView
-                  ? 'bg-m3-primary/10 text-m3-primary border border-m3-primary/20 shadow-sm'
-                  : 'text-m3-secondary hover:bg-m3-hover hover:text-m3-text'
-              }`}
+              onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+              className="w-full flex items-center justify-between p-2 rounded-xl hover:bg-slate-200/60 dark:hover:bg-slate-800 transition-colors cursor-pointer"
             >
-              <div className="flex items-center gap-3">
-                <Music className="w-4.5 h-4.5 text-m3-primary" />
-                <span>Biblioteca</span>
+              <div className="flex items-center gap-2 min-w-0">
+                <div className="w-7 h-7 rounded-full bg-sky-100 dark:bg-sky-950 text-[#0284c7] dark:text-sky-400 flex items-center justify-center font-bold text-xs shrink-0">
+                  {user.name.split(' ').map((n) => n[0]).join('')}
+                </div>
+                <div className="flex flex-col min-w-0 text-left">
+                  <span className="text-xs font-bold text-slate-900 dark:text-slate-100 truncate">
+                    {user.name}
+                  </span>
+                  <span className="text-[9px] text-emerald-600 dark:text-emerald-400 font-bold uppercase tracking-wider">
+                    {user.role}
+                  </span>
+                </div>
               </div>
-              <Badge variant={isSongsView ? 'sky' : 'slate'}>{allSongs.length}</Badge>
+              <Settings className="w-4 h-4 text-slate-400 shrink-0" />
             </button>
-
-            <button
-              onClick={() => navigate('/services')}
-              className={`w-full flex items-center px-4 py-3 text-[13px] font-bold rounded-2xl transition-all cursor-pointer group ${
-                isServicesView
-                  ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 shadow-sm'
-                  : 'text-m3-secondary hover:bg-m3-hover hover:text-m3-text'
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <CheckSquare className="w-4.5 h-4.5 text-emerald-500" />
-                <span>Cultos</span>
-              </div>
-            </button>
-
-            <div className="mt-6 px-3 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-m3-secondary opacity-60">
-              Diretórios ({allFolders.length})
-            </div>
-
-            {/* Hierarchical Folder Tree */}
-            <div className="flex-1 overflow-y-auto flex flex-col gap-1 pr-1 custom-scrollbar">
-              {folderTree.map((node) => (
-                <FolderTreeItem
-                  key={node.folder.id}
-                  node={node}
-                  currentFolderId={currentFolderId}
-                  onSelectFolder={handleSelectFolder}
-                  onContextMenu={handleContextMenu}
-                  expandedFolderIds={expandedFolderIds}
-                  toggleExpand={toggleExpand}
-                />
-              ))}
-            </div>
-
-            {/* User Dropdown at bottom of sidebar */}
-            {user && (
-              <div className="mt-2 pt-2 border-t border-slate-200 dark:border-slate-800 relative shrink-0" ref={userMenuRef}>
+            
+            {isUserMenuOpen && (
+              <div className="absolute bottom-full left-0 mb-2 w-56 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl z-50 p-2 space-y-1 animate-in fade-in slide-in-from-bottom-2 duration-150">
                 <button
-                  onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                  className="w-full flex items-center justify-between p-2 rounded-xl hover:bg-slate-200/60 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                  onClick={() => {
+                    setIsUserMenuOpen(false);
+                    navigate('/musicians');
+                    if (window.innerWidth < 768) setIsSidebarOpen(false);
+                  }}
+                  className="w-full flex items-center gap-3 px-3 py-2 text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors cursor-pointer text-left"
                 >
-                  <div className="flex items-center gap-2 min-w-0">
-                    <div className="w-7 h-7 rounded-full bg-sky-100 dark:bg-sky-950 text-[#0284c7] dark:text-sky-400 flex items-center justify-center font-bold text-xs shrink-0">
-                      {user.name.split(' ').map((n) => n[0]).join('')}
-                    </div>
-                    <div className="flex flex-col min-w-0 text-left">
-                      <span className="text-xs font-bold text-slate-900 dark:text-slate-100 truncate">
-                        {user.name}
-                      </span>
-                      <span className="text-[9px] text-emerald-600 dark:text-emerald-400 font-bold uppercase tracking-wider">
-                        {user.role}
-                      </span>
-                    </div>
-                  </div>
-                  <Settings className="w-4 h-4 text-slate-400 shrink-0" />
+                  <QrCode className="w-4 h-4 text-[#0284c7]" />
+                  Acesso a Músicos
                 </button>
-                
-                {isUserMenuOpen && (
-                  <div className="absolute bottom-full left-0 mb-2 w-56 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl z-50 p-2 space-y-1 animate-in fade-in slide-in-from-bottom-2 duration-150">
-                    <button
-                      onClick={() => {
-                        setIsUserMenuOpen(false);
-                        navigate('/musicians');
-                      }}
-                      className="w-full flex items-center gap-3 px-3 py-2 text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors cursor-pointer text-left"
-                    >
-                      <QrCode className="w-4 h-4 text-[#0284c7]" />
-                      Acesso a Músicos
-                    </button>
-                    <button
-                      onClick={() => {
-                        setIsUserMenuOpen(false);
-                        navigate('/settings');
-                      }}
-                      className="w-full flex items-center gap-3 px-3 py-2 text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors cursor-pointer text-left"
-                    >
-                      <Settings className="w-4 h-4 text-[#0284c7]" />
-                      Definições
-                    </button>
-                    <div className="my-1 border-t border-slate-100 dark:border-slate-800" />
-                    <button
-                      onClick={() => {
-                        setIsUserMenuOpen(false);
-                        logout();
-                      }}
-                      className="w-full flex items-center gap-3 px-3 py-2 text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-xl transition-colors cursor-pointer text-left"
-                    >
-                      <LogOut className="w-4 h-4 text-rose-500" />
-                      Sair
-                    </button>
-                  </div>
-                )}
+                <button
+                  onClick={() => {
+                    setIsUserMenuOpen(false);
+                    navigate('/settings');
+                    if (window.innerWidth < 768) setIsSidebarOpen(false);
+                  }}
+                  className="w-full flex items-center gap-3 px-3 py-2 text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors cursor-pointer text-left"
+                >
+                  <Settings className="w-4 h-4 text-[#0284c7]" />
+                  Definições
+                </button>
+                <div className="my-1 border-t border-slate-100 dark:border-slate-800" />
+                <button
+                  onClick={() => {
+                    setIsUserMenuOpen(false);
+                    logout();
+                  }}
+                  className="w-full flex items-center gap-3 px-3 py-2 text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-xl transition-colors cursor-pointer text-left"
+                >
+                  <LogOut className="w-4 h-4 text-rose-500" />
+                  Sair
+                </button>
               </div>
             )}
           </div>
+        )}
+      </div>
+
+      {/* Main Container (Toolbar + Content) */}
+      <div className="flex-1 flex flex-col p-2 sm:p-4 md:p-0 h-full w-full overflow-hidden">
+        {/* Hidden File Input for Multiple ChordPro Uploads */}
+        <input
+          type="file"
+          ref={fileInputRef}
+          multiple
+          accept=".pro,.chordpro,.txt,.chopro"
+          onChange={handleChordProFileUpload}
+          className="hidden"
+        />
+
+        {/* Explorador de Ficheiros Window Container */}
+        <div className="bg-m3-card border md:border-none border-m3-border rounded-[32px] md:rounded-none shadow-2xl md:shadow-none shadow-black/10 overflow-hidden flex flex-col flex-1 h-full transition-all duration-300">
+          
+          {/* Explorer Address Bar & Toolbar */}
+          {(isExplorerView || isSongsView || isServicesView || isMusiciansView || isSettingsView || isEditorView) && (
+            <div className="p-3 sm:p-4 bg-m3-sidebar/40 border-b border-m3-border/50 flex flex-col md:flex-row items-center justify-between gap-3 sm:gap-4">
+              
+              {/* Navigation Controls & Address Bar */}
+              <div className="flex items-center gap-2 sm:gap-3 flex-1 w-full md:w-auto">
+                {/* Mobile Sidebar Toggle */}
+                <button
+                  onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                  className="md:hidden p-2.5 rounded-2xl border transition-all text-m3-primary border-m3-primary/30 hover:bg-m3-primary hover:text-white bg-m3-card cursor-pointer shadow-sm shrink-0"
+                >
+                  <Menu className="w-4.5 h-4.5" />
+                </button>
+                {/* Up / Back Button */}
+                <button
+                  onClick={() => {
+                    if (isExplorerView) {
+                      handleSelectFolder(currentFolder?.parentId || null);
+                    } else {
+                      navigate(-1);
+                    }
+                  }}
+                  disabled={isExplorerView && currentFolderId === null}
+                  title={
+                    isExplorerView
+                      ? currentFolderId === null
+                        ? 'No Nível Raiz'
+                        : currentFolder?.parentId
+                        ? 'Subir um nível'
+                        : 'Subir para a pasta Raiz'
+                      : 'Voltar'
+                  }
+                  className={`p-2.5 rounded-2xl border transition-all ${
+                    isExplorerView && currentFolderId === null
+                      ? 'text-m3-secondary/30 bg-m3-bg border-m3-border/30 cursor-not-allowed opacity-50'
+                      : 'text-m3-primary border-m3-primary/30 hover:bg-m3-primary hover:text-white bg-m3-card cursor-pointer shadow-sm hover:shadow-m3-primary/20'
+                  }`}
+                >
+                  <CornerLeftUp className="w-4.5 h-4.5" />
+                </button>
+
+                {/* Address Path Bar */}
+                <div className="flex-1 flex items-center gap-2 px-4 py-2.5 bg-m3-bg border border-m3-border rounded-2xl text-[13px] overflow-x-auto select-none hide-scrollbar shadow-inner min-w-0">
+                  <button
+                    onClick={() => {
+                      handleSelectFolder(null);
+                      navigate('/folders');
+                    }}
+                    className={`flex items-center gap-2 font-black uppercase tracking-widest transition-all cursor-pointer shrink-0 ${
+                      currentFolderId === null && isExplorerView
+                        ? 'text-m3-primary'
+                        : 'text-m3-secondary hover:text-m3-text'
+                    }`}
+                  >
+                    <HardDrive className={`w-4 h-4 ${currentFolderId === null && isExplorerView ? 'text-m3-primary' : 'text-m3-secondary'}`} />
+                    <span>Início</span>
+                  </button>
+
+                  {isExplorerView && folderBreadcrumbs.map((folder, index) => {
+                    const isLast = index === folderBreadcrumbs.length - 1;
+                    return (
+                      <React.Fragment key={folder.id}>
+                        <ChevronRight className="w-3.5 h-3.5 text-m3-secondary/40 shrink-0" />
+                        {isLast ? (
+                          <div className="flex items-center gap-2 font-black text-m3-primary shrink-0 uppercase tracking-wide">
+                            <FolderOpen className="w-4 h-4" />
+                            <span>{folder.name}</span>
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => handleSelectFolder(folder.id)}
+                            className="flex items-center gap-2 font-bold text-m3-secondary hover:text-m3-text transition-all cursor-pointer shrink-0"
+                          >
+                            <FolderIcon className="w-4 h-4 opacity-70" />
+                            <span>{folder.name}</span>
+                          </button>
+                        )}
+                      </React.Fragment>
+                    );
+                  })}
+
+                  {isSongsView && (
+                    <>
+                      <ChevronRight className="w-3.5 h-3.5 text-m3-secondary/40 shrink-0" />
+                      <div className="flex items-center gap-2 font-black text-m3-primary shrink-0 uppercase tracking-wide">
+                        <Music className="w-4 h-4" />
+                        <span>Biblioteca</span>
+                      </div>
+                    </>
+                  )}
+
+                  {isSongEditorView && (
+                    <>
+                      {songBreadcrumbs.map((folder) => (
+                        <React.Fragment key={folder.id}>
+                          <ChevronRight className="w-3.5 h-3.5 text-m3-secondary/40 shrink-0" />
+                          <button
+                            onClick={() => {
+                              handleSelectFolder(folder.id);
+                              navigate('/folders');
+                            }}
+                            className="flex items-center gap-2 font-bold text-m3-secondary hover:text-m3-text transition-all cursor-pointer shrink-0"
+                          >
+                            <FolderIcon className="w-4 h-4 opacity-70" />
+                            <span>{folder.name}</span>
+                          </button>
+                        </React.Fragment>
+                      ))}
+
+                      {currentSong && (
+                        <>
+                          <ChevronRight className="w-3.5 h-3.5 text-m3-secondary/40 shrink-0" />
+                          <div className="flex items-center gap-2 font-black text-m3-primary shrink-0 uppercase tracking-wide">
+                            <FileText className="w-4 h-4" />
+                            <span>{currentSongFileName}</span>
+                          </div>
+                        </>
+                      )}
+                    </>
+                  )}
+
+                  {isServicesView && (
+                    <>
+                      <ChevronRight className="w-3.5 h-3.5 text-m3-secondary/40 shrink-0" />
+                      <div className="flex items-center gap-2 font-black text-m3-primary shrink-0 uppercase tracking-wide">
+                        <Calendar className="w-4 h-4" />
+                        <span>Cultos</span>
+                      </div>
+                    </>
+                  )}
+
+                  {isServiceEditorView && (
+                    <>
+                      <ChevronRight className="w-3.5 h-3.5 text-m3-secondary/40 shrink-0" />
+                      <button
+                        onClick={() => navigate('/services')}
+                        className="flex items-center gap-2 font-bold text-m3-secondary hover:text-m3-text transition-all cursor-pointer shrink-0"
+                      >
+                        <Calendar className="w-4 h-4" />
+                        <span>Cultos</span>
+                      </button>
+                      {currentService && (
+                        <>
+                          <ChevronRight className="w-3.5 h-3.5 text-m3-secondary/40 shrink-0" />
+                          <div className="flex items-center gap-2 font-black text-m3-primary shrink-0 uppercase tracking-wide">
+                            <Calendar className="w-4 h-4" />
+                            <span>{currentService.name}</span>
+                          </div>
+                        </>
+                      )}
+                    </>
+                  )}
+
+                  {isMusiciansView && (
+                    <>
+                      <ChevronRight className="w-3.5 h-3.5 text-m3-secondary/40 shrink-0" />
+                      <div className="flex items-center gap-2 font-black text-m3-primary shrink-0 uppercase tracking-wide">
+                        <User className="w-4 h-4" />
+                        <span>Músicos</span>
+                      </div>
+                    </>
+                  )}
+
+                  {isSettingsView && (
+                    <>
+                      <ChevronRight className="w-3.5 h-3.5 text-m3-secondary/40 shrink-0" />
+                      <div className="flex items-center gap-2 font-black text-m3-primary shrink-0 uppercase tracking-wide">
+                        <Settings className="w-4 h-4" />
+                        <span>Definições</span>
+                      </div>
+                    </>
+                  )}
+                </div>
+
+                {/* Plus Dropdown - Only for explorer/songs/services */}
+                {(isExplorerView || isSongsView || isServicesView) && (
+                  <div className="relative shrink-0 ml-1" ref={plusMenuRef}>
+                    <button
+                      onClick={() => setIsPlusMenuOpen(!isPlusMenuOpen)}
+                      className="w-10 h-10 rounded-2xl bg-m3-primary text-white flex items-center justify-center border border-m3-primary font-black text-lg shadow-xl shadow-m3-primary/20 hover:bg-m3-primary-dark hover:scale-105 active:scale-95 transition-all cursor-pointer"
+                      title="Criar..."
+                    >
+                      <Plus className="w-5 h-5" />
+                    </button>
+                    {isPlusMenuOpen && (
+                      <div className="absolute right-0 top-full mt-3 w-64 bg-m3-card border border-m3-border rounded-[24px] shadow-2xl z-50 p-2 space-y-1 animate-in fade-in slide-in-from-top-2 duration-200">
+                        <div className="px-4 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-m3-secondary opacity-60">
+                          Criar Novo
+                        </div>
+                        <button
+                          onClick={() => {
+                            setIsPlusMenuOpen(false);
+                            setIsCreateSongModalOpen(true);
+                          }}
+                          className="w-full flex items-center gap-4 px-4 py-3 text-xs font-bold text-m3-text hover:bg-m3-hover rounded-2xl transition-all cursor-pointer text-left group"
+                        >
+                          <div className="w-8 h-8 rounded-xl bg-m3-primary/10 text-m3-primary flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                            <Music className="w-4 h-4" />
+                          </div>
+                          Novo Cântico
+                        </button>
+                        <button
+                          onClick={() => {
+                            setIsPlusMenuOpen(false);
+                            setIsCreateServiceModalOpen(true);
+                          }}
+                          className="w-full flex items-center gap-4 px-4 py-3 text-xs font-bold text-m3-text hover:bg-m3-hover rounded-2xl transition-all cursor-pointer text-left group"
+                        >
+                          <div className="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                            <Calendar className="w-4 h-4" />
+                          </div>
+                          Novo Plano de Culto
+                        </button>
+                        <button
+                          onClick={() => {
+                            setIsPlusMenuOpen(false);
+                            setIsCreateModalOpen(true);
+                          }}
+                          className="w-full flex items-center gap-4 px-4 py-3 text-xs font-bold text-m3-text hover:bg-m3-hover rounded-2xl transition-all cursor-pointer text-left group"
+                        >
+                          <div className="w-8 h-8 rounded-xl bg-m3-primary-light/10 text-m3-primary flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                            <FolderPlus className="w-4 h-4" />
+                          </div>
+                          Nova Pasta
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* Search Filter, Sorting & View Mode Toggles */}
+              {(isExplorerView || isSongsView || isServicesView) && (
+                <div className="flex items-center gap-3 w-full md:w-auto overflow-x-auto hide-scrollbar pb-1 md:pb-0">
+                  {/* Search Input */}
+                  <div className="relative w-full sm:w-64">
+                    <Input
+                      placeholder={
+                        isServicesView
+                          ? "Pesquisar cultos..."
+                          : isSongsView
+                          ? "Pesquisar biblioteca..."
+                          : currentFolder
+                          ? `Pesquisar em "${currentFolder.name}"...`
+                          : "Pesquisar ficheiros..."
+                      }
+                      value={searchQuery}
+                      onChange={(e) => handleSearchChange(e.target.value)}
+                      icon={<Search className="w-4 h-4 text-m3-secondary" />}
+                      className="py-2.5 text-sm pr-9 rounded-2xl"
+                    />
+                    {searchQuery && (
+                      <button
+                        onClick={() => handleSearchChange('')}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-m3-secondary hover:text-m3-text hover:bg-m3-hover rounded-lg cursor-pointer transition-all"
+                        title="Limpar pesquisa"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                  </div>
+
+                  {isExplorerView && (
+                    <>
+                      {/* Filter Pop-Up Panel Trigger Button */}
+                      <button
+                        onClick={() => {
+                          navigateBackToDrive();
+                          setIsFilterPanelOpen(true);
+                        }}
+                        className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl border text-xs font-black uppercase tracking-widest transition-all cursor-pointer relative ${
+                          activeFiltersCount > 0
+                            ? 'bg-m3-primary/10 border-m3-primary text-m3-primary shadow-lg shadow-m3-primary/10'
+                            : 'bg-m3-card border-m3-border text-m3-secondary hover:bg-m3-hover hover:text-m3-text hover:border-m3-primary/30'
+                        }`}
+                        title="Abrir Filtros Avançados"
+                      >
+                        <Filter className="w-4 h-4" />
+                        <span className="hidden sm:inline">Filtros</span>
+                        {activeFiltersCount > 0 && (
+                          <span className="w-4.5 h-4.5 rounded-full bg-m3-primary text-white text-[10px] font-black flex items-center justify-center shadow-sm">
+                            {activeFiltersCount}
+                          </span>
+                        )}
+                      </button>
+
+                      {/* Sort Control Button */}
+                      <div className="flex items-center gap-2 bg-m3-bg border border-m3-border rounded-2xl px-3 py-2 text-xs transition-all hover:border-m3-primary/30">
+                        <ArrowUpDown className="w-4 h-4 text-m3-secondary shrink-0" />
+                        <select
+                          value={`${sortBy}-${sortOrder}`}
+                          onChange={(e) => {
+                            const [sb, so] = e.target.value.split('-') as ['title' | 'artist' | 'updatedAt', 'asc' | 'desc'];
+                            handleSortChange(sb, so);
+                          }}
+                          className="bg-transparent font-bold text-m3-text focus:outline-none cursor-pointer text-[11px] uppercase tracking-wider"
+                          title="Organizar ficheiros"
+                        >
+                          <option value="title-asc">Nome (A-Z)</option>
+                          <option value="title-desc">Nome (Z-A)</option>
+                          <option value="artist-asc">Artista (A-Z)</option>
+                          <option value="updatedAt-desc">Data Recente</option>
+                        </select>
+                      </div>
+
+                      {/* View Mode Toggle */}
+                      <div className="flex items-center p-1 bg-m3-bg rounded-2xl border border-m3-border select-none shrink-0 shadow-inner">
+                        <button
+                          onClick={() => handleViewModeChange('grid')}
+                          title="Vista em Grelha"
+                          className={`p-2 rounded-xl transition-all cursor-pointer ${
+                            viewMode === 'grid'
+                              ? 'bg-m3-card text-m3-primary shadow-lg shadow-black/10'
+                              : 'text-m3-secondary hover:text-m3-text'
+                          }`}
+                        >
+                          <LayoutGrid className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => handleViewModeChange('list')}
+                          title="Vista em Lista"
+                          className={`p-2 rounded-xl transition-all cursor-pointer ${
+                            viewMode === 'list'
+                              ? 'bg-m3-card text-m3-primary shadow-lg shadow-black/10'
+                              : 'text-m3-secondary hover:text-m3-text'
+                          }`}
+                        >
+                          <List className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Main Content Area */}
           <div className="flex-1 flex flex-col relative bg-white dark:bg-slate-900 overflow-hidden">
@@ -1489,6 +1645,7 @@ export const MainLayout: React.FC = () => {
               fileInputRef,
               sortBy,
               sortOrder,
+              hideHeader: true,
               selectedKey,
               selectedTag,
               searchFields,
@@ -1500,27 +1657,29 @@ export const MainLayout: React.FC = () => {
               handleDrop,
               isDraggingOver,
               totalItemsCount,
-              currentFolderId
+              currentFolderId,
+              selectionBox,
             }} />
+          </div>
 
-          </div>
-      </div>
-    {/* Status Bar */}
-      {isExplorerView && (
-        <div className="h-10 bg-m3-sidebar/40 border-t border-m3-border px-6 flex items-center justify-between text-[10px] text-m3-secondary font-black uppercase tracking-widest select-none">
-          <div className="flex items-center gap-4">
-            <span className="flex items-center gap-1.5">
-              <HardDrive className="w-3.5 h-3.5 opacity-60" />
-              {currentFolder ? `/${currentFolder.name}` : '/ (Raiz)'}
-            </span>
-          </div>
-          <div className="flex items-center gap-6">
-            <span>{filteredSubfolders.length} Pastas</span>
-            <span>{filteredFiles.length} Ficheiros</span>
-            <span className="text-m3-primary">{totalItemsCount} Total</span>
-          </div>
+          {/* Status Bar */}
+          {isExplorerView && (
+            <div className="h-10 bg-m3-sidebar/40 border-t border-m3-border px-6 flex items-center justify-between text-[10px] text-m3-secondary font-black uppercase tracking-widest select-none">
+              <div className="flex items-center gap-4">
+                <span className="flex items-center gap-1.5">
+                  <HardDrive className="w-3.5 h-3.5 opacity-60" />
+                  {currentFolder ? `/${currentFolder.name}` : '/ (Raiz)'}
+                </span>
+              </div>
+              <div className="flex items-center gap-6">
+                <span>{filteredSubfolders.length} Pastas</span>
+                <span>{filteredFiles.length} Ficheiros</span>
+                <span className="text-m3-primary">{totalItemsCount} Total</span>
+              </div>
+            </div>
+          )}
         </div>
-      )}
+      </div>
     </div>
 
       <ToastContainer />
@@ -2230,7 +2389,22 @@ export const MainLayout: React.FC = () => {
           </div>
         </div>
       </Modal>
-    </div>
+
+      {/* Marquee rubberband drag selection box */}
+      {selectionBox && (
+        <div
+          style={{
+            position: 'fixed',
+            left: selectionBox.x,
+            top: selectionBox.y,
+            width: selectionBox.width,
+            height: selectionBox.height,
+            pointerEvents: 'none',
+            zIndex: 100,
+          }}
+          className="border-2 border-[#0284c7] bg-[#0284c7]/25 rounded-lg shadow-xl backdrop-blur-[1px]"
+        />
+      )}
     </>
   );
 };

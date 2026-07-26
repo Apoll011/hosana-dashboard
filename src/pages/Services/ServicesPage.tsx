@@ -23,10 +23,11 @@ interface ServicesPageProps {
   searchQuery?: string;
 }
 
-export const ServicesPage: React.FC<ServicesPageProps> = ({ hideHeader, searchQuery: externalSearchQuery = '' }) => {
+export const ServicesPage: React.FC<ServicesPageProps> = ({ hideHeader, searchQuery: externalSearchQuery }) => {
   const navigate = useNavigate();
   const context = useOutletContext<any>() || {};
-  const actualSearchQuery = externalSearchQuery ?? context.searchQuery ?? '';
+  const actualHideHeader = hideHeader ?? context.hideHeader;
+  const actualSearchQuery = externalSearchQuery !== undefined ? externalSearchQuery : (context.searchQuery || '');
 
 
   const { servicesQuery, createService, deleteService } = useServices();
@@ -65,9 +66,9 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({ hideHeader, searchQu
   };
 
   return (
-    <div className={`flex-1 flex flex-col w-full mx-auto space-y-8 animate-in fade-in duration-500 ${hideHeader ? 'p-6' : 'p-4 sm:p-8 max-w-7xl'}`}>
+    <div className={`flex-1 flex flex-col w-full mx-auto space-y-8 animate-in fade-in duration-500 overflow-y-auto h-full ${hideHeader ? 'p-6' : 'p-4 sm:p-8 max-w-7xl'}`}>
       {/* Header Banner */}
-      {!hideHeader && (
+      {!actualHideHeader && (
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
           <div>
             <h1 className="text-3xl font-black text-m3-text tracking-tighter flex items-center gap-4">
