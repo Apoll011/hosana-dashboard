@@ -4,10 +4,10 @@
  */
 
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { httpClient } from '../../api/client';
-import { Layers, Lock, Mail, ArrowRight, ShieldCheck, AlertCircle } from 'lucide-react';
+import { Layers, Lock, Mail, ArrowRight, ShieldCheck, AlertCircle, CheckCircle2, UserPlus } from 'lucide-react';
 import { Button } from '../../components/common/Button';
 import { Input } from '../../components/common/Input';
 import bg from '../../assets/images/background.webp';
@@ -15,16 +15,22 @@ import logo from '../../assets/logo.png';
 
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { login } = useAuth();
 
+  const redirectMessage = (location.state as any)?.message || '';
+
+  const [serverUrl, setServerUrl] = useState(httpClient.getBaseURL());
   const [email, setEmail] = useState('leader@church.org');
   const [password, setPassword] = useState('admin123');
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  const [isUnapproved, setIsUnapproved] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg('');
+    setIsUnapproved(false);
     setIsLoading(true);
 
     try {
@@ -34,7 +40,12 @@ export const LoginPage: React.FC = () => {
       await login({ email: email.trim(), password });
       navigate('/songs', { replace: true });
     } catch (err: any) {
-      setErrorMsg(err.message || 'Authentication failed');
+      if (err?.code === 'ACCOUNT_NOT_APPROVED' || err?.status === 403 || err?.message?.includes('pending approval')) {
+        setIsUnapproved(true);
+        setErrorMsg('Your account is pending approval by a tenant administrator.');
+      } else {
+        setErrorMsg(err?.message || 'Authentication failed');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -58,7 +69,7 @@ export const LoginPage: React.FC = () => {
       <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-m3-primary/10 rounded-full blur-[120px] pointer-events-none animate-pulse z-10" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-m3-primary-dark/10 rounded-full blur-[120px] pointer-events-none z-10" />
 
-      <div className="relative max-w-[360px] w-full bg-white border border-slate-200 rounded-[32px] shadow-2xl shadow-black/40 p-6 sm:p-8 transition-all duration-300 z-20">
+      <div className="relative max-w-[380px] w-full bg-white border border-slate-200 rounded-[32px] shadow-2xl shadow-black/40 p-6 sm:p-8 transition-all duration-300 z-20">
         {/* Branding */}
         <div className="flex flex-col items-center text-center mb-6 select-none">
           <div
@@ -86,10 +97,24 @@ export const LoginPage: React.FC = () => {
           </h1>
         </div>
 
-        {/* Error Alert */}
+        {/* Redirect Success Message */}
+        {redirectMessage && (
+          <div className="mb-4 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 text-xs font-semibold flex items-center gap-2 animate-in fade-in slide-in-from-top-2">
+            <CheckCircle2 className="w-4 h-4 shrink-0" />
+            <span>{redirectMessage}</span>
+          </div>
+        )}
+
+        {/* Error / Account Unapproved Alert */}
         {errorMsg && (
-          <div className="mb-4 p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-500 text-[10px] font-black uppercase tracking-wider flex items-center gap-2 animate-in fade-in slide-in-from-top-2">
-            <AlertCircle className="w-4 h-4 shrink-0" />
+          <div
+            className={`mb-4 p-3.5 rounded-xl border text-xs font-semibold flex items-start gap-2.5 animate-in fade-in slide-in-from-top-2 ${
+              isUnapproved
+                ? 'bg-amber-500/10 border-amber-500/30 text-amber-700'
+                : 'bg-rose-500/10 border-rose-500/20 text-rose-600'
+            }`}
+          >
+            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
             <span>{errorMsg}</span>
           </div>
         )}
@@ -127,8 +152,23 @@ export const LoginPage: React.FC = () => {
             <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
           </Button>
         </form>
+
+        {/* Link to Register */}
+        <div className="mt-4 text-center">
+          <Link
+            to="/register"
+            className="inline-flex items-center gap-1.5 text-xs font-bold text-m3-primary hover:underline"
+          >
+            <UserPlus className="w-3.5 h-3.5" />
+            <span>Criar ou aderir a uma organização</span>
+          </Link>
+        </div>
+
+        <div className="mt-6 pt-4 border-t border-slate-100 text-center text-[9px] text-slate-400 font-black uppercase tracking-[0.2em] flex items-center justify-center gap-2">
+          <ShieldCheck className="w-3 h-3 text-emerald-500 opacity-60" />
+          <span>Acesso Criptografado</span>
+        </div>
       </div>
     </div>
   );
 };
-

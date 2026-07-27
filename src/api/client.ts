@@ -1,3 +1,22 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+export class ApiError extends Error {
+  public status: number;
+  public code?: string;
+  public details?: any;
+
+  constructor(message: string, status: number, code?: string, details?: any) {
+    super(message);
+    this.name = 'ApiError';
+    this.status = status;
+    this.code = code;
+    this.details = details;
+  }
+}
+
 class ApiClient {
   private baseURL: string;
   private token: string | null = null;
@@ -78,7 +97,7 @@ class ApiClient {
     try {
       response = await fetch(url, config);
     } catch (err: any) {
-      throw new Error(`Network Error: ${err.message || 'Failed to connect to server'}`);
+      throw new ApiError(`Network Error: ${err.message || 'Failed to connect to server'}`, 0);
     }
 
     // Handle 401 Unauthorized -> Attempt token refresh
@@ -92,25 +111,35 @@ class ApiClient {
         if (this.onUnauthorizedCallback) {
           this.onUnauthorizedCallback();
         }
-        throw new Error('Session expired. Please log in again.');
+        throw new ApiError('Session expired. Please log in again.', 401, 'SESSION_EXPIRED');
       }
     } else if (response.status === 401) {
       if (this.onUnauthorizedCallback && !endpoint.includes('auth/login')) {
         this.onUnauthorizedCallback();
       }
-      throw new Error('Unauthorized access');
     }
 
     if (!response.ok) {
       let errorMessage = `Server error (${response.status})`;
+      let errorCode: string | undefined;
+      let errorDetails: any;
       try {
         const errorData = await response.json();
-        if (errorData.error) errorMessage = errorData.error;
-        else if (errorData.message) errorMessage = errorData.message;
+        if (errorData.error) {
+          if (typeof errorData.error === 'object') {
+            errorMessage = errorData.error.message || errorMessage;
+            errorCode = errorData.error.code;
+            errorDetails = errorData.error.details;
+          } else {
+            errorMessage = errorData.error;
+          }
+        } else if (errorData.message) {
+          errorMessage = errorData.message;
+        }
       } catch {
         // Fallback to generic message
       }
-      throw new Error(errorMessage);
+      throw new ApiError(errorMessage, response.status, errorCode, errorDetails);
     }
 
     if (response.status === 204) {
