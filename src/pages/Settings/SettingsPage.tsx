@@ -157,17 +157,6 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ hideHeader }) => {
           </div>
         </div>
       )}
-
-      {/* Floating Badge for when header is hidden */}
-      {hideHeader && (
-        <div className="flex justify-end">
-          <Badge variant="emerald">
-            <Server className="w-3.5 h-3.5 mr-1" />
-            Servidor Hosana Ativo
-          </Badge>
-        </div>
-      )}
-
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Card 0: Theme and Appearance */}
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs space-y-4">
