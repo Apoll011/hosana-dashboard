@@ -35,7 +35,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ hideHeader }) => {
   const { settingsQuery, updateSettings, isUpdating } = useSettings();
 
   const [formState, setFormState] = useState<ServerSettings>({
-    serverName: 'Hosana Studio Server',
+    serverName: 'Hosanna Studio Server',
     port: 3000,
     defaultKey: 'G',
     syncIntervalSeconds: 30,
@@ -74,7 +74,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ hideHeader }) => {
       const link = document.createElement('a');
       link.href = url;
       const dateStr = new Date().toISOString().slice(0, 10);
-      link.download = `hosana-studio-backup-${dateStr}.json`;
+      link.download = `hosanna-studio-backup-${dateStr}.json`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -139,7 +139,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ hideHeader }) => {
   if (settingsQuery.isLoading) {
     return (
       <div className="flex-1 flex items-center justify-center p-12">
-        <Spinner size="lg" label="A carregar definições do Hosana Studio..." />
+        <Spinner size="lg" label="A carregar definições do Hosanna Studio..." />
       </div>
     );
   }
