@@ -28,9 +28,6 @@ export const LoginPage: React.FC = () => {
     setIsLoading(true);
 
     try {
-      if (!serverUrl.trim()) {
-        throw new Error('Please enter the server URL');
-      }
       if (!email.trim() || !password.trim()) {
         throw new Error('Please enter both email and password');
       }
