@@ -113,8 +113,6 @@ const ChordProPreview = React.memo(({ content }: { content: string }) => {
                           key={lineIdx} 
                           line={line} 
                           showChords={showChords} 
-                          transpose={transposeVal} 
-                          onChordClick={setSelectedChord}
                         />
                       ))}
                     </div>
@@ -155,8 +153,6 @@ const ChordProPreview = React.memo(({ content }: { content: string }) => {
                         key={lineIdx} 
                         line={line} 
                         showChords={showChords} 
-                        transpose={transposeVal} 
-                        onChordClick={setSelectedChord}
                       />
                     ))}
                   </div>
