@@ -11,12 +11,12 @@ import { Layers, Lock, Mail, ArrowRight, ShieldCheck, AlertCircle } from 'lucide
 import { Button } from '../../components/common/Button';
 import { Input } from '../../components/common/Input';
 import bg from '../../assets/images/background.webp';
+import logo from '../../assets/logo.png';
 
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
 
-  const [serverUrl, setServerUrl] = useState(httpClient.getBaseURL());
   const [email, setEmail] = useState('leader@church.org');
   const [password, setPassword] = useState('admin123');
   const [isLoading, setIsLoading] = useState(false);
@@ -34,7 +34,7 @@ export const LoginPage: React.FC = () => {
       if (!email.trim() || !password.trim()) {
         throw new Error('Please enter both email and password');
       }
-      await login({ email: email.trim(), password, serverUrl: serverUrl.trim() });
+      await login({ email: email.trim(), password });
       navigate('/songs', { replace: true });
     } catch (err: any) {
       setErrorMsg(err.message || 'Authentication failed');
@@ -64,8 +64,25 @@ export const LoginPage: React.FC = () => {
       <div className="relative max-w-[360px] w-full bg-white border border-slate-200 rounded-[32px] shadow-2xl shadow-black/40 p-6 sm:p-8 transition-all duration-300 z-20">
         {/* Branding */}
         <div className="flex flex-col items-center text-center mb-6 select-none">
-          <div className="w-16 h-16 rounded-[22px] bg-gradient-to-tr from-m3-primary to-m3-primary-light flex items-center justify-center shadow-2xl shadow-m3-primary/30 mb-4 transform transition-transform hover:scale-105 hover:rotate-2">
-            <Layers className="w-8 h-8 text-white" />
+          <div
+            className="
+              w-16 h-16 rounded-[22px]
+              flex items-center justify-center
+              mb-4
+              border
+              transition-transform
+              hover:scale-105 hover:rotate-2
+            "
+            style={{
+              backgroundColor: "#EEF4FA",
+              borderColor: "#D3E5F8",
+            }}
+          >
+            <img
+              src={logo}
+              alt="Hosanna Studio"
+              className="w-9 h-9 object-contain"
+            />
           </div>
           <h1 className="font-display font-black text-3xl tracking-tighter text-slate-900">
             Hosanna Studio
@@ -86,14 +103,6 @@ export const LoginPage: React.FC = () => {
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-3">
-            <Input
-              label="URL do Servidor"
-              placeholder="http://servidor.com/api"
-              value={serverUrl}
-              onChange={(e) => setServerUrl(e.target.value)}
-              icon={<Layers className="w-4 h-4 opacity-40" />}
-              className="h-11 rounded-xl border-slate-200 focus:border-m3-primary transition-all text-sm"
-            />
             <Input
               type="email"
               label="E-mail"
@@ -124,11 +133,6 @@ export const LoginPage: React.FC = () => {
             <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
           </Button>
         </form>
-
-        <div className="mt-6 pt-4 border-t border-slate-100 text-center text-[9px] text-slate-400 font-black uppercase tracking-[0.2em] flex items-center justify-center gap-2">
-          <ShieldCheck className="w-3 h-3 text-emerald-500 opacity-60" />
-          <span>Acesso Criptografado</span>
-        </div>
       </div>
     </div>
   );
