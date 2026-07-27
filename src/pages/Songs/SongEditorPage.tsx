@@ -54,10 +54,10 @@ export const SongEditorPage: React.FC = () => {
     );
   }
 
-  const handleSave = async (songId: string, updatedContent: string) => {
+  const handleSave = async (songId: string, updatedAt: string, updatedContent: string) => {
     const parsed = parseChordPro(updatedContent);
     const meta = parsed.metadata;
-    const updates: any = { content: updatedContent, updatedAt: new Date().toISOString() };
+    const updates: any = { content: updatedContent, updatedAt: updatedAt };
     
     if (meta.title) updates.title = meta.title;
     if (meta.artist) updates.artist = meta.artist;
@@ -97,7 +97,7 @@ export const SongEditorPage: React.FC = () => {
             size="sm"
             icon={<Save className="w-4 h-4" />}
             isLoading={isUpdating}
-            onClick={() => handleSave(song.id, content)}
+            onClick={() => handleSave(song.id, song.updatedAt, content)}
             className="rounded-xl font-black uppercase tracking-widest text-[10px] shadow-lg shadow-m3-primary/20"
           >
             Guardar
