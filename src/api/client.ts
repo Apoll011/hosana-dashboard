@@ -1,8 +1,3 @@
-/**
- * @license
- * SPDX-License-Identifier: Apache-2.0
- */
-
 class ApiClient {
   private baseURL: string;
   private token: string | null = null;
@@ -10,12 +5,12 @@ class ApiClient {
   private onUnauthorizedCallback: (() => void) | null = null;
 
   constructor() {
-    this.baseURL = localStorage.getItem('chordpro_server_url') || '/api';
+    this.baseURL = localStorage.getItem('chordpro_server_url') || import.meta.env.API_URL || '/api';
     this.token = localStorage.getItem('chordpro_access_token');
     this.refreshTokenVal = localStorage.getItem('chordpro_refresh_token');
   }
 
-  public setBaseURL(url: string) {
+  public setBaseURL(url: string) { // TODO: Add it to settings
     this.baseURL = url.endsWith('/') ? url.slice(0, -1) : url;
     localStorage.setItem('chordpro_server_url', this.baseURL);
   }
