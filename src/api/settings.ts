@@ -29,7 +29,7 @@ export const settingsApi = {
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `hosana_backup_${new Date().toISOString().split('T')[0]}.json`;
+    a.download = `hosanna_backup_${new Date().toISOString().split('T')[0]}.json`;
     document.body.appendChild(a);
     a.click();
     window.URL.revokeObjectURL(url);

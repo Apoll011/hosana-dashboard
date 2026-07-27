@@ -68,7 +68,7 @@ export const LoginPage: React.FC = () => {
             <Layers className="w-8 h-8 text-white" />
           </div>
           <h1 className="font-display font-black text-3xl tracking-tighter text-slate-900">
-            Hosana Studio
+            Hosanna Studio
           </h1>
           <p className="text-[10px] text-slate-500 mt-2 uppercase tracking-[0.4em] font-black opacity-60">
             Consola de Gestão
@@ -97,7 +97,7 @@ export const LoginPage: React.FC = () => {
             <Input
               type="email"
               label="E-mail"
-              placeholder="admin@hosana.org"
+              placeholder="admin@hosanna.org"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               icon={<Mail className="w-4 h-4 opacity-40" />}
