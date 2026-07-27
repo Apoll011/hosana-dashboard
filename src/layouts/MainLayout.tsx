@@ -400,6 +400,7 @@ export const MainLayout: React.FC = () => {
 
   const allFolders = useMemo(() => foldersQuery.data?.folders || [], [foldersQuery.data?.folders]);
   const allSongs = useMemo(() => songsQuery.data?.songs || [], [songsQuery.data?.songs]);
+  const totalSongs = songsQuery.data?.total;
   const rootSongsCount = foldersQuery.data?.rootSongsCount || 0;
 
   // Build tree structure from folders
@@ -1164,7 +1165,7 @@ export const MainLayout: React.FC = () => {
             <Music className="w-4.5 h-4.5 text-m3-primary" />
             <span>Biblioteca</span>
           </div>
-          <Badge variant={isSongsView ? 'sky' : 'slate'}>{allSongs.length}</Badge>
+          <Badge variant={isSongsView ? 'sky' : 'slate'}>{totalSongs}</Badge>
         </button>
 
         <button
