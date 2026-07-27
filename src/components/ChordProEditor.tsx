@@ -12,6 +12,11 @@ interface ChordProEditorProps {
   onTogglePreview: () => void;
 }
 
+// Directive names our parser treats as metadata (kept in sync with parseChordPro).
+// Used to strip metadata lines back out of the raw text before dropping it into
+// the free-form lyrics/chords textarea.
+const META_DIRECTIVE_REGEX = /^\{\s*(title|t|subtitle|st|artist|a|tempo|album|key|k|capo|song_number|number|youtube|yt|composer|copyright)\s*:/i;
+
 export default function ChordProEditor({
   song,
   hasUnsavedChanges,
@@ -62,59 +67,24 @@ export default function ChordProEditor({
   useEffect(() => {
     if (song) {
       const parsed = parseChordPro(song.content);
-      setTitle(parsed.title || '');
-      setArtist(parsed.artist || '');
-      // Some directives might not be officially parsed yet, let's extract them manually to be safe
-      const lines = song.content.split('\n');
-      let foundKey = 'G';
-      let foundCapo = '0';
-      let foundSongNumber = '';
-      let foundYoutube = '';
-      let foundComposer = '';
-      let foundCopyright = '';
-      
-      const bodyLines = lines.filter(line => {
-        const trimmed = line.trim().toLowerCase();
-        // Extract metadata for our specific fields
-        if (trimmed.startsWith('{key:') || trimmed.startsWith('{k:')) {
-          foundKey = line.substring(line.indexOf(':') + 1, line.indexOf('}')).trim();
-          return false;
-        }
-        if (trimmed.startsWith('{capo:')) {
-          foundCapo = line.substring(line.indexOf(':') + 1, line.indexOf('}')).trim();
-          return false;
-        }
-        if (trimmed.startsWith('{song_number:') || trimmed.startsWith('{number:')) {
-          foundSongNumber = line.substring(line.indexOf(':') + 1, line.indexOf('}')).trim();
-          return false;
-        }
-        if (trimmed.startsWith('{youtube:') || trimmed.startsWith('{yt:')) {
-          foundYoutube = line.substring(line.indexOf(':') + 1, line.indexOf('}')).trim();
-          return false;
-        }
-        if (trimmed.startsWith('{composer:')) {
-          foundComposer = line.substring(line.indexOf(':') + 1, line.indexOf('}')).trim();
-          return false;
-        }
-        if (trimmed.startsWith('{copyright:')) {
-          foundCopyright = line.substring(line.indexOf(':') + 1, line.indexOf('}')).trim();
-          return false;
-        }
-        
-        // Skip basic metadata headers for editing body
-        const isMeta = trimmed.startsWith('{title:') || trimmed.startsWith('{t:') ||
-                       trimmed.startsWith('{subtitle:') || trimmed.startsWith('{st:') ||
-                       trimmed.startsWith('{artist:') || trimmed.startsWith('{a:') ||
-                       trimmed.startsWith('{tempo:') || trimmed.startsWith('{album:');
-        return !isMeta;
-      });
+      const meta = parsed.metadata;
 
-      setKey(foundKey);
-      setCapo(foundCapo);
-      setSongNumber(foundSongNumber);
-      setYoutube(foundYoutube);
-      setComposer(foundComposer);
-      setCopyright(foundCopyright);
+      setTitle(meta.title && meta.title !== 'Sem Título' ? meta.title : '');
+      setArtist(meta.artist || '');
+      setKey(meta.key || 'G');
+      setCapo(meta.capo || '0');
+      setSongNumber(meta.songNumber || '');
+      setYoutube(meta.youtube || '');
+      setComposer(meta.composer || '');
+      setCopyright(meta.copyright || '');
+
+      // Body text is everything except the metadata directive lines - the
+      // structured metadata above already came from the same parse, so we
+      // just need to strip those lines back out of the raw source.
+      const bodyLines = song.content
+        .split('\n')
+        .filter(line => !META_DIRECTIVE_REGEX.test(line.trim()));
+
       setBodyText(bodyLines.join('\n').trim());
     }
   }, [song.id, song.content]);
@@ -157,14 +127,6 @@ export default function ChordProEditor({
     return ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
   };
 
-  // Sync back to parent when typing so that we can have "unsaved changes" marker 
-  // Wait, the parent uses handleSave to save to DB. Parent expects onSave for the DB call.
-  // Actually, parent sets hasUnsavedChanges when its own content state differs from DB.
-  // Since we replaced the generic textarea with inputs, we should notify the parent of live content changes
-  // to update the preview live and trigger hasUnsavedChanges.
-  // Wait, I will just update the parent content when any field changes if the parent expects it!
-  // But wait, SongEditorPage currently only receives onSave. 
-  
   return (
     <div className="flex-1 flex flex-col h-full bg-m3-bg dark:bg-m3-dark-bg overflow-hidden select-none">
       

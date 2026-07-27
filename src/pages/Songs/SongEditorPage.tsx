@@ -56,10 +56,11 @@ export const SongEditorPage: React.FC = () => {
 
   const handleSave = async (songId: string, updatedContent: string) => {
     const parsed = parseChordPro(updatedContent);
+    const meta = parsed.metadata;
     const updates: any = { content: updatedContent };
     
-    if (parsed.title) updates.title = parsed.title;
-    if (parsed.artist) updates.artist = parsed.artist;
+    if (meta.title) updates.title = meta.title;
+    if (meta.artist) updates.artist = meta.artist;
 
     await updateSong({
       id: songId,
