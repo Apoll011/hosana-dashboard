@@ -66,7 +66,7 @@ export const LoginPage: React.FC = () => {
         <div className="flex flex-col items-center text-center mb-6 select-none">
           <div
             className="
-              w-16 h-16 rounded-[22px]
+              w-22 h-22 rounded-[22px]
               flex items-center justify-center
               mb-4
               border
@@ -81,15 +81,12 @@ export const LoginPage: React.FC = () => {
             <img
               src={logo}
               alt="Hosanna Studio"
-              className="w-9 h-9 object-contain"
+              className="w-22 h-22 object-contain translate-y-0.5"
             />
           </div>
           <h1 className="font-display font-black text-3xl tracking-tighter text-slate-900">
             Hosanna Studio
           </h1>
-          <p className="text-[10px] text-slate-500 mt-2 uppercase tracking-[0.4em] font-black opacity-60">
-            Consola de Gestão
-          </p>
         </div>
 
         {/* Error Alert */}
