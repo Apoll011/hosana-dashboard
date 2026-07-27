@@ -86,7 +86,7 @@ export const SongsPage: React.FC<SongsPageProps> = ({
     sortBy: finalSortBy,
     sortOrder: finalSortOrder,
     page,
-    limit: 20, // Increased limit for better library view
+    limit: 50, // Increased limit for better library view
     key: actualSelectedKey || undefined,
     tag: actualSelectedTag || undefined,
     searchFields: actualSearchFields,
@@ -387,7 +387,7 @@ export const SongsPage: React.FC<SongsPageProps> = ({
             totalPages={totalPages}
             onPageChange={(p) => setPage(p)}
             total={totalSongs}
-            limit={20}
+            limit={50}
           />
         </div>
       </div>
