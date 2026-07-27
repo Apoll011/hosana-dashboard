@@ -8,7 +8,7 @@ import { useNavigate, useLocation, Outlet } from 'react-router-dom';
 import { ToastContainer } from '../components/common/Toast';
 import { useAuth } from '../contexts/AuthContext';
 import { useFolders } from '../hooks/useFolders';
-import { useSongs } from '../hooks/useSongs';
+import { useAllSongs } from '../hooks/useSongs';
 import { useServices } from '../hooks/useServices';
 import { useSync } from '../contexts/SyncContext';
 import { songsApi } from '../api/songs';
@@ -362,7 +362,7 @@ export const MainLayout: React.FC = () => {
 
   const songParams = useMemo(() => ({}), []);
 
-  const { songsQuery, renameSong, moveSong, deleteSong, updateBatchTags } = useSongs(songParams);
+  const { songsQuery, renameSong, moveSong, deleteSong, updateBatchTags } = useAllSongs(songParams);
 
   // Search & Filters State
   const [selectedKey, setSelectedKey] = useState<string>('');

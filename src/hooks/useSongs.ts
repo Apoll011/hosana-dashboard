@@ -118,6 +118,66 @@ export function useSongs(params: GetSongsParams = {}) {
   };
 }
 
+export function useAllSongs(params: GetSongsParams = {}) {
+  const { setSyncStatus } = useSync();
+  const queryClient = useQueryClient();
+  const mutations = useSongMutations();
+
+  const songsQuery = useQuery({
+    queryKey: ['songs', 'all', params],
+    queryFn: async () => {
+      setSyncStatus('syncing');
+      try {
+        const existingData: any = queryClient.getQueryData(['songs', 'all', params]);
+        const isInitialLoad = !existingData || !existingData.songs || existingData.songs.length === 0;
+
+        // 1. Pede a primeira página
+        const firstPage = await songsApi.getSongs({ ...params, page: 1, limit: 200 });
+        
+        if (isInitialLoad) {
+          queryClient.setQueryData(['songs', 'all', params], firstPage);
+        }
+
+        let apiSongs = [...firstPage.songs];
+
+        // 2. Continua a pedir o resto se houver mais de uma página
+        if (firstPage.totalPages && firstPage.totalPages > 1) {
+          const remainingPages = await Promise.all(
+            Array.from({ length: firstPage.totalPages - 1 }, (_, i) =>
+              songsApi.getSongs({ ...params, page: i + 2, limit: 200 }).then(pageData => {
+                
+                if (isInitialLoad) {
+                  // Injeta os cânticos na cache para aparecerem progressivamente
+                  queryClient.setQueryData(['songs', 'all', params], (oldData: any) => {
+                    if (!oldData) return oldData;
+                    return {
+                      ...oldData,
+                      songs: [...oldData.songs, ...pageData.songs]
+                    };
+                  });
+                }
+                return pageData;
+              })
+            )
+          );
+          
+          apiSongs = [...firstPage.songs];
+          remainingPages.forEach(page => apiSongs.push(...page.songs));
+        }
+
+        setSyncStatus('synced');
+        return { ...firstPage, songs: apiSongs };
+      } catch (err: any) {
+        setSyncStatus('error');
+        throw err;
+      }
+    },
+    staleTime: 10000,
+  });
+
+  return { songsQuery, ...mutations };
+}
+
 export function useSong(id: string | null) {
   return useQuery({
     queryKey: ['song', id],
