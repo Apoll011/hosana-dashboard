@@ -9,7 +9,6 @@ import { User } from '../types';
 export interface LoginParams {
   email: string;
   password: string;
-  serverUrl?: string;
 }
 
 export interface LoginResponse {
