@@ -24,7 +24,7 @@ class ApiClient {
   private onUnauthorizedCallback: (() => void) | null = null;
 
   constructor() {
-    this.baseURL = localStorage.getItem('chordpro_server_url') || import.meta.env.API_URL || '/api';
+    this.baseURL = localStorage.getItem('chordpro_server_url') || import.meta.env.VITE_API_URL || '/api';
     this.token = localStorage.getItem('chordpro_access_token');
     this.refreshTokenVal = localStorage.getItem('chordpro_refresh_token');
   }
