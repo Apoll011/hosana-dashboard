@@ -100,10 +100,11 @@ const ChordProPreview = React.memo(({ content }: { content: string }) => {
                 return (
                   <div
                     key={secIdx}
-                    className="pl-4 md:pl-6 border-l-2 border-[#0284c7]/30 my-6"
+                    data-section-index={secIdx}
+                    className="pl-4 md:pl-6 border-l-2 border-m3-primary/30 dark:border-m3-dark-primary/30 my-6"
                   >
-                    <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-900 dark:text-slate-100 uppercase tracking-wider mb-3 select-none">
-                      <Music className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                    <div className="flex items-center gap-1.5 text-[11px] font-bold text-m3-text dark:text-m3-dark-text uppercase tracking-wider mb-3 select-none">
+                      <Music className="w-3.5 h-3.5 text-m3-secondary shrink-0" />
                       <span>{section.label || 'Refrão'}</span>
                     </div>
                     <div className="space-y-4 font-medium">
@@ -112,6 +113,8 @@ const ChordProPreview = React.memo(({ content }: { content: string }) => {
                           key={lineIdx} 
                           line={line} 
                           showChords={showChords} 
+                          transpose={transposeVal} 
+                          onChordClick={setSelectedChord}
                         />
                       ))}
                     </div>
@@ -121,11 +124,11 @@ const ChordProPreview = React.memo(({ content }: { content: string }) => {
 
               if (section.type === 'tab') {
                 return (
-                  <div key={secIdx} className="bg-slate-100 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-200 dark:border-slate-700 my-4 select-text">
-                    <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2 select-none">
-                      {section.label || 'Tab'}
+                  <div key={secIdx} data-section-index={secIdx} className="bg-m3-sidebar dark:bg-m3-dark-sidebar p-4 rounded-xl border border-m3-border dark:border-m3-dark-border my-4 select-text">
+                    <div className="text-[10px] font-bold text-m3-secondary dark:text-m3-dark-secondary uppercase tracking-wider mb-2 select-none">
+                      {section.label || 'Tablatura'}
                     </div>
-                    <pre className="font-mono text-xs text-slate-800 dark:text-slate-200 overflow-x-auto leading-relaxed whitespace-pre">
+                    <pre className="font-mono text-xs text-m3-text dark:text-m3-dark-text overflow-x-auto leading-relaxed whitespace-pre">
                       {section.lines.map(line => line.text || '').join('\n')}
                     </pre>
                   </div>
@@ -134,25 +137,26 @@ const ChordProPreview = React.memo(({ content }: { content: string }) => {
 
               if (section.type === 'comment') {
                 return (
-                  <div key={secIdx} className="italic text-xs text-slate-500 bg-slate-100 dark:bg-slate-800/50 px-4 py-2 rounded-xl border-l-2 border-slate-200 dark:border-slate-700 my-2 select-none">
-                    {section.lines.map(l => l.text).join(', ')}
+                  <div
+                    key={secIdx}
+                    data-section-index={secIdx}
+                    className="my-2 select-none pl-3 text-[11px] italic text-m3-secondary/70 dark:text-m3-dark-secondary/70"
+                  >
+                    {section.lines.map(l => l.text).join(", ")}
                   </div>
                 );
               }
 
-              // Normal Verse
-              const verseLabel = section.label || `Verso`;
               return (
-                <div key={secIdx} className="relative pl-6 sm:pl-8 border-l border-slate-100 dark:border-slate-800/50 py-1.5">
-                  <div className="absolute -left-1 top-4 text-[9px] font-bold text-[#0284c7] -rotate-90 origin-left tracking-wider uppercase select-none whitespace-nowrap opacity-80">
-                    {verseLabel}
-                  </div>
+                <div key={secIdx} data-section-index={secIdx} className="relative pl-6 sm:pl-8 border-l border-m3-border/30 dark:border-m3-dark-border/30 py-1.5">
                   <div className="space-y-4">
                     {section.lines.map((line, lineIdx) => (
                       <LineRenderer 
                         key={lineIdx} 
                         line={line} 
                         showChords={showChords} 
+                        transpose={transposeVal} 
+                        onChordClick={setSelectedChord}
                       />
                     ))}
                   </div>
