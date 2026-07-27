@@ -155,11 +155,6 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ hideHeader }) => {
               Definições do Servidor e Cópias de Segurança
             </h1>
           </div>
-
-          <Badge variant="emerald">
-            <Server className="w-3.5 h-3.5 mr-1" />
-            Servidor Hosana Ativo
-          </Badge>
         </div>
       )}
 
@@ -228,23 +223,6 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ hideHeader }) => {
           </h3>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Input
-              label="Nome do Servidor"
-              value={formState.serverName}
-              onChange={(e) => setFormState({ ...formState, serverName: e.target.value })}
-              icon={<Server className="w-4 h-4 text-slate-400" />}
-              placeholder="Ex: Hosana Studio Central"
-            />
-
-            <Input
-              label="Porta HTTP do Servidor"
-              type="number"
-              value={formState.port}
-              onChange={(e) => setFormState({ ...formState, port: Number(e.target.value) })}
-              icon={<Globe className="w-4 h-4 text-slate-400" />}
-              placeholder="3000"
-            />
-
             <div className="flex flex-col gap-1.5">
               <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
                 <KeyRound className="w-3.5 h-3.5 text-slate-400" />
@@ -270,15 +248,6 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ hideHeader }) => {
               onChange={(e) => setFormState({ ...formState, syncIntervalSeconds: Number(e.target.value) })}
               icon={<RefreshCw className="w-4 h-4 text-slate-400" />}
               placeholder="30"
-            />
-
-            <Input
-              label="Limite Máximo de Upload por Ficheiro (MB)"
-              type="number"
-              value={formState.maxUploadMB}
-              onChange={(e) => setFormState({ ...formState, maxUploadMB: Number(e.target.value) })}
-              icon={<HardDrive className="w-4 h-4 text-slate-400" />}
-              placeholder="50"
             />
           </div>
         </div>
