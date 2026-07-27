@@ -106,4 +106,52 @@ export type SyncStatus = 'synced' | 'syncing' | 'error' | 'offline' | 'local_onl
 export interface APIError {
   message: string;
   status?: number;
+  code?: string;
 }
+
+export interface AdminUser {
+  id: string;
+  tenantId?: string;
+  email: string;
+  name: string;
+  role: string;
+  isApproved: boolean;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export interface RegisterTenantParams {
+  tenantName: string;
+  tenantSlug: string;
+  adminName: string;
+  adminEmail: string;
+  adminPassword: string;
+}
+
+export interface RegisterUserParams {
+  tenantSlug: string;
+  name: string;
+  email: string;
+  password: string;
+}
+
+export interface CreateAdminParams {
+  email: string;
+  password: string;
+  name: string;
+  role?: string;
+}
+
+export interface SyncStatusResponse {
+  versionHash: string;
+  timestamp: string;
+  timestamps: {
+    songs: string;
+    folders: string;
+    services: string;
+    musicians: string;
+    settings: string;
+    admins: string;
+  };
+}
+
