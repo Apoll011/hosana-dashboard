@@ -6,8 +6,7 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { httpClient } from '../../api/client';
-import { Layers, Lock, Mail, ArrowRight, ShieldCheck, AlertCircle, CheckCircle2, UserPlus } from 'lucide-react';
+import { Lock, Mail, ArrowRight, ShieldCheck, AlertCircle, CheckCircle2, UserPlus } from 'lucide-react';
 import { Button } from '../../components/common/Button';
 import { Input } from '../../components/common/Input';
 import bg from '../../assets/images/background.webp';
@@ -20,7 +19,6 @@ export const LoginPage: React.FC = () => {
 
   const redirectMessage = (location.state as any)?.message || '';
 
-  const [serverUrl, setServerUrl] = useState(httpClient.getBaseURL());
   const [email, setEmail] = useState('leader@church.org');
   const [password, setPassword] = useState('admin123');
   const [isLoading, setIsLoading] = useState(false);
@@ -162,11 +160,6 @@ export const LoginPage: React.FC = () => {
             <UserPlus className="w-3.5 h-3.5" />
             <span>Criar ou aderir a uma organização</span>
           </Link>
-        </div>
-
-        <div className="mt-6 pt-4 border-t border-slate-100 text-center text-[9px] text-slate-400 font-black uppercase tracking-[0.2em] flex items-center justify-center gap-2">
-          <ShieldCheck className="w-3 h-3 text-emerald-500 opacity-60" />
-          <span>Acesso Criptografado</span>
         </div>
       </div>
     </div>
