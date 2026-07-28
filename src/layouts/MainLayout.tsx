@@ -1438,7 +1438,7 @@ export const MainLayout: React.FC = () => {
                             className="ml-auto mr-2 items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full border"
                           >
                             <Calendar className="w-3.5 h-3.5" />
-                            {new Date(service.date).toLocaleDateString('pt-PT', {
+                            {new Date(currentService.date).toLocaleDateString('pt-PT', {
                               weekday: 'long',
                               year: 'numeric',
                               month: 'long',
