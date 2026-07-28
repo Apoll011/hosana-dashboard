@@ -400,40 +400,6 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ hideHeader }) => {
               <label className="flex items-center gap-3.5 p-4 border border-slate-200 dark:border-slate-800 rounded-2xl cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
                 <input
                   type="checkbox"
-                  checked={formState.autoBackupEnabled}
-                  onChange={(e) => setFormState({ ...formState, autoBackupEnabled: e.target.checked })}
-                  className="w-4 h-4 text-[#0284c7] rounded-md focus:ring-[#0284c7] cursor-pointer"
-                />
-                <div className="flex flex-col">
-                  <span className="text-xs font-bold text-slate-900 dark:text-slate-100">
-                    Ativar Cópias de Segurança Automáticas da Base de Dados
-                  </span>
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-                    Garante que todas as alterações às cifras, pastas e cultos sejam persistidas e salvaguardadas automaticamente.
-                  </p>
-                </div>
-              </label>
-
-              <label className="flex items-center gap-3.5 p-4 border border-slate-200 dark:border-slate-800 rounded-2xl cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
-                <input
-                  type="checkbox"
-                  checked={formState.allowPublicRead}
-                  onChange={(e) => setFormState({ ...formState, allowPublicRead: e.target.checked })}
-                  className="w-4 h-4 text-[#0284c7] rounded-md focus:ring-[#0284c7] cursor-pointer"
-                />
-                <div className="flex flex-col">
-                  <span className="text-xs font-bold text-slate-900 dark:text-slate-100">
-                    Permitir Pesquisa Pública de Cânticos Apenas de Leitura (Sem Autenticação)
-                  </span>
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-                    Permite que músicos e leitores consultem a biblioteca em modo de leitura sem autorizações administrativas.
-                  </p>
-                </div>
-              </label>
-
-              <label className="flex items-center gap-3.5 p-4 border border-slate-200 dark:border-slate-800 rounded-2xl cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
-                <input
-                  type="checkbox"
                   checked={formState.showChordsDefault ?? true}
                   onChange={(e) => setFormState({ ...formState, showChordsDefault: e.target.checked })}
                   className="w-4 h-4 text-[#0284c7] rounded-md focus:ring-[#0284c7] cursor-pointer"
