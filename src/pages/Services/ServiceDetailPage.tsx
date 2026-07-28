@@ -568,13 +568,15 @@ export const ServiceDetailPage: React.FC = () => {
        
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.3fr] gap-6 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.3fr] gap-6 lg:h-[calc(100vh-150px)] min-h-[600px]">
+        
         {/* LEFT: Song Library */}
         <div
-          className="bg-white rounded-3xl border shadow-sm flex flex-col"
-          style={{ borderColor: border, maxHeight: '75vh' }}
+          className="bg-white rounded-3xl border shadow-sm flex flex-col h-[60vh] lg:h-full overflow-hidden"
+          style={{ borderColor: border }}
         >
-          <div className="p-5 pb-4 border-b" style={{ borderColor: border }}>
+          {/* Adicionado shrink-0 ao cabeçalho para não encolher */}
+          <div className="p-5 pb-4 border-b shrink-0" style={{ borderColor: border }}>
             <h2 className="text-base font-bold mb-3" style={{ color: navy }}>
               Biblioteca de Cânticos
             </h2>
@@ -587,6 +589,7 @@ export const ServiceDetailPage: React.FC = () => {
             />
           </div>
 
+          {/* flex-1 e overflow-y-auto faz com que APENAS esta zona dê scroll */}
           <div className="overflow-y-auto flex-1 divide-y" style={{ borderColor: border }}>
             {filteredLibrarySongs.length === 0 ? (
               <div className="p-6 text-center text-xs text-slate-400">
@@ -634,10 +637,11 @@ export const ServiceDetailPage: React.FC = () => {
         </div>
 
         {/* RIGHT: Service Plan */}
-        <div className="flex flex-col gap-4">
-          {/* General notes */}
+        <div className="flex flex-col gap-4 h-full overflow-hidden">
+          
+          {/* General notes - shrink-0 garante que a caixa de notas não é esmagada */}
           <div
-            className="bg-white rounded-2xl border p-4 space-y-2"
+            className="bg-white rounded-2xl border p-4 space-y-2 shrink-0"
             style={{ borderColor: border }}
           >
             <div className="flex items-center justify-between">
@@ -663,13 +667,13 @@ export const ServiceDetailPage: React.FC = () => {
             />
           </div>
 
-          {/* Plan list */}
+          {/* Plan list - flex-1 garante que ocupa todo o espaço restante e overflow-hidden segura o scroll interno */}
           <div
-            className="bg-white rounded-3xl border shadow-sm flex flex-col"
+            className="bg-white rounded-3xl border shadow-sm flex flex-col flex-1 overflow-hidden"
             style={{ borderColor: border }}
           >
             <div
-              className="flex flex-wrap items-center justify-between px-5 py-4 border-b gap-2"
+              className="flex flex-wrap items-center justify-between px-5 py-4 border-b gap-2 shrink-0"
               style={{ borderColor: border }}
             >
               <h2 className="text-base font-bold" style={{ color: navy }}>
@@ -712,10 +716,11 @@ export const ServiceDetailPage: React.FC = () => {
               </div>
             </div>
 
-            <div className="p-4">
+            {/* Apenas este contentor do plano dá scroll (flex-1 overflow-y-auto) */}
+            <div className="p-4 flex-1 overflow-y-auto flex flex-col">
               {unifiedItems.length === 0 ? (
                 <div
-                  className="p-8 text-center rounded-2xl border border-dashed flex flex-col items-center justify-center gap-3"
+                  className="p-8 text-center rounded-2xl border border-dashed flex flex-col items-center justify-center gap-3 shrink-0"
                   style={{ borderColor: border }}
                 >
                   <div
@@ -778,7 +783,8 @@ export const ServiceDetailPage: React.FC = () => {
                 </DndContext>
               )}
 
-              <div className="flex gap-2 mt-3">
+              {/* Botões empurrados para baixo pelo mt-auto e sem encolher com shrink-0 */}
+              <div className="flex gap-2 mt-auto pt-3 shrink-0">
                 <button
                   type="button"
                   onClick={() => searchInputRef.current?.focus()}
@@ -795,7 +801,7 @@ export const ServiceDetailPage: React.FC = () => {
                   style={{ borderColor: border }}
                 >
                   <Plus className="w-4 h-4" />
-                  Adicionar Elemento
+                  Adicionar Outro/Personalizado
                 </button>
               </div>
             </div>
