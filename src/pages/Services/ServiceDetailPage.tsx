@@ -7,10 +7,10 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useService, useServices } from '../../hooks/useServices';
 import { useSongs } from '../../hooks/useSongs';
-import { Service, Song } from '../../types';
+import { Service, Song, ServiceElement } from '../../types';
 import {
   Calendar, ArrowLeft, Plus, GripVertical, Trash2, Edit3, Save, Music,
-  FileText, Search, Check, MoreHorizontal,
+  FileText, Search, Check, MoreHorizontal, BookOpen, MessageSquare, Megaphone, HelpCircle, X
 } from 'lucide-react';
 import {
   DndContext,
@@ -33,15 +33,19 @@ import { Button } from '../../components/common/Button';
 import { Input } from '../../components/common/Input';
 import { Spinner } from '../../components/common/Spinner';
 
-/**
- * Warm "plan" palette, scoped to this page only (kept as literal values so this
- * page doesn't depend on the app's existing slate/m3 theme tokens).
- */
 const gold = '#C9992F';
 const goldSoft = '#F4E9D3';
 const cream = '#FBF8F2';
 const border = '#EAE2D1';
 const navy = '#12203D';
+
+export interface UnifiedPlanItem {
+  id: string; // "song-{songId}" or "elem-{elementId}"
+  kind: 'song' | 'element';
+  songId?: string;
+  element?: ServiceElement;
+  position: number;
+}
 
 interface SortableSongRowProps {
   id: string;
@@ -143,7 +147,7 @@ const SortableSongRow: React.FC<SortableSongRowProps> = ({
                 <button
                   type="button"
                   onClick={() => {
-                    onRemove(id);
+                    onRemove(id.replace('song-', ''));
                     setMenuOpen(false);
                   }}
                   className="w-full flex items-center gap-2 px-3 py-2 text-xs font-medium text-rose-500 hover:bg-rose-50 cursor-pointer"
@@ -174,7 +178,7 @@ const SortableSongRow: React.FC<SortableSongRowProps> = ({
                 size="sm"
                 variant="primary"
                 onClick={() => {
-                  onNoteChange(id, localNote);
+                  onNoteChange(id.replace('song-', ''), localNote);
                   setIsEditingNote(false);
                 }}
               >
@@ -195,23 +199,186 @@ const SortableSongRow: React.FC<SortableSongRowProps> = ({
   );
 };
 
+interface SortableElementRowProps {
+  id: string;
+  element: ServiceElement;
+  index: number;
+  onRemove: (elementId: string) => void;
+  onEdit: (element: ServiceElement) => void;
+}
+
+const SortableElementRow: React.FC<SortableElementRowProps> = ({
+  id,
+  element,
+  index,
+  onRemove,
+  onEdit,
+}) => {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
+    useSortable({ id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  const getElementBadge = (type: string) => {
+    switch (type.toLowerCase()) {
+      case 'welcome':
+        return { label: 'Boas-vindas', bg: '#EBF5FF', color: '#1D4ED8' };
+      case 'scripture':
+        return { label: 'Escritura', bg: '#FDF4FF', color: '#C026D3' };
+      case 'message':
+        return { label: 'Mensagem', bg: '#FEF3C7', color: '#D97706' };
+      case 'reading':
+        return { label: 'Leitura', bg: '#F3E8FF', color: '#7E22CE' };
+      case 'announcement':
+        return { label: 'Avisos', bg: '#ECFDF5', color: '#059669' };
+      default:
+        return { label: type || 'Elemento', bg: '#F1F5F9', color: '#475569' };
+    }
+  };
+
+  const badge = getElementBadge(element.type);
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={{ ...style, borderColor: isDragging ? gold : border }}
+      className={`bg-white rounded-2xl border transition-shadow ${
+        isDragging ? 'shadow-lg z-20 opacity-90' : 'shadow-none'
+      }`}
+    >
+      <div className="flex items-center gap-3 px-4 py-3">
+        <button
+          type="button"
+          {...attributes}
+          {...listeners}
+          className="text-slate-300 hover:text-slate-500 cursor-grab active:cursor-grabbing shrink-0"
+          title="Arrastar para reordenar"
+        >
+          <GripVertical className="w-4 h-4" />
+        </button>
+
+        <span className="text-xs font-semibold text-slate-400 w-4 shrink-0 text-center">
+          {index + 1}
+        </span>
+
+        <div
+          className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 font-bold text-xs"
+          style={{ backgroundColor: badge.bg, color: badge.color }}
+        >
+          <FileText className="w-4 h-4" />
+        </div>
+
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2">
+            <p className="text-sm font-semibold truncate" style={{ color: navy }}>
+              {element.title || 'Elemento Sem Título'}
+            </p>
+            <span
+              className="text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0"
+              style={{ backgroundColor: badge.bg, color: badge.color }}
+            >
+              {badge.label}
+            </span>
+          </div>
+          {element.content && (
+            <p className="text-xs text-slate-500 truncate mt-0.5">{element.content}</p>
+          )}
+        </div>
+
+        <div className="relative shrink-0">
+          <button
+            type="button"
+            onClick={() => setMenuOpen((o) => !o)}
+            className="p-1.5 text-slate-300 hover:text-slate-500 rounded-lg cursor-pointer"
+          >
+            <MoreHorizontal className="w-4 h-4" />
+          </button>
+
+          {menuOpen && (
+            <>
+              <div className="fixed inset-0 z-10" onClick={() => setMenuOpen(false)} />
+              <div
+                className="absolute right-0 top-8 z-20 w-40 bg-white rounded-xl shadow-lg border py-1"
+                style={{ borderColor: border }}
+              >
+                <button
+                  type="button"
+                  onClick={() => {
+                    onEdit(element);
+                    setMenuOpen(false);
+                  }}
+                  className="w-full flex items-center gap-2 px-3 py-2 text-xs font-medium text-slate-600 hover:bg-slate-50 cursor-pointer"
+                >
+                  <Edit3 className="w-3.5 h-3.5" />
+                  Editar Elemento
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    onRemove(element.id);
+                    setMenuOpen(false);
+                  }}
+                  className="w-full flex items-center gap-2 px-3 py-2 text-xs font-medium text-rose-500 hover:bg-rose-50 cursor-pointer"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  Remover
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export const ServiceDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
   const { data: service, isLoading, isError } = useService(id || null);
-  const { addSong, removeSong, updateNotes, updateSongNotes, reorderSongs } = useServices();
+  const { addSong, removeSong, updateNotes, updateSongNotes, reorderSongs, updateElements } = useServices();
   const { songsQuery } = useSongs({ limit: 200 });
 
-  const [serviceSongs, setServiceSongs] = useState<Service['songs']>([]);
+  const [unifiedItems, setUnifiedItems] = useState<UnifiedPlanItem[]>([]);
   const [generalNotes, setGeneralNotes] = useState('');
   const [librarySearch, setLibrarySearch] = useState('');
   const searchInputRef = useRef<HTMLInputElement>(null);
 
+  // Element modal states
+  const [editingElement, setEditingElement] = useState<ServiceElement | null>(null);
+  const [isElementModalOpen, setIsElementModalOpen] = useState(false);
+  const [elementForm, setElementForm] = useState<{ id?: string; type: string; title: string; content: string }>({
+    type: 'welcome',
+    title: '',
+    content: '',
+  });
+
   useEffect(() => {
     if (service) {
-      setServiceSongs(service.songs || []);
       setGeneralNotes(service.notes || '');
+      
+      const songsList: UnifiedPlanItem[] = (service.songs || []).map((s, idx) => ({
+        id: `song-${s.songId}`,
+        kind: 'song',
+        songId: s.songId,
+        position: s.position !== undefined ? s.position : idx,
+      }));
+
+      const elementsList: UnifiedPlanItem[] = (service.elements || []).map((e, idx) => ({
+        id: `elem-${e.id}`,
+        kind: 'element',
+        element: e,
+        position: e.position !== undefined ? e.position : idx,
+      }));
+
+      const merged = [...songsList, ...elementsList].sort((a, b) => a.position - b.position);
+      setUnifiedItems(merged);
     }
   }, [service]);
 
@@ -242,7 +409,9 @@ export const ServiceDetailPage: React.FC = () => {
   }
 
   const allAvailableSongs = songsQuery.data?.songs || [];
-  const addedSongIds = new Set(serviceSongs.map((s) => (s as any).songId));
+  const addedSongIds = new Set(
+    unifiedItems.filter((i) => i.kind === 'song').map((i) => i.songId!)
+  );
 
   const filteredLibrarySongs = allAvailableSongs.filter(
     (s) =>
@@ -250,26 +419,56 @@ export const ServiceDetailPage: React.FC = () => {
       (s.artist || '').toLowerCase().includes(librarySearch.toLowerCase())
   );
 
-  const handleDragEnd = async (event: DragEndEvent) => {
-    const { active, over } = event;
-    if (over && active.id !== over.id) {
-      const oldIndex = serviceSongs.findIndex((item) => (item as any).songId === active.id);
-      const newIndex = serviceSongs.findIndex((item) => (item as any).songId === over.id);
-      const updated = arrayMove(serviceSongs, oldIndex, newIndex);
+  const syncPlanState = async (newItems: UnifiedPlanItem[]) => {
+    setUnifiedItems(newItems);
 
-      setServiceSongs(updated);
+    const orderedSongIds = newItems.filter((i) => i.kind === 'song').map((i) => i.songId!);
+    const updatedElements: ServiceElement[] = newItems
+      .filter((i) => i.kind === 'element')
+      .map((i, index) => ({
+        ...i.element!,
+        position: newItems.indexOf(i),
+      }));
+
+    if (orderedSongIds.length > 0) {
       await reorderSongs({
         serviceId: service.id,
         data: {
-          orderedSongIds: updated.map((s) => (s as any).songId),
+          orderedSongIds,
           updatedAt: service.updatedAt,
         },
       });
+    }
+
+    await updateElements({
+      serviceId: service.id,
+      data: {
+        elements: updatedElements,
+        updatedAt: service.updatedAt,
+      },
+    });
+  };
+
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (over && active.id !== over.id) {
+      const oldIndex = unifiedItems.findIndex((item) => item.id === active.id);
+      const newIndex = unifiedItems.findIndex((item) => item.id === over.id);
+      const updated = arrayMove(unifiedItems, oldIndex, newIndex);
+      await syncPlanState(updated);
     }
   };
 
   const handleRemoveSong = async (songId: string) => {
     await removeSong({ serviceId: service.id, songId, updatedAt: service.updatedAt });
+  };
+
+  const handleRemoveElement = async (elementId: string) => {
+    const nextElements = (service.elements || []).filter((e) => e.id !== elementId);
+    await updateElements({
+      serviceId: service.id,
+      data: { elements: nextElements, updatedAt: service.updatedAt },
+    });
   };
 
   const handleNoteChange = async (songId: string, note: string) => {
@@ -294,6 +493,63 @@ export const ServiceDetailPage: React.FC = () => {
     });
   };
 
+  const openAddElementModal = (presetType: string = 'welcome') => {
+    const titles: Record<string, string> = {
+      welcome: 'Boas-vindas & Oração Inicial',
+      scripture: 'Leitura Bíblica',
+      message: 'Mensagem / Sermão',
+      reading: 'Leitura Responsiva',
+      announcement: 'Avisos da Igreja',
+      custom: 'Novo Elemento',
+    };
+    setElementForm({
+      type: presetType,
+      title: titles[presetType] || 'Novo Elemento',
+      content: '',
+    });
+    setEditingElement(null);
+    setIsElementModalOpen(true);
+  };
+
+  const openEditElementModal = (element: ServiceElement) => {
+    setEditingElement(element);
+    setElementForm({
+      id: element.id,
+      type: element.type,
+      title: element.title,
+      content: element.content || '',
+    });
+    setIsElementModalOpen(true);
+  };
+
+  const handleSaveElement = async () => {
+    if (!elementForm.title.trim()) return;
+
+    let nextElements = [...(service.elements || [])];
+    if (editingElement) {
+      nextElements = nextElements.map((e) =>
+        e.id === editingElement.id
+          ? { ...e, type: elementForm.type, title: elementForm.title, content: elementForm.content }
+          : e
+      );
+    } else {
+      const newElem: ServiceElement = {
+        id: crypto.randomUUID(),
+        type: elementForm.type,
+        title: elementForm.title,
+        content: elementForm.content,
+        position: unifiedItems.length,
+      };
+      nextElements.push(newElem);
+    }
+
+    await updateElements({
+      serviceId: service.id,
+      data: { elements: nextElements, updatedAt: service.updatedAt },
+    });
+    setIsElementModalOpen(false);
+  };
+
   return (
     <div
       className="flex-1 w-full mx-auto max-w-7xl p-4 sm:p-6"
@@ -306,7 +562,7 @@ export const ServiceDetailPage: React.FC = () => {
             {service.name}
           </h1>
           <p className="text-xs text-slate-400 mt-1">
-            Arraste os cânticos para reordenar. Clique em “⋯” para adicionar notas.
+            Arraste os elementos e cânticos para reordenar o culto modular.
           </p>
         </div>
         <div
@@ -424,19 +680,51 @@ export const ServiceDetailPage: React.FC = () => {
             style={{ borderColor: border }}
           >
             <div
-              className="flex items-center justify-between px-5 py-4 border-b"
+              className="flex flex-wrap items-center justify-between px-5 py-4 border-b gap-2"
               style={{ borderColor: border }}
             >
               <h2 className="text-base font-bold" style={{ color: navy }}>
                 Plano do Culto
                 <span className="ml-2 text-xs font-medium text-slate-400">
-                  ({serviceSongs.length} {serviceSongs.length === 1 ? 'cântico' : 'cânticos'})
+                  ({unifiedItems.length} {unifiedItems.length === 1 ? 'item' : 'itens'})
                 </span>
               </h2>
+
+              {/* Quick Add Element Presets */}
+              <div className="flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={() => openAddElementModal('welcome')}
+                  className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 cursor-pointer"
+                >
+                  + Boas-vindas
+                </button>
+                <button
+                  type="button"
+                  onClick={() => openAddElementModal('scripture')}
+                  className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-fuchsia-50 text-fuchsia-700 hover:bg-fuchsia-100 cursor-pointer"
+                >
+                  + Escritura
+                </button>
+                <button
+                  type="button"
+                  onClick={() => openAddElementModal('message')}
+                  className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-amber-50 text-amber-700 hover:bg-amber-100 cursor-pointer"
+                >
+                  + Mensagem
+                </button>
+                <button
+                  type="button"
+                  onClick={() => openAddElementModal('announcement')}
+                  className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 cursor-pointer"
+                >
+                  + Avisos
+                </button>
+              </div>
             </div>
 
             <div className="p-4">
-              {serviceSongs.length === 0 ? (
+              {unifiedItems.length === 0 ? (
                 <div
                   className="p-8 text-center rounded-2xl border border-dashed flex flex-col items-center justify-center gap-3"
                   style={{ borderColor: border }}
@@ -452,7 +740,7 @@ export const ServiceDetailPage: React.FC = () => {
                       O plano ainda está vazio
                     </h4>
                     <p className="text-xs text-slate-400 mt-1 max-w-sm">
-                      Adicione cânticos a partir da biblioteca à esquerda para começar a montar o plano.
+                      Adicione cânticos da biblioteca ou elementos (Boas-vindas, Leitura, Mensagem) para montar a ordem de culto.
                     </p>
                   </div>
                 </div>
@@ -463,44 +751,136 @@ export const ServiceDetailPage: React.FC = () => {
                   onDragEnd={handleDragEnd}
                 >
                   <SortableContext
-                    items={serviceSongs.map((s) => s.songId)}
+                    items={unifiedItems.map((i) => i.id)}
                     strategy={verticalListSortingStrategy}
                   >
                     <div className="flex flex-col gap-2.5">
-                      {serviceSongs.map((item, index) => {
-                        const songObj = allAvailableSongs.find((s) => s.id === item.songId);
-                        const noteText = service.songNotes[item.songId] || item.notes || '';
+                      {unifiedItems.map((item, index) => {
+                        if (item.kind === 'song') {
+                          const songObj = allAvailableSongs.find((s) => s.id === item.songId);
+                          const noteText = service.songNotes[item.songId!] || '';
 
-                        return (
-                          <SortableSongRow
-                            key={item.songId}
-                            id={item.songId}
-                            song={songObj}
-                            note={noteText}
-                            index={index}
-                            onRemove={handleRemoveSong}
-                            onNoteChange={handleNoteChange}
-                          />
-                        );
+                          return (
+                            <SortableSongRow
+                              key={item.id}
+                              id={item.id}
+                              song={songObj}
+                              note={noteText}
+                              index={index}
+                              onRemove={handleRemoveSong}
+                              onNoteChange={handleNoteChange}
+                            />
+                          );
+                        } else {
+                          return (
+                            <SortableElementRow
+                              key={item.id}
+                              id={item.id}
+                              element={item.element!}
+                              index={index}
+                              onRemove={handleRemoveElement}
+                              onEdit={openEditElementModal}
+                            />
+                          );
+                        }
                       })}
                     </div>
                   </SortableContext>
                 </DndContext>
               )}
 
-              <button
-                type="button"
-                onClick={() => searchInputRef.current?.focus()}
-                className="w-full mt-3 py-3 rounded-2xl border border-dashed text-xs font-semibold flex items-center justify-center gap-2 cursor-pointer transition-colors hover:bg-slate-50"
-                style={{ borderColor: border, color: gold }}
-              >
-                <Plus className="w-4 h-4" />
-                Adicionar Cântico
-              </button>
+              <div className="flex gap-2 mt-3">
+                <button
+                  type="button"
+                  onClick={() => searchInputRef.current?.focus()}
+                  className="flex-1 py-3 rounded-2xl border border-dashed text-xs font-semibold flex items-center justify-center gap-2 cursor-pointer transition-colors hover:bg-slate-50"
+                  style={{ borderColor: border, color: gold }}
+                >
+                  <Plus className="w-4 h-4" />
+                  Adicionar Cântico
+                </button>
+                <button
+                  type="button"
+                  onClick={() => openAddElementModal('custom')}
+                  className="flex-1 py-3 rounded-2xl border border-dashed text-xs font-semibold flex items-center justify-center gap-2 cursor-pointer transition-colors hover:bg-slate-50 text-slate-600"
+                  style={{ borderColor: border }}
+                >
+                  <Plus className="w-4 h-4" />
+                  Adicionar Elemento Custom
+                </button>
+              </div>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Add / Edit Element Modal */}
+      {isElementModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl border space-y-4" style={{ borderColor: border }}>
+            <div className="flex items-center justify-between border-b pb-3" style={{ borderColor: border }}>
+              <h3 className="text-base font-bold" style={{ color: navy }}>
+                {editingElement ? 'Editar Elemento de Culto' : 'Novo Elemento de Culto'}
+              </h3>
+              <button onClick={() => setIsElementModalOpen(false)} className="p-1 rounded-lg text-slate-400 hover:text-slate-600">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <label className="text-xs font-semibold text-slate-600 block mb-1">Tipo de Elemento</label>
+                <select
+                  value={elementForm.type}
+                  onChange={(e) => setElementForm({ ...elementForm, type: e.target.value })}
+                  className="w-full text-xs rounded-xl border p-2.5 bg-white focus:outline-none focus:ring-2"
+                  style={{ borderColor: border }}
+                >
+                  <option value="welcome">Boas-vindas / Oração</option>
+                  <option value="scripture">Leitura Bíblica</option>
+                  <option value="message">Mensagem / Sermão</option>
+                  <option value="reading">Leitura Responsiva</option>
+                  <option value="announcement">Avisos</option>
+                  <option value="custom">Outro / Personalizado</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-slate-600 block mb-1">Título</label>
+                <input
+                  type="text"
+                  value={elementForm.title}
+                  onChange={(e) => setElementForm({ ...elementForm, title: e.target.value })}
+                  placeholder="Ex: Leitura de Salmos 23"
+                  className="w-full text-xs rounded-xl border p-2.5 bg-white focus:outline-none focus:ring-2"
+                  style={{ borderColor: border }}
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-slate-600 block mb-1">Detalhes / Conteúdo (Opcional)</label>
+                <textarea
+                  rows={3}
+                  value={elementForm.content}
+                  onChange={(e) => setElementForm({ ...elementForm, content: e.target.value })}
+                  placeholder="Ex: O Senhor é o meu pastor, nada me faltará..."
+                  className="w-full text-xs rounded-xl border p-2.5 bg-white focus:outline-none focus:ring-2"
+                  style={{ borderColor: border }}
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2 pt-2">
+              <Button size="sm" variant="ghost" onClick={() => setIsElementModalOpen(false)}>
+                Cancelar
+              </Button>
+              <Button size="sm" variant="primary" onClick={handleSaveElement}>
+                Guardar Elemento
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

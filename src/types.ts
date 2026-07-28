@@ -59,6 +59,14 @@ export interface FoldersResponse {
   rootSongsCount: number;
 }
 
+export interface ServiceElement {
+  id: string;
+  type: 'welcome' | 'scripture' | 'message' | 'reading' | 'announcement' | 'custom' | string;
+  title: string;
+  content?: string;
+  position?: number;
+}
+
 export interface ServiceSong {
   songId: string;
   notes: string;
@@ -69,6 +77,7 @@ export interface Service {
   name: string;
   date: string;
   notes: string; // Service-wide planning notes
+  elements?: ServiceElement[];
   songIds: string[];
   songs: Array<{ songId: string; notes: string; position: number }>;
   songNotes: Record<string, string>; // Maps songId -> notes

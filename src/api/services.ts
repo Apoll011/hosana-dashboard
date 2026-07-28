@@ -76,4 +76,11 @@ export const servicesApi = {
       body: JSON.stringify(data),
     });
   },
+
+  updateServiceElements: async (serviceId: string, data: { elements: any[]; updatedAt: string }): Promise<Service> => {
+    return httpClient.request<Service>(`/services/${serviceId}/elements`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  },
 };
