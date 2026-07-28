@@ -103,6 +103,17 @@ export function useServices() {
     onError: (err: any) => showToast(err.message || 'Failed to reorder songs', 'error'),
   });
 
+  const updateElementsMutation = useMutation({
+    mutationFn: ({ serviceId, data }: { serviceId: string; data: { elements: any[]; updatedAt: string } }) =>
+      servicesApi.updateServiceElements(serviceId, data),
+    onSuccess: (updated) => {
+      queryClient.invalidateQueries({ queryKey: ['service', updated.id] });
+      queryClient.invalidateQueries({ queryKey: ['services'] });
+      showToast('Service elements saved', 'success');
+    },
+    onError: (err: any) => showToast(err.message || 'Failed to update elements', 'error'),
+  });
+
   return {
     servicesQuery,
     createService: createServiceMutation.mutateAsync,
@@ -112,6 +123,7 @@ export function useServices() {
     removeSong: removeSongMutation.mutateAsync,
     updateNotes: updateNotesMutation.mutateAsync,
     updateSongNotes: updateSongNotesMutation.mutateAsync,
+    updateElements: updateElementsMutation.mutateAsync,
     reorderSongs: reorderSongsMutation.mutateAsync,
     isCreating: createServiceMutation.isPending,
     isUpdating: updateServiceMutation.isPending,
