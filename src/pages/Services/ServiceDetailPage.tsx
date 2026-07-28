@@ -806,7 +806,7 @@ export const ServiceDetailPage: React.FC = () => {
                   style={{ borderColor: border }}
                 >
                   <Plus className="w-4 h-4" />
-                  Adicionar Elemento Custom
+                  Adicionar Elemento
                 </button>
               </div>
             </div>
