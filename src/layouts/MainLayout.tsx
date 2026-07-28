@@ -1112,6 +1112,32 @@ export const MainLayout: React.FC = () => {
     }
   };
 
+  // Substitui a seleção atual por apenas 1 item (usado no Drag & Drop interno)
+  const overrideSelection = (id: string, type: 'folder' | 'song') => {
+    if (type === 'folder') {
+      setSelectedFolderIds(new Set([id]));
+      setSelectedSongIds(new Set());
+    } else {
+      setSelectedFolderIds(new Set());
+      setSelectedSongIds(new Set([id]));
+    }
+    setLastClickedId(id);
+  };
+
+  // Abre o modal de eliminar em lote que já tens criado
+  const handleDeleteSelected = () => {
+    if (selectedFolderIds.size > 0 || selectedSongIds.size > 0) {
+      setIsBatchDeleteOpen(true);
+    }
+  };
+
+  // Abre o modal de mover em lote que já tens criado
+  const handleMoveItems = () => {
+    if (selectedFolderIds.size > 0 || selectedSongIds.size > 0) {
+      setIsBatchMoveOpen(true);
+    }
+  };
+
   const totalItemsCount = filteredSubfolders.length + filteredFiles.length;
 
   return (
@@ -1674,6 +1700,11 @@ export const MainLayout: React.FC = () => {
               totalItemsCount,
               currentFolderId,
               selectionBox,
+              clearSelection,
+              selectAll: selectAllInCurrentView,
+              overrideSelection,
+              handleDeleteSelected,
+              handleMoveItems,
             }} />
           </div>
 
