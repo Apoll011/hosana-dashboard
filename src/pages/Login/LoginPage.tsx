@@ -19,8 +19,8 @@ export const LoginPage: React.FC = () => {
 
   const redirectMessage = (location.state as any)?.message || '';
 
-  const [email, setEmail] = useState('leader@church.org');
-  const [password, setPassword] = useState('admin123');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [isUnapproved, setIsUnapproved] = useState(false);
@@ -33,16 +33,17 @@ export const LoginPage: React.FC = () => {
 
     try {
       if (!email.trim() || !password.trim()) {
-        throw new Error('Please enter both email and password');
+        setErrorMsg('Por favor, insira o seu e-mail e a sua senha');
+        return;
       }
       await login({ email: email.trim(), password });
       navigate('/songs', { replace: true });
     } catch (err: any) {
       if (err?.code === 'ACCOUNT_NOT_APPROVED' || err?.status === 403 || err?.message?.includes('pending approval')) {
         setIsUnapproved(true);
-        setErrorMsg('Your account is pending approval by a tenant administrator.');
+        setErrorMsg('A sua conta está a aguardar aprovação de um administrador da Organização');
       } else {
-        setErrorMsg(err?.message || 'Authentication failed');
+        setErrorMsg(err?.message || 'Autenticação Falhou');
       }
     } finally {
       setIsLoading(false);
