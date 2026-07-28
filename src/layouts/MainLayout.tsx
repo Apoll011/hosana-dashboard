@@ -351,6 +351,9 @@ export const MainLayout: React.FC = () => {
   const [isDraggingOver, setIsDraggingOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const [isInternalDragActive, setIsInternalDragActive] = useState(false);
+  const [dropTargetFolderId, setDropTargetFolderId] = useState<string | null>(null);
+
   // Context Menu state
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
 
@@ -877,6 +880,64 @@ export const MainLayout: React.FC = () => {
     };
   }, []);
 
+  useEffect(() => {
+    const handleCloseMenu = () => setContextMenu(null);
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setContextMenu(null);
+        clearSelection();
+        return;
+      }
+
+      const target = e.target as HTMLElement;
+      const isTyping =
+        target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable;
+    if (isTyping) return;
+
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'a') {
+      if (!isExplorerView) return;
+      e.preventDefault();
+      selectAllInCurrentView();
+      return;
+    }
+
+    if (e.key === 'Delete' || e.key === 'Backspace') {
+      if (totalSelectedCount === 0) return;
+      e.preventDefault();
+
+      if (totalSelectedCount === 1) {
+        if (selectedFolderIds.size === 1) {
+          const folder = allFolders.find((f) => f.id === Array.from(selectedFolderIds)[0]);
+          if (folder) setDeleteTarget(folder);
+        } else {
+          const song = allSongs.find((s) => s.id === Array.from(selectedSongIds)[0]);
+          if (song) setDeleteSongTarget(song);
+        }
+      } else {
+        setIsBatchDeleteOpen(true);
+      }
+      return;
+    }
+
+    if (e.key === 'Enter') {
+      if (totalSelectedCount !== 1) return;
+      if (selectedFolderIds.size === 1) {
+        handleSelectFolder(Array.from(selectedFolderIds)[0]);
+      } else if (selectedSongIds.size === 1) {
+        navigate(`/songs/${Array.from(selectedSongIds)[0]}`);
+      }
+    }
+  };
+
+  window.addEventListener('click', handleCloseMenu);
+  window.addEventListener('keydown', handleKeyDown);
+  return () => {
+    window.removeEventListener('click', handleCloseMenu);
+    window.removeEventListener('keydown', handleKeyDown);
+  };
+}, [totalSelectedCount, selectedFolderIds, selectedSongIds, allFolders, allSongs, isExplorerView]);
+
   const toggleExpand = (id: string) => {
     setExpandedFolderIds((prev) => {
       const next = new Set(prev);
@@ -1091,8 +1152,9 @@ export const MainLayout: React.FC = () => {
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    if (isInternalDragActive) return; // não mostra overlay de upload durante drag interno
     if (!isDraggingOver) setIsDraggingOver(true);
-  };
+    };
 
   const handleDragLeave = (e: React.DragEvent) => {
     e.preventDefault();
@@ -1106,36 +1168,70 @@ export const MainLayout: React.FC = () => {
     e.stopPropagation();
     setIsDraggingOver(false);
 
+    if (isInternalDragActive) {
+      setIsInternalDragActive(false);
+      return; // era um drag interno que escapou de uma pasta — ignora como upload
+    }
+
     const files = e.dataTransfer.files;
     if (files && files.length > 0) {
       await processAndUploadFiles(Array.from(files));
     }
   };
 
-  // Substitui a seleção atual por apenas 1 item (usado no Drag & Drop interno)
-  const overrideSelection = (id: string, type: 'folder' | 'song') => {
-    if (type === 'folder') {
-      setSelectedFolderIds(new Set([id]));
-      setSelectedSongIds(new Set());
-    } else {
-      setSelectedFolderIds(new Set());
-      setSelectedSongIds(new Set([id]));
+  const handleItemDragStart = (e: React.DragEvent, id: string, type: 'folder' | 'song') => {
+    const isSelected = type === 'folder' ? selectedFolderIds.has(id) : selectedSongIds.has(id);
+
+    if (!isSelected) {
+      if (type === 'folder') {
+        setSelectedFolderIds(new Set([id]));
+        setSelectedSongIds(new Set());
+      } else {
+        setSelectedFolderIds(new Set());
+        setSelectedSongIds(new Set([id]));
+      }
+      setLastClickedId(id);
     }
-    setLastClickedId(id);
+
+    setIsInternalDragActive(true);
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('application/x-app-internal-drag', 'true');
   };
 
-  // Abre o modal de eliminar em lote que já tens criado
-  const handleDeleteSelected = () => {
-    if (selectedFolderIds.size > 0 || selectedSongIds.size > 0) {
-      setIsBatchDeleteOpen(true);
-    }
+  const handleItemDragEnd = () => {
+    setIsInternalDragActive(false);
+    setDropTargetFolderId(null);
   };
 
-  // Abre o modal de mover em lote que já tens criado
-  const handleMoveItems = () => {
-    if (selectedFolderIds.size > 0 || selectedSongIds.size > 0) {
-      setIsBatchMoveOpen(true);
+  const handleFolderDragOver = (e: React.DragEvent, folderId: string) => {
+    if (!isInternalDragActive) return;
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (disabledFolderIdsForBatchMove.has(folderId)) {
+      e.dataTransfer.dropEffect = 'none';
+      return;
     }
+    e.dataTransfer.dropEffect = 'move';
+    setDropTargetFolderId(folderId);
+  };
+
+  const handleFolderDragLeave = (e: React.DragEvent, folderId: string) => {
+    e.stopPropagation();
+    setDropTargetFolderId((prev) => (prev === folderId ? null : prev));
+  };
+
+  const handleFolderDrop = async (e: React.DragEvent, folderId: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const wasInternalDrag = isInternalDragActive;
+    setDropTargetFolderId(null);
+    setIsInternalDragActive(false);
+
+    if (!wasInternalDrag || disabledFolderIdsForBatchMove.has(folderId)) return;
+
+    // Move direto, sem modal de confirmação
+    await handleBatchMoveConfirm(folderId);
   };
 
   const totalItemsCount = filteredSubfolders.length + filteredFiles.length;
@@ -1700,11 +1796,14 @@ export const MainLayout: React.FC = () => {
               totalItemsCount,
               currentFolderId,
               selectionBox,
-              clearSelection,
-              selectAll: selectAllInCurrentView,
-              overrideSelection,
-              handleDeleteSelected,
-              handleMoveItems,
+              isInternalDragActive,
+              dropTargetFolderId,
+              dragDisabledFolderIds: disabledFolderIdsForBatchMove,
+              handleItemDragStart,
+              handleItemDragEnd,
+              handleFolderDragOver,
+              handleFolderDragLeave,
+              handleFolderDrop,
             }} />
           </div>
 
@@ -1729,6 +1828,46 @@ export const MainLayout: React.FC = () => {
     </div>
 
       <ToastContainer />
+
+      {totalSelectedCount > 1 && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 rounded-3xl shadow-2xl px-5 py-3 animate-in fade-in slide-in-from-bottom-4 duration-200">
+          <span className="text-xs font-black uppercase tracking-widest px-2">
+            {totalSelectedCount} itens selecionados
+          </span>
+
+          <div className="h-6 w-px bg-white/20 dark:bg-slate-900/20" />
+
+          <Button
+            size="sm"
+            variant="ghost"
+            icon={<Move className="w-4 h-4" />}
+            onClick={() => setIsBatchMoveOpen(true)}
+            className="!text-white dark:!text-slate-900 hover:!bg-white/10 dark:hover:!bg-slate-900/10"
+          >
+            Mover
+          </Button>
+
+          <Button
+            size="sm"
+            variant="ghost"
+            icon={<Trash2 className="w-4 h-4" />}
+            onClick={() => setIsBatchDeleteOpen(true)}
+            className="!text-rose-400 hover:!bg-rose-500/10"
+          >
+            Eliminar
+          </Button>
+
+          <Button
+            size="sm"
+            variant="ghost"
+            icon={<X className="w-4 h-4" />}
+            onClick={clearSelection}
+            className="!text-white/70 dark:!text-slate-900/70 hover:!bg-white/10 dark:hover:!bg-slate-900/10"
+          >
+            Cancelar
+          </Button>
+        </div>
+      )}
 
       {/* FLOATING CONTEXT MENU */}
       {contextMenu && (
@@ -1982,7 +2121,7 @@ export const MainLayout: React.FC = () => {
         </>
       )}
     </div>
-  )}
+      )}
 
       {/* CREATE SONG MODAL */}
       <Modal
