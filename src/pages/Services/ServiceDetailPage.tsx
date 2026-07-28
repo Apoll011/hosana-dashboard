@@ -568,14 +568,13 @@ export const ServiceDetailPage: React.FC = () => {
        
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.3fr] gap-6 lg:h-[calc(100vh-150px)] min-h-[600px]">
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.3fr] gap-6 lg:h-[calc(100vh-240px)] min-h-[600px]">
         
         {/* LEFT: Song Library */}
         <div
           className="bg-white rounded-3xl border shadow-sm flex flex-col h-[60vh] lg:h-full overflow-hidden"
           style={{ borderColor: border }}
         >
-          {/* Adicionado shrink-0 ao cabeçalho para não encolher */}
           <div className="p-5 pb-4 border-b shrink-0" style={{ borderColor: border }}>
             <h2 className="text-base font-bold mb-3" style={{ color: navy }}>
               Biblioteca de Cânticos
@@ -589,8 +588,7 @@ export const ServiceDetailPage: React.FC = () => {
             />
           </div>
 
-          {/* flex-1 e overflow-y-auto faz com que APENAS esta zona dê scroll */}
-          <div className="overflow-y-auto flex-1 divide-y" style={{ borderColor: border }}>
+          <div className="overflow-y-auto flex-1 min-h-0 divide-y" style={{ borderColor: border }}>
             {filteredLibrarySongs.length === 0 ? (
               <div className="p-6 text-center text-xs text-slate-400">
                 Nenhum cântico encontrado.
@@ -637,9 +635,10 @@ export const ServiceDetailPage: React.FC = () => {
         </div>
 
         {/* RIGHT: Service Plan */}
-        <div className="flex flex-col gap-4 h-full overflow-hidden">
+        {/* Adicionado min-h-0 aqui também */}
+        <div className="flex flex-col gap-4 h-full min-h-0 overflow-hidden">
           
-          {/* General notes - shrink-0 garante que a caixa de notas não é esmagada */}
+          {/* General notes - shrink-0 garante que não encolhe */}
           <div
             className="bg-white rounded-2xl border p-4 space-y-2 shrink-0"
             style={{ borderColor: border }}
@@ -667,9 +666,8 @@ export const ServiceDetailPage: React.FC = () => {
             />
           </div>
 
-          {/* Plan list - flex-1 garante que ocupa todo o espaço restante e overflow-hidden segura o scroll interno */}
           <div
-            className="bg-white rounded-3xl border shadow-sm flex flex-col flex-1 overflow-hidden"
+            className="bg-white rounded-3xl border shadow-sm flex flex-col flex-1 min-h-0 overflow-hidden"
             style={{ borderColor: border }}
           >
             <div
@@ -683,7 +681,6 @@ export const ServiceDetailPage: React.FC = () => {
                 </span>
               </h2>
 
-              {/* Quick Add Element Presets */}
               <div className="flex items-center gap-1">
                 <button
                   type="button"
@@ -716,8 +713,7 @@ export const ServiceDetailPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Apenas este contentor do plano dá scroll (flex-1 overflow-y-auto) */}
-            <div className="p-4 flex-1 overflow-y-auto flex flex-col">
+            <div className="p-4 flex-1 min-h-0 overflow-y-auto flex flex-col">
               {unifiedItems.length === 0 ? (
                 <div
                   className="p-8 text-center rounded-2xl border border-dashed flex flex-col items-center justify-center gap-3 shrink-0"
@@ -734,7 +730,7 @@ export const ServiceDetailPage: React.FC = () => {
                       O plano ainda está vazio
                     </h4>
                     <p className="text-xs text-slate-400 mt-1 max-w-sm">
-                      Adicione cânticos da biblioteca ou elementos (Boas-vindas, Leitura, Mensagem) para montar a ordem de culto.
+                      Adicione cânticos da biblioteca ou elementos para montar a ordem de culto.
                     </p>
                   </div>
                 </div>
@@ -783,7 +779,6 @@ export const ServiceDetailPage: React.FC = () => {
                 </DndContext>
               )}
 
-              {/* Botões empurrados para baixo pelo mt-auto e sem encolher com shrink-0 */}
               <div className="flex gap-2 mt-auto pt-3 shrink-0">
                 <button
                   type="button"
