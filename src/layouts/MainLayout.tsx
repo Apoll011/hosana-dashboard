@@ -1436,7 +1436,6 @@ export const MainLayout: React.FC = () => {
                           </div>
                            <div
                             className="ml-auto mr-2 items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full border"
-                            style={{ backgroundColor: goldSoft, color: '#8A6A1F', borderColor: '#E9D9AE' }}
                           >
                             <Calendar className="w-3.5 h-3.5" />
                             {new Date(service.date).toLocaleDateString('pt-PT', {
