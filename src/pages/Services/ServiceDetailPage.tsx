@@ -552,27 +552,25 @@ export const ServiceDetailPage: React.FC = () => {
 
   return (
     <div
-      className="flex-1 w-full mx-auto max-w-7xl p-4 sm:p-6"
+      className="flex-1 min-h-0 overflow-hidden p-6 flex flex-col"
       style={{ backgroundColor: cream }}
     >
-      {/* Service header row */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
         <div>
           <h1 className="text-2xl font-extrabold tracking-tight" style={{ color: navy }}>
             {service.name}
           </h1>
           <p className="text-xs text-slate-400 mt-1">
-            Arraste os elementos e cânticos para reordenar o culto modular.
+            Arraste os elementos e cânticos para reordenar o culto.
           </p>
         </div>
        
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.3fr] gap-6 lg:h-[calc(100vh-240px)] min-h-[600px]">
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.3fr] gap-6 h-full min-h-0">
         
-        {/* LEFT: Song Library */}
         <div
-          className="bg-white rounded-3xl border shadow-sm flex flex-col h-[60vh] lg:h-full overflow-hidden"
+          className="bg-white rounded-3xl border shadow-sm flex flex-col h-full min-h-0"
           style={{ borderColor: border }}
         >
           <div className="p-5 pb-4 border-b shrink-0" style={{ borderColor: border }}>
@@ -634,11 +632,8 @@ export const ServiceDetailPage: React.FC = () => {
           </div>
         </div>
 
-        {/* RIGHT: Service Plan */}
-        {/* Adicionado min-h-0 aqui também */}
-        <div className="flex flex-col gap-4 h-full min-h-0 overflow-hidden">
+        <div className="flex flex-col gap-4 h-full min-h-0">
           
-          {/* General notes - shrink-0 garante que não encolhe */}
           <div
             className="bg-white rounded-2xl border p-4 space-y-2 shrink-0"
             style={{ borderColor: border }}
@@ -667,7 +662,7 @@ export const ServiceDetailPage: React.FC = () => {
           </div>
 
           <div
-            className="bg-white rounded-3xl border shadow-sm flex flex-col flex-1 min-h-0 overflow-hidden"
+            className="bg-white rounded-3xl border shadow-sm flex flex-col flex-1 min-h-0"
             style={{ borderColor: border }}
           >
             <div
@@ -713,7 +708,7 @@ export const ServiceDetailPage: React.FC = () => {
               </div>
             </div>
 
-            <div className="p-4 flex-1 min-h-0 overflow-y-auto flex flex-col">
+            <div className="p-4 flex-1 overflow-y-auto min-h-0 flex flex-col">
               {unifiedItems.length === 0 ? (
                 <div
                   className="p-8 text-center rounded-2xl border border-dashed flex flex-col items-center justify-center gap-3 shrink-0"
@@ -729,9 +724,6 @@ export const ServiceDetailPage: React.FC = () => {
                     <h4 className="text-sm font-bold" style={{ color: navy }}>
                       O plano ainda está vazio
                     </h4>
-                    <p className="text-xs text-slate-400 mt-1 max-w-sm">
-                      Adicione cânticos da biblioteca ou elementos para montar a ordem de culto.
-                    </p>
                   </div>
                 </div>
               ) : (
