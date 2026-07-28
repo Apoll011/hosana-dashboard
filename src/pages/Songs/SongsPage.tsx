@@ -102,9 +102,9 @@ export const SongsPage: React.FC<SongsPageProps> = ({
   const [destinationFolderId, setDestinationFolderId] = useState<string>('');
   const [deleteTarget, setDeleteTarget] = useState<Song | null>(null);
 
-  const folders = foldersQuery.data?.folders || [];
-  const songsData = songsQuery.data?.songs || [];
-  const totalPages = songsQuery.data?.totalPages || 1;
+  const folders = Array.isArray(foldersQuery.data?.folders) ? foldersQuery.data.folders : [];
+  const songsData = Array.isArray(songsQuery.data?.songs) ? songsQuery.data.songs : [];
+  const totalPages = Math.max(1, songsQuery.data?.totalPages || 1);
   const totalSongs = songsQuery.data?.total || 0;
 
   const handleCreateSongSubmit = React.useCallback(async (data: {
