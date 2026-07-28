@@ -40,7 +40,7 @@ export function useAdmins() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admins'] });
       queryClient.invalidateQueries({ queryKey: ['admins', 'pending'] });
-      showToast('User approved successfully', 'success');
+      showToast('Utilizador aprovado com sucesso!', 'success');
     },
     onError: (err: any) => {
       showToast(err.message || 'Falha ao aprovar utilizador', 'error');
@@ -52,7 +52,7 @@ export function useAdmins() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admins'] });
       queryClient.invalidateQueries({ queryKey: ['admins', 'pending'] });
-      showToast('User removed', 'info');
+      showToast('Utilizador removido com sucesso!', 'info');
     },
     onError: (err: any) => {
       showToast(err.message || 'Falha ao remover utilizador', 'error');

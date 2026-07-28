@@ -21,10 +21,10 @@ export function useSettings() {
     mutationFn: (settings: Partial<ServerSettings>) => settingsApi.updateSettings(settings),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['settings'] });
-      showToast('Server settings updated successfully', 'success');
+      showToast('Definições do servidor guardadas com sucesso!', 'success');
     },
     onError: (err: any) => {
-      showToast(err.message || 'Failed to update server settings', 'error');
+      showToast(err.message || 'Falha ao guardar definições do servidor', 'error');
     },
   });
 

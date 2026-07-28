@@ -3,17 +3,25 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { ToggleLeft, ToggleRight, Music, Disc, Key, Flame, User } from 'lucide-react';
 import { parseChordPro } from '../utils';
+import { useSettings } from '../hooks/useSettings';
 
 interface ChordProPreviewProps {
   content: string;
 }
 
 const ChordProPreview = React.memo(({ content }: { content: string }) => {
-  // Hide chords by default as requested
-  const [showChords, setShowChords] = useState(false);
+  const { settingsQuery } = useSettings();
+  const defaultShowChords = settingsQuery.data?.showChordsDefault ?? true;
+  const [showChords, setShowChords] = useState(defaultShowChords);
+
+  useEffect(() => {
+    if (settingsQuery.data?.showChordsDefault !== undefined) {
+      setShowChords(settingsQuery.data.showChordsDefault);
+    }
+  }, [settingsQuery.data?.showChordsDefault]);
 
   // Parse ChordPro in real-time
   const parsedSong = useMemo(() => {

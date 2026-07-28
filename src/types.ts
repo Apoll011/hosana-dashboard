@@ -98,6 +98,7 @@ export interface ServerSettings {
   allowPublicRead: boolean;
   autoBackupEnabled: boolean;
   maxUploadMB: number;
+  showChordsDefault?: boolean;
   updatedAt: string;
 }
 
