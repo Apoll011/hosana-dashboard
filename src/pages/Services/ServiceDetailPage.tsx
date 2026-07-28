@@ -33,11 +33,11 @@ import { Button } from '../../components/common/Button';
 import { Input } from '../../components/common/Input';
 import { Spinner } from '../../components/common/Spinner';
 
-const gold = '#C9992F';
-const goldSoft = '#F4E9D3';
-const cream = '#FBF8F2';
-const border = '#EAE2D1';
-const navy = '#12203D';
+const gold = '#0284c7';
+const goldSoft = '#e0f2fe';
+const cream = '#f8fafc';
+const border = '#cbd5e1';
+const navy = '#1d1b20';
 
 export interface UnifiedPlanItem {
   id: string; // "song-{songId}" or "elem-{elementId}"
