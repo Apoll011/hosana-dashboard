@@ -12,6 +12,7 @@ import { Spinner } from '../components/common/Spinner';
 // Lazy load pages for performance
 const LoginPage = lazy(() => import('../pages/Login/LoginPage').then(m => ({ default: m.LoginPage })));
 const RegisterPage = lazy(() => import('../pages/Register/RegisterPage').then(m => ({ default: m.RegisterPage })));
+const RegisterTenantPage = lazy(() => import('../pages/Register/Tenant').then(m => ({ default: m.RegisterTenantPage })));
 const FoldersPage = lazy(() => import('../pages/Folders/FoldersPage').then(m => ({ default: m.FoldersPage })));
 const SongsPage = lazy(() => import('../pages/Songs/SongsPage').then(m => ({ default: m.SongsPage })));
 const SongEditorPage = lazy(() => import('../pages/Songs/SongEditorPage').then(m => ({ default: m.SongEditorPage })));
@@ -32,6 +33,7 @@ export const AppRoutes: React.FC = () => {
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+        <Route path="/new" element={<RegisterTenantPage />} />
 
         <Route element={<ProtectedRoute />}>
           <Route element={<MainLayout />}>

@@ -27,6 +27,29 @@ export const authApi = {
     return data;
   },
 
+    registerTenant: async (params: {
+    tenantName: string;
+    tenantSlug: string;
+    adminName: string;
+    adminEmail: string;
+    adminPassword: string;
+    serverUrl?: string;
+  }): Promise<any> => {
+    if (params.serverUrl) {
+      httpClient.setBaseURL(params.serverUrl);
+    }
+    return httpClient.request('/tenants/register', {
+      method: 'POST',
+      body: JSON.stringify({
+        tenantName: params.tenantName,
+        tenantSlug: params.tenantSlug,
+        adminName: params.adminName,
+        adminEmail: params.adminEmail,
+        adminPassword: params.adminPassword,
+      }),
+    });
+  },
+
   registerUser: async (params: {
     tenantSlug: string;
     name: string;
