@@ -565,18 +565,7 @@ export const ServiceDetailPage: React.FC = () => {
             Arraste os elementos e cânticos para reordenar o culto modular.
           </p>
         </div>
-        <div
-          className="inline-flex items-center gap-1.5 self-start sm:self-auto text-xs font-semibold px-3 py-1.5 rounded-full border"
-          style={{ backgroundColor: goldSoft, color: '#8A6A1F', borderColor: '#E9D9AE' }}
-        >
-          <Calendar className="w-3.5 h-3.5" />
-          {new Date(service.date).toLocaleDateString('pt-PT', {
-            weekday: 'long',
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-          })}
-        </div>
+       
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.3fr] gap-6 items-start">

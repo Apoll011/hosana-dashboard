@@ -1432,7 +1432,19 @@ export const MainLayout: React.FC = () => {
                           <ChevronRight className="w-3.5 h-3.5 text-m3-secondary/40 shrink-0" />
                           <div className="flex items-center gap-2 font-black text-m3-primary shrink-0 uppercase tracking-wide">
                             <Calendar className="w-4 h-4" />
-                            <span>{currentService.name}</span>
+                            <span>{currentService.name}.service</span>
+                          </div>
+                           <div
+                            className="ml-auto mr-2 items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full border"
+                            style={{ backgroundColor: goldSoft, color: '#8A6A1F', borderColor: '#E9D9AE' }}
+                          >
+                            <Calendar className="w-3.5 h-3.5" />
+                            {new Date(service.date).toLocaleDateString('pt-PT', {
+                              weekday: 'long',
+                              year: 'numeric',
+                              month: 'long',
+                              day: 'numeric',
+                            })}
                           </div>
                         </>
                       )}
