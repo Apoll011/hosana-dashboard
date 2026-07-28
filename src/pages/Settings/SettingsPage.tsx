@@ -429,6 +429,8 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ hideHeader }) => {
                     Permite que músicos e leitores consultem a biblioteca em modo de leitura sem autorizações administrativas.
                   </p>
                 </div>
+              </label>
+
               <label className="flex items-center gap-3.5 p-4 border border-slate-200 dark:border-slate-800 rounded-2xl cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
                 <input
                   type="checkbox"
