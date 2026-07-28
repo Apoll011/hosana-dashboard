@@ -222,25 +222,8 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ hideHeader }) => {
 
   return (
     <div className={`flex-1 flex flex-col w-full mx-auto space-y-6 overflow-y-auto h-full ${hideHeader ? 'p-6' : 'p-4 sm:p-6 max-w-5xl'}`}>
-      {/* Header Banner */}
-      {!actualHideHeader && (
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight flex items-center gap-2.5">
-              <Settings className="w-6 h-6 text-[#0284c7]" />
-              Definições da Organização e Administração
-            </h1>
-          </div>
-
-          <Badge variant="emerald">
-            <Server className="w-3.5 h-3.5 mr-1" />
-            Servidor Hosana Ativo
-          </Badge>
-        </div>
-      )}
-
       {/* Tab Navigation */}
-      <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-2 overflow-x-auto">
+      <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-2 overflow-x-auto [&>*]:shrink-0">
         <button
           type="button"
           onClick={() => setActiveTab('general')}
