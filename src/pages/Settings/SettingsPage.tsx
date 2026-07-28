@@ -268,8 +268,9 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ hideHeader }) => {
           <span>Cópias de Segurança</span>
         </button>
       </div>
-
-      {/* ==================== TAB 1: GENERAL & SERVER SETTINGS ==================== */}
+      
+      <div className="flex-1 overflow-y-auto p-6">
+              {/* ==================== TAB 1: GENERAL & SERVER SETTINGS ==================== */}
       {activeTab === 'general' && (
         <form onSubmit={handleSubmitSettings} className="space-y-6">
           {/* Theme and Appearance */}
@@ -660,6 +661,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ hideHeader }) => {
           </div>
         </div>
       )}
+      </div>
 
       {/* ==================== MODAL: INVITE ADMINISTRATOR ==================== */}
       <Modal
