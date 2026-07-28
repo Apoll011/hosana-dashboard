@@ -31,13 +31,24 @@ export function useServices() {
   const updateServiceMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: Partial<Service> }) =>
       servicesApi.updateService(id, data),
-    onSuccess: (updated) => {
-      queryClient.invalidateQueries({ queryKey: ['services'] });
-      queryClient.invalidateQueries({ queryKey: ['service', updated.id] });
-      showToast('Service updated successfully', 'success');
+    onMutate: async ({ id, data }) => {
+      await queryClient.cancelQueries({ queryKey: ['service', id] });
+      const previousService = queryClient.getQueryData(['service', id]);
+      queryClient.setQueryData(['service', id], (old: any) => ({
+        ...old,
+        ...data,
+      }));
+      return { previousService };
     },
-    onError: (err: any) => {
+    onError: (err: any, variables, context) => {
+      if (context?.previousService) {
+        queryClient.setQueryData(['service', variables.id], context.previousService);
+      }
       showToast(err.message || 'Failed to update service', 'error');
+    },
+    onSettled: (data, error, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['service', variables.id] });
+      queryClient.invalidateQueries({ queryKey: ['services'] });
     },
   });
 
@@ -52,66 +63,28 @@ export function useServices() {
     },
   });
 
-  const addSongMutation = useMutation({
-    mutationFn: ({ serviceId, data }: { serviceId: string; data: { songId: string; notes?: string; position?: number; updatedAt: string } }) =>
-      servicesApi.addSongToService(serviceId, data),
-    onSuccess: (updated) => {
-      queryClient.invalidateQueries({ queryKey: ['service', updated.id] });
-      queryClient.invalidateQueries({ queryKey: ['services'] });
-    },
-    onError: (err: any) => showToast(err.message || 'Failed to add song', 'error'),
-  });
-
-  const removeSongMutation = useMutation({
-    mutationFn: ({ serviceId, songId, updatedAt }: { serviceId: string; songId: string; updatedAt: string }) =>
-      servicesApi.removeSongFromService(serviceId, songId, updatedAt),
-    onSuccess: (updated) => {
-      queryClient.invalidateQueries({ queryKey: ['service', updated.id] });
-      queryClient.invalidateQueries({ queryKey: ['services'] });
-    },
-    onError: (err: any) => showToast(err.message || 'Failed to remove song', 'error'),
-  });
-
-  const updateNotesMutation = useMutation({
-    mutationFn: ({ serviceId, data }: { serviceId: string; data: { notes: string; updatedAt: string } }) =>
-      servicesApi.updateServiceNotes(serviceId, data),
-    onSuccess: (updated) => {
-      queryClient.invalidateQueries({ queryKey: ['service', updated.id] });
-      queryClient.invalidateQueries({ queryKey: ['services'] });
-      showToast('Service notes saved', 'success');
-    },
-    onError: (err: any) => showToast(err.message || 'Failed to update notes', 'error'),
-  });
-
-  const updateSongNotesMutation = useMutation({
-    mutationFn: ({ serviceId, songId, data }: { serviceId: string; songId: string; data: { notes: string; updatedAt: string } }) =>
-      servicesApi.updateServiceSongNotes(serviceId, songId, data),
-    onSuccess: (updated) => {
-      queryClient.invalidateQueries({ queryKey: ['service', updated.id] });
-      queryClient.invalidateQueries({ queryKey: ['services'] });
-    },
-    onError: (err: any) => showToast(err.message || 'Failed to update song notes', 'error'),
-  });
-
-  const reorderSongsMutation = useMutation({
-    mutationFn: ({ serviceId, data }: { serviceId: string; data: { orderedSongIds: string[]; updatedAt: string } }) =>
-      servicesApi.reorderServiceSongs(serviceId, data),
-    onSuccess: (updated) => {
-      queryClient.invalidateQueries({ queryKey: ['service', updated.id] });
-      queryClient.invalidateQueries({ queryKey: ['services'] });
-    },
-    onError: (err: any) => showToast(err.message || 'Failed to reorder songs', 'error'),
-  });
-
   const updateElementsMutation = useMutation({
     mutationFn: ({ serviceId, data }: { serviceId: string; data: { elements: any[]; updatedAt: string } }) =>
       servicesApi.updateServiceElements(serviceId, data),
-    onSuccess: (updated) => {
-      queryClient.invalidateQueries({ queryKey: ['service', updated.id] });
-      queryClient.invalidateQueries({ queryKey: ['services'] });
-      showToast('Service elements saved', 'success');
+    onMutate: async ({ serviceId, data }) => {
+      await queryClient.cancelQueries({ queryKey: ['service', serviceId] });
+      const previousService = queryClient.getQueryData(['service', serviceId]);
+      queryClient.setQueryData(['service', serviceId], (old: any) => ({
+        ...old,
+        elements: data.elements,
+      }));
+      return { previousService };
     },
-    onError: (err: any) => showToast(err.message || 'Failed to update elements', 'error'),
+    onError: (err: any, variables, context) => {
+      if (context?.previousService) {
+        queryClient.setQueryData(['service', variables.serviceId], context.previousService);
+      }
+      showToast(err.message || 'Failed to update elements', 'error');
+    },
+    onSettled: (data, error, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['service', variables.serviceId] });
+      queryClient.invalidateQueries({ queryKey: ['services'] });
+    },
   });
 
   return {
@@ -119,12 +92,7 @@ export function useServices() {
     createService: createServiceMutation.mutateAsync,
     updateService: updateServiceMutation.mutateAsync,
     deleteService: deleteServiceMutation.mutateAsync,
-    addSong: addSongMutation.mutateAsync,
-    removeSong: removeSongMutation.mutateAsync,
-    updateNotes: updateNotesMutation.mutateAsync,
-    updateSongNotes: updateSongNotesMutation.mutateAsync,
     updateElements: updateElementsMutation.mutateAsync,
-    reorderSongs: reorderSongsMutation.mutateAsync,
     isCreating: createServiceMutation.isPending,
     isUpdating: updateServiceMutation.isPending,
     isDeleting: deleteServiceMutation.isPending,
