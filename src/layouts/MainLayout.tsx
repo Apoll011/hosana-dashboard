@@ -1434,17 +1434,22 @@ export const MainLayout: React.FC = () => {
                             <Calendar className="w-4 h-4" />
                             <span>{currentService.name}.service</span>
                           </div>
-                           <div
-                            className="ml-auto mr-2 items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full border"
-                          >
-                            <Calendar className="w-3.5 h-3.5" />
+                          <div
+                          className="ml-auto mr-2 inline-flex items-center gap-1.5 rounded-full
+                                    px-3 py-1.5 text-xs font-semibold
+                                    bg-m3-primary-light text-m3-primary
+                                    border border-m3-primary"
+                        >
+                          <Calendar className="h-3.5 w-3.5" />
+                          <span>
                             {new Date(currentService.date).toLocaleDateString('pt-PT', {
                               weekday: 'long',
                               year: 'numeric',
                               month: 'long',
                               day: 'numeric',
                             })}
-                          </div>
+                          </span>
+                        </div>
                         </>
                       )}
                     </>
