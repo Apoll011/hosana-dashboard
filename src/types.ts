@@ -61,10 +61,13 @@ export interface FoldersResponse {
 
 export interface ServiceElement {
   id: string;
-  type: 'welcome' | 'scripture' | 'message' | 'reading' | 'announcement' | 'custom' | string;
+  type: 'welcome' | 'scripture' | 'message' | 'reading' | 'announcement' | 'custom' | 'song' | string;
   title: string;
   content?: string;
   position?: number;
+  songId?: string;
+  notes?: string;
+  passage?: string;
 }
 
 export interface ServiceSong {
@@ -78,9 +81,6 @@ export interface Service {
   date: string;
   notes: string; // Service-wide planning notes
   elements?: ServiceElement[];
-  songIds: string[];
-  songs: Array<{ songId: string; notes: string; position: number }>;
-  songNotes: Record<string, string>; // Maps songId -> notes
   createdAt: string;
   updatedAt: string;
 }

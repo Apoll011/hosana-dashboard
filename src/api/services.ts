@@ -35,47 +35,7 @@ export const servicesApi = {
     });
   },
 
-  addSongToService: async (serviceId: string, data: { songId: string; notes?: string; position?: number; updatedAt: string }): Promise<Service> => {
-    return httpClient.request<Service>(`/services/${serviceId}/songs`, {
-      method: 'POST',
-      body: JSON.stringify(data),
-    });
-  },
 
-  removeSongFromService: async (serviceId: string, songId: string, updatedAt: string): Promise<Service> => {
-    return httpClient.request<Service>(`/services/${serviceId}/songs/${songId}`, {
-      method: 'DELETE',
-      body: JSON.stringify({ updatedAt }),
-    });
-  },
-
-  reorderServiceSongs: async (serviceId: string, data: { orderedSongIds: string[]; updatedAt: string }): Promise<Service> => {
-    return httpClient.request<Service>(`/services/${serviceId}/songs/reorder`, {
-      method: 'PUT',
-      body: JSON.stringify(data),
-    });
-  },
-
-  moveServiceSong: async (serviceId: string, songId: string, data: { targetIndex: number; updatedAt: string }): Promise<Service> => {
-    return httpClient.request<Service>(`/services/${serviceId}/songs/${songId}/move`, {
-      method: 'PUT',
-      body: JSON.stringify(data),
-    });
-  },
-
-  updateServiceNotes: async (serviceId: string, data: { notes: string; updatedAt: string }): Promise<Service> => {
-    return httpClient.request<Service>(`/services/${serviceId}/notes`, {
-      method: 'PUT',
-      body: JSON.stringify(data),
-    });
-  },
-
-  updateServiceSongNotes: async (serviceId: string, songId: string, data: { notes: string; updatedAt: string }): Promise<Service> => {
-    return httpClient.request<Service>(`/services/${serviceId}/songs/${songId}/notes`, {
-      method: 'PUT',
-      body: JSON.stringify(data),
-    });
-  },
 
   updateServiceElements: async (serviceId: string, data: { elements: any[]; updatedAt: string }): Promise<Service> => {
     return httpClient.request<Service>(`/services/${serviceId}/elements`, {
