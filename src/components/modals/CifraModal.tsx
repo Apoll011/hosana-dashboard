@@ -64,7 +64,9 @@ export const CifraClubImportModal: React.FC<{
       if (result.error) {
         setError(`Erro ao obter a cifra: ${result.error}`);
       } else {
-        handleSave(convertToChordProDetailed(result.cifra!), slug_to_name(artist), slug_to_name(song))
+        handleSave(convertToChordProDetailed(result.cifra!, {
+          strictChordDetection: false
+        }), slug_to_name(artist), slug_to_name(song))
         handleClosed();
       }
     } catch (err: any) {
