@@ -39,7 +39,6 @@ const ChordProPreview = React.memo(({ content }: { content: string }) => {
           Pré-visualização
         </span>
 
-        {/* Mostrar Acordes Toggle */}
         <div className="flex items-center gap-2">
           <span className="text-xs font-medium text-slate-500 select-none">
             Mostrar Acordes
@@ -69,10 +68,26 @@ const ChordProPreview = React.memo(({ content }: { content: string }) => {
                 <h2 className="text-2xl font-bold tracking-tight text-neutral-900 dark:text-white">
                   {metadata.title}
                 </h2>
-                {metadata.artist && (
-                  <div className="flex items-center gap-1 text-xs text-neutral-500 mt-2 font-medium">
+                
+                {metadata.subtitle && (
+                  <h3 className="text-[15px] font-medium text-neutral-600 dark:text-neutral-400 mt-1">
+                    {metadata.subtitle}
+                  </h3>
+                )}
+
+                {(metadata.artist || metadata.composer) && (
+                  <div className="flex items-center gap-1.5 text-xs text-neutral-500 mt-2 font-medium flex-wrap">
                     <User className="w-3.5 h-3.5 text-[#0284c7]" />
-                    <span>Por: {metadata.artist}</span>
+                    <span>
+                      Por: {[metadata.artist, metadata.composer].filter(Boolean).join(' / ')}
+                    </span>
+                  </div>
+                )}
+                
+                {metadata.album && (
+                  <div className="flex items-center gap-1.5 text-xs text-neutral-500 mt-1 font-medium">
+                    <Disc className="w-3.5 h-3.5 text-[#0284c7]" />
+                    <span>Álbum: {metadata.album}</span>
                   </div>
                 )}
               </div>
@@ -84,8 +99,14 @@ const ChordProPreview = React.memo(({ content }: { content: string }) => {
                   </span>
                 )}
                 {metadata.key && (
-                  <span className="text-[10px] font-bold bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 px-2.5 py-1 rounded-lg border border-indigo-100 dark:border-indigo-950/50">
-                    Tom Original: {metadata.key}
+                  <span className="text-[10px] font-bold bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 px-2.5 py-1 rounded-lg border border-indigo-100 dark:border-indigo-950/50 flex items-center gap-1">
+                    <Key className="w-3 h-3" />
+                    Tom: {metadata.key}
+                  </span>
+                )}
+                {metadata.originalKey && (
+                  <span className="text-[10px] font-bold bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 px-2.5 py-1 rounded-lg border border-purple-100 dark:border-purple-950/50">
+                    Tom Orig: {metadata.originalKey}
                   </span>
                 )}
                 {metadata.capo && metadata.capo !== '0' && (
@@ -93,8 +114,37 @@ const ChordProPreview = React.memo(({ content }: { content: string }) => {
                     Capo: {metadata.capo}ª casa
                   </span>
                 )}
+                {metadata.tempo && (
+                  <span className="text-[10px] font-bold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 px-2.5 py-1 rounded-lg border border-emerald-100 dark:border-emerald-950/50 flex items-center gap-1">
+                    <Flame className="w-3 h-3" />
+                    {metadata.tempo} BPM
+                  </span>
+                )}
+                {metadata.time && (
+                  <span className="text-[10px] font-bold bg-cyan-50 dark:bg-cyan-950/40 text-cyan-700 dark:text-cyan-300 px-2.5 py-1 rounded-lg border border-cyan-100 dark:border-cyan-950/50">
+                    {metadata.time}
+                  </span>
+                )}
+                {metadata.ccli && (
+                  <span className="text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-700">
+                    CCLI: {metadata.ccli}
+                  </span>
+                )}
               </div>
             </div>
+
+            {/* Informações Auxiliares (Copyright, YT, Duration) */}
+            {(metadata.copyright || metadata.youtube || metadata.duration) && (
+              <div className="flex items-center gap-4 text-[10px] text-neutral-400 dark:text-neutral-500 mt-3 pt-3 border-t border-neutral-100 dark:border-slate-800/50">
+                {metadata.copyright && <span>© {metadata.copyright}</span>}
+                {metadata.duration && <span>Duração: {metadata.duration}</span>}
+                {metadata.youtube && (
+                  <a href={metadata.youtube} target="_blank" rel="noreferrer" className="text-red-500 hover:text-red-600 font-medium flex items-center gap-1">
+                    ▶ YouTube
+                  </a>
+                )}
+              </div>
+            )}
           </div>
 
           <div className="space-y-6 font-sans leading-relaxed text-sm">
@@ -118,9 +168,15 @@ const ChordProPreview = React.memo(({ content }: { content: string }) => {
                       <span>{section.label || (isChorus ? 'Refrão' : 'Ponte')}</span>
                     </div>
                     <div className="space-y-4 font-medium">
-                      {section.lines.map((line, lineIdx) => (
-                        <LineRenderer key={lineIdx} line={line} showChords={showChords} />
-                      ))}
+                      {section.lines.length === 0 ? (
+                        <div className={`text-xs italic my-1 opacity-70 ${labelColor}`}>
+                          (Repete o refrão)
+                        </div>
+                      ) : (
+                        section.lines.map((line, lineIdx) => (
+                          <LineRenderer key={lineIdx} line={line} showChords={showChords} />
+                        ))
+                      )}
                     </div>
                   </div>
                 );
@@ -151,7 +207,7 @@ const ChordProPreview = React.memo(({ content }: { content: string }) => {
                 );
               }
 
-              // Default standard verse fallback mechanism 
+              // Standard verse / general lines fallback
               return (
                 <div key={secIdx} data-section-index={secIdx} className="relative pl-6 sm:pl-8 border-l border-m3-border/30 dark:border-m3-dark-border/30 py-1.5 my-4">
                   {section.label && (
@@ -229,14 +285,13 @@ const LyricsRenderer = React.memo(({ line, showChords }: { line: LineAST, showCh
 
 
 const ChordSectionRenderer = React.memo(({ line, showChords }: { line: LineAST, showChords: boolean }) => {
-  if (!showChords) return null; // We hide structural measure blocks if chords are toggled off
+  if (!showChords) return null;
 
   const measures = line.measures || [];
   
   return (
-    <div className="flex items-stretch my-2 bg-slate-50 dark:bg-slate-900/30 rounded border border-slate-200 dark:border-slate-800 overflow-hidden w-full">
+    <div className="flex items-stretch my-2 bg-slate-50 dark:bg-slate-900/30 rounded border border-slate-200 dark:border-slate-800 overflow-hidden w-full max-w-max">
       
-      {/* Starting measure Barline */}
       {line.startBarline && (
         <div className="flex items-center px-2 bg-slate-100/50 dark:bg-slate-800/50 border-r border-slate-200 dark:border-slate-800">
           <span className="text-slate-400 dark:text-slate-500 font-bold select-none text-sm tracking-widest">
@@ -245,7 +300,6 @@ const ChordSectionRenderer = React.memo(({ line, showChords }: { line: LineAST, 
         </div>
       )}
 
-      {/* Structured Measures */}
       <div className="flex flex-1 min-w-0">
         {measures.map((measure, mIdx) => (
           <React.Fragment key={mIdx}>
@@ -257,7 +311,6 @@ const ChordSectionRenderer = React.memo(({ line, showChords }: { line: LineAST, 
               ))}
             </div>
             
-            {/* End Barline specific to closure sequence tracking per block/bar */}
             {measure.endBarline && (
               <div className="flex items-center px-1.5 bg-slate-100/50 dark:bg-slate-800/50 border-l border-slate-200 dark:border-slate-800">
                 <span className="text-slate-400 dark:text-slate-500 font-bold select-none text-sm tracking-widest">
