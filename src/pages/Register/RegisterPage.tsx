@@ -92,7 +92,7 @@ export const RegisterPage: React.FC = () => {
             <img
               src={logo}
               alt="Hosanna Studio"
-              className="w-22 h-22 object-contain translate-y-0.5"
+              className="w-22 h-22 object-contain rounded-[22px]"
             />
           </div>
           <h1 className="font-display font-black text-3xl tracking-tighter text-slate-900">
