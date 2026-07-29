@@ -1239,30 +1239,33 @@ export const MainLayout: React.FC = () => {
       <div className={`${isSidebarOpen ? 'flex absolute inset-y-0 left-0 z-50 bg-m3-sidebar shadow-2xl' : 'hidden'} md:flex md:static md:bg-m3-sidebar/30 w-72 md:w-64 border-r border-m3-border p-4 flex-col gap-1 select-none shrink-0 overflow-y-auto transition-all duration-300`}>
         
         {/* Branding & Tenant */}
-        <div className="flex flex-col items-center text-center mb-6 mt-4 select-none">
-          <div
-            className="
-              w-22 h-22 rounded-[22px]
-              flex items-center justify-center
-              mb-4
-              border border-slate-200 dark:border-slate-800
-              transition-transform
-              hover:scale-105 hover:rotate-2
-            "
-          >
-            <img
-              src={logo}
-              alt="Hosanna Studio"
-              className="w-22 h-22 object-contain rounded-[22px]"
-            />
+        <div className="flex flex-col items-center text-center mb-4 mt-2 select-none">
+          <div className="flex items-center gap-3">
+            <div
+              className="
+                w-12 h-12 rounded-xl
+                flex items-center justify-center
+                border border-slate-200 dark:border-slate-800
+                transition-transform
+                hover:scale-105 hover:rotate-2
+                overflow-hidden
+              "
+            >
+              <img
+                src={logo}
+                alt="Hosanna Studio"
+                className="w-full h-full object-contain"
+              />
+            </div>
+
+            <h1 className="font-display font-black text-2xl tracking-tighter text-slate-900 dark:text-slate-100">
+              Hosanna Studio
+            </h1>
           </div>
-          <h1 className="font-display font-black text-2xl tracking-tighter text-slate-900 dark:text-slate-100">
-            Hosanna Studio
-          </h1>
-          
+
           {/* Tenant Info */}
           {tenant && (
-            <div className="mt-2 px-3 py-1 bg-m3-primary/10 rounded-full border border-m3-primary/20">
+            <div className="mt-3 px-3 py-1 bg-m3-primary/10 rounded-full border border-m3-primary/20">
               <span className="text-[10px] font-bold text-m3-primary uppercase tracking-wider">
                 {tenant.name || tenant.slug}
               </span>
