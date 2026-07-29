@@ -6,34 +6,14 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useSong, useSongs } from '../../hooks/useSongs';
-import { ArrowLeft, Save, Eye, EyeOff, Music, FileText, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, Save, Eye, EyeOff, Settings } from 'lucide-react';
 import { Button } from '../../components/common/Button';
 import { Spinner } from '../../components/common/Spinner';
-import ChordProEditor from '../../components/ChordProEditor';
+import Editor from '../../components/Editor';
+import { EditorSettingsPanel } from '../../components/EditorSettingsPanel';
 import ChordProPreview from '../../components/ChordProPreview';
 
 import { parseChordPro } from '../../utils';
-
-import AceEditor from "react-ace";
-
-import "ace-builds/src-noconflict/theme-textmate";
-
-export default function Editor({ song }) {
-  return (
-    <AceEditor
-      mode="chordpro"
-      theme="textmate"
-      width="100%"
-      height="700px"
-      value={song.content}
-      onChange={(value) => console.log(value)}
-      setOptions={{
-        enableLiveAutocompletion: true,
-        enableSnippets: true,
-      }}
-    />
-  );
-}
 
 export const SongEditorPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -44,6 +24,7 @@ export const SongEditorPage: React.FC = () => {
 
   const [content, setContent] = useState('');
   const [showPreview, setShowPreview] = useState(true);
+  const [showSettings, setShowSettings] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
   useEffect(() => {
@@ -75,24 +56,20 @@ export const SongEditorPage: React.FC = () => {
     );
   }
 
-  const handleSave = async (id: string, updatedAt: string, updatedContent: string) => {
+  const handleSave = async (updatedContent: string) => {
     const parsed = parseChordPro(updatedContent);
     const meta = parsed.metadata;
-    const updates: any = { content: updatedContent, updatedAt: updatedAt };
-    
+    const updates: any = { content: updatedContent, updatedAt: song.updatedAt };
+
     if (meta.title) updates.title = meta.title;
     if (meta.artist) updates.artist = meta.artist;
 
-    await updateSong({
-      id,
-      data: updates,
-    });
+    await updateSong({ id: song.id, data: updates });
     setHasUnsavedChanges(false);
   };
 
   return (
     <div className="flex-1 flex flex-col h-full overflow-hidden bg-m3-sidebar/10">
-      {/* Top Breadcrumb Navigation */}
       <div className="h-16 bg-m3-sidebar/30 border-b border-m3-border flex items-center justify-between px-6 shrink-0 gap-4 transition-all duration-300">
         <div className="flex items-center gap-4 min-w-0">
           <div className="flex flex-col min-w-0">
@@ -101,11 +78,22 @@ export const SongEditorPage: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-3 shrink-0">
+          <div className="relative">
+            <button
+              onClick={() => setShowSettings((s) => !s)}
+              className="flex items-center gap-2 px-3 py-2 text-[10px] font-black uppercase tracking-widest rounded-xl border bg-m3-card border-m3-border text-m3-secondary hover:bg-m3-hover transition-all cursor-pointer"
+            >
+              <Settings className="w-4 h-4" />
+              <span className="hidden md:inline">Definições</span>
+            </button>
+            <EditorSettingsPanel isOpen={showSettings} onClose={() => setShowSettings(false)} />
+          </div>
+
           <button
             onClick={() => setShowPreview(!showPreview)}
             className={`flex items-center gap-2 px-3 py-2 text-[10px] font-black uppercase tracking-widest rounded-xl border transition-all cursor-pointer ${
-              showPreview 
-                ? 'bg-m3-primary/10 border-m3-primary/30 text-m3-primary' 
+              showPreview
+                ? 'bg-m3-primary/10 border-m3-primary/30 text-m3-primary'
                 : 'bg-m3-card border-m3-border text-m3-secondary hover:bg-m3-hover'
             }`}
           >
@@ -118,7 +106,7 @@ export const SongEditorPage: React.FC = () => {
             size="sm"
             icon={<Save className="w-4 h-4" />}
             isLoading={isUpdating}
-            onClick={() => handleSave(song.id, song.updatedAt, content)}
+            onClick={() => handleSave(content)}
             className="rounded-xl font-black uppercase tracking-widest text-[10px] shadow-lg shadow-m3-primary/20"
           >
             Guardar
@@ -126,21 +114,17 @@ export const SongEditorPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Main Dual Pane Content Area */}
       <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
         <div className={`${showPreview ? 'h-1/2 md:h-full md:w-1/2' : 'h-full w-full'} flex flex-col transition-all duration-300 relative`}>
-          <ChordProEditor
-            song={song}
-            hasUnsavedChanges={hasUnsavedChanges}
+          <Editor
+            value={content}
             onChange={(newContent) => {
               setContent(newContent);
               setHasUnsavedChanges(true);
             }}
             onSave={handleSave}
-            showPreview={showPreview}
-            onTogglePreview={() => setShowPreview(!showPreview)}
+            mode="chordpro"
           />
-          <Editor song={song}/>
         </div>
 
         {showPreview && (
