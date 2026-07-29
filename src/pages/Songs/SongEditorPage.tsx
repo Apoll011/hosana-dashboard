@@ -14,7 +14,7 @@ import Editor from '../../components/Editor';
 import { EditorSettingsPanel } from '../../components/EditorSettingsPanel';
 import ChordProPreview from '../../components/ChordProPreview';
 import { HelpModal } from '../../components/HelpModal';
-import { parseChordPro } from '../../utils';
+import { parseChordPro } from '../../utils/chordproparser';
 
 export const SongEditorPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
