@@ -1023,7 +1023,7 @@ export const MainLayout: React.FC = () => {
 
   // Song Actions
   const handleCreateSongSubmit = async (data: { title: string; artist: string; folderId: string | null; tags: string[] }) => {
-    await songsApi.createSong({
+    const song = await songsApi.createSong({
       title: data.title,
       artist: data.artist,
       folderId: data.folderId,
@@ -1033,6 +1033,7 @@ export const MainLayout: React.FC = () => {
     await Promise.all([songsQuery.refetch(), foldersQuery.refetch()]);
     setIsCreateSongModalOpen(false);
     showToast('Cântico criado com sucesso!', 'success');
+    navigate(`/songs/${song.id}`);
   };
 
   const handleCreateServiceSubmit = async (data: { name: string; date: string; notes: string }) => {
