@@ -403,6 +403,7 @@ export const MainLayout: React.FC = () => {
   const allFolders = useMemo(() => foldersQuery.data?.folders || [], [foldersQuery.data?.folders]);
   const allSongs = useMemo(() => songsQuery.data?.songs || [], [songsQuery.data?.songs]);
   const totalSongs = songsQuery.data?.total;
+  const totalServices = servicesQuery.data?.length || 0;
   const rootSongsCount = foldersQuery.data?.rootSongsCount || 0;
 
   // Build tree structure from folders
@@ -1328,6 +1329,7 @@ export const MainLayout: React.FC = () => {
             <CheckSquare className="w-4.5 h-4.5 text-emerald-500" />
             <span>Cultos</span>
           </div>
+          <Badge variant={isServicesView ? 'sky' : 'slate'}>{totalServices}</Badge>
         </button>
 
         <div className="mt-6 px-3 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-m3-secondary opacity-60">
