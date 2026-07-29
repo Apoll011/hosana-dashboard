@@ -14,7 +14,7 @@ import {
 import { Button } from '../../components/common/Button';
 import { Input } from '../../components/common/Input';
 import bg from '../../assets/images/background.webp';
-import logo from '../../assets/logo.png';
+import logo from '../../assets/hosannastudio_logo.png';
 
 export const RegisterPage: React.FC = () => {
   const navigate = useNavigate();
@@ -88,10 +88,6 @@ export const RegisterPage: React.FC = () => {
               transition-transform
               hover:scale-105 hover:rotate-2
             "
-            style={{
-              backgroundColor: "#EEF4FA",
-              borderColor: "#D3E5F8",
-            }}
           >
             <img
               src={logo}
