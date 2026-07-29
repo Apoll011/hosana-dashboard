@@ -13,6 +13,7 @@ import 'ace-builds/src-noconflict/theme-tomorrow_night';
 import 'ace-builds/src-noconflict/theme-solarized_dark';
 
 import { useEditorSettings } from '../hooks/useEditorSettings';
+import { registerChordProSnippets } from '../utils/chordproSnippets';
 
 interface EditorProps {
   value: string;
@@ -28,6 +29,7 @@ export default function Editor({ value, onChange, onSave, mode = 'chordpro', rea
 
   const handleLoad = (editor: IAceEditor) => {
     editorRef.current = editor;
+    registerChordProSnippets();
     editor.commands.addCommand({
       name: 'save',
       bindKey: { win: 'Ctrl-S', mac: 'Cmd-S' },
