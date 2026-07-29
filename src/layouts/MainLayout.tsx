@@ -1521,7 +1521,7 @@ export const MainLayout: React.FC = () => {
             <div className="flex items-center gap-3">
               <div
                 className="
-                w-12 h-12 rounded-[22px]
+                w-12 h-12 rounded-[12px]
                 flex items-center justify-center
                 mb-4
                 border
@@ -1532,7 +1532,7 @@ export const MainLayout: React.FC = () => {
                 <img
                   src={logo}
                   alt="Hosanna Studio"
-                  className="w-12 h-12 object-contain rounded-[22px]"
+                  className="w-12 h-12 object-contain rounded-[12px]"
                 />
               </div>
 
