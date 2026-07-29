@@ -130,7 +130,7 @@ export const RegisterTenantPage: React.FC = () => {
         {!isSuccess && (
           <div className="flex flex-col items-center text-center mb-8 select-none animate-in fade-in slide-in-from-top-4 duration-500">
             <div className="w-20 h-20 rounded-[20px] flex items-center justify-center mb-3 border shadow-inner">
-              <img src={logo} alt="Hosanna Studio" className="w-20 h-29 object-contain translate-y-0.5" />
+              <img src={logo} alt="Hosanna Studio" className="w-20 h-29 object-contain rounded-[20px]" />
             </div>
             <h1 className="font-display font-black text-2xl sm:text-3xl tracking-tight text-slate-900">
               Criar Organização
