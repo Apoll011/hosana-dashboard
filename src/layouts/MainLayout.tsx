@@ -1243,18 +1243,18 @@ export const MainLayout: React.FC = () => {
         <div className="flex items-center gap-3">
           <div
             className="
-              w-12 h-12 rounded-xl
+              w-12 h-12 rounded-[22px]
               flex items-center justify-center
-              border border-slate-200 dark:border-slate-800
+              mb-4
+              border
               transition-transform
               hover:scale-105 hover:rotate-2
-              overflow-hidden
             "
           >
             <img
               src={logo}
               alt="Hosanna Studio"
-              className="w-12 h-12 object-contain rounded-xl"
+              className="w-12 h-12 object-contain rounded-[22px]"
             />
           </div>
 
