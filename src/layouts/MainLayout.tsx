@@ -1252,7 +1252,6 @@ export const MainLayout: React.FC = () => {
               className="
                 w-12 h-12 rounded-[12px]
                 flex items-center justify-center
-                mb-4
                 border
                 transition-transform
                 hover:scale-105 hover:rotate-2
@@ -1261,11 +1260,11 @@ export const MainLayout: React.FC = () => {
               <img
                 src={logo}
                 alt="Hosanna Studio"
-                className="w-12 h-12 object-contain rounded-[12px]"
+                className="w-12 h-12 object-contain rounded-xl"
               />
             </div>
 
-            <div className="flex flex-col items-start">
+            <div className="flex flex-col items-start translate-y-5">
               <h1 className="font-display font-black text-2xl tracking-tighter text-slate-900 dark:text-slate-100 leading-none">
                 Hosanna Studio
               </h1>
