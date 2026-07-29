@@ -1238,38 +1238,38 @@ export const MainLayout: React.FC = () => {
 {/* Sidebar (Tree View) */}
       <div className={`${isSidebarOpen ? 'flex absolute inset-y-0 left-0 z-50 bg-m3-sidebar shadow-2xl' : 'hidden'} md:flex md:static md:bg-m3-sidebar/30 w-72 md:w-64 border-r border-m3-border p-4 flex-col gap-1 select-none shrink-0 overflow-y-auto transition-all duration-300`}>
         
-        {/* Branding & Tenant */}
-        <div className="flex flex-col items-center text-center mb-4 mt-2 select-none">
-          <div className="flex items-center gap-3">
-            <div
-              className="
-                w-12 h-12 rounded-xl
-                flex items-center justify-center
-                border border-slate-200 dark:border-slate-800
-                transition-transform
-                hover:scale-105 hover:rotate-2
-                overflow-hidden
-              "
-            >
-              <img
-                src={logo}
-                alt="Hosanna Studio"
-                className="w-full h-full object-contain"
-              />
-            </div>
+      <div className="flex flex-col items-center text-center mb-4 mt-2 select-none">
+        <div className="flex items-center gap-3">
+          <div
+            className="
+              w-12 h-12 rounded-xl
+              flex items-center justify-center
+              border border-slate-200 dark:border-slate-800
+              transition-transform
+              hover:scale-105 hover:rotate-2
+              overflow-hidden
+            "
+          >
+            <img
+              src={logo}
+              alt="Hosanna Studio"
+              className="w-full h-full object-contain"
+            />
+          </div>
 
-            <h1 className="font-display font-black text-2xl tracking-tighter text-slate-900 dark:text-slate-100">
+          <div className="flex flex-col items-start">
+            <h1 className="font-display font-black text-2xl tracking-tighter text-slate-900 dark:text-slate-100 leading-none">
               Hosanna Studio
             </h1>
+
             {tenant && (
-              <div className="mt-1 px-3 py-1">
-                <span className="text-[10px] font-bold text-m3-primary uppercase tracking-wider">
-                  {tenant.name || tenant.slug}
-                </span>
-              </div>
+              <span className="mt-1 text-xs font-medium text-slate-500 dark:text-slate-400">
+                {tenant.name || tenant.slug}
+              </span>
             )}
           </div>
         </div>
+      </div>
 
         {/* Changed from Acesso Rápido */}
         <div className="px-3 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-m3-secondary opacity-60">
