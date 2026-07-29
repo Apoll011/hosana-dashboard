@@ -3,32 +3,44 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
-import { useNavigate, useOutletContext } from 'react-router-dom';
-import { useServices } from '../../hooks/useServices';
-import { Service } from '../../types';
+import React, { useState } from "react";
+import { useNavigate, useOutletContext } from "react-router-dom";
+import { useServices } from "../../hooks/useServices";
+import { Service } from "../../types";
 import {
-  Calendar, Plus, Clock, Music, Edit2, Trash2, ArrowRight, CheckCircle2
-} from 'lucide-react';
-import { Button } from '../../components/common/Button';
-import { Modal } from '../../components/common/Modal';
-import { ConfirmDialog } from '../../components/common/ConfirmDialog';
-import { ServiceForm } from '../../components/forms/ServiceForm';
-import { Spinner } from '../../components/common/Spinner';
-import { EmptyState } from '../../components/common/EmptyState';
-import { Badge } from '../../components/common/Badge';
+  Calendar,
+  Plus,
+  Clock,
+  Music,
+  Edit2,
+  Trash2,
+  ArrowRight,
+  CheckCircle2,
+} from "lucide-react";
+import { Button } from "../../components/common/Button";
+import { Modal } from "../../components/common/Modal";
+import { ConfirmDialog } from "../../components/common/ConfirmDialog";
+import { ServiceForm } from "../../components/forms/ServiceForm";
+import { Spinner } from "../../components/common/Spinner";
+import { EmptyState } from "../../components/common/EmptyState";
+import { Badge } from "../../components/common/Badge";
 
 interface ServicesPageProps {
   hideHeader?: boolean;
   searchQuery?: string;
 }
 
-export const ServicesPage: React.FC<ServicesPageProps> = ({ hideHeader, searchQuery: externalSearchQuery }) => {
+export const ServicesPage: React.FC<ServicesPageProps> = ({
+  hideHeader,
+  searchQuery: externalSearchQuery,
+}) => {
   const navigate = useNavigate();
   const context = useOutletContext<any>() || {};
   const actualHideHeader = hideHeader ?? context.hideHeader;
-  const actualSearchQuery = externalSearchQuery !== undefined ? externalSearchQuery : (context.searchQuery || '');
-
+  const actualSearchQuery =
+    externalSearchQuery !== undefined
+      ? externalSearchQuery
+      : context.searchQuery || "";
 
   const { servicesQuery, createService, deleteService } = useServices();
 
@@ -36,17 +48,22 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({ hideHeader, searchQu
   const [deleteTarget, setDeleteTarget] = useState<Service | null>(null);
 
   const services = servicesQuery.data || [];
-  
+
   const filteredServices = React.useMemo(() => {
     if (!actualSearchQuery.trim()) return services;
     const lowerQuery = actualSearchQuery.toLowerCase();
-    return services.filter(service => 
-      service.name.toLowerCase().includes(lowerQuery) || 
-      (service.notes && service.notes.toLowerCase().includes(lowerQuery))
+    return services.filter(
+      (service) =>
+        service.name.toLowerCase().includes(lowerQuery) ||
+        (service.notes && service.notes.toLowerCase().includes(lowerQuery)),
     );
   }, [services, actualSearchQuery]);
 
-  const handleCreateServiceSubmit = async (data: { name: string; date: string; notes: string }) => {
+  const handleCreateServiceSubmit = async (data: {
+    name: string;
+    date: string;
+    notes: string;
+  }) => {
     const newService = await createService({
       name: data.name,
       date: data.date,
@@ -66,7 +83,9 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({ hideHeader, searchQu
   };
 
   return (
-    <div className={`flex-1 flex flex-col w-full mx-auto space-y-8 animate-in fade-in duration-500 overflow-y-auto h-full ${hideHeader ? 'p-6' : 'p-4 sm:p-8 max-w-7xl'}`}>
+    <div
+      className={`flex-1 flex flex-col w-full mx-auto space-y-8 animate-in fade-in duration-500 overflow-y-auto h-full ${hideHeader ? "p-6" : "p-4 sm:p-8 max-w-7xl"}`}
+    >
       {/* Header Banner */}
       {!actualHideHeader && (
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
@@ -114,64 +133,65 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({ hideHeader, searchQu
             </div>
           ) : (
             filteredServices.map((service) => (
-            <div
-              key={service.id}
-              onClick={() => navigate(`/services/${service.id}`)}
-              className="bg-m3-card border border-m3-border rounded-[32px] p-8 shadow-xl shadow-black/5 hover:shadow-m3-primary/10 hover:border-m3-primary transition-all cursor-pointer flex flex-col justify-between group relative overflow-hidden"
-            >
-              {/* Decorative accent */}
-              <div className="absolute top-0 left-0 w-2 h-full bg-m3-primary opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div
+                key={service.id}
+                onClick={() => navigate(`/services/${service.id}`)}
+                className="bg-m3-card border border-m3-border rounded-[32px] p-8 shadow-xl shadow-black/5 hover:shadow-m3-primary/10 hover:border-m3-primary transition-all cursor-pointer flex flex-col justify-between group relative overflow-hidden"
+              >
+                {/* Decorative accent */}
+                <div className="absolute top-0 left-0 w-2 h-full bg-m3-primary opacity-0 group-hover:opacity-100 transition-opacity" />
 
-              <div className="space-y-5">
-                <div className="flex items-start justify-between gap-4">
-                  <Badge variant="sky">
-                    <Clock className="w-3.5 h-3.5 mr-1.5 opacity-70" />
-                    {new Date(service.date).toLocaleDateString('pt-PT', {
-                      weekday: 'long',
-                      day: 'numeric',
-                      month: 'long',
-                    })}
-                  </Badge>
+                <div className="space-y-5">
+                  <div className="flex items-start justify-between gap-4">
+                    <Badge variant="sky">
+                      <Clock className="w-3.5 h-3.5 mr-1.5 opacity-70" />
+                      {new Date(service.date).toLocaleDateString("pt-PT", {
+                        weekday: "long",
+                        day: "numeric",
+                        month: "long",
+                      })}
+                    </Badge>
 
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setDeleteTarget(service);
-                    }}
-                    title="Apagar Culto"
-                    className="p-2 text-m3-secondary hover:text-rose-500 hover:bg-rose-500/10 rounded-xl cursor-pointer transition-all opacity-0 group-hover:opacity-100"
-                  >
-                    <Trash2 className="w-4.5 h-4.5" />
-                  </button>
-                </div>
-
-                <h3 className="text-xl font-black text-m3-text group-hover:text-m3-primary transition-colors leading-tight">
-                  {service.name}
-                </h3>
-
-                {service.notes && (
-                  <p className="text-xs text-m3-secondary line-clamp-3 italic opacity-80 leading-relaxed">
-                    "{service.notes}"
-                  </p>
-                )}
-
-                <div className="pt-5 border-t border-m3-border/30 flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center border border-emerald-500/20">
-                    <Music className="w-4 h-4" />
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setDeleteTarget(service);
+                      }}
+                      title="Apagar Culto"
+                      className="p-2 text-m3-secondary hover:text-rose-500 hover:bg-rose-500/10 rounded-xl cursor-pointer transition-all opacity-0 group-hover:opacity-100"
+                    >
+                      <Trash2 className="w-4.5 h-4.5" />
+                    </button>
                   </div>
-                  <span className="text-[11px] font-black uppercase tracking-widest text-m3-secondary">
-                    {service.songs ? service.songs.length : 0} Cânticos agendados
-                  </span>
-                </div>
-              </div>
 
-              <div className="mt-8 pt-5 flex items-center justify-between text-[11px] font-black uppercase tracking-[0.2em] text-m3-primary">
-                <span>Gerir Lista & Notas</span>
-                <div className="w-8 h-8 rounded-full bg-m3-primary/10 flex items-center justify-center group-hover:bg-m3-primary group-hover:text-white transition-all">
-                  <ArrowRight className="w-4 h-4" />
+                  <h3 className="text-xl font-black text-m3-text group-hover:text-m3-primary transition-colors leading-tight">
+                    {service.name}
+                  </h3>
+
+                  {service.notes && (
+                    <p className="text-xs text-m3-secondary line-clamp-3 italic opacity-80 leading-relaxed">
+                      "{service.notes}"
+                    </p>
+                  )}
+
+                  <div className="pt-5 border-t border-m3-border/30 flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center border border-emerald-500/20">
+                      <Music className="w-4 h-4" />
+                    </div>
+                    <span className="text-[11px] font-black uppercase tracking-widest text-m3-secondary">
+                      {service.songs ? service.songs.length : 0} Cânticos
+                      agendados
+                    </span>
+                  </div>
+                </div>
+
+                <div className="mt-8 pt-5 flex items-center justify-between text-[11px] font-black uppercase tracking-[0.2em] text-m3-primary">
+                  <span>Gerir Lista & Notas</span>
+                  <div className="w-8 h-8 rounded-full bg-m3-primary/10 flex items-center justify-center group-hover:bg-m3-primary group-hover:text-white transition-all">
+                    <ArrowRight className="w-4 h-4" />
+                  </div>
                 </div>
               </div>
-            </div>
             ))
           )}
         </div>
