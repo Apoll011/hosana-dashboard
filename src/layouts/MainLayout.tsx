@@ -1261,16 +1261,14 @@ export const MainLayout: React.FC = () => {
             <h1 className="font-display font-black text-2xl tracking-tighter text-slate-900 dark:text-slate-100">
               Hosanna Studio
             </h1>
+            {tenant && (
+              <div className="mt-1 px-3 py-1">
+                <span className="text-[10px] font-bold text-m3-primary uppercase tracking-wider">
+                  {tenant.name || tenant.slug}
+                </span>
+              </div>
+            )}
           </div>
-
-          {/* Tenant Info */}
-          {tenant && (
-            <div className="mt-3 px-3 py-1 bg-m3-primary/10 rounded-full border border-m3-primary/20">
-              <span className="text-[10px] font-bold text-m3-primary uppercase tracking-wider">
-                {tenant.name || tenant.slug}
-              </span>
-            </div>
-          )}
         </div>
 
         {/* Changed from Acesso Rápido */}
