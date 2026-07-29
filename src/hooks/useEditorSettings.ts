@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useSyncExternalStore, useCallback } from 'react';
 
 export interface EditorSettings {
   theme: string;
@@ -37,22 +37,52 @@ function loadSettings(): EditorSettings {
   }
 }
 
-export function useEditorSettings() {
-  const [settings, setSettings] = useState<EditorSettings>(loadSettings);
+// Store a nível de módulo: todas as instâncias do hook leem/escrevem o mesmo
+// estado, por isso uma mudança num componente é vista de imediato nos outros.
+let state: EditorSettings = loadSettings();
+const listeners = new Set<() => void>();
 
-  useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
-    } catch {
-      // localStorage indisponível (modo privado, quota excedida, etc.) — ignora silenciosamente
+function setState(updater: (prev: EditorSettings) => EditorSettings) {
+  state = updater(state);
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } catch {
+    // localStorage indisponível — ignora silenciosamente
+  }
+  listeners.forEach((l) => l());
+}
+
+function subscribe(listener: () => void) {
+  listeners.add(listener);
+  return () => listeners.delete(listener);
+}
+
+function getSnapshot() {
+  return state;
+}
+
+// Sincroniza entre separadores/janelas abertas na mesma origem
+if (typeof window !== 'undefined') {
+  window.addEventListener('storage', (e) => {
+    if (e.key === STORAGE_KEY && e.newValue) {
+      try {
+        state = { ...DEFAULT_SETTINGS, ...JSON.parse(e.newValue) };
+        listeners.forEach((l) => l());
+      } catch {
+        // ignora JSON inválido vindo de outro separador
+      }
     }
-  }, [settings]);
+  });
+}
+
+export function useEditorSettings() {
+  const settings = useSyncExternalStore(subscribe, getSnapshot);
 
   const updateSetting = useCallback(<K extends keyof EditorSettings>(key: K, value: EditorSettings[K]) => {
-    setSettings((prev) => ({ ...prev, [key]: value }));
+    setState((prev) => ({ ...prev, [key]: value }));
   }, []);
 
-  const resetSettings = useCallback(() => setSettings(DEFAULT_SETTINGS), []);
+  const resetSettings = useCallback(() => setState(() => DEFAULT_SETTINGS), []);
 
   return { settings, updateSetting, resetSettings };
 }

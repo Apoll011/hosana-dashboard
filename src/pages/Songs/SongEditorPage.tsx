@@ -6,13 +6,13 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useSong, useSongs } from '../../hooks/useSongs';
-import { ArrowLeft, Save, Eye, EyeOff, Settings } from 'lucide-react';
+import { ArrowLeft, Save, Eye, EyeOff, Settings, HelpCircle } from 'lucide-react';
 import { Button } from '../../components/common/Button';
 import { Spinner } from '../../components/common/Spinner';
 import Editor from '../../components/Editor';
 import { EditorSettingsPanel } from '../../components/EditorSettingsPanel';
 import ChordProPreview from '../../components/ChordProPreview';
-
+import { HelpModal } from '../../components/HelpModal';
 import { parseChordPro } from '../../utils';
 
 export const SongEditorPage: React.FC = () => {
@@ -26,7 +26,7 @@ export const SongEditorPage: React.FC = () => {
   const [showPreview, setShowPreview] = useState(true);
   const [showSettings, setShowSettings] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-
+  const [showHelp, setShowHelp] = useState(false);
   useEffect(() => {
     if (song) {
       setContent(song.content);
@@ -87,6 +87,15 @@ export const SongEditorPage: React.FC = () => {
               <span className="hidden md:inline">Definições</span>
             </button>
             <EditorSettingsPanel isOpen={showSettings} onClose={() => setShowSettings(false)} />
+            <button
+              onClick={() => setShowHelp(true)}
+              className="flex items-center gap-2 px-3 py-2 text-[10px] font-black uppercase tracking-widest rounded-xl border bg-m3-card border-m3-border text-m3-secondary hover:bg-m3-hover transition-all cursor-pointer"
+              title="Ajuda"
+            >
+              <HelpCircle className="w-4 h-4" />
+            </button>
+
+            <HelpModal isOpen={showHelp} onClose={() => setShowHelp(false)} />
           </div>
 
           <button
