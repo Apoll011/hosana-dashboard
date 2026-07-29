@@ -73,12 +73,21 @@ export const SongEditorPage: React.FC = () => {
       <div className="h-16 bg-m3-sidebar/30 border-b border-m3-border flex items-center justify-between px-6 shrink-0 gap-4 transition-all duration-300">
         <div className="flex items-center gap-4 min-w-0">
           <div className="flex flex-col min-w-0">
-            <span className="text-[9px] font-bold text-m3-primary uppercase tracking-[0.2em] opacity-60">ChordPro Editor</span>
+            <div className="flex items-center gap-2">
+              <span className="text-[9px] font-bold text-m3-primary uppercase tracking-[0.2em] opacity-60">
+                ChordPro Editor
+              </span>
+              {hasUnsavedChanges && (
+                <span className="text-[9px] font-medium text-amber-500 italic">
+                  • Alterações não guardadas
+                </span>
+              )}
+            </div>
           </div>
         </div>
 
         <div className="flex items-center gap-3 shrink-0">
-          <div className="relative">
+          <div className="relative flex gap-2">
             <button
               onClick={() => setShowSettings((s) => !s)}
               className="flex items-center gap-2 px-3 py-2 text-[10px] font-black uppercase tracking-widest rounded-xl border bg-m3-card border-m3-border text-m3-secondary hover:bg-m3-hover transition-all cursor-pointer"
