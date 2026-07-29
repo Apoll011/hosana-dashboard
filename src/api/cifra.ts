@@ -1,4 +1,3 @@
-import { Builder, By } from 'selenium-webdriver';
 import * as cheerio from 'cheerio';
 
 const CIFRACLUB_URL = "https://www.cifraclub.com.br/";
@@ -32,27 +31,29 @@ export function parseCifraClubInput(input: string): { artist: string; song: stri
 }
 
 export async function getCifra(artist: string, song: string): Promise<CifraResult> {
-    const url = `${CIFRACLUB_URL}${artist}/${song}`;
+    const url = `https://www.cifraclub.com.br/${artist}/${song}/`;
     const result: CifraResult = { cifraclub_url: url };
 
-    let driver;
     try {
-        driver = await new Builder()
-            .usingServer('http://selenium:4444/wd/hub')
-            .forBrowser('firefox')
-            .build();
+        const response = await fetch(url, {
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+            }
+        });
 
-        await driver.get(url);
+        if (!response.ok) {
+            throw new Error(`Failed to fetch page (Status ${response.status})`);
+        }
 
-        const cifraElement = await driver.findElement(By.className('cifra'));
-        const detailsHtml = await cifraElement.getAttribute('outerHTML');
-        if (!detailsHtml) throw new Error()
-        const $details = cheerio.load(detailsHtml);
+        const html = await response.text();
+        const $ = cheerio.load(html);
 
-        result.name = $details('h1.t1').text().trim();
-        result.artist = $details('h2.t3').text().trim();
+        // Extract Title & Artist
+        result.name = $('h1.t1').text().trim();
+        result.artist = $('h2.t3').text().trim();
 
-        const imgYoutubeSrc = $details('div.player-placeholder img').attr('src');
+        // Extract YouTube URL
+        const imgYoutubeSrc = $('div.player-placeholder img').attr('src');
         if (imgYoutubeSrc && imgYoutubeSrc.includes('/vi/')) {
             const videoId = imgYoutubeSrc.split('/vi/')[1]?.split('/')[0];
             if (videoId) {
@@ -60,19 +61,11 @@ export async function getCifra(artist: string, song: string): Promise<CifraResul
             }
         }
 
-        const cifraCntElement = await driver.findElement(By.className('cifra_cnt'));
-        const cifraHtml = await cifraCntElement.getAttribute('outerHTML');
-        if (!cifraHtml) throw new Error('Failed to get cifra');
-        const $cifra = cheerio.load(cifraHtml);
-
-        result.cifra = $cifra('pre').text();
+        // Extract Cifra Text Sheet
+        result.cifra = $('pre').text();
 
     } catch (err: any) {
-        result.error = err.message || "Error fetching song details";
-    } finally {
-        if (driver) {
-            await driver.quit();
-        }
+        result.error = err?.message || "Error fetching song details";
     }
 
     return result;
