@@ -1253,7 +1253,7 @@ export const MainLayout: React.FC = () => {
             <img
               src={logo}
               alt="Hosanna Studio"
-              className="w-full h-full object-contain"
+              className="w-12 h-12 object-contain rounded-xl"
             />
           </div>
 
