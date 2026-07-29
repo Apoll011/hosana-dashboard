@@ -5,7 +5,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { ToggleLeft, ToggleRight, Music, Disc, Key, Flame, User } from 'lucide-react';
-import { LineAST, parseChordPro } from '../utils';
+import { LineAST, parseChordPro } from '../utils/chordproparser';
 import { useSettings } from '../hooks/useSettings';
 
 interface ChordProPreviewProps {
