@@ -14,6 +14,27 @@ import ChordProPreview from '../../components/ChordProPreview';
 
 import { parseChordPro } from '../../utils';
 
+import AceEditor from "react-ace";
+
+import "ace-builds/src-noconflict/theme-textmate";
+
+export default function Editor({ song }) {
+  return (
+    <AceEditor
+      mode="chordpro"
+      theme="textmate"
+      width="100%"
+      height="700px"
+      value={song.content}
+      onChange={(value) => console.log(value)}
+      setOptions={{
+        enableLiveAutocompletion: true,
+        enableSnippets: true,
+      }}
+    />
+  );
+}
+
 export const SongEditorPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -54,7 +75,7 @@ export const SongEditorPage: React.FC = () => {
     );
   }
 
-  const handleSave = async (songId: string, updatedAt: string, updatedContent: string) => {
+  const handleSave = async (id: string, updatedAt: string, updatedContent: string) => {
     const parsed = parseChordPro(updatedContent);
     const meta = parsed.metadata;
     const updates: any = { content: updatedContent, updatedAt: updatedAt };
@@ -63,7 +84,7 @@ export const SongEditorPage: React.FC = () => {
     if (meta.artist) updates.artist = meta.artist;
 
     await updateSong({
-      id: songId,
+      id,
       data: updates,
     });
     setHasUnsavedChanges(false);
@@ -119,6 +140,7 @@ export const SongEditorPage: React.FC = () => {
             showPreview={showPreview}
             onTogglePreview={() => setShowPreview(!showPreview)}
           />
+          <Editor song={song}/>
         </div>
 
         {showPreview && (
