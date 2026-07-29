@@ -1277,7 +1277,7 @@ export const MainLayout: React.FC = () => {
         <div className="px-3 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-m3-secondary opacity-60">
           Menu Principal
         </div>
-        <CifraClubImportModal/>
+
         <button
           onClick={() => {
             setCurrentFolderId(null);
