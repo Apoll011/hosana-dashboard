@@ -3,13 +3,23 @@ import { RotateCcw, X } from 'lucide-react';
 import { Button } from './common/Button';
 import { useEditorSettings, EDITOR_THEMES } from '../hooks/useEditorSettings';
 
-export const EditorSettingsPanel: React.FC = () => {
+interface EditorSettingsPanelProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+export const EditorSettingsPanel: React.FC<EditorSettingsPanelProps> = ({ isOpen, onClose }) => {
   const { settings, updateSetting, resetSettings } = useEditorSettings();
+
+  if (!isOpen) return null;
 
   return (
     <div className="absolute right-0 top-full mt-2 w-80 bg-white dark:bg-slate-900 border border-m3-border rounded-2xl shadow-xl p-4 z-50 space-y-3">
       <div className="flex items-center justify-between mb-1">
         <h3 className="text-[10px] font-black uppercase tracking-widest text-m3-primary">Definições do Editor</h3>
+        <button onClick={onClose} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 cursor-pointer">
+          <X className="w-4 h-4" />
+        </button>
       </div>
 
       <div className="space-y-1.5">
