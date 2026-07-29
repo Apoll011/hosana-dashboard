@@ -11,7 +11,6 @@ import { Button } from '../../components/common/Button';
 import { Input } from '../../components/common/Input';
 import bg from '../../assets/images/background.webp';
 import logo from '../../assets/hosannastudio_logo.png';
-import { CifraClubImportModal } from '@/src/components/modals/CifraModal';
 
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
@@ -71,7 +70,6 @@ export const LoginPage: React.FC = () => {
 
       <div className="relative max-w-[380px] w-full bg-white border border-slate-200 rounded-[32px] shadow-2xl shadow-black/40 p-6 sm:p-8 transition-all duration-300 z-20">
         {/* Branding */}
-                <CifraClubImportModal/>
 
         <div className="flex flex-col items-center text-center mb-6 select-none">
           <div

@@ -1676,6 +1676,8 @@ export const MainLayout: React.FC = () => {
                           </div>
                           Nova Pasta
                         </button>
+
+                        <CifraClubImportModal/>
                       </div>
                     )}
                   </div>
