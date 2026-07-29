@@ -27,6 +27,8 @@ export const SongEditorPage: React.FC = () => {
   const [showSettings, setShowSettings] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
+  const [readOnly, setReadOnly] = useState(false);
+
   useEffect(() => {
     if (song) {
       setContent(song.content);
@@ -64,7 +66,10 @@ export const SongEditorPage: React.FC = () => {
     if (meta.title) updates.title = meta.title;
     if (meta.artist) updates.artist = meta.artist;
 
+    setReadOnly(true);
     await updateSong({ id: song.id, data: updates });
+    
+    setReadOnly(false);
     setHasUnsavedChanges(false);
   };
 
@@ -140,6 +145,7 @@ export const SongEditorPage: React.FC = () => {
               setContent(newContent);
               setHasUnsavedChanges(true);
             }}
+            readOnly={readOnly}
             onSave={handleSave}
             mode="chordpro"
           />
