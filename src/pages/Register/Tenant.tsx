@@ -21,7 +21,7 @@ import {
 import { Button } from '../../components/common/Button';
 import { Input } from '../../components/common/Input';
 import bg from '../../assets/images/background.webp';
-import logo from '../../assets/logo.png';
+import logo from '../../assets/hosannastudio_logo.png';
 
 import { authApi } from '../../api/auth'; 
 
@@ -129,8 +129,8 @@ export const RegisterTenantPage: React.FC = () => {
         {/* Branding */}
         {!isSuccess && (
           <div className="flex flex-col items-center text-center mb-8 select-none animate-in fade-in slide-in-from-top-4 duration-500">
-            <div className="w-20 h-20 rounded-[20px] flex items-center justify-center mb-5 border bg-[#EEF4FA] border-[#D3E5F8] shadow-inner">
-              <img src={logo} alt="Hosanna Studio" className="w-14 h-14 object-contain translate-y-0.5" />
+            <div className="w-20 h-20 rounded-[20px] flex items-center justify-center mb-3 border shadow-inner">
+              <img src={logo} alt="Hosanna Studio" className="w-20 h-29 object-contain translate-y-0.5" />
             </div>
             <h1 className="font-display font-black text-2xl sm:text-3xl tracking-tight text-slate-900">
               Criar Organização
