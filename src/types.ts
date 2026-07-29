@@ -10,6 +10,14 @@ export interface User {
   role: 'admin' | 'leader' | 'musician';
 }
 
+export interface Tenant {
+  name: string;
+  slug: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+
 export interface AuthState {
   user: User | null;
   token: string | null;

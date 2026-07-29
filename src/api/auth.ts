@@ -4,7 +4,7 @@
  */
 
 import { httpClient } from './client';
-import { User } from '../types';
+import { Tenant, User } from '../types';
 
 export interface LoginParams {
   email: string;
@@ -27,7 +27,7 @@ export const authApi = {
     return data;
   },
 
-    registerTenant: async (params: {
+  registerTenant: async (params: {
     tenantName: string;
     tenantSlug: string;
     adminName: string;
@@ -48,6 +48,10 @@ export const authApi = {
         adminPassword: params.adminPassword,
       }),
     });
+  },
+
+  getCurrentTenant: async (): Promise<Tenant> => {
+      return httpClient.request<Tenant>('/tenants/me');
   },
 
   registerUser: async (params: {
