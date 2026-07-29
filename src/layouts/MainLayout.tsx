@@ -33,6 +33,7 @@ import logo from '../assets/hosannastudio_logo.png';
 
 import { ServiceForm } from '../components/forms/ServiceForm';
 import { CifraClubImportModal } from '../components/modals/CifraModal';
+import { ConversionResult } from '../utils/conversion';
 
 interface ContextMenuState {
   x: number;
@@ -387,6 +388,8 @@ export const MainLayout: React.FC = () => {
   const [renameTarget, setRenameTarget] = useState<Folder | null>(null);
   const [moveFolderTarget, setMoveFolderTarget] = useState<Folder | null>(null);
   const [targetParentFolderId, setTargetParentFolderId] = useState<string | null>(null);
+
+  const [isCifraImportOpen, setIsCifraImportOpen] = useState(false);
 
   const [deleteTarget, setDeleteTarget] = useState<Folder | null>(null);
   const [deleteAção, setDeleteAção] = useState<'move_to_root' | 'delete_songs'>('move_to_root');
@@ -772,11 +775,6 @@ export const MainLayout: React.FC = () => {
   }, []);
 
   const totalSelectedCount = selectedFolderIds.size + selectedSongIds.size;
-  const totalViewItemsCount = filteredSubfolders.length + filteredFiles.length;
-  const isAllSelected =
-    totalViewItemsCount > 0 &&
-    selectedFolderIds.size === filteredSubfolders.length &&
-    selectedSongIds.size === filteredFiles.length;
 
   const selectedFolderObjects = useMemo(
     () => allFolders.filter((f) => selectedFolderIds.has(f.id)),
@@ -1036,6 +1034,20 @@ export const MainLayout: React.FC = () => {
     navigate(`/songs/${song.id}`);
   };
 
+  const handleCifraClubSubmit = async (chordpro: ConversionResult, artist: string, title: string) => {
+    const song = await songsApi.createSong({
+      title,
+      artist,
+      folderId: currentFolderId,
+      content: chordpro.chordpro,
+      tags: ['cifraclub'],
+    });
+    await Promise.all([songsQuery.refetch(), foldersQuery.refetch()]);
+    setIsCreateSongModalOpen(false);
+    showToast('Cântico importado com sucesso!', 'success');
+    navigate(`/songs/${song.id}`);
+  };
+
   const handleCreateServiceSubmit = async (data: { name: string; date: string; notes: string }) => {
     const newService = await createService({
       name: data.name,
@@ -1053,12 +1065,6 @@ export const MainLayout: React.FC = () => {
     await renameSong({ id: renameSongTarget.id, newTitle: newSongTitle.trim(), updatedAt: renameSongTarget.updatedAt });
     setRenameSongTarget(null);
     setNewSongTitle('');
-  };
-
-  const handleMoveSongSubmit = async () => {
-    if (!moveSongTarget) return;
-    await moveSong({ id: moveSongTarget.id, folderId: targetSongFolderId, updatedAt: moveSongTarget.updatedAt });
-    setMoveSongTarget(null);
   };
 
   const handleDeleteSongSubmit = async () => {
@@ -1238,43 +1244,41 @@ export const MainLayout: React.FC = () => {
         />
       )}
 
-{/* Sidebar (Tree View) */}
       <div className={`${isSidebarOpen ? 'flex absolute inset-y-0 left-0 z-50 bg-m3-sidebar shadow-2xl' : 'hidden'} md:flex md:static md:bg-m3-sidebar/30 w-72 md:w-64 border-r border-m3-border p-4 flex-col gap-1 select-none shrink-0 overflow-y-auto transition-all duration-300`}>
         
-      <div className="flex flex-col items-center text-center mb-4 mt-2 select-none">
-        <div className="flex items-center gap-3">
-          <div
-            className="
-              w-12 h-12 rounded-[22px]
-              flex items-center justify-center
-              mb-4
-              border
-              transition-transform
-              hover:scale-105 hover:rotate-2
-            "
-          >
-            <img
-              src={logo}
-              alt="Hosanna Studio"
-              className="w-12 h-12 object-contain rounded-[22px]"
-            />
-          </div>
+        <div className="flex flex-col items-center text-center mb-4 mt-2 select-none">
+          <div className="flex items-center gap-3">
+            <div
+              className="
+                w-12 h-12 rounded-[22px]
+                flex items-center justify-center
+                mb-4
+                border
+                transition-transform
+                hover:scale-105 hover:rotate-2
+              "
+            >
+              <img
+                src={logo}
+                alt="Hosanna Studio"
+                className="w-12 h-12 object-contain rounded-[22px]"
+              />
+            </div>
 
-          <div className="flex flex-col items-start">
-            <h1 className="font-display font-black text-2xl tracking-tighter text-slate-900 dark:text-slate-100 leading-none">
-              Hosanna Studio
-            </h1>
+            <div className="flex flex-col items-start">
+              <h1 className="font-display font-black text-2xl tracking-tighter text-slate-900 dark:text-slate-100 leading-none">
+                Hosanna Studio
+              </h1>
 
-            {tenant && (
-              <span className="mt-1 text-xs font-medium text-slate-500 dark:text-slate-400">
-                {tenant.name || tenant.slug}
-              </span>
-            )}
+              {tenant && (
+                <span className="mt-1 text-xs font-medium text-slate-500 dark:text-slate-400">
+                  {tenant.name || tenant.slug}
+                </span>
+              )}
+            </div>
           </div>
         </div>
-      </div>
 
-        {/* Changed from Acesso Rápido */}
         <div className="px-3 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-m3-secondary opacity-60">
           Menu Principal
         </div>
@@ -1655,6 +1659,18 @@ export const MainLayout: React.FC = () => {
                         <button
                           onClick={() => {
                             setIsPlusMenuOpen(false);
+                            setIsCifraImportOpen(true);
+                          }}
+                          className="w-full flex items-center gap-4 px-4 py-3 text-xs font-bold text-m3-text hover:bg-m3-hover rounded-2xl transition-all cursor-pointer text-left group"
+                        >
+                          <div className="w-8 h-8 rounded-xl bg-m3-primary/10 text-m3-primary flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                            <Music className="w-4 h-4" />
+                          </div>
+                          Importar Cântico do CifraClub
+                        </button>
+                        <button
+                          onClick={() => {
+                            setIsPlusMenuOpen(false);
                             setIsCreateServiceModalOpen(true);
                           }}
                           className="w-full flex items-center gap-4 px-4 py-3 text-xs font-bold text-m3-text hover:bg-m3-hover rounded-2xl transition-all cursor-pointer text-left group"
@@ -1677,7 +1693,7 @@ export const MainLayout: React.FC = () => {
                           Nova Pasta
                         </button>
 
-                        <CifraClubImportModal/>
+                        
                       </div>
                     )}
                   </div>
@@ -2151,6 +2167,8 @@ export const MainLayout: React.FC = () => {
       )}
     </div>
       )}
+
+      <CifraClubImportModal isOpen={isCifraImportOpen} handleClose={() => {setIsCifraImportOpen(false)}} handleSave={handleCifraClubSubmit}/>
 
       {/* CREATE SONG MODAL */}
       <Modal
