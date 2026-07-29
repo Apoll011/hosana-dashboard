@@ -68,9 +68,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
       name: data.name,
       date: data.date,
       notes: data.notes,
-      songIds: [],
-      songs: [],
-      songNotes: {},
+      elements: [],
     });
     setIsCreateModalOpen(false);
     navigate(`/services/${newService.id}`);

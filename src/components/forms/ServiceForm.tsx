@@ -51,7 +51,7 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
   const onFormSubmit = async (data: ServiceFormData) => {
     await onSubmit({
       name: data.name.trim(),
-      date: data.date,
+      date: new Date(data.date).toISOString(),
       notes: data.notes || '',
     });
   };
