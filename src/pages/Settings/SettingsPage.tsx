@@ -32,7 +32,7 @@ interface SettingsPageProps {
 export const SettingsPage: React.FC<SettingsPageProps> = ({ hideHeader }) => {
   const queryClient = useQueryClient();
   const { showToast } = useSync();
-  const { user: currentUser } = useAuth();
+  const { user: currentUser, logout } = useAuth();
   const { darkMode, toggleDarkMode } = useTheme();
   const { settingsQuery, updateSettings, isUpdating } = useSettings();
 
@@ -127,9 +127,16 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ hideHeader }) => {
 
   const handleConfirmRemove = async () => {
     if (!adminToRemove) return;
+    const isRemovingSelf = currentUser?.id === adminToRemove.id;
+
     try {
       await removeAdmin(adminToRemove.id);
       setAdminToRemove(null);
+
+      if (isRemovingSelf) {
+        showToast('A sua conta foi eliminada. A terminar sessão...', 'success');
+        await logout();
+      }
     } catch {
       // Error handled by mutation
     }
@@ -559,15 +566,12 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ hideHeader }) => {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                disabled={isSelf}
-                                title={isSelf ? 'Não pode remover a sua própria conta' : 'Remover utilizador'}
-                                className={`text-rose-600 hover:bg-rose-50 border-rose-200 dark:border-rose-900/50 dark:hover:bg-rose-950/50 ${
-                                  isSelf ? 'opacity-40 cursor-not-allowed' : ''
-                                }`}
+                                title={isSelf ? 'Apagar a sua própria conta' : 'Apagar conta do utilizador'}
+                                className="text-rose-600 hover:bg-rose-50 border-rose-200 dark:border-rose-900/50 dark:hover:bg-rose-950/50"
                                 icon={<Trash2 className="w-3.5 h-3.5" />}
-                                onClick={() => !isSelf && setAdminToRemove(admin)}
+                                onClick={() => setAdminToRemove(admin)}
                               >
-                                Remover
+                                Apagar Conta
                               </Button>
                             </div>
                           </td>
@@ -722,16 +726,21 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ hideHeader }) => {
       <Modal
         isOpen={Boolean(adminToRemove)}
         onClose={() => setAdminToRemove(null)}
-        title="Remover Administrador"
+        title="Eliminar Conta de Administrador"
       >
         <div className="flex flex-col gap-4">
           <div className="p-3.5 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 rounded-xl flex items-start gap-3 text-xs text-rose-800 dark:text-rose-300">
             <AlertTriangle className="w-5 h-5 shrink-0 text-rose-500 mt-0.5" />
             <div>
-              <strong className="font-bold">Atenção ao Remover:</strong>
+              <strong className="font-bold">Atenção ao Eliminar Conta:</strong>
               <p className="mt-0.5">
-                Tem a certeza que deseja remover o administrador{' '}
-                <strong>{adminToRemove?.name}</strong> ({adminToRemove?.email})? Esta ação revogará imediatamente todos os privilégios de acesso.
+                Tem a certeza que deseja eliminar permanentemente a conta de{' '}
+                <strong>{adminToRemove?.name}</strong> ({adminToRemove?.email})? Esta ação revogará imediatamente todos os privilégios de acesso e removerá esta conta da organização.
+                {currentUser?.id === adminToRemove?.id && (
+                  <>
+                    {' '}Como esta é a sua própria conta, a sua sessão será terminada após a eliminação.
+                  </>
+                )}
               </p>
             </div>
           </div>
@@ -751,7 +760,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ hideHeader }) => {
               icon={<Trash2 className="w-4 h-4" />}
               onClick={handleConfirmRemove}
             >
-              Remover Administrador
+              Eliminar Conta
             </Button>
           </div>
         </div>
