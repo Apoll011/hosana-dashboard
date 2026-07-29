@@ -32,6 +32,7 @@ import { Badge } from '../components/common/Badge';
 import logo from '../assets/hosannastudio_logo.png';
 
 import { ServiceForm } from '../components/forms/ServiceForm';
+import { CifraClubImportModal } from '../components/modals/CifraModal';
 
 interface ContextMenuState {
   x: number;
@@ -1276,7 +1277,7 @@ export const MainLayout: React.FC = () => {
         <div className="px-3 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-m3-secondary opacity-60">
           Menu Principal
         </div>
-
+        <CifraClubImportModal/>
         <button
           onClick={() => {
             setCurrentFolderId(null);
