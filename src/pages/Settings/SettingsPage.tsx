@@ -17,15 +17,13 @@ import {
   Settings, Shield, Save, Server, Download, Upload,
   Database, AlertTriangle, RotateCcw,
   Globe, HardDrive, KeyRound, RefreshCw, Sun, Moon, Palette,
-  Users, UserPlus, CheckCircle2, Clock, Trash2, Check, UserCheck, Mail, Lock, User,
-  Edit
+  Users, UserPlus, CheckCircle2, Clock, Trash2, Check, UserCheck, Mail, Lock, User
 } from 'lucide-react';
 import { Button } from '../../components/common/Button';
 import { Spinner } from '../../components/common/Spinner';
 import { Badge } from '../../components/common/Badge';
 import { Modal } from '../../components/common/Modal';
 import { Input } from '../../components/common/Input';
-import { EditorSettingsPanel } from '@/src/components/EditorSettingsPanel';
 
 interface SettingsPageProps {
   hideHeader?: boolean;
@@ -39,7 +37,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ hideHeader }) => {
   const { settingsQuery, updateSettings, isUpdating } = useSettings();
 
   // Navigation tab inside Settings page
-  const [activeTab, setActiveTab] = useState<'general' | 'editor' | 'admins' | 'backup'>('general');
+  const [activeTab, setActiveTab] = useState<'general' | 'admins' | 'backup'>('general');
 
   // Admins Hook
   const {
@@ -236,24 +234,6 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ hideHeader }) => {
           <Server className="w-4 h-4" />
           <span>Geral e Servidor</span>
         </button>
-        
-        <button
-          type="button"
-          onClick={() => setActiveTab('editor')}
-          className={`px-4 py-2.5 rounded-xl text-xs font-extrabold transition-all flex items-center gap-2 cursor-pointer relative ${
-            activeTab === 'admins'
-              ? 'bg-[#0284c7] text-white shadow-md shadow-[#0284c7]/20'
-              : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60'
-          }`}
-        >
-          <Edit className="w-4 h-4" />
-          <span>Editor</span>
-          {pendingCount > 0 && (
-            <span className="px-1.5 py-0.5 rounded-full text-[10px] font-black bg-amber-500 text-white animate-pulse">
-              {pendingCount}
-            </span>
-          )}
-        </button>
 
         <button
           type="button"
@@ -430,10 +410,6 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ hideHeader }) => {
             </div>
           </div>
         </form>
-      )}
-
-      {activeTab === 'editor' && (
-        <EditorSettingsPanel/>
       )}
 
       {/* ==================== TAB 2: ADMINISTRATORS MANAGEMENT ==================== */}
