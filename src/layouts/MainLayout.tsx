@@ -1039,7 +1039,7 @@ export const MainLayout: React.FC = () => {
       title,
       artist,
       folderId: currentFolderId,
-      content: chordpro.chordpro,
+      content: `{title: ${title}}\n{artist: ${artist}}\n\n${chordpro.chordpro}`,
       tags: ['cifraclub'],
     });
     await Promise.all([songsQuery.refetch(), foldersQuery.refetch()]);
