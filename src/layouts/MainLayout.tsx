@@ -406,7 +406,7 @@ export const MainLayout: React.FC = () => {
 
   const allFolders = useMemo(() => foldersQuery.data?.folders || [], [foldersQuery.data?.folders]);
   const allSongs = useMemo(() => songsQuery.data?.songs || [], [songsQuery.data?.songs]);
-  const totalSongs = songsQuery.data?.total;
+  const totalSongs = songsQuery.data?.total || 0;
   const totalServices = servicesQuery.data?.length || 0;
   const rootSongsCount = foldersQuery.data?.rootSongsCount || 0;
 
