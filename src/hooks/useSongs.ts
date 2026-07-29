@@ -28,7 +28,7 @@ function useSongMutations() {
   function updateSong(updatedSong: Song) {
     queryClient.setQueryData(['song', updatedSong.id], updatedSong);
 
-     queryClient.setQueriesData({ queryKey: ['songs'] }, (oldData: any) => {
+    queryClient.setQueriesData({ queryKey: ['songs'] }, (oldData: any) => {
       if (!oldData || !Array.isArray(oldData.songs)) {
         return oldData;
       }

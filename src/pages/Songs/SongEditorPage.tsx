@@ -3,8 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query'; // <-- Importado o useQueryClient
 import { useSong, useSongs } from '../../hooks/useSongs';
 import { ArrowLeft, Save, Eye, EyeOff, Settings, HelpCircle } from 'lucide-react';
 import { Button } from '../../components/common/Button';
@@ -18,6 +19,7 @@ import { parseChordPro } from '../../utils';
 export const SongEditorPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const queryClient = useQueryClient(); // <-- Instanciado o queryClient
 
   const { data: song, isLoading, isError, error } = useSong(id || null);
   const { updateSong, isUpdating } = useSongs();
@@ -29,12 +31,15 @@ export const SongEditorPage: React.FC = () => {
   const [showHelp, setShowHelp] = useState(false);
   const [readOnly, setReadOnly] = useState(false);
 
+  // <-- Utilizamos uma referência para bloquear saves concorrentes
+  const isSavingRef = useRef(false);
+
   useEffect(() => {
     if (song) {
       setContent(song.content);
       setHasUnsavedChanges(false);
     }
-  }, [song]);
+  }, [song?.id]);
 
   if (isLoading) {
     return (
@@ -59,18 +64,26 @@ export const SongEditorPage: React.FC = () => {
   }
 
   const handleSave = async (updatedContent: string) => {
-    const parsed = parseChordPro(updatedContent);
-    const meta = parsed.metadata;
-    const updates: any = { content: updatedContent, updatedAt: song.updatedAt };
-
-    if (meta.title) updates.title = meta.title;
-    if (meta.artist) updates.artist = meta.artist;
-
-    setReadOnly(true);
-    await updateSong({ id: song.id, data: updates });
+    if (isSavingRef.current) return;
     
-    setReadOnly(false);
-    setHasUnsavedChanges(false);
+    isSavingRef.current = true;
+
+    try {
+      const currentSong = queryClient.getQueryData<any>(['song', song.id]) || song;
+
+      const parsed = parseChordPro(updatedContent);
+      const meta = parsed.metadata;
+      
+      const updates: any = { content: updatedContent, updatedAt: currentSong.updatedAt };
+
+      if (meta.title) updates.title = meta.title;
+      if (meta.artist) updates.artist = meta.artist;
+
+      await updateSong({ id: currentSong.id, data: updates });
+      setHasUnsavedChanges(false);
+    } finally {
+      isSavingRef.current = false;
+    }
   };
 
   return (
