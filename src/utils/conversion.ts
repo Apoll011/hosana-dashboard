@@ -35,11 +35,12 @@ const DEFAULT_OPTIONS: Required<ConversionOptions> = {
 };
 
 const CHORD_BODY =
-  '[A-G](?:#|b)?(?:maj|min|M|m)?(?:2|5|6|7|9|11|13)?(?:sus2|sus4|sus)?' +
+  '[A-G](?:#|b)?(?:maj|min|M|m)?(?:2|4|5|6|7|9|11|13)?(?:sus2|sus4|sus)?' +
   '(?:add(?:2|4|6|9|11|13))?(?:dim7?|aug|\\+)?(?:[#b](?:5|9|11|13))?(?:\\/[A-G](?:#|b)?)?';
 
 const CHORD_TOKEN_REGEX = new RegExp(`^${CHORD_BODY}$`);
 const CHORD_SCAN_REGEX = new RegExp(`(?<=^|\\s)(${CHORD_BODY})(?=\\s|$)`, 'g');
+
 
 const PUNCTUATION_TOKENS = new Set(['|', '%', '-', '.', '...', '/', 'x2', 'x3', 'x4']);
 
@@ -65,9 +66,6 @@ function isAlreadyInlineChordPro(line: string): boolean {
   return matches.every((m) => isValidChordToken(m[1]));
 }
 
-// ============================================================
-// METADADOS (bilíngue PT/EN)
-// ============================================================
 const METADATA_MAP: Record<string, string> = {
   title: 'title', t: 'title', titulo: 'title', título: 'title',
   subtitle: 'subtitle', st: 'subtitle',
@@ -88,9 +86,6 @@ function stripAccents(s: string): string {
   return s.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 }
 
-// ============================================================
-// CABEÇALHOS DE SEÇÃO
-// ============================================================
 const SECTION_KEYWORDS: Record<SectionKind, string[]> = {
   verse: ['verso', 'verse'],
   chorus: ['refrao', 'chorus'],
@@ -109,9 +104,6 @@ function detectSectionHeader(line: string): SectionKind | null {
   return null;
 }
 
-// ============================================================
-// ESTÁGIO 1 — CLASSIFICAÇÃO
-// ============================================================
 function classify(lines: string[], options: Required<ConversionOptions>): ParsedLine[] {
   const result: ParsedLine[] = [];
 
@@ -237,6 +229,7 @@ function extractTitle(chordpro: string): string | null {
   return match ? match[1].trim() : null;
 }
 
+/** Gera um nome de arquivo seguro a partir do título (uso opcional, ex: download). */
 export function slugifyTitle(title: string | null): string {
   if (!title) return 'cifra_convertida';
   return (
@@ -247,6 +240,7 @@ export function slugifyTitle(title: string | null): string {
   );
 }
 
+/** Versão detalhada: devolve o chordpro, o título detectado e avisos. */
 export function convertToChordProDetailed(
   input: string,
   options: ConversionOptions = {}
@@ -268,6 +262,7 @@ export function convertToChordProDetailed(
   return { chordpro, title, warnings };
 }
 
+/** Versão simples: manda o texto, recebe o ChordPro de volta como string. */
 export function toChordPro(input: string, options?: ConversionOptions): string {
   return convertToChordProDetailed(input, options).chordpro;
 }
