@@ -4,6 +4,15 @@ import { Modal } from '../common/Modal';
 import { CifraResult, getCifra, parseCifraClubInput } from '@/src/api/cifra';
 import { ConversionResult, convertToChordProDetailed } from '@/src/utils/conversion';
 
+
+function slug_to_name(slug: string): string {
+  const s = slug.split("-");
+  return s.join(" ").replace(
+    /\w\S*/g,
+    text => text.charAt(0).toUpperCase() + text.substring(1).toLowerCase()
+  );
+}
+
 export const CifraClubImportModal: React.FC<{
   isOpen: boolean;
   handleClose: () => void;
@@ -12,8 +21,6 @@ export const CifraClubImportModal: React.FC<{
   const [urlInput, setUrlInput] = useState('');
   const [artistSlug, setArtistSlug] = useState('');
   const [songSlug, setSongSlug] = useState('');
-  const [artist, setArtist] = useState('');
-  const [song, setSong] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -57,7 +64,7 @@ export const CifraClubImportModal: React.FC<{
       if (result.error) {
         setError(`Erro ao obter a cifra: ${result.error}`);
       } else {
-        handleSave(convertToChordProDetailed(result.cifra!), artist, song)
+        handleSave(convertToChordProDetailed(result.cifra!), slug_to_name(artist), slug_to_name(song))
         handleClosed();
       }
     } catch (err: any) {
@@ -72,8 +79,6 @@ export const CifraClubImportModal: React.FC<{
     setUrlInput('');
     setArtistSlug('');
     setSongSlug('');
-    setArtist('');
-    setSong('');
     setError(null);
     setIsLoading(false);
   };
@@ -115,34 +120,6 @@ export const CifraClubImportModal: React.FC<{
             <span className="bg-white dark:bg-slate-900 px-2.5 text-[10px] font-bold uppercase tracking-wider text-slate-400 absolute">
               ou especifique
             </span>
-          </div>
-
-          {/* Manual Slugs */}
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5">
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
-                Artista
-              </label>
-              <input
-                type="text"
-                value={artist}
-                onChange={(e) => setArtist(e.target.value)}
-                placeholder="Legiao Urbana"
-                className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#0284c7]"
-              />
-            </div>
-            <div className="space-y-1.5">
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
-                Música
-              </label>
-              <input
-                type="text"
-                value={song}
-                onChange={(e) => setSong(e.target.value)}
-                placeholder="Tempo Perdido"
-                className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#0284c7]"
-              />
-            </div>
           </div>
 
           {/* Footer Actions */}
