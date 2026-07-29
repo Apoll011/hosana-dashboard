@@ -25,11 +25,27 @@ function useSongMutations() {
     },
   });
 
+  function updateSong(updatedSong: Song) {
+    queryClient.setQueryData(['song', updatedSong.id], updatedSong);
+
+     queryClient.setQueriesData({ queryKey: ['songs'] }, (oldData: any) => {
+      if (!oldData || !Array.isArray(oldData.songs)) {
+        return oldData;
+      }
+
+      return {
+        ...oldData,
+        songs: oldData.songs.map((song: Song) =>
+          song.id === updatedSong.id ? updatedSong : song
+        ),
+      };
+    });
+  };
+
   const updateSongMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: Partial<Song> }) => songsApi.updateSong(id, data),
     onSuccess: (updatedSong) => {
-      queryClient.invalidateQueries({ queryKey: ['songs'] });
-      queryClient.invalidateQueries({ queryKey: ['song', updatedSong.id] });
+      updateSong(updatedSong);
       showToast(`Cântico "${updatedSong.title}" guardado`, 'success');
     },
     onError: (err: any) => {
@@ -53,8 +69,8 @@ function useSongMutations() {
   const renameSongMutation = useMutation({
     mutationFn: ({ id, newTitle, updatedAt, newPath }: { id: string; newTitle: string; updatedAt: string; newPath?: string }) =>
       songsApi.renameSong(id, newTitle, updatedAt, newPath),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['songs'] });
+    onSuccess: (updatedSong) => {
+      updateSong(updatedSong);
       queryClient.invalidateQueries({ queryKey: ['folders'] });
       showToast('Nome do cântico alterado', 'success');
     },
@@ -66,8 +82,8 @@ function useSongMutations() {
   const moveSongMutation = useMutation({
     mutationFn: ({ id, folderId, updatedAt, newPath }: { id: string; folderId: string | null; updatedAt: string; newPath?: string }) =>
       songsApi.moveSong(id, folderId, updatedAt, newPath),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['songs'] });
+    onSuccess: (updatedSong) => {
+      updateSong(updatedSong);
       queryClient.invalidateQueries({ queryKey: ['folders'] });
       showToast('Cântico movido', 'success');
     },
