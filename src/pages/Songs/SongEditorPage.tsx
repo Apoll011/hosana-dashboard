@@ -31,7 +31,6 @@ export const SongEditorPage: React.FC = () => {
   const [showHelp, setShowHelp] = useState(false);
   const [readOnly, setReadOnly] = useState(false);
 
-  // <-- Utilizamos uma referência para bloquear saves concorrentes
   const isSavingRef = useRef(false);
 
   useEffect(() => {
