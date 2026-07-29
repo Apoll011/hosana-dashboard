@@ -39,12 +39,8 @@ const CHORD_BODY =
   '(?:add(?:2|4|6|9|11|13))?(?:dim7?|aug|\\+)?(?:[#b](?:5|9|11|13))?(?:\\/[A-G](?:#|b)?)?';
 
 const CHORD_TOKEN_REGEX = new RegExp(`^${CHORD_BODY}$`);
-// Versão "scanner": encontra ocorrências de acordes delimitadas por espaço,
-// preservando o índice de caractere (necessário para alinhar com a letra abaixo).
 const CHORD_SCAN_REGEX = new RegExp(`(?<=^|\\s)(${CHORD_BODY})(?=\\s|$)`, 'g');
 
-// Símbolos comuns em tablaturas/cifras que não são acordes mas aparecem em
-// linhas de acorde (barras de compasso, repetição etc) — ignorados na validação.
 const PUNCTUATION_TOKENS = new Set(['|', '%', '-', '.', '...', '/', 'x2', 'x3', 'x4']);
 
 function isValidChordToken(token: string): boolean {
