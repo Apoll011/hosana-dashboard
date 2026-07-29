@@ -435,15 +435,6 @@ export const MainLayout: React.FC = () => {
     return pathList.length > 0 ? pathList.join(' / ') : 'Raiz';
   };
 
-  // Available keys and tags for pop-up filter panel options
-  const availableKeys = useMemo(() => {
-    const keysSet = new Set<string>();
-    allSongs.forEach((s) => {
-      if (s.key) keysSet.add(s.key);
-    });
-    return Array.from(keysSet).sort();
-  }, [allSongs]);
-
   const availableTags = useMemo(() => {
     const tagsSet = new Set<string>();
     allSongs.forEach((s) => {
@@ -566,7 +557,6 @@ export const MainLayout: React.FC = () => {
           }
         }
 
-        if (selectedKey && s.key !== selectedKey) return false;
         if (selectedTag && (!s.tags || !s.tags.includes(selectedTag))) return false;
 
         if (q) {
@@ -1048,8 +1038,7 @@ export const MainLayout: React.FC = () => {
       name: data.name,
       date: data.date,
       notes: data.notes,
-      songs: [],
-      songNotes: {},
+      elements: [],
     });
     setIsCreateServiceModalOpen(false);
     navigate(`/services/${newService.id}`);
@@ -2039,7 +2028,7 @@ export const MainLayout: React.FC = () => {
             <>
               <button
                 onClick={() => {
-                  handleSelectFolder(contextMenu.item.id);
+                  handleSelectFolder((contextMenu.item as Folder).id);
                   setContextMenu(null);
                 }}
                 className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left"
@@ -2089,7 +2078,7 @@ export const MainLayout: React.FC = () => {
             <>
               <button
                 onClick={() => {
-                  navigate(`/songs/${contextMenu.item.id}`);
+                  navigate(`/songs/${(contextMenu.item as Song).id}`);
                   setContextMenu(null);
                 }}
                 className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left"
@@ -2466,40 +2455,6 @@ export const MainLayout: React.FC = () => {
               {currentFolder ? `Pasta "${currentFolder.name}" e Subpastas` : 'Todo o Explorador (Diretório Raiz)'}
             </span>
           </p>
-
-          {/* Key / Tonality Filter */}
-          <div className="space-y-2">
-            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
-              Tonalidade / Tom do Cântico
-            </label>
-            <div className="flex flex-wrap gap-1.5 max-h-28 overflow-y-auto p-1.5 border border-slate-200 dark:border-slate-800 rounded-xl bg-slate-50/50 dark:bg-slate-900/50">
-              <button
-                type="button"
-                onClick={() => setSelectedKey('')}
-                className={`px-2.5 py-1 rounded-lg text-xs font-semibold cursor-pointer border transition-colors ${
-                  selectedKey === ''
-                    ? 'bg-[#0284c7] text-white border-[#0284c7]'
-                    : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700'
-                }`}
-              >
-                Todos os Tons
-              </button>
-              {availableKeys.map((key) => (
-                <button
-                  type="button"
-                  key={key}
-                  onClick={() => setSelectedKey(key)}
-                  className={`px-2.5 py-1 rounded-lg text-xs font-semibold cursor-pointer border transition-colors ${
-                    selectedKey === key
-                      ? 'bg-[#0284c7] text-white border-[#0284c7]'
-                      : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700'
-                  }`}
-                >
-                  {key}
-                </button>
-              ))}
-            </div>
-          </div>
 
           {/* Tag / Category Filter */}
           <div className="space-y-2">
