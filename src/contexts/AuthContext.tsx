@@ -4,12 +4,13 @@
  */
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { User } from '../types';
+import { Tenant, User } from '../types';
 import { authApi, LoginParams } from '../api/auth';
 import { httpClient } from '../api/client';
 
 interface AuthContextType {
   user: User | null;
+  tenant: Tenant | null;
   token: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
@@ -21,6 +22,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [tenant, setTenant] = useState<Tenant | null>(null);
   const [token, setToken] = useState<string | null>(() => httpClient.getToken());
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
@@ -37,10 +39,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const data = await authApi.getCurrentUser();
         setUser(data.user);
         setToken(savedToken);
+        const t = await authApi.getCurrentTenant();
+        setTenant(t);
       } catch (err) {
         console.warn('Failed to validate initial token:', err);
         setUser(null);
         setToken(null);
+        setTenant(null);
         httpClient.setTokens(null, null);
       } finally {
         setIsLoading(false);
@@ -53,6 +58,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     httpClient.onUnauthorized(() => {
       setUser(null);
       setToken(null);
+      setTenant(null);
     });
   }, []);
 
@@ -62,6 +68,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const res = await authApi.login(params);
       setUser(res.user);
       setToken(res.accessToken);
+      const t = await authApi.getCurrentTenant();
+      setTenant(t);
     } finally {
       setIsLoading(false);
     }
@@ -74,6 +82,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } finally {
       setUser(null);
       setToken(null);
+      setTenant(null)
       setIsLoading(false);
     }
   };
@@ -82,6 +91,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     <AuthContext.Provider
       value={{
         user,
+        tenant,
         token,
         isAuthenticated: !!user && !!token,
         isLoading,

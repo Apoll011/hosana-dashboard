@@ -14,11 +14,10 @@ import { useSync } from '../contexts/SyncContext';
 import { songsApi } from '../api/songs';
 import { Folder, Song } from '../types';
 import {
-  Folder as FolderIcon, FolderOpen, FolderPlus, FileText, FilePlus,
-  ChevronRight, ChevronDown, Search, LayoutGrid, List,
+  Folder as FolderIcon, FolderOpen, FolderPlus, FileText, ChevronRight, ChevronDown, Search, LayoutGrid, List,
   Edit2, Trash2, HardDrive, CornerLeftUp, AlertTriangle, Move,
   ExternalLink, ArrowRightLeft, Upload, Plus, CheckSquare, Square, X, Check, RotateCw, Tag,
-  Music, SlidersHorizontal, ArrowUpDown, Filter, User, ShieldCheck, QrCode, Settings, LogOut, Calendar, Menu
+  Music, ArrowUpDown, Filter, User, QrCode, Settings, LogOut, Calendar, Menu
 } from 'lucide-react';
 import { Button } from '../components/common/Button';
 import { Input } from '../components/common/Input';
@@ -29,8 +28,8 @@ import { BatchDeleteModal } from '../components/modals/BatchDeleteModal';
 import { BatchTagModal } from '../components/modals/BatchTagModal';
 import { FolderForm } from '../components/forms/FolderForm';
 import { SongForm } from '../components/forms/SongForm';
-import { Spinner } from '../components/common/Spinner';
 import { Badge } from '../components/common/Badge';
+import logo from '../assets/hosannastudio_logo.png';
 
 import { ServiceForm } from '../components/forms/ServiceForm';
 
@@ -242,7 +241,7 @@ const MoveFolderTreeItem: React.FC<{
 export const MainLayout: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, logout } = useAuth();
+  const { user, logout, tenant } = useAuth();
   
   const isSongsView = location.pathname === '/songs';
   const isSongEditorView = location.pathname.startsWith('/songs/') && location.pathname !== '/songs';
@@ -1247,10 +1246,44 @@ export const MainLayout: React.FC = () => {
         />
       )}
 
-      {/* Acesso Rápido Sidebar (Tree View) */}
+{/* Sidebar (Tree View) */}
       <div className={`${isSidebarOpen ? 'flex absolute inset-y-0 left-0 z-50 bg-m3-sidebar shadow-2xl' : 'hidden'} md:flex md:static md:bg-m3-sidebar/30 w-72 md:w-64 border-r border-m3-border p-4 flex-col gap-1 select-none shrink-0 overflow-y-auto transition-all duration-300`}>
+        
+        {/* Branding & Tenant */}
+        <div className="flex flex-col items-center text-center mb-6 mt-4 select-none">
+          <div
+            className="
+              w-22 h-22 rounded-[22px]
+              flex items-center justify-center
+              mb-4
+              border border-slate-200 dark:border-slate-800
+              transition-transform
+              hover:scale-105 hover:rotate-2
+            "
+          >
+            <img
+              src={logo}
+              alt="Hosanna Studio"
+              className="w-22 h-22 object-contain rounded-[22px]"
+            />
+          </div>
+          <h1 className="font-display font-black text-2xl tracking-tighter text-slate-900 dark:text-slate-100">
+            Hosanna Studio
+          </h1>
+          
+          {/* Tenant Info */}
+          {tenant && (
+            <div className="mt-2 px-3 py-1 bg-m3-primary/10 rounded-full border border-m3-primary/20">
+              <span className="text-[10px] font-bold text-m3-primary uppercase tracking-wider">
+                {tenant.name || tenant.slug}
+              </span>
+            </div>
+          )}
+        </div>
+
+        {/* Changed from Acesso Rápido */}
         <div className="px-3 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-m3-secondary opacity-60">
-          Acesso Rápido
+          Menu Principal
         </div>
 
         <button
@@ -1392,7 +1425,7 @@ export const MainLayout: React.FC = () => {
           </div>
         )}
       </div>
-
+      
       {/* Main Container (Toolbar + Content) */}
       <div className="flex-1 flex flex-col p-2 sm:p-4 md:p-0 h-full w-full overflow-hidden">
         {/* Hidden File Input for Multiple ChordPro Uploads */}
