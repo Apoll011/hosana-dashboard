@@ -5,7 +5,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { ToggleLeft, ToggleRight, Music, Disc, Key, Flame, User } from 'lucide-react';
-import { parseChordPro } from '../utils';
+import { LineAST, parseChordPro } from '../utils';
 import { useSettings } from '../hooks/useSettings';
 
 interface ChordProPreviewProps {
@@ -23,7 +23,6 @@ const ChordProPreview = React.memo(({ content }: { content: string }) => {
     }
   }, [settingsQuery.data?.showChordsDefault]);
 
-  // Parse ChordPro in real-time
   const parsedSong = useMemo(() => {
     return parseChordPro(content);
   }, [content]);
@@ -62,10 +61,8 @@ const ChordProPreview = React.memo(({ content }: { content: string }) => {
       {/* Sheet Render Area */}
       <div className="flex-1 overflow-y-auto px-4 py-4 sm:px-6 bg-slate-50 dark:bg-slate-950 print-page select-text leading-relaxed">
         
-        {/* Printable/Print-friendly Song Sheet Card */}
         <div className="max-w-3xl mx-auto print-song-card">
           
-          {/* Title and Metadata Header block */}
           <div className="mb-6 border-b border-neutral-100 dark:border-slate-800 pb-5 select-none">
             <div className="flex items-start justify-between gap-4 flex-wrap">
               <div>
@@ -80,7 +77,6 @@ const ChordProPreview = React.memo(({ content }: { content: string }) => {
                 )}
               </div>
 
-              {/* Floating Metadata Pills */}
               <div className="flex flex-wrap items-center gap-1.5 justify-end">
                 {metadata.songNumber && (
                   <span className="text-[10px] font-bold bg-neutral-100 dark:bg-slate-800 text-neutral-600 dark:text-neutral-400 px-2 py-1 rounded-lg border border-neutral-200 dark:border-slate-700">
@@ -101,27 +97,29 @@ const ChordProPreview = React.memo(({ content }: { content: string }) => {
             </div>
           </div>
 
-          {/* Song Lyrics and Chords sheet container */}
           <div className="space-y-6 font-sans leading-relaxed text-sm">
             {parsedSong.sections.map((section, secIdx) => {
-              if (section.type === 'chorus') {
+              const isChorus = section.type === 'chorus';
+              const isBridge = section.type === 'bridge';
+              
+              if (isChorus || isBridge) {
+                const borderColor = isChorus ? 'border-m3-primary/30 dark:border-m3-dark-primary/30' : 'border-amber-500/30 dark:border-amber-400/30';
+                const labelColor = isChorus ? 'text-m3-text dark:text-m3-dark-text' : 'text-amber-700 dark:text-amber-400';
+                const iconColor = isChorus ? 'text-m3-secondary' : 'text-amber-500';
+
                 return (
                   <div
                     key={secIdx}
                     data-section-index={secIdx}
-                    className="pl-4 md:pl-6 border-l-2 border-m3-primary/30 dark:border-m3-dark-primary/30 my-6"
+                    className={`pl-4 md:pl-6 border-l-2 my-6 ${borderColor}`}
                   >
-                    <div className="flex items-center gap-1.5 text-[11px] font-bold text-m3-text dark:text-m3-dark-text uppercase tracking-wider mb-3 select-none">
-                      <Music className="w-3.5 h-3.5 text-m3-secondary shrink-0" />
-                      <span>{section.label || 'Refrão'}</span>
+                    <div className={`flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider mb-3 select-none ${labelColor}`}>
+                      <Music className={`w-3.5 h-3.5 shrink-0 ${iconColor}`} />
+                      <span>{section.label || (isChorus ? 'Refrão' : 'Ponte')}</span>
                     </div>
                     <div className="space-y-4 font-medium">
                       {section.lines.map((line, lineIdx) => (
-                        <LineRenderer 
-                          key={lineIdx} 
-                          line={line} 
-                          showChords={showChords} 
-                        />
+                        <LineRenderer key={lineIdx} line={line} showChords={showChords} />
                       ))}
                     </div>
                   </div>
@@ -153,15 +151,21 @@ const ChordProPreview = React.memo(({ content }: { content: string }) => {
                 );
               }
 
+              // Default standard verse fallback mechanism 
               return (
-                <div key={secIdx} data-section-index={secIdx} className="relative pl-6 sm:pl-8 border-l border-m3-border/30 dark:border-m3-dark-border/30 py-1.5">
+                <div key={secIdx} data-section-index={secIdx} className="relative pl-6 sm:pl-8 border-l border-m3-border/30 dark:border-m3-dark-border/30 py-1.5 my-4">
+                  {section.label && (
+                    <div className="absolute -left-0.5 top-0 bottom-0 w-0.5 bg-m3-secondary/20 dark:bg-m3-dark-secondary/20 rounded-full"></div>
+                  )}
+                  {section.label && (
+                    <div className="flex items-center gap-1.5 text-[11px] font-bold text-m3-text/60 dark:text-m3-dark-text/60 uppercase tracking-wider mb-3 select-none">
+                      <Music className="w-3.5 h-3.5 text-m3-secondary/60 shrink-0" />
+                      <span>{section.label}</span>
+                    </div>
+                  )}
                   <div className="space-y-4">
                     {section.lines.map((line, lineIdx) => (
-                      <LineRenderer 
-                        key={lineIdx} 
-                        line={line} 
-                        showChords={showChords} 
-                      />
+                      <LineRenderer key={lineIdx} line={line} showChords={showChords} />
                     ))}
                   </div>
                 </div>
@@ -174,28 +178,27 @@ const ChordProPreview = React.memo(({ content }: { content: string }) => {
   );
 });
 
-/**
- * Sub-component to render a line of text, splitting into segmented block components
- */
-const LineRenderer = React.memo(({ 
-  line, 
-  showChords
-}: { 
-  line: any; 
-  showChords: boolean; key?: string | number; 
-}) => {
-  if (line.type === 'empty') {
-    return <div className="h-2"></div>;
-  }
+// ---------------------------------------------------------------------------
+// Render Dispatchers & Sub-components 
+// ---------------------------------------------------------------------------
 
-  if (line.type === 'comment') {
-    return (
-      <div className="text-xs text-slate-400 dark:text-slate-500 italic">
-        {line.text}
-      </div>
-    );
-  }
+const LineRenderer = React.memo(({ line, showChords }: { line: LineAST; showChords: boolean; }) => {
+  if (line.type === 'empty') return <div className="h-2"></div>;
+  if (line.type === 'comment') return <CommentRenderer line={line} />;
+  if (line.type === 'chord-section') return <ChordSectionRenderer line={line} showChords={showChords} />;
+  
+  return <LyricsRenderer line={line} showChords={showChords} />;
+});
 
+
+const CommentRenderer = React.memo(({ line }: { line: LineAST }) => (
+  <div className="text-xs text-slate-400 dark:text-slate-500 italic my-1">
+    {line.text}
+  </div>
+));
+
+
+const LyricsRenderer = React.memo(({ line, showChords }: { line: LineAST, showChords: boolean }) => {
   const segments = line.segments || [];
 
   return (
@@ -220,6 +223,51 @@ const LineRenderer = React.memo(({
           </div>
         );
       })}
+    </div>
+  );
+});
+
+
+const ChordSectionRenderer = React.memo(({ line, showChords }: { line: LineAST, showChords: boolean }) => {
+  if (!showChords) return null; // We hide structural measure blocks if chords are toggled off
+
+  const measures = line.measures || [];
+  
+  return (
+    <div className="flex items-stretch my-2 bg-slate-50 dark:bg-slate-900/30 rounded border border-slate-200 dark:border-slate-800 overflow-hidden w-full">
+      
+      {/* Starting measure Barline */}
+      {line.startBarline && (
+        <div className="flex items-center px-2 bg-slate-100/50 dark:bg-slate-800/50 border-r border-slate-200 dark:border-slate-800">
+          <span className="text-slate-400 dark:text-slate-500 font-bold select-none text-sm tracking-widest">
+            {line.startBarline}
+          </span>
+        </div>
+      )}
+
+      {/* Structured Measures */}
+      <div className="flex flex-1 min-w-0">
+        {measures.map((measure, mIdx) => (
+          <React.Fragment key={mIdx}>
+            <div className="flex-1 flex items-center justify-around px-3 py-2 min-w-[3rem]">
+              {measure.chords.map((chordSeg, cIdx) => (
+                <span key={cIdx} className="font-black text-[#0284c7] font-mono select-none text-[15px]">
+                  {chordSeg.chord}
+                </span>
+              ))}
+            </div>
+            
+            {/* End Barline specific to closure sequence tracking per block/bar */}
+            {measure.endBarline && (
+              <div className="flex items-center px-1.5 bg-slate-100/50 dark:bg-slate-800/50 border-l border-slate-200 dark:border-slate-800">
+                <span className="text-slate-400 dark:text-slate-500 font-bold select-none text-sm tracking-widest">
+                  {measure.endBarline}
+                </span>
+              </div>
+            )}
+          </React.Fragment>
+        ))}
+      </div>
     </div>
   );
 });
