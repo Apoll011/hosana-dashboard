@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Button } from '../common/Button';
 import { Modal } from '../common/Modal';
 import { CifraResult, getCifra, parseCifraClubInput } from '@/src/api/cifra';
+import { convertToChordProDetailed } from '@/src/utils/conversion';
 
 export function CifraClubImportModal() {
   const [isOpen, setIsOpen] = useState(false);
@@ -55,6 +56,7 @@ export function CifraClubImportModal() {
       } else {
         // Output result to console as requested
         console.log('🎵 CifraClub Import Result:', result);
+        console.log(convertToChordProDetailed(result.cifra!))
         handleClose();
       }
     } catch (err: any) {
