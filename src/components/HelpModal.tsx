@@ -37,7 +37,7 @@ const SNIPPETS: [string, string][] = [
   ['sot', '{start_of_tab}'],
   ['eot', '{end_of_tab}'],
   ['define ou d', '{define:...}'],
-  ['yt ou youtube', '{youtube: $editing_here}'],
+  ['yt ou youtube', '{youtube: url}'],
 ];
 
 const SHORTCUTS: [string, string][] = [

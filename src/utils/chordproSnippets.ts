@@ -1,8 +1,8 @@
 export const CHORDPRO_SNIPPETS = `
 snippet yt
-	{youtube: \${1:editing_here}}
+	{youtube: \${1:url}}
 snippet youtube
-	{youtube: \${1:editing_here}}
+	{youtube: \${1:url}}
 `;
 
 let registered = false;
