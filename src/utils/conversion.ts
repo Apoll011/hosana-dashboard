@@ -35,9 +35,26 @@ const DEFAULT_OPTIONS: Required<ConversionOptions> = {
 };
 
 const CHORD_BODY =
-  '[A-G](?:#|b)?(?:maj|min|M|m)?(?:2|4|5|6|7|9|11|13)?(?:sus2|sus4|sus)?' +
-  '(?:add(?:2|4|6|9|11|13))?(?:dim7?|aug|\\+)?(?:[#b](?:5|9|11|13))?(?:\\/[A-G](?:#|b)?)?';
-
+  // 1. Root Note
+  '[A-G](?:#|b)?' +
+  // 2. Base Quality
+  '(?:maj|min|m\\(maj7\\)|mM|m7b5|dim|aug|alt|Δ|°|ø|M|m|\\+|-)?' +
+  // 3. Numbered Extension
+  '(?:2|4|5|6\\/9|6|7|9|11|13)?' +
+  // 4. Post-number Modifiers
+  '(?:[Mm+])?' +
+  // 5. Suspended Notes
+  '(?:sus(?:2|4)?)?' +
+  // 6. Added Notes
+  '(?:add(?:2|4|6|9|11|13))?' +
+  // 7. Omitted Notes
+  '(?:(?:omit|no)(?:3|5))?' +
+  // 8. Parenthesized Complex Extensions
+  '(?:\\((?:[#b]?(?:5|9|11|13)|sus(?:2|4)?|add(?:2|4|9|11|13)|alt|omit(?:3|5)|no(?:3|5))(?:[,/]\\s*[#b]?(?:5|9|11|13))*\\))*' +
+  // 9. Unparenthesized Alterations
+  '(?:[#b](?:5|9|11|13))*' +
+  // 10. Slash Bass Note
+  '(?:\\/[A-G](?:#|b)?)?';
 const CHORD_TOKEN_REGEX = new RegExp(`^${CHORD_BODY}$`);
 const CHORD_SCAN_REGEX = new RegExp(`(?<=^|\\s)(${CHORD_BODY})(?=\\s|$)`, 'g');
 
