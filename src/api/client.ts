@@ -75,10 +75,10 @@ class ApiClient {
       return {} as T;
     }
 
-    return req.json()
+    return (await req).json()
   }
 
-  public async request_raw(endpoint: string, options: RequestInit = {}): Response {
+  public async request_raw(endpoint: string, options: RequestInit = {}): Promise<Response> {
     const url = endpoint.startsWith('/') ? `${this.baseURL}${endpoint}` : `${this.baseURL}/${endpoint}`;
     
     const requestHeaders: Record<string, string> = {};
