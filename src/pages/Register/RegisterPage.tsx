@@ -59,7 +59,7 @@ export const RegisterPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-start p-4 sm:p-8 md:p-16 relative overflow-hidden font-sans transition-colors duration-500">
+    <div className="min-h-screen w-full flex items-center justify-center p-4 sm:p-8 md:p-16 relative overflow-hidden font-sans bg-slate-50 transition-colors duration-500">
       {/* Background Image */}
       <div className="absolute inset-0 z-0">
         <img 
@@ -71,10 +71,6 @@ export const RegisterPage: React.FC = () => {
         {/* Subtle Overlay for contrast */}
         <div className="absolute inset-0 bg-black/40" />
       </div>
-
-      {/* Background ambient lighting */}
-      <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-m3-primary/10 rounded-full blur-[120px] pointer-events-none animate-pulse z-10" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-m3-primary-dark/10 rounded-full blur-[120px] pointer-events-none z-10" />
 
       <div className="relative max-w-[380px] w-full bg-white border border-slate-200 rounded-[32px] shadow-2xl shadow-black/40 p-6 sm:p-8 transition-all duration-300 z-20">
         {/* Branding */}
