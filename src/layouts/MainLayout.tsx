@@ -1265,6 +1265,37 @@ export const MainLayout: React.FC = () => {
     setDeleteAção("move_to_root");
   };
 
+  function printHtmlDirectly(html: string) {
+    const iframe = document.createElement('iframe');
+    
+    // Hide it completely from view
+    iframe.style.position = 'fixed';
+    iframe.style.right = '0';
+    iframe.style.bottom = '0';
+    iframe.style.width = '0';
+    iframe.style.height = '0';
+    iframe.style.border = '0';
+    
+    // Add the iframe to the page body
+    document.body.appendChild(iframe);
+    
+    if(!iframe.contentWindow) return
+
+    // Write your HTML content inside the iframe
+    const doc = iframe.contentWindow.document;
+    doc.open();
+    doc.write(html);
+    doc.close();
+    
+    iframe.contentWindow.focus();
+    iframe.contentWindow.print();
+    
+    setTimeout(() => {
+        document.body.removeChild(iframe);
+    }, 1000);
+  }
+
+
   // Song Actions
   const handleCreateSongSubmit = async (data: {
     title: string;
@@ -1285,12 +1316,32 @@ export const MainLayout: React.FC = () => {
     navigate(`/songs/${song.id}`);
   };
 
-  const handlePrintSong = async () => {
+  const handlePrintSongs = async () => {
     setContextMenu(null);
     selectedSongIds.forEach(async (id) => {
       const html = await printApi.printSong(id);
-      console.log(html);
+      printHtmlDirectly(html);
     });
+  }
+
+  const handlePrintSong = async (id: string) => {
+    setContextMenu(null);
+    const html = await printApi.printSong(id);
+    printHtmlDirectly(html);
+  }
+
+  const handlePrintFolders = async () => {
+    setContextMenu(null);
+    selectedFolderIds.forEach(async (id) => {
+      const html = await printApi.printFolder(id);
+      printHtmlDirectly(html);
+    });
+  }
+
+  const handlePrintFolder = async (id: string) => {
+    setContextMenu(null);
+    const html = await printApi.printSong(id);
+    printHtmlDirectly(html);
   }
 
   const handleCifraClubSubmit = async (
@@ -2320,7 +2371,7 @@ export const MainLayout: React.FC = () => {
                     <span>Etiquetar {selectedSongIds.size} cântico(s)</span>
                   </button>
                   <button
-                    onClick={handlePrintSong}
+                    onClick={handlePrintSongs}
                     className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left cursor-pointer"
                   >
                     <Printer className="w-4 h-4 text-[#0284c7]" />
@@ -2328,6 +2379,20 @@ export const MainLayout: React.FC = () => {
                   </button>
                 </>
               )}
+
+
+              {selectedFolderIds.size > 0 && (
+                <>
+                  <button
+                    onClick={handlePrintFolders}
+                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left cursor-pointer"
+                  >
+                    <Printer className="w-4 h-4 text-[#0284c7]" />
+                    <span>Imprimir {selectedFolderIds.size} Pastas</span>
+                  </button>
+                </>
+              )}
+
 
               <button
                 onClick={() => {
@@ -2410,9 +2475,8 @@ export const MainLayout: React.FC = () => {
                   </button>
 
                   <button
-                    onClick={() => {
-                      console.log(printApi.printFolder((contextMenu.item as Folder).id));
-                      setContextMenu(null);
+                    onClick={async () => {
+                      await handlePrintFolder((contextMenu.item as Folder).id);
                     }}
                     className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left"
                   >
@@ -2486,14 +2550,13 @@ export const MainLayout: React.FC = () => {
                   </button>
                  
                   <button
-                    onClick={() => {
-                      console.log(printApi.printSong((contextMenu.item as Song).id));
-                      setContextMenu(null);
+                    onClick={async () => {
+                      handlePrintSong((contextMenu.item as Song).id);
                     }}
                     className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left"
                   >
                     <Printer className="w-4 h-4 text-emerald-500" />
-                    <span>Imprimir {(contextMenu.item as Song).title}</span>
+                    <span>Imprimir Cântico</span>
                   </button>
 
                   <div className="my-1 border-t border-slate-100 dark:border-slate-800/80" />
