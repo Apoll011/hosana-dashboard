@@ -1285,7 +1285,7 @@ export const MainLayout: React.FC = () => {
     navigate(`/songs/${song.id}`);
   };
 
-  const handlePrintSong = async (songId: {songId: string}) => {
+  const handlePrintSong = async () => {
     setContextMenu(null);
     const printPromises = selectedSongIds.map(async (id) => {
       const html = await printApi.printSong(id);
@@ -2311,16 +2311,25 @@ export const MainLayout: React.FC = () => {
               </div>
 
               {selectedSongIds.size > 0 && (
-                <button
-                  onClick={() => {
-                    setIsBatchTagOpen(true);
-                    setContextMenu(null);
-                  }}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left cursor-pointer"
-                >
-                  <Tag className="w-4 h-4 text-[#0284c7]" />
-                  <span>Etiquetar {selectedSongIds.size} cântico(s)</span>
-                </button>
+                <>
+                  <button
+                    onClick={() => {
+                      setIsBatchTagOpen(true);
+                      setContextMenu(null);
+                    }}
+                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left cursor-pointer"
+                  >
+                    <Tag className="w-4 h-4 text-[#0284c7]" />
+                    <span>Etiquetar {selectedSongIds.size} cântico(s)</span>
+                  </button>
+                  <button
+                    onClick={handlePrintSong}
+                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left cursor-pointer"
+                  >
+                    <Tag className="w-4 h-4 text-[#0284c7]" />
+                    <span>Imprimir {selectedSongIds.size} cântico(s)</span>
+                  </button>
+                </>
               )}
 
               <button
