@@ -142,7 +142,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
                 {/* Decorative accent */}
                 <div className="absolute top-0 left-0 w-2 h-full bg-m3-primary opacity-0 group-hover:opacity-100 transition-opacity" />
 
-                <div className="space-y-5">
+                <div className="space-y-3">
                   <div className="flex items-start justify-between gap-4">
                     <Badge variant="sky">
                       <Clock className="w-3.5 h-3.5 mr-1.5 opacity-70" />
@@ -200,7 +200,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
                   </div>
                 </div>
 
-                <div className="mt-8 pt-5 flex items-center justify-between text-[11px] font-black uppercase tracking-[0.2em] text-m3-primary">
+                <div className="mt-4 pt-5 flex items-center justify-between text-[11px] font-black uppercase tracking-[0.2em] text-m3-primary">
                   <span>Gerir Lista & Notas</span>
                   <div className="w-8 h-8 rounded-full bg-m3-primary/10 flex items-center justify-center group-hover:bg-m3-primary group-hover:text-white transition-all">
                     <ArrowRight className="w-4 h-4" />
