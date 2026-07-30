@@ -64,6 +64,7 @@ import logo from "../assets/hosannastudio_logo.png";
 import { ServiceForm } from "../components/forms/ServiceForm";
 import { CifraClubImportModal } from "../components/modals/CifraModal";
 import { ConversionResult } from "../utils/conversion";
+import { printApi } from "../api/print";
 
 interface ContextMenuState {
   x: number;
@@ -2197,7 +2198,7 @@ export const MainLayout: React.FC = () => {
             variant="ghost"
             icon={<Trash2 className="w-4 h-4" />}
             onClick={() => setIsBatchDeleteOpen(true)}
-            className="!text-rose-400 hover:!bg-rose-500/10"
+            className="text-rose-400! hover:bg-rose-500/10!"
           >
             Eliminar
           </Button>
@@ -2207,7 +2208,7 @@ export const MainLayout: React.FC = () => {
             variant="ghost"
             icon={<X className="w-4 h-4" />}
             onClick={clearSelection}
-            className="!text-white/70 dark:!text-slate-900/70 hover:!bg-white/10 dark:hover:!bg-slate-900/10"
+            className="text-white/70! dark:text-slate-900/70! hover:bg-white/10! dark:hover:bg-slate-900/10!"
           >
             Cancelar
           </Button>
@@ -2390,6 +2391,16 @@ export const MainLayout: React.FC = () => {
                     <span>Mover Pasta</span>
                   </button>
 
+                  <button
+                    onClick={() => {
+                      console.log(printApi.printFolder((contextMenu.item as Folder).id))
+                    }}
+                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left"
+                  >
+                    <Move className="w-4 h-4 text-emerald-500" />
+                    <span>Imprimir Pasta</span>
+                  </button>
+
                   <div className="my-1 border-t border-slate-100 dark:border-slate-800/80" />
 
                   <button
@@ -2453,6 +2464,16 @@ export const MainLayout: React.FC = () => {
                   >
                     <Tag className="w-4 h-4 text-[#0284c7]" />
                     <span>Etiquetar Cântico</span>
+                  </button>
+                 
+                  <button
+                    onClick={() => {
+                      console.log(printApi.printSong((contextMenu.item as Song).id))
+                    }}
+                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left"
+                  >
+                    <Move className="w-4 h-4 text-emerald-500" />
+                    <span>Imprimir {(contextMenu.item as Song).title}</span>
                   </button>
 
                   <div className="my-1 border-t border-slate-100 dark:border-slate-800/80" />
