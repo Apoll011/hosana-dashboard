@@ -1340,7 +1340,7 @@ export const MainLayout: React.FC = () => {
 
   const handlePrintFolder = async (id: string) => {
     setContextMenu(null);
-    const html = await printApi.printSong(id);
+    const html = await printApi.printFolder(id);
     printHtmlDirectly(html);
   }
 
