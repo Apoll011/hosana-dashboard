@@ -117,13 +117,6 @@ export const CifraClubImportModal: React.FC<{
             />
           </div>
 
-          <div className="relative flex items-center justify-center">
-            <div className="border-t border-slate-200 dark:border-slate-800 w-full" />
-            <span className="bg-white dark:bg-slate-900 px-2.5 text-[10px] font-bold uppercase tracking-wider text-slate-400 absolute">
-              ou especifique
-            </span>
-          </div>
-
           {/* Footer Actions */}
           <div className="flex items-center justify-end gap-2 pt-4 border-t border-slate-200 dark:border-slate-800">
             <Button
