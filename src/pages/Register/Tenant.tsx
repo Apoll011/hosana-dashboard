@@ -119,10 +119,6 @@ export const RegisterTenantPage: React.FC = () => {
         <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-[2px]" />
       </div>
 
-      {/* Ambient lighting */}
-      <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-m3-primary/20 rounded-full blur-[120px] pointer-events-none animate-pulse z-10" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-m3-primary-dark/20 rounded-full blur-[120px] pointer-events-none z-10" />
-
       {/* Main Card */}
       <div className="relative max-w-[440px] w-full bg-white/95 backdrop-blur-xl border border-white/20 rounded-[32px] shadow-2xl shadow-black/40 p-6 sm:p-10 transition-all duration-300 z-20 my-8">
         
