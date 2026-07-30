@@ -78,11 +78,6 @@ export interface ServiceElement {
   passage?: string;
 }
 
-export interface ServiceSong {
-  songId: string;
-  notes: string;
-}
-
 export interface Service {
   id: string;
   name: string;
