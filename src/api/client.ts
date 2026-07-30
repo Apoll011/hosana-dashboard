@@ -69,13 +69,13 @@ class ApiClient {
   }
 
   public async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
-    const req = this.request_raw(endpoint, options);
+    const req = await this.request_raw(endpoint, options);
     
     if (req.status === 204) {
       return {} as T;
     }
 
-    return (await req).json()
+    return req.json()
   }
 
   public async request_raw(endpoint: string, options: RequestInit = {}): Promise<Response> {

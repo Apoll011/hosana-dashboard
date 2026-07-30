@@ -42,15 +42,15 @@ interface Templates {
 
 export const printApi = {
   printService: async (serviceId: string): Promise<string> => {
-    return httpClient.request_raw(`/print/services/${serviceId}`).text();
+    return (await httpClient.request_raw(`/print/services/${serviceId}`)).text();
   },
 
   printSong: async (songId: string): Promise<string> => {
-    return httpClient.request_raw(`/print/songs/${songId}`).text();
+    return (await httpClient.request_raw(`/print/songs/${songId}`)).text();
   },
 
   printFolder: async (folderId: string): Promise<string> => {
-    return httpClient.request_raw(`/print/folders/${folderId}`).text();
+    return (await httpClient.request_raw(`/print/folders/${folderId}`)).text();
   },
 
   templates: async (): Promise<Templates> => {

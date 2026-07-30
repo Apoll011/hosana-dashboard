@@ -48,6 +48,7 @@ import {
   LogOut,
   Calendar,
   Menu,
+  Printer,
 } from "lucide-react";
 import { Button } from "../components/common/Button";
 import { Input } from "../components/common/Input";
@@ -1284,6 +1285,17 @@ export const MainLayout: React.FC = () => {
     navigate(`/songs/${song.id}`);
   };
 
+  const handlePrintSong = async (songId: {songId: string}) => {
+    setContextMenu(null);
+    const printPromises = selectedSongIds.map(async (id) => {
+      const html = await printApi.printSong(id);
+      console.log(html);
+      return html;
+    });
+
+    await Promise.all(printPromises);
+  }
+
   const handleCifraClubSubmit = async (
     chordpro: ConversionResult,
     artist: string,
@@ -2393,11 +2405,12 @@ export const MainLayout: React.FC = () => {
 
                   <button
                     onClick={() => {
-                      console.log(printApi.printFolder((contextMenu.item as Folder).id))
+                      console.log(printApi.printFolder((contextMenu.item as Folder).id));
+                      setContextMenu(null);
                     }}
                     className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left"
                   >
-                    <Move className="w-4 h-4 text-emerald-500" />
+                    <Printer className="w-4 h-4 text-emerald-500" />
                     <span>Imprimir Pasta</span>
                   </button>
 
@@ -2468,11 +2481,12 @@ export const MainLayout: React.FC = () => {
                  
                   <button
                     onClick={() => {
-                      console.log(printApi.printSong((contextMenu.item as Song).id))
+                      console.log(printApi.printSong((contextMenu.item as Song).id));
+                      setContextMenu(null);
                     }}
                     className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left"
                   >
-                    <Move className="w-4 h-4 text-emerald-500" />
+                    <Printer className="w-4 h-4 text-emerald-500" />
                     <span>Imprimir {(contextMenu.item as Song).title}</span>
                   </button>
 
