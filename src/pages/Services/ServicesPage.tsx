@@ -16,6 +16,7 @@ import {
   Trash2,
   ArrowRight,
   CheckCircle2,
+  Printer,
 } from "lucide-react";
 import { Button } from "../../components/common/Button";
 import { Modal } from "../../components/common/Modal";
@@ -24,6 +25,8 @@ import { ServiceForm } from "../../components/forms/ServiceForm";
 import { Spinner } from "../../components/common/Spinner";
 import { EmptyState } from "../../components/common/EmptyState";
 import { Badge } from "../../components/common/Badge";
+import { printHtmlDirectly } from "@/src/utils";
+import { printApi } from "@/src/api/print";
 
 interface ServicesPageProps {
   hideHeader?: boolean;
@@ -150,6 +153,18 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
                       })}
                     </Badge>
 
+                    <>
+                     <button
+                      onClick={async (e) => {
+                        e.stopPropagation();
+                        const html = await printApi.printSong(service.id);
+                        printHtmlDirectly(html);
+                      }}
+                      title="Imprimir Culto"
+                      className="p-2 text-m3-secondary hover:text-blue-500 hover:bg-cyan-500/10 rounded-xl cursor-pointer transition-all opacity-0 group-hover:opacity-100"
+                    >
+                      <Printer className="w-4.5 h-4.5" />
+                    </button>
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -160,6 +175,8 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
                     >
                       <Trash2 className="w-4.5 h-4.5" />
                     </button>
+                    </>
+                   
                   </div>
 
                   <h3 className="text-xl font-black text-m3-text group-hover:text-m3-primary transition-colors leading-tight">
