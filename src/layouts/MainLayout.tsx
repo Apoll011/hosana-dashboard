@@ -66,6 +66,7 @@ import { ServiceForm } from "../components/forms/ServiceForm";
 import { CifraClubImportModal } from "../components/modals/CifraModal";
 import { ConversionResult } from "../utils/conversion";
 import { printApi } from "../api/print";
+import { printHtmlDirectly } from "../utils";
 
 interface ContextMenuState {
   x: number;
@@ -1264,37 +1265,6 @@ export const MainLayout: React.FC = () => {
     setConfirmFolderName("");
     setDeleteAção("move_to_root");
   };
-
-  function printHtmlDirectly(html: string) {
-    const iframe = document.createElement('iframe');
-    
-    // Hide it completely from view
-    iframe.style.position = 'fixed';
-    iframe.style.right = '0';
-    iframe.style.bottom = '0';
-    iframe.style.width = '0';
-    iframe.style.height = '0';
-    iframe.style.border = '0';
-    
-    // Add the iframe to the page body
-    document.body.appendChild(iframe);
-    
-    if(!iframe.contentWindow) return
-
-    // Write your HTML content inside the iframe
-    const doc = iframe.contentWindow.document;
-    doc.open();
-    doc.write(html);
-    doc.close();
-    
-    iframe.contentWindow.focus();
-    iframe.contentWindow.print();
-    
-    setTimeout(() => {
-        document.body.removeChild(iframe);
-    }, 1000);
-  }
-
 
   // Song Actions
   const handleCreateSongSubmit = async (data: {

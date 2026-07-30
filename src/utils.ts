@@ -3,30 +3,34 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Song, FolderNode } from './types';
-
+import { Song, FolderNode } from "./types";
 
 // ---------------------------------------------------------------------------
 // Folder tree
 // ---------------------------------------------------------------------------
 
-export function buildFolderTree(songs: Song[], search: string = ''): FolderNode[] {
+export function buildFolderTree(
+  songs: Song[],
+  search: string = "",
+): FolderNode[] {
   const root: FolderNode[] = [];
   const query = search.trim().toLowerCase();
 
-  const filteredSongs = songs.filter(song => {
+  const filteredSongs = songs.filter((song) => {
     if (!query) return true;
-    return song.title.toLowerCase().includes(query) || 
-           song.artist.toLowerCase().includes(query) || 
-           song.content.toLowerCase().includes(query) || 
-           song.path.toLowerCase().includes(query) || 
-           song.tags.some(t => t.toLowerCase().includes(query));
+    return (
+      song.title.toLowerCase().includes(query) ||
+      song.artist.toLowerCase().includes(query) ||
+      song.content.toLowerCase().includes(query) ||
+      song.path.toLowerCase().includes(query) ||
+      song.tags.some((t) => t.toLowerCase().includes(query))
+    );
   });
 
   for (const song of filteredSongs) {
-    const parts = song.path.split('/');
+    const parts = song.path.split("/");
     let currentLevel = root;
-    let currentPath = '';
+    let currentPath = "";
 
     for (let i = 0; i < parts.length; i++) {
       const part = parts[i];
@@ -35,15 +39,26 @@ export function buildFolderTree(songs: Song[], search: string = ''): FolderNode[
 
       if (isLast) {
         currentLevel.push({
-          name: part.endsWith('.pro') ? part.slice(0, -4) : part.endsWith('.chordpro') ? part.slice(0, -9) : part,
+          name: part.endsWith(".pro")
+            ? part.slice(0, -4)
+            : part.endsWith(".chordpro")
+              ? part.slice(0, -9)
+              : part,
           path: song.path,
-          type: 'song',
-          songId: song.id
+          type: "song",
+          songId: song.id,
         });
       } else {
-        let folder = currentLevel.find(n => n.type === 'folder' && n.name === part);
+        let folder = currentLevel.find(
+          (n) => n.type === "folder" && n.name === part,
+        );
         if (!folder) {
-          folder = { name: part, path: currentPath, type: 'folder', children: [] };
+          folder = {
+            name: part,
+            path: currentPath,
+            type: "folder",
+            children: [],
+          };
           currentLevel.push(folder);
         }
         currentLevel = folder.children!;
@@ -53,7 +68,7 @@ export function buildFolderTree(songs: Song[], search: string = ''): FolderNode[
 
   const sortTree = (nodes: FolderNode[]) => {
     nodes.sort((a, b) => {
-      if (a.type !== b.type) return a.type === 'folder' ? -1 : 1;
+      if (a.type !== b.type) return a.type === "folder" ? -1 : 1;
       return a.name.localeCompare(b.name);
     });
     for (const node of nodes) {
@@ -65,3 +80,32 @@ export function buildFolderTree(songs: Song[], search: string = ''): FolderNode[
   return root;
 }
 
+export function printHtmlDirectly(html: string) {
+  const iframe = document.createElement("iframe");
+
+  // Hide it completely from view
+  iframe.style.position = "fixed";
+  iframe.style.right = "0";
+  iframe.style.bottom = "0";
+  iframe.style.width = "0";
+  iframe.style.height = "0";
+  iframe.style.border = "0";
+
+  // Add the iframe to the page body
+  document.body.appendChild(iframe);
+
+  if (!iframe.contentWindow) return;
+
+  // Write your HTML content inside the iframe
+  const doc = iframe.contentWindow.document;
+  doc.open();
+  doc.write(html);
+  doc.close();
+
+  iframe.contentWindow.focus();
+  iframe.contentWindow.print();
+
+  setTimeout(() => {
+    document.body.removeChild(iframe);
+  }, 1000);
+}
