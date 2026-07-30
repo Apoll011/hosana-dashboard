@@ -3,61 +3,61 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { 
-  Lock, 
-  Mail, 
-  ArrowRight, 
+import React, { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import {
+  Lock,
+  Mail,
+  ArrowRight,
   ArrowLeft,
-  AlertCircle, 
-  Building2, 
-  Link as LinkIcon, 
-  User, 
+  AlertCircle,
+  Building2,
+  Link as LinkIcon,
+  User,
   CheckCircle2,
   Loader2,
-  ShieldCheck
-} from 'lucide-react';
-import { Button } from '../../components/common/Button';
-import { Input } from '../../components/common/Input';
-import bg from '../../assets/images/background.webp';
-import logo from '../../assets/hosannastudio_logo.png';
+  ShieldCheck,
+} from "lucide-react";
+import { Button } from "../../components/common/Button";
+import { Input } from "../../components/common/Input";
+import bg from "../../assets/images/background.webp";
+import logo from "../../assets/hosannastudio_logo.png";
 
-import { authApi } from '../../api/auth'; 
+import { authApi } from "../../api/auth";
+import LoginLayout from "./Layout";
 
 export const RegisterTenantPage: React.FC = () => {
   const navigate = useNavigate();
 
   // Step state
   const [step, setStep] = useState(1);
-  
+
   // Form State
-  const [tenantName, setTenantName] = useState('');
-  const [tenantSlug, setTenantSlug] = useState('');
-  const [adminName, setAdminName] = useState('');
-  const [adminEmail, setAdminEmail] = useState('');
-  const [adminPassword, setAdminPassword] = useState('');
-  const [serverUrl, setServerUrl] = useState(''); 
+  const [tenantName, setTenantName] = useState("");
+  const [tenantSlug, setTenantSlug] = useState("");
+  const [adminName, setAdminName] = useState("");
+  const [adminEmail, setAdminEmail] = useState("");
+  const [adminPassword, setAdminPassword] = useState("");
   const [agreedToTerms, setAgreedToTerms] = useState(false);
 
   // Status State
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
-  const [errorMsg, setErrorMsg] = useState('');
+  const [errorMsg, setErrorMsg] = useState("");
 
   // Validation per step
-  const isStep1Valid = tenantName.trim() !== '' && tenantSlug.trim() !== '';
-  const isStep2Valid = adminName.trim() !== '' && adminEmail.trim() !== '';
-  const isStep3Valid = adminPassword.trim() !== '' && agreedToTerms;
+  const isStep1Valid = tenantName.trim() !== "" && tenantSlug.trim() !== "";
+  const isStep2Valid = adminName.trim() !== "" && adminEmail.trim() !== "";
+  const isStep3Valid = adminPassword.trim() !== "" && agreedToTerms;
 
   const handleNext = () => {
-    setErrorMsg('');
+    setErrorMsg("");
     if (step === 1 && isStep1Valid) setStep(2);
     else if (step === 2 && isStep2Valid) setStep(3);
   };
 
   const handleBack = () => {
-    setErrorMsg('');
+    setErrorMsg("");
     if (step > 1) setStep(step - 1);
   };
 
@@ -65,7 +65,7 @@ export const RegisterTenantPage: React.FC = () => {
     if (e) e.preventDefault();
     if (!isStep3Valid) return;
 
-    setErrorMsg('');
+    setErrorMsg("");
     setIsLoading(true);
 
     try {
@@ -75,7 +75,6 @@ export const RegisterTenantPage: React.FC = () => {
         adminName: adminName.trim(),
         adminEmail: adminEmail.trim(),
         adminPassword: adminPassword,
-        serverUrl: serverUrl.trim(),
       });
 
       // Show success checkmark
@@ -84,21 +83,22 @@ export const RegisterTenantPage: React.FC = () => {
 
       // Wait 2 seconds for the user to see the success animation, then redirect
       setTimeout(() => {
-        navigate('/login', {
-          state: { message: 'Organização criada! Já pode fazer login.' },
+        navigate("/login", {
+          state: { message: "Organização criada! Já pode fazer login." },
           replace: true,
         });
       }, 2000);
-
     } catch (err: any) {
-      setErrorMsg(err.message || 'Falha ao criar organização. Tente novamente.');
+      setErrorMsg(
+        err.message || "Falha ao criar organização. Tente novamente.",
+      );
       setIsLoading(false);
     }
   };
 
   // Allow pressing Enter to go to next step
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       e.preventDefault();
       if (step === 1 && isStep1Valid) handleNext();
       if (step === 2 && isStep2Valid) handleNext();
@@ -107,37 +107,7 @@ export const RegisterTenantPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center p-4 sm:p-8 md:p-16 relative overflow-hidden font-sans bg-slate-50 transition-colors duration-500">
-      {/* Background Image */}
-      <div className="absolute inset-0 z-0">
-        <img 
-          src={bg}
-          alt="Background" 
-          className="w-full h-full object-cover opacity-90"
-          referrerPolicy="no-referrer"
-        />
-        <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-[2px]" />
-      </div>
-
-      {/* Main Card */}
-      <div className="relative max-w-[440px] w-full bg-white/95 backdrop-blur-xl border border-white/20 rounded-[32px] shadow-2xl shadow-black/40 p-6 sm:p-10 transition-all duration-300 z-20 my-8">
-        
-        {/* Branding */}
-        {!isSuccess && (
-          <div className="flex flex-col items-center text-center mb-8 select-none animate-in fade-in slide-in-from-top-4 duration-500">
-            <div className="w-22 h-22 rounded-[20px] flex items-center justify-center mb-3 border shadow-inner">
-              <img src={logo} alt="Hosanna Studio" className="w-22 h-22 object-contain rounded-[20px]" />
-            </div>
-            <h1 className="font-display font-black text-2xl sm:text-3xl tracking-tight text-slate-900">
-              Criar Organização
-            </h1>
-            <p className="text-slate-500 text-sm mt-2 font-medium">
-              Configure o seu espaço em 3 passos simples
-            </p>
-          </div>
-        )}
-
-        {/* Success / Loading State Screen */}
+      <LoginLayout optionalLink="/link" optionalMsg="Já tem uma organização? Faça Login" errorMsg={errorMsg}>
         {isSuccess ? (
           <div className="py-12 flex flex-col items-center justify-center text-center animate-in zoom-in-95 duration-500">
             <div className="relative w-24 h-24 mb-6">
@@ -146,41 +116,48 @@ export const RegisterTenantPage: React.FC = () => {
                 <CheckCircle2 className="w-12 h-12 animate-in zoom-in duration-300 delay-150" />
               </div>
             </div>
-            <h2 className="text-2xl font-black text-slate-900 mb-2">Tudo Pronto!</h2>
-            <p className="text-slate-500 font-medium">A redirecionar para o login...</p>
+            <h2 className="text-2xl font-black text-slate-900 mb-2">
+              Tudo Pronto!
+            </h2>
+            <p className="text-slate-500 font-medium">
+              A redirecionar para o login...
+            </p>
           </div>
         ) : (
           <>
             {/* Progress Bar */}
             <div className="flex items-center justify-between mb-8 gap-2">
+              <h1 className="font-display font-black text-2xl sm:text-3xl tracking-tight text-slate-900">
+                Criar Organização
+              </h1>
+              <p className="text-slate-500 text-sm mt-2 mb-2 font-medium">
+                Configure o seu espaço em 3 passos simples
+              </p>
               {[1, 2, 3].map((i) => (
                 <div key={i} className="flex-1 flex flex-col gap-2">
-                  <div 
+                  <div
                     className={`h-1.5 rounded-full transition-all duration-500 ${
-                      step >= i ? 'bg-m3-primary shadow-[0_0_10px_rgba(var(--m3-primary-rgb),0.4)]' : 'bg-slate-200'
+                      step >= i
+                        ? "bg-m3-primary shadow-[0_0_10px_rgba(var(--m3-primary-rgb),0.4)]"
+                        : "bg-slate-200"
                     }`}
                   />
                 </div>
               ))}
             </div>
 
-            {/* Error Alert */}
-            {errorMsg && (
-              <div className="mb-6 p-3.5 rounded-xl border text-xs font-semibold flex items-start gap-2.5 animate-in fade-in slide-in-from-top-2 bg-rose-50 border-rose-200 text-rose-600">
-                <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
-                <span>{errorMsg}</span>
-              </div>
-            )}
-
             {/* Form Steps */}
-            <form onKeyDown={handleKeyDown} className="relative min-h-[220px]">
-              
+            <form onKeyDown={handleKeyDown} className="relative min-h-55">
               {/* STEP 1: Church Info */}
               {step === 1 && (
                 <div className="space-y-4 animate-in slide-in-from-right-4 fade-in duration-300">
                   <div className="mb-2">
-                    <h3 className="text-lg font-bold text-slate-800">Dados da Igreja</h3>
-                    <p className="text-xs text-slate-500">Como se chama a sua comunidade?</p>
+                    <h3 className="text-lg font-bold text-slate-800">
+                      Dados da Igreja
+                    </h3>
+                    <p className="text-xs text-slate-500">
+                      Como se chama a sua comunidade?
+                    </p>
                   </div>
                   <Input
                     type="text"
@@ -197,7 +174,11 @@ export const RegisterTenantPage: React.FC = () => {
                     label="URL Personalizado"
                     placeholder="Ex: hosanna-community"
                     value={tenantSlug}
-                    onChange={(e) => setTenantSlug(e.target.value.toLowerCase().replace(/\s+/g, '-'))}
+                    onChange={(e) =>
+                      setTenantSlug(
+                        e.target.value.toLowerCase().replace(/\s+/g, "-"),
+                      )
+                    }
                     icon={<LinkIcon className="w-4 h-4 opacity-40" />}
                     className="h-12 rounded-xl border-slate-200 focus:border-m3-primary text-sm bg-slate-50 focus:bg-white transition-colors"
                   />
@@ -208,8 +189,12 @@ export const RegisterTenantPage: React.FC = () => {
               {step === 2 && (
                 <div className="space-y-4 animate-in slide-in-from-right-4 fade-in duration-300">
                   <div className="mb-2">
-                    <h3 className="text-lg font-bold text-slate-800">Perfil de Administrador</h3>
-                    <p className="text-xs text-slate-500">Quem vai gerir a plataforma?</p>
+                    <h3 className="text-lg font-bold text-slate-800">
+                      Perfil de Administrador
+                    </h3>
+                    <p className="text-xs text-slate-500">
+                      Quem vai gerir a plataforma?
+                    </p>
                   </div>
                   <Input
                     type="text"
@@ -237,8 +222,12 @@ export const RegisterTenantPage: React.FC = () => {
               {step === 3 && (
                 <div className="space-y-4 animate-in slide-in-from-right-4 fade-in duration-300">
                   <div className="mb-2">
-                    <h3 className="text-lg font-bold text-slate-800">Segurança</h3>
-                    <p className="text-xs text-slate-500">Proteja a sua conta com uma senha forte.</p>
+                    <h3 className="text-lg font-bold text-slate-800">
+                      Segurança
+                    </h3>
+                    <p className="text-xs text-slate-500">
+                      Proteja a sua conta com uma senha forte.
+                    </p>
                   </div>
                   <Input
                     type="password"
@@ -250,7 +239,7 @@ export const RegisterTenantPage: React.FC = () => {
                     autoFocus
                     className="h-12 rounded-xl border-slate-200 focus:border-m3-primary text-sm bg-slate-50 focus:bg-white transition-colors"
                   />
-                  
+
                   <div className="flex items-start gap-3 mt-4 p-3 bg-slate-50 rounded-xl border border-slate-100">
                     <input
                       type="checkbox"
@@ -259,8 +248,25 @@ export const RegisterTenantPage: React.FC = () => {
                       onChange={(e) => setAgreedToTerms(e.target.checked)}
                       className="mt-0.5 w-4 h-4 rounded border-slate-300 text-m3-primary focus:ring-m3-primary cursor-pointer transition-all"
                     />
-                    <label htmlFor="terms" className="text-xs text-slate-600 leading-relaxed cursor-pointer select-none">
-                      Concordo com os <a href="#" className="font-bold text-m3-primary hover:underline">Termos de Serviço</a> e a <a href="#" className="font-bold text-m3-primary hover:underline">Política de Privacidade</a>.
+                    <label
+                      htmlFor="terms"
+                      className="text-xs text-slate-600 leading-relaxed cursor-pointer select-none"
+                    >
+                      Concordo com os{" "}
+                      <a
+                        href="#"
+                        className="font-bold text-m3-primary hover:underline"
+                      >
+                        Termos de Serviço
+                      </a>{" "}
+                      e a{" "}
+                      <a
+                        href="#"
+                        className="font-bold text-m3-primary hover:underline"
+                      >
+                        Política de Privacidade
+                      </a>
+                      .
                     </label>
                   </div>
                 </div>
@@ -280,7 +286,7 @@ export const RegisterTenantPage: React.FC = () => {
                   <ArrowLeft className="w-4 h-4" />
                 </Button>
               )}
-              
+
               {step < 3 ? (
                 <Button
                   type="button"
@@ -312,19 +318,8 @@ export const RegisterTenantPage: React.FC = () => {
                 </Button>
               )}
             </div>
-
-            {/* Footer Link */}
-            <div className="mt-8 text-center animate-in fade-in duration-700">
-              <p className="text-sm text-slate-500 font-medium">
-                Já tem uma organização?{' '}
-                <Link to="/login" className="font-bold text-m3-primary hover:text-m3-primary-dark hover:underline transition-colors">
-                  Faça Login Aqui
-                </Link>
-              </p>
-            </div>
           </>
         )}
-      </div>
-    </div>
+      </LoginLayout>
   );
 };
