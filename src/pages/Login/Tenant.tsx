@@ -125,14 +125,12 @@ export const RegisterTenantPage: React.FC = () => {
           </div>
         ) : (
           <>
-            {/* Progress Bar */}
-            <div className="flex items-center justify-between mb-8 gap-2">
-              <h1 className="font-display font-black text-2xl sm:text-3xl tracking-tight text-slate-900">
+          <div className="items-center mb-2">
+              <h2 className="font-display font-black text-2xl sm:text-3xl tracking-tight text-slate-900">
                 Criar Organização
-              </h1>
-              <p className="text-slate-500 text-sm mt-2 mb-2 font-medium">
-                Configure o seu espaço em 3 passos simples
-              </p>
+              </h2>
+            </div>
+            <div className="flex items-center justify-between mb-8 gap-2">
               {[1, 2, 3].map((i) => (
                 <div key={i} className="flex-1 flex flex-col gap-2">
                   <div
