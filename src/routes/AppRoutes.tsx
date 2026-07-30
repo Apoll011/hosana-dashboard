@@ -54,8 +54,8 @@ const ErrorFallback = ({ resetErrorBoundary }: { resetErrorBoundary: () => void 
 );
 
 const LoginPage = lazyImport(() => import('../pages/Login/LoginPage').then(m => ({ default: m.LoginPage })));
-const RegisterPage = lazyImport(() => import('../pages/Register/RegisterPage').then(m => ({ default: m.RegisterPage })));
-const RegisterTenantPage = lazyImport(() => import('../pages/Register/Tenant').then(m => ({ default: m.RegisterTenantPage })));
+const RegisterPage = lazyImport(() => import('../pages/Login/RegisterPage').then(m => ({ default: m.RegisterPage })));
+const RegisterTenantPage = lazyImport(() => import('../pages/Login/Tenant').then(m => ({ default: m.RegisterTenantPage })));
 const FoldersPage = lazyImport(() => import('../pages/Folders/FoldersPage').then(m => ({ default: m.FoldersPage })));
 const SongsPage = lazyImport(() => import('../pages/Songs/SongsPage').then(m => ({ default: m.SongsPage })));
 const SongEditorPage = lazyImport(() => import('../pages/Songs/SongEditorPage').then(m => ({ default: m.SongEditorPage })));

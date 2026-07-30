@@ -33,11 +33,7 @@ export const authApi = {
     adminName: string;
     adminEmail: string;
     adminPassword: string;
-    serverUrl?: string;
   }): Promise<any> => {
-    if (params.serverUrl) {
-      httpClient.setBaseURL(params.serverUrl);
-    }
     return httpClient.request('/tenants/register', {
       method: 'POST',
       body: JSON.stringify({

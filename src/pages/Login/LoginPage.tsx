@@ -11,6 +11,7 @@ import { Button } from '../../components/common/Button';
 import { Input } from '../../components/common/Input';
 import bg from '../../assets/images/background.webp';
 import logo from '../../assets/hosannastudio_logo.png';
+import LoginLayout from './Layout';
 
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
@@ -23,12 +24,10 @@ export const LoginPage: React.FC = () => {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
-  const [isUnapproved, setIsUnapproved] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg('');
-    setIsUnapproved(false);
     setIsLoading(true);
 
     try {
@@ -40,7 +39,6 @@ export const LoginPage: React.FC = () => {
       navigate('/songs', { replace: true });
     } catch (err: any) {
       if (err?.code === 'ACCOUNT_NOT_APPROVED' || err?.status === 403 || err?.message?.includes('pending approval')) {
-        setIsUnapproved(true);
         setErrorMsg('A sua conta está a aguardar aprovação de um administrador da Organização');
       } else {
         setErrorMsg(err?.message || 'Autenticação Falhou');
@@ -51,67 +49,7 @@ export const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center p-4 sm:p-8 md:p-16 relative overflow-hidden font-sans bg-slate-50 transition-colors duration-500">
-      {/* Background Image */}
-      <div className="absolute inset-0 z-0">
-        <img 
-          src={bg}
-          alt="Background" 
-          className="w-full h-full object-cover"
-          referrerPolicy="no-referrer"
-        />
-        {/* Subtle Overlay for contrast */}
-        <div className="absolute inset-0 bg-black/40" />
-      </div>
-
-      <div className="relative max-w-95 w-full bg-white border border-slate-200 rounded-4xl shadow-2xl shadow-black/40 p-6 sm:p-8 transition-all duration-300 z-20">
-        {/* Branding */}
-
-        <div className="flex flex-col items-center text-center mb-6 select-none">
-          <div
-            className="
-              w-22 h-22 rounded-[22px]
-              flex items-center justify-center
-              mb-4
-              border
-              transition-transform
-              hover:scale-105 hover:rotate-2
-            "
-          >
-            <img
-              src={logo}
-              alt="Hosanna Studio"
-              className="w-22 h-22 object-contain rounded-[22px]"
-            />
-          </div>
-          <h1 className="font-display font-black text-3xl tracking-tighter text-slate-900">
-            Hosanna Studio
-          </h1>
-        </div>
-
-        {/* Redirect Success Message */}
-        {redirectMessage && (
-          <div className="mb-4 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 text-xs font-semibold flex items-center gap-2 animate-in fade-in slide-in-from-top-2">
-            <CheckCircle2 className="w-4 h-4 shrink-0" />
-            <span>{redirectMessage}</span>
-          </div>
-        )}
-
-        {/* Error / Account Unapproved Alert */}
-        {errorMsg && (
-          <div
-            className={`mb-4 p-3.5 rounded-xl border text-xs font-semibold flex items-start gap-2.5 animate-in fade-in slide-in-from-top-2 ${
-              isUnapproved
-                ? 'bg-amber-500/10 border-amber-500/30 text-amber-700'
-                : 'bg-rose-500/10 border-rose-500/20 text-rose-600'
-            }`}
-          >
-            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
-            <span>{errorMsg}</span>
-          </div>
-        )}
-
-        {/* Form */}
+      <LoginLayout errorMsg={errorMsg} redirectMessage={redirectMessage} optionalLink={"/register"} optionalMsg={"Criar ou aderir a uma organização"}>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-3">
             <Input
@@ -144,18 +82,6 @@ export const LoginPage: React.FC = () => {
             <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
           </Button>
         </form>
-
-        {/* Link to Register */}
-        <div className="mt-4 text-center">
-          <Link
-            to="/register"
-            className="inline-flex items-center gap-1.5 text-xs font-bold text-m3-primary hover:underline"
-          >
-            <UserPlus className="w-3.5 h-3.5" />
-            <span>Criar ou aderir a uma organização</span>
-          </Link>
-        </div>
-      </div>
-    </div>
+      </LoginLayout>    
   );
 };
