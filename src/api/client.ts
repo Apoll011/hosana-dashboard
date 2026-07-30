@@ -69,6 +69,16 @@ class ApiClient {
   }
 
   public async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+    const req = this.request_raw(endpoint, options);
+    
+    if (req.status === 204) {
+      return {} as T;
+    }
+
+    return req.json()
+  }
+
+  public async request_raw(endpoint: string, options: RequestInit = {}): Response {
     const url = endpoint.startsWith('/') ? `${this.baseURL}${endpoint}` : `${this.baseURL}/${endpoint}`;
     
     const requestHeaders: Record<string, string> = {};
@@ -142,11 +152,7 @@ class ApiClient {
       throw new ApiError(errorMessage, response.status, errorCode, errorDetails);
     }
 
-    if (response.status === 204) {
-      return {} as T;
-    }
-
-    return response.json();
+    return response;
   }
 
   private async tryRefreshToken(): Promise<boolean> {
