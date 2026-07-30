@@ -107,7 +107,7 @@ export const RegisterTenantPage: React.FC = () => {
   };
 
   return (
-      <LoginLayout optionalLink="/link" optionalMsg="Já tem uma organização? Faça Login" errorMsg={errorMsg}>
+      <LoginLayout optionalLink="/link" optionalMsg="Já tem uma organização? Faça Login" errorMsg={errorMsg} titleMb={2}>
         {isSuccess ? (
           <div className="py-12 flex flex-col items-center justify-center text-center animate-in zoom-in-95 duration-500">
             <div className="relative w-24 h-24 mb-6">
@@ -125,7 +125,7 @@ export const RegisterTenantPage: React.FC = () => {
           </div>
         ) : (
           <>
-          <div className="items-center mb-2">
+            <div className="text-center mb-5">
               <h2 className="font-display font-black text-2xl sm:text-3xl tracking-tight text-slate-900">
                 Criar Organização
               </h2>
