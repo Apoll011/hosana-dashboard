@@ -157,7 +157,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
                      <button
                       onClick={async (e) => {
                         e.stopPropagation();
-                        const html = await printApi.printSong(service.id);
+                        const html = await printApi.printService(service.id);
                         printHtmlDirectly(html);
                       }}
                       title="Imprimir Culto"
