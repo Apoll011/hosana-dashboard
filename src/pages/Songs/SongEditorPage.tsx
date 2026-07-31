@@ -3,18 +3,27 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { useQueryClient } from '@tanstack/react-query'; // <-- Importado o useQueryClient
-import { useSong, useSongs } from '../../hooks/useSongs';
-import { ArrowLeft, Save, Eye, EyeOff, Settings, HelpCircle } from 'lucide-react';
-import { Button } from '../../components/common/Button';
-import { Spinner } from '../../components/common/Spinner';
-import Editor from '../../components/Editor';
-import { EditorSettingsPanel } from '../../components/EditorSettingsPanel';
-import ChordProPreview from '../../components/ChordProPreview';
-import { HelpModal } from '../../components/HelpModal';
-import { parseChordPro } from '../../utils/chordproparser';
+import {
+  Button,
+  Editor,
+  EditorSettingsPanel,
+  parseChordPro,
+  Spinner,
+} from "@hosanna/shared";
+import { useQueryClient } from "@tanstack/react-query";
+import {
+  ArrowLeft,
+  Eye,
+  EyeOff,
+  HelpCircle,
+  Save,
+  Settings,
+} from "lucide-react";
+import React, { useEffect, useRef, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import ChordProPreview from "../../components/ChordProPreview";
+import { HelpModal } from "../../components/HelpModal";
+import { useSong, useSongs } from "../../hooks/useSongs";
 
 export const SongEditorPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -24,7 +33,7 @@ export const SongEditorPage: React.FC = () => {
   const { data: song, isLoading, isError, error } = useSong(id || null);
   const { updateSong, isUpdating } = useSongs();
 
-  const [content, setContent] = useState('');
+  const [content, setContent] = useState("");
   const [showPreview, setShowPreview] = useState(true);
   const [showSettings, setShowSettings] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
@@ -51,11 +60,21 @@ export const SongEditorPage: React.FC = () => {
   if (isError || !song) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center p-12 text-center">
-        <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">Cântico Não Encontrado</h2>
+        <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">
+          Cântico Não Encontrado
+        </h2>
         <p className="text-sm text-slate-500 mt-1 mb-6">
-          {error ? (error as Error).message : "O cântico solicitado não existe ou foi apagado."}
+          {error
+            ? (error as Error).message
+            : "O cântico solicitado não existe ou foi apagado."}
         </p>
-        <Button variant="primary" icon={<ArrowLeft className="w-4 h-4" />} onClick={() => { window.history.length > 2 ? navigate(-1) : navigate('/folders') }}>
+        <Button
+          variant="primary"
+          icon={<ArrowLeft className="w-4 h-4" />}
+          onClick={() => {
+            window.history.length > 2 ? navigate(-1) : navigate("/folders");
+          }}
+        >
           Voltar
         </Button>
       </div>
@@ -64,16 +83,20 @@ export const SongEditorPage: React.FC = () => {
 
   const handleSave = async (updatedContent: string) => {
     if (isSavingRef.current) return;
-    
+
     isSavingRef.current = true;
 
     try {
-      const currentSong = queryClient.getQueryData<any>(['song', song.id]) || song;
+      const currentSong =
+        queryClient.getQueryData<any>(["song", song.id]) || song;
 
       const parsed = parseChordPro(updatedContent);
       const meta = parsed.metadata;
-      
-      const updates: any = { content: updatedContent, updatedAt: currentSong.updatedAt };
+
+      const updates: any = {
+        content: updatedContent,
+        updatedAt: currentSong.updatedAt,
+      };
 
       if (meta.title) updates.title = meta.title;
       if (meta.artist) updates.artist = meta.artist;
@@ -112,7 +135,10 @@ export const SongEditorPage: React.FC = () => {
               <Settings className="w-4 h-4" />
               <span className="hidden md:inline">Definições</span>
             </button>
-            <EditorSettingsPanel isOpen={showSettings} onClose={() => setShowSettings(false)} />
+            <EditorSettingsPanel
+              isOpen={showSettings}
+              onClose={() => setShowSettings(false)}
+            />
             <button
               onClick={() => setShowHelp(true)}
               className="flex items-center gap-2 px-3 py-2 text-[10px] font-black uppercase tracking-widest rounded-xl border bg-m3-card border-m3-border text-m3-secondary hover:bg-m3-hover transition-all cursor-pointer"
@@ -128,12 +154,18 @@ export const SongEditorPage: React.FC = () => {
             onClick={() => setShowPreview(!showPreview)}
             className={`flex items-center gap-2 px-3 py-2 text-[10px] font-black uppercase tracking-widest rounded-xl border transition-all cursor-pointer ${
               showPreview
-                ? 'bg-m3-primary/10 border-m3-primary/30 text-m3-primary'
-                : 'bg-m3-card border-m3-border text-m3-secondary hover:bg-m3-hover'
+                ? "bg-m3-primary/10 border-m3-primary/30 text-m3-primary"
+                : "bg-m3-card border-m3-border text-m3-secondary hover:bg-m3-hover"
             }`}
           >
-            {showPreview ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-            <span className="hidden md:inline">{showPreview ? 'Ocultar Prévia' : 'Mostrar Prévia'}</span>
+            {showPreview ? (
+              <EyeOff className="w-4 h-4" />
+            ) : (
+              <Eye className="w-4 h-4" />
+            )}
+            <span className="hidden md:inline">
+              {showPreview ? "Ocultar Prévia" : "Mostrar Prévia"}
+            </span>
           </button>
 
           <Button
@@ -150,7 +182,9 @@ export const SongEditorPage: React.FC = () => {
       </div>
 
       <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
-        <div className={`${showPreview ? 'h-1/2 md:h-full md:w-1/2' : 'h-full w-full'} flex flex-col transition-all duration-300 relative`}>
+        <div
+          className={`${showPreview ? "h-1/2 md:h-full md:w-1/2" : "h-full w-full"} flex flex-col transition-all duration-300 relative`}
+        >
           <Editor
             value={content}
             onChange={(newContent) => {

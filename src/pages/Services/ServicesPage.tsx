@@ -3,30 +3,29 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { printHtmlDirectly } from "@/src/utils";
+import {
+  Badge,
+  Button,
+  ConfirmDialog,
+  EmptyState,
+  Modal,
+  printApi,
+  Service,
+  Spinner,
+} from "@hosanna/shared";
+import {
+  ArrowRight,
+  Calendar,
+  Clock,
+  Plus,
+  Printer,
+  Trash2,
+} from "lucide-react";
 import React, { useState } from "react";
 import { useNavigate, useOutletContext } from "react-router-dom";
-import { useServices } from "../../hooks/useServices";
-import { Service } from "../../types";
-import {
-  Calendar,
-  Plus,
-  Clock,
-  Music,
-  Edit2,
-  Trash2,
-  ArrowRight,
-  CheckCircle2,
-  Printer,
-} from "lucide-react";
-import { Button } from "../../components/common/Button";
-import { Modal } from "../../components/common/Modal";
-import { ConfirmDialog } from "../../components/common/ConfirmDialog";
 import { ServiceForm } from "../../components/forms/ServiceForm";
-import { Spinner } from "../../components/common/Spinner";
-import { EmptyState } from "../../components/common/EmptyState";
-import { Badge } from "../../components/common/Badge";
-import { printHtmlDirectly } from "@/src/utils";
-import { printApi } from "@/src/api/print";
+import { useServices } from "../../hooks/useServices";
 
 interface ServicesPageProps {
   hideHeader?: boolean;
@@ -137,7 +136,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
               <div
                 key={service.id}
                 onClick={() => navigate(`/services/${service.id}`)}
-                className="bg-m3-card border border-m3-border rounded-[32px] p-8 shadow-xl shadow-black/5 hover:shadow-m3-primary/10 hover:border-m3-primary transition-all cursor-pointer flex flex-col justify-between group relative overflow-hidden"
+                className="bg-m3-card border border-m3-border rounded-4xl p-8 shadow-xl shadow-black/5 hover:shadow-m3-primary/10 hover:border-m3-primary transition-all cursor-pointer flex flex-col justify-between group relative overflow-hidden"
               >
                 {/* Decorative accent */}
                 <div className="absolute top-0 left-0 w-2 h-full bg-m3-primary opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -154,29 +153,28 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
                     </Badge>
 
                     <>
-                     <button
-                      onClick={async (e) => {
-                        e.stopPropagation();
-                        const html = await printApi.printService(service.id);
-                        printHtmlDirectly(html);
-                      }}
-                      title="Imprimir Culto"
-                      className="p-2 text-m3-secondary hover:text-blue-500 hover:bg-cyan-500/10 rounded-xl cursor-pointer transition-all opacity-0 group-hover:opacity-100"
-                    >
-                      <Printer className="w-4.5 h-4.5" />
-                    </button>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setDeleteTarget(service);
-                      }}
-                      title="Apagar Culto"
-                      className="p-2 text-m3-secondary hover:text-rose-500 hover:bg-rose-500/10 rounded-xl cursor-pointer transition-all opacity-0 group-hover:opacity-100"
-                    >
-                      <Trash2 className="w-4.5 h-4.5" />
-                    </button>
+                      <button
+                        onClick={async (e) => {
+                          e.stopPropagation();
+                          const html = await printApi.printService(service.id);
+                          printHtmlDirectly(html);
+                        }}
+                        title="Imprimir Culto"
+                        className="p-2 text-m3-secondary hover:text-blue-500 hover:bg-cyan-500/10 rounded-xl cursor-pointer transition-all opacity-0 group-hover:opacity-100"
+                      >
+                        <Printer className="w-4.5 h-4.5" />
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setDeleteTarget(service);
+                        }}
+                        title="Apagar Culto"
+                        className="p-2 text-m3-secondary hover:text-rose-500 hover:bg-rose-500/10 rounded-xl cursor-pointer transition-all opacity-0 group-hover:opacity-100"
+                      >
+                        <Trash2 className="w-4.5 h-4.5" />
+                      </button>
                     </>
-                   
                   </div>
 
                   <h3 className="text-xl font-black text-m3-text group-hover:text-m3-primary transition-colors leading-tight">
@@ -188,16 +186,6 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
                       "{service.notes}"
                     </p>
                   )}
-
-                  <div className="pt-5 border-t border-m3-border/30 flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center border border-emerald-500/20">
-                      <Music className="w-4 h-4" />
-                    </div>
-                    <span className="text-[11px] font-black uppercase tracking-widest text-m3-secondary">
-                      {service.songs ? service.songs.length : 0} Cânticos
-                      agendados
-                    </span>
-                  </div>
                 </div>
 
                 <div className="mt-4 pt-5 flex items-center justify-between text-[11px] font-black uppercase tracking-[0.2em] text-m3-primary">

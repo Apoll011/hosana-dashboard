@@ -3,17 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { authApi, Button, Input } from "@hosanna/shared";
+import { ArrowRight, Building, Lock, Mail, User } from "lucide-react";
 import React, { useState } from "react";
-import { authApi } from "../../api/auth";
-import {
-  Lock,
-  Mail,
-  User,
-  Building,
-  ArrowRight,
-} from "lucide-react";
-import { Button } from "../../components/common/Button";
-import { Input } from "../../components/common/Input";
 import LoginLayout from "./Layout";
 
 export const RegisterPage: React.FC = () => {

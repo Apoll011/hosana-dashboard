@@ -3,11 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect, useMemo } from 'react';
-import { Folder } from '../../types';
-import { Modal } from '../common/Modal';
-import { Button } from '../common/Button';
-import { Folder as FolderIcon, HardDrive, ChevronRight, ChevronDown } from 'lucide-react';
+import { Button, Folder, Modal } from "@hosanna/shared";
+import {
+  ChevronDown,
+  ChevronRight,
+  Folder as FolderIcon,
+  HardDrive,
+} from "lucide-react";
+import React, { useEffect, useMemo, useState } from "react";
 
 interface FolderTreeNode {
   folder: Folder;
@@ -45,7 +48,14 @@ const MoveFolderTreeItem: React.FC<{
   disabledFolderIds: Set<string>;
   expandedFolderIds: Set<string>;
   toggleExpand: (id: string) => void;
-}> = ({ node, selectedFolderId, onSelect, disabledFolderIds, expandedFolderIds, toggleExpand }) => {
+}> = ({
+  node,
+  selectedFolderId,
+  onSelect,
+  disabledFolderIds,
+  expandedFolderIds,
+  toggleExpand,
+}) => {
   const isSelected = selectedFolderId === node.folder.id;
   const isDisabled = disabledFolderIds.has(node.folder.id);
   const hasChildren = node.children.length > 0;
@@ -57,10 +67,10 @@ const MoveFolderTreeItem: React.FC<{
         style={{ paddingLeft: `${12 + node.level * 16}px` }}
         className={`flex items-center gap-2.5 p-2.5 border rounded-xl transition-colors ${
           isDisabled
-            ? 'opacity-40 bg-slate-100 dark:bg-slate-800/40 cursor-not-allowed border-dashed border-slate-200 dark:border-slate-800'
+            ? "opacity-40 bg-slate-100 dark:bg-slate-800/40 cursor-not-allowed border-dashed border-slate-200 dark:border-slate-800"
             : isSelected
-            ? 'bg-sky-50 dark:bg-sky-950/60 border-sky-300 dark:border-sky-800 cursor-pointer'
-            : 'border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer'
+              ? "bg-sky-50 dark:bg-sky-950/60 border-sky-300 dark:border-sky-800 cursor-pointer"
+              : "border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer"
         }`}
       >
         <input
@@ -82,7 +92,11 @@ const MoveFolderTreeItem: React.FC<{
             }}
             className="p-0.5 hover:bg-slate-200 dark:hover:bg-slate-700 rounded text-slate-500 transition-colors shrink-0"
           >
-            {isExpanded ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
+            {isExpanded ? (
+              <ChevronDown className="w-3.5 h-3.5" />
+            ) : (
+              <ChevronRight className="w-3.5 h-3.5" />
+            )}
           </button>
         ) : (
           <span className="w-3.5 h-3.5 shrink-0" />
@@ -91,7 +105,11 @@ const MoveFolderTreeItem: React.FC<{
         <FolderIcon className="w-4 h-4 text-amber-500 shrink-0" />
         <span className="text-xs font-bold text-slate-900 dark:text-slate-100 truncate">
           {node.folder.name}
-          {isDisabled && <span className="text-[10px] font-normal text-slate-400 ml-1.5">(Inválido)</span>}
+          {isDisabled && (
+            <span className="text-[10px] font-normal text-slate-400 ml-1.5">
+              (Inválido)
+            </span>
+          )}
         </span>
       </label>
 
@@ -134,7 +152,9 @@ export const BatchMoveModal: React.FC<BatchMoveModalProps> = ({
   onConfirm,
 }) => {
   const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null);
-  const [expandedFolderIds, setExpandedFolderIds] = useState<Set<string>>(new Set());
+  const [expandedFolderIds, setExpandedFolderIds] = useState<Set<string>>(
+    new Set(),
+  );
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -177,12 +197,13 @@ export const BatchMoveModal: React.FC<BatchMoveModalProps> = ({
     >
       <div className="flex flex-col gap-4">
         <p className="text-xs text-slate-500 dark:text-slate-400">
-          Escolha a pasta de destino para mover{' '}
+          Escolha a pasta de destino para mover{" "}
           <strong className="text-slate-900 dark:text-slate-100">
             {selectedFoldersCount > 0 && `${selectedFoldersCount} pasta(s)`}
-            {selectedFoldersCount > 0 && selectedSongsCount > 0 && ' e '}
+            {selectedFoldersCount > 0 && selectedSongsCount > 0 && " e "}
             {selectedSongsCount > 0 && `${selectedSongsCount} cântico(s)`}
-          </strong>:
+          </strong>
+          :
         </p>
 
         <div className="flex flex-col gap-2 max-h-72 overflow-y-auto pr-1">
@@ -220,7 +241,11 @@ export const BatchMoveModal: React.FC<BatchMoveModalProps> = ({
           <Button variant="ghost" onClick={onClose} disabled={isLoading}>
             Cancelar
           </Button>
-          <Button variant="primary" isLoading={isLoading} onClick={handleConfirm}>
+          <Button
+            variant="primary"
+            isLoading={isLoading}
+            onClick={handleConfirm}
+          >
             Mover {totalItems} Item(ns)
           </Button>
         </div>
