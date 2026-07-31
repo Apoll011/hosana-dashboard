@@ -20,7 +20,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { Button, Input, Spinner } from "@hosanna/shared";
+import { Button, Input, ServiceElement, Song, Spinner } from "@hosanna/shared";
 import {
   ArrowLeft,
   BookOpen,
@@ -42,7 +42,6 @@ import React, { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useService, useServices } from "../../hooks/useServices";
 import { useSongs } from "../../hooks/useSongs";
-import { ServiceElement, Song } from "../../types";
 
 const gold = "#0284c7";
 const goldSoft = "#e0f2fe";

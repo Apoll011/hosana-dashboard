@@ -3,28 +3,28 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { servicesApi } from '../api/services';
-import { Service } from '../types';
-import { useSync } from '../contexts/SyncContext';
+import { Service } from "@hosanna/shared";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { servicesApi } from "../api/services";
+import { useSync } from "../contexts/SyncContext";
 
 export function useServices() {
   const { showToast } = useSync();
   const queryClient = useQueryClient();
 
   const servicesQuery = useQuery({
-    queryKey: ['services'],
+    queryKey: ["services"],
     queryFn: () => servicesApi.getServices(),
   });
 
   const createServiceMutation = useMutation({
     mutationFn: (data: Partial<Service>) => servicesApi.createService(data),
     onSuccess: (newService) => {
-      queryClient.invalidateQueries({ queryKey: ['services'] });
-      showToast(`Service "${newService.name}" created`, 'success');
+      queryClient.invalidateQueries({ queryKey: ["services"] });
+      showToast(`Service "${newService.name}" created`, "success");
     },
     onError: (err: any) => {
-      showToast(err.message || 'Failed to create service', 'error');
+      showToast(err.message || "Failed to create service", "error");
     },
   });
 
@@ -32,9 +32,9 @@ export function useServices() {
     mutationFn: ({ id, data }: { id: string; data: Partial<Service> }) =>
       servicesApi.updateService(id, data),
     onMutate: async ({ id, data }) => {
-      await queryClient.cancelQueries({ queryKey: ['service', id] });
-      const previousService = queryClient.getQueryData(['service', id]);
-      queryClient.setQueryData(['service', id], (old: any) => ({
+      await queryClient.cancelQueries({ queryKey: ["service", id] });
+      const previousService = queryClient.getQueryData(["service", id]);
+      queryClient.setQueryData(["service", id], (old: any) => ({
         ...old,
         ...data,
       }));
@@ -42,34 +42,42 @@ export function useServices() {
     },
     onError: (err: any, variables, context) => {
       if (context?.previousService) {
-        queryClient.setQueryData(['service', variables.id], context.previousService);
+        queryClient.setQueryData(
+          ["service", variables.id],
+          context.previousService,
+        );
       }
-      showToast(err.message || 'Failed to update service', 'error');
+      showToast(err.message || "Failed to update service", "error");
     },
     onSettled: (data, error, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['service', variables.id] });
-      queryClient.invalidateQueries({ queryKey: ['services'] });
+      queryClient.invalidateQueries({ queryKey: ["service", variables.id] });
+      queryClient.invalidateQueries({ queryKey: ["services"] });
     },
   });
 
   const deleteServiceMutation = useMutation({
     mutationFn: (id: string) => servicesApi.deleteService(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['services'] });
-      showToast('Service deleted', 'info');
+      queryClient.invalidateQueries({ queryKey: ["services"] });
+      showToast("Service deleted", "info");
     },
     onError: (err: any) => {
-      showToast(err.message || 'Failed to delete service', 'error');
+      showToast(err.message || "Failed to delete service", "error");
     },
   });
 
   const updateElementsMutation = useMutation({
-    mutationFn: ({ serviceId, data }: { serviceId: string; data: { elements: any[]; updatedAt: string } }) =>
-      servicesApi.updateServiceElements(serviceId, data),
+    mutationFn: ({
+      serviceId,
+      data,
+    }: {
+      serviceId: string;
+      data: { elements: any[]; updatedAt: string };
+    }) => servicesApi.updateServiceElements(serviceId, data),
     onMutate: async ({ serviceId, data }) => {
-      await queryClient.cancelQueries({ queryKey: ['service', serviceId] });
-      const previousService = queryClient.getQueryData(['service', serviceId]);
-      queryClient.setQueryData(['service', serviceId], (old: any) => ({
+      await queryClient.cancelQueries({ queryKey: ["service", serviceId] });
+      const previousService = queryClient.getQueryData(["service", serviceId]);
+      queryClient.setQueryData(["service", serviceId], (old: any) => ({
         ...old,
         elements: data.elements,
       }));
@@ -77,13 +85,18 @@ export function useServices() {
     },
     onError: (err: any, variables, context) => {
       if (context?.previousService) {
-        queryClient.setQueryData(['service', variables.serviceId], context.previousService);
+        queryClient.setQueryData(
+          ["service", variables.serviceId],
+          context.previousService,
+        );
       }
-      showToast(err.message || 'Failed to update elements', 'error');
+      showToast(err.message || "Failed to update elements", "error");
     },
     onSettled: (data, error, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['service', variables.serviceId] });
-      queryClient.invalidateQueries({ queryKey: ['services'] });
+      queryClient.invalidateQueries({
+        queryKey: ["service", variables.serviceId],
+      });
+      queryClient.invalidateQueries({ queryKey: ["services"] });
     },
   });
 
@@ -101,7 +114,7 @@ export function useServices() {
 
 export function useService(id: string | null) {
   return useQuery({
-    queryKey: ['service', id],
+    queryKey: ["service", id],
     queryFn: () => (id ? servicesApi.getServiceById(id) : null),
     enabled: !!id,
   });
