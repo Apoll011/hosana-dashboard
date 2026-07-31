@@ -40,11 +40,11 @@ import {
   Users,
 } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
-import { useAuth } from "../../contexts/AuthContext";
-import { useSync } from "../../contexts/SyncContext";
-import { useTheme } from "../../contexts/ThemeContext";
-import { useAdmins } from "../../hooks/useAdmins";
-import { useSettings } from "../../hooks/useSettings";
+import { useAuth } from "../contexts/AuthContext";
+import { useSync } from "../contexts/SyncContext";
+import { useTheme } from "../contexts/ThemeContext";
+import { useAdmins } from "../hooks/useAdmins";
+import { useSettings } from "../hooks/useSettings";
 
 interface SettingsPageProps {
   hideHeader?: boolean;
@@ -278,7 +278,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ hideHeader }) => {
       className={`flex-1 flex flex-col w-full mx-auto space-y-6 overflow-y-auto h-full ${hideHeader ? "p-6" : "p-4 sm:p-6 max-w-5xl"}`}
     >
       {/* Tab Navigation */}
-      <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-2 overflow-x-auto [&>*]:shrink-0">
+      <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-2 overflow-x-auto *:shrink-0">
         <button
           type="button"
           onClick={() => setActiveTab("general")}
@@ -608,7 +608,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ hideHeader }) => {
                             {/* Name & Email */}
                             <td className="py-4 px-4 sm:px-6">
                               <div className="flex items-center gap-3">
-                                <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-[#0284c7] to-sky-400 flex items-center justify-center text-white font-extrabold text-xs shadow-sm shrink-0">
+                                <div className="w-9 h-9 rounded-full bg-linear-to-tr from-[#0284c7] to-sky-400 flex items-center justify-center text-white font-extrabold text-xs shadow-sm shrink-0">
                                   {admin.name.charAt(0).toUpperCase()}
                                 </div>
                                 <div className="flex flex-col min-w-0">

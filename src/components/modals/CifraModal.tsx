@@ -1,4 +1,5 @@
-import { CifraResult, getCifra, parseCifraClubInput } from "@/src/api/cifra";
+import { CifraResult } from "@/src/types";
+import { getCifra, parseCifraClubInput } from "@/src/utils";
 import {
   Button,
   ConversionResult,
