@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { printApi } from "@/src/api/print";
 import { printHtmlDirectly } from "@/src/utils";
 import {
   Badge,
@@ -11,6 +10,7 @@ import {
   ConfirmDialog,
   EmptyState,
   Modal,
+  printApi,
   Service,
   Spinner,
 } from "@hosanna/shared";

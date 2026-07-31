@@ -221,7 +221,7 @@ const SongGridCard: React.FC<SongGridCardProps> = ({
     onContextMenu={onContextMenu}
     onDragStart={onDragStart}
     onDragEnd={onDragEnd}
-    className={`p-5 rounded-[24px] border transition-all cursor-pointer flex flex-col items-center text-center group relative shadow-sm hover:shadow-xl active:scale-95 select-none ${
+    className={`p-5 rounded-3xl border transition-all cursor-pointer flex flex-col items-center text-center group relative shadow-sm hover:shadow-xl active:scale-95 select-none ${
       isSelected
         ? "border-m3-primary bg-m3-primary/10 ring-4 ring-m3-primary/10 shadow-lg"
         : "border-m3-border/50 bg-m3-card hover:bg-m3-hover hover:border-m3-primary/40"
@@ -302,7 +302,7 @@ const FolderTableRow: React.FC<FolderTableRowProps> = ({
       onDrop={onDrop}
       className={`cursor-pointer transition-all group select-none ${
         isDropTarget && !isDropDisabled
-          ? "bg-emerald-50 dark:bg-emerald-950/30 outline outline-2 outline-dashed outline-emerald-400 -outline-offset-2"
+          ? "bg-emerald-50 dark:bg-emerald-950/30 outline outline-dashed outline-emerald-400 -outline-offset-2"
           : isSelected
             ? "bg-m3-primary/10 text-m3-primary"
             : "hover:bg-m3-hover/50 text-m3-text"
@@ -446,7 +446,7 @@ export const FoldersPage: React.FC = () => {
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
-      className={`flex-1 p-6 overflow-y-auto bg-white dark:bg-slate-900 relative transition-all select-none min-h-[300px] h-full ${
+      className={`flex-1 p-6 overflow-y-auto bg-white dark:bg-slate-900 relative transition-all select-none min-h-75 h-full ${
         isDraggingOver
           ? "ring-4 ring-inset ring-[#0284c7] bg-sky-50/50 dark:bg-sky-950/30"
           : ""

@@ -3,9 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Song } from "@hosanna/shared";
+import { GetSongsParams, Song, songsApi } from "@hosanna/shared";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { GetSongsParams, songsApi } from "../api/songs";
 import { useSync } from "../contexts/SyncContext";
 
 function useSongMutations() {

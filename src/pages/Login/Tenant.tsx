@@ -18,7 +18,7 @@ import {
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { authApi } from "../../api/auth";
+import { authApi } from "@hosanna/shared";
 import LoginLayout from "./Layout";
 
 export const RegisterTenantPage: React.FC = () => {
