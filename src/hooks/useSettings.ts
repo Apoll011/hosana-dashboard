@@ -3,9 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ServerSettings } from "@hosanna/shared";
+import { ServerSettings, settingsApi } from "@hosanna/shared";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { settingsApi } from "../api/settings";
 import { useSync } from "../contexts/SyncContext";
 
 export function useSettings() {

@@ -3,27 +3,28 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { musiciansApi, CreateMusicianTokenParams } from '../api/musicians';
-import { useSync } from '../contexts/SyncContext';
+import { CreateMusicianTokenParams, musiciansApi } from "@hosanna/shared";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useSync } from "../contexts/SyncContext";
 
 export function useMusicians() {
   const { showToast } = useSync();
   const queryClient = useQueryClient();
 
   const tokensQuery = useQuery({
-    queryKey: ['musicianTokens'],
+    queryKey: ["musicianTokens"],
     queryFn: () => musiciansApi.getTokens(),
   });
 
   const createTokenMutation = useMutation({
-    mutationFn: (params: CreateMusicianTokenParams) => musiciansApi.createToken(params),
+    mutationFn: (params: CreateMusicianTokenParams) =>
+      musiciansApi.createToken(params),
     onSuccess: (newToken) => {
-      queryClient.invalidateQueries({ queryKey: ['musicianTokens'] });
-      showToast(`Musician token "${newToken.name}" generated!`, 'success');
+      queryClient.invalidateQueries({ queryKey: ["musicianTokens"] });
+      showToast(`Musician token "${newToken.name}" generated!`, "success");
     },
     onError: (err: any) => {
-      showToast(err.message || 'Failed to generate token', 'error');
+      showToast(err.message || "Failed to generate token", "error");
     },
   });
 
@@ -31,11 +32,11 @@ export function useMusicians() {
     mutationFn: ({ id, updatedAt }: { id: string; updatedAt: string }) =>
       musiciansApi.revokeToken(id, updatedAt),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['musicianTokens'] });
-      showToast('Musician token revoked', 'info');
+      queryClient.invalidateQueries({ queryKey: ["musicianTokens"] });
+      showToast("Musician token revoked", "info");
     },
     onError: (err: any) => {
-      showToast(err.message || 'Failed to revoke token', 'error');
+      showToast(err.message || "Failed to revoke token", "error");
     },
   });
 
@@ -43,19 +44,21 @@ export function useMusicians() {
     mutationFn: ({ id, updatedAt }: { id: string; updatedAt: string }) =>
       musiciansApi.regenerateToken(id, updatedAt),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['musicianTokens'] });
-      showToast('Musician token regenerated', 'success');
+      queryClient.invalidateQueries({ queryKey: ["musicianTokens"] });
+      showToast("Musician token regenerated", "success");
     },
-    onError: (err: any) => showToast(err.message || 'Failed to regenerate token', 'error'),
+    onError: (err: any) =>
+      showToast(err.message || "Failed to regenerate token", "error"),
   });
 
   const deleteTokenPermanentlyMutation = useMutation({
     mutationFn: (id: string) => musiciansApi.deleteTokenPermanently(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['musicianTokens'] });
-      showToast('Musician token deleted permanently', 'info');
+      queryClient.invalidateQueries({ queryKey: ["musicianTokens"] });
+      showToast("Musician token deleted permanently", "info");
     },
-    onError: (err: any) => showToast(err.message || 'Failed to delete token', 'error'),
+    onError: (err: any) =>
+      showToast(err.message || "Failed to delete token", "error"),
   });
 
   return {
