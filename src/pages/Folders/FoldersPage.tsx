@@ -325,7 +325,7 @@ const FolderTableRow: React.FC<FolderTableRowProps> = ({
         {folder.songCount || 0} Musicas
       </td>
       <td className="py-4 px-6 text-right">
-        <Button size="xs" variant="ghost">
+        <Button size="lg" variant="ghost">
           Abrir
         </Button>
       </td>
@@ -388,7 +388,7 @@ const SongTableRow: React.FC<SongTableRowProps> = ({
     )}
     <td className="py-4 px-6 text-m3-secondary">{song.artist || "—"}</td>
     <td className="py-4 px-6 text-right">
-      <Button size="xs" variant="ghost">
+      <Button size="lg" variant="ghost">
         Editar
       </Button>
     </td>
