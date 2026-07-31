@@ -3,11 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect, useMemo } from 'react';
-import { Folder } from '../../types';
-import { Modal } from '../common/Modal';
-import { Button } from '../common/Button';
-import { Folder as FolderIcon, HardDrive, ChevronRight, ChevronDown } from 'lucide-react';
+import { Button, Folder, Modal } from "@hosanna/shared";
+import {
+  ChevronDown,
+  ChevronRight,
+  Folder as FolderIcon,
+  HardDrive,
+} from "lucide-react";
+import React, { useEffect, useMemo, useState } from "react";
 
 interface FolderTreeNode {
   folder: Folder;
@@ -44,7 +47,13 @@ const MoveFolderTreeItem: React.FC<{
   onSelect: (id: string) => void;
   expandedFolderIds: Set<string>;
   toggleExpand: (id: string) => void;
-}> = ({ node, selectedFolderId, onSelect, expandedFolderIds, toggleExpand }) => {
+}> = ({
+  node,
+  selectedFolderId,
+  onSelect,
+  expandedFolderIds,
+  toggleExpand,
+}) => {
   const isSelected = selectedFolderId === node.folder.id;
   const hasChildren = node.children.length > 0;
   const isExpanded = expandedFolderIds.has(node.folder.id);
@@ -55,8 +64,8 @@ const MoveFolderTreeItem: React.FC<{
         style={{ paddingLeft: `${12 + node.level * 16}px` }}
         className={`flex items-center gap-2.5 p-2.5 border rounded-xl transition-colors cursor-pointer ${
           isSelected
-            ? 'bg-sky-50 dark:bg-sky-950/60 border-sky-300 dark:border-sky-800'
-            : 'border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50'
+            ? "bg-sky-50 dark:bg-sky-950/60 border-sky-300 dark:border-sky-800"
+            : "border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50"
         }`}
       >
         <input
@@ -77,7 +86,11 @@ const MoveFolderTreeItem: React.FC<{
             }}
             className="p-0.5 hover:bg-slate-200 dark:hover:bg-slate-700 rounded text-slate-500 transition-colors shrink-0"
           >
-            {isExpanded ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
+            {isExpanded ? (
+              <ChevronDown className="w-3.5 h-3.5" />
+            ) : (
+              <ChevronRight className="w-3.5 h-3.5" />
+            )}
           </button>
         ) : (
           <span className="w-3.5 h-3.5 shrink-0" />
@@ -126,8 +139,12 @@ export const MoveSongModal: React.FC<MoveSongModalProps> = ({
   onConfirm,
   isLoading = false,
 }) => {
-  const [selectedFolderId, setSelectedFolderId] = useState<string | null>(initialFolderId || null);
-  const [expandedFolderIds, setExpandedFolderIds] = useState<Set<string>>(new Set());
+  const [selectedFolderId, setSelectedFolderId] = useState<string | null>(
+    initialFolderId || null,
+  );
+  const [expandedFolderIds, setExpandedFolderIds] = useState<Set<string>>(
+    new Set(),
+  );
 
   useEffect(() => {
     if (isOpen) {
@@ -158,12 +175,18 @@ export const MoveSongModal: React.FC<MoveSongModalProps> = ({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={songTitle ? `Mover Cântico "${songTitle}"` : 'Mover Cântico para Pasta'}
+      title={
+        songTitle ? `Mover Cântico "${songTitle}"` : "Mover Cântico para Pasta"
+      }
     >
       <div className="flex flex-col gap-4">
         {songTitle && (
           <p className="text-xs text-slate-500 dark:text-slate-400">
-            Escolha a pasta de destino para <strong className="text-slate-900 dark:text-slate-100">{songTitle}</strong>:
+            Escolha a pasta de destino para{" "}
+            <strong className="text-slate-900 dark:text-slate-100">
+              {songTitle}
+            </strong>
+            :
           </p>
         )}
 
@@ -201,7 +224,11 @@ export const MoveSongModal: React.FC<MoveSongModalProps> = ({
           <Button variant="ghost" onClick={onClose}>
             Cancelar
           </Button>
-          <Button variant="primary" isLoading={isLoading} onClick={handleConfirm}>
+          <Button
+            variant="primary"
+            isLoading={isLoading}
+            onClick={handleConfirm}
+          >
             Mover Cântico
           </Button>
         </div>

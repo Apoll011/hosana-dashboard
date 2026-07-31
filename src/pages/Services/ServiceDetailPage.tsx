@@ -3,41 +3,52 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { useService, useServices } from '../../hooks/useServices';
-import { useSongs } from '../../hooks/useSongs';
-import { Service, Song, ServiceElement } from '../../types';
 import {
-  Calendar, ArrowLeft, Plus, GripVertical, Trash2, Edit3, Save, Music,
-  FileText, Search, Check, MoreHorizontal, BookOpen, MessageSquare, Megaphone, HelpCircle, X
-} from 'lucide-react';
-import {
-  DndContext,
   closestCenter,
+  DndContext,
+  DragEndEvent,
   KeyboardSensor,
   PointerSensor,
   useSensor,
   useSensors,
-  DragEndEvent,
-} from '@dnd-kit/core';
+} from "@dnd-kit/core";
 import {
   arrayMove,
   SortableContext,
   sortableKeyboardCoordinates,
-  verticalListSortingStrategy,
   useSortable,
-} from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
-import { Button } from '../../components/common/Button';
-import { Input } from '../../components/common/Input';
-import { Spinner } from '../../components/common/Spinner';
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { Button, Input, Spinner } from "@hosanna/shared";
+import {
+  ArrowLeft,
+  BookOpen,
+  Check,
+  Edit3,
+  FileText,
+  GripVertical,
+  Megaphone,
+  MessageSquare,
+  MoreHorizontal,
+  Music,
+  Plus,
+  Save,
+  Search,
+  Trash2,
+  X,
+} from "lucide-react";
+import React, { useEffect, useRef, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { useService, useServices } from "../../hooks/useServices";
+import { useSongs } from "../../hooks/useSongs";
+import { ServiceElement, Song } from "../../types";
 
-const gold = '#0284c7';
-const goldSoft = '#e0f2fe';
-const cream = '#f8fafc';
-const border = '#cbd5e1';
-const navy = '#1d1b20';
+const gold = "#0284c7";
+const goldSoft = "#e0f2fe";
+const cream = "#f8fafc";
+const border = "#cbd5e1";
+const navy = "#1d1b20";
 
 interface SortableRowProps {
   id: string;
@@ -58,8 +69,14 @@ const SortableRow: React.FC<SortableRowProps> = ({
   onEdit,
   onNoteChange,
 }) => {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
-    useSortable({ id });
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -67,29 +84,59 @@ const SortableRow: React.FC<SortableRowProps> = ({
   };
 
   const [isEditingNote, setIsEditingNote] = useState(false);
-  const [localNote, setLocalNote] = useState(element.notes || '');
+  const [localNote, setLocalNote] = useState(element.notes || "");
   const [menuOpen, setMenuOpen] = useState(false);
 
-  useEffect(() => setLocalNote(element.notes || ''), [element.notes]);
+  useEffect(() => setLocalNote(element.notes || ""), [element.notes]);
 
-  const isSong = element.type === 'song';
+  const isSong = element.type === "song";
 
   const getElementBadge = (type: string) => {
     switch (type.toLowerCase()) {
-      case 'song':
-        return { label: 'Cântico', bg: goldSoft, color: gold, icon: Music };
-      case 'welcome':
-        return { label: 'Boas-vindas', bg: '#EBF5FF', color: '#1D4ED8', icon: FileText };
-      case 'scripture':
-        return { label: 'Escritura', bg: '#FDF4FF', color: '#C026D3', icon: BookOpen };
-      case 'message':
-        return { label: 'Mensagem', bg: '#FEF3C7', color: '#D97706', icon: MessageSquare };
-      case 'reading':
-        return { label: 'Leitura', bg: '#F3E8FF', color: '#7E22CE', icon: FileText };
-      case 'announcement':
-        return { label: 'Avisos', bg: '#ECFDF5', color: '#059669', icon: Megaphone };
+      case "song":
+        return { label: "Cântico", bg: goldSoft, color: gold, icon: Music };
+      case "welcome":
+        return {
+          label: "Boas-vindas",
+          bg: "#EBF5FF",
+          color: "#1D4ED8",
+          icon: FileText,
+        };
+      case "scripture":
+        return {
+          label: "Escritura",
+          bg: "#FDF4FF",
+          color: "#C026D3",
+          icon: BookOpen,
+        };
+      case "message":
+        return {
+          label: "Mensagem",
+          bg: "#FEF3C7",
+          color: "#D97706",
+          icon: MessageSquare,
+        };
+      case "reading":
+        return {
+          label: "Leitura",
+          bg: "#F3E8FF",
+          color: "#7E22CE",
+          icon: FileText,
+        };
+      case "announcement":
+        return {
+          label: "Avisos",
+          bg: "#ECFDF5",
+          color: "#059669",
+          icon: Megaphone,
+        };
       default:
-        return { label: type || 'Elemento', bg: '#F1F5F9', color: '#475569', icon: FileText };
+        return {
+          label: type || "Elemento",
+          bg: "#F1F5F9",
+          color: "#475569",
+          icon: FileText,
+        };
     }
   };
 
@@ -101,7 +148,7 @@ const SortableRow: React.FC<SortableRowProps> = ({
       ref={setNodeRef}
       style={{ ...style, borderColor: isDragging ? gold : border }}
       className={`bg-white rounded-2xl border transition-shadow ${
-        isDragging ? 'shadow-lg z-20 opacity-90' : 'shadow-none'
+        isDragging ? "shadow-lg z-20 opacity-90" : "shadow-none"
       }`}
     >
       <div className="flex items-center gap-3 px-4 py-3">
@@ -128,8 +175,15 @@ const SortableRow: React.FC<SortableRowProps> = ({
 
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <p className="text-sm font-semibold truncate" style={{ color: navy }}>
-              {isSong ? (song ? song.title : 'Cântico Desconhecido') : (element.title || 'Elemento Sem Título')}
+            <p
+              className="text-sm font-semibold truncate"
+              style={{ color: navy }}
+            >
+              {isSong
+                ? song
+                  ? song.title
+                  : "Cântico Desconhecido"
+                : element.title || "Elemento Sem Título"}
             </p>
             <span
               className="text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0"
@@ -140,12 +194,20 @@ const SortableRow: React.FC<SortableRowProps> = ({
           </div>
           {isSong ? (
             <p className="text-xs text-slate-400 truncate">
-              {song ? song.artist || '—' : '—'}
+              {song ? song.artist || "—" : "—"}
             </p>
           ) : (
             <>
-              {element.passage && <p className="text-xs text-slate-500 font-medium truncate mt-0.5">{element.passage}</p>}
-              {element.content && <p className="text-xs text-slate-500 truncate mt-0.5">{element.content}</p>}
+              {element.passage && (
+                <p className="text-xs text-slate-500 font-medium truncate mt-0.5">
+                  {element.passage}
+                </p>
+              )}
+              {element.content && (
+                <p className="text-xs text-slate-500 truncate mt-0.5">
+                  {element.content}
+                </p>
+              )}
             </>
           )}
         </div>
@@ -161,7 +223,10 @@ const SortableRow: React.FC<SortableRowProps> = ({
 
           {menuOpen && (
             <>
-              <div className="fixed inset-0 z-10" onClick={() => setMenuOpen(false)} />
+              <div
+                className="fixed inset-0 z-10"
+                onClick={() => setMenuOpen(false)}
+              />
               <div
                 className="absolute right-0 top-8 z-20 w-40 bg-white rounded-xl shadow-lg border py-1"
                 style={{ borderColor: border }}
@@ -188,7 +253,7 @@ const SortableRow: React.FC<SortableRowProps> = ({
                   className="w-full flex items-center gap-2 px-3 py-2 text-xs font-medium text-slate-600 hover:bg-slate-50 cursor-pointer"
                 >
                   <FileText className="w-3.5 h-3.5" />
-                  {element.notes ? 'Editar Notas' : 'Adicionar Notas'}
+                  {element.notes ? "Editar Notas" : "Adicionar Notas"}
                 </button>
                 <button
                   type="button"
@@ -210,14 +275,17 @@ const SortableRow: React.FC<SortableRowProps> = ({
       {(isEditingNote || element.notes) && (
         <div className="px-4 pb-3">
           {isEditingNote ? (
-            <div className="flex items-center gap-2 pt-2 border-t" style={{ borderColor: border }}>
+            <div
+              className="flex items-center gap-2 pt-2 border-t"
+              style={{ borderColor: border }}
+            >
               <input
                 type="text"
                 value={localNote}
                 onChange={(e) => setLocalNote(e.target.value)}
                 placeholder="Ex: Introdução ao piano, repetir refrão 2x..."
                 className="flex-1 text-xs rounded-lg border px-3 py-1.5 bg-white focus:outline-none focus:ring-2"
-                style={{ borderColor: border, boxShadow: 'none' }}
+                style={{ borderColor: border, boxShadow: "none" }}
                 autoFocus
               />
               <Button
@@ -234,7 +302,11 @@ const SortableRow: React.FC<SortableRowProps> = ({
           ) : (
             <div
               className="text-xs italic px-2.5 py-2 rounded-xl border"
-              style={{ backgroundColor: goldSoft, color: '#8A6A1F', borderColor: '#E9D9AE' }}
+              style={{
+                backgroundColor: goldSoft,
+                color: "#8A6A1F",
+                borderColor: "#E9D9AE",
+              }}
             >
               {element.notes}
             </div>
@@ -254,32 +326,45 @@ export const ServiceDetailPage: React.FC = () => {
   const { songsQuery } = useSongs({ limit: 200 });
 
   const [elements, setElements] = useState<ServiceElement[]>([]);
-  const [generalNotes, setGeneralNotes] = useState('');
-  const [librarySearch, setLibrarySearch] = useState('');
+  const [generalNotes, setGeneralNotes] = useState("");
+  const [librarySearch, setLibrarySearch] = useState("");
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   // Element modal states
-  const [editingElement, setEditingElement] = useState<ServiceElement | null>(null);
+  const [editingElement, setEditingElement] = useState<ServiceElement | null>(
+    null,
+  );
   const [isElementModalOpen, setIsElementModalOpen] = useState(false);
-  const [elementForm, setElementForm] = useState<{ id?: string; type: string; title: string; content: string; passage: string; notes: string }>({
-    type: 'welcome',
-    title: '',
-    content: '',
-    passage: '',
-    notes: '',
+  const [elementForm, setElementForm] = useState<{
+    id?: string;
+    type: string;
+    title: string;
+    content: string;
+    passage: string;
+    notes: string;
+  }>({
+    type: "welcome",
+    title: "",
+    content: "",
+    passage: "",
+    notes: "",
   });
 
   useEffect(() => {
     if (service) {
-      setGeneralNotes(service.notes || '');
-      const sortedElements = [...(service.elements || [])].sort((a, b) => (a.position || 0) - (b.position || 0));
+      setGeneralNotes(service.notes || "");
+      const sortedElements = [...(service.elements || [])].sort(
+        (a, b) => (a.position || 0) - (b.position || 0),
+      );
       setElements(sortedElements);
     }
   }, [service]);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
-    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
   );
 
   if (isLoading) {
@@ -296,7 +381,11 @@ export const ServiceDetailPage: React.FC = () => {
         <h2 className="text-lg font-bold" style={{ color: navy }}>
           Plano de Culto Não Encontrado
         </h2>
-        <Button variant="primary" icon={<ArrowLeft className="w-4 h-4" />} onClick={() => navigate(-1)}>
+        <Button
+          variant="primary"
+          icon={<ArrowLeft className="w-4 h-4" />}
+          onClick={() => navigate(-1)}
+        >
           Voltar
         </Button>
       </div>
@@ -305,13 +394,13 @@ export const ServiceDetailPage: React.FC = () => {
 
   const allAvailableSongs = songsQuery.data?.songs || [];
   const addedSongIds = new Set(
-    elements.filter((e) => e.type === 'song').map((e) => e.songId)
+    elements.filter((e) => e.type === "song").map((e) => e.songId),
   );
 
   const filteredLibrarySongs = allAvailableSongs.filter(
     (s) =>
       s.title.toLowerCase().includes(librarySearch.toLowerCase()) ||
-      (s.artist || '').toLowerCase().includes(librarySearch.toLowerCase())
+      (s.artist || "").toLowerCase().includes(librarySearch.toLowerCase()),
   );
 
   const syncElements = async (newElements: ServiceElement[]) => {
@@ -339,7 +428,9 @@ export const ServiceDetailPage: React.FC = () => {
   };
 
   const handleNoteChange = async (elementId: string, note: string) => {
-    const nextElements = elements.map(e => e.id === elementId ? { ...e, notes: note } : e);
+    const nextElements = elements.map((e) =>
+      e.id === elementId ? { ...e, notes: note } : e,
+    );
     await syncElements(nextElements);
   };
 
@@ -353,29 +444,29 @@ export const ServiceDetailPage: React.FC = () => {
   const handleAddSongToService = async (songId: string) => {
     const newElem: ServiceElement = {
       id: crypto.randomUUID(),
-      type: 'song',
-      title: 'Cântico',
+      type: "song",
+      title: "Cântico",
       songId: songId,
       position: elements.length,
     };
     await syncElements([...elements, newElem]);
   };
 
-  const openAddElementModal = (presetType: string = 'welcome') => {
+  const openAddElementModal = (presetType: string = "welcome") => {
     const titles: Record<string, string> = {
-      welcome: 'Boas-vindas & Oração Inicial',
-      scripture: 'Leitura Bíblica',
-      message: 'Mensagem / Sermão',
-      reading: 'Leitura Responsiva',
-      announcement: 'Avisos da Igreja',
-      custom: 'Novo Elemento',
+      welcome: "Boas-vindas & Oração Inicial",
+      scripture: "Leitura Bíblica",
+      message: "Mensagem / Sermão",
+      reading: "Leitura Responsiva",
+      announcement: "Avisos da Igreja",
+      custom: "Novo Elemento",
     };
     setElementForm({
       type: presetType,
-      title: titles[presetType] || 'Novo Elemento',
-      content: '',
-      passage: '',
-      notes: '',
+      title: titles[presetType] || "Novo Elemento",
+      content: "",
+      passage: "",
+      notes: "",
     });
     setEditingElement(null);
     setIsElementModalOpen(true);
@@ -387,9 +478,9 @@ export const ServiceDetailPage: React.FC = () => {
       id: element.id,
       type: element.type,
       title: element.title,
-      content: element.content || '',
-      passage: element.passage || '',
-      notes: element.notes || '',
+      content: element.content || "",
+      passage: element.passage || "",
+      notes: element.notes || "",
     });
     setIsElementModalOpen(true);
   };
@@ -401,8 +492,15 @@ export const ServiceDetailPage: React.FC = () => {
     if (editingElement) {
       nextElements = nextElements.map((e) =>
         e.id === editingElement.id
-          ? { ...e, type: elementForm.type, title: elementForm.title, content: elementForm.content, passage: elementForm.passage, notes: elementForm.notes }
-          : e
+          ? {
+              ...e,
+              type: elementForm.type,
+              title: elementForm.title,
+              content: elementForm.content,
+              passage: elementForm.passage,
+              notes: elementForm.notes,
+            }
+          : e,
       );
     } else {
       const newElem: ServiceElement = {
@@ -428,23 +526,27 @@ export const ServiceDetailPage: React.FC = () => {
     >
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
         <div>
-          <h1 className="text-2xl font-extrabold tracking-tight" style={{ color: navy }}>
+          <h1
+            className="text-2xl font-extrabold tracking-tight"
+            style={{ color: navy }}
+          >
             {service.name}
           </h1>
           <p className="text-xs text-slate-400 mt-1">
             Arraste os elementos e cânticos para reordenar o culto.
           </p>
         </div>
-       
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.3fr] gap-6 h-full min-h-0">
-        
         <div
           className="bg-white rounded-3xl border shadow-sm flex flex-col h-full min-h-0"
           style={{ borderColor: border }}
         >
-          <div className="p-5 pb-4 border-b shrink-0" style={{ borderColor: border }}>
+          <div
+            className="p-5 pb-4 border-b shrink-0"
+            style={{ borderColor: border }}
+          >
             <h2 className="text-base font-bold mb-3" style={{ color: navy }}>
               Biblioteca de Cânticos
             </h2>
@@ -457,7 +559,10 @@ export const ServiceDetailPage: React.FC = () => {
             />
           </div>
 
-          <div className="overflow-y-auto flex-1 min-h-0 divide-y" style={{ borderColor: border }}>
+          <div
+            className="overflow-y-auto flex-1 min-h-0 divide-y"
+            style={{ borderColor: border }}
+          >
             {filteredLibrarySongs.length === 0 ? (
               <div className="p-6 text-center text-xs text-slate-400">
                 Nenhum cântico encontrado.
@@ -471,16 +576,21 @@ export const ServiceDetailPage: React.FC = () => {
                     className="flex items-center justify-between gap-3 px-5 py-3"
                   >
                     <div className="min-w-0">
-                      <p className="text-sm font-semibold truncate" style={{ color: navy }}>
+                      <p
+                        className="text-sm font-semibold truncate"
+                        style={{ color: navy }}
+                      >
                         {s.title}
                       </p>
-                      <p className="text-xs text-slate-400 truncate">{s.artist || '—'}</p>
+                      <p className="text-xs text-slate-400 truncate">
+                        {s.artist || "—"}
+                      </p>
                     </div>
 
                     {isAdded ? (
                       <span
-                         className="inline-flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-full shrink-0"
-                        style={{ backgroundColor: '#EAF6EE', color: '#2E8B4F' }}
+                        className="inline-flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-full shrink-0"
+                        style={{ backgroundColor: "#EAF6EE", color: "#2E8B4F" }}
                       >
                         <Check className="w-3 h-3" />
                         Na Lista
@@ -504,7 +614,6 @@ export const ServiceDetailPage: React.FC = () => {
         </div>
 
         <div className="flex flex-col gap-4 h-full min-h-0">
-          
           <div
             className="bg-white rounded-2xl border p-4 space-y-2 shrink-0"
             style={{ borderColor: border }}
@@ -517,7 +626,11 @@ export const ServiceDetailPage: React.FC = () => {
                 <FileText className="w-4 h-4" style={{ color: gold }} />
                 Notas Gerais do Culto
               </label>
-              <Button size="sm" variant="ghost" onClick={handleSaveGeneralNotes}>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={handleSaveGeneralNotes}
+              >
                 <Save className="w-3.5 h-3.5" style={{ color: gold }} />
                 Guardar
               </Button>
@@ -543,35 +656,35 @@ export const ServiceDetailPage: React.FC = () => {
               <h2 className="text-base font-bold" style={{ color: navy }}>
                 Plano do Culto
                 <span className="ml-2 text-xs font-medium text-slate-400">
-                  ({elements.length} {elements.length === 1 ? 'item' : 'itens'})
+                  ({elements.length} {elements.length === 1 ? "item" : "itens"})
                 </span>
               </h2>
 
               <div className="flex items-center gap-1">
                 <button
                   type="button"
-                  onClick={() => openAddElementModal('welcome')}
+                  onClick={() => openAddElementModal("welcome")}
                   className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 cursor-pointer transition-colors"
                 >
                   + Boas-vindas
                 </button>
                 <button
                   type="button"
-                  onClick={() => openAddElementModal('scripture')}
+                  onClick={() => openAddElementModal("scripture")}
                   className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-fuchsia-50 text-fuchsia-700 hover:bg-fuchsia-100 cursor-pointer transition-colors"
                 >
                   + Escritura
                 </button>
                 <button
                   type="button"
-                  onClick={() => openAddElementModal('message')}
+                  onClick={() => openAddElementModal("message")}
                   className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-amber-50 text-amber-700 hover:bg-amber-100 cursor-pointer transition-colors"
                 >
                   + Mensagem
                 </button>
                 <button
                   type="button"
-                  onClick={() => openAddElementModal('announcement')}
+                  onClick={() => openAddElementModal("announcement")}
                   className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 cursor-pointer transition-colors"
                 >
                   + Avisos
@@ -609,7 +722,12 @@ export const ServiceDetailPage: React.FC = () => {
                   >
                     <div className="flex flex-col gap-2.5">
                       {elements.map((element, index) => {
-                        const songObj = element.type === 'song' ? allAvailableSongs.find((s) => s.id === element.songId) : undefined;
+                        const songObj =
+                          element.type === "song"
+                            ? allAvailableSongs.find(
+                                (s) => s.id === element.songId,
+                              )
+                            : undefined;
                         return (
                           <SortableRow
                             key={element.id}
@@ -640,7 +758,7 @@ export const ServiceDetailPage: React.FC = () => {
                 </button>
                 <button
                   type="button"
-                  onClick={() => openAddElementModal('custom')}
+                  onClick={() => openAddElementModal("custom")}
                   className="flex-1 py-3 rounded-2xl border border-dashed text-xs font-semibold flex items-center justify-center gap-2 cursor-pointer transition-colors hover:bg-slate-50 text-slate-600"
                   style={{ borderColor: border }}
                 >
@@ -656,22 +774,37 @@ export const ServiceDetailPage: React.FC = () => {
       {/* Add / Edit Element Modal */}
       {isElementModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl border space-y-4" style={{ borderColor: border }}>
-            <div className="flex items-center justify-between border-b pb-3" style={{ borderColor: border }}>
+          <div
+            className="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl border space-y-4"
+            style={{ borderColor: border }}
+          >
+            <div
+              className="flex items-center justify-between border-b pb-3"
+              style={{ borderColor: border }}
+            >
               <h3 className="text-base font-bold" style={{ color: navy }}>
-                {editingElement ? 'Editar Elemento de Culto' : 'Novo Elemento de Culto'}
+                {editingElement
+                  ? "Editar Elemento de Culto"
+                  : "Novo Elemento de Culto"}
               </h3>
-              <button onClick={() => setIsElementModalOpen(false)} className="p-1 rounded-lg text-slate-400 hover:text-slate-600 cursor-pointer">
+              <button
+                onClick={() => setIsElementModalOpen(false)}
+                className="p-1 rounded-lg text-slate-400 hover:text-slate-600 cursor-pointer"
+              >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             <div className="space-y-3">
               <div>
-                <label className="text-xs font-semibold text-slate-600 block mb-1">Tipo de Elemento</label>
+                <label className="text-xs font-semibold text-slate-600 block mb-1">
+                  Tipo de Elemento
+                </label>
                 <select
                   value={elementForm.type}
-                  onChange={(e) => setElementForm({ ...elementForm, type: e.target.value })}
+                  onChange={(e) =>
+                    setElementForm({ ...elementForm, type: e.target.value })
+                  }
                   className="w-full text-xs rounded-xl border p-2.5 bg-white focus:outline-none focus:ring-2"
                   style={{ borderColor: border }}
                 >
@@ -685,24 +818,35 @@ export const ServiceDetailPage: React.FC = () => {
               </div>
 
               <div>
-                <label className="text-xs font-semibold text-slate-600 block mb-1">Título</label>
+                <label className="text-xs font-semibold text-slate-600 block mb-1">
+                  Título
+                </label>
                 <input
                   type="text"
                   value={elementForm.title}
-                  onChange={(e) => setElementForm({ ...elementForm, title: e.target.value })}
+                  onChange={(e) =>
+                    setElementForm({ ...elementForm, title: e.target.value })
+                  }
                   placeholder="Ex: Leitura de Salmos 23"
                   className="w-full text-xs rounded-xl border p-2.5 bg-white focus:outline-none focus:ring-2"
                   style={{ borderColor: border }}
                 />
               </div>
 
-              {elementForm.type === 'scripture' && (
+              {elementForm.type === "scripture" && (
                 <div>
-                  <label className="text-xs font-semibold text-slate-600 block mb-1">Passagem Bíblica</label>
+                  <label className="text-xs font-semibold text-slate-600 block mb-1">
+                    Passagem Bíblica
+                  </label>
                   <input
                     type="text"
                     value={elementForm.passage}
-                    onChange={(e) => setElementForm({ ...elementForm, passage: e.target.value })}
+                    onChange={(e) =>
+                      setElementForm({
+                        ...elementForm,
+                        passage: e.target.value,
+                      })
+                    }
                     placeholder="Ex: Salmos 23:1-6"
                     className="w-full text-xs rounded-xl border p-2.5 bg-white focus:outline-none focus:ring-2"
                     style={{ borderColor: border }}
@@ -711,23 +855,31 @@ export const ServiceDetailPage: React.FC = () => {
               )}
 
               <div>
-                <label className="text-xs font-semibold text-slate-600 block mb-1">Detalhes / Conteúdo (Opcional)</label>
+                <label className="text-xs font-semibold text-slate-600 block mb-1">
+                  Detalhes / Conteúdo (Opcional)
+                </label>
                 <textarea
                   rows={3}
                   value={elementForm.content}
-                  onChange={(e) => setElementForm({ ...elementForm, content: e.target.value })}
+                  onChange={(e) =>
+                    setElementForm({ ...elementForm, content: e.target.value })
+                  }
                   placeholder="Ex: O Senhor é o meu pastor, nada me faltará..."
                   className="w-full text-xs rounded-xl border p-2.5 bg-white focus:outline-none focus:ring-2"
                   style={{ borderColor: border }}
                 />
               </div>
-              
+
               <div>
-                <label className="text-xs font-semibold text-slate-600 block mb-1">Notas (Opcional)</label>
+                <label className="text-xs font-semibold text-slate-600 block mb-1">
+                  Notas (Opcional)
+                </label>
                 <textarea
                   rows={2}
                   value={elementForm.notes}
-                  onChange={(e) => setElementForm({ ...elementForm, notes: e.target.value })}
+                  onChange={(e) =>
+                    setElementForm({ ...elementForm, notes: e.target.value })
+                  }
                   placeholder="Ex: Começar com música suave..."
                   className="w-full text-xs rounded-xl border p-2.5 bg-white focus:outline-none focus:ring-2"
                   style={{ borderColor: border }}
@@ -736,7 +888,11 @@ export const ServiceDetailPage: React.FC = () => {
             </div>
 
             <div className="flex justify-end gap-2 pt-2">
-              <Button size="sm" variant="ghost" onClick={() => setIsElementModalOpen(false)}>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => setIsElementModalOpen(false)}
+              >
                 Cancelar
               </Button>
               <Button size="sm" variant="primary" onClick={handleSaveElement}>
