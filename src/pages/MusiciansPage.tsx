@@ -25,9 +25,9 @@ import {
 import { QRCodeSVG } from "qrcode.react";
 import React, { useState } from "react";
 import { useOutletContext } from "react-router-dom";
-import { MusicianTokenForm } from "../../components/forms/MusicianTokenForm";
-import { useSync } from "../../contexts/SyncContext";
-import { useMusicians } from "../../hooks/useMusicians";
+import { MusicianTokenForm } from "../components/forms/MusicianTokenForm";
+import { useSync } from "../contexts/SyncContext";
+import { useMusicians } from "../hooks/useMusicians";
 
 interface MusiciansPageProps {
   hideHeader?: boolean;
