@@ -2788,11 +2788,6 @@ export const MainLayout: React.FC = () => {
           </div>
         ) : (
           <div className="flex flex-col gap-4">
-            <div className="p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-xl flex items-start gap-2.5 text-xs text-amber-800 dark:text-amber-300">
-              <AlertTriangle className="w-4 h-4 shrink-0 text-amber-500 mt-0.5" />
-              <span>Selecione como tratar os cânticos dentro desta pasta:</span>
-            </div>
-
             <div className="flex flex-col gap-2.5">
               <label className="flex items-center gap-3 p-3 border border-slate-200 dark:border-slate-800 rounded-xl cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50">
                 <div className="flex flex-col">
