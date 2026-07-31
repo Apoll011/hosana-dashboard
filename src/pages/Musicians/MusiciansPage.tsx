@@ -9,6 +9,7 @@ import {
   ConfirmDialog,
   EmptyState,
   Modal,
+  MusicianToken,
   Spinner,
 } from "@hosanna/shared";
 import {
@@ -27,7 +28,6 @@ import { useOutletContext } from "react-router-dom";
 import { MusicianTokenForm } from "../../components/forms/MusicianTokenForm";
 import { useSync } from "../../contexts/SyncContext";
 import { useMusicians } from "../../hooks/useMusicians";
-import { MusicianToken } from "../../types";
 
 interface MusiciansPageProps {
   hideHeader?: boolean;

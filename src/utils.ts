@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Song, FolderNode } from "./types";
+import { Song } from "@hosanna/shared";
+import { FolderNode } from "./types";
 
 // ---------------------------------------------------------------------------
 // Folder tree

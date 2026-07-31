@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { httpClient } from './client';
-import { Tenant, User } from '../types';
+import { Tenant, User } from "@hosanna/shared";
+import { httpClient } from "./client";
 
 export interface LoginParams {
   email: string;
@@ -19,8 +19,8 @@ export interface LoginResponse {
 
 export const authApi = {
   login: async (credentials: LoginParams): Promise<LoginResponse> => {
-    const data = await httpClient.request<LoginResponse>('/auth/login', {
-      method: 'POST',
+    const data = await httpClient.request<LoginResponse>("/auth/login", {
+      method: "POST",
       body: JSON.stringify(credentials),
     });
     httpClient.setTokens(data.accessToken, data.refreshToken);
@@ -34,8 +34,8 @@ export const authApi = {
     adminEmail: string;
     adminPassword: string;
   }): Promise<any> => {
-    return httpClient.request('/tenants/register', {
-      method: 'POST',
+    return httpClient.request("/tenants/register", {
+      method: "POST",
       body: JSON.stringify({
         tenantName: params.tenantName,
         tenantSlug: params.tenantSlug,
@@ -47,7 +47,7 @@ export const authApi = {
   },
 
   getCurrentTenant: async (): Promise<Tenant> => {
-      return httpClient.request<Tenant>('/tenants/me');
+    return httpClient.request<Tenant>("/tenants/me");
   },
 
   registerUser: async (params: {
@@ -56,8 +56,8 @@ export const authApi = {
     email: string;
     password: string;
   }): Promise<{ message: string; isApproved: boolean; user: User }> => {
-    return httpClient.request('/auth/register', {
-      method: 'POST',
+    return httpClient.request("/auth/register", {
+      method: "POST",
       body: JSON.stringify({
         tenantSlug: params.tenantSlug,
         name: params.name,
@@ -68,12 +68,12 @@ export const authApi = {
   },
 
   getCurrentUser: async (): Promise<{ user: User }> => {
-    return httpClient.request<{ user: User }>('/auth/me');
+    return httpClient.request<{ user: User }>("/auth/me");
   },
 
   logout: async (): Promise<void> => {
     try {
-      await httpClient.request('/auth/logout', { method: 'POST' });
+      await httpClient.request("/auth/logout", { method: "POST" });
     } catch {
       // Ignore network errors on logout
     } finally {
