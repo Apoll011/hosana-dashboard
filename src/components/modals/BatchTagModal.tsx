@@ -181,7 +181,7 @@ export const BatchTagModal: React.FC<BatchTagModalProps> = ({
                       : "bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-[#0284c7]"
                   }`}
                 >
-                  {isSelected && <Check className="w-3 h-3 stroke-[3]" />}
+                  {isSelected && <Check className="w-3 h-3 stroke-3" />}
                   <span>{cat}</span>
                 </button>
               );

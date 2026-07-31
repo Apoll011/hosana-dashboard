@@ -70,7 +70,7 @@ const RegisterTenantPage = lazyImport(() =>
   })),
 );
 const FoldersPage = lazyImport(() =>
-  import("../pages/Folders/FoldersPage").then((m) => ({
+  import("../pages/FoldersPage").then((m) => ({
     default: m.FoldersPage,
   })),
 );
@@ -93,12 +93,12 @@ const ServiceDetailPage = lazyImport(() =>
   })),
 );
 const MusiciansPage = lazyImport(() =>
-  import("../pages/Musicians/MusiciansPage").then((m) => ({
+  import("../pages/MusiciansPage").then((m) => ({
     default: m.MusiciansPage,
   })),
 );
 const SettingsPage = lazyImport(() =>
-  import("../pages/Settings/SettingsPage").then((m) => ({
+  import("../pages/SettingsPage").then((m) => ({
     default: m.SettingsPage,
   })),
 );

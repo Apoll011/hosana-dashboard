@@ -17,3 +17,12 @@ export type SyncStatus =
   | "error"
   | "offline"
   | "local_only";
+
+export interface CifraResult {
+  cifraclub_url: string;
+  name?: string;
+  artist?: string;
+  youtube_url?: string;
+  cifra?: string;
+  error?: string;
+}
