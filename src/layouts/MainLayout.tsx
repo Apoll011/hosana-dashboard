@@ -49,7 +49,7 @@ import {
 } from "lucide-react";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
-import logo from "../assets/hosannastudio_logo.png";
+import logo from "../assets/images/hosannastudio_logo.png";
 import { FolderForm } from "../components/forms/FolderForm";
 import { SongForm } from "../components/forms/SongForm";
 import { BatchDeleteModal } from "../components/modals/BatchDeleteModal";

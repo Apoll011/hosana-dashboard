@@ -1,7 +1,7 @@
 import { AlertCircle, CheckCircle2 } from "lucide-react";
 import React from "react";
 import { Link } from "react-router-dom";
-import logo from "../../assets/hosannastudio_logo.png";
+import logo from "../../assets/images/hosannastudio_logo.png";
 import bg from "../../assets/images/background.webp";
 
 interface LoginLayoutProps {
