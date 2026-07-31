@@ -9,9 +9,6 @@ import {
 import React from "react";
 import { useNavigate, useOutletContext } from "react-router-dom";
 
-/* ------------------------------------------------------------------ */
-/* Domain contract: exactly what MainLayout provides via Outlet context */
-/* ------------------------------------------------------------------ */
 interface FolderExplorerContext {
   filteredSubfolders: Folder[];
   filteredFiles: Song[];
@@ -174,7 +171,7 @@ const FolderGridCard: React.FC<FolderGridCardProps> = ({
       </span>
 
       <span className="text-[10px] text-m3-secondary font-bold uppercase tracking-wider mt-0.5 opacity-70">
-        {folder.songCount || 0} Musicas
+        {(folder.songCount || 0) + (folder.folderCount || 0)} Items
       </span>
 
       {isSearchingOrFiltering && (
