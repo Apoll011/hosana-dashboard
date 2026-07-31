@@ -219,7 +219,7 @@ export const MusiciansPage: React.FC<MusiciansPageProps> = ({ hideHeader }) => {
                     <div className="w-16 h-16 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-lg flex items-center justify-center opacity-40">
                       <QrCode className="w-8 h-8 text-slate-300" />
                     </div>
-                    <p className="text-[10px] text-slate-400 max-w-[140px]">
+                    <p className="text-[10px] text-slate-400 max-w-35">
                       O código QR só é visível no momento da criação para sua
                       segurança.
                     </p>
@@ -268,7 +268,7 @@ export const MusiciansPage: React.FC<MusiciansPageProps> = ({ hideHeader }) => {
                 <img
                   src={activeQrModalToken.qrCode}
                   alt="QR Code"
-                  className="w-[220px] h-[220px]"
+                  className="w-55 h-55"
                 />
               ) : activeQrModalToken.token ? (
                 <QRCodeSVG
@@ -276,7 +276,7 @@ export const MusiciansPage: React.FC<MusiciansPageProps> = ({ hideHeader }) => {
                   size={220}
                 />
               ) : (
-                <div className="w-[220px] h-[220px] flex items-center justify-center text-slate-400 italic text-xs">
+                <div className="w-55 h-55 flex items-center justify-center text-slate-400 italic text-xs">
                   Acesso indisponível. Por favor, regenere a senha.
                 </div>
               )}
