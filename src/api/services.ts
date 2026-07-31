@@ -3,12 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { httpClient } from './client';
-import { Service } from '../types';
+import { Service } from "@hosanna/shared";
+import { httpClient } from "./client";
 
 export const servicesApi = {
   getServices: async (): Promise<Service[]> => {
-    return httpClient.request<Service[]>('/services');
+    return httpClient.request<Service[]>("/services");
   },
 
   getServiceById: async (id: string): Promise<Service> => {
@@ -16,30 +16,34 @@ export const servicesApi = {
   },
 
   createService: async (data: Partial<Service>): Promise<Service> => {
-    return httpClient.request<Service>('/services', {
-      method: 'POST',
+    return httpClient.request<Service>("/services", {
+      method: "POST",
       body: JSON.stringify(data),
     });
   },
 
-  updateService: async (id: string, data: Partial<Service>): Promise<Service> => {
+  updateService: async (
+    id: string,
+    data: Partial<Service>,
+  ): Promise<Service> => {
     return httpClient.request<Service>(`/services/${id}`, {
-      method: 'PUT',
+      method: "PUT",
       body: JSON.stringify(data),
     });
   },
 
   deleteService: async (id: string): Promise<void> => {
     return httpClient.request<void>(`/services/${id}`, {
-      method: 'DELETE',
+      method: "DELETE",
     });
   },
 
-
-
-  updateServiceElements: async (serviceId: string, data: { elements: any[]; updatedAt: string }): Promise<Service> => {
+  updateServiceElements: async (
+    serviceId: string,
+    data: { elements: any[]; updatedAt: string },
+  ): Promise<Service> => {
     return httpClient.request<Service>(`/services/${serviceId}/elements`, {
-      method: 'PUT',
+      method: "PUT",
       body: JSON.stringify(data),
     });
   },

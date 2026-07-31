@@ -11,6 +11,7 @@ import {
   Input,
   Modal,
   Pagination,
+  Song,
   Spinner,
 } from "@hosanna/shared";
 import {
@@ -31,7 +32,6 @@ import { SongForm } from "../../components/forms/SongForm";
 import { MoveSongModal } from "../../components/modals/MoveSongModal";
 import { useFolders } from "../../hooks/useFolders";
 import { useSongs } from "../../hooks/useSongs";
-import { Song } from "../../types";
 
 interface SongsPageProps {
   hideHeader?: boolean;
