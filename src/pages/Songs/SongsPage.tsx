@@ -247,7 +247,7 @@ export const SongsPage: React.FC<SongsPageProps> = ({
       {/* Search & Filters Toolbar */}
       {!actualHideHeader && (
         <div className="flex flex-wrap items-center justify-between gap-3 p-4 bg-m3-sidebar/30 border border-m3-border rounded-[28px] shadow-lg shadow-black/5 transition-all">
-          <div className="flex-1 min-w-[240px] max-w-lg">
+          <div className="flex-1 min-w-60 max-w-lg">
             <Input
               placeholder="Pesquisar cânticos..."
               value={finalSearchQuery}
@@ -311,7 +311,7 @@ export const SongsPage: React.FC<SongsPageProps> = ({
       )}
 
       {/* Main Table / List View */}
-      <div className="bg-m3-card border border-m3-border rounded-[32px] shadow-2xl shadow-black/5 overflow-hidden flex flex-col flex-1 transition-all duration-300">
+      <div className="bg-m3-card border border-m3-border rounded-4xl shadow-2xl shadow-black/5 overflow-hidden flex flex-col flex-1 transition-all duration-300">
         {songsQuery.isLoading ? (
           <div className="flex-1 flex items-center justify-center p-12">
             <Spinner label="A carregar biblioteca..." />
