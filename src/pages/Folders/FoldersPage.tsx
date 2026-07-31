@@ -1,4 +1,4 @@
-import { Button, Spinner } from "@hosanna/shared";
+import { Button, Folder, Song, Spinner } from "@hosanna/shared";
 import {
   FileText,
   Folder as FolderIcon,
@@ -8,7 +8,6 @@ import {
 } from "lucide-react";
 import React from "react";
 import { useNavigate, useOutletContext } from "react-router-dom";
-import { Folder, Song } from "../../types";
 
 /* ------------------------------------------------------------------ */
 /* Domain contract: exactly what MainLayout provides via Outlet context */

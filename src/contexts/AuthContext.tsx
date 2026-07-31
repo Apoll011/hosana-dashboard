@@ -3,10 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Tenant, User } from '../types';
-import { authApi, LoginParams } from '../api/auth';
-import { httpClient } from '../api/client';
+import { Tenant, User } from "@hosanna/shared";
+import React, { createContext, useContext, useEffect, useState } from "react";
+import { authApi, LoginParams } from "../api/auth";
+import { httpClient } from "../api/client";
 
 interface AuthContextType {
   user: User | null;
@@ -20,10 +20,14 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const [user, setUser] = useState<User | null>(null);
   const [tenant, setTenant] = useState<Tenant | null>(null);
-  const [token, setToken] = useState<string | null>(() => httpClient.getToken());
+  const [token, setToken] = useState<string | null>(() =>
+    httpClient.getToken(),
+  );
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   // Initialize auth state from local token
@@ -42,7 +46,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const t = await authApi.getCurrentTenant();
         setTenant(t);
       } catch (err) {
-        console.warn('Failed to validate initial token:', err);
+        console.warn("Failed to validate initial token:", err);
         setUser(null);
         setToken(null);
         setTenant(null);
@@ -82,7 +86,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } finally {
       setUser(null);
       setToken(null);
-      setTenant(null)
+      setTenant(null);
       setIsLoading(false);
     }
   };
@@ -107,7 +111,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };

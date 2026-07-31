@@ -3,7 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Button, Input, Modal, Spinner } from "@hosanna/shared";
+import {
+  AdminUser,
+  Button,
+  Input,
+  Modal,
+  ServerSettings,
+  Spinner,
+} from "@hosanna/shared";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   AlertTriangle,
@@ -38,7 +45,6 @@ import { useSync } from "../../contexts/SyncContext";
 import { useTheme } from "../../contexts/ThemeContext";
 import { useAdmins } from "../../hooks/useAdmins";
 import { useSettings } from "../../hooks/useSettings";
-import { AdminUser, ServerSettings } from "../../types";
 
 interface SettingsPageProps {
   hideHeader?: boolean;
