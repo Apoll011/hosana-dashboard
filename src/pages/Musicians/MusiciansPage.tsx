@@ -3,22 +3,31 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
-import { useOutletContext } from 'react-router-dom';
-import { QRCodeSVG } from 'qrcode.react';
-import { useMusicians } from '../../hooks/useMusicians';
-import { MusicianToken } from '../../types';
 import {
-  QrCode, Plus, Copy, Check, Trash2, ShieldAlert, Clock, Smartphone, Share2, Lock
-} from 'lucide-react';
-import { Button } from '../../components/common/Button';
-import { Modal } from '../../components/common/Modal';
-import { ConfirmDialog } from '../../components/common/ConfirmDialog';
-import { MusicianTokenForm } from '../../components/forms/MusicianTokenForm';
-import { Spinner } from '../../components/common/Spinner';
-import { EmptyState } from '../../components/common/EmptyState';
-import { Badge } from '../../components/common/Badge';
-import { useSync } from '../../contexts/SyncContext';
+  Badge,
+  Button,
+  ConfirmDialog,
+  EmptyState,
+  Modal,
+  Spinner,
+} from "@hosanna/shared";
+import {
+  Clock,
+  Copy,
+  Lock,
+  Plus,
+  QrCode,
+  Share2,
+  Smartphone,
+  Trash2,
+} from "lucide-react";
+import { QRCodeSVG } from "qrcode.react";
+import React, { useState } from "react";
+import { useOutletContext } from "react-router-dom";
+import { MusicianTokenForm } from "../../components/forms/MusicianTokenForm";
+import { useSync } from "../../contexts/SyncContext";
+import { useMusicians } from "../../hooks/useMusicians";
+import { MusicianToken } from "../../types";
 
 interface MusiciansPageProps {
   hideHeader?: boolean;
@@ -28,16 +37,27 @@ export const MusiciansPage: React.FC<MusiciansPageProps> = ({ hideHeader }) => {
   const { showToast } = useSync();
   const context = useOutletContext<any>() || {};
   const actualHideHeader = hideHeader ?? context.hideHeader;
-  const { tokensQuery, createToken, revokeToken, regenerateToken, deleteTokenPermanently } = useMusicians();
+  const {
+    tokensQuery,
+    createToken,
+    revokeToken,
+    regenerateToken,
+    deleteTokenPermanently,
+  } = useMusicians();
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [activeQrModalToken, setActiveQrModalToken] = useState<(MusicianToken & { token?: string; qrCode?: string }) | null>(null);
+  const [activeQrModalToken, setActiveQrModalToken] = useState<
+    (MusicianToken & { token?: string; qrCode?: string }) | null
+  >(null);
   const [revokeTarget, setRevokeTarget] = useState<MusicianToken | null>(null);
   const [copiedTokenId, setCopiedTokenId] = useState<string | null>(null);
 
   const tokens = tokensQuery.data || [];
 
-  const handleCreateTokenSubmit = async (data: { name: string; expiresAt: string }) => {
+  const handleCreateTokenSubmit = async (data: {
+    name: string;
+    expiresAt: string;
+  }) => {
     const newToken = await createToken(data);
     setIsCreateModalOpen(false);
     setActiveQrModalToken(newToken);
@@ -45,29 +65,47 @@ export const MusiciansPage: React.FC<MusiciansPageProps> = ({ hideHeader }) => {
 
   const handleRevokeConfirm = async () => {
     if (!revokeTarget) return;
-    await revokeToken({ id: revokeTarget.id, updatedAt: revokeTarget.updatedAt });
+    await revokeToken({
+      id: revokeTarget.id,
+      updatedAt: revokeTarget.updatedAt,
+    });
     setRevokeTarget(null);
   };
 
   const handleRegenerate = async (tok: MusicianToken) => {
-    const newToken = await regenerateToken({ id: tok.id, updatedAt: tok.updatedAt });
+    const newToken = await regenerateToken({
+      id: tok.id,
+      updatedAt: tok.updatedAt,
+    });
     setActiveQrModalToken(newToken);
   };
 
-  const copyShareUrl = (token: MusicianToken & { token?: string; accessUrl?: string }) => {
-    const accessUrl = token.accessUrl || `${window.location.origin}/musician-access?token=${token.token}`;
+  const copyShareUrl = (
+    token: MusicianToken & { token?: string; accessUrl?: string },
+  ) => {
+    const accessUrl =
+      token.accessUrl ||
+      `${window.location.origin}/musician-access?token=${token.token}`;
     if (!token.token && !token.accessUrl) {
-      showToast('Acesso indisponível. Por favor, regenere a senha para ver a nova ligação.', 'error');
+      showToast(
+        "Acesso indisponível. Por favor, regenere a senha para ver a nova ligação.",
+        "error",
+      );
       return;
     }
     navigator.clipboard.writeText(accessUrl);
     setCopiedTokenId(token.id);
-    showToast('Ligação de acesso para músicos copiada para a área de transferência!', 'success');
+    showToast(
+      "Ligação de acesso para músicos copiada para a área de transferência!",
+      "success",
+    );
     setTimeout(() => setCopiedTokenId(null), 2500);
   };
 
   return (
-    <div className={`flex-1 flex flex-col w-full mx-auto space-y-6 overflow-y-auto h-full ${hideHeader ? 'p-6' : 'p-4 sm:p-6 max-w-7xl'}`}>
+    <div
+      className={`flex-1 flex flex-col w-full mx-auto space-y-6 overflow-y-auto h-full ${hideHeader ? "p-6" : "p-4 sm:p-6 max-w-7xl"}`}
+    >
       {/* Header Banner */}
       {!actualHideHeader && (
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -116,7 +154,7 @@ export const MusiciansPage: React.FC<MusiciansPageProps> = ({ hideHeader }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {tokens.map((tok) => {
             const isExpired = new Date(tok.expiresAt) < new Date();
-            const isRevoked = tok.status === 'revoked';
+            const isRevoked = tok.status === "revoked";
             const isActive = !isExpired && !isRevoked;
             const accessUrl = `${window.location.origin}/musician-access?token=${tok.token}`;
 
@@ -127,8 +165,12 @@ export const MusiciansPage: React.FC<MusiciansPageProps> = ({ hideHeader }) => {
               >
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <Badge variant={isActive ? 'emerald' : 'rose'}>
-                      {isActive ? 'Senha Ativa' : isRevoked ? 'Revogada' : 'Expirada'}
+                    <Badge variant={isActive ? "emerald" : "rose"}>
+                      {isActive
+                        ? "Senha Ativa"
+                        : isRevoked
+                          ? "Revogada"
+                          : "Expirada"}
                     </Badge>
 
                     <div className="flex items-center gap-2">
@@ -141,7 +183,7 @@ export const MusiciansPage: React.FC<MusiciansPageProps> = ({ hideHeader }) => {
                           Regenerar
                         </button>
                       )}
-                      
+
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -166,19 +208,20 @@ export const MusiciansPage: React.FC<MusiciansPageProps> = ({ hideHeader }) => {
                     </div>
                     <div className="flex items-center gap-1.5 text-[10px] font-medium text-slate-500">
                       <Clock className="w-3 h-3" />
-                      <span>{new Date(tok.expiresAt).toLocaleDateString()}</span>
+                      <span>
+                        {new Date(tok.expiresAt).toLocaleDateString()}
+                      </span>
                     </div>
                   </div>
 
                   {/* QR Code Placeholder for listed tokens (since secret is not stored) */}
-                  <div
-                    className="p-4 bg-slate-50/50 dark:bg-slate-950/30 border border-slate-100 dark:border-slate-800/60 rounded-xl flex flex-col items-center justify-center gap-2 text-center"
-                  >
+                  <div className="p-4 bg-slate-50/50 dark:bg-slate-950/30 border border-slate-100 dark:border-slate-800/60 rounded-xl flex flex-col items-center justify-center gap-2 text-center">
                     <div className="w-16 h-16 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-lg flex items-center justify-center opacity-40">
                       <QrCode className="w-8 h-8 text-slate-300" />
                     </div>
                     <p className="text-[10px] text-slate-400 max-w-[140px]">
-                      O código QR só é visível no momento da criação para sua segurança.
+                      O código QR só é visível no momento da criação para sua
+                      segurança.
                     </p>
                   </div>
                 </div>
@@ -240,7 +283,8 @@ export const MusiciansPage: React.FC<MusiciansPageProps> = ({ hideHeader }) => {
             </div>
 
             <p className="text-xs text-slate-500 max-w-sm">
-              Digitalize este código QR com a câmara do telemóvel para visualizar as cifras do culto de domingo imediatamente.
+              Digitalize este código QR com a câmara do telemóvel para
+              visualizar as cifras do culto de domingo imediatamente.
             </p>
 
             <div className="w-full pt-4 border-t border-slate-100 flex items-center justify-center gap-3">
@@ -251,7 +295,10 @@ export const MusiciansPage: React.FC<MusiciansPageProps> = ({ hideHeader }) => {
               >
                 Copiar Ligação
               </Button>
-              <Button variant="ghost" onClick={() => setActiveQrModalToken(null)}>
+              <Button
+                variant="ghost"
+                onClick={() => setActiveQrModalToken(null)}
+              >
                 Fechar
               </Button>
             </div>

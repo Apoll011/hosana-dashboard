@@ -3,9 +3,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
-import { useSync } from '../../contexts/SyncContext';
-import { CheckCircle2, AlertCircle, Info, AlertTriangle, X } from 'lucide-react';
+import {
+  AlertCircle,
+  AlertTriangle,
+  CheckCircle2,
+  Info,
+  X,
+} from "lucide-react";
+import React from "react";
+import { useSync } from "../contexts/SyncContext";
 
 export const ToastContainer: React.FC = () => {
   const { toasts, removeToast } = useSync();

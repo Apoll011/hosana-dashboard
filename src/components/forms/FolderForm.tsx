@@ -3,15 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { Input } from '../common/Input';
-import { Button } from '../common/Button';
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Button, Input } from "@hosanna/shared";
+import React from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 
 const folderSchema = z.object({
-  name: z.string().min(1, 'O nome da pasta é obrigatório'),
+  name: z.string().min(1, "O nome da pasta é obrigatório"),
 });
 
 type FolderFormData = z.infer<typeof folderSchema>;
@@ -25,11 +24,11 @@ interface FolderFormProps {
 }
 
 export const FolderForm: React.FC<FolderFormProps> = ({
-  initialName = '',
+  initialName = "",
   onSubmit,
   onCancel,
   isLoading = false,
-  title = 'Criar Pasta',
+  title = "Criar Pasta",
 }) => {
   const {
     register,
@@ -53,11 +52,18 @@ export const FolderForm: React.FC<FolderFormProps> = ({
         placeholder="Ex: Natal 2026"
         error={errors.name?.message}
         autoFocus
-        {...register('name')}
+        {...register("name")}
       />
 
       <div className="flex items-center justify-end gap-3 mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
-        <Button type="button" variant="ghost" onClick={onCancel} disabled={isLoading}>Cancelar</Button>
+        <Button
+          type="button"
+          variant="ghost"
+          onClick={onCancel}
+          disabled={isLoading}
+        >
+          Cancelar
+        </Button>
         <Button type="submit" variant="primary" isLoading={isLoading}>
           {title}
         </Button>

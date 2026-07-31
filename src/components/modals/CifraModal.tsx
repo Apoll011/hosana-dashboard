@@ -1,16 +1,21 @@
-import React, { useState } from 'react';
-import { Button } from '../common/Button';
-import { Modal } from '../common/Modal';
-import { CifraResult, getCifra, parseCifraClubInput } from '@/src/api/cifra';
-import { ConversionResult, convertToChordProDetailed } from '@/src/utils/conversion';
+import { CifraResult, getCifra, parseCifraClubInput } from "@/src/api/cifra";
+import {
+  Button,
+  ConversionResult,
+  Modal,
+  convertToChordProDetailed,
+} from "@hosanna/shared";
 
+import React, { useState } from "react";
 
 function slug_to_name(slug: string): string {
   const s = slug.split("-");
-  return s.join(" ").replace(
-    /\w\S*/g,
-    text => text.charAt(0).toUpperCase() + text.substring(1).toLowerCase()
-  );
+  return s
+    .join(" ")
+    .replace(
+      /\w\S*/g,
+      (text) => text.charAt(0).toUpperCase() + text.substring(1).toLowerCase(),
+    );
 }
 
 export const CifraClubImportModal: React.FC<{
@@ -18,9 +23,9 @@ export const CifraClubImportModal: React.FC<{
   handleClose: () => void;
   handleSave: (result: ConversionResult, artist: string, title: string) => void;
 }> = ({ isOpen, handleClose, handleSave }) => {
-  const [urlInput, setUrlInput] = useState('');
-  const [artistSlug, setArtistSlug] = useState('');
-  const [songSlug, setSongSlug] = useState('');
+  const [urlInput, setUrlInput] = useState("");
+  const [artistSlug, setArtistSlug] = useState("");
+  const [songSlug, setSongSlug] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -51,7 +56,9 @@ export const CifraClubImportModal: React.FC<{
     }
 
     if (!artist || !song) {
-      setError('Por favor, introduza um link válido do Cifra Club ou o Artista e Música.');
+      setError(
+        "Por favor, introduza um link válido do Cifra Club ou o Artista e Música.",
+      );
       return;
     }
 
@@ -64,13 +71,17 @@ export const CifraClubImportModal: React.FC<{
       if (result.error) {
         setError(`Erro ao obter a cifra: ${result.error}`);
       } else {
-        handleSave(convertToChordProDetailed(result.cifra!, {
-          strictChordDetection: false
-        }), slug_to_name(artist), slug_to_name(song))
+        handleSave(
+          convertToChordProDetailed(result.cifra!, {
+            strictChordDetection: false,
+          }),
+          slug_to_name(artist),
+          slug_to_name(song),
+        );
         handleClosed();
       }
     } catch (err: any) {
-      setError(err?.message || 'Ocorreu um erro inesperado.');
+      setError(err?.message || "Ocorreu um erro inesperado.");
     } finally {
       setIsLoading(false);
     }
@@ -78,9 +89,9 @@ export const CifraClubImportModal: React.FC<{
 
   const handleClosed = () => {
     handleClose();
-    setUrlInput('');
-    setArtistSlug('');
-    setSongSlug('');
+    setUrlInput("");
+    setArtistSlug("");
+    setSongSlug("");
     setError(null);
     setIsLoading(false);
   };
@@ -135,11 +146,11 @@ export const CifraClubImportModal: React.FC<{
               size="sm"
               disabled={isLoading || (!urlInput && (!artistSlug || !songSlug))}
             >
-              {isLoading ? 'A Importar...' : 'Importar Cifra'}
+              {isLoading ? "A Importar..." : "Importar Cifra"}
             </Button>
           </div>
         </form>
       </Modal>
     </>
   );
-}
+};
