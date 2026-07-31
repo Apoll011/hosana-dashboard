@@ -357,7 +357,7 @@ const ChordSectionRenderer = React.memo(
         <div className="flex flex-1 min-w-0">
           {measures.map((measure, mIdx) => (
             <React.Fragment key={mIdx}>
-              <div className="flex-1 flex items-center justify-around px-3 py-2 min-w-[3rem]">
+              <div className="flex-1 flex items-center justify-around px-3 py-2 min-w-12">
                 {measure.chords.map((chordSeg, cIdx) => (
                   <span
                     key={cIdx}
