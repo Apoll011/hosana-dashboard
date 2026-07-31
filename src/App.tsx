@@ -3,13 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
-import { BrowserRouter } from 'react-router-dom';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { AuthProvider } from './contexts/AuthContext';
-import { ThemeProvider } from './contexts/ThemeContext';
-import { SyncProvider } from './contexts/SyncContext';
-import { AppRoutes } from './routes/AppRoutes';
+import { configureApiClient } from "@hosanna/shared";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter } from "react-router-dom";
+import { AuthProvider } from "./contexts/AuthContext";
+import { SyncProvider } from "./contexts/SyncContext";
+import { ThemeProvider } from "./contexts/ThemeContext";
+import { AppRoutes } from "./routes/AppRoutes";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -21,6 +21,11 @@ const queryClient = new QueryClient({
 });
 
 export default function App() {
+  configureApiClient(
+    localStorage.getItem("server_url") ||
+      import.meta.env.VITE_API_URL ||
+      "/api",
+  );
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>

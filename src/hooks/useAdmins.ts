@@ -3,9 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { CreateAdminParams } from "@hosanna/shared";
+import { adminsApi, CreateAdminParams } from "@hosanna/shared";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { adminsApi } from "../api/admins";
 import { useSync } from "../contexts/SyncContext";
 
 export function useAdmins() {

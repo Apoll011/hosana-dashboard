@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { getApiClient, syncApi } from "@hosanna/shared";
 import { useQueryClient } from "@tanstack/react-query";
 import React, {
   createContext,
@@ -12,8 +13,6 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { httpClient } from "../api/client";
-import { syncApi } from "../api/sync";
 import { SyncStatus } from "../types";
 
 export interface ToastMessage {
@@ -61,7 +60,7 @@ export const SyncProvider: React.FC<{ children: React.ReactNode }> = ({
   );
 
   const triggerSyncCheck = useCallback(async () => {
-    const token = httpClient.getToken();
+    const token = getApiClient().getToken();
     if (!token) return;
 
     try {
@@ -104,13 +103,13 @@ export const SyncProvider: React.FC<{ children: React.ReactNode }> = ({
   // Periodic lightweight poll for background changes
   useEffect(() => {
     const interval = setInterval(() => {
-      if (httpClient.getToken()) {
+      if (getApiClient().getToken()) {
         triggerSyncCheck();
       }
     }, 15000); // 15 seconds poll for fast & lightweight sync check
 
     const handleFocus = () => {
-      if (httpClient.getToken()) {
+      if (getApiClient().getToken()) {
         triggerSyncCheck();
       }
     };
