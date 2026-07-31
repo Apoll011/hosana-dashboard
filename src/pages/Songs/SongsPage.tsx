@@ -3,33 +3,43 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
-import { useNavigate, useOutletContext } from 'react-router-dom';
-import { useSongs } from '../../hooks/useSongs';
-import { useFolders } from '../../hooks/useFolders';
-import { Song } from '../../types';
 import {
-  Music, Search, Plus, Filter, FolderInput, Edit2, Trash2,
-  FileText, ArrowUpDown, Calendar, MoveRight, FolderTree
-} from 'lucide-react';
-import { Button } from '../../components/common/Button';
-import { Input } from '../../components/common/Input';
-import { Modal } from '../../components/common/Modal';
-import { ConfirmDialog } from '../../components/common/ConfirmDialog';
-import { MoveSongModal } from '../../components/modals/MoveSongModal';
-import { SongForm } from '../../components/forms/SongForm';
-import { Pagination } from '../../components/common/Pagination';
-import { Spinner } from '../../components/common/Spinner';
-import { EmptyState } from '../../components/common/EmptyState';
-import { Badge } from '../../components/common/Badge';
+  Badge,
+  Button,
+  ConfirmDialog,
+  EmptyState,
+  Input,
+  Modal,
+  Pagination,
+  Song,
+  Spinner,
+} from "@hosanna/shared";
+import {
+  ArrowUpDown,
+  Edit2,
+  FileText,
+  Filter,
+  FolderInput,
+  FolderTree,
+  Music,
+  Plus,
+  Search,
+  Trash2,
+} from "lucide-react";
+import React, { useState } from "react";
+import { useNavigate, useOutletContext } from "react-router-dom";
+import { SongForm } from "../../components/forms/SongForm";
+import { MoveSongModal } from "../../components/modals/MoveSongModal";
+import { useFolders } from "../../hooks/useFolders";
+import { useSongs } from "../../hooks/useSongs";
 
 interface SongsPageProps {
   hideHeader?: boolean;
-  actualSearchQuery?: string;
-  actualSortBy?: 'title' | 'artist' | 'updatedAt';
-  actualSortOrder?: 'asc' | 'desc';
-  actualSelectedKey?: string;
-  actualSelectedTag?: string;
+  searchQuery?: string;
+  sortBy?: "title" | "artist" | "updatedAt";
+  sortOrder?: "asc" | "desc";
+  selectedKey?: string;
+  selectedTag?: string;
   searchFields?: {
     title: boolean;
     artist: boolean;
@@ -38,109 +48,154 @@ interface SongsPageProps {
   };
 }
 
-export const SongsPage: React.FC<SongsPageProps> = ({ 
-  hideHeader, 
+export const SongsPage: React.FC<SongsPageProps> = ({
+  hideHeader,
   searchQuery: externalSearchQuery,
   sortBy: externalSortBy,
   sortOrder: externalSortOrder,
   selectedKey,
   selectedTag,
-  searchFields: externalSearchFields
+  searchFields: externalSearchFields,
 }) => {
   const navigate = useNavigate();
   const context = useOutletContext<any>() || {};
   const actualHideHeader = hideHeader ?? context.hideHeader;
-  const actualSearchQuery = externalSearchQuery ?? context.searchQuery ?? '';
-  const actualSortBy = externalSortBy ?? context.sortBy ?? 'title';
-  const actualSortOrder = externalSortOrder ?? context.sortOrder ?? 'asc';
-  const actualSelectedKey = selectedKey ?? context.selectedKey ?? '';
-  const actualSelectedTag = selectedTag ?? context.selectedTag ?? '';
-  const actualSearchFields = externalSearchFields ?? context.searchFields ?? { title: true, artist: true, content: true, tags: true };
-
+  const actualSearchQuery = externalSearchQuery ?? context.searchQuery ?? "";
+  const actualSortBy = externalSortBy ?? context.sortBy ?? "title";
+  const actualSortOrder = externalSortOrder ?? context.sortOrder ?? "asc";
+  const actualSelectedKey = selectedKey ?? context.selectedKey ?? "";
+  const actualSelectedTag = selectedTag ?? context.selectedTag ?? "";
+  const actualSearchFields = externalSearchFields ??
+    context.searchFields ?? {
+      title: true,
+      artist: true,
+      content: true,
+      tags: true,
+    };
 
   // Search, Filtering, Pagination, Sorting State
-  const [internalSearchQuery, setInternalSearchQuery] = useState('');
-  const [selectedFolder, setSelectedFolder] = useState<string>('');
-  const [internalSortBy, setInternalSortBy] = useState<'title' | 'artist' | 'updatedAt'>('title');
-  const [internalSortOrder, setInternalSortOrder] = useState<'asc' | 'desc'>('asc');
+  const [internalSearchQuery, setInternalSearchQuery] = useState("");
+  const [selectedFolder, setSelectedFolder] = useState<string>("");
+  const [internalSortBy, setInternalSortBy] = useState<
+    "title" | "artist" | "updatedAt"
+  >("title");
+  const [internalSortOrder, setInternalSortOrder] = useState<"asc" | "desc">(
+    "asc",
+  );
   const [page, setPage] = useState(1);
 
-  const finalSearchQuery = externalSearchQuery !== undefined 
-    ? externalSearchQuery 
-    : (context.searchQuery !== undefined ? context.searchQuery : internalSearchQuery);
-  const finalSortBy = externalSortBy !== undefined 
-    ? externalSortBy 
-    : (context.sortBy !== undefined ? context.sortBy : internalSortBy);
-  const finalSortOrder = externalSortOrder !== undefined 
-    ? externalSortOrder 
-    : (context.sortOrder !== undefined ? context.sortOrder : internalSortOrder);
+  const finalSearchQuery =
+    externalSearchQuery !== undefined
+      ? externalSearchQuery
+      : context.searchQuery !== undefined
+        ? context.searchQuery
+        : internalSearchQuery;
+  const finalSortBy =
+    externalSortBy !== undefined
+      ? externalSortBy
+      : context.sortBy !== undefined
+        ? context.sortBy
+        : internalSortBy;
+  const finalSortOrder =
+    externalSortOrder !== undefined
+      ? externalSortOrder
+      : context.sortOrder !== undefined
+        ? context.sortOrder
+        : internalSortOrder;
 
   // Reset page when filters change
   React.useEffect(() => {
     setPage(1);
-  }, [finalSearchQuery, finalSortBy, finalSortOrder, actualSelectedKey, actualSelectedTag, actualSearchFields, selectedFolder]);
+  }, [
+    finalSearchQuery,
+    finalSortBy,
+    finalSortOrder,
+    actualSelectedKey,
+    actualSelectedTag,
+    actualSearchFields,
+    selectedFolder,
+  ]);
 
-  const { songsQuery, createSong, deleteSong, renameSong, moveSong } = useSongs({
-    search: finalSearchQuery,
-    folder: selectedFolder || undefined,
-    sortBy: finalSortBy,
-    sortOrder: finalSortOrder,
-    page,
-    limit: 50, // Increased limit for better library view
-    key: actualSelectedKey || undefined,
-    tag: actualSelectedTag || undefined,
-    searchFields: actualSearchFields,
-  });
+  const { songsQuery, createSong, deleteSong, renameSong, moveSong } = useSongs(
+    {
+      search: finalSearchQuery,
+      folder: selectedFolder || undefined,
+      sortBy: finalSortBy,
+      sortOrder: finalSortOrder,
+      page,
+      limit: 50, // Increased limit for better library view
+      key: actualSelectedKey || undefined,
+      tag: actualSelectedTag || undefined,
+      searchFields: actualSearchFields,
+    },
+  );
 
   const { foldersQuery } = useFolders();
 
   // Modals state
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [renameTarget, setRenameTarget] = useState<Song | null>(null);
-  const [newTitle, setNewTitle] = useState('');
+  const [newTitle, setNewTitle] = useState("");
   const [moveTarget, setMoveTarget] = useState<Song | null>(null);
-  const [destinationFolderId, setDestinationFolderId] = useState<string>('');
+  const [destinationFolderId, setDestinationFolderId] = useState<string>("");
   const [deleteTarget, setDeleteTarget] = useState<Song | null>(null);
 
-  const folders = Array.isArray(foldersQuery.data?.folders) ? foldersQuery.data.folders : [];
-  const songsData = Array.isArray(songsQuery.data?.songs) ? songsQuery.data.songs : [];
+  const folders = Array.isArray(foldersQuery.data?.folders)
+    ? foldersQuery.data.folders
+    : [];
+  const songsData = Array.isArray(songsQuery.data?.songs)
+    ? songsQuery.data.songs
+    : [];
   const totalPages = Math.max(1, songsQuery.data?.totalPages || 1);
   const totalSongs = songsQuery.data?.total || 0;
 
-  const handleCreateSongSubmit = React.useCallback(async (data: {
-    title: string;
-    artist: string;
-    folderId: string | null;
-    tags: string[];
-  }) => {
-    const newSong = await createSong({
-      title: data.title,
-      artist: data.artist,
-      folderId: data.folderId,
-      tags: data.tags,
-      content: `{title: ${data.title}}\n{artist: ${data.artist}}\n{key: G}\n\n[G]Enter lyrics and chords...`,
-    });
-    setIsCreateModalOpen(false);
-    navigate(`/songs/${newSong.id}`);
-  }, [createSong, navigate]);
+  const handleCreateSongSubmit = React.useCallback(
+    async (data: {
+      title: string;
+      artist: string;
+      folderId: string | null;
+      tags: string[];
+    }) => {
+      const newSong = await createSong({
+        title: data.title,
+        artist: data.artist,
+        folderId: data.folderId,
+        tags: data.tags,
+        content: `{title: ${data.title}}\n{artist: ${data.artist}}\n{key: G}\n\n[G]Enter lyrics and chords...`,
+      });
+      setIsCreateModalOpen(false);
+      navigate(`/songs/${newSong.id}`);
+    },
+    [createSong, navigate],
+  );
 
-  const handleRenameSubmit = React.useCallback(async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!renameTarget || !newTitle.trim()) return;
-    await renameSong({ id: renameTarget.id, newTitle: newTitle.trim(), updatedAt: renameTarget.updatedAt });
-    setRenameTarget(null);
-  }, [renameTarget, newTitle, renameSong]);
+  const handleRenameSubmit = React.useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      if (!renameTarget || !newTitle.trim()) return;
+      await renameSong({
+        id: renameTarget.id,
+        newTitle: newTitle.trim(),
+        updatedAt: renameTarget.updatedAt,
+      });
+      setRenameTarget(null);
+    },
+    [renameTarget, newTitle, renameSong],
+  );
 
-  const handleMoveSubmit = React.useCallback(async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!moveTarget) return;
-    await moveSong({
-      id: moveTarget.id,
-      folderId: destinationFolderId || null,
-      updatedAt: moveTarget.updatedAt,
-    });
-    setMoveTarget(null);
-  }, [moveTarget, destinationFolderId, moveSong]);
+  const handleMoveSubmit = React.useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      if (!moveTarget) return;
+      await moveSong({
+        id: moveTarget.id,
+        folderId: destinationFolderId || null,
+        updatedAt: moveTarget.updatedAt,
+      });
+      setMoveTarget(null);
+    },
+    [moveTarget, destinationFolderId, moveSong],
+  );
 
   const handleDeleteConfirm = React.useCallback(async () => {
     if (!deleteTarget) return;
@@ -149,7 +204,9 @@ export const SongsPage: React.FC<SongsPageProps> = ({
   }, [deleteTarget, deleteSong]);
 
   return (
-    <div className={`flex-1 flex flex-col w-full mx-auto space-y-6 animate-in fade-in duration-500 overflow-y-auto h-full ${hideHeader ? 'p-6' : 'p-4 sm:p-8 max-w-7xl'}`}>
+    <div
+      className={`flex-1 flex flex-col w-full mx-auto space-y-6 animate-in fade-in duration-500 overflow-y-auto h-full ${hideHeader ? "p-6" : "p-4 sm:p-8 max-w-7xl"}`}
+    >
       {/* Header Banner */}
       {!actualHideHeader && (
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
@@ -169,7 +226,7 @@ export const SongsPage: React.FC<SongsPageProps> = ({
             <Button
               variant="outline"
               icon={<FolderTree className="w-5 h-5" />}
-              onClick={() => navigate('/folders')}
+              onClick={() => navigate("/folders")}
               className="rounded-2xl py-6 px-6 font-black uppercase tracking-widest text-[11px]"
             >
               Explorador
@@ -230,7 +287,10 @@ export const SongsPage: React.FC<SongsPageProps> = ({
               <select
                 value={`${finalSortBy}-${finalSortOrder}`}
                 onChange={(e) => {
-                  const [sb, so] = e.target.value.split('-') as ['title' | 'artist' | 'updatedAt', 'asc' | 'desc'];
+                  const [sb, so] = e.target.value.split("-") as [
+                    "title" | "artist" | "updatedAt",
+                    "asc" | "desc",
+                  ];
                   if (externalSortBy !== undefined) {
                     // If controlled by parent, we might not want to set internal
                   } else {
@@ -266,8 +326,8 @@ export const SongsPage: React.FC<SongsPageProps> = ({
             title="Nenhum cântico encontrado"
             description={
               finalSearchQuery || selectedFolder
-                ? 'A sua pesquisa não retornou resultados. Experimente termos mais genéricos.'
-                : 'A sua biblioteca está vazia. Comece a sua jornada musical agora!'
+                ? "A sua pesquisa não retornou resultados. Experimente termos mais genéricos."
+                : "A sua biblioteca está vazia. Comece a sua jornada musical agora!"
             }
             actionLabel="Criar Novo Cântico"
             onAction={() => setIsCreateModalOpen(true)}
@@ -306,14 +366,16 @@ export const SongsPage: React.FC<SongsPageProps> = ({
                       </td>
 
                       <td className="py-4 px-6 text-m3-secondary">
-                        {song.artist || '—'}
+                        {song.artist || "—"}
                       </td>
 
                       <td className="py-4 px-6">
                         {folder ? (
                           <Badge variant="sky">{folder.name}</Badge>
                         ) : (
-                          <span className="text-[10px] text-m3-secondary font-black uppercase tracking-widest opacity-40 italic">Raiz</span>
+                          <span className="text-[10px] text-m3-secondary font-black uppercase tracking-widest opacity-40 italic">
+                            Raiz
+                          </span>
                         )}
                       </td>
 
@@ -326,16 +388,21 @@ export const SongsPage: React.FC<SongsPageProps> = ({
                               </Badge>
                             ))
                           ) : (
-                            <span className="text-xs text-m3-secondary opacity-30">—</span>
+                            <span className="text-xs text-m3-secondary opacity-30">
+                              —
+                            </span>
                           )}
                         </div>
                       </td>
 
                       <td className="py-4 px-6 text-[11px] text-m3-secondary opacity-70 font-black uppercase tracking-tighter">
-                        {new Date(song.updatedAt).toLocaleDateString('pt-PT')}
+                        {new Date(song.updatedAt).toLocaleDateString("pt-PT")}
                       </td>
 
-                      <td className="py-4 px-6 text-right" onClick={(e) => e.stopPropagation()}>
+                      <td
+                        className="py-4 px-6 text-right"
+                        onClick={(e) => e.stopPropagation()}
+                      >
                         <div className="flex items-center justify-end gap-1 group-hover:opacity-100 opacity-40 transition-opacity">
                           <button
                             onClick={() => navigate(`/songs/${song.id}`)}
@@ -357,7 +424,7 @@ export const SongsPage: React.FC<SongsPageProps> = ({
                           <button
                             onClick={() => {
                               setMoveTarget(song);
-                              setDestinationFolderId(song.folderId || '');
+                              setDestinationFolderId(song.folderId || "");
                             }}
                             title="Mover"
                             className="p-2 text-m3-secondary hover:text-sky-500 hover:bg-sky-500/10 rounded-xl cursor-pointer transition-all"
@@ -419,10 +486,16 @@ export const SongsPage: React.FC<SongsPageProps> = ({
             autoFocus
           />
           <div className="flex items-center justify-end gap-3 mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
-            <Button type="button" variant="ghost" onClick={() => setRenameTarget(null)}>
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => setRenameTarget(null)}
+            >
               Cancelar
             </Button>
-            <Button type="submit" variant="primary">Atualizar Título</Button>
+            <Button type="submit" variant="primary">
+              Atualizar Título
+            </Button>
           </div>
         </form>
       </Modal>
