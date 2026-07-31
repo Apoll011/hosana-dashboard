@@ -1,7 +1,6 @@
 {
-  "name": "react-example",
-  "private": true,
-  "version": "0.0.0",
+  "name": "@hosanna/dashboard",
+  "version": "1.6.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
