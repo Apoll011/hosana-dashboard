@@ -2691,7 +2691,9 @@ export const MainLayout: React.FC = () => {
           <div className="flex flex-col gap-4">
             <div className="p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-xl flex items-start gap-2.5 text-xs text-amber-800 dark:text-amber-300">
               <AlertTriangle className="w-4 h-4 shrink-0 text-amber-500 mt-0.5" />
-              <span>Selecione como tratar os cânticos dentro desta pasta:</span>
+              <span>
+                Selecione como tratar os conteúdos dentro desta pasta:
+              </span>
             </div>
 
             <div className="flex flex-col gap-2.5">
@@ -2709,7 +2711,7 @@ export const MainLayout: React.FC = () => {
                 />
                 <div className="flex flex-col">
                   <span className="text-xs font-bold text-slate-900 dark:text-slate-100">
-                    Mover cânticos para a Raiz (Recomendado)
+                    Mover Conteúdos para a Raiz (Recomendado)
                   </span>
                   <span className="text-[11px] text-slate-500">
                     Mantém as cifras dos cânticos na biblioteca sem categoria de
@@ -2729,11 +2731,11 @@ export const MainLayout: React.FC = () => {
                 />
                 <div className="flex flex-col">
                   <span className="text-xs font-bold text-rose-600 dark:text-rose-400">
-                    Apagar pasta e todos os cânticos nela contidos
+                    Apagar pasta e todos os conteúdos nela contidos
                   </span>
                   <span className="text-[11px] text-slate-500">
                     Apaga permanentemente a pasta E todos os ficheiros de
-                    cânticos dentro dela.
+                    cânticos e pastas e os conteudoes das mesmas, dentro dela.
                   </span>
                 </div>
               </label>
