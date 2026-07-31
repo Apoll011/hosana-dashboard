@@ -227,7 +227,7 @@ export const BatchTagModal: React.FC<BatchTagModalProps> = ({
               {tags.map((tag) => (
                 <Badge
                   key={tag}
-                  variant={mode === "remove" ? "danger" : "sky"}
+                  variant={mode === "remove" ? "rose" : "sky"}
                   className="flex items-center gap-1 text-xs py-1 px-2.5"
                 >
                   <span>{tag}</span>
