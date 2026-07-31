@@ -3,10 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Tenant, User } from "@hosanna/shared";
+import {
+  authApi,
+  getApiClient,
+  LoginParams,
+  Tenant,
+  User,
+} from "@hosanna/shared";
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { authApi, LoginParams } from "../api/auth";
-import { httpClient } from "../api/client";
 
 interface AuthContextType {
   user: User | null;
@@ -26,14 +30,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const [user, setUser] = useState<User | null>(null);
   const [tenant, setTenant] = useState<Tenant | null>(null);
   const [token, setToken] = useState<string | null>(() =>
-    httpClient.getToken(),
+    getApiClient().getToken(),
   );
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   // Initialize auth state from local token
   useEffect(() => {
     const initAuth = async () => {
-      const savedToken = httpClient.getToken();
+      const savedToken = getApiClient().getToken();
       if (!savedToken) {
         setIsLoading(false);
         return;
@@ -50,7 +54,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         setUser(null);
         setToken(null);
         setTenant(null);
-        httpClient.setTokens(null, null);
+        getApiClient().setTokens(null, null);
       } finally {
         setIsLoading(false);
       }
@@ -59,7 +63,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     initAuth();
 
     // Register 401 callback
-    httpClient.onUnauthorized(() => {
+    getApiClient().onUnauthorized(() => {
       setUser(null);
       setToken(null);
       setTenant(null);

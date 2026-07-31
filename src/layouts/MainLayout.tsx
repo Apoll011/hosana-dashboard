@@ -3,7 +3,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Badge, Button, Folder, Input, Modal, Song } from "@hosanna/shared";
+import {
+  Badge,
+  Button,
+  Folder,
+  Input,
+  Modal,
+  Song,
+  songsApi,
+} from "@hosanna/shared";
 import {
   AlertTriangle,
   ArrowRightLeft,
@@ -41,7 +49,6 @@ import {
 } from "lucide-react";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
-import { songsApi } from "../api/songs";
 import logo from "../assets/hosannastudio_logo.png";
 import { FolderForm } from "../components/forms/FolderForm";
 import { SongForm } from "../components/forms/SongForm";
@@ -56,8 +63,7 @@ import { useFolders } from "../hooks/useFolders";
 import { useServices } from "../hooks/useServices";
 import { useAllSongs } from "../hooks/useSongs";
 
-import { ConversionResult } from "@hosanna/shared";
-import { printApi } from "../api/print";
+import { ConversionResult, printApi } from "@hosanna/shared";
 import { ServiceForm } from "../components/forms/ServiceForm";
 import { CifraClubImportModal } from "../components/modals/CifraModal";
 import { printHtmlDirectly } from "../utils";

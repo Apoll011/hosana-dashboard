@@ -9,6 +9,7 @@ import {
   Input,
   Modal,
   ServerSettings,
+  settingsApi,
   Spinner,
 } from "@hosanna/shared";
 import { useQueryClient } from "@tanstack/react-query";
@@ -39,7 +40,6 @@ import {
   Users,
 } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
-import { settingsApi } from "../../api/settings";
 import { useAuth } from "../../contexts/AuthContext";
 import { useSync } from "../../contexts/SyncContext";
 import { useTheme } from "../../contexts/ThemeContext";
