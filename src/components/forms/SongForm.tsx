@@ -3,17 +3,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { Input } from '../common/Input';
-import { Button } from '../common/Button';
-import { Folder } from '../../types';
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Button, Folder, Input } from "@hosanna/shared";
+import React from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 
 const songSchema = z.object({
-  title: z.string().min(1, 'O título do cântico é obrigatório'),
-  artist: z.string().min(1, 'O nome do artista é obrigatório'),
+  title: z.string().min(1, "O título do cântico é obrigatório"),
+  artist: z.string().min(1, "O nome do artista é obrigatório"),
   folderId: z.string().optional(),
   tags: z.string().optional(),
 });
@@ -28,7 +26,12 @@ interface SongFormProps {
     tags?: string[];
   };
   folders: Folder[];
-  onSubmit: (data: { title: string; artist: string; folderId: string | null; tags: string[] }) => Promise<void>;
+  onSubmit: (data: {
+    title: string;
+    artist: string;
+    folderId: string | null;
+    tags: string[];
+  }) => Promise<void>;
   onCancel: () => void;
   isLoading?: boolean;
 }
@@ -47,16 +50,19 @@ export const SongForm: React.FC<SongFormProps> = ({
   } = useForm<SongFormData>({
     resolver: zodResolver(songSchema),
     defaultValues: {
-      title: initialValues?.title || '',
-      artist: initialValues?.artist || 'Unknown Artist',
-      folderId: initialValues?.folderId || '',
-      tags: initialValues?.tags ? initialValues.tags.join(', ') : '',
+      title: initialValues?.title || "",
+      artist: initialValues?.artist || "Unknown Artist",
+      folderId: initialValues?.folderId || "",
+      tags: initialValues?.tags ? initialValues.tags.join(", ") : "",
     },
   });
 
   const onFormSubmit = async (data: SongFormData) => {
     const parsedTags = data.tags
-      ? data.tags.split(',').map((t) => t.trim()).filter(Boolean)
+      ? data.tags
+          .split(",")
+          .map((t) => t.trim())
+          .filter(Boolean)
       : [];
 
     await onSubmit({
@@ -73,14 +79,14 @@ export const SongForm: React.FC<SongFormProps> = ({
         label="Título do Cântico"
         placeholder="Ex: Caminho no Deserto"
         error={errors.title?.message}
-        {...register('title')}
+        {...register("title")}
       />
 
       <Input
         label="Artista / Autor"
         placeholder="Ex: Sinach"
         error={errors.artist?.message}
-        {...register('artist')}
+        {...register("artist")}
       />
 
       <div className="flex flex-col gap-1.5">
@@ -88,7 +94,7 @@ export const SongForm: React.FC<SongFormProps> = ({
           Categoria de Pasta
         </label>
         <select
-          {...register('folderId')}
+          {...register("folderId")}
           className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#0284c7]"
         >
           <option value="">Nível Raiz (Sem pasta)</option>
@@ -104,11 +110,18 @@ export const SongForm: React.FC<SongFormProps> = ({
         label="Etiquetas (separadas por vírgulas)"
         placeholder="Ex: Hino, Louvor, Graça"
         error={errors.tags?.message}
-        {...register('tags')}
+        {...register("tags")}
       />
 
       <div className="flex items-center justify-end gap-3 mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
-        <Button type="button" variant="ghost" onClick={onCancel} disabled={isLoading}>Cancelar</Button>
+        <Button
+          type="button"
+          variant="ghost"
+          onClick={onCancel}
+          disabled={isLoading}
+        >
+          Cancelar
+        </Button>
         <Button type="submit" variant="primary" isLoading={isLoading}>
           Guardar Cântico
         </Button>

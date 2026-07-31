@@ -3,19 +3,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from 'react';
-import { Folder } from '../../types';
-import { Modal } from '../common/Modal';
-import { Button } from '../common/Button';
-import { Input } from '../common/Input';
-import { AlertTriangle, Trash2 } from 'lucide-react';
+import { Button, Folder, Input, Modal } from "@hosanna/shared";
+import { AlertTriangle, Trash2 } from "lucide-react";
+import React, { useEffect, useState } from "react";
 
 interface BatchDeleteModalProps {
   isOpen: boolean;
   onClose: () => void;
   selectedFolders: Folder[];
   selectedSongsCount: number;
-  onConfirm: (folderAction: 'move_to_root' | 'delete_songs') => Promise<void>;
+  onConfirm: (folderAction: "move_to_root" | "delete_songs") => Promise<void>;
 }
 
 export const BatchDeleteModal: React.FC<BatchDeleteModalProps> = ({
@@ -25,25 +22,30 @@ export const BatchDeleteModal: React.FC<BatchDeleteModalProps> = ({
   selectedSongsCount,
   onConfirm,
 }) => {
-  const [folderAction, setFolderAction] = useState<'move_to_root' | 'delete_songs'>('move_to_root');
-  const [confirmText, setConfirmText] = useState('');
+  const [folderAction, setFolderAction] = useState<
+    "move_to_root" | "delete_songs"
+  >("move_to_root");
+  const [confirmText, setConfirmText] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
-      setFolderAction('move_to_root');
-      setConfirmText('');
+      setFolderAction("move_to_root");
+      setConfirmText("");
     }
   }, [isOpen]);
 
   const hasFolders = selectedFolders.length > 0;
-  const foldersWithSongs = selectedFolders.filter((f) => (f.songCount || 0) > 0);
+  const foldersWithSongs = selectedFolders.filter(
+    (f) => (f.songCount || 0) > 0,
+  );
   const totalItems = selectedFolders.length + selectedSongsCount;
 
-  const requiresTypedConfirmation = hasFolders && folderAction === 'delete_songs';
+  const requiresTypedConfirmation =
+    hasFolders && folderAction === "delete_songs";
   // Expected text: name of first folder if 1 folder, or 'APAGAR' if multiple
   const expectedConfirmText =
-    selectedFolders.length === 1 ? selectedFolders[0].name.trim() : 'APAGAR';
+    selectedFolders.length === 1 ? selectedFolders[0].name.trim() : "APAGAR";
 
   const isConfirmDisabled =
     requiresTypedConfirmation && confirmText.trim() !== expectedConfirmText;
@@ -68,10 +70,11 @@ export const BatchDeleteModal: React.FC<BatchDeleteModalProps> = ({
         <div className="p-3.5 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 rounded-xl flex items-start gap-3">
           <AlertTriangle className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
           <p className="text-xs text-amber-900 dark:text-amber-200">
-            Está prestes a apagar{' '}
+            Está prestes a apagar{" "}
             <strong>
-              {selectedFolders.length > 0 && `${selectedFolders.length} pasta(s)`}
-              {selectedFolders.length > 0 && selectedSongsCount > 0 && ' e '}
+              {selectedFolders.length > 0 &&
+                `${selectedFolders.length} pasta(s)`}
+              {selectedFolders.length > 0 && selectedSongsCount > 0 && " e "}
               {selectedSongsCount > 0 && `${selectedSongsCount} cântico(s)`}
             </strong>
             .
@@ -89,10 +92,10 @@ export const BatchDeleteModal: React.FC<BatchDeleteModalProps> = ({
                 type="radio"
                 name="batchFolderAction"
                 value="move_to_root"
-                checked={folderAction === 'move_to_root'}
+                checked={folderAction === "move_to_root"}
                 onChange={() => {
-                  setFolderAction('move_to_root');
-                  setConfirmText('');
+                  setFolderAction("move_to_root");
+                  setConfirmText("");
                 }}
                 className="text-[#0284c7] focus:ring-[#0284c7] mt-0.5"
               />
@@ -101,7 +104,8 @@ export const BatchDeleteModal: React.FC<BatchDeleteModalProps> = ({
                   Preservar cânticos (Mover para o Nível Raiz)
                 </span>
                 <span className="text-[11px] text-slate-500 dark:text-slate-400">
-                  Apaga apenas as pastas e move os seus cânticos para a raiz sem perder dados.
+                  Apaga apenas as pastas e move os seus cânticos para a raiz sem
+                  perder dados.
                 </span>
               </div>
             </label>
@@ -111,8 +115,8 @@ export const BatchDeleteModal: React.FC<BatchDeleteModalProps> = ({
                 type="radio"
                 name="batchFolderAction"
                 value="delete_songs"
-                checked={folderAction === 'delete_songs'}
-                onChange={() => setFolderAction('delete_songs')}
+                checked={folderAction === "delete_songs"}
+                onChange={() => setFolderAction("delete_songs")}
                 className="text-rose-600 focus:ring-rose-500 mt-0.5"
               />
               <div className="flex flex-col">
@@ -120,7 +124,8 @@ export const BatchDeleteModal: React.FC<BatchDeleteModalProps> = ({
                   Apagar permanentemente as pastas e todos os seus cânticos
                 </span>
                 <span className="text-[11px] text-rose-600/80 dark:text-rose-400">
-                  Ação destrutiva. Apaga as pastas e todos os cânticos nelas contidos.
+                  Ação destrutiva. Apaga as pastas e todos os cânticos nelas
+                  contidos.
                 </span>
               </div>
             </label>
@@ -134,8 +139,11 @@ export const BatchDeleteModal: React.FC<BatchDeleteModalProps> = ({
               <span>Confirmação de Segurança</span>
             </div>
             <p className="text-rose-900 dark:text-rose-200 text-[11px] leading-relaxed">
-              Para confirmar a eliminação de{' '}
-              <strong className="font-extrabold underline">{expectedConfirmText}</strong>, escreva exatamente o nome abaixo:
+              Para confirmar a eliminação de{" "}
+              <strong className="font-extrabold underline">
+                {expectedConfirmText}
+              </strong>
+              , escreva exatamente o nome abaixo:
             </p>
             <Input
               placeholder={`Escreva "${expectedConfirmText}" para confirmar`}
