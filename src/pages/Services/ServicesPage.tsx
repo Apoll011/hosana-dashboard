@@ -3,30 +3,30 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from "react";
-import { useNavigate, useOutletContext } from "react-router-dom";
-import { useServices } from "../../hooks/useServices";
-import { Service } from "../../types";
+import { printApi } from "@/src/api/print";
+import { printHtmlDirectly } from "@/src/utils";
 import {
+  Badge,
+  Button,
+  ConfirmDialog,
+  EmptyState,
+  Modal,
+  Spinner,
+} from "@hosanna/shared";
+import {
+  ArrowRight,
   Calendar,
-  Plus,
   Clock,
   Music,
-  Edit2,
-  Trash2,
-  ArrowRight,
-  CheckCircle2,
+  Plus,
   Printer,
+  Trash2,
 } from "lucide-react";
-import { Button } from "../../components/common/Button";
-import { Modal } from "../../components/common/Modal";
-import { ConfirmDialog } from "../../components/common/ConfirmDialog";
+import React, { useState } from "react";
+import { useNavigate, useOutletContext } from "react-router-dom";
 import { ServiceForm } from "../../components/forms/ServiceForm";
-import { Spinner } from "../../components/common/Spinner";
-import { EmptyState } from "../../components/common/EmptyState";
-import { Badge } from "../../components/common/Badge";
-import { printHtmlDirectly } from "@/src/utils";
-import { printApi } from "@/src/api/print";
+import { useServices } from "../../hooks/useServices";
+import { Service } from "../../types";
 
 interface ServicesPageProps {
   hideHeader?: boolean;
@@ -154,29 +154,28 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
                     </Badge>
 
                     <>
-                     <button
-                      onClick={async (e) => {
-                        e.stopPropagation();
-                        const html = await printApi.printService(service.id);
-                        printHtmlDirectly(html);
-                      }}
-                      title="Imprimir Culto"
-                      className="p-2 text-m3-secondary hover:text-blue-500 hover:bg-cyan-500/10 rounded-xl cursor-pointer transition-all opacity-0 group-hover:opacity-100"
-                    >
-                      <Printer className="w-4.5 h-4.5" />
-                    </button>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setDeleteTarget(service);
-                      }}
-                      title="Apagar Culto"
-                      className="p-2 text-m3-secondary hover:text-rose-500 hover:bg-rose-500/10 rounded-xl cursor-pointer transition-all opacity-0 group-hover:opacity-100"
-                    >
-                      <Trash2 className="w-4.5 h-4.5" />
-                    </button>
+                      <button
+                        onClick={async (e) => {
+                          e.stopPropagation();
+                          const html = await printApi.printService(service.id);
+                          printHtmlDirectly(html);
+                        }}
+                        title="Imprimir Culto"
+                        className="p-2 text-m3-secondary hover:text-blue-500 hover:bg-cyan-500/10 rounded-xl cursor-pointer transition-all opacity-0 group-hover:opacity-100"
+                      >
+                        <Printer className="w-4.5 h-4.5" />
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setDeleteTarget(service);
+                        }}
+                        title="Apagar Culto"
+                        className="p-2 text-m3-secondary hover:text-rose-500 hover:bg-rose-500/10 rounded-xl cursor-pointer transition-all opacity-0 group-hover:opacity-100"
+                      >
+                        <Trash2 className="w-4.5 h-4.5" />
+                      </button>
                     </>
-                   
                   </div>
 
                   <h3 className="text-xl font-black text-m3-text group-hover:text-m3-primary transition-colors leading-tight">

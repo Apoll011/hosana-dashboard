@@ -3,16 +3,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { Input } from '../common/Input';
-import { Button } from '../common/Button';
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Button, Input } from "@hosanna/shared";
+import React from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 
 const tokenSchema = z.object({
-  name: z.string().min(1, 'A descrição / identificador da senha é obrigatório'),
-  expiresInDays: z.string().min(1, 'A validade é obrigatória'),
+  name: z.string().min(1, "A descrição / identificador da senha é obrigatório"),
+  expiresInDays: z.string().min(1, "A validade é obrigatória"),
 });
 
 type TokenFormData = z.infer<typeof tokenSchema>;
@@ -35,8 +34,8 @@ export const MusicianTokenForm: React.FC<MusicianTokenFormProps> = ({
   } = useForm<TokenFormData>({
     resolver: zodResolver(tokenSchema),
     defaultValues: {
-      name: 'Acesso para Equipas de Louvor e Banda',
-      expiresInDays: '365',
+      name: "Acesso para Equipas de Louvor e Banda",
+      expiresInDays: "365",
     },
   });
 
@@ -56,7 +55,7 @@ export const MusicianTokenForm: React.FC<MusicianTokenFormProps> = ({
         placeholder="Ex: Acesso Banda de Domingo"
         error={errors.name?.message}
         autoFocus
-        {...register('name')}
+        {...register("name")}
       />
 
       <div className="flex flex-col gap-1.5">
@@ -64,7 +63,7 @@ export const MusicianTokenForm: React.FC<MusicianTokenFormProps> = ({
           Validade da Senha
         </label>
         <select
-          {...register('expiresInDays')}
+          {...register("expiresInDays")}
           className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#0284c7]"
         >
           <option value="365">1 Ano (Padrão)</option>
@@ -76,11 +75,20 @@ export const MusicianTokenForm: React.FC<MusicianTokenFormProps> = ({
       </div>
 
       <div className="p-3 bg-sky-50 dark:bg-sky-950/30 border border-sky-200 dark:border-sky-800 rounded-xl text-xs text-sky-800 dark:text-sky-300 leading-relaxed">
-        A geração de uma senha para músico cria um código QR e uma ligação segura para os membros da equipa visualizarem as pautas dos cultos de louvor sem necessidade de permissões de administração.
+        A geração de uma senha para músico cria um código QR e uma ligação
+        segura para os membros da equipa visualizarem as pautas dos cultos de
+        louvor sem necessidade de permissões de administração.
       </div>
 
       <div className="flex items-center justify-end gap-3 mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
-        <Button type="button" variant="ghost" onClick={onCancel} disabled={isLoading}>Cancelar</Button>
+        <Button
+          type="button"
+          variant="ghost"
+          onClick={onCancel}
+          disabled={isLoading}
+        >
+          Cancelar
+        </Button>
         <Button type="submit" variant="primary" isLoading={isLoading}>
           Gerar Acesso e Código QR
         </Button>

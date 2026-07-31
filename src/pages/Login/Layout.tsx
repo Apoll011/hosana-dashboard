@@ -1,10 +1,8 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { Lock, Mail, ArrowRight, AlertCircle, CheckCircle2, UserPlus } from 'lucide-react';
-import { Button } from '../../components/common/Button';
-import { Input } from '../../components/common/Input';
-import bg from '../../assets/images/background.webp';
-import logo from '../../assets/hosannastudio_logo.png';
+import { AlertCircle, CheckCircle2 } from "lucide-react";
+import React from "react";
+import { Link } from "react-router-dom";
+import logo from "../../assets/hosannastudio_logo.png";
+import bg from "../../assets/images/background.webp";
 
 interface LoginLayoutProps {
   children: React.ReactNode;
@@ -15,14 +13,21 @@ interface LoginLayoutProps {
   titleMb?: number;
 }
 
-export default function LoginLayout({ children,  redirectMessage, errorMsg, optionalLink, optionalMsg, titleMb = 6}: LoginLayoutProps) {
+export default function LoginLayout({
+  children,
+  redirectMessage,
+  errorMsg,
+  optionalLink,
+  optionalMsg,
+  titleMb = 6,
+}: LoginLayoutProps) {
   return (
     <div className="min-h-screen w-full flex items-center justify-center p-4 sm:p-8 md:p-16 relative overflow-hidden font-sans bg-slate-50 transition-colors duration-500">
       {/* Background Image */}
       <div className="absolute inset-0 z-0">
-        <img 
+        <img
           src={bg}
-          alt="Background" 
+          alt="Background"
           className="w-full h-full object-cover"
           referrerPolicy="no-referrer"
         />
@@ -33,7 +38,9 @@ export default function LoginLayout({ children,  redirectMessage, errorMsg, opti
       <div className="relative max-w-95 w-full bg-white border border-slate-200 rounded-4xl shadow-2xl shadow-black/40 p-6 sm:p-8 transition-all duration-300 z-20">
         {/* Branding */}
 
-        <div className={`flex flex-col items-center text-center mb-${titleMb} select-none`}>
+        <div
+          className={`flex flex-col items-center text-center mb-${titleMb} select-none`}
+        >
           <div
             className="
               w-22 h-22 rounded-[22px]

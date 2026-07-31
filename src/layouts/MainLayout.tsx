@@ -3,70 +3,65 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect, useRef, useMemo } from "react";
-import { useNavigate, useLocation, Outlet } from "react-router-dom";
-import { ToastContainer } from "../components/common/Toast";
-import { useAuth } from "../contexts/AuthContext";
-import { useFolders } from "../hooks/useFolders";
-import { useAllSongs } from "../hooks/useSongs";
-import { useServices } from "../hooks/useServices";
-import { useSync } from "../contexts/SyncContext";
-import { songsApi } from "../api/songs";
-import { Folder, Song } from "../types";
+import { Badge, Button, Input, Modal } from "@hosanna/shared";
 import {
-  Folder as FolderIcon,
-  FolderOpen,
-  FolderPlus,
-  FileText,
-  ChevronRight,
-  ChevronDown,
-  Search,
-  LayoutGrid,
-  List,
-  Edit2,
-  Trash2,
-  HardDrive,
-  CornerLeftUp,
-  AlertTriangle,
-  Move,
-  ExternalLink,
-  ArrowRightLeft,
-  Upload,
-  Plus,
-  CheckSquare,
-  Square,
-  X,
-  Check,
-  RotateCw,
-  Tag,
-  Music,
-  ArrowUpDown,
-  Filter,
-  User,
-  QrCode,
-  Settings,
-  LogOut,
-  Calendar,
-  Menu,
-  Printer,
+    AlertTriangle,
+    ArrowRightLeft,
+    ArrowUpDown,
+    Calendar,
+    CheckSquare,
+    ChevronDown,
+    ChevronRight,
+    CornerLeftUp,
+    Edit2,
+    ExternalLink,
+    FileText,
+    Filter,
+    Folder as FolderIcon,
+    FolderOpen,
+    FolderPlus,
+    HardDrive,
+    LayoutGrid,
+    List,
+    LogOut,
+    Menu,
+    Move,
+    Music,
+    Plus,
+    Printer,
+    QrCode,
+    RotateCw,
+    Search,
+    Settings,
+    Tag,
+    Trash2,
+    Upload,
+    User,
+    X,
 } from "lucide-react";
-import { Button } from "../components/common/Button";
-import { Input } from "../components/common/Input";
-import { Modal } from "../components/common/Modal";
-import { MoveSongModal } from "../components/modals/MoveSongModal";
-import { BatchMoveModal } from "../components/modals/BatchMoveModal";
-import { BatchDeleteModal } from "../components/modals/BatchDeleteModal";
-import { BatchTagModal } from "../components/modals/BatchTagModal";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import { songsApi } from "../api/songs";
+import logo from "../assets/hosannastudio_logo.png";
 import { FolderForm } from "../components/forms/FolderForm";
 import { SongForm } from "../components/forms/SongForm";
-import { Badge } from "../components/common/Badge";
-import logo from "../assets/hosannastudio_logo.png";
+import { BatchDeleteModal } from "../components/modals/BatchDeleteModal";
+import { BatchMoveModal } from "../components/modals/BatchMoveModal";
+import { BatchTagModal } from "../components/modals/BatchTagModal";
+import { MoveSongModal } from "../components/modals/MoveSongModal";
+import { ToastContainer } from "../components/Toast";
+import { useAuth } from "../contexts/AuthContext";
+import { useSync } from "../contexts/SyncContext";
+import { useFolders } from "../hooks/useFolders";
+import { useServices } from "../hooks/useServices";
+import { useAllSongs } from "../hooks/useSongs";
+import { Folder, Song } from "../types";
 
+import { printApi } from "../api/print";
 import { ServiceForm } from "../components/forms/ServiceForm";
 import { CifraClubImportModal } from "../components/modals/CifraModal";
-import { ConversionResult } from "../utils/conversion";
-import { printApi } from "../api/print";
 import { printHtmlDirectly } from "../utils";
+import { ConversionResult } from "../utils/conversion";
 
 interface ContextMenuState {
   x: number;
@@ -1292,13 +1287,13 @@ export const MainLayout: React.FC = () => {
       const html = await printApi.printSong(id);
       printHtmlDirectly(html);
     });
-  }
+  };
 
   const handlePrintSong = async (id: string) => {
     setContextMenu(null);
     const html = await printApi.printSong(id);
     printHtmlDirectly(html);
-  }
+  };
 
   const handlePrintFolders = async () => {
     setContextMenu(null);
@@ -1306,13 +1301,13 @@ export const MainLayout: React.FC = () => {
       const html = await printApi.printFolder(id);
       printHtmlDirectly(html);
     });
-  }
+  };
 
   const handlePrintFolder = async (id: string) => {
     setContextMenu(null);
     const html = await printApi.printFolder(id);
     printHtmlDirectly(html);
-  }
+  };
 
   const handleCifraClubSubmit = async (
     chordpro: ConversionResult,
@@ -2350,7 +2345,6 @@ export const MainLayout: React.FC = () => {
                 </>
               )}
 
-
               {selectedFolderIds.size > 0 && (
                 <>
                   <button
@@ -2362,7 +2356,6 @@ export const MainLayout: React.FC = () => {
                   </button>
                 </>
               )}
-
 
               <button
                 onClick={() => {
@@ -2518,7 +2511,7 @@ export const MainLayout: React.FC = () => {
                     <Tag className="w-4 h-4 text-[#0284c7]" />
                     <span>Etiquetar Cântico</span>
                   </button>
-                 
+
                   <button
                     onClick={async () => {
                       handlePrintSong((contextMenu.item as Song).id);
