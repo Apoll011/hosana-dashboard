@@ -2686,103 +2686,150 @@ export const MainLayout: React.FC = () => {
         }}
         title={`Apagar Pasta "${deleteTarget?.name}"`}
       >
-        <div className="flex flex-col gap-4">
-          <div className="p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-xl flex items-start gap-2.5 text-xs text-amber-800 dark:text-amber-300">
-            <AlertTriangle className="w-4 h-4 shrink-0 text-amber-500 mt-0.5" />
-            <span>Selecione como tratar os cânticos dentro desta pasta:</span>
-          </div>
-
-          <div className="flex flex-col gap-2.5">
-            <label className="flex items-center gap-3 p-3 border border-slate-200 dark:border-slate-800 rounded-xl cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50">
-              <input
-                type="radio"
-                name="deleteAção"
-                value="move_to_root"
-                checked={deleteAção === "move_to_root"}
-                onChange={() => {
-                  setDeleteAção("move_to_root");
-                  setConfirmFolderName("");
-                }}
-                className="text-[#0284c7] focus:ring-[#0284c7]"
-              />
-              <div className="flex flex-col">
-                <span className="text-xs font-bold text-slate-900 dark:text-slate-100">
-                  Mover cânticos para a Raiz (Recomendado)
-                </span>
-                <span className="text-[11px] text-slate-500">
-                  Mantém as cifras dos cânticos na biblioteca sem categoria de
-                  pasta.
-                </span>
-              </div>
-            </label>
-
-            <label className="flex items-center gap-3 p-3 border border-rose-200 dark:border-rose-950 rounded-xl cursor-pointer hover:bg-rose-50/50 dark:hover:bg-rose-950/20">
-              <input
-                type="radio"
-                name="deleteAção"
-                value="delete_songs"
-                checked={deleteAção === "delete_songs"}
-                onChange={() => setDeleteAção("delete_songs")}
-                className="text-rose-600 focus:ring-rose-500"
-              />
-              <div className="flex flex-col">
-                <span className="text-xs font-bold text-rose-600 dark:text-rose-400">
-                  Apagar pasta e todos os cânticos nela contidos
-                </span>
-                <span className="text-[11px] text-slate-500">
-                  Apaga permanentemente a pasta E todos os ficheiros de cânticos
-                  dentro dela.
-                </span>
-              </div>
-            </label>
-          </div>
-
-          {deleteAção === "delete_songs" && (
-            <div className="p-4 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 rounded-2xl flex flex-col gap-3 text-xs">
-              <div className="flex items-center gap-2 font-bold text-rose-700 dark:text-rose-300">
-                <AlertTriangle className="w-4 h-4 text-rose-500 shrink-0" />
-                <span>Confirmação Adicional de Segurança</span>
-              </div>
-              <p className="text-rose-900 dark:text-rose-200 text-[11px] leading-relaxed">
-                Esta ação é irreversível. Para confirmar a eliminação permanente
-                da pasta e de todos os seus cânticos, escreva o nome da pasta{" "}
-                <strong className="font-extrabold underline">
-                  {deleteTarget?.name}
-                </strong>{" "}
-                abaixo:
-              </p>
-              <Input
-                placeholder={`Escreva "${deleteTarget?.name}" para confirmar`}
-                value={confirmFolderName}
-                onChange={(e) => setConfirmFolderName(e.target.value)}
-                className="bg-white dark:bg-slate-900 border-rose-300 dark:border-rose-800 text-xs"
-              />
+        {(deleteTarget?.folderCount || 0) + (deleteTarget?.songCount || 0) >
+        0 ? (
+          <div className="flex flex-col gap-4">
+            <div className="p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-xl flex items-start gap-2.5 text-xs text-amber-800 dark:text-amber-300">
+              <AlertTriangle className="w-4 h-4 shrink-0 text-amber-500 mt-0.5" />
+              <span>Selecione como tratar os cânticos dentro desta pasta:</span>
             </div>
-          )}
 
-          <div className="flex items-center justify-end gap-3 mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
-            <Button
-              variant="ghost"
-              onClick={() => {
-                setDeleteTarget(null);
-                setConfirmFolderName("");
-                setDeleteAção("move_to_root");
-              }}
-            >
-              Cancelar
-            </Button>
-            <Button
-              variant="danger"
-              disabled={
-                deleteAção === "delete_songs" &&
-                confirmFolderName.trim() !== deleteTarget?.name?.trim()
-              }
-              onClick={handleDeleteFolderSubmit}
-            >
-              Confirmar Eliminação
-            </Button>
+            <div className="flex flex-col gap-2.5">
+              <label className="flex items-center gap-3 p-3 border border-slate-200 dark:border-slate-800 rounded-xl cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                <input
+                  type="radio"
+                  name="deleteAção"
+                  value="move_to_root"
+                  checked={deleteAção === "move_to_root"}
+                  onChange={() => {
+                    setDeleteAção("move_to_root");
+                    setConfirmFolderName("");
+                  }}
+                  className="text-[#0284c7] focus:ring-[#0284c7]"
+                />
+                <div className="flex flex-col">
+                  <span className="text-xs font-bold text-slate-900 dark:text-slate-100">
+                    Mover cânticos para a Raiz (Recomendado)
+                  </span>
+                  <span className="text-[11px] text-slate-500">
+                    Mantém as cifras dos cânticos na biblioteca sem categoria de
+                    pasta.
+                  </span>
+                </div>
+              </label>
+
+              <label className="flex items-center gap-3 p-3 border border-rose-200 dark:border-rose-950 rounded-xl cursor-pointer hover:bg-rose-50/50 dark:hover:bg-rose-950/20">
+                <input
+                  type="radio"
+                  name="deleteAção"
+                  value="delete_songs"
+                  checked={deleteAção === "delete_songs"}
+                  onChange={() => setDeleteAção("delete_songs")}
+                  className="text-rose-600 focus:ring-rose-500"
+                />
+                <div className="flex flex-col">
+                  <span className="text-xs font-bold text-rose-600 dark:text-rose-400">
+                    Apagar pasta e todos os cânticos nela contidos
+                  </span>
+                  <span className="text-[11px] text-slate-500">
+                    Apaga permanentemente a pasta E todos os ficheiros de
+                    cânticos dentro dela.
+                  </span>
+                </div>
+              </label>
+            </div>
+
+            {deleteAção === "delete_songs" && (
+              <div className="p-4 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 rounded-2xl flex flex-col gap-3 text-xs">
+                <div className="flex items-center gap-2 font-bold text-rose-700 dark:text-rose-300">
+                  <AlertTriangle className="w-4 h-4 text-rose-500 shrink-0" />
+                  <span>Confirmação Adicional de Segurança</span>
+                </div>
+                <p className="text-rose-900 dark:text-rose-200 text-[11px] leading-relaxed">
+                  Esta ação é irreversível. Para confirmar a eliminação
+                  permanente da pasta e de todos os seus cânticos, escreva o
+                  nome da pasta{" "}
+                  <strong className="font-extrabold underline">
+                    {deleteTarget?.name}
+                  </strong>{" "}
+                  abaixo:
+                </p>
+                <Input
+                  placeholder={`Escreva "${deleteTarget?.name}" para confirmar`}
+                  value={confirmFolderName}
+                  onChange={(e) => setConfirmFolderName(e.target.value)}
+                  className="bg-white dark:bg-slate-900 border-rose-300 dark:border-rose-800 text-xs"
+                />
+              </div>
+            )}
+
+            <div className="flex items-center justify-end gap-3 mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  setDeleteTarget(null);
+                  setConfirmFolderName("");
+                  setDeleteAção("move_to_root");
+                }}
+              >
+                Cancelar
+              </Button>
+              <Button
+                variant="danger"
+                disabled={
+                  deleteAção === "delete_songs" &&
+                  confirmFolderName.trim() !== deleteTarget?.name?.trim()
+                }
+                onClick={handleDeleteFolderSubmit}
+              >
+                Confirmar Eliminação
+              </Button>
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="flex flex-col gap-4">
+            <div className="p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-xl flex items-start gap-2.5 text-xs text-amber-800 dark:text-amber-300">
+              <AlertTriangle className="w-4 h-4 shrink-0 text-amber-500 mt-0.5" />
+              <span>Selecione como tratar os cânticos dentro desta pasta:</span>
+            </div>
+
+            <div className="flex flex-col gap-2.5">
+              <label className="flex items-center gap-3 p-3 border border-slate-200 dark:border-slate-800 rounded-xl cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                <div className="flex flex-col">
+                  <span className="text-xs font-bold text-slate-900 dark:text-slate-100">
+                    Apagar pasta
+                  </span>
+                  <span className="text-[11px] text-slate-500">
+                    A pasta está vazia e será eliminada
+                  </span>
+                </div>
+              </label>
+
+              <div className="flex items-center justify-end gap-3 mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
+                <Button
+                  variant="ghost"
+                  onClick={() => {
+                    setDeleteTarget(null);
+                    setConfirmFolderName("");
+                    setDeleteAção("move_to_root");
+                  }}
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  variant="danger"
+                  disabled={
+                    deleteAção === "delete_songs" &&
+                    confirmFolderName.trim() !== deleteTarget?.name?.trim()
+                  }
+                  onClick={handleDeleteFolderSubmit}
+                >
+                  Confirmar Eliminação
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
       </Modal>
 
       {/* RENAME SONG MODAL */}
