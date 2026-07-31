@@ -22,7 +22,7 @@ import {
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import ChordProPreview from "../../components/ChordProPreview";
-import { HelpModal } from "../../components/HelpModal";
+import { HelpModal } from "../../components/modals/HelpModal";
 import { useSong, useSongs } from "../../hooks/useSongs";
 
 export const SongEditorPage: React.FC = () => {

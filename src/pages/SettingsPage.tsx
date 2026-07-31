@@ -40,11 +40,11 @@ import {
   Users,
 } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
-import { useAuth } from "../../contexts/AuthContext";
-import { useSync } from "../../contexts/SyncContext";
-import { useTheme } from "../../contexts/ThemeContext";
-import { useAdmins } from "../../hooks/useAdmins";
-import { useSettings } from "../../hooks/useSettings";
+import { useAuth } from "../contexts/AuthContext";
+import { useSync } from "../contexts/SyncContext";
+import { useTheme } from "../contexts/ThemeContext";
+import { useAdmins } from "../hooks/useAdmins";
+import { useSettings } from "../hooks/useSettings";
 
 interface SettingsPageProps {
   hideHeader?: boolean;
