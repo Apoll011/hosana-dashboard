@@ -1558,7 +1558,6 @@ export const MainLayout: React.FC = () => {
                 className="
                 w-12 h-12 rounded-xl
                 flex items-center justify-center
-                mb-4
                 border
                 transition-transform
                 hover:scale-105 hover:rotate-2
@@ -1961,74 +1960,6 @@ export const MainLayout: React.FC = () => {
                       </>
                     )}
                   </div>
-
-                  {/* Plus Dropdown - Only for explorer/songs/services */}
-                  {(isExplorerView || isSongsView || isServicesView) && (
-                    <div className="relative shrink-0 ml-1" ref={plusMenuRef}>
-                      <button
-                        onClick={() => setIsPlusMenuOpen(!isPlusMenuOpen)}
-                        className="w-10 h-10 rounded-2xl bg-m3-primary text-white flex items-center justify-center border border-m3-primary font-black text-lg shadow-xl shadow-m3-primary/20 hover:bg-m3-primary-dark hover:scale-105 active:scale-95 transition-all cursor-pointer"
-                        title="Criar..."
-                      >
-                        <Plus className="w-5 h-5" />
-                      </button>
-                      {isPlusMenuOpen && (
-                        <div className="absolute right-0 top-full mt-3 w-64 bg-m3-card border border-m3-border rounded-3xl shadow-2xl z-50 p-2 space-y-1 animate-in fade-in slide-in-from-top-2 duration-200">
-                          <div className="px-4 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-m3-secondary opacity-60">
-                            Criar Novo
-                          </div>
-                          <button
-                            onClick={() => {
-                              setIsPlusMenuOpen(false);
-                              setIsCreateSongModalOpen(true);
-                            }}
-                            className="w-full flex items-center gap-4 px-4 py-3 text-xs font-bold text-m3-text hover:bg-m3-hover rounded-2xl transition-all cursor-pointer text-left group"
-                          >
-                            <div className="w-8 h-8 rounded-xl bg-m3-primary/10 text-m3-primary flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-                              <Music className="w-4 h-4" />
-                            </div>
-                            Novo Cântico
-                          </button>
-                          <button
-                            onClick={() => {
-                              setIsPlusMenuOpen(false);
-                              setIsCifraImportOpen(true);
-                            }}
-                            className="w-full flex items-center gap-4 px-4 py-3 text-xs font-bold text-m3-text hover:bg-m3-hover rounded-2xl transition-all cursor-pointer text-left group"
-                          >
-                            <div className="w-8 h-8 rounded-xl bg-m3-primary/10 text-m3-primary flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-                              <Music className="w-4 h-4" />
-                            </div>
-                            Importar Cântico do CifraClub
-                          </button>
-                          <button
-                            onClick={() => {
-                              setIsPlusMenuOpen(false);
-                              setIsCreateServiceModalOpen(true);
-                            }}
-                            className="w-full flex items-center gap-4 px-4 py-3 text-xs font-bold text-m3-text hover:bg-m3-hover rounded-2xl transition-all cursor-pointer text-left group"
-                          >
-                            <div className="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-                              <Calendar className="w-4 h-4" />
-                            </div>
-                            Novo Plano de Culto
-                          </button>
-                          <button
-                            onClick={() => {
-                              setIsPlusMenuOpen(false);
-                              setIsCreateModalOpen(true);
-                            }}
-                            className="w-full flex items-center gap-4 px-4 py-3 text-xs font-bold text-m3-text hover:bg-m3-hover rounded-2xl transition-all cursor-pointer text-left group"
-                          >
-                            <div className="w-8 h-8 rounded-xl bg-m3-primary-light/10 text-m3-primary flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-                              <FolderPlus className="w-4 h-4" />
-                            </div>
-                            Nova Pasta
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  )}
                 </div>
 
                 {/* Search Filter, Sorting & View Mode Toggles */}
@@ -2132,6 +2063,74 @@ export const MainLayout: React.FC = () => {
                           >
                             <List className="w-4 h-4" />
                           </button>
+                        </div>
+
+                        <div
+                          className="relative shrink-0 ml-1"
+                          ref={plusMenuRef}
+                        >
+                          <button
+                            onClick={() => setIsPlusMenuOpen(!isPlusMenuOpen)}
+                            className="w-10 h-10 rounded-2xl bg-m3-primary text-white flex items-center justify-center border border-m3-primary font-black text-lg shadow-xl shadow-m3-primary/20 hover:bg-m3-primary-dark hover:scale-105 active:scale-95 transition-all cursor-pointer"
+                            title="Criar..."
+                          >
+                            <Plus className="w-5 h-5" />
+                          </button>
+                          {isPlusMenuOpen && (
+                            <div className="absolute right-0 top-full mt-3 w-64 bg-m3-card border border-m3-border rounded-3xl shadow-2xl z-50 p-2 space-y-1 animate-in fade-in slide-in-from-top-2 duration-200">
+                              <div className="px-4 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-m3-secondary opacity-60">
+                                Criar Novo
+                              </div>
+                              <button
+                                onClick={() => {
+                                  setIsPlusMenuOpen(false);
+                                  setIsCreateSongModalOpen(true);
+                                }}
+                                className="w-full flex items-center gap-4 px-4 py-3 text-xs font-bold text-m3-text hover:bg-m3-hover rounded-2xl transition-all cursor-pointer text-left group"
+                              >
+                                <div className="w-8 h-8 rounded-xl bg-m3-primary/10 text-m3-primary flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                                  <Music className="w-4 h-4" />
+                                </div>
+                                Novo Cântico
+                              </button>
+                              <button
+                                onClick={() => {
+                                  setIsPlusMenuOpen(false);
+                                  setIsCifraImportOpen(true);
+                                }}
+                                className="w-full flex items-center gap-4 px-4 py-3 text-xs font-bold text-m3-text hover:bg-m3-hover rounded-2xl transition-all cursor-pointer text-left group"
+                              >
+                                <div className="w-8 h-8 rounded-xl bg-m3-primary/10 text-m3-primary flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                                  <Music className="w-4 h-4" />
+                                </div>
+                                Importar Cântico do CifraClub
+                              </button>
+                              <button
+                                onClick={() => {
+                                  setIsPlusMenuOpen(false);
+                                  setIsCreateServiceModalOpen(true);
+                                }}
+                                className="w-full flex items-center gap-4 px-4 py-3 text-xs font-bold text-m3-text hover:bg-m3-hover rounded-2xl transition-all cursor-pointer text-left group"
+                              >
+                                <div className="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                                  <Calendar className="w-4 h-4" />
+                                </div>
+                                Novo Plano de Culto
+                              </button>
+                              <button
+                                onClick={() => {
+                                  setIsPlusMenuOpen(false);
+                                  setIsCreateModalOpen(true);
+                                }}
+                                className="w-full flex items-center gap-4 px-4 py-3 text-xs font-bold text-m3-text hover:bg-m3-hover rounded-2xl transition-all cursor-pointer text-left group"
+                              >
+                                <div className="w-8 h-8 rounded-xl bg-m3-primary-light/10 text-m3-primary flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                                  <FolderPlus className="w-4 h-4" />
+                                </div>
+                                Nova Pasta
+                              </button>
+                            </div>
+                          )}
                         </div>
                       </>
                     )}
