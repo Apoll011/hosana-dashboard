@@ -198,7 +198,7 @@ export const SongEditorPage: React.FC = () => {
         </div>
 
         {showPreview && (
-          <div className="h-1/2 md:h-full md:w-1/2 border-t md:border-t-0 md:border-l border-m3-border bg-m3-card flex flex-col animate-in slide-in-from-right duration-500">
+          <div className="h-1/2 md:h-full md:w-1/2 border-t md:border-t-0 md:border-l border-m3-border bg-m3-card flex flex-col animate-in slide-in-from-right duration-500 relative">
             <ChordProPreview content={content} />
           </div>
         )}
