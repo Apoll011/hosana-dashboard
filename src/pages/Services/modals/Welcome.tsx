@@ -5,12 +5,22 @@
 import { Button, Modal } from "@hosanna/shared";
 import { FileText } from "lucide-react";
 import { useEffect, useState } from "react";
+import {
+  DurationField,
+  durationInputToSeconds,
+  secondsToDurationInput,
+} from "./DurationField";
 
 interface WelcomeModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (data: { title: string; content: string; notes: string }) => void;
-  initial?: { title: string; content: string; notes: string };
+  onSave: (data: {
+    title: string;
+    content: string;
+    notes: string;
+    duration: number;
+  }) => void;
+  initial?: { title: string; content: string; notes: string; duration?: number };
 }
 
 export const WelcomeModal: React.FC<WelcomeModalProps> = ({
@@ -24,12 +34,16 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({
   );
   const [content, setContent] = useState(initial?.content || "");
   const [notes, setNotes] = useState(initial?.notes || "");
+  const [duration, setDuration] = useState(
+    secondsToDurationInput(initial?.duration),
+  );
 
   useEffect(() => {
     if (isOpen) {
       setTitle(initial?.title || "Boas-vindas & Oração Inicial");
       setContent(initial?.content || "");
       setNotes(initial?.notes || "");
+      setDuration(secondsToDurationInput(initial?.duration));
     }
   }, [isOpen, initial]);
 
@@ -97,6 +111,12 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({
           />
         </div>
 
+        <DurationField
+          value={duration}
+          onChange={setDuration}
+          accentRingClass="focus:ring-blue-500"
+        />
+
         <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-200 dark:border-slate-800">
           <Button type="button" variant="ghost" size="sm" onClick={onClose}>
             Cancelar
@@ -107,7 +127,12 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({
             size="sm"
             onClick={() => {
               if (!title.trim()) return;
-              onSave({ title, content, notes });
+              onSave({
+                title,
+                content,
+                notes,
+                duration: durationInputToSeconds(duration),
+              });
             }}
           >
             Guardar
