@@ -209,7 +209,7 @@ const SortableRow: React.FC<SortableRowProps> = ({
               </p>
             )}
             {element.content && (
-              <p className="text-xs text-slate-500 truncate mt-0.5">
+              <p className="text-xs text-slate-500 line-clamp-3 mt-0.5">
                 {element.content}
               </p>
             )}
@@ -556,82 +556,7 @@ export const ServiceDetailPage: React.FC = () => {
           </p>
         </div>
       </div>
-
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.3fr] gap-6 h-full min-h-0">
-        <div
-          className="bg-white rounded-3xl border shadow-sm flex flex-col h-full min-h-0"
-          style={{ borderColor: border }}
-        >
-          <div
-            className="p-5 pb-4 border-b shrink-0"
-            style={{ borderColor: border }}
-          >
-            <h2 className="text-base font-bold mb-3" style={{ color: navy }}>
-              Biblioteca de Cânticos
-            </h2>
-            <Input
-              ref={searchInputRef as any}
-              placeholder="Pesquisar cânticos..."
-              value={librarySearch}
-              onChange={(e) => setLibrarySearch(e.target.value)}
-              icon={<Search className="w-4 h-4 text-slate-400" />}
-            />
-          </div>
-
-          <div
-            className="overflow-y-auto flex-1 min-h-0 divide-y"
-            style={{ borderColor: border }}
-          >
-            {filteredLibrarySongs.length === 0 ? (
-              <div className="p-6 text-center text-xs text-slate-400">
-                Nenhum cântico encontrado.
-              </div>
-            ) : (
-              filteredLibrarySongs.map((s) => {
-                const isAdded = addedSongIds.has(s.id);
-                return (
-                  <div
-                    key={s.id}
-                    className="flex items-center justify-between gap-3 px-5 py-3"
-                  >
-                    <div className="min-w-0">
-                      <p
-                        className="text-sm font-semibold truncate"
-                        style={{ color: navy }}
-                      >
-                        {s.title}
-                      </p>
-                      <p className="text-xs text-slate-400 truncate">
-                        {s.artist || "—"}
-                      </p>
-                    </div>
-
-                    {isAdded ? (
-                      <span
-                        className="inline-flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-full shrink-0"
-                        style={{ backgroundColor: "#EAF6EE", color: "#2E8B4F" }}
-                      >
-                        <Check className="w-3 h-3" />
-                        Na Lista
-                      </span>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={() => handleAddSongToService(s.id)}
-                        className="p-1.5 rounded-lg shrink-0 cursor-pointer transition-colors hover:bg-sky-200"
-                        style={{ backgroundColor: goldSoft, color: gold }}
-                        title="Adicionar ao plano"
-                      >
-                        <Plus className="w-4 h-4" />
-                      </button>
-                    )}
-                  </div>
-                );
-              })
-            )}
-          </div>
-        </div>
-
         <div className="flex flex-col gap-4 h-full min-h-0">
           <div
             className="bg-white rounded-2xl border p-4 space-y-2 shrink-0"
@@ -665,126 +590,202 @@ export const ServiceDetailPage: React.FC = () => {
           </div>
 
           <div
-            className="bg-white rounded-3xl border shadow-sm flex flex-col flex-1 min-h-0"
+            className="bg-white rounded-3xl border shadow-sm flex flex-col h-full min-h-0"
             style={{ borderColor: border }}
           >
             <div
-              className="flex flex-wrap items-center justify-between px-5 py-4 border-b gap-2 shrink-0"
+              className="p-5 pb-4 border-b shrink-0"
               style={{ borderColor: border }}
             >
-              <h2 className="text-base font-bold" style={{ color: navy }}>
-                Plano do Culto
-                <span className="ml-2 text-xs font-medium text-slate-400">
-                  ({elements.length} {elements.length === 1 ? "item" : "itens"})
-                </span>
+              <h2 className="text-base font-bold mb-3" style={{ color: navy }}>
+                Biblioteca de Cânticos
               </h2>
-
-              <div className="flex items-center gap-1">
-                <button
-                  type="button"
-                  onClick={() => openAddModal("welcome")}
-                  className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 cursor-pointer transition-colors"
-                >
-                  + Boas-vindas
-                </button>
-                <button
-                  type="button"
-                  onClick={() => openAddModal("scripture")}
-                  className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-fuchsia-50 text-fuchsia-700 hover:bg-fuchsia-100 cursor-pointer transition-colors"
-                >
-                  + Escritura
-                </button>
-                <button
-                  type="button"
-                  onClick={() => openAddModal("reading")}
-                  className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-red-50 text-red-700 hover:bg-red-100 cursor-pointer transition-colors"
-                >
-                  + Leitura Responsiva
-                </button>
-                <button
-                  type="button"
-                  onClick={() => openAddModal("message")}
-                  className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-amber-50 text-amber-700 hover:bg-amber-100 cursor-pointer transition-colors"
-                >
-                  + Mensagem
-                </button>
-                <button
-                  type="button"
-                  onClick={() => openAddModal("announcement")}
-                  className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 cursor-pointer transition-colors"
-                >
-                  + Avisos
-                </button>
-              </div>
+              <Input
+                ref={searchInputRef as any}
+                placeholder="Pesquisar cânticos..."
+                value={librarySearch}
+                onChange={(e) => setLibrarySearch(e.target.value)}
+                icon={<Search className="w-4 h-4 text-slate-400" />}
+              />
             </div>
 
-            <div className="p-4 flex-1 overflow-y-auto min-h-0 flex flex-col">
-              {elements.length === 0 ? (
-                <div
-                  className="p-8 text-center rounded-2xl border border-dashed flex flex-col items-center justify-center gap-3 shrink-0"
-                  style={{ borderColor: border }}
-                >
-                  <div
-                    className="w-12 h-12 rounded-2xl flex items-center justify-center"
-                    style={{ backgroundColor: goldSoft, color: gold }}
-                  >
-                    <Music className="w-6 h-6" />
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-bold" style={{ color: navy }}>
-                      O plano ainda está vazio
-                    </h4>
-                  </div>
+            <div
+              className="overflow-y-auto flex-1 min-h-0 divide-y"
+              style={{ borderColor: border }}
+            >
+              {filteredLibrarySongs.length === 0 ? (
+                <div className="p-6 text-center text-xs text-slate-400">
+                  Nenhum cântico encontrado.
                 </div>
               ) : (
-                <DndContext
-                  sensors={sensors}
-                  collisionDetection={closestCenter}
-                  onDragEnd={handleDragEnd}
-                >
-                  <SortableContext
-                    items={elements.map((i) => i.id)}
-                    strategy={verticalListSortingStrategy}
-                  >
-                    <div className="flex flex-col gap-2.5">
-                      {elements.map((element, index) => {
-                        return (
-                          <SortableRow
-                            key={element.id}
-                            id={element.id}
-                            element={element}
-                            index={index}
-                            onRemove={handleRemoveElement}
-                            onEdit={openEditModal}
-                            onNoteChange={handleNoteChange}
-                          />
-                        );
-                      })}
-                    </div>
-                  </SortableContext>
-                </DndContext>
-              )}
+                filteredLibrarySongs.map((s) => {
+                  const isAdded = addedSongIds.has(s.id);
+                  return (
+                    <div
+                      key={s.id}
+                      className="flex items-center justify-between gap-3 px-5 py-3"
+                    >
+                      <div className="min-w-0">
+                        <p
+                          className="text-sm font-semibold truncate"
+                          style={{ color: navy }}
+                        >
+                          {s.title}
+                        </p>
+                        <p className="text-xs text-slate-400 truncate">
+                          {s.artist || "—"}
+                        </p>
+                      </div>
 
-              <div className="flex gap-2 mt-auto pt-3 shrink-0">
-                <button
-                  type="button"
-                  onClick={() => searchInputRef.current?.focus()}
-                  className="flex-1 py-3 rounded-2xl border border-dashed text-xs font-semibold flex items-center justify-center gap-2 cursor-pointer transition-colors hover:bg-slate-50"
-                  style={{ borderColor: border, color: gold }}
+                      {isAdded ? (
+                        <span
+                          className="inline-flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-full shrink-0"
+                          style={{
+                            backgroundColor: "#EAF6EE",
+                            color: "#2E8B4F",
+                          }}
+                        >
+                          <Check className="w-3 h-3" />
+                          Na Lista
+                        </span>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => handleAddSongToService(s.id)}
+                          className="p-1.5 rounded-lg shrink-0 cursor-pointer transition-colors hover:bg-sky-200"
+                          style={{ backgroundColor: goldSoft, color: gold }}
+                          title="Adicionar ao plano"
+                        >
+                          <Plus className="w-4 h-4" />
+                        </button>
+                      )}
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </div>
+        </div>
+        <div
+          className="bg-white rounded-3xl border shadow-sm flex flex-col flex-1 min-h-0"
+          style={{ borderColor: border }}
+        >
+          <div
+            className="flex flex-wrap items-center justify-between px-5 py-4 border-b gap-2 shrink-0"
+            style={{ borderColor: border }}
+          >
+            <h2 className="text-base font-bold" style={{ color: navy }}>
+              Plano do Culto
+              <span className="ml-2 text-xs font-medium text-slate-400">
+                ({elements.length} {elements.length === 1 ? "item" : "itens"})
+              </span>
+            </h2>
+
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                onClick={() => openAddModal("welcome")}
+                className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 cursor-pointer transition-colors"
+              >
+                + Boas-vindas
+              </button>
+              <button
+                type="button"
+                onClick={() => openAddModal("scripture")}
+                className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-fuchsia-50 text-fuchsia-700 hover:bg-fuchsia-100 cursor-pointer transition-colors"
+              >
+                + Escritura
+              </button>
+              <button
+                type="button"
+                onClick={() => openAddModal("reading")}
+                className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-red-50 text-red-700 hover:bg-red-100 cursor-pointer transition-colors"
+              >
+                + Leitura Responsiva
+              </button>
+              <button
+                type="button"
+                onClick={() => openAddModal("message")}
+                className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-amber-50 text-amber-700 hover:bg-amber-100 cursor-pointer transition-colors"
+              >
+                + Mensagem
+              </button>
+              <button
+                type="button"
+                onClick={() => openAddModal("announcement")}
+                className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 cursor-pointer transition-colors"
+              >
+                + Avisos
+              </button>
+            </div>
+          </div>
+
+          <div className="p-4 flex-1 overflow-y-auto min-h-0 flex flex-col">
+            {elements.length === 0 ? (
+              <div
+                className="p-8 text-center rounded-2xl border border-dashed flex flex-col items-center justify-center gap-3 shrink-0"
+                style={{ borderColor: border }}
+              >
+                <div
+                  className="w-12 h-12 rounded-2xl flex items-center justify-center"
+                  style={{ backgroundColor: goldSoft, color: gold }}
                 >
-                  <Plus className="w-4 h-4" />
-                  Adicionar Cântico
-                </button>
-                <button
-                  type="button"
-                  onClick={() => openAddModal("custom")}
-                  className="flex-1 py-3 rounded-2xl border border-dashed text-xs font-semibold flex items-center justify-center gap-2 cursor-pointer transition-colors hover:bg-slate-50 text-slate-600"
-                  style={{ borderColor: border }}
-                >
-                  <Plus className="w-4 h-4" />
-                  Adicionar Outro/Personalizado
-                </button>
+                  <Music className="w-6 h-6" />
+                </div>
+                <div>
+                  <h4 className="text-sm font-bold" style={{ color: navy }}>
+                    O plano ainda está vazio
+                  </h4>
+                </div>
               </div>
+            ) : (
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleDragEnd}
+              >
+                <SortableContext
+                  items={elements.map((i) => i.id)}
+                  strategy={verticalListSortingStrategy}
+                >
+                  <div className="flex flex-col gap-2.5">
+                    {elements.map((element, index) => {
+                      return (
+                        <SortableRow
+                          key={element.id}
+                          id={element.id}
+                          element={element}
+                          index={index}
+                          onRemove={handleRemoveElement}
+                          onEdit={openEditModal}
+                          onNoteChange={handleNoteChange}
+                        />
+                      );
+                    })}
+                  </div>
+                </SortableContext>
+              </DndContext>
+            )}
+
+            <div className="flex gap-2 mt-auto pt-3 shrink-0">
+              <button
+                type="button"
+                onClick={() => searchInputRef.current?.focus()}
+                className="flex-1 py-3 rounded-2xl border border-dashed text-xs font-semibold flex items-center justify-center gap-2 cursor-pointer transition-colors hover:bg-slate-50"
+                style={{ borderColor: border, color: gold }}
+              >
+                <Plus className="w-4 h-4" />
+                Adicionar Cântico
+              </button>
+              <button
+                type="button"
+                onClick={() => openAddModal("custom")}
+                className="flex-1 py-3 rounded-2xl border border-dashed text-xs font-semibold flex items-center justify-center gap-2 cursor-pointer transition-colors hover:bg-slate-50 text-slate-600"
+                style={{ borderColor: border }}
+              >
+                <Plus className="w-4 h-4" />
+                Adicionar Outro/Personalizado
+              </button>
             </div>
           </div>
         </div>
