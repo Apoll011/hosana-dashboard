@@ -1,0 +1,119 @@
+// ══════════════════════════════════════════════════════════════════════
+// ── Welcome Modal ─────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════════
+
+import { Button, Modal } from "@hosanna/shared";
+import { FileText } from "lucide-react";
+import { useEffect, useState } from "react";
+
+interface WelcomeModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSave: (data: { title: string; content: string; notes: string }) => void;
+  initial?: { title: string; content: string; notes: string };
+}
+
+export const WelcomeModal: React.FC<WelcomeModalProps> = ({
+  isOpen,
+  onClose,
+  onSave,
+  initial,
+}) => {
+  const [title, setTitle] = useState(
+    initial?.title || "Boas-vindas & Oração Inicial",
+  );
+  const [content, setContent] = useState(initial?.content || "");
+  const [notes, setNotes] = useState(initial?.notes || "");
+
+  useEffect(() => {
+    if (isOpen) {
+      setTitle(initial?.title || "Boas-vindas & Oração Inicial");
+      setContent(initial?.content || "");
+      setNotes(initial?.notes || "");
+    }
+  }, [isOpen, initial]);
+
+  return (
+    <Modal isOpen={isOpen} onClose={onClose} title="Boas-vindas & Oração">
+      <div className="space-y-4 py-2">
+        <div
+          className="flex items-center gap-3 p-3 rounded-xl"
+          style={{ backgroundColor: "#EBF5FF" }}
+        >
+          <div
+            className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+            style={{ backgroundColor: "#1D4ED8", color: "white" }}
+          >
+            <FileText className="w-5 h-5" />
+          </div>
+          <div>
+            <p className="text-xs font-bold" style={{ color: "#1D4ED8" }}>
+              Boas-vindas
+            </p>
+            <p className="text-[11px] text-slate-500">
+              Momento de acolhimento e oração inicial do culto.
+            </p>
+          </div>
+        </div>
+
+        <div className="space-y-1.5">
+          <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+            Título
+          </label>
+          <input
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="Ex: Boas-vindas & Oração Inicial"
+            className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
+        <div className="space-y-1.5">
+          <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+            Detalhes / Conteúdo
+            <span className="font-normal text-slate-400 ml-1">(opcional)</span>
+          </label>
+          <textarea
+            rows={3}
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            placeholder="Ex: Saudação pelo pastor, oração de abertura..."
+            className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
+        <div className="space-y-1.5">
+          <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+            Notas
+            <span className="font-normal text-slate-400 ml-1">(opcional)</span>
+          </label>
+          <textarea
+            rows={2}
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            placeholder="Ex: O pastor João faz a saudação..."
+            className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
+        <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-200 dark:border-slate-800">
+          <Button type="button" variant="ghost" size="sm" onClick={onClose}>
+            Cancelar
+          </Button>
+          <Button
+            type="button"
+            variant="primary"
+            size="sm"
+            onClick={() => {
+              if (!title.trim()) return;
+              onSave({ title, content, notes });
+            }}
+          >
+            Guardar
+          </Button>
+        </div>
+      </div>
+    </Modal>
+  );
+};
