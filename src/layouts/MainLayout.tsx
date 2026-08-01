@@ -1547,8 +1547,12 @@ export const MainLayout: React.FC = () => {
 
         <div
           className={`${isSidebarOpen ? "flex absolute inset-y-0 left-0 z-50 bg-m3-sidebar shadow-2xl" : "hidden"} md:flex md:static md:bg-m3-sidebar/30 w-72 md:w-64 border-r border-m3-border p-4 flex-col gap-1 select-none shrink-0 overflow-y-auto transition-all duration-300`}
+          role="navigation"
         >
-          <div className="flex flex-col items-center text-center mb-4 mt-2 select-none">
+          <div
+            className="flex flex-col items-center text-center mb-4 mt-2 select-none"
+            role="banner"
+          >
             <div className="flex items-center gap-3">
               <div
                 className="
@@ -1755,7 +1759,10 @@ export const MainLayout: React.FC = () => {
           />
 
           {/* Explorador de Ficheiros Window Container */}
-          <div className="bg-m3-card border md:border-none border-m3-border rounded-4xl md:rounded-none shadow-2xl md:shadow-none shadow-black/10 overflow-hidden flex flex-col flex-1 h-full transition-all duration-300">
+          <div
+            className="bg-m3-card border md:border-none border-m3-border rounded-4xl md:rounded-none shadow-2xl md:shadow-none shadow-black/10 overflow-hidden flex flex-col flex-1 h-full transition-all duration-300"
+            role="main"
+          >
             {/* Explorer Address Bar & Toolbar */}
             {(isExplorerView ||
               isSongsView ||
