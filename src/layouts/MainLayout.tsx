@@ -19,7 +19,9 @@ import {
   Calendar,
   CheckSquare,
   ChevronDown,
+  ChevronLeft,
   ChevronRight,
+  Church,
   CornerLeftUp,
   Edit2,
   ExternalLink,
@@ -404,6 +406,59 @@ export const MainLayout: React.FC = () => {
   };
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+
+  // Track page transitions to manage searchQuery persistence like a file system
+  const prevPathnameRef = useRef(location.pathname);
+
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(
+    () => localStorage.getItem("sidebarCollapsed") === "true",
+  );
+
+  useEffect(() => {
+    localStorage.setItem("sidebarCollapsed", String(isSidebarCollapsed));
+  }, [isSidebarCollapsed]);
+
+  useEffect(() => {
+    const prevPath = prevPathnameRef.current;
+    const currPath = location.pathname;
+
+    if (prevPath !== currPath) {
+      const getDomain = (path: string) => {
+        if (path === "/songs" || path.startsWith("/songs/")) return "songs";
+        if (path === "/services" || path.startsWith("/services/"))
+          return "services";
+        if (path === "/folders" || path.startsWith("/folders/"))
+          return "explorer";
+        if (path.startsWith("/musicians")) return "musicians";
+        if (path.startsWith("/settings")) return "settings";
+        return "other";
+      };
+
+      const prevDomain = getDomain(prevPath);
+      const currDomain = getDomain(currPath);
+
+      // Search persists when remaining in same context domain:
+      // - Songs domain (songs list, song editor, folder explorer)
+      // - Services domain (services list, service editor)
+      const isSongDomain =
+        (prevDomain === "songs" || prevDomain === "explorer") &&
+        (currDomain === "songs" || currDomain === "explorer");
+
+      const isServiceDomain =
+        prevDomain === "services" && currDomain === "services";
+
+      const keepSearch = isSongDomain || isServiceDomain;
+
+      if (!keepSearch) {
+        setSearchQuery("");
+        setSelectedKey("");
+        setSelectedTag("");
+        setIsFilterPanelOpen(false);
+      }
+    }
+
+    prevPathnameRef.current = currPath;
+  }, [location.pathname]);
 
   // Multi-Selection State
   const [selectedFolderIds, setSelectedFolderIds] = useState<Set<string>>(
@@ -1546,47 +1601,54 @@ export const MainLayout: React.FC = () => {
         )}
 
         <div
-          className={`${isSidebarOpen ? "flex absolute inset-y-0 left-0 z-50 bg-m3-sidebar shadow-2xl" : "hidden"} md:flex md:static md:bg-m3-sidebar/30 w-72 md:w-64 border-r border-m3-border p-4 flex-col gap-1 select-none shrink-0 overflow-y-auto transition-all duration-300`}
+          className={`${isSidebarOpen ? "flex absolute inset-y-0 left-0 z-50 bg-m3-sidebar shadow-2xl" : "hidden"} md:flex md:relative md:bg-m3-sidebar/30 ${
+            isSidebarCollapsed ? "md:w-20" : "md:w-64"
+          } w-72 border-r border-m3-border p-4 flex-col gap-1 select-none shrink-0 overflow-y-auto transition-all duration-300`}
           role="navigation"
         >
+          <button
+            onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+            className="hidden md:flex absolute -top-2 right-3 w-6 h-6 rounded-full bg-m3-card border border-m3-border items-center justify-center shadow-md hover:bg-m3-hover transition-all z-20 cursor-pointer"
+            title={isSidebarCollapsed ? "Expandir menu" : "Recolher menu"}
+          >
+            <ChevronLeft
+              className={`w-3.5 h-3.5 text-m3-secondary transition-transform duration-300 ${
+                isSidebarCollapsed ? "rotate-180" : ""
+              }`}
+            />
+          </button>
           <div
-            className="flex flex-col items-center text-center mb-4 mt-2 select-none"
+            className="flex flex-col items-center text-center mb-4 mt-5 select-none"
             role="banner"
           >
             <div className="flex items-center gap-3">
-              <div
-                className="
-                w-12 h-12 rounded-xl
-                flex items-center justify-center
-                border
-                transition-transform
-                hover:scale-105 hover:rotate-2
-              "
-              >
+              <div className="w-12 h-12 rounded-xl flex items-center justify-center border transition-transform hover:scale-105 hover:rotate-2">
                 <img
                   src={logo}
                   alt="Hosanna Studio"
                   className="w-12 h-12 object-contain rounded-xl"
                 />
               </div>
-
-              <div className="flex flex-col items-start">
-                <h1 className="font-display font-black text-2xl tracking-tighter text-slate-900 dark:text-slate-100 leading-none">
-                  Hosanna Studio
-                </h1>
-
-                {tenant && (
-                  <span className="mt-1 text-xs font-medium text-slate-500 dark:text-slate-400">
-                    {tenant.name || tenant.slug}
-                  </span>
-                )}
-              </div>
+              {!isSidebarCollapsed && (
+                <div className="flex flex-col items-start">
+                  <h1 className="font-display font-black text-2xl tracking-tighter text-slate-900 dark:text-slate-100 leading-none">
+                    Hosanna Studio
+                  </h1>
+                  {tenant && (
+                    <span className="mt-1 text-xs font-medium text-slate-500 dark:text-slate-400">
+                      {tenant.name || tenant.slug}
+                    </span>
+                  )}
+                </div>
+              )}
             </div>
           </div>
 
-          <div className="px-3 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-m3-secondary opacity-60">
-            Menu Principal
-          </div>
+          {!isSidebarCollapsed && (
+            <div className="px-3 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-m3-secondary opacity-60">
+              Menu Principal
+            </div>
+          )}
 
           <button
             onClick={() => {
@@ -1594,25 +1656,30 @@ export const MainLayout: React.FC = () => {
               navigate("/folders");
               if (window.innerWidth < 768) setIsSidebarOpen(false);
             }}
-            className={`w-full flex items-center justify-between px-4 py-3 text-[13px] font-bold rounded-2xl transition-all cursor-pointer group ${
+            title={isSidebarCollapsed ? `Drive da ${tenant?.name}` : undefined}
+            className={`w-full flex items-center ${isSidebarCollapsed ? "justify-center" : "justify-between"} px-4 py-3 text-[13px] font-bold rounded-2xl transition-all cursor-pointer group ${
               isExplorerView && currentFolderId === null
                 ? "bg-m3-primary/10 text-m3-primary border border-m3-primary/20 shadow-sm"
                 : "text-m3-secondary hover:bg-m3-hover hover:text-m3-text"
             }`}
           >
-            <div className="flex items-center gap-3">
+            <div
+              className={`flex items-center ${isSidebarCollapsed ? "" : "gap-3"}`}
+            >
               <HardDrive
                 className={`w-4.5 h-4.5 ${isExplorerView && currentFolderId === null ? "text-m3-primary" : "text-m3-secondary"}`}
               />
-              <span>Drive da {tenant?.name}</span>
+              {!isSidebarCollapsed && <span>Drive da {tenant?.name}</span>}
             </div>
-            <Badge
-              variant={
-                isExplorerView && currentFolderId === null ? "sky" : "slate"
-              }
-            >
-              {rootSongsCount}
-            </Badge>
+            {!isSidebarCollapsed && (
+              <Badge
+                variant={
+                  isExplorerView && currentFolderId === null ? "sky" : "slate"
+                }
+              >
+                {rootSongsCount}
+              </Badge>
+            )}
           </button>
 
           <button
@@ -1620,17 +1687,27 @@ export const MainLayout: React.FC = () => {
               navigate("/songs");
               if (window.innerWidth < 768) setIsSidebarOpen(false);
             }}
-            className={`w-full flex items-center justify-between px-4 py-3 text-[13px] font-bold rounded-2xl transition-all cursor-pointer group ${
+            title={isSidebarCollapsed ? `Biblioteca` : undefined}
+            className={`w-full flex items-center ${isSidebarCollapsed ? "justify-center" : "justify-between"} px-4 py-3 text-[13px] font-bold rounded-2xl transition-all cursor-pointer group ${
               isSongsView
                 ? "bg-m3-primary/10 text-m3-primary border border-m3-primary/20 shadow-sm"
                 : "text-m3-secondary hover:bg-m3-hover hover:text-m3-text"
             }`}
           >
-            <div className="flex items-center gap-3">
-              <Music className="w-4.5 h-4.5 text-m3-primary" />
-              <span>Biblioteca</span>
+            <div
+              className={`flex items-center ${isSidebarCollapsed ? "" : "gap-3"}`}
+            >
+              {" "}
+              <Music
+                className={`w-4.5 h-4.5 ${isSongsView ? "text-m3-primary" : "text-m3-secondary"}`}
+              />
+              {!isSidebarCollapsed && <span>Biblioteca</span>}
             </div>
-            <Badge variant={isSongsView ? "sky" : "slate"}>{totalSongs}</Badge>
+            {!isSidebarCollapsed && (
+              <Badge variant={isSongsView ? "sky" : "slate"}>
+                {totalSongs}
+              </Badge>
+            )}{" "}
           </button>
 
           <button
@@ -1638,44 +1715,55 @@ export const MainLayout: React.FC = () => {
               navigate("/services");
               if (window.innerWidth < 768) setIsSidebarOpen(false);
             }}
-            className={`w-full flex items-center justify-between px-4 py-3 text-[13px] font-bold rounded-2xl transition-all cursor-pointer group ${
+            title={isSidebarCollapsed ? `Cultos` : undefined}
+            className={`w-full flex items-center ${isSidebarCollapsed ? "justify-center" : "justify-between"} px-4 py-3 text-[13px] font-bold rounded-2xl transition-all cursor-pointer group ${
               isServicesView
                 ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 shadow-sm"
                 : "text-m3-secondary hover:bg-m3-hover hover:text-m3-text"
             }`}
           >
-            <div className="flex items-center gap-3">
-              <CheckSquare className="w-4.5 h-4.5 text-emerald-500" />
-              <span>Cultos</span>
+            <div
+              className={`flex items-center ${isSidebarCollapsed ? "" : "gap-3"}`}
+            >
+              {" "}
+              <Church
+                className={`w-4.5 h-4.5 ${isServicesView ? "text-emerald-500" : "text-m3-secondary"}`}
+              />
+              {!isSidebarCollapsed && <span>Cultos</span>}
             </div>
-            <Badge variant={isServicesView ? "sky" : "slate"}>
-              {totalServices}
-            </Badge>
+            {!isSidebarCollapsed && (
+              <Badge variant={isServicesView === null ? "sky" : "slate"}>
+                {totalServices}
+              </Badge>
+            )}
           </button>
 
-          <div className="mt-6 px-3 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-m3-secondary opacity-60">
-            Pastas ({allFolders.length})
-          </div>
+          {!isSidebarCollapsed && (
+            <>
+              <div className="mt-6 px-3 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-m3-secondary opacity-60">
+                Pastas ({allFolders.length})
+              </div>
 
-          {/* Hierarchical Folder Tree */}
-          <div className="flex-1 overflow-y-auto flex flex-col gap-1 pr-1 custom-scrollbar">
-            {folderTree.map((node) => (
-              <FolderTreeItem
-                key={node.folder.id}
-                node={node}
-                currentFolderId={currentFolderId}
-                onSelectFolder={(id) => {
-                  handleSelectFolder(id);
-                  if (window.innerWidth < 768) setIsSidebarOpen(false);
-                }}
-                onContextMenu={handleContextMenu}
-                expandedFolderIds={expandedFolderIds}
-                toggleExpand={toggleExpand}
-              />
-            ))}
-          </div>
+              <div className="flex-1 overflow-y-auto flex flex-col gap-1 pr-1 custom-scrollbar">
+                {folderTree.map((node) => (
+                  <FolderTreeItem
+                    key={node.folder.id}
+                    node={node}
+                    currentFolderId={currentFolderId}
+                    onSelectFolder={(id) => {
+                      handleSelectFolder(id);
+                      if (window.innerWidth < 768) setIsSidebarOpen(false);
+                    }}
+                    onContextMenu={handleContextMenu}
+                    expandedFolderIds={expandedFolderIds}
+                    toggleExpand={toggleExpand}
+                  />
+                ))}
+              </div>
+            </>
+          )}
+          {isSidebarCollapsed && <div className="flex-1" />}
 
-          {/* User Dropdown at bottom of sidebar */}
           {user && (
             <div
               className="mt-2 pt-2 border-t border-slate-200 dark:border-slate-800 relative shrink-0"
@@ -1683,27 +1771,33 @@ export const MainLayout: React.FC = () => {
             >
               <button
                 onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                className="w-full flex items-center justify-between p-2 rounded-xl hover:bg-slate-200/60 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                title={isSidebarCollapsed ? user.name : undefined}
+                className={`w-full flex items-center ${isSidebarCollapsed ? "justify-center" : "justify-between"} p-2 rounded-xl hover:bg-slate-200/60 dark:hover:bg-slate-800 transition-colors cursor-pointer`}
               >
-                <div className="flex items-center gap-2 min-w-0">
+                <div
+                  className={`flex items-center ${isSidebarCollapsed ? "" : "gap-2"} min-w-0`}
+                >
                   <div className="w-7 h-7 rounded-full bg-sky-100 dark:bg-sky-950 text-[#0284c7] dark:text-sky-400 flex items-center justify-center font-bold text-xs shrink-0">
                     {user.name
                       .split(" ")
                       .map((n) => n[0])
                       .join("")}
                   </div>
-                  <div className="flex flex-col min-w-0 text-left">
-                    <span className="text-xs font-bold text-slate-900 dark:text-slate-100 truncate">
-                      {user.name}
-                    </span>
-                    <span className="text-[9px] text-emerald-600 dark:text-emerald-400 font-bold uppercase tracking-wider">
-                      {user.role}
-                    </span>
-                  </div>
+                  {!isSidebarCollapsed && (
+                    <div className="flex flex-col min-w-0 text-left">
+                      <span className="text-xs font-bold text-slate-900 dark:text-slate-100 truncate">
+                        {user.name}
+                      </span>
+                      <span className="text-[9px] text-emerald-600 dark:text-emerald-400 font-bold uppercase tracking-wider">
+                        {user.role}
+                      </span>
+                    </div>
+                  )}
                 </div>
-                <Settings className="w-4 h-4 text-slate-400 shrink-0" />
+                {!isSidebarCollapsed && (
+                  <Settings className="w-4 h-4 text-slate-400 shrink-0" />
+                )}
               </button>
-
               {isUserMenuOpen && (
                 <div className="absolute bottom-full left-0 mb-2 w-56 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl z-50 p-2 space-y-1 animate-in fade-in slide-in-from-bottom-2 duration-150">
                   <button
@@ -1979,6 +2073,11 @@ export const MainLayout: React.FC = () => {
                         }
                         value={searchQuery}
                         onChange={(e) => handleSearchChange(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Escape") {
+                            handleSearchChange("");
+                          }
+                        }}
                         icon={<Search className="w-4 h-4 text-m3-secondary" />}
                         className="py-2.5 text-sm pr-9 rounded-2xl"
                       />
