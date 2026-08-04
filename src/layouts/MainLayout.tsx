@@ -1601,9 +1601,9 @@ export const MainLayout: React.FC = () => {
         )}
 
         <div
-          className={`${isSidebarOpen ? "flex absolute inset-y-0 left-0 z-50 bg-m3-sidebar shadow-2xl" : "hidden"} md:flex md:static md:bg-m3-sidebar/30 ${
+          className={`${isSidebarOpen ? "flex absolute inset-y-0 left-0 z-50 bg-m3-sidebar shadow-2xl" : "hidden"} md:flex md:relative md:bg-m3-sidebar/30 ${
             isSidebarCollapsed ? "md:w-20" : "md:w-64"
-          } w-72 border-r border-m3-border p-4 flex-col gap-1 select-none shrink-0 overflow-y-auto transition-all duration-300 relative`}
+          } w-72 border-r border-m3-border p-4 flex-col gap-1 select-none shrink-0 overflow-y-auto transition-all duration-300`}
           role="navigation"
         >
           <button
