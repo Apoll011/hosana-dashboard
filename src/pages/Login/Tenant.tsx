@@ -18,13 +18,11 @@ import {
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { useFlags } from "@/src/hooks/useFlags";
 import { authApi } from "@hosanna/shared";
 import LoginLayout from "./Layout";
 
 export const RegisterTenantPage: React.FC = () => {
   const navigate = useNavigate();
-  const { flag } = useFlags();
 
   // Step state
   const [step, setStep] = useState(1);
@@ -103,7 +101,7 @@ export const RegisterTenantPage: React.FC = () => {
     }
   };
 
-  if (!flag("alpha-release")) {
+  /*if (!flag("alpha-release")) {
     return (
       <LoginLayout
         optionalLink="/login"
@@ -119,7 +117,7 @@ export const RegisterTenantPage: React.FC = () => {
         </div>
       </LoginLayout>
     );
-  }
+  }*/
 
   return (
     <LoginLayout
