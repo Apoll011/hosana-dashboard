@@ -1608,7 +1608,7 @@ export const MainLayout: React.FC = () => {
         >
           <button
             onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-            className="hidden md:flex absolute top-3 right-3 w-6 h-6 rounded-full bg-m3-card border border-m3-border items-center justify-center shadow-md hover:bg-m3-hover transition-all z-20 cursor-pointer"
+            className="hidden md:flex absolute -top-2 right-3 w-6 h-6 rounded-full bg-m3-card border border-m3-border items-center justify-center shadow-md hover:bg-m3-hover transition-all z-20 cursor-pointer"
             title={isSidebarCollapsed ? "Expandir menu" : "Recolher menu"}
           >
             <ChevronLeft
@@ -1618,7 +1618,7 @@ export const MainLayout: React.FC = () => {
             />
           </button>
           <div
-            className="flex flex-col items-center text-center mb-4 mt-2 select-none"
+            className="flex flex-col items-center text-center mb-4 mt-5 select-none"
             role="banner"
           >
             <div className="flex items-center gap-3">
