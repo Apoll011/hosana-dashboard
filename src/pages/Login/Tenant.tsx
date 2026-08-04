@@ -4,6 +4,7 @@
  */
 
 import { Button, Input } from "@hosanna/shared";
+import { useStatsigClient } from "@statsig/react-bindings";
 import {
   ArrowLeft,
   ArrowRight,
@@ -23,6 +24,8 @@ import LoginLayout from "./Layout";
 
 export const RegisterTenantPage: React.FC = () => {
   const navigate = useNavigate();
+  const { client } = useStatsigClient();
+  const alpha_release = client.checkGate("alpha_release");
 
   // Step state
   const [step, setStep] = useState(1);
@@ -101,9 +104,27 @@ export const RegisterTenantPage: React.FC = () => {
     }
   };
 
+  if (!alpha_release) {
+    return (
+      <LoginLayout
+        optionalLink="/login"
+        optionalMsg="Faça Login"
+        errorMsg={""}
+        titleMb={2}
+      >
+        <div className="py-12 flex flex-col items-center justify-center text-center animate-in zoom-in-95 duration-500">
+          <h2 className="text-2xl font-black text-slate-900 mb-2">
+            Registro de organizações ainda não está ativo, Espere até o Alpha
+            Release no dia 1 de Setembro
+          </h2>
+        </div>
+      </LoginLayout>
+    );
+  }
+
   return (
     <LoginLayout
-      optionalLink="/link"
+      optionalLink="/login"
       optionalMsg="Já tem uma organização? Faça Login"
       errorMsg={errorMsg}
       titleMb={2}
@@ -142,9 +163,7 @@ export const RegisterTenantPage: React.FC = () => {
                 <div
                   key={s.num}
                   className={`flex items-center gap-1.5 text-xs font-bold transition-colors ${
-                    step >= s.num
-                      ? "text-m3-primary"
-                      : "text-slate-400"
+                    step >= s.num ? "text-m3-primary" : "text-slate-400"
                   }`}
                 >
                   <span
