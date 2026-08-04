@@ -405,6 +405,49 @@ export const MainLayout: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
+  // Track page transitions to manage searchQuery persistence like a file system
+  const prevPathnameRef = useRef(location.pathname);
+
+  useEffect(() => {
+    const prevPath = prevPathnameRef.current;
+    const currPath = location.pathname;
+
+    if (prevPath !== currPath) {
+      const getDomain = (path: string) => {
+        if (path === "/songs" || path.startsWith("/songs/")) return "songs";
+        if (path === "/services" || path.startsWith("/services/")) return "services";
+        if (path === "/folders" || path.startsWith("/folders/")) return "explorer";
+        if (path.startsWith("/musicians")) return "musicians";
+        if (path.startsWith("/settings")) return "settings";
+        return "other";
+      };
+
+      const prevDomain = getDomain(prevPath);
+      const currDomain = getDomain(currPath);
+
+      // Search persists when remaining in same context domain:
+      // - Songs domain (songs list, song editor, folder explorer)
+      // - Services domain (services list, service editor)
+      const isSongDomain =
+        (prevDomain === "songs" || prevDomain === "explorer") &&
+        (currDomain === "songs" || currDomain === "explorer");
+
+      const isServiceDomain =
+        prevDomain === "services" && currDomain === "services";
+
+      const keepSearch = isSongDomain || isServiceDomain;
+
+      if (!keepSearch) {
+        setSearchQuery("");
+        setSelectedKey("");
+        setSelectedTag("");
+        setIsFilterPanelOpen(false);
+      }
+    }
+
+    prevPathnameRef.current = currPath;
+  }, [location.pathname]);
+
   // Multi-Selection State
   const [selectedFolderIds, setSelectedFolderIds] = useState<Set<string>>(
     new Set(),
@@ -1979,6 +2022,11 @@ export const MainLayout: React.FC = () => {
                         }
                         value={searchQuery}
                         onChange={(e) => handleSearchChange(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Escape") {
+                            handleSearchChange("");
+                          }
+                        }}
                         icon={<Search className="w-4 h-4 text-m3-secondary" />}
                         className="py-2.5 text-sm pr-9 rounded-2xl"
                       />
