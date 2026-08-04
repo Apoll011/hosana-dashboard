@@ -4,6 +4,7 @@
  */
 
 import { Button, Input } from "@hosanna/shared";
+import { useStatsigClient } from "@statsig/react-bindings";
 import {
   ArrowLeft,
   ArrowRight,
@@ -23,6 +24,8 @@ import LoginLayout from "./Layout";
 
 export const RegisterTenantPage: React.FC = () => {
   const navigate = useNavigate();
+  const { client } = useStatsigClient();
+  const alpha_release = client.checkGate("alpha_release");
 
   // Step state
   const [step, setStep] = useState(1);
@@ -101,7 +104,7 @@ export const RegisterTenantPage: React.FC = () => {
     }
   };
 
-  /*if (!flag("alpha-release")) {
+  if (alpha_release) {
     return (
       <LoginLayout
         optionalLink="/login"
@@ -117,7 +120,7 @@ export const RegisterTenantPage: React.FC = () => {
         </div>
       </LoginLayout>
     );
-  }*/
+  }
 
   return (
     <LoginLayout
