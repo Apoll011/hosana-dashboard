@@ -19,11 +19,20 @@ const queryClient = new QueryClient({
 });
 
 function StatsigWrapper({ children }: { children: React.ReactNode }) {
-  const { user } = useAuth();
+  const { user, tenant } = useAuth();
   const id = user?.id || "a-user";
+  const email = user?.email || "example@gmail.com";
   const { client } = useClientAsyncInit(
     "client-4459XEXCHZyP192QOlIwzRAffGVP9zfS33rnXpdquAI",
-    { userID: id },
+    {
+      userID: id,
+      email: email,
+      locale: "pt",
+      custom: {
+        role: user?.role || "user",
+        tenant_slug: tenant?.slug || "default",
+      },
+    },
   );
 
   return (
