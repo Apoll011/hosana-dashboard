@@ -4,49 +4,50 @@
  */
 
 import {
-  Badge,
-  Button,
-  Folder,
-  Input,
-  Modal,
-  Song,
-  songsApi,
+    Badge,
+    Button,
+    Folder,
+    Input,
+    Modal,
+    Song,
+    songsApi,
 } from "@hosanna/shared";
 import {
-  AlertTriangle,
-  ArrowRightLeft,
-  ArrowUpDown,
-  Calendar,
-  CheckSquare,
-  ChevronDown,
-  ChevronLeft,
-  ChevronRight,
-  CornerLeftUp,
-  Edit2,
-  ExternalLink,
-  FileText,
-  Filter,
-  Folder as FolderIcon,
-  FolderOpen,
-  FolderPlus,
-  HardDrive,
-  LayoutGrid,
-  List,
-  LogOut,
-  Menu,
-  Move,
-  Music,
-  Plus,
-  Printer,
-  QrCode,
-  RotateCw,
-  Search,
-  Settings,
-  Tag,
-  Trash2,
-  Upload,
-  User,
-  X,
+    AlertTriangle,
+    ArrowRightLeft,
+    ArrowUpDown,
+    Calendar,
+    CheckSquare,
+    ChevronDown,
+    ChevronLeft,
+    ChevronRight,
+    Church,
+    CornerLeftUp,
+    Edit2,
+    ExternalLink,
+    FileText,
+    Filter,
+    Folder as FolderIcon,
+    FolderOpen,
+    FolderPlus,
+    HardDrive,
+    LayoutGrid,
+    List,
+    LogOut,
+    Menu,
+    Move,
+    Music,
+    Plus,
+    Printer,
+    QrCode,
+    RotateCw,
+    Search,
+    Settings,
+    Tag,
+    Trash2,
+    Upload,
+    User,
+    X
 } from "lucide-react";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
@@ -1697,7 +1698,9 @@ export const MainLayout: React.FC = () => {
               className={`flex items-center ${isSidebarCollapsed ? "" : "gap-3"}`}
             >
               {" "}
-              <Music className="w-4.5 h-4.5 text-m3-primary" />
+              <Music
+                className={`w-4.5 h-4.5 ${isSongsView ? "text-m3-primary" : "text-m3-secondary"}`}
+              />
               {!isSidebarCollapsed && <span>Biblioteca</span>}
             </div>
             {!isSidebarCollapsed && (
@@ -1723,7 +1726,7 @@ export const MainLayout: React.FC = () => {
               className={`flex items-center ${isSidebarCollapsed ? "" : "gap-3"}`}
             >
               {" "}
-              <CheckSquare className="w-4.5 h-4.5 text-emerald-500" />
+              <Church className={`w-4.5 h-4.5 ${isServicesView ? "text-emerald-500" : "text-m3-secondary"}`}" />
               {!isSidebarCollapsed && <span>Cultos</span>}
             </div>
             {!isSidebarCollapsed && (
