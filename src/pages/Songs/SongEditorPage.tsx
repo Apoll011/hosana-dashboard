@@ -16,9 +16,10 @@ import { useQueryClient } from "@tanstack/react-query";
 import {
   ArrowLeft,
   Columns,
+  EditIcon,
   Eye,
   EyeOff,
-  FileCode2,
+  File,
   HelpCircle,
   LayoutTemplate,
   Minus,
@@ -28,7 +29,6 @@ import {
   Save,
   Settings,
   Settings2,
-  SquareTerminal,
 } from "lucide-react";
 import React, {
   useCallback,
@@ -177,7 +177,7 @@ export const SongEditorPage: React.FC = () => {
           <div className="flex flex-col">
             <div className="flex items-center gap-2">
               <span className="text-[11px] font-bold text-m3-text flex items-center gap-1.5">
-                <FileCode2 className="w-3.5 h-3.5 text-m3-primary" />
+                <File className="w-3.5 h-3.5 text-m3-primary" />
                 {song.title || "Sem Título"}
               </span>
               {hasUnsavedChanges && (
@@ -197,7 +197,7 @@ export const SongEditorPage: React.FC = () => {
             className={`p-1.5 rounded-md transition-all ${layoutMode === "editor" ? "bg-m3-primary/10 text-m3-primary shadow-sm" : "text-m3-secondary hover:bg-m3-hover"}`}
             title="Apenas Editor"
           >
-            <SquareTerminal className="w-4 h-4" />
+            <EditIcon className="w-4 h-4" />
           </button>
           <button
             onClick={() => setLayoutMode("split")}
@@ -251,7 +251,7 @@ export const SongEditorPage: React.FC = () => {
             {/* Editor Tab Header */}
             <div className="h-9 bg-m3-sidebar/30 border-b border-m3-border flex items-center justify-between px-3 shrink-0">
               <span className="text-[10px] font-semibold text-m3-secondary uppercase tracking-wider flex items-center gap-1.5">
-                <SquareTerminal className="w-3 h-3" />
+                <EditIcon className="w-3 h-3" />
                 Código
               </span>
               <button
