@@ -1605,21 +1605,21 @@ export const MainLayout: React.FC = () => {
           } w-72 border-r border-m3-border p-4 flex-col gap-1 select-none shrink-0 overflow-y-auto transition-all duration-300 relative`}
           role="navigation"
         >
+          <button
+            onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+            className="hidden md:flex absolute top-3 right-3 w-6 h-6 rounded-full bg-m3-card border border-m3-border items-center justify-center shadow-md hover:bg-m3-hover transition-all z-20 cursor-pointer"
+            title={isSidebarCollapsed ? "Expandir menu" : "Recolher menu"}
+          >
+            <ChevronLeft
+              className={`w-3.5 h-3.5 text-m3-secondary transition-transform duration-300 ${
+                isSidebarCollapsed ? "rotate-180" : ""
+              }`}
+            />
+          </button>
           <div
             className="flex flex-col items-center text-center mb-4 mt-2 select-none"
             role="banner"
           >
-            <button
-              onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-              className="hidden md:flex absolute -right-3 top-8 w-6 h-6 rounded-full bg-m3-card border border-m3-border items-center justify-center shadow-md hover:bg-m3-hover transition-all z-10 cursor-pointer"
-              title={isSidebarCollapsed ? "Expandir menu" : "Recolher menu"}
-            >
-              <ChevronLeft
-                className={`w-3.5 h-3.5 text-m3-secondary transition-transform duration-300 ${
-                  isSidebarCollapsed ? "rotate-180" : ""
-                }`}
-              />
-            </button>
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-xl flex items-center justify-center border transition-transform hover:scale-105 hover:rotate-2">
                 <img
