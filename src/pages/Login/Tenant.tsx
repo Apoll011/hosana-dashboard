@@ -104,7 +104,7 @@ export const RegisterTenantPage: React.FC = () => {
     }
   };
 
-  if (alpha_release) {
+  if (!alpha_release) {
     return (
       <LoginLayout
         optionalLink="/login"

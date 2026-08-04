@@ -1,4 +1,5 @@
-import { configureApiClient } from "@hosanna/shared";
+import { configureApiClient, Spinner } from "@hosanna/shared";
+import { StatsigProvider, useClientAsyncInit } from "@statsig/react-bindings";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/react";
@@ -7,7 +8,6 @@ import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { SyncProvider } from "./contexts/SyncContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { AppRoutes } from "./routes/AppRoutes";
-import { StatsigProvider, useClientAsyncInit } from "@statsig/react-bindings";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -23,11 +23,18 @@ function StatsigWrapper({ children }: { children: React.ReactNode }) {
   const id = user?.id || "a-user";
   const { client } = useClientAsyncInit(
     "client-4459XEXCHZyP192QOlIwzRAffGVP9zfS33rnXpdquAI",
-    { userID: id }
+    { userID: id },
   );
 
   return (
-    <StatsigProvider client={client} loadingComponent={<div>Loading...</div>}>
+    <StatsigProvider
+      client={client}
+      loadingComponent={
+        <div className="h-screen w-screen flex items-center justify-center bg-slate-900 text-white">
+          <Spinner size="lg" label="A autenticar no servidor de flags..." />
+        </div>
+      }
+    >
       {children}
     </StatsigProvider>
   );
@@ -58,5 +65,3 @@ export default function App() {
     </QueryClientProvider>
   );
 }
-
-
