@@ -1608,7 +1608,7 @@ export const MainLayout: React.FC = () => {
         >
           <button
             onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-            className="hidden md:flex absolute -top-2 right-3 w-6 h-6 rounded-full bg-m3-card border border-m3-border items-center justify-center shadow-md hover:bg-m3-hover transition-all z-20 cursor-pointer"
+            className="hidden md:flex absolute right-3 w-6 h-6 rounded-full bg-m3-card border border-m3-border items-center justify-center shadow-md hover:bg-m3-hover transition-all z-20 cursor-pointer"
             title={isSidebarCollapsed ? "Expandir menu" : "Recolher menu"}
           >
             <ChevronLeft
