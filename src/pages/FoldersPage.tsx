@@ -536,7 +536,7 @@ export const FoldersPage: React.FC = () => {
             Solte os ficheiros aqui
           </h3>
           <p className="text-xs font-semibold text-slate-600 dark:text-slate-300 mt-1">
-            Os ficheiros ChordPro serão associados a "
+            Os ficheiros serão importados a "
             {currentFolder ? currentFolder.name : "Diretório Raiz"}"
           </p>
         </div>
