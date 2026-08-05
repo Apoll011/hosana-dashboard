@@ -816,10 +816,10 @@ export const MainLayout: React.FC = () => {
         perform: () => setIsCreateModalOpen(true),
       },
       {
-        id: "action-upload-chordpro",
-        name: "Carregar Ficheiros ChordPro (.pro, .txt)",
+        id: "action-upload-files",
+        name: "Importar Ficheiros",
         shortcut: ["u"],
-        keywords: "upload carregar ficheiros chordpro import txt pro",
+        keywords: "upload carregar ficheiros chordpro sbpbackup import txt pro",
         section: "Ações Rápidas",
         icon: <Upload className="w-4 h-4 text-purple-500" />,
         perform: () => fileInputRef.current?.click(),
@@ -1728,7 +1728,8 @@ export const MainLayout: React.FC = () => {
           : "Diretório Raiz";
         showToast(
           `${result.created} ficheiro(s) ${result.fileTypeName} carregado(s) com sucesso para "${targetFolderName}"!`,
-          "success",
+          "success"
+        )
     } 
     
     if (result.failed > 0) {
