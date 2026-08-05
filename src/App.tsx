@@ -21,11 +21,13 @@ const queryClient = new QueryClient({
 function StatsigWrapper({ children }: { children: React.ReactNode }) {
   const { user, tenant, isLoading } = useAuth();
 
-  if (isLoading) {
+  if (isLoading || !user) {
     <div className="h-screen w-screen flex items-center justify-center bg-slate-900 text-white">
       <Spinner size="lg" label="A autenticar o Utilizador..." />
     </div>;
   }
+
+  console.log(user);
 
   const id = user?.id || "a-user";
   const email = user?.email || "example@gmail.com";
