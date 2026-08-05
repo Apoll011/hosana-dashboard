@@ -73,7 +73,9 @@ import { Action, KBarProvider } from "kbar";
 import { ServiceForm } from "../components/forms/ServiceForm";
 import { KBarCommandPaletteUI } from "../components/KBarCommandPalette";
 import { CifraClubImportModal } from "../components/modals/CifraModal";
+import { songImportRegistry } from "../import";
 import { printHtmlDirectly } from "../utils";
+import { ProviderImportResult } from "../utils/import";
 
 interface ContextMenuState {
   x: number;
@@ -547,7 +549,7 @@ export const MainLayout: React.FC = () => {
 
   const songParams = useMemo(() => ({}), []);
 
-  const { songsQuery, renameSong, moveSong, deleteSong, updateBatchTags } =
+  const { songsQuery, moveSong, deleteSong, updateBatchTags } =
     useAllSongs(songParams);
 
   // Search & Filters State
@@ -583,10 +585,6 @@ export const MainLayout: React.FC = () => {
   );
   const [confirmFolderName, setConfirmFolderName] = useState("");
 
-  // Song Modal States
-  const [renameSongTarget, setRenameSongTarget] = useState<Song | null>(null);
-  const [newSongTitle, setNewSongTitle] = useState("");
-
   const [moveSongTarget, setMoveSongTarget] = useState<Song | null>(null);
   const [targetSongFolderId, setTargetSongFolderId] = useState<string | null>(
     null,
@@ -605,6 +603,7 @@ export const MainLayout: React.FC = () => {
   const totalSongs = songsQuery.data?.total || 0;
   const totalServices = servicesQuery.data?.length || 0;
   const rootSongsCount = foldersQuery.data?.rootSongsCount || 0;
+  const rootFoldersCount = foldersQuery.data?.folders.length || 0;
 
   // Build tree structure from folders
   const folderTree = useMemo(() => buildFolderTree(allFolders), [allFolders]);
@@ -814,10 +813,10 @@ export const MainLayout: React.FC = () => {
         perform: () => setIsCreateModalOpen(true),
       },
       {
-        id: "action-upload-chordpro",
-        name: "Carregar Ficheiros ChordPro (.pro, .txt)",
+        id: "action-upload-files",
+        name: "Importar Ficheiros",
         shortcut: ["u"],
-        keywords: "upload carregar ficheiros chordpro import txt pro",
+        keywords: "upload carregar ficheiros chordpro sbpbackup import txt pro",
         section: "Ações Rápidas",
         icon: <Upload className="w-4 h-4 text-purple-500" />,
         perform: () => fileInputRef.current?.click(),
@@ -905,17 +904,6 @@ export const MainLayout: React.FC = () => {
           section: "Cântico Atual",
           icon: <Printer className="w-4 h-4 text-indigo-500" />,
           perform: () => handlePrintSong(currentSong.id),
-        },
-        {
-          id: "song-rename-current",
-          name: `Renomear Cântico: "${currentSong.title}"`,
-          keywords: "renomear editar titulo rename title",
-          section: "Cântico Atual",
-          icon: <Edit2 className="w-4 h-4 text-amber-500" />,
-          perform: () => {
-            setRenameSongTarget(currentSong);
-            setNewSongTitle(currentSong.title);
-          },
         },
         {
           id: "song-move-current",
@@ -1701,88 +1689,53 @@ export const MainLayout: React.FC = () => {
     navigate(`/services/${newService.id}`);
   };
 
-  const handleRenameSongSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!renameSongTarget || !newSongTitle.trim()) return;
-    await renameSong({
-      id: renameSongTarget.id,
-      newTitle: newSongTitle.trim(),
-      updatedAt: renameSongTarget.updatedAt,
-    });
-    setRenameSongTarget(null);
-    setNewSongTitle("");
-  };
-
   const handleDeleteSongSubmit = async () => {
     if (!deleteSongTarget) return;
     await deleteSong(deleteSongTarget.id);
     setDeleteSongTarget(null);
   };
 
-  const cleanSongTitleFromFilename = (filename: string): string => {
-    let name = filename.replace(/\.[^/.]+$/, "");
-    name = name.replace(/\[.*?\]/g, "");
-    name = name.replace(/\(.*?\)/g, "");
-    name = name.replace(/\{.*?\}/g, "");
-    name = name.replace(/#\w+/g, "");
-    name = name.replace(/_/g, " ");
-    name = name.replace(/\s+/g, " ").trim();
-    return name || filename.replace(/\.[^/.]+$/, "").trim();
+  const showToastImportResult = (result: ProviderImportResult) => {
+    if (result.created > 0) {
+      const targetFolderName = currentFolder
+        ? currentFolder.name
+        : "Diretório Raiz";
+      showToast(
+        `${result.created} ficheiro(s) ${result.fileTypeName} carregado(s) com sucesso para "${targetFolderName}"!`,
+        "success",
+      );
+    }
+
+    if (result.failed > 0) {
+      showToast(
+        `Erro ao carregar ${result.failed} ficheiro(s)  ${result.fileTypeName}`,
+        "error",
+      );
+    }
+
+    if (result.ignored > 0) {
+      showToast(
+        `Ignorado ${result.ignored} ficheiro(s) ${result.fileTypeName}`,
+        "warning",
+      );
+    }
   };
 
   const processAndUploadFiles = async (fileList: File[]) => {
     if (!fileList || fileList.length === 0) return;
 
     setIsUploadingFiles(true);
+    const result = await songImportRegistry.importFiles(fileList, {
+      folderId: currentFolderId,
+    });
 
-    try {
-      const songPayloads: Array<Partial<Song>> = [];
+    result.results.forEach((r) => {
+      showToastImportResult(r);
+    });
 
-      for (const file of fileList) {
-        const fileText = await file.text();
-        const cleanTitle = cleanSongTitleFromFilename(file.name);
+    await Promise.all([songsQuery.refetch(), foldersQuery.refetch()]);
 
-        let finalContent = fileText;
-        if (!/\{title\s*:/i.test(fileText)) {
-          finalContent = `{title: ${cleanTitle}}\n${fileText}`;
-        }
-
-        let artist = "Vários";
-        const artistMatch = fileText.match(/\{artist\s*:\s*([^}]+)\}/i);
-        if (artistMatch && artistMatch[1]) {
-          artist = artistMatch[1].trim();
-        }
-
-        songPayloads.push({
-          title: cleanTitle,
-          artist: artist,
-          content: finalContent,
-          folderId: currentFolderId,
-          tags: ["ChordPro"],
-        });
-      }
-
-      if (songPayloads.length > 0) {
-        const res = await songsApi.createSongsBatch(songPayloads);
-
-        await Promise.all([songsQuery.refetch(), foldersQuery.refetch()]);
-
-        const targetFolderName = currentFolder
-          ? currentFolder.name
-          : "Diretório Raiz";
-        showToast(
-          `${res.count} ficheiro(s) ChordPro carregado(s) com sucesso para "${targetFolderName}"!`,
-          "success",
-        );
-      }
-    } catch (err: any) {
-      showToast(
-        "Erro ao carregar ficheiros: " + (err?.message || "Falha de leitura"),
-        "error",
-      );
-    } finally {
-      setIsUploadingFiles(false);
-    }
+    setIsUploadingFiles(false);
   };
 
   const handleChordProFileUpload = async (
@@ -1927,7 +1880,7 @@ export const MainLayout: React.FC = () => {
                     Hosanna Studio
                   </h1>
                   {tenant && (
-                    <span className="mt-1 text-xs font-medium text-slate-500 dark:text-slate-400 truncate max-w-[130px]">
+                    <span className="mt-1 text-xs font-medium text-slate-500 dark:text-slate-400 truncate max-w-32.5">
                       {tenant.name || tenant.slug}
                     </span>
                   )}
@@ -1989,7 +1942,7 @@ export const MainLayout: React.FC = () => {
                   isExplorerView && currentFolderId === null ? "sky" : "slate"
                 }
               >
-                {rootSongsCount}
+                {rootSongsCount + rootFoldersCount}
               </Badge>
             )}
           </button>
@@ -2896,19 +2849,6 @@ export const MainLayout: React.FC = () => {
                   <button
                     onClick={() => {
                       const song = contextMenu.item as Song;
-                      setRenameSongTarget(song);
-                      setNewSongTitle(song.title);
-                      setContextMenu(null);
-                    }}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left"
-                  >
-                    <Edit2 className="w-4 h-4 text-[#0284c7]" />
-                    <span>Mudar Nome do Cântico</span>
-                  </button>
-
-                  <button
-                    onClick={() => {
-                      const song = contextMenu.item as Song;
                       setMoveSongTarget(song);
                       setTargetSongFolderId(song.folderId || null);
                       setContextMenu(null);
@@ -3242,37 +3182,6 @@ export const MainLayout: React.FC = () => {
             </div>
           </div>
         )}
-      </Modal>
-
-      {/* RENAME SONG MODAL */}
-      <Modal
-        isOpen={!!renameSongTarget}
-        onClose={() => setRenameSongTarget(null)}
-        title={`Mudar Nome do Cântico "${renameSongTarget?.title}"`}
-      >
-        <form onSubmit={handleRenameSongSubmit} className="flex flex-col gap-4">
-          <Input
-            label="Título do Cântico"
-            value={newSongTitle}
-            onChange={(e) => setNewSongTitle(e.target.value)}
-            placeholder="Insira o novo título do cântico..."
-            autoFocus
-            required
-          />
-
-          <div className="flex items-center justify-end gap-3 mt-2 pt-4 border-t border-slate-100 dark:border-slate-800">
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={() => setRenameSongTarget(null)}
-            >
-              Cancelar
-            </Button>
-            <Button type="submit" variant="primary">
-              Guardar Título
-            </Button>
-          </div>
-        </form>
       </Modal>
 
       {/* MOVE SONG MODAL (TREE HIERARCHY) */}

@@ -266,6 +266,11 @@ const SongGridCard: React.FC<SongGridCardProps> = ({
     <span className="text-sm font-black text-m3-text transition-colors truncate w-full px-1">
       {song.title}
     </span>
+    {song.song_number && (
+      <span className="text-[10px] font-bold bg-neutral-100 dark:bg-slate-800 text-neutral-600 dark:text-neutral-400 px-2 py-1 rounded-lg border border-neutral-200 dark:border-slate-700">
+        Nº {song.song_number}
+      </span>
+    )}
 
     <span className="text-[10px] text-m3-secondary font-bold truncate w-full px-1 mt-0.5 opacity-70">
       {song.artist || "Cifra"}
@@ -536,7 +541,7 @@ export const FoldersPage: React.FC = () => {
             Solte os ficheiros aqui
           </h3>
           <p className="text-xs font-semibold text-slate-600 dark:text-slate-300 mt-1">
-            Os ficheiros ChordPro serão associados a "
+            Os ficheiros serão importados a "
             {currentFolder ? currentFolder.name : "Diretório Raiz"}"
           </p>
         </div>

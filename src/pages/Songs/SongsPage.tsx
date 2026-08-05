@@ -16,7 +16,6 @@ import {
 } from "@hosanna/shared";
 import {
   ArrowUpDown,
-  Edit2,
   FileText,
   Filter,
   FolderInput,
@@ -60,6 +59,7 @@ export const SongsPage: React.FC<SongsPageProps> = ({
   const navigate = useNavigate();
   const context = useOutletContext<any>() || {};
   const actualHideHeader = hideHeader ?? context.hideHeader;
+  //TODO: Add support
   const actualSearchQuery = externalSearchQuery ?? context.searchQuery ?? "";
   const actualSortBy = externalSortBy ?? context.sortBy ?? "title";
   const actualSortOrder = externalSortOrder ?? context.sortOrder ?? "asc";
@@ -116,28 +116,23 @@ export const SongsPage: React.FC<SongsPageProps> = ({
     selectedFolder,
   ]);
 
-  const { songsQuery, createSong, deleteSong, renameSong, moveSong } = useSongs(
-    {
-      search: finalSearchQuery,
-      folder: selectedFolder || undefined,
-      sortBy: finalSortBy,
-      sortOrder: finalSortOrder,
-      page,
-      limit: 50, // Increased limit for better library view
-      key: actualSelectedKey || undefined,
-      tag: actualSelectedTag || undefined,
-      searchFields: actualSearchFields,
-    },
-  );
+  const { songsQuery, createSong, deleteSong, moveSong } = useSongs({
+    search: finalSearchQuery,
+    folder: selectedFolder || undefined,
+    sortBy: finalSortBy,
+    sortOrder: finalSortOrder,
+    page,
+    limit: 50, // Increased limit for better library view
+    key: actualSelectedKey || undefined,
+    tag: actualSelectedTag || undefined,
+    searchFields: actualSearchFields,
+  });
 
   const { foldersQuery } = useFolders();
 
   // Modals state
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [renameTarget, setRenameTarget] = useState<Song | null>(null);
-  const [newTitle, setNewTitle] = useState("");
   const [moveTarget, setMoveTarget] = useState<Song | null>(null);
-  const [destinationFolderId, setDestinationFolderId] = useState<string>("");
   const [deleteTarget, setDeleteTarget] = useState<Song | null>(null);
 
   const folders = Array.isArray(foldersQuery.data?.folders)
@@ -167,34 +162,6 @@ export const SongsPage: React.FC<SongsPageProps> = ({
       navigate(`/songs/${newSong.id}`);
     },
     [createSong, navigate],
-  );
-
-  const handleRenameSubmit = React.useCallback(
-    async (e: React.FormEvent) => {
-      e.preventDefault();
-      if (!renameTarget || !newTitle.trim()) return;
-      await renameSong({
-        id: renameTarget.id,
-        newTitle: newTitle.trim(),
-        updatedAt: renameTarget.updatedAt,
-      });
-      setRenameTarget(null);
-    },
-    [renameTarget, newTitle, renameSong],
-  );
-
-  const handleMoveSubmit = React.useCallback(
-    async (e: React.FormEvent) => {
-      e.preventDefault();
-      if (!moveTarget) return;
-      await moveSong({
-        id: moveTarget.id,
-        folderId: destinationFolderId || null,
-        updatedAt: moveTarget.updatedAt,
-      });
-      setMoveTarget(null);
-    },
-    [moveTarget, destinationFolderId, moveSong],
   );
 
   const handleDeleteConfirm = React.useCallback(async () => {
@@ -413,18 +380,7 @@ export const SongsPage: React.FC<SongsPageProps> = ({
                           </button>
                           <button
                             onClick={() => {
-                              setRenameTarget(song);
-                              setNewTitle(song.title);
-                            }}
-                            title="Mudar Nome"
-                            className="p-2 text-m3-secondary hover:text-amber-500 hover:bg-amber-500/10 rounded-xl cursor-pointer transition-all"
-                          >
-                            <Edit2 className="w-4.5 h-4.5" />
-                          </button>
-                          <button
-                            onClick={() => {
                               setMoveTarget(song);
-                              setDestinationFolderId(song.folderId || "");
                             }}
                             title="Mover"
                             className="p-2 text-m3-secondary hover:text-sky-500 hover:bg-sky-500/10 rounded-xl cursor-pointer transition-all"
@@ -470,34 +426,6 @@ export const SongsPage: React.FC<SongsPageProps> = ({
           onSubmit={handleCreateSongSubmit}
           onCancel={() => setIsCreateModalOpen(false)}
         />
-      </Modal>
-
-      {/* RENAME SONG MODAL */}
-      <Modal
-        isOpen={!!renameTarget}
-        onClose={() => setRenameTarget(null)}
-        title="Mudar Nome do Cântico"
-      >
-        <form onSubmit={handleRenameSubmit} className="flex flex-col gap-4">
-          <Input
-            label="Novo Título"
-            value={newTitle}
-            onChange={(e) => setNewTitle(e.target.value)}
-            autoFocus
-          />
-          <div className="flex items-center justify-end gap-3 mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={() => setRenameTarget(null)}
-            >
-              Cancelar
-            </Button>
-            <Button type="submit" variant="primary">
-              Atualizar Título
-            </Button>
-          </div>
-        </form>
       </Modal>
 
       {/* MOVE SONG MODAL */}
