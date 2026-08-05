@@ -527,42 +527,44 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ hideHeader }) => {
               </p>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
-                {songImportRegistry.getProviders().map((provider) => (
-                  <div
-                    key={provider.id}
-                    className="flex flex-col justify-between p-3.5 border border-slate-200 dark:border-slate-800 rounded-xl bg-slate-50/50 dark:bg-slate-800/30 hover:border-slate-300 dark:hover:border-slate-700 transition-colors space-y-2.5"
-                  >
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <FileText className="w-3.5 h-3.5 text-[#0284c7] shrink-0" />
-                        <span className="text-xs font-semibold text-slate-900 dark:text-slate-100">
-                          {provider.name}
-                        </span>
+                {Array.from(songImportRegistry.getProviders()).map(
+                  (provider) => (
+                    <div
+                      key={provider.id}
+                      className="flex flex-col justify-between p-3.5 border border-slate-200 dark:border-slate-800 rounded-xl bg-slate-50/50 dark:bg-slate-800/30 hover:border-slate-300 dark:hover:border-slate-700 transition-colors space-y-2.5"
+                    >
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <FileText className="w-3.5 h-3.5 text-[#0284c7] shrink-0" />
+                          <span className="text-xs font-semibold text-slate-900 dark:text-slate-100">
+                            {provider.name}
+                          </span>
+                        </div>
+                        {provider.description && (
+                          <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
+                            {provider.description}
+                          </p>
+                        )}
                       </div>
-                      {provider.description && (
-                        <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
-                          {provider.description}
-                        </p>
+
+                      {provider.supportedExtensions.length > 0 && (
+                        <div className="flex items-center gap-1.5 flex-wrap pt-1 border-t border-slate-200/60 dark:border-slate-800/60">
+                          <span className="text-[10px] uppercase font-medium text-slate-400 dark:text-slate-500">
+                            Extensões:
+                          </span>
+                          {provider.supportedExtensions.map((ext) => (
+                            <span
+                              key={ext}
+                              className="px-2 py-0.5 text-[10px] font-mono font-medium bg-slate-200/60 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-md border border-slate-300/50 dark:border-slate-700/50"
+                            >
+                              .{ext.replace(/^\./, "")}
+                            </span>
+                          ))}
+                        </div>
                       )}
                     </div>
-
-                    {provider.supportedExtensions.length > 0 && (
-                      <div className="flex items-center gap-1.5 flex-wrap pt-1 border-t border-slate-200/60 dark:border-slate-800/60">
-                        <span className="text-[10px] uppercase font-medium text-slate-400 dark:text-slate-500">
-                          Extensões:
-                        </span>
-                        {provider.supportedExtensions.map((ext) => (
-                          <span
-                            key={ext}
-                            className="px-2 py-0.5 text-[10px] font-mono font-medium bg-slate-200/60 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-md border border-slate-300/50 dark:border-slate-700/50"
-                          >
-                            .{ext.replace(/^\./, "")}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                ))}
+                  ),
+                )}
               </div>
             </div>
           </form>
