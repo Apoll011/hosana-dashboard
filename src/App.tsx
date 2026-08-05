@@ -45,13 +45,13 @@ function StatsigWrapper({ children }: { children: React.ReactNode }) {
     <StatsigProvider
       client={client}
       loadingComponent={
-        <div className="h-screen w-screen flex items-center justify-center bg-slate-900 text-white">
+        <div className="h-screen w-screen flex items-center justify-center bg-m3-bg">
           <Spinner size="lg" label="A autenticar no servidor de flags..." />
         </div>
       }
     >
       {isLoading ? (
-        <div className="h-screen w-screen flex items-center justify-center bg-slate-900 text-white">
+        <div className="h-screen w-screen flex items-center justify-center bg-m3-bg">
           <Spinner size="lg" label="A autenticar o Utilizador..." />
         </div>
       ) : (
