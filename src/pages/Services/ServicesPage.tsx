@@ -351,7 +351,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
                 <div className="absolute top-0 left-0 w-2 h-full bg-m3-primary opacity-0 group-hover:opacity-100 transition-opacity" />
 
                 <div className="space-y-4">
-                  <div className="relative flex items-center justify-between min-h-[32px]">
+                  <div className="relative flex items-center justify-between min-h-8">
                     <Badge variant="sky">
                       <Clock className="w-3.5 h-3.5 mr-1.5 opacity-70" />
                       {new Date(service.date).toLocaleDateString("pt-PT", {
@@ -361,17 +361,12 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
                       })}
                     </Badge>
 
-                    {/* 
-      A ILHA DE AÇÕES (Isolada com group/island)
-      - O hover do Card externo já não afeta isto.
-      - A própria div reage a hover:w-[168px] (cresce quando passas o rato NELA).
-    */}
                     <div
                       tabIndex={0}
                       className="group/island absolute right-0 z-10 flex items-center justify-end bg-m3-card/90 backdrop-blur-xs rounded-2xl border border-m3-border/60 shadow-sm overflow-hidden transition-[width,opacity] duration-300 ease-out outline-none cursor-default
                  w-8 h-8 opacity-70 
-                 hover:opacity-100 hover:w-[168px] 
-                 focus-within:opacity-100 focus-within:w-[168px]"
+                 hover:opacity-100 hover:w-42 
+                 focus-within:opacity-100 focus-within:w-42"
                     >
                       {/* Ícone 3 pontos (Só desaparece com o hover/foco NA ILHA) */}
                       <div
