@@ -1,0 +1,89 @@
+import { Song, songsApi } from "@hosanna/shared";
+import { ProviderImportResult, SongImportProvider } from "../utils/import";
+
+export class JsonImportProvider implements SongImportProvider {
+  readonly id = "json";
+  readonly name = "JSON Importer";
+  readonly fileTypeName = "JSON";
+  readonly description = "Imports songs structured in JSON format";
+  readonly supportedExtensions = [".json"];
+
+  async import(
+    files: File[],
+    songData: Partial<Song>,
+  ): Promise<ProviderImportResult> {
+    const songPayloads: Array<Partial<Song>> = [];
+    let ignoredCount = 0;
+
+    for (const file of files) {
+      try {
+        const fileText = await file.text();
+        const parsedJson = JSON.parse(fileText);
+
+        // Process object-based formats: { "normal": [...], "folder-uuid-123": [...] }
+        if (typeof parsedJson === "object" && !Array.isArray(parsedJson)) {
+          for (const [key, songs] of Object.entries(parsedJson)) {
+            if (!Array.isArray(songs)) continue;
+
+            // Determine folderId: fallback to songData for "normal", otherwise use key (UUID)
+            const targetFolderId = key === "normal" ? songData.folderId : key;
+
+            for (const item of songs) {
+              songPayloads.push({
+                title: item.title,
+                content: item.content,
+                tags: item.tags || [],
+                artist: item.artist || "Vários",
+                ...songData,
+                folderId: targetFolderId,
+              });
+            }
+          }
+        }
+        // Process flat array formats: [ { title: "...", content: "..." } ]
+        else if (Array.isArray(parsedJson)) {
+          for (const item of parsedJson) {
+            songPayloads.push({
+              title: item.title,
+              content: item.content,
+              tags: item.tags || [],
+              artist: item.artist || "Vários",
+              ...songData,
+            });
+          }
+        }
+      } catch {
+        ignoredCount++;
+      }
+    }
+
+    if (songPayloads.length > 0) {
+      try {
+        const res = await songsApi.createSongsBatch(songPayloads);
+        return {
+          providerId: this.id,
+          fileTypeName: this.fileTypeName,
+          created: res.count,
+          failed: songPayloads.length - res.count,
+          ignored: ignoredCount,
+        };
+      } catch {
+        return {
+          providerId: this.id,
+          fileTypeName: this.fileTypeName,
+          created: 0,
+          failed: songPayloads.length,
+          ignored: ignoredCount,
+        };
+      }
+    }
+
+    return {
+      providerId: this.id,
+      fileTypeName: this.fileTypeName,
+      created: 0,
+      failed: 0,
+      ignored: files.length,
+    };
+  }
+}
