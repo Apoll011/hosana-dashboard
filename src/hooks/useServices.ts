@@ -99,10 +99,38 @@ export function useServices() {
     },
   });
 
+  const archiveServiceMutation = useMutation({
+    mutationFn: ({ id, archived }: { id: string; archived: boolean }) =>
+      servicesApi.archiveService(id, archived),
+    onMutate: async ({ id, archived }) => {
+      await queryClient.cancelQueries({ queryKey: ["service", id] });
+      const previousService = queryClient.getQueryData(["service", id]);
+      queryClient.setQueryData(["service", id], (old: any) => ({
+        ...old,
+        archived,
+      }));
+      return { previousService };
+    },
+    onError: (err: any, variables, context) => {
+      if (context?.previousService) {
+        queryClient.setQueryData(
+          ["service", variables.id],
+          context.previousService,
+        );
+      }
+      showToast(err.message || "Failed to update service", "error");
+    },
+    onSettled: (data, error, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["service", variables.id] });
+      queryClient.invalidateQueries({ queryKey: ["services"] });
+    },
+  });
+
   return {
     servicesQuery,
     createService: createServiceMutation.mutateAsync,
     updateService: updateServiceMutation.mutateAsync,
+    archiveService: archiveServiceMutation.mutateAsync,
     deleteService: deleteServiceMutation.mutateAsync,
     updateElements: updateElementsMutation.mutateAsync,
     isCreating: createServiceMutation.isPending,

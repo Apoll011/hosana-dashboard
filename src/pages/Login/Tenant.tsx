@@ -4,6 +4,7 @@
  */
 
 import { Button, Input } from "@hosanna/shared";
+import { useStatsigClient } from "@statsig/react-bindings";
 import {
   ArrowLeft,
   ArrowRight,
@@ -23,6 +24,8 @@ import LoginLayout from "./Layout";
 
 export const RegisterTenantPage: React.FC = () => {
   const navigate = useNavigate();
+  const { client } = useStatsigClient();
+  const alpha_release = client.checkGate("alpha_release");
 
   // Step state
   const [step, setStep] = useState(1);
@@ -101,9 +104,27 @@ export const RegisterTenantPage: React.FC = () => {
     }
   };
 
+  if (!alpha_release) {
+    return (
+      <LoginLayout
+        optionalLink="/login"
+        optionalMsg="Faça Login"
+        errorMsg={""}
+        titleMb={2}
+      >
+        <div className="py-12 flex flex-col items-center justify-center text-center animate-in zoom-in-95 duration-500">
+          <h2 className="text-2xl font-black text-slate-900 mb-2">
+            Registro de organizações ainda não está ativo, Espere até o Alpha
+            Release no dia 1 de Setembro
+          </h2>
+        </div>
+      </LoginLayout>
+    );
+  }
+
   return (
     <LoginLayout
-      optionalLink="/link"
+      optionalLink="/login"
       optionalMsg="Já tem uma organização? Faça Login"
       errorMsg={errorMsg}
       titleMb={2}
@@ -125,23 +146,52 @@ export const RegisterTenantPage: React.FC = () => {
         </div>
       ) : (
         <>
-          <div className="text-center mb-5">
+          <div className="text-center mb-4">
             <h2 className="font-display font-black text-2xl sm:text-3xl tracking-tight text-slate-900">
               Criar Organização
             </h2>
           </div>
-          <div className="flex items-center justify-between mb-8 gap-2">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="flex-1 flex flex-col gap-2">
+
+          {/* Step Progress Bar with Labels */}
+          <div className="mb-6">
+            <div className="flex items-center justify-between mb-2">
+              {[
+                { num: 1, label: "Igreja" },
+                { num: 2, label: "Admin" },
+                { num: 3, label: "Segurança" },
+              ].map((s) => (
                 <div
-                  className={`h-1.5 rounded-full transition-all duration-500 ${
-                    step >= i
-                      ? "bg-m3-primary shadow-[0_0_10px_rgba(var(--m3-primary-rgb),0.4)]"
-                      : "bg-slate-200"
+                  key={s.num}
+                  className={`flex items-center gap-1.5 text-xs font-bold transition-colors ${
+                    step >= s.num ? "text-m3-primary" : "text-slate-400"
                   }`}
-                />
-              </div>
-            ))}
+                >
+                  <span
+                    className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black transition-all ${
+                      step >= s.num
+                        ? "bg-m3-primary text-white shadow-sm"
+                        : "bg-slate-200 text-slate-500"
+                    }`}
+                  >
+                    {s.num}
+                  </span>
+                  <span className="hidden sm:inline">{s.label}</span>
+                </div>
+              ))}
+            </div>
+            <div className="flex items-center justify-between gap-2">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="flex-1 flex flex-col gap-2">
+                  <div
+                    className={`h-1.5 rounded-full transition-all duration-500 ${
+                      step >= i
+                        ? "bg-m3-primary shadow-[0_0_10px_rgba(var(--m3-primary-rgb),0.4)]"
+                        : "bg-slate-200"
+                    }`}
+                  />
+                </div>
+              ))}
+            </div>
           </div>
 
           {/* Form Steps */}

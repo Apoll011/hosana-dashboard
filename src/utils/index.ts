@@ -4,7 +4,7 @@
  */
 
 import { Song } from "@hosanna/shared";
-import { CifraResult, FolderNode } from "./types";
+import { CifraResult, FolderNode } from "../types";
 
 // ---------------------------------------------------------------------------
 // Folder tree

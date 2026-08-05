@@ -12,7 +12,6 @@ export interface PreviewSettings {
   instrument: "guitar" | "piano";
   showDiagrams: boolean;
   showYoutubePlayer: boolean;
-  keepScreenAwake: boolean;
 }
 
 const DEFAULT_SETTINGS: PreviewSettings = {
@@ -22,7 +21,6 @@ const DEFAULT_SETTINGS: PreviewSettings = {
   instrument: "guitar",
   showDiagrams: true,
   showYoutubePlayer: false,
-  keepScreenAwake: false,
 };
 
 const STORAGE_KEY = "chordpro-preview-settings";
@@ -87,10 +85,7 @@ export function usePreviewSettings() {
     [],
   );
 
-  const resetSettings = useCallback(
-    () => setState(() => DEFAULT_SETTINGS),
-    [],
-  );
+  const resetSettings = useCallback(() => setState(() => DEFAULT_SETTINGS), []);
 
   return { settings, updateSetting, resetSettings };
 }

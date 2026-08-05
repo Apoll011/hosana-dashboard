@@ -66,28 +66,6 @@ function useSongMutations() {
     },
   });
 
-  const renameSongMutation = useMutation({
-    mutationFn: ({
-      id,
-      newTitle,
-      updatedAt,
-      newPath,
-    }: {
-      id: string;
-      newTitle: string;
-      updatedAt: string;
-      newPath?: string;
-    }) => songsApi.renameSong(id, newTitle, updatedAt, newPath),
-    onSuccess: (updatedSong) => {
-      updateSong(updatedSong);
-      queryClient.invalidateQueries({ queryKey: ["folders"] });
-      showToast("Nome do cântico alterado", "success");
-    },
-    onError: (err: any) => {
-      showToast(err.message || "Falha ao alterar nome do cântico", "error");
-    },
-  });
-
   const moveSongMutation = useMutation({
     mutationFn: ({
       id,
@@ -132,7 +110,6 @@ function useSongMutations() {
     createSong: createSongMutation.mutateAsync,
     updateSong: updateSongMutation.mutateAsync,
     deleteSong: deleteSongMutation.mutateAsync,
-    renameSong: renameSongMutation.mutateAsync,
     moveSong: moveSongMutation.mutateAsync,
     updateBatchTags: updateBatchTagsMutation.mutateAsync,
     isCreating: createSongMutation.isPending,
