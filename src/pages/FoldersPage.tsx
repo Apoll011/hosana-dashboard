@@ -155,7 +155,7 @@ const FolderGridCard: React.FC<FolderGridCardProps> = ({
       onDragOver={onDragOver}
       onDragLeave={onDragLeave}
       onDrop={onDrop}
-      className={`p-5 rounded-[24px] border transition-all cursor-pointer flex flex-col items-center text-center group relative shadow-sm hover:shadow-xl active:scale-95 select-none ${
+      className={`p-5 rounded-3xl border transition-all cursor-pointer flex flex-col items-center text-center group relative shadow-sm hover:shadow-xl active:scale-95 select-none ${
         isDropTarget && !isDropDisabled
           ? "border-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 ring-4 ring-emerald-300/40 border-dashed shadow-lg scale-[1.02]"
           : isSelected
