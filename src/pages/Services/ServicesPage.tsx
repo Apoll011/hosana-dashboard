@@ -351,7 +351,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
                 <div className="absolute top-0 left-0 w-2 h-full bg-m3-primary opacity-0 group-hover:opacity-100 transition-opacity" />
 
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between gap-2">
+                  <div className="relative flex items-center justify-between min-h-[32px]">
                     <Badge variant="sky">
                       <Clock className="w-3.5 h-3.5 mr-1.5 opacity-70" />
                       {new Date(service.date).toLocaleDateString("pt-PT", {
@@ -361,47 +361,61 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
                       })}
                     </Badge>
 
-                    {/* Container do Menu de Ações */}
-                    <div className="relative group flex items-center justify-end z-20">
-                      <button
-                        type="button"
-                        aria-label="Mais opções"
-                        className="p-1.5 text-m3-secondary hover:text-m3-primary hover:bg-m3-primary/10 rounded-xl cursor-pointer transition-all opacity-80 group-hover:opacity-100 focus:outline-none"
-                      >
-                        <MoreHorizontal className="w-5 h-5" />
-                      </button>
-
+                    {/* 
+      A ILHA DE AÇÕES (Isolada com group/island)
+      - O hover do Card externo já não afeta isto.
+      - A própria div reage a hover:w-[168px] (cresce quando passas o rato NELA).
+    */}
+                    <div
+                      tabIndex={0}
+                      className="group/island absolute right-0 z-10 flex items-center justify-end bg-m3-card/90 backdrop-blur-xs rounded-2xl border border-m3-border/60 shadow-sm overflow-hidden transition-[width,opacity] duration-300 ease-out outline-none cursor-default
+                 w-8 h-8 opacity-70 
+                 hover:opacity-100 hover:w-[168px] 
+                 focus-within:opacity-100 focus-within:w-[168px]"
+                    >
+                      {/* Ícone 3 pontos (Só desaparece com o hover/foco NA ILHA) */}
                       <div
-                        className="absolute right-0 flex items-center gap-1 bg-m3-card/95 backdrop-blur-md p-1 rounded-2xl border border-m3-border/60 shadow-lg transition-all duration-300 origin-right
-        opacity-0 pointer-events-none scale-90 translate-x-4
-        group-hover:opacity-100 group-hover:pointer-events-auto group-hover:scale-100 group-hover:translate-x-0
-        focus-within:opacity-100 focus-within:pointer-events-auto focus-within:scale-100 focus-within:translate-x-0"
+                        className="absolute right-0 top-0 w-8 h-8 flex items-center justify-center transition-all duration-300 pointer-events-none
+                      opacity-100 scale-100 
+                      group-hover/island:opacity-0 group-hover/island:scale-75 group-hover/island:-translate-x-2 
+                      focus-within:opacity-0 focus-within:scale-75 focus-within:-translate-x-2"
+                      >
+                        <MoreHorizontal className="w-4 h-4 text-m3-secondary" />
+                      </div>
+
+                      {/* Botões de Ação (Só aparecem com o hover/foco NA ILHA) */}
+                      <div
+                        className="flex items-center gap-1 p-1 w-max transition-all duration-300
+                      opacity-0 translate-x-4 pointer-events-none
+                      group-hover/island:opacity-100 group-hover/island:translate-x-0 group-hover/island:pointer-events-auto
+                      focus-within:opacity-100 focus-within:translate-x-0 focus-within:pointer-events-auto"
                       >
                         <button
+                          type="button"
                           onClick={(e) => {
                             e.stopPropagation();
                             setEditTarget(service);
                           }}
                           title="Editar Nome e Data"
-                          aria-label="Editar Nome e Data"
-                          className="p-1.5 text-m3-secondary hover:text-m3-primary hover:bg-m3-primary/10 rounded-xl cursor-pointer transition-all"
+                          className="p-1.5 text-m3-secondary hover:text-m3-primary hover:bg-m3-primary/10 rounded-xl cursor-pointer transition-all focus:outline-none"
                         >
                           <Edit2 className="w-4 h-4" />
                         </button>
 
                         <button
+                          type="button"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleDuplicateService(service);
                           }}
                           title="Duplicar Culto"
-                          aria-label="Duplicar Culto"
-                          className="p-1.5 text-m3-secondary hover:text-emerald-600 hover:bg-emerald-500/10 rounded-xl cursor-pointer transition-all"
+                          className="p-1.5 text-m3-secondary hover:text-emerald-600 hover:bg-emerald-500/10 rounded-xl cursor-pointer transition-all focus:outline-none"
                         >
                           <Copy className="w-4 h-4" />
                         </button>
 
                         <button
+                          type="button"
                           onClick={async (e) => {
                             e.stopPropagation();
                             const html = await printApi.printService(
@@ -410,20 +424,19 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
                             printHtmlDirectly(html);
                           }}
                           title="Imprimir Culto"
-                          aria-label="Imprimir Culto"
-                          className="p-1.5 text-m3-secondary hover:text-sky-600 hover:bg-sky-500/10 rounded-xl cursor-pointer transition-all"
+                          className="p-1.5 text-m3-secondary hover:text-sky-600 hover:bg-sky-500/10 rounded-xl cursor-pointer transition-all focus:outline-none"
                         >
                           <Printer className="w-4 h-4" />
                         </button>
 
                         <button
+                          type="button"
                           onClick={(e) => {
                             e.stopPropagation();
                             setArchiveTarget(service);
                           }}
                           title={`${archiveTarget?.archived ? "Ativar" : "Arquivar"} Culto`}
-                          aria-label={`${archiveTarget?.archived ? "Ativar" : "Arquivar"} Culto`}
-                          className="p-1.5 text-m3-secondary hover:text-rose-600 hover:bg-rose-500/10 rounded-xl cursor-pointer transition-all"
+                          className="p-1.5 text-m3-secondary hover:text-rose-600 hover:bg-rose-500/10 rounded-xl cursor-pointer transition-all focus:outline-none"
                         >
                           {archiveTarget?.archived ? (
                             <ArchiveRestore className="w-4 h-4" />
@@ -433,13 +446,13 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
                         </button>
 
                         <button
+                          type="button"
                           onClick={(e) => {
                             e.stopPropagation();
                             setDeleteTarget(service);
                           }}
                           title="Apagar Culto"
-                          aria-label="Apagar Culto"
-                          className="p-1.5 text-m3-secondary hover:text-rose-600 hover:bg-rose-500/10 rounded-xl cursor-pointer transition-all"
+                          className="p-1.5 text-m3-secondary hover:text-rose-600 hover:bg-rose-500/10 rounded-xl cursor-pointer transition-all focus:outline-none"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
