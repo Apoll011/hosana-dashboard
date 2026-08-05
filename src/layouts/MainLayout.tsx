@@ -23,6 +23,7 @@ import {
   ChevronRight,
   Church,
   CornerLeftUp,
+  Download,
   Edit2,
   ExternalLink,
   FileText,
@@ -68,7 +69,9 @@ import { useAllSongs } from "../hooks/useSongs";
 
 import { ConversionResult, printApi } from "@hosanna/shared";
 import { useStatsigClient } from "@statsig/react-bindings";
+import { Action, KBarProvider } from "kbar";
 import { ServiceForm } from "../components/forms/ServiceForm";
+import { KBarCommandPaletteUI, KBarTriggerButton } from "../components/KBarCommandPalette";
 import { CifraClubImportModal } from "../components/modals/CifraModal";
 import { printHtmlDirectly } from "../utils";
 
@@ -714,6 +717,279 @@ export const MainLayout: React.FC = () => {
     () => allServices.find((s) => s.id === currentServiceId),
     [allServices, currentServiceId],
   );
+
+  const isCommandPaletteEnabled = client?.checkGate
+    ? client.checkGate("command_palett") || client.checkGate("command_palette")
+    : false;
+
+  const kbarActions = useMemo<Action[]>(() => {
+    if (!isCommandPaletteEnabled) return [];
+
+    const actions: Action[] = [
+      // --- NAVEGAÇÃO ---
+      {
+        id: "nav-drive",
+        name: "Ir para Drive (Início)",
+        shortcut: ["g", "d"],
+        keywords: "drive inicio home pastas root folders",
+        section: "Navegação",
+        icon: <HardDrive className="w-4 h-4 text-sky-500" />,
+        perform: () => {
+          setCurrentFolderId(null);
+          navigate("/folders");
+        },
+      },
+      {
+        id: "nav-songs",
+        name: "Ir para Biblioteca de Cânticos",
+        shortcut: ["g", "s"],
+        keywords: "biblioteca canticos musicas songs library",
+        section: "Navegação",
+        icon: <Music className="w-4 h-4 text-sky-500" />,
+        perform: () => navigate("/songs"),
+      },
+      {
+        id: "nav-services",
+        name: "Ir para Cultos / Planos",
+        shortcut: ["g", "c"],
+        keywords: "cultos planos servicos services worship",
+        section: "Navegação",
+        icon: <Church className="w-4 h-4 text-emerald-500" />,
+        perform: () => navigate("/services"),
+      },
+      {
+        id: "nav-musicians",
+        name: "Ir para Músicos & Acessos",
+        shortcut: ["g", "m"],
+        keywords: "musicos equipa team qr code access",
+        section: "Navegação",
+        icon: <User className="w-4 h-4 text-indigo-500" />,
+        perform: () => navigate("/musicians"),
+      },
+      {
+        id: "nav-settings",
+        name: "Ir para Definições do Sistema",
+        shortcut: ["g", "t"],
+        keywords: "definicoes configuracoes settings preferences",
+        section: "Navegação",
+        icon: <Settings className="w-4 h-4 text-slate-500" />,
+        perform: () => navigate("/settings"),
+      },
+
+      // --- AÇÕES RÁPIDAS ---
+      {
+        id: "action-create-song",
+        name: "Criar Novo Cântico",
+        shortcut: ["c", "s"],
+        keywords: "novo cantico musica adicionar song create add",
+        section: "Ações Rápidas",
+        icon: <Plus className="w-4 h-4 text-sky-500" />,
+        perform: () => setIsCreateSongModalOpen(true),
+      },
+      {
+        id: "action-import-cifra",
+        name: "Importar Cântico do CifraClub",
+        shortcut: ["c", "i"],
+        keywords: "importar cifraclub cifra web url fetch",
+        section: "Ações Rápidas",
+        icon: <Download className="w-4 h-4 text-sky-500" />,
+        perform: () => setIsCifraImportOpen(true),
+      },
+      {
+        id: "action-create-service",
+        name: "Criar Novo Plano de Culto",
+        shortcut: ["c", "c"],
+        keywords: "novo culto plano servico create service worship date",
+        section: "Ações Rápidas",
+        icon: <Calendar className="w-4 h-4 text-emerald-500" />,
+        perform: () => setIsCreateServiceModalOpen(true),
+      },
+      {
+        id: "action-create-folder",
+        name: "Criar Nova Pasta",
+        shortcut: ["c", "f"],
+        keywords: "nova pasta diretorio novapasta create folder directory",
+        section: "Ações Rápidas",
+        icon: <FolderPlus className="w-4 h-4 text-amber-500" />,
+        perform: () => setIsCreateModalOpen(true),
+      },
+      {
+        id: "action-upload-chordpro",
+        name: "Carregar Ficheiros ChordPro (.pro, .txt)",
+        shortcut: ["u"],
+        keywords: "upload carregar ficheiros chordpro import txt pro",
+        section: "Ações Rápidas",
+        icon: <Upload className="w-4 h-4 text-purple-500" />,
+        perform: () => fileInputRef.current?.click(),
+      },
+    ];
+
+    // --- DYNAMIC FOLDERS ---
+    allFolders.forEach((f) => {
+      actions.push({
+        id: `folder-${f.id}`,
+        name: `Pasta: ${f.name}`,
+        subtitle: `Caminho: ${getFolderPathString(f.parentId)} (${f.songCount || 0} cânticos)`,
+        keywords: `pasta folder ${f.name} ${getFolderPathString(f.parentId)}`,
+        section: "Pastas",
+        icon: <FolderIcon className="w-4 h-4 text-amber-500" />,
+        perform: () => {
+          handleSelectFolder(f.id);
+          navigate("/folders");
+        },
+      });
+    });
+
+    // --- DYNAMIC SONGS ---
+    allSongs.forEach((s) => {
+      actions.push({
+        id: `song-${s.id}`,
+        name: `Cântico: ${s.title}`,
+        subtitle: `${s.artist || "Artista Desconhecido"} ${s.tags?.length ? "• " + s.tags.join(", ") : ""}`,
+        keywords: `cantico musica song ${s.title} ${s.artist || ""} ${(s.tags || []).join(" ")}`,
+        section: "Cânticos",
+        icon: <FileText className="w-4 h-4 text-sky-500" />,
+        perform: () => navigate(`/songs/${s.id}`),
+      });
+    });
+
+    // --- DYNAMIC SERVICES ---
+    allServices.forEach((serv) => {
+      actions.push({
+        id: `service-${serv.id}`,
+        name: `Culto: ${serv.name}`,
+        subtitle: `Data: ${new Date(serv.date).toLocaleDateString("pt-PT")}`,
+        keywords: `culto plano service worship ${serv.name} ${serv.notes || ""}`,
+        section: "Cultos",
+        icon: <Calendar className="w-4 h-4 text-emerald-500" />,
+        perform: () => navigate(`/services/${serv.id}`),
+      });
+    });
+
+    // --- CURRENT CONTEXT & VIEW ACTIONS ---
+    if (isExplorerView) {
+      actions.push(
+        {
+          id: "view-grid",
+          name: "Alternar Vista para Grelha",
+          keywords: "vista grelha grid view layout",
+          section: "Visualização",
+          icon: <LayoutGrid className="w-4 h-4 text-slate-500" />,
+          perform: () => handleViewModeChange("grid"),
+        },
+        {
+          id: "view-list",
+          name: "Alternar Vista para Lista",
+          keywords: "vista lista list view table layout",
+          section: "Visualização",
+          icon: <List className="w-4 h-4 text-slate-500" />,
+          perform: () => handleViewModeChange("list"),
+        },
+        {
+          id: "open-filters",
+          name: "Abrir Painel de Filtros Avançados",
+          keywords: "filtros filter pesquisar tom tag artista",
+          section: "Visualização",
+          icon: <Filter className="w-4 h-4 text-slate-500" />,
+          perform: () => setIsFilterPanelOpen(true),
+        },
+      );
+    }
+
+    if (isSongEditorView && currentSong) {
+      actions.push(
+        {
+          id: "song-print-current",
+          name: `Imprimir Cântico: "${currentSong.title}"`,
+          keywords: "imprimir print pdf cantico atual",
+          section: "Cântico Atual",
+          icon: <Printer className="w-4 h-4 text-indigo-500" />,
+          perform: () => handlePrintSong(currentSong.id),
+        },
+        {
+          id: "song-rename-current",
+          name: `Renomear Cântico: "${currentSong.title}"`,
+          keywords: "renomear editar titulo rename title",
+          section: "Cântico Atual",
+          icon: <Edit2 className="w-4 h-4 text-amber-500" />,
+          perform: () => {
+            setRenameSongTarget(currentSong);
+            setNewSongTitle(currentSong.title);
+          },
+        },
+        {
+          id: "song-move-current",
+          name: `Mover Cântico: "${currentSong.title}"`,
+          keywords: "mover pasta move folder destination",
+          section: "Cântico Atual",
+          icon: <Move className="w-4 h-4 text-sky-500" />,
+          perform: () => {
+            setMoveSongTarget(currentSong);
+            setTargetSongFolderId(currentSong.folderId);
+          },
+        },
+        {
+          id: "song-delete-current",
+          name: `Eliminar Cântico: "${currentSong.title}"`,
+          keywords: "eliminar apagar remover delete remove",
+          section: "Cântico Atual",
+          icon: <Trash2 className="w-4 h-4 text-rose-500" />,
+          perform: () => setDeleteSongTarget(currentSong),
+        },
+      );
+    }
+
+    if (isServiceEditorView && currentService) {
+      actions.push({
+        id: "service-delete-current",
+        name: `Eliminar Culto: "${currentService.name}"`,
+        keywords: "eliminar apagar culto delete service",
+        section: "Culto Atual",
+        icon: <Trash2 className="w-4 h-4 text-rose-500" />,
+        perform: async () => {
+          await deleteService(currentService.id);
+          navigate("/services");
+        },
+      });
+    }
+
+    // --- CONTA E PREFERÊNCIAS ---
+    actions.push(
+      {
+        id: "toggle-sidebar",
+        name: isSidebarCollapsed ? "Expandir Barra Lateral" : "Recolher Barra Lateral",
+        shortcut: ["b", "s"],
+        keywords: "sidebar menu barras lateral recolher expandir toggle",
+        section: "Definições & Conta",
+        icon: <ChevronRight className="w-4 h-4 text-slate-500" />,
+        perform: () => setIsSidebarCollapsed(!isSidebarCollapsed),
+      },
+      {
+        id: "user-logout",
+        name: "Sair / Terminar Sessão",
+        keywords: "sair logout encerrar sessao exit",
+        section: "Definições & Conta",
+        icon: <LogOut className="w-4 h-4 text-rose-500" />,
+        perform: () => logout(),
+      },
+    );
+
+    return actions;
+  }, [
+    isCommandPaletteEnabled,
+    allFolders,
+    allSongs,
+    allServices,
+    currentFolderId,
+    currentSong,
+    currentService,
+    isExplorerView,
+    isSongEditorView,
+    isServiceEditorView,
+    isSidebarCollapsed,
+    navigate,
+    logout,
+  ]);
 
   // Is searching or filtering active?
   const isSearchingOrFiltering = Boolean(
@@ -1610,8 +1886,9 @@ export const MainLayout: React.FC = () => {
 
   const totalItemsCount = filteredSubfolders.length + filteredFiles.length;
 
-  return (
+  const layoutContent = (
     <>
+      {isCommandPaletteEnabled && <KBarCommandPaletteUI />}
       <div className="h-dvh max-h-dvh w-full flex flex-row overflow-hidden bg-m3-bg">
         {/* Mobile Sidebar Overlay */}
         {isSidebarOpen && (
@@ -1627,43 +1904,55 @@ export const MainLayout: React.FC = () => {
           } w-72 border-r border-m3-border p-4 flex-col gap-1 select-none shrink-0 overflow-y-auto transition-all duration-300`}
           role="navigation"
         >
-          <button
-            onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-            className="hidden md:flex absolute right-3 w-6 h-6 rounded-full bg-m3-card border border-m3-border items-center justify-center shadow-md hover:bg-m3-hover transition-all z-20 cursor-pointer"
-            title={isSidebarCollapsed ? "Expandir menu" : "Recolher menu"}
-          >
-            <ChevronLeft
-              className={`w-3.5 h-3.5 text-m3-secondary transition-transform duration-300 ${
-                isSidebarCollapsed ? "rotate-180" : ""
-              }`}
-            />
-          </button>
+          {/* Integrated Sidebar Header */}
           <div
-            className="flex flex-col items-center text-center mb-4 mt-5 select-none"
+            className="flex items-center justify-between mb-4 mt-2 select-none px-1"
             role="banner"
           >
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl flex items-center justify-center border transition-transform hover:scale-105 hover:rotate-2">
+            <div
+              className={`flex items-center ${isSidebarCollapsed ? "justify-center w-full" : "gap-3"}`}
+            >
+              <div className="w-11 h-11 rounded-xl flex items-center justify-center border border-m3-border/50 bg-m3-card transition-transform hover:scale-105 shadow-xs shrink-0">
                 <img
                   src={logo}
                   alt="Hosanna Studio"
-                  className="w-12 h-12 object-contain rounded-xl"
+                  className="w-10 h-10 object-contain rounded-lg"
                 />
               </div>
               {!isSidebarCollapsed && (
-                <div className="flex flex-col items-start">
-                  <h1 className="font-display font-black text-2xl tracking-tighter text-slate-900 dark:text-slate-100 leading-none">
+                <div className="flex flex-col items-start min-w-0 flex-1">
+                  <h1 className="font-display font-black text-xl tracking-tighter text-slate-900 dark:text-slate-100 leading-none truncate">
                     Hosanna Studio
                   </h1>
                   {tenant && (
-                    <span className="mt-1 text-xs font-medium text-slate-500 dark:text-slate-400">
+                    <span className="mt-1 text-xs font-medium text-slate-500 dark:text-slate-400 truncate max-w-[130px]">
                       {tenant.name || tenant.slug}
                     </span>
                   )}
                 </div>
               )}
             </div>
+
+            {!isSidebarCollapsed && (
+              <button
+                onClick={() => setIsSidebarCollapsed(true)}
+                className="hidden md:flex p-1.5 rounded-xl hover:bg-m3-hover text-m3-secondary hover:text-m3-text border border-transparent hover:border-m3-border/60 transition-all cursor-pointer shrink-0"
+                title="Recolher menu"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+            )}
           </div>
+
+          {isSidebarCollapsed && (
+            <button
+              onClick={() => setIsSidebarCollapsed(false)}
+              className="hidden md:flex w-full py-2 items-center justify-center rounded-xl bg-m3-card/50 hover:bg-m3-hover border border-m3-border/40 text-m3-secondary hover:text-m3-text transition-all cursor-pointer mb-3 shadow-xs"
+              title="Expandir menu"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          )}
 
           {!isSidebarCollapsed && (
             <div className="px-3 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-m3-secondary opacity-60">
@@ -2080,6 +2369,7 @@ export const MainLayout: React.FC = () => {
                 {/* Search Filter, Sorting & View Mode Toggles */}
                 {(isExplorerView || isSongsView || isServicesView) && (
                   <div className="flex items-center gap-3 w-full md:w-auto overflow-visible hide-scrollbar pb-1 md:pb-0">
+                    {isCommandPaletteEnabled && <KBarTriggerButton />}
                     {/* Search Input */}
                     <div className="relative w-full sm:w-64">
                       <Input
@@ -3224,4 +3514,10 @@ export const MainLayout: React.FC = () => {
       )}
     </>
   );
+
+  if (isCommandPaletteEnabled) {
+    return <KBarProvider actions={kbarActions}>{layoutContent}</KBarProvider>;
+  }
+
+  return layoutContent;
 };
