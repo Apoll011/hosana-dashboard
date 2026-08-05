@@ -4,52 +4,52 @@
  */
 
 import {
-    Badge,
-    Button,
-    Folder,
-    Input,
-    Modal,
-    Song,
-    songsApi,
+  Badge,
+  Button,
+  Folder,
+  Input,
+  Modal,
+  Song,
+  songsApi,
 } from "@hosanna/shared";
 import {
-    AlertTriangle,
-    ArrowRightLeft,
-    ArrowUpDown,
-    Calendar,
-    CheckSquare,
-    ChevronDown,
-    ChevronLeft,
-    ChevronRight,
-    Church,
-    CornerLeftUp,
-    Download,
-    Edit2,
-    ExternalLink,
-    FileText,
-    Filter,
-    Folder as FolderIcon,
-    FolderOpen,
-    FolderPlus,
-    HardDrive,
-    LayoutGrid,
-    List,
-    LogOut,
-    Menu,
-    MoreVertical,
-    Move,
-    Music,
-    Plus,
-    Printer,
-    QrCode,
-    RotateCw,
-    Search,
-    Settings,
-    Tag,
-    Trash2,
-    Upload,
-    User,
-    X,
+  AlertTriangle,
+  ArrowRightLeft,
+  ArrowUpDown,
+  Calendar,
+  CheckSquare,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  Church,
+  CornerLeftUp,
+  Download,
+  Edit2,
+  ExternalLink,
+  FileText,
+  Filter,
+  Folder as FolderIcon,
+  FolderOpen,
+  FolderPlus,
+  HardDrive,
+  LayoutGrid,
+  List,
+  LogOut,
+  Menu,
+  MoreVertical,
+  Move,
+  Music,
+  Plus,
+  Printer,
+  QrCode,
+  RotateCw,
+  Search,
+  Settings,
+  Tag,
+  Trash2,
+  Upload,
+  User,
+  X,
 } from "lucide-react";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
@@ -1723,29 +1723,29 @@ export const MainLayout: React.FC = () => {
 
   const showToastImportResult = (result: ProviderImportResult) => {
     if (result.created > 0) {
-        const targetFolderName = currentFolder
-          ? currentFolder.name
-          : "Diretório Raiz";
-        showToast(
-          `${result.created} ficheiro(s) ${result.fileTypeName} carregado(s) com sucesso para "${targetFolderName}"!`,
-          "success"
-        )
-    } 
-    
+      const targetFolderName = currentFolder
+        ? currentFolder.name
+        : "Diretório Raiz";
+      showToast(
+        `${result.created} ficheiro(s) ${result.fileTypeName} carregado(s) com sucesso para "${targetFolderName}"!`,
+        "success",
+      );
+    }
+
     if (result.failed > 0) {
       showToast(
-        `Erro ao carregar ${result.created} ficheiro(s)  ${result.fileTypeName}`,
+        `Erro ao carregar ${result.failed} ficheiro(s)  ${result.fileTypeName}`,
         "error",
       );
     }
 
     if (result.ignored > 0) {
       showToast(
-        `Ignorado ${result.created} ficheiro(s) ${result.fileTypeName}`,
+        `Ignorado ${result.ignored} ficheiro(s) ${result.fileTypeName}`,
         "warning",
       );
-    } 
-  }
+    }
+  };
 
   const processAndUploadFiles = async (fileList: File[]) => {
     if (!fileList || fileList.length === 0) return;
@@ -1754,8 +1754,8 @@ export const MainLayout: React.FC = () => {
     const result = await songImportRegistry.importFiles(fileList, {
       folderId: currentFolderId,
     });
-    
-    result.results.forEach(r => {
+
+    result.results.forEach((r) => {
       showToastImportResult(r);
     });
 
