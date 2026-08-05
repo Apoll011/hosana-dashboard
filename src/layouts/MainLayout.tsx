@@ -71,7 +71,10 @@ import { ConversionResult, printApi } from "@hosanna/shared";
 import { useStatsigClient } from "@statsig/react-bindings";
 import { Action, KBarProvider } from "kbar";
 import { ServiceForm } from "../components/forms/ServiceForm";
-import { KBarCommandPaletteUI, KBarTriggerButton } from "../components/KBarCommandPalette";
+import {
+  KBarCommandPaletteUI,
+  KBarTriggerButton,
+} from "../components/KBarCommandPalette";
 import { CifraClubImportModal } from "../components/modals/CifraModal";
 import { printHtmlDirectly } from "../utils";
 
@@ -719,7 +722,7 @@ export const MainLayout: React.FC = () => {
   );
 
   const isCommandPaletteEnabled = client?.checkGate
-    ? client.checkGate("command_palett") || client.checkGate("command_palette")
+    ? client.checkGate("command_palett")
     : false;
 
   const kbarActions = useMemo<Action[]>(() => {
@@ -830,7 +833,7 @@ export const MainLayout: React.FC = () => {
         id: `folder-${f.id}`,
         name: `Pasta: ${f.name}`,
         subtitle: `Caminho: ${getFolderPathString(f.parentId)} (${f.songCount || 0} cânticos)`,
-        keywords: `pasta folder ${f.name} ${getFolderPathString(f.parentId)}`,
+        keywords: `pasta pastas folder folders diretoria directory ${f.name} ${getFolderPathString(f.parentId)}`,
         section: "Pastas",
         icon: <FolderIcon className="w-4 h-4 text-amber-500" />,
         perform: () => {
@@ -846,7 +849,7 @@ export const MainLayout: React.FC = () => {
         id: `song-${s.id}`,
         name: `Cântico: ${s.title}`,
         subtitle: `${s.artist || "Artista Desconhecido"} ${s.tags?.length ? "• " + s.tags.join(", ") : ""}`,
-        keywords: `cantico musica song ${s.title} ${s.artist || ""} ${(s.tags || []).join(" ")}`,
+        keywords: `cantico canticos musica musicas song songs louvor ${s.title} ${s.artist || ""} ${(s.tags || []).join(" ")}`,
         section: "Cânticos",
         icon: <FileText className="w-4 h-4 text-sky-500" />,
         perform: () => navigate(`/songs/${s.id}`),
@@ -859,7 +862,7 @@ export const MainLayout: React.FC = () => {
         id: `service-${serv.id}`,
         name: `Culto: ${serv.name}`,
         subtitle: `Data: ${new Date(serv.date).toLocaleDateString("pt-PT")}`,
-        keywords: `culto plano service worship ${serv.name} ${serv.notes || ""}`,
+        keywords: `culto cultos plano planos service services worship reuniao ${serv.name} ${serv.notes || ""}`,
         section: "Cultos",
         icon: <Calendar className="w-4 h-4 text-emerald-500" />,
         perform: () => navigate(`/services/${serv.id}`),
@@ -957,7 +960,9 @@ export const MainLayout: React.FC = () => {
     actions.push(
       {
         id: "toggle-sidebar",
-        name: isSidebarCollapsed ? "Expandir Barra Lateral" : "Recolher Barra Lateral",
+        name: isSidebarCollapsed
+          ? "Expandir Barra Lateral"
+          : "Recolher Barra Lateral",
         shortcut: ["b", "s"],
         keywords: "sidebar menu barras lateral recolher expandir toggle",
         section: "Definições & Conta",
@@ -1901,7 +1906,7 @@ export const MainLayout: React.FC = () => {
         <div
           className={`${isSidebarOpen ? "flex absolute inset-y-0 left-0 z-50 bg-m3-sidebar shadow-2xl" : "hidden"} md:flex md:relative md:bg-m3-sidebar/30 ${
             isSidebarCollapsed ? "md:w-20" : "md:w-64"
-          } w-72 border-r border-m3-border p-4 flex-col gap-1 select-none shrink-0 overflow-y-auto transition-all duration-300`}
+          } w-72 border-r border-m3-border p-4 flex-col gap-1 select-none shrink-0 transition-all duration-300 z-30`}
           role="navigation"
         >
           {/* Integrated Sidebar Header */}
