@@ -1927,7 +1927,7 @@ export const MainLayout: React.FC = () => {
                     Hosanna Studio
                   </h1>
                   {tenant && (
-                    <span className="mt-1 text-xs font-medium text-slate-500 dark:text-slate-400 truncate max-w-[130px]">
+                    <span className="mt-1 text-xs font-medium text-slate-500 dark:text-slate-400 truncate max-w-32.5">
                       {tenant.name || tenant.slug}
                     </span>
                   )}

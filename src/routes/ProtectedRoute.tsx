@@ -13,7 +13,7 @@ export const ProtectedRoute: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="h-screen w-screen flex items-center justify-center bg-slate-900 text-white">
+      <div className="h-screen w-screen flex items-center justify-center bg-m3-bg">
         <Spinner size="lg" label="A autenticar sessão no Servidor Hosanna..." />
       </div>
     );
