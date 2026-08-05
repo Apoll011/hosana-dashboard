@@ -1,6 +1,11 @@
 import { Button, Modal } from "@hosanna/shared";
 import { BookOpen, Check, ChevronDown, Loader2, Search } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
+import {
+  DurationField,
+  durationInputToSeconds,
+  secondsToDurationInput,
+} from "./DurationField";
 
 // ── Bolls Life Bible API Integration ──────────────────────────────────
 // API explicitly permits free web usage. It replaces the buggy NPM package.
@@ -352,8 +357,15 @@ interface ScriptureModalProps {
     content: string;
     passage: string;
     notes: string;
+    duration: number;
   }) => void;
-  initial?: { title: string; content: string; passage: string; notes: string };
+  initial?: {
+    title: string;
+    content: string;
+    passage: string;
+    notes: string;
+    duration?: number;
+  };
 }
 
 export const ScriptureModal: React.FC<ScriptureModalProps> = ({
@@ -365,6 +377,9 @@ export const ScriptureModal: React.FC<ScriptureModalProps> = ({
   const [title, setTitle] = useState(initial?.title || "Leitura Bíblica");
   const [passageInput, setPassageInput] = useState(initial?.passage || "");
   const [notes, setNotes] = useState(initial?.notes || "");
+  const [duration, setDuration] = useState(
+    secondsToDurationInput(initial?.duration),
+  );
 
   const [translations, setTranslations] = useState<Translation[]>(
     FALLBACK_TRANSLATIONS,
@@ -418,6 +433,7 @@ export const ScriptureModal: React.FC<ScriptureModalProps> = ({
       setTitle(initial?.title || "Leitura Bíblica");
       setPassageInput(initial?.passage || "");
       setNotes(initial?.notes || "");
+      setDuration(secondsToDurationInput(initial?.duration));
       setFetchedText(null);
       setFetchedPassageLabel("");
       setFetchError(null);
@@ -498,6 +514,7 @@ export const ScriptureModal: React.FC<ScriptureModalProps> = ({
       content: accepted ? fetchedText || "" : "",
       passage: accepted ? fetchedPassageLabel || passageInput : passageInput,
       notes,
+      duration: durationInputToSeconds(duration),
     });
   };
 
@@ -679,6 +696,12 @@ export const ScriptureModal: React.FC<ScriptureModalProps> = ({
             className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-fuchsia-500"
           />
         </div>
+
+        <DurationField
+          value={duration}
+          onChange={setDuration}
+          accentRingClass="focus:ring-fuchsia-500"
+        />
 
         {/* Actions */}
         <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-200 dark:border-slate-800">
