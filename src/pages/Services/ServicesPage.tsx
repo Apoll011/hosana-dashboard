@@ -114,6 +114,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
         name: data.name,
         date: data.date,
         notes: data.notes,
+        updatedAt: editTarget.updatedAt,
       },
     });
     setEditTarget(null);
@@ -341,7 +342,8 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
                             type="button"
                             onClick={(e) => {
                               e.stopPropagation();
-                              const rect = e.currentTarget.getBoundingClientRect();
+                              const rect =
+                                e.currentTarget.getBoundingClientRect();
                               setContextMenu({
                                 x: rect.left,
                                 y: rect.bottom + 4,
