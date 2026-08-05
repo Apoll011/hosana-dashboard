@@ -18,17 +18,16 @@ export class SongImportRegistry {
     return this.providers.get(extension.toLowerCase());
   }
 
-  getProviders(): ProvidersMetadata[] {
-    let meta: ProvidersMetadata[] = [];
+  getProviders(): Set<ProvidersMetadata> {
+    let meta: Set<ProvidersMetadata> = new Set();
     this.providers.forEach((value) => {
-      meta.push({
+      meta.add({
         id: value.id,
         name: value.name,
         description: value.description,
         supportedExtensions: value.supportedExtensions,
       });
     });
-    console.log(meta, this.providers);
     return meta;
   }
 
