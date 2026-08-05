@@ -23,10 +23,7 @@ import {
   Clock,
   Copy,
   Edit2,
-  LayoutGrid,
-  List,
   MoreVertical,
-  Plus,
   Printer,
   Trash2,
 } from "lucide-react";
@@ -47,6 +44,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
   const navigate = useNavigate();
   const context = useOutletContext<any>() || {};
   const actualHideHeader = hideHeader ?? context.hideHeader;
+  const viewMode = context.viewMode;
   const actualSearchQuery =
     externalSearchQuery !== undefined
       ? externalSearchQuery
@@ -63,7 +61,6 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<Service | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Service | null>(null);
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [contextMenu, setContextMenu] = useState<{
     x: number;
     y: number;
@@ -154,55 +151,6 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
     <div
       className={`flex-1 flex flex-col w-full mx-auto space-y-8 animate-in fade-in duration-500 overflow-y-auto h-full ${hideHeader ? "p-6" : "p-4 sm:p-8 max-w-7xl"}`}
     >
-      {/* Header Banner */}
-      {!actualHideHeader && (
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-          <div>
-            <h1 className="text-3xl font-black text-m3-text tracking-tighter flex items-center gap-4">
-              <div className="w-12 h-12 rounded-2xl bg-m3-primary/10 text-m3-primary flex items-center justify-center border border-m3-primary/20">
-                <Calendar className="w-7 h-7" />
-              </div>
-              Planeador de Cultos
-            </h1>
-            <p className="text-sm text-m3-secondary font-bold uppercase tracking-widest mt-2 ml-16 opacity-60">
-              Organize as listas de cânticos para os próximos eventos
-            </p>
-          </div>
-
-          <div className="flex items-center gap-3">
-            {serviceAsFolderItem && (
-              <div className="flex items-center p-1 bg-m3-card border border-m3-border rounded-xl">
-                <button
-                  type="button"
-                  onClick={() => setViewMode("grid")}
-                  className={`p-2 rounded-lg transition-colors ${viewMode === "grid" ? "bg-m3-primary/10 text-m3-primary" : "text-m3-secondary hover:text-m3-text"}`}
-                  title="Grelha"
-                >
-                  <LayoutGrid className="w-4 h-4" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setViewMode("list")}
-                  className={`p-2 rounded-lg transition-colors ${viewMode === "list" ? "bg-m3-primary/10 text-m3-primary" : "text-m3-secondary hover:text-m3-text"}`}
-                  title="Lista"
-                >
-                  <List className="w-4 h-4" />
-                </button>
-              </div>
-            )}
-
-            <Button
-              variant="primary"
-              icon={<Plus className="w-5 h-5" />}
-              onClick={() => setIsCreateModalOpen(true)}
-              className="rounded-2xl py-6 px-6 font-black uppercase tracking-widest text-[11px] shadow-xl shadow-m3-primary/20"
-            >
-              Novo Culto
-            </Button>
-          </div>
-        </div>
-      )}
-
       {/* Services Content */}
       {servicesQuery.isLoading ? (
         <div className="flex-1 flex items-center justify-center p-12">
