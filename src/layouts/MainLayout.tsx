@@ -4,51 +4,51 @@
  */
 
 import {
-    Badge,
-    Button,
-    Folder,
-    Input,
-    Modal,
-    Song,
-    songsApi,
+  Badge,
+  Button,
+  Folder,
+  Input,
+  Modal,
+  Song,
+  songsApi,
 } from "@hosanna/shared";
 import {
-    AlertTriangle,
-    ArrowRightLeft,
-    ArrowUpDown,
-    Calendar,
-    CheckSquare,
-    ChevronDown,
-    ChevronLeft,
-    ChevronRight,
-    Church,
-    CornerLeftUp,
-    Edit2,
-    ExternalLink,
-    FileText,
-    Filter,
-    Folder as FolderIcon,
-    FolderOpen,
-    FolderPlus,
-    HardDrive,
-    LayoutGrid,
-    List,
-    LogOut,
-    Menu,
-    MoreVertical,
-    Move,
-    Music,
-    Plus,
-    Printer,
-    QrCode,
-    RotateCw,
-    Search,
-    Settings,
-    Tag,
-    Trash2,
-    Upload,
-    User,
-    X,
+  AlertTriangle,
+  ArrowRightLeft,
+  ArrowUpDown,
+  Calendar,
+  CheckSquare,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  Church,
+  CornerLeftUp,
+  Edit2,
+  ExternalLink,
+  FileText,
+  Filter,
+  Folder as FolderIcon,
+  FolderOpen,
+  FolderPlus,
+  HardDrive,
+  LayoutGrid,
+  List,
+  LogOut,
+  Menu,
+  MoreVertical,
+  Move,
+  Music,
+  Plus,
+  Printer,
+  QrCode,
+  RotateCw,
+  Search,
+  Settings,
+  Tag,
+  Trash2,
+  Upload,
+  User,
+  X,
 } from "lucide-react";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
@@ -1079,7 +1079,7 @@ export const MainLayout: React.FC = () => {
         await moveFolder({
           id: fId,
           parentId: targetFolderId,
-          updatedAt: f.updatedAt,
+          updatedAt: f.updatedAt!,
         });
     }
     for (const sId of songList) {
@@ -1306,7 +1306,7 @@ export const MainLayout: React.FC = () => {
     await renameFolder({
       id: renameTarget.id,
       name,
-      updatedAt: renameTarget.updatedAt,
+      updatedAt: renameTarget.updatedAt!,
     });
     setRenameTarget(null);
   };
@@ -1316,7 +1316,7 @@ export const MainLayout: React.FC = () => {
     await moveFolder({
       id: moveFolderTarget.id,
       parentId: targetParentFolderId,
-      updatedAt: moveFolderTarget.updatedAt,
+      updatedAt: moveFolderTarget.updatedAt!,
     });
     setMoveFolderTarget(null);
   };
@@ -2114,7 +2114,7 @@ export const MainLayout: React.FC = () => {
                     </div>
 
                     {isExplorerView ||
-                      (isServicesView && serviceAsFolderItem) && (
+                      (isServicesView && serviceAsFolderItem && (
                         <>
                           {/* Filter Pop-Up Panel Trigger Button */}
                           <button
