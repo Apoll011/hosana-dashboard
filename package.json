@@ -29,6 +29,7 @@
     "express": "^4.21.2",
     "free-use-bible-api": "^0.2.0",
     "jsonwebtoken": "^9.0.3",
+    "kbar": "^0.1.0-beta.48",
     "lucide-react": "^0.546.0",
     "motion": "^12.23.24",
     "qrcode.react": "^4.2.0",
