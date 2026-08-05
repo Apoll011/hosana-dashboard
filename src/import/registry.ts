@@ -18,6 +18,19 @@ export class SongImportRegistry {
     return this.providers.get(extension.toLowerCase());
   }
 
+  getProviders(): ProvidersMetadata[] {
+    let meta: ProvidersMetadata[] = [];
+    this.providers.forEach((value) => {
+      meta.push({
+        id: value.id,
+        name: value.name,
+        description: value.description,
+        supportedExtensions: value.supportedExtensions,
+      });
+    });
+    return meta;
+  }
+
   async importFiles(
     files: readonly File[],
     songData: Partial<Song>,
@@ -72,4 +85,12 @@ export class SongImportRegistry {
       results,
     };
   }
+}
+
+interface ProvidersMetadata {
+  id: string;
+  name: string;
+  description?: string;
+
+  supportedExtensions: readonly string[];
 }
