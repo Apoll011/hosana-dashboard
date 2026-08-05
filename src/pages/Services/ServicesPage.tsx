@@ -19,6 +19,7 @@ import { useStatsigClient } from "@statsig/react-bindings";
 import {
   ArrowRight,
   Calendar,
+  Church,
   Clock,
   Copy,
   Edit2,
@@ -254,7 +255,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
                   </button>
 
                   <div className="w-14 h-14 rounded-2xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-600 dark:text-sky-400 mb-3 group-hover:scale-110 transition-transform">
-                    <Calendar className="w-8 h-8 opacity-80" />
+                    <Church className="w-8 h-8 opacity-80" />
                   </div>
 
                   <span className="text-sm font-black text-m3-text transition-colors truncate w-full px-1">
@@ -267,10 +268,6 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
                       month: "long",
                       year: "numeric",
                     })}
-                  </span>
-
-                  <span className="text-[9px] font-extrabold uppercase tracking-widest text-sky-600 dark:text-sky-400 bg-sky-500/10 px-2 py-0.5 rounded-md mt-2">
-                    .service
                   </span>
                 </div>
               ))

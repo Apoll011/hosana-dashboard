@@ -4,51 +4,51 @@
  */
 
 import {
-  Badge,
-  Button,
-  Folder,
-  Input,
-  Modal,
-  Song,
-  songsApi,
+    Badge,
+    Button,
+    Folder,
+    Input,
+    Modal,
+    Song,
+    songsApi,
 } from "@hosanna/shared";
 import {
-  AlertTriangle,
-  ArrowRightLeft,
-  ArrowUpDown,
-  Calendar,
-  CheckSquare,
-  ChevronDown,
-  ChevronLeft,
-  ChevronRight,
-  Church,
-  CornerLeftUp,
-  Edit2,
-  ExternalLink,
-  FileText,
-  Filter,
-  Folder as FolderIcon,
-  FolderOpen,
-  FolderPlus,
-  HardDrive,
-  LayoutGrid,
-  List,
-  LogOut,
-  Menu,
-  MoreVertical,
-  Move,
-  Music,
-  Plus,
-  Printer,
-  QrCode,
-  RotateCw,
-  Search,
-  Settings,
-  Tag,
-  Trash2,
-  Upload,
-  User,
-  X,
+    AlertTriangle,
+    ArrowRightLeft,
+    ArrowUpDown,
+    Calendar,
+    CheckSquare,
+    ChevronDown,
+    ChevronLeft,
+    ChevronRight,
+    Church,
+    CornerLeftUp,
+    Edit2,
+    ExternalLink,
+    FileText,
+    Filter,
+    Folder as FolderIcon,
+    FolderOpen,
+    FolderPlus,
+    HardDrive,
+    LayoutGrid,
+    List,
+    LogOut,
+    Menu,
+    MoreVertical,
+    Move,
+    Music,
+    Plus,
+    Printer,
+    QrCode,
+    RotateCw,
+    Search,
+    Settings,
+    Tag,
+    Trash2,
+    Upload,
+    User,
+    X,
 } from "lucide-react";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
@@ -67,6 +67,7 @@ import { useServices } from "../hooks/useServices";
 import { useAllSongs } from "../hooks/useSongs";
 
 import { ConversionResult, printApi } from "@hosanna/shared";
+import { useStatsigClient } from "@statsig/react-bindings";
 import { ServiceForm } from "../components/forms/ServiceForm";
 import { CifraClubImportModal } from "../components/modals/CifraModal";
 import { printHtmlDirectly } from "../utils";
@@ -378,6 +379,11 @@ export const MainLayout: React.FC = () => {
     () => servicesQuery.data || [],
     [servicesQuery.data],
   );
+
+  const { client } = useStatsigClient();
+  const serviceAsFolderItem = client?.checkGate
+    ? client.checkGate("service_as_folder_item")
+    : false;
 
   // Folder state: null = Root directory
   const [currentFolderId, setCurrentFolderId] = useState<string | null>(null);
@@ -2107,79 +2113,82 @@ export const MainLayout: React.FC = () => {
                       )}
                     </div>
 
-                    {isExplorerView && (
-                      <>
-                        {/* Filter Pop-Up Panel Trigger Button */}
-                        <button
-                          onClick={() => {
-                            navigateBackToDrive();
-                            setIsFilterPanelOpen(true);
-                          }}
-                          className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl border text-xs font-black uppercase tracking-widest transition-all cursor-pointer relative ${
-                            activeFiltersCount > 0
-                              ? "bg-m3-primary/10 border-m3-primary text-m3-primary shadow-lg shadow-m3-primary/10"
-                              : "bg-m3-card border-m3-border text-m3-secondary hover:bg-m3-hover hover:text-m3-text hover:border-m3-primary/30"
-                          }`}
-                          title="Abrir Filtros Avançados"
-                        >
-                          <Filter className="w-4 h-4" />
-                          <span className="hidden sm:inline">Filtros</span>
-                          {activeFiltersCount > 0 && (
-                            <span className="w-4.5 h-4.5 rounded-full bg-m3-primary text-white text-[10px] font-black flex items-center justify-center shadow-sm">
-                              {activeFiltersCount}
-                            </span>
-                          )}
-                        </button>
-
-                        {/* Sort Control Button */}
-                        <div className="flex items-center gap-2 bg-m3-bg border border-m3-border rounded-2xl px-3 py-2 text-xs transition-all hover:border-m3-primary/30">
-                          <ArrowUpDown className="w-4 h-4 text-m3-secondary shrink-0" />
-                          <select
-                            value={`${sortBy}-${sortOrder}`}
-                            onChange={(e) => {
-                              const [sb, so] = e.target.value.split("-") as [
-                                "title" | "artist" | "updatedAt",
-                                "asc" | "desc",
-                              ];
-                              handleSortChange(sb, so);
+                    {isExplorerView ||
+                      (isServicesView && serviceAsFolderItem) && (
+                        <>
+                          {/* Filter Pop-Up Panel Trigger Button */}
+                          <button
+                            onClick={() => {
+                              navigateBackToDrive();
+                              setIsFilterPanelOpen(true);
                             }}
-                            className="bg-transparent font-bold text-m3-text focus:outline-none cursor-pointer text-[11px] uppercase tracking-wider"
-                            title="Organizar ficheiros"
+                            className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl border text-xs font-black uppercase tracking-widest transition-all cursor-pointer relative ${
+                              activeFiltersCount > 0
+                                ? "bg-m3-primary/10 border-m3-primary text-m3-primary shadow-lg shadow-m3-primary/10"
+                                : "bg-m3-card border-m3-border text-m3-secondary hover:bg-m3-hover hover:text-m3-text hover:border-m3-primary/30"
+                            }`}
+                            title="Abrir Filtros Avançados"
                           >
-                            <option value="title-asc">Nome (A-Z)</option>
-                            <option value="title-desc">Nome (Z-A)</option>
-                            <option value="artist-asc">Artista (A-Z)</option>
-                            <option value="updatedAt-desc">Data Recente</option>
-                          </select>
-                        </div>
+                            <Filter className="w-4 h-4" />
+                            <span className="hidden sm:inline">Filtros</span>
+                            {activeFiltersCount > 0 && (
+                              <span className="w-4.5 h-4.5 rounded-full bg-m3-primary text-white text-[10px] font-black flex items-center justify-center shadow-sm">
+                                {activeFiltersCount}
+                              </span>
+                            )}
+                          </button>
 
-                        {/* View Mode Toggle */}
-                        <div className="flex items-center p-1 bg-m3-bg rounded-2xl border border-m3-border select-none shrink-0 shadow-inner">
-                          <button
-                            onClick={() => handleViewModeChange("grid")}
-                            title="Vista em Grelha"
-                            className={`p-2 rounded-xl transition-all cursor-pointer ${
-                              viewMode === "grid"
-                                ? "bg-m3-card text-m3-primary shadow-lg shadow-black/10"
-                                : "text-m3-secondary hover:text-m3-text"
-                            }`}
-                          >
-                            <LayoutGrid className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => handleViewModeChange("list")}
-                            title="Vista em Lista"
-                            className={`p-2 rounded-xl transition-all cursor-pointer ${
-                              viewMode === "list"
-                                ? "bg-m3-card text-m3-primary shadow-lg shadow-black/10"
-                                : "text-m3-secondary hover:text-m3-text"
-                            }`}
-                          >
-                            <List className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </>
-                    )}
+                          {/* Sort Control Button */}
+                          <div className="flex items-center gap-2 bg-m3-bg border border-m3-border rounded-2xl px-3 py-2 text-xs transition-all hover:border-m3-primary/30">
+                            <ArrowUpDown className="w-4 h-4 text-m3-secondary shrink-0" />
+                            <select
+                              value={`${sortBy}-${sortOrder}`}
+                              onChange={(e) => {
+                                const [sb, so] = e.target.value.split("-") as [
+                                  "title" | "artist" | "updatedAt",
+                                  "asc" | "desc",
+                                ];
+                                handleSortChange(sb, so);
+                              }}
+                              className="bg-transparent font-bold text-m3-text focus:outline-none cursor-pointer text-[11px] uppercase tracking-wider"
+                              title="Organizar ficheiros"
+                            >
+                              <option value="title-asc">Nome (A-Z)</option>
+                              <option value="title-desc">Nome (Z-A)</option>
+                              <option value="artist-asc">Artista (A-Z)</option>
+                              <option value="updatedAt-desc">
+                                Data Recente
+                              </option>
+                            </select>
+                          </div>
+
+                          {/* View Mode Toggle */}
+                          <div className="flex items-center p-1 bg-m3-bg rounded-2xl border border-m3-border select-none shrink-0 shadow-inner">
+                            <button
+                              onClick={() => handleViewModeChange("grid")}
+                              title="Vista em Grelha"
+                              className={`p-2 rounded-xl transition-all cursor-pointer ${
+                                viewMode === "grid"
+                                  ? "bg-m3-card text-m3-primary shadow-lg shadow-black/10"
+                                  : "text-m3-secondary hover:text-m3-text"
+                              }`}
+                            >
+                              <LayoutGrid className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => handleViewModeChange("list")}
+                              title="Vista em Lista"
+                              className={`p-2 rounded-xl transition-all cursor-pointer ${
+                                viewMode === "list"
+                                  ? "bg-m3-card text-m3-primary shadow-lg shadow-black/10"
+                                  : "text-m3-secondary hover:text-m3-text"
+                              }`}
+                            >
+                              <List className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </>
+                      ))}
 
                     <div className="relative shrink-0 ml-1" ref={plusMenuRef}>
                       <button
