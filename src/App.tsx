@@ -3,6 +3,7 @@ import { StatsigProvider, useClientAsyncInit } from "@statsig/react-bindings";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/react";
+import { useEffect } from "react";
 import { BrowserRouter } from "react-router-dom";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { SyncProvider } from "./contexts/SyncContext";
@@ -19,21 +20,26 @@ const queryClient = new QueryClient({
 });
 
 function StatsigWrapper({ children }: { children: React.ReactNode }) {
-  const { user, tenant } = useAuth();
-  const id = user?.id || "a-user";
-  const email = user?.email || "example@gmail.com";
+  const { user, tenant, isLoading } = useAuth();
+
   const { client } = useClientAsyncInit(
     "client-4459XEXCHZyP192QOlIwzRAffGVP9zfS33rnXpdquAI",
-    {
-      userID: id,
-      email: email,
+    {},
+  );
+
+  useEffect(() => {
+    if (!client || isLoading) return;
+
+    void client.updateUserAsync({
+      userID: user?.id ?? "anonymous",
+      email: user?.email,
       locale: "pt",
       custom: {
-        role: user?.role || "user",
-        tenant_slug: tenant?.slug || "default",
+        role: user?.role ?? "user",
+        tenant_slug: tenant?.slug ?? "default",
       },
-    },
-  );
+    });
+  }, [client, user, tenant, isLoading]);
 
   return (
     <StatsigProvider
@@ -44,11 +50,16 @@ function StatsigWrapper({ children }: { children: React.ReactNode }) {
         </div>
       }
     >
-      {children}
+      {isLoading ? (
+        <div className="h-screen w-screen flex items-center justify-center bg-slate-900 text-white">
+          <Spinner size="lg" label="A autenticar o Utilizador..." />
+        </div>
+      ) : (
+        children
+      )}
     </StatsigProvider>
   );
 }
-
 export default function App() {
   configureApiClient(
     localStorage.getItem("server_url") ||

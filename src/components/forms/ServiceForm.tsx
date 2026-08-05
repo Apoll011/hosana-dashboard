@@ -46,7 +46,9 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
     resolver: zodResolver(serviceSchema),
     defaultValues: {
       name: initialValues?.name || "",
-      date: initialValues?.date || new Date().toISOString(),
+      date: initialValues?.date
+        ? new Date(initialValues.date).toISOString().split("T")[0]
+        : new Date().toISOString().split("T")[0],
       notes: initialValues?.notes || "",
     },
   });
