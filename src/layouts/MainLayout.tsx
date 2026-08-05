@@ -71,7 +71,10 @@ import { ConversionResult, printApi } from "@hosanna/shared";
 import { useStatsigClient } from "@statsig/react-bindings";
 import { Action, KBarProvider } from "kbar";
 import { ServiceForm } from "../components/forms/ServiceForm";
-import { KBarCommandPaletteUI } from "../components/KBarCommandPalette";
+import {
+  KBarCommandPaletteUI,
+  KBarTriggerButton,
+} from "../components/KBarCommandPalette";
 import { CifraClubImportModal } from "../components/modals/CifraModal";
 import { printHtmlDirectly } from "../utils";
 
