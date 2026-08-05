@@ -17,6 +17,8 @@ import {
 } from "@hosanna/shared";
 import { useStatsigClient } from "@statsig/react-bindings";
 import {
+  Archive,
+  ArchiveRestore,
   ArrowRight,
   Calendar,
   Church,
@@ -55,12 +57,18 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
     ? client.checkGate("service_as_folder_item")
     : false;
 
-  const { servicesQuery, createService, updateService, deleteService } =
-    useServices();
+  const {
+    servicesQuery,
+    createService,
+    updateService,
+    deleteService,
+    archiveService,
+  } = useServices();
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<Service | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Service | null>(null);
+  const [archiveTarget, setArchiveTarget] = useState<Service | null>(null);
   const [contextMenu, setContextMenu] = useState<{
     x: number;
     y: number;
@@ -145,6 +153,15 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
     if (!deleteTarget) return;
     await deleteService(deleteTarget.id);
     setDeleteTarget(null);
+  };
+
+  const handleArchive = async () => {
+    if (!archiveTarget) return;
+    await archiveService({
+      id: archiveTarget.id,
+      archived: !archiveTarget.archived,
+    });
+    setArchiveTarget(null);
   };
 
   return (
@@ -385,6 +402,22 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
+                          setArchiveTarget(service);
+                        }}
+                        title={`${archiveTarget?.archived ? "Ativar" : "Arquivar"} Culto`}
+                        aria-label={`${archiveTarget?.archived ? "Ativar" : "Arquivar"} Culto`}
+                        className="p-1.5 text-m3-secondary hover:text-rose-600 hover:bg-rose-500/10 rounded-xl cursor-pointer transition-all"
+                      >
+                        {archiveTarget?.archived ? (
+                          <Archive className="w-4 h-4" />
+                        ) : (
+                          <ArchiveRestore className="w-4 h-4" />
+                        )}
+                      </button>
+
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
                           setDeleteTarget(service);
                         }}
                         title="Apagar Culto"
@@ -475,6 +508,21 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
             <span>Imprimir Culto</span>
           </button>
 
+          <button
+            onClick={() => {
+              setArchiveTarget(contextMenu.service);
+              setContextMenu(null);
+            }}
+            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left cursor-pointer"
+          >
+            {archiveTarget?.archived ? (
+              <Archive className="w-4 h-4 text-orange-500" />
+            ) : (
+              <ArchiveRestore className="w-4 h-4 text-orange-500" />
+            )}
+            <span>{archiveTarget?.archived ? "Ativar" : "Arquivar"} Culto</span>
+          </button>
+
           <div className="my-1 border-t border-slate-100 dark:border-slate-800/80" />
 
           <button
@@ -529,6 +577,15 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
         title="Apagar Culto"
         message={`Tem a certeza de que deseja apagar o culto "${deleteTarget?.name}"?`}
         confirmText="Apagar Culto"
+      />
+      <ConfirmDialog
+        variant="primary"
+        isOpen={!!archiveTarget}
+        onClose={() => setArchiveTarget(null)}
+        onConfirm={handleArchive}
+        title={`${archiveTarget?.archived ? "Ativar" : "Arquivar"} Culto`}
+        message={`Tem a certeza de que deseja ${archiveTarget?.archived ? "ativar" : "arquivar"} o culto "${archiveTarget?.name}"?`}
+        confirmText={`${archiveTarget?.archived ? "Ativar" : "Arquivar"} Culto`}
       />
     </div>
   );
