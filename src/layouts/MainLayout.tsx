@@ -549,7 +549,7 @@ export const MainLayout: React.FC = () => {
 
   const songParams = useMemo(() => ({}), []);
 
-  const { songsQuery, renameSong, moveSong, deleteSong, updateBatchTags } =
+  const { songsQuery, moveSong, deleteSong, updateBatchTags } =
     useAllSongs(songParams);
 
   // Search & Filters State
@@ -584,10 +584,6 @@ export const MainLayout: React.FC = () => {
     "move_to_root",
   );
   const [confirmFolderName, setConfirmFolderName] = useState("");
-
-  // Song Modal States
-  const [renameSongTarget, setRenameSongTarget] = useState<Song | null>(null);
-  const [newSongTitle, setNewSongTitle] = useState("");
 
   const [moveSongTarget, setMoveSongTarget] = useState<Song | null>(null);
   const [targetSongFolderId, setTargetSongFolderId] = useState<string | null>(
@@ -908,17 +904,6 @@ export const MainLayout: React.FC = () => {
           section: "Cântico Atual",
           icon: <Printer className="w-4 h-4 text-indigo-500" />,
           perform: () => handlePrintSong(currentSong.id),
-        },
-        {
-          id: "song-rename-current",
-          name: `Renomear Cântico: "${currentSong.title}"`,
-          keywords: "renomear editar titulo rename title",
-          section: "Cântico Atual",
-          icon: <Edit2 className="w-4 h-4 text-amber-500" />,
-          perform: () => {
-            setRenameSongTarget(currentSong);
-            setNewSongTitle(currentSong.title);
-          },
         },
         {
           id: "song-move-current",
@@ -1702,18 +1687,6 @@ export const MainLayout: React.FC = () => {
     });
     setIsCreateServiceModalOpen(false);
     navigate(`/services/${newService.id}`);
-  };
-
-  const handleRenameSongSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!renameSongTarget || !newSongTitle.trim()) return;
-    await renameSong({
-      id: renameSongTarget.id,
-      newTitle: newSongTitle.trim(),
-      updatedAt: renameSongTarget.updatedAt,
-    });
-    setRenameSongTarget(null);
-    setNewSongTitle("");
   };
 
   const handleDeleteSongSubmit = async () => {
@@ -2876,19 +2849,6 @@ export const MainLayout: React.FC = () => {
                   <button
                     onClick={() => {
                       const song = contextMenu.item as Song;
-                      setRenameSongTarget(song);
-                      setNewSongTitle(song.title);
-                      setContextMenu(null);
-                    }}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left"
-                  >
-                    <Edit2 className="w-4 h-4 text-[#0284c7]" />
-                    <span>Mudar Nome do Cântico</span>
-                  </button>
-
-                  <button
-                    onClick={() => {
-                      const song = contextMenu.item as Song;
                       setMoveSongTarget(song);
                       setTargetSongFolderId(song.folderId || null);
                       setContextMenu(null);
@@ -3222,37 +3182,6 @@ export const MainLayout: React.FC = () => {
             </div>
           </div>
         )}
-      </Modal>
-
-      {/* RENAME SONG MODAL */}
-      <Modal
-        isOpen={!!renameSongTarget}
-        onClose={() => setRenameSongTarget(null)}
-        title={`Mudar Nome do Cântico "${renameSongTarget?.title}"`}
-      >
-        <form onSubmit={handleRenameSongSubmit} className="flex flex-col gap-4">
-          <Input
-            label="Título do Cântico"
-            value={newSongTitle}
-            onChange={(e) => setNewSongTitle(e.target.value)}
-            placeholder="Insira o novo título do cântico..."
-            autoFocus
-            required
-          />
-
-          <div className="flex items-center justify-end gap-3 mt-2 pt-4 border-t border-slate-100 dark:border-slate-800">
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={() => setRenameSongTarget(null)}
-            >
-              Cancelar
-            </Button>
-            <Button type="submit" variant="primary">
-              Guardar Título
-            </Button>
-          </div>
-        </form>
       </Modal>
 
       {/* MOVE SONG MODAL (TREE HIERARCHY) */}
