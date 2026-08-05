@@ -71,10 +71,7 @@ import { ConversionResult, printApi } from "@hosanna/shared";
 import { useStatsigClient } from "@statsig/react-bindings";
 import { Action, KBarProvider } from "kbar";
 import { ServiceForm } from "../components/forms/ServiceForm";
-import {
-  KBarCommandPaletteUI,
-  KBarTriggerButton,
-} from "../components/KBarCommandPalette";
+import { KBarCommandPaletteUI } from "../components/KBarCommandPalette";
 import { CifraClubImportModal } from "../components/modals/CifraModal";
 import { printHtmlDirectly } from "../utils";
 
@@ -928,7 +925,7 @@ export const MainLayout: React.FC = () => {
           icon: <Move className="w-4 h-4 text-sky-500" />,
           perform: () => {
             setMoveSongTarget(currentSong);
-            setTargetSongFolderId(currentSong.folderId);
+            setTargetSongFolderId(currentSong.folderId!);
           },
         },
         {
@@ -2374,7 +2371,6 @@ export const MainLayout: React.FC = () => {
                 {/* Search Filter, Sorting & View Mode Toggles */}
                 {(isExplorerView || isSongsView || isServicesView) && (
                   <div className="flex items-center gap-3 w-full md:w-auto overflow-visible hide-scrollbar pb-1 md:pb-0">
-                    {isCommandPaletteEnabled && <KBarTriggerButton />}
                     {/* Search Input */}
                     <div className="relative w-full sm:w-64">
                       <Input

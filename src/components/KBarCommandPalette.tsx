@@ -3,18 +3,18 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from "react";
 import {
+  ActionImpl,
+  KBarAnimator,
   KBarPortal,
   KBarPositioner,
-  KBarAnimator,
-  KBarSearch,
   KBarResults,
-  useMatches,
+  KBarSearch,
   useKBar,
-  ActionImpl,
+  useMatches,
 } from "kbar";
-import { Search, CornerDownLeft, Command } from "lucide-react";
+import { Command, CornerDownLeft, Search } from "lucide-react";
+import React from "react";
 
 export const KBarCommandPaletteUI: React.FC = () => {
   return (
@@ -42,12 +42,18 @@ export const KBarCommandPaletteUI: React.FC = () => {
           <div className="px-5 py-3 bg-slate-50 dark:bg-slate-950/80 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-[11px] text-slate-400 dark:text-slate-500 font-medium">
             <div className="flex items-center gap-4">
               <span className="flex items-center gap-1.5">
-                <kbd className="px-1.5 py-0.5 rounded-md bg-slate-200 dark:bg-slate-800 text-[10px] font-mono">↑</kbd>
-                <kbd className="px-1.5 py-0.5 rounded-md bg-slate-200 dark:bg-slate-800 text-[10px] font-mono">↓</kbd>
+                <kbd className="px-1.5 py-0.5 rounded-md bg-slate-200 dark:bg-slate-800 text-[10px] font-mono">
+                  ↑
+                </kbd>
+                <kbd className="px-1.5 py-0.5 rounded-md bg-slate-200 dark:bg-slate-800 text-[10px] font-mono">
+                  ↓
+                </kbd>
                 Navegar
               </span>
               <span className="flex items-center gap-1.5">
-                <kbd className="px-1.5 py-0.5 rounded-md bg-slate-200 dark:bg-slate-800 text-[10px] font-mono">↵</kbd>
+                <kbd className="px-1.5 py-0.5 rounded-md bg-slate-200 dark:bg-slate-800 text-[10px] font-mono">
+                  ↵
+                </kbd>
                 Selecionar
               </span>
             </div>
@@ -129,7 +135,9 @@ const ResultItem = React.forwardRef<
             ))}
           </div>
         ) : null}
-        {active && <CornerDownLeft className="w-3.5 h-3.5 text-[#0284c7] dark:text-sky-400" />}
+        {active && (
+          <CornerDownLeft className="w-3.5 h-3.5 text-[#0284c7] dark:text-sky-400" />
+        )}
       </div>
     </div>
   );
@@ -137,7 +145,9 @@ const ResultItem = React.forwardRef<
 
 ResultItem.displayName = "ResultItem";
 
-export const KBarTriggerButton: React.FC<{ className?: string }> = ({ className }) => {
+export const KBarTriggerButton: React.FC<{ className?: string }> = ({
+  className,
+}) => {
   const { query } = useKBar();
   return (
     <button
@@ -145,7 +155,6 @@ export const KBarTriggerButton: React.FC<{ className?: string }> = ({ className 
       className={`flex items-center gap-2 px-3 py-2 bg-m3-card hover:bg-m3-hover border border-m3-border rounded-2xl text-xs font-medium text-m3-secondary hover:text-m3-text transition-all cursor-pointer shadow-xs ${className || ""}`}
       title="Abrir Menu de Comandos (Ctrl+K / Cmd+K)"
     >
-      <Search className="w-3.5 h-3.5 text-[#0284c7] dark:text-sky-400 shrink-0" />
       <span className="hidden sm:inline font-semibold">Comandos</span>
       <kbd className="px-1.5 py-0.5 rounded-md bg-m3-bg border border-m3-border text-[10px] font-mono font-bold text-m3-secondary">
         ⌘K
