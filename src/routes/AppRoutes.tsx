@@ -11,8 +11,8 @@ import { MainLayout } from "../layouts/MainLayout";
 import { ProtectedRoute } from "./ProtectedRoute";
 
 const PageLoader = () => (
-  <div className="flex-1 flex items-center justify-center p-12">
-    <Spinner label="A carregar..." />
+  <div className="h-screen w-screen flex items-center justify-center bg-m3-bg">
+    <Spinner size="lg" label="A carregar..." />
   </div>
 );
 

@@ -10,6 +10,7 @@ import {
   Editor,
   EditorSettingsPanel,
   parseChordPro,
+  Song,
   Spinner,
 } from "@hosanna/shared";
 import { useQueryClient } from "@tanstack/react-query";
@@ -108,13 +109,15 @@ export const SongEditorPage: React.FC = () => {
         const parsed = parseChordPro(updatedContent);
         const meta = parsed.metadata;
 
-        const updates: any = {
+        const updates: Partial<Song> = {
           content: updatedContent,
           updatedAt: currentSong.updatedAt,
         };
 
         if (meta.title) updates.title = meta.title;
         if (meta.artist) updates.artist = meta.artist;
+        if (meta.songNumber && Number(meta.songNumber))
+          updates.song_number = Number(meta.songNumber);
 
         await updateSong({ id: currentSong.id, data: updates });
         setHasUnsavedChanges(false);
