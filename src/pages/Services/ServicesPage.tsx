@@ -25,6 +25,7 @@ import {
   Clock,
   Copy,
   Edit2,
+  MoreHorizontal,
   MoreVertical,
   Printer,
   Trash2,
@@ -360,72 +361,89 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
                       })}
                     </Badge>
 
-                    {/* Action Buttons list (Position fixed nicely) */}
-                    <div className="flex items-center gap-1 bg-m3-card/90 backdrop-blur-xs p-1 rounded-2xl border border-m3-border/60 shadow-sm transition-all opacity-90 group-hover:opacity-100">
+                    {/* Container do Menu de Ações */}
+                    <div className="relative group flex items-center justify-end z-20">
                       <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setEditTarget(service);
-                        }}
-                        title="Editar Nome e Data"
-                        aria-label="Editar Nome e Data"
-                        className="p-1.5 text-m3-secondary hover:text-m3-primary hover:bg-m3-primary/10 rounded-xl cursor-pointer transition-all"
+                        type="button"
+                        aria-label="Mais opções"
+                        className="p-1.5 text-m3-secondary hover:text-m3-primary hover:bg-m3-primary/10 rounded-xl cursor-pointer transition-all opacity-80 group-hover:opacity-100 focus:outline-none"
                       >
-                        <Edit2 className="w-4 h-4" />
+                        <MoreHorizontal className="w-5 h-5" />
                       </button>
 
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDuplicateService(service);
-                        }}
-                        title="Duplicar Culto"
-                        aria-label="Duplicar Culto"
-                        className="p-1.5 text-m3-secondary hover:text-emerald-600 hover:bg-emerald-500/10 rounded-xl cursor-pointer transition-all"
+                      <div
+                        className="absolute right-0 flex items-center gap-1 bg-m3-card/95 backdrop-blur-md p-1 rounded-2xl border border-m3-border/60 shadow-lg transition-all duration-300 origin-right
+        opacity-0 pointer-events-none scale-90 translate-x-4
+        group-hover:opacity-100 group-hover:pointer-events-auto group-hover:scale-100 group-hover:translate-x-0
+        focus-within:opacity-100 focus-within:pointer-events-auto focus-within:scale-100 focus-within:translate-x-0"
                       >
-                        <Copy className="w-4 h-4" />
-                      </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setEditTarget(service);
+                          }}
+                          title="Editar Nome e Data"
+                          aria-label="Editar Nome e Data"
+                          className="p-1.5 text-m3-secondary hover:text-m3-primary hover:bg-m3-primary/10 rounded-xl cursor-pointer transition-all"
+                        >
+                          <Edit2 className="w-4 h-4" />
+                        </button>
 
-                      <button
-                        onClick={async (e) => {
-                          e.stopPropagation();
-                          const html = await printApi.printService(service.id);
-                          printHtmlDirectly(html);
-                        }}
-                        title="Imprimir Culto"
-                        aria-label="Imprimir Culto"
-                        className="p-1.5 text-m3-secondary hover:text-sky-600 hover:bg-sky-500/10 rounded-xl cursor-pointer transition-all"
-                      >
-                        <Printer className="w-4 h-4" />
-                      </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDuplicateService(service);
+                          }}
+                          title="Duplicar Culto"
+                          aria-label="Duplicar Culto"
+                          className="p-1.5 text-m3-secondary hover:text-emerald-600 hover:bg-emerald-500/10 rounded-xl cursor-pointer transition-all"
+                        >
+                          <Copy className="w-4 h-4" />
+                        </button>
 
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setArchiveTarget(service);
-                        }}
-                        title={`${archiveTarget?.archived ? "Ativar" : "Arquivar"} Culto`}
-                        aria-label={`${archiveTarget?.archived ? "Ativar" : "Arquivar"} Culto`}
-                        className="p-1.5 text-m3-secondary hover:text-rose-600 hover:bg-rose-500/10 rounded-xl cursor-pointer transition-all"
-                      >
-                        {archiveTarget?.archived ? (
-                          <ArchiveRestore className="w-4 h-4" />
-                        ) : (
-                          <Archive className="w-4 h-4" />
-                        )}
-                      </button>
+                        <button
+                          onClick={async (e) => {
+                            e.stopPropagation();
+                            const html = await printApi.printService(
+                              service.id,
+                            );
+                            printHtmlDirectly(html);
+                          }}
+                          title="Imprimir Culto"
+                          aria-label="Imprimir Culto"
+                          className="p-1.5 text-m3-secondary hover:text-sky-600 hover:bg-sky-500/10 rounded-xl cursor-pointer transition-all"
+                        >
+                          <Printer className="w-4 h-4" />
+                        </button>
 
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setDeleteTarget(service);
-                        }}
-                        title="Apagar Culto"
-                        aria-label="Apagar Culto"
-                        className="p-1.5 text-m3-secondary hover:text-rose-600 hover:bg-rose-500/10 rounded-xl cursor-pointer transition-all"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setArchiveTarget(service);
+                          }}
+                          title={`${archiveTarget?.archived ? "Ativar" : "Arquivar"} Culto`}
+                          aria-label={`${archiveTarget?.archived ? "Ativar" : "Arquivar"} Culto`}
+                          className="p-1.5 text-m3-secondary hover:text-rose-600 hover:bg-rose-500/10 rounded-xl cursor-pointer transition-all"
+                        >
+                          {archiveTarget?.archived ? (
+                            <ArchiveRestore className="w-4 h-4" />
+                          ) : (
+                            <Archive className="w-4 h-4" />
+                          )}
+                        </button>
+
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setDeleteTarget(service);
+                          }}
+                          title="Apagar Culto"
+                          aria-label="Apagar Culto"
+                          className="p-1.5 text-m3-secondary hover:text-rose-600 hover:bg-rose-500/10 rounded-xl cursor-pointer transition-all"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
                     </div>
                   </div>
 
