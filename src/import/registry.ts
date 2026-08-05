@@ -28,6 +28,7 @@ export class SongImportRegistry {
         supportedExtensions: value.supportedExtensions,
       });
     });
+    console.log(meta);
     return meta;
   }
 
