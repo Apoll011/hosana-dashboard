@@ -13,6 +13,7 @@ export class JsonImportProvider implements SongImportProvider {
     songData: Partial<Song>,
   ): Promise<ProviderImportResult> {
     const songPayloads: Array<Partial<Song>> = [];
+    const nameSet: Set<string> = new Set();
     let ignoredCount = 0;
 
     for (const file of files) {
@@ -20,15 +21,19 @@ export class JsonImportProvider implements SongImportProvider {
         const fileText = await file.text();
         const parsedJson = JSON.parse(fileText);
 
-        // Process object-based formats: { "normal": [...], "folder-uuid-123": [...] }
+        // Process object-based formats: { "root": [...], "folder-uuid-123": [...] }
         if (typeof parsedJson === "object" && !Array.isArray(parsedJson)) {
           for (const [key, songs] of Object.entries(parsedJson)) {
             if (!Array.isArray(songs)) continue;
 
             // Determine folderId: fallback to songData for "normal", otherwise use key (UUID)
-            const targetFolderId = key === "normal" ? songData.folderId : key;
+            const targetFolderId = key === "root" ? songData.folderId : key;
 
             for (const item of songs) {
+              if (nameSet.has(item.title)) {
+                ignoredCount++;
+                continue;
+              }
               songPayloads.push({
                 title: item.title,
                 content: item.content,
@@ -37,12 +42,17 @@ export class JsonImportProvider implements SongImportProvider {
                 ...songData,
                 folderId: targetFolderId,
               });
+              nameSet.add(item.title);
             }
           }
         }
         // Process flat array formats: [ { title: "...", content: "..." } ]
         else if (Array.isArray(parsedJson)) {
           for (const item of parsedJson) {
+            if (nameSet.has(item.title)) {
+              ignoredCount++;
+              continue;
+            }
             songPayloads.push({
               title: item.title,
               content: item.content,
