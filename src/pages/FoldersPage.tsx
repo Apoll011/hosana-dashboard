@@ -3,6 +3,7 @@ import {
   FileText,
   Folder as FolderIcon,
   FolderOpen,
+  MoreVertical,
   Plus,
   Upload,
 } from "lucide-react";
@@ -162,6 +163,23 @@ const FolderGridCard: React.FC<FolderGridCardProps> = ({
             : "border-m3-border/50 bg-m3-card hover:bg-m3-hover hover:border-m3-primary/40"
       } ${showDisabledDuringDrag ? "opacity-40 cursor-not-allowed" : ""}`}
     >
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation();
+          onContextMenu(e);
+        }}
+        className={`absolute top-3 right-3 p-1.5 rounded-xl text-m3-secondary hover:text-m3-text hover:bg-slate-200/60 dark:hover:bg-slate-700/60 transition-all z-10 cursor-pointer ${
+          isSelected
+            ? "opacity-100"
+            : "opacity-0 group-hover:opacity-100 focus:opacity-100"
+        }`}
+        title="Mais opções"
+        aria-label="Mais opções"
+      >
+        <MoreVertical className="w-4.5 h-4.5" />
+      </button>
+
       <div className="w-14 h-14 rounded-2xl bg-m3-primary/10 border border-m3-primary/20 flex items-center justify-center text-m3-primary mb-3 group-hover:scale-110 transition-transform">
         <FolderIcon className="w-8 h-8 opacity-80" />
       </div>
@@ -224,6 +242,23 @@ const SongGridCard: React.FC<SongGridCardProps> = ({
         : "border-m3-border/50 bg-m3-card hover:bg-m3-hover hover:border-m3-primary/40"
     }`}
   >
+    <button
+      type="button"
+      onClick={(e) => {
+        e.stopPropagation();
+        onContextMenu(e);
+      }}
+      className={`absolute top-3 right-3 p-1.5 rounded-xl text-m3-secondary hover:text-m3-text hover:bg-slate-200/60 dark:hover:bg-slate-700/60 transition-all z-10 cursor-pointer ${
+        isSelected
+          ? "opacity-100"
+          : "opacity-0 group-hover:opacity-100 focus:opacity-100"
+      }`}
+      title="Mais opções"
+      aria-label="Mais opções"
+    >
+      <MoreVertical className="w-4.5 h-4.5" />
+    </button>
+
     <div className="w-14 h-14 rounded-2xl bg-m3-primary-light/20 border border-m3-primary/20 flex items-center justify-center text-m3-primary mb-3 group-hover:scale-110 transition-transform">
       <FileText className="w-8 h-8 opacity-80" />
     </div>
@@ -321,9 +356,30 @@ const FolderTableRow: React.FC<FolderTableRowProps> = ({
         {folder.songCount || 0} Musicas
       </td>
       <td className="py-4 px-6 text-right">
-        <Button size="lg" variant="ghost">
-          Abrir
-        </Button>
+        <div className="flex items-center justify-end gap-1">
+          <Button
+            size="lg"
+            variant="ghost"
+            onClick={(e) => {
+              e.stopPropagation();
+              onDoubleClick(e);
+            }}
+          >
+            Abrir
+          </Button>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onContextMenu(e);
+            }}
+            className="p-2 rounded-xl text-m3-secondary hover:text-m3-text hover:bg-m3-hover dark:hover:bg-slate-800 transition-colors cursor-pointer"
+            title="Mais opções"
+            aria-label="Mais opções"
+          >
+            <MoreVertical className="w-4.5 h-4.5" />
+          </button>
+        </div>
       </td>
     </tr>
   );
@@ -384,9 +440,30 @@ const SongTableRow: React.FC<SongTableRowProps> = ({
     )}
     <td className="py-4 px-6 text-m3-secondary">{song.artist || "—"}</td>
     <td className="py-4 px-6 text-right">
-      <Button size="lg" variant="ghost">
-        Editar
-      </Button>
+      <div className="flex items-center justify-end gap-1">
+        <Button
+          size="lg"
+          variant="ghost"
+          onClick={(e) => {
+            e.stopPropagation();
+            onDoubleClick(e);
+          }}
+        >
+          Editar
+        </Button>
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onContextMenu(e);
+          }}
+          className="p-2 rounded-xl text-m3-secondary hover:text-m3-text hover:bg-m3-hover dark:hover:bg-slate-800 transition-colors cursor-pointer"
+          title="Mais opções"
+          aria-label="Mais opções"
+        >
+          <MoreVertical className="w-4.5 h-4.5" />
+        </button>
+      </div>
     </td>
   </tr>
 );

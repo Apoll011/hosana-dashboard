@@ -35,6 +35,7 @@ import {
   List,
   LogOut,
   Menu,
+  MoreVertical,
   Move,
   Music,
   Plus,
@@ -190,9 +191,23 @@ const FolderTreeItem: React.FC<{
             <span className="truncate tracking-tight">{node.folder.name}</span>
           </div>
 
-          <span className="text-[10px] text-m3-secondary font-black opacity-60 shrink-0">
-            {node.folder.songCount || 0}
-          </span>
+          <div className="flex items-center gap-1 shrink-0">
+            <span className="text-[10px] text-m3-secondary font-black opacity-60 group-hover:hidden transition-opacity">
+              {node.folder.songCount || 0}
+            </span>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onContextMenu(e, "folder", node.folder);
+              }}
+              className="hidden group-hover:flex p-1 rounded-lg hover:bg-m3-primary/20 text-m3-secondary hover:text-m3-primary transition-all cursor-pointer"
+              title="Mais opções"
+              aria-label="Mais opções"
+            >
+              <MoreVertical className="w-3.5 h-3.5" />
+            </button>
+          </div>
         </div>
 
         {hasChildren && isExpanded && (
