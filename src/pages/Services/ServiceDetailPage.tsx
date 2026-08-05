@@ -32,11 +32,10 @@ import { useQueryClient } from "@tanstack/react-query";
 import {
   ArrowLeft,
   BookOpen,
-  Clock3,
+  Check,
   Edit3,
   FileText,
   GripVertical,
-  Loader2,
   Megaphone,
   MessageSquare,
   MoreHorizontal,
@@ -48,7 +47,6 @@ import {
 } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useSync } from "../../contexts/SyncContext";
 import { useService, useServices } from "../../hooks/useServices";
 import { useSongs } from "../../hooks/useSongs";
 import { AnnouncementModal } from "./modals/Anouncement";
@@ -63,13 +61,6 @@ const goldSoft = "#e0f2fe";
 const cream = "#f8fafc";
 const border = "#cbd5e1";
 const navy = "#1d1b20";
-
-const formatDuration = (seconds: number) => {
-  const safe = Math.max(0, Math.floor(seconds || 0));
-  const mm = Math.floor(safe / 60);
-  const ss = safe % 60;
-  return `${String(mm).padStart(2, "0")}:${String(ss).padStart(2, "0")}`;
-};
 
 // ── Element badge helper ──────────────────────────────────────────────
 const getElementBadge = (type: string) => {
@@ -210,12 +201,6 @@ const SortableRow: React.FC<SortableRowProps> = ({
             >
               {badge.label}
             </span>
-            {Number(element.duration || 0) > 0 && (
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 shrink-0">
-                <Clock3 className="w-3 h-3 inline mr-1" />
-                {formatDuration(Number(element.duration || 0))}
-              </span>
-            )}
           </div>
           <>
             {element.passage && (
@@ -224,7 +209,7 @@ const SortableRow: React.FC<SortableRowProps> = ({
               </p>
             )}
             {element.content && (
-              <p className="text-xs text-slate-500 truncate mt-0.5">
+              <p className="text-xs text-slate-500 line-clamp-3 mt-0.5">
                 {element.content}
               </p>
             )}
@@ -352,18 +337,12 @@ export const ServiceDetailPage: React.FC = () => {
   const { data: service, isLoading, isError } = useService(id || null);
   const { updateElements, updateService } = useServices();
   const { songsQuery } = useSongs({ limit: 1000 });
-  const { showToast } = useSync();
 
   const queryClient = useQueryClient();
 
   const [elements, setElements] = useState<ServiceElement[]>([]);
-  const elementsRef = useRef<ServiceElement[]>([]);
   const [generalNotes, setGeneralNotes] = useState("");
   const [librarySearch, setLibrarySearch] = useState("");
-  const [pendingSongIds, setPendingSongIds] = useState<Record<string, number>>(
-    {},
-  );
-  const [isDropTargetActive, setIsDropTargetActive] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   // Modal states
@@ -379,13 +358,8 @@ export const ServiceDetailPage: React.FC = () => {
         (a, b) => (a.position || 0) - (b.position || 0),
       );
       setElements(sortedElements);
-      elementsRef.current = sortedElements;
     }
   }, [service]);
-
-  useEffect(() => {
-    elementsRef.current = elements;
-  }, [elements]);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -420,15 +394,8 @@ export const ServiceDetailPage: React.FC = () => {
   }
 
   const allAvailableSongs = songsQuery.data?.songs || [];
-  const songCountById = elements.reduce<Record<string, number>>((acc, el) => {
-    if (el.type === "song" && el.songId) {
-      acc[el.songId] = (acc[el.songId] || 0) + 1;
-    }
-    return acc;
-  }, {});
-  const totalDurationSeconds = elements.reduce(
-    (acc, el) => acc + Math.max(0, Number(el.duration || 0)),
-    0,
+  const addedSongIds = new Set(
+    elements.filter((e) => e.type === "song").map((e) => e.songId),
   );
 
   const filteredLibrarySongs = allAvailableSongs.filter(
@@ -437,22 +404,13 @@ export const ServiceDetailPage: React.FC = () => {
       (s.artist || "").toLowerCase().includes(librarySearch.toLowerCase()),
   );
 
-  const syncElements = async (
-    newElements: ServiceElement[],
-    fallbackElements: ServiceElement[] = elementsRef.current,
-  ) => {
+  const syncElements = async (newElements: ServiceElement[]) => {
     const updated = newElements.map((e, index) => ({ ...e, position: index }));
     setElements(updated);
-    try {
-      await updateElements({
-        serviceId: service.id,
-        data: { elements: updated, updatedAt: service.updatedAt },
-      });
-    } catch (error) {
-      setElements(fallbackElements);
-      elementsRef.current = fallbackElements;
-      throw error;
-    }
+    await updateElements({
+      serviceId: service.id,
+      data: { elements: updated, updatedAt: service.updatedAt },
+    });
   };
 
   const handleDragEnd = async (event: DragEndEvent) => {
@@ -485,46 +443,24 @@ export const ServiceDetailPage: React.FC = () => {
   };
 
   const handleAddSongToService = async (songId: string) => {
-    setPendingSongIds((prev) => ({ ...prev, [songId]: (prev[songId] || 0) + 1 }));
-    const previousElements = [...elementsRef.current];
-    try {
-      let song: Awaited<ReturnType<typeof songsApi.getSongById>> | null = null;
-      try {
-        song = await queryClient.fetchQuery({
-          queryKey: ["song", songId],
-          queryFn: () => songsApi.getSongById(songId),
-        });
-      } catch {
-        showToast("Falha ao carregar cântico", "error");
-        return;
-      }
+    const song = await queryClient.fetchQuery({
+      queryKey: ["song", songId],
+      queryFn: () => (id ? songsApi.getSongById(id) : null),
+    });
 
-      const parsed = parseChordPro(song?.content || "");
-      const liveElements = [...elementsRef.current];
-      const newElem: ServiceElement = {
-        id: crypto.randomUUID(),
-        type: "song",
-        title: song?.title || "Cântico Desconhecido",
-        songId,
-        content: song?.artist || "Sem Compositor",
-        position: liveElements.length,
-        duration: Number(parsed.metadata.duration || "0"),
-      };
+    const parsed = parseChordPro(song?.content || "");
 
-      await syncElements([...liveElements, newElem], previousElements);
-    } catch {
-      // updateElements mutation already reports toast errors.
-    } finally {
-      setPendingSongIds((prev) => {
-        const count = (prev[songId] || 0) - 1;
-        if (count <= 0) {
-          const next = { ...prev };
-          delete next[songId];
-          return next;
-        }
-        return { ...prev, [songId]: count };
-      });
-    }
+    const newElem: ServiceElement = {
+      id: crypto.randomUUID(),
+      type: "song",
+      title: song?.title || "Cântico Desconhecido",
+      songId,
+      content: song?.artist || "Sem Compositor",
+      position: elements.length,
+      duration: Number(parsed.metadata.duration || "0"),
+    };
+
+    void syncElements([...elements, newElem]);
   };
 
   // ── Modal openers ────────────────────────────────────────────────
@@ -570,7 +506,6 @@ export const ServiceDetailPage: React.FC = () => {
               content: data.content || "",
               passage: data.passage || "",
               notes: data.notes || "",
-              duration: data.duration ?? Number(e.duration || 0),
             }
           : e,
       );
@@ -600,7 +535,6 @@ export const ServiceDetailPage: React.FC = () => {
         content: editingElement.content || "",
         passage: editingElement.passage || "",
         notes: editingElement.notes || "",
-        duration: Number(editingElement.duration || 0),
       }
     : undefined;
 
@@ -622,91 +556,7 @@ export const ServiceDetailPage: React.FC = () => {
           </p>
         </div>
       </div>
-
-      <div className="grid grid-cols-1 xl:grid-cols-[0.95fr_1.45fr] gap-6 h-full min-h-0">
-        <div
-          className="bg-white rounded-3xl border shadow-sm flex flex-col h-full min-h-0"
-          style={{ borderColor: border }}
-        >
-          <div
-            className="p-5 pb-4 border-b shrink-0"
-            style={{ borderColor: border }}
-          >
-            <h2 className="text-base font-bold mb-3" style={{ color: navy }}>
-              Biblioteca de Cânticos
-            </h2>
-            <Input
-              ref={searchInputRef as any}
-              placeholder="Pesquisar cânticos..."
-              value={librarySearch}
-              onChange={(e) => setLibrarySearch(e.target.value)}
-              icon={<Search className="w-4 h-4 text-slate-400" />}
-            />
-          </div>
-
-          <div
-            className="overflow-y-auto flex-1 min-h-0 divide-y"
-            style={{ borderColor: border }}
-          >
-            {filteredLibrarySongs.length === 0 ? (
-              <div className="p-6 text-center text-xs text-slate-400">
-                Nenhum cântico encontrado.
-              </div>
-            ) : (
-              filteredLibrarySongs.map((s) => {
-                return (
-                  <div
-                    key={s.id}
-                    className="flex items-center justify-between gap-3 px-5 py-3"
-                    draggable
-                    onDragStart={(event) => {
-                      event.dataTransfer.setData("text/x-song-id", s.id);
-                      event.dataTransfer.effectAllowed = "copy";
-                    }}
-                  >
-                    <div className="min-w-0">
-                      <p
-                        className="text-sm font-semibold truncate"
-                        style={{ color: navy }}
-                      >
-                        {s.title}
-                      </p>
-                      <p className="text-xs text-slate-400 truncate">
-                        {s.artist || "—"}
-                      </p>
-                    </div>
-
-                    <div className="flex items-center gap-2 shrink-0">
-                      {(songCountById[s.id] || 0) > 0 && (
-                        <span
-                          className="inline-flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-full"
-                          style={{ backgroundColor: "#EAF6EE", color: "#2E8B4F" }}
-                        >
-                          Na Lista ×{songCountById[s.id]}
-                        </span>
-                      )}
-                      <button
-                        type="button"
-                        onClick={() => handleAddSongToService(s.id)}
-                        disabled={Boolean(pendingSongIds[s.id])}
-                        className="p-1.5 rounded-lg shrink-0 cursor-pointer transition-colors hover:bg-sky-200 disabled:cursor-wait disabled:opacity-70"
-                        style={{ backgroundColor: goldSoft, color: gold }}
-                        title="Adicionar ao plano"
-                      >
-                        {pendingSongIds[s.id] ? (
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                        ) : (
-                          <Plus className="w-4 h-4" />
-                        )}
-                      </button>
-                    </div>
-                  </div>
-                );
-              })
-            )}
-          </div>
-        </div>
-
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.3fr] gap-6 h-full min-h-0">
         <div className="flex flex-col gap-4 h-full min-h-0">
           <div
             className="bg-white rounded-2xl border p-4 space-y-2 shrink-0"
@@ -730,7 +580,7 @@ export const ServiceDetailPage: React.FC = () => {
               </Button>
             </div>
             <textarea
-              rows={4}
+              rows={2}
               value={generalNotes}
               onChange={(e) => setGeneralNotes(e.target.value)}
               placeholder="Ex: Horário do ensaio: 8:30. Mensagem do pastor: A Caminhar pela Fé."
@@ -740,151 +590,202 @@ export const ServiceDetailPage: React.FC = () => {
           </div>
 
           <div
-            className="bg-white rounded-3xl border shadow-sm flex flex-col flex-1 min-h-0"
+            className="bg-white rounded-3xl border shadow-sm flex flex-col h-full min-h-0"
             style={{ borderColor: border }}
           >
             <div
-              className="flex flex-wrap items-center justify-between px-5 py-4 border-b gap-2 shrink-0"
+              className="p-5 pb-4 border-b shrink-0"
               style={{ borderColor: border }}
             >
-              <h2 className="text-base font-bold" style={{ color: navy }}>
-                Plano do Culto
-                <span className="ml-2 text-xs font-medium text-slate-400">
-                  ({elements.length} {elements.length === 1 ? "item" : "itens"})
-                </span>
+              <h2 className="text-base font-bold mb-3" style={{ color: navy }}>
+                Biblioteca de Cânticos
               </h2>
-              <span className="text-xs font-semibold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-full">
-                Duração Total: {formatDuration(totalDurationSeconds)}
-              </span>
-
-              <div className="flex items-center gap-1">
-                <button
-                  type="button"
-                  onClick={() => openAddModal("welcome")}
-                  className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 cursor-pointer transition-colors"
-                >
-                  + Boas-vindas
-                </button>
-                <button
-                  type="button"
-                  onClick={() => openAddModal("scripture")}
-                  className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-fuchsia-50 text-fuchsia-700 hover:bg-fuchsia-100 cursor-pointer transition-colors"
-                >
-                  + Escritura
-                </button>
-                <button
-                  type="button"
-                  onClick={() => openAddModal("reading")}
-                  className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-red-50 text-red-700 hover:bg-red-100 cursor-pointer transition-colors"
-                >
-                  + Leitura Responsiva
-                </button>
-                <button
-                  type="button"
-                  onClick={() => openAddModal("message")}
-                  className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-amber-50 text-amber-700 hover:bg-amber-100 cursor-pointer transition-colors"
-                >
-                  + Mensagem
-                </button>
-                <button
-                  type="button"
-                  onClick={() => openAddModal("announcement")}
-                  className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 cursor-pointer transition-colors"
-                >
-                  + Avisos
-                </button>
-              </div>
+              <Input
+                ref={searchInputRef as any}
+                placeholder="Pesquisar cânticos..."
+                value={librarySearch}
+                onChange={(e) => setLibrarySearch(e.target.value)}
+                icon={<Search className="w-4 h-4 text-slate-400" />}
+              />
             </div>
 
             <div
-              className={`p-4 flex-1 overflow-y-auto min-h-0 flex flex-col rounded-b-3xl transition-colors ${
-                isDropTargetActive ? "bg-sky-50/60" : "bg-transparent"
-              }`}
-              onDragOver={(event) => {
-                if (event.dataTransfer.types.includes("text/x-song-id")) {
-                  event.preventDefault();
-                  setIsDropTargetActive(true);
-                }
-              }}
-              onDragLeave={() => setIsDropTargetActive(false)}
-              onDrop={(event) => {
-                event.preventDefault();
-                setIsDropTargetActive(false);
-                const draggedSongId = event.dataTransfer.getData("text/x-song-id");
-                if (draggedSongId) {
-                  void handleAddSongToService(draggedSongId);
-                }
-              }}
+              className="overflow-y-auto flex-1 min-h-0 divide-y"
+              style={{ borderColor: border }}
             >
-              {elements.length === 0 ? (
-                <div
-                  className="p-8 text-center rounded-2xl border border-dashed flex flex-col items-center justify-center gap-3 shrink-0"
-                  style={{ borderColor: border }}
-                >
-                  <div
-                    className="w-12 h-12 rounded-2xl flex items-center justify-center"
-                    style={{ backgroundColor: goldSoft, color: gold }}
-                  >
-                    <Music className="w-6 h-6" />
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-bold" style={{ color: navy }}>
-                      O plano ainda está vazio
-                    </h4>
-                    <p className="text-xs text-slate-400 mt-1">
-                      Arraste cânticos da biblioteca para adicionar.
-                    </p>
-                  </div>
+              {filteredLibrarySongs.length === 0 ? (
+                <div className="p-6 text-center text-xs text-slate-400">
+                  Nenhum cântico encontrado.
                 </div>
               ) : (
-                <DndContext
-                  sensors={sensors}
-                  collisionDetection={closestCenter}
-                  onDragEnd={handleDragEnd}
-                >
-                  <SortableContext
-                    items={elements.map((i) => i.id)}
-                    strategy={verticalListSortingStrategy}
-                  >
-                    <div className="flex flex-col gap-2.5">
-                      {elements.map((element, index) => {
-                        return (
-                          <SortableRow
-                            key={element.id}
-                            id={element.id}
-                            element={element}
-                            index={index}
-                            onRemove={handleRemoveElement}
-                            onEdit={openEditModal}
-                            onNoteChange={handleNoteChange}
-                          />
-                        );
-                      })}
-                    </div>
-                  </SortableContext>
-                </DndContext>
-              )}
+                filteredLibrarySongs.map((s) => {
+                  const isAdded = addedSongIds.has(s.id);
+                  return (
+                    <div
+                      key={s.id}
+                      className="flex items-center justify-between gap-3 px-5 py-3"
+                    >
+                      <div className="min-w-0">
+                        <p
+                          className="text-sm font-semibold truncate"
+                          style={{ color: navy }}
+                        >
+                          {s.title}
+                        </p>
+                        <p className="text-xs text-slate-400 truncate">
+                          {s.artist || "—"}
+                        </p>
+                      </div>
 
-              <div className="flex gap-2 mt-auto pt-3 shrink-0">
-                <button
-                  type="button"
-                  onClick={() => searchInputRef.current?.focus()}
-                  className="flex-1 py-3 rounded-2xl border border-dashed text-xs font-semibold flex items-center justify-center gap-2 cursor-pointer transition-colors hover:bg-slate-50"
-                  style={{ borderColor: border, color: gold }}
+                      {isAdded ? (
+                        <span
+                          className="inline-flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-full shrink-0"
+                          style={{
+                            backgroundColor: "#EAF6EE",
+                            color: "#2E8B4F",
+                          }}
+                        >
+                          <Check className="w-3 h-3" />
+                          Na Lista
+                        </span>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => handleAddSongToService(s.id)}
+                          className="p-1.5 rounded-lg shrink-0 cursor-pointer transition-colors hover:bg-sky-200"
+                          style={{ backgroundColor: goldSoft, color: gold }}
+                          title="Adicionar ao plano"
+                        >
+                          <Plus className="w-4 h-4" />
+                        </button>
+                      )}
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </div>
+        </div>
+        <div
+          className="bg-white rounded-3xl border shadow-sm flex flex-col flex-1 min-h-0"
+          style={{ borderColor: border }}
+        >
+          <div
+            className="flex flex-wrap items-center justify-between px-5 py-4 border-b gap-2 shrink-0"
+            style={{ borderColor: border }}
+          >
+            <h2 className="text-base font-bold" style={{ color: navy }}>
+              Plano do Culto
+              <span className="ml-2 text-xs font-medium text-slate-400">
+                ({elements.length} {elements.length === 1 ? "item" : "itens"})
+              </span>
+            </h2>
+
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                onClick={() => openAddModal("welcome")}
+                className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 cursor-pointer transition-colors"
+              >
+                + Boas-vindas
+              </button>
+              <button
+                type="button"
+                onClick={() => openAddModal("scripture")}
+                className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-fuchsia-50 text-fuchsia-700 hover:bg-fuchsia-100 cursor-pointer transition-colors"
+              >
+                + Escritura
+              </button>
+              <button
+                type="button"
+                onClick={() => openAddModal("reading")}
+                className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-red-50 text-red-700 hover:bg-red-100 cursor-pointer transition-colors"
+              >
+                + Leitura Responsiva
+              </button>
+              <button
+                type="button"
+                onClick={() => openAddModal("message")}
+                className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-amber-50 text-amber-700 hover:bg-amber-100 cursor-pointer transition-colors"
+              >
+                + Mensagem
+              </button>
+              <button
+                type="button"
+                onClick={() => openAddModal("announcement")}
+                className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 cursor-pointer transition-colors"
+              >
+                + Avisos
+              </button>
+            </div>
+          </div>
+
+          <div className="p-4 flex-1 overflow-y-auto min-h-0 flex flex-col">
+            {elements.length === 0 ? (
+              <div
+                className="p-8 text-center rounded-2xl border border-dashed flex flex-col items-center justify-center gap-3 shrink-0"
+                style={{ borderColor: border }}
+              >
+                <div
+                  className="w-12 h-12 rounded-2xl flex items-center justify-center"
+                  style={{ backgroundColor: goldSoft, color: gold }}
                 >
-                  <Plus className="w-4 h-4" />
-                  Adicionar Cântico
-                </button>
-                <button
-                  type="button"
-                  onClick={() => openAddModal("custom")}
-                  className="flex-1 py-3 rounded-2xl border border-dashed text-xs font-semibold flex items-center justify-center gap-2 cursor-pointer transition-colors hover:bg-slate-50 text-slate-600"
-                  style={{ borderColor: border }}
-                >
-                  <Plus className="w-4 h-4" />
-                  Adicionar Outro/Personalizado
-                </button>
+                  <Music className="w-6 h-6" />
+                </div>
+                <div>
+                  <h4 className="text-sm font-bold" style={{ color: navy }}>
+                    O plano ainda está vazio
+                  </h4>
+                </div>
               </div>
+            ) : (
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleDragEnd}
+              >
+                <SortableContext
+                  items={elements.map((i) => i.id)}
+                  strategy={verticalListSortingStrategy}
+                >
+                  <div className="flex flex-col gap-2.5">
+                    {elements.map((element, index) => {
+                      return (
+                        <SortableRow
+                          key={element.id}
+                          id={element.id}
+                          element={element}
+                          index={index}
+                          onRemove={handleRemoveElement}
+                          onEdit={openEditModal}
+                          onNoteChange={handleNoteChange}
+                        />
+                      );
+                    })}
+                  </div>
+                </SortableContext>
+              </DndContext>
+            )}
+
+            <div className="flex gap-2 mt-auto pt-3 shrink-0">
+              <button
+                type="button"
+                onClick={() => searchInputRef.current?.focus()}
+                className="flex-1 py-3 rounded-2xl border border-dashed text-xs font-semibold flex items-center justify-center gap-2 cursor-pointer transition-colors hover:bg-slate-50"
+                style={{ borderColor: border, color: gold }}
+              >
+                <Plus className="w-4 h-4" />
+                Adicionar Cântico
+              </button>
+              <button
+                type="button"
+                onClick={() => openAddModal("custom")}
+                className="flex-1 py-3 rounded-2xl border border-dashed text-xs font-semibold flex items-center justify-center gap-2 cursor-pointer transition-colors hover:bg-slate-50 text-slate-600"
+                style={{ borderColor: border }}
+              >
+                <Plus className="w-4 h-4" />
+                Adicionar Outro/Personalizado
+              </button>
             </div>
           </div>
         </div>

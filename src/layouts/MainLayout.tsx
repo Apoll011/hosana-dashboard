@@ -19,8 +19,11 @@ import {
   Calendar,
   CheckSquare,
   ChevronDown,
+  ChevronLeft,
   ChevronRight,
+  Church,
   CornerLeftUp,
+  Download,
   Edit2,
   ExternalLink,
   FileText,
@@ -33,6 +36,7 @@ import {
   List,
   LogOut,
   Menu,
+  MoreVertical,
   Move,
   Music,
   Plus,
@@ -64,9 +68,14 @@ import { useServices } from "../hooks/useServices";
 import { useAllSongs } from "../hooks/useSongs";
 
 import { ConversionResult, printApi } from "@hosanna/shared";
+import { useStatsigClient } from "@statsig/react-bindings";
+import { Action, KBarProvider } from "kbar";
 import { ServiceForm } from "../components/forms/ServiceForm";
+import { KBarCommandPaletteUI } from "../components/KBarCommandPalette";
 import { CifraClubImportModal } from "../components/modals/CifraModal";
+import { songImportRegistry } from "../import";
 import { printHtmlDirectly } from "../utils";
+import { ProviderImportResult } from "../utils/import";
 
 interface ContextMenuState {
   x: number;
@@ -188,9 +197,23 @@ const FolderTreeItem: React.FC<{
             <span className="truncate tracking-tight">{node.folder.name}</span>
           </div>
 
-          <span className="text-[10px] text-m3-secondary font-black opacity-60 shrink-0">
-            {node.folder.songCount || 0}
-          </span>
+          <div className="flex items-center gap-1 shrink-0">
+            <span className="text-[10px] text-m3-secondary font-black opacity-60 group-hover:hidden transition-opacity">
+              {node.folder.songCount || 0}
+            </span>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onContextMenu(e, "folder", node.folder);
+              }}
+              className="hidden group-hover:flex p-1 rounded-lg hover:bg-m3-primary/20 text-m3-secondary hover:text-m3-primary transition-all cursor-pointer"
+              title="Mais opções"
+              aria-label="Mais opções"
+            >
+              <MoreVertical className="w-3.5 h-3.5" />
+            </button>
+          </div>
         </div>
 
         {hasChildren && isExpanded && (
@@ -362,6 +385,11 @@ export const MainLayout: React.FC = () => {
     [servicesQuery.data],
   );
 
+  const { client } = useStatsigClient();
+  const serviceAsFolderItem = client?.checkGate
+    ? client.checkGate("service_as_folder_item")
+    : false;
+
   // Folder state: null = Root directory
   const [currentFolderId, setCurrentFolderId] = useState<string | null>(null);
 
@@ -404,6 +432,59 @@ export const MainLayout: React.FC = () => {
   };
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+
+  // Track page transitions to manage searchQuery persistence like a file system
+  const prevPathnameRef = useRef(location.pathname);
+
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(
+    () => localStorage.getItem("sidebarCollapsed") === "true",
+  );
+
+  useEffect(() => {
+    localStorage.setItem("sidebarCollapsed", String(isSidebarCollapsed));
+  }, [isSidebarCollapsed]);
+
+  useEffect(() => {
+    const prevPath = prevPathnameRef.current;
+    const currPath = location.pathname;
+
+    if (prevPath !== currPath) {
+      const getDomain = (path: string) => {
+        if (path === "/songs" || path.startsWith("/songs/")) return "songs";
+        if (path === "/services" || path.startsWith("/services/"))
+          return "services";
+        if (path === "/folders" || path.startsWith("/folders/"))
+          return "explorer";
+        if (path.startsWith("/musicians")) return "musicians";
+        if (path.startsWith("/settings")) return "settings";
+        return "other";
+      };
+
+      const prevDomain = getDomain(prevPath);
+      const currDomain = getDomain(currPath);
+
+      // Search persists when remaining in same context domain:
+      // - Songs domain (songs list, song editor, folder explorer)
+      // - Services domain (services list, service editor)
+      const isSongDomain =
+        (prevDomain === "songs" || prevDomain === "explorer") &&
+        (currDomain === "songs" || currDomain === "explorer");
+
+      const isServiceDomain =
+        prevDomain === "services" && currDomain === "services";
+
+      const keepSearch = isSongDomain || isServiceDomain;
+
+      if (!keepSearch) {
+        setSearchQuery("");
+        setSelectedKey("");
+        setSelectedTag("");
+        setIsFilterPanelOpen(false);
+      }
+    }
+
+    prevPathnameRef.current = currPath;
+  }, [location.pathname]);
 
   // Multi-Selection State
   const [selectedFolderIds, setSelectedFolderIds] = useState<Set<string>>(
@@ -468,7 +549,7 @@ export const MainLayout: React.FC = () => {
 
   const songParams = useMemo(() => ({}), []);
 
-  const { songsQuery, renameSong, moveSong, deleteSong, updateBatchTags } =
+  const { songsQuery, moveSong, deleteSong, updateBatchTags } =
     useAllSongs(songParams);
 
   // Search & Filters State
@@ -504,10 +585,6 @@ export const MainLayout: React.FC = () => {
   );
   const [confirmFolderName, setConfirmFolderName] = useState("");
 
-  // Song Modal States
-  const [renameSongTarget, setRenameSongTarget] = useState<Song | null>(null);
-  const [newSongTitle, setNewSongTitle] = useState("");
-
   const [moveSongTarget, setMoveSongTarget] = useState<Song | null>(null);
   const [targetSongFolderId, setTargetSongFolderId] = useState<string | null>(
     null,
@@ -526,6 +603,7 @@ export const MainLayout: React.FC = () => {
   const totalSongs = songsQuery.data?.total || 0;
   const totalServices = servicesQuery.data?.length || 0;
   const rootSongsCount = foldersQuery.data?.rootSongsCount || 0;
+  const rootFoldersCount = foldersQuery.data?.folders.length || 0;
 
   // Build tree structure from folders
   const folderTree = useMemo(() => buildFolderTree(allFolders), [allFolders]);
@@ -638,6 +716,270 @@ export const MainLayout: React.FC = () => {
     () => allServices.find((s) => s.id === currentServiceId),
     [allServices, currentServiceId],
   );
+
+  const isCommandPaletteEnabled = client?.checkGate
+    ? client.checkGate("command_palett")
+    : false;
+
+  const kbarActions = useMemo<Action[]>(() => {
+    if (!isCommandPaletteEnabled) return [];
+
+    const actions: Action[] = [
+      // --- NAVEGAÇÃO ---
+      {
+        id: "nav-drive",
+        name: "Ir para Drive (Início)",
+        shortcut: ["g", "d"],
+        keywords: "drive inicio home pastas root folders",
+        section: "Navegação",
+        icon: <HardDrive className="w-4 h-4 text-sky-500" />,
+        perform: () => {
+          setCurrentFolderId(null);
+          navigate("/folders");
+        },
+      },
+      {
+        id: "nav-songs",
+        name: "Ir para Biblioteca de Cânticos",
+        shortcut: ["g", "s"],
+        keywords: "biblioteca canticos musicas songs library",
+        section: "Navegação",
+        icon: <Music className="w-4 h-4 text-sky-500" />,
+        perform: () => navigate("/songs"),
+      },
+      {
+        id: "nav-services",
+        name: "Ir para Cultos / Planos",
+        shortcut: ["g", "c"],
+        keywords: "cultos planos servicos services worship",
+        section: "Navegação",
+        icon: <Church className="w-4 h-4 text-emerald-500" />,
+        perform: () => navigate("/services"),
+      },
+      {
+        id: "nav-musicians",
+        name: "Ir para Músicos & Acessos",
+        shortcut: ["g", "m"],
+        keywords: "musicos equipa team qr code access",
+        section: "Navegação",
+        icon: <User className="w-4 h-4 text-indigo-500" />,
+        perform: () => navigate("/musicians"),
+      },
+      {
+        id: "nav-settings",
+        name: "Ir para Definições do Sistema",
+        shortcut: ["g", "t"],
+        keywords: "definicoes configuracoes settings preferences",
+        section: "Navegação",
+        icon: <Settings className="w-4 h-4 text-slate-500" />,
+        perform: () => navigate("/settings"),
+      },
+
+      // --- AÇÕES RÁPIDAS ---
+      {
+        id: "action-create-song",
+        name: "Criar Novo Cântico",
+        shortcut: ["c", "s"],
+        keywords: "novo cantico musica adicionar song create add",
+        section: "Ações Rápidas",
+        icon: <Plus className="w-4 h-4 text-sky-500" />,
+        perform: () => setIsCreateSongModalOpen(true),
+      },
+      {
+        id: "action-import-cifra",
+        name: "Importar Cântico do CifraClub",
+        shortcut: ["c", "i"],
+        keywords: "importar cifraclub cifra web url fetch",
+        section: "Ações Rápidas",
+        icon: <Download className="w-4 h-4 text-sky-500" />,
+        perform: () => setIsCifraImportOpen(true),
+      },
+      {
+        id: "action-create-service",
+        name: "Criar Novo Plano de Culto",
+        shortcut: ["c", "c"],
+        keywords: "novo culto plano servico create service worship date",
+        section: "Ações Rápidas",
+        icon: <Calendar className="w-4 h-4 text-emerald-500" />,
+        perform: () => setIsCreateServiceModalOpen(true),
+      },
+      {
+        id: "action-create-folder",
+        name: "Criar Nova Pasta",
+        shortcut: ["c", "f"],
+        keywords: "nova pasta diretorio novapasta create folder directory",
+        section: "Ações Rápidas",
+        icon: <FolderPlus className="w-4 h-4 text-amber-500" />,
+        perform: () => setIsCreateModalOpen(true),
+      },
+      {
+        id: "action-upload-files",
+        name: "Importar Ficheiros",
+        shortcut: ["u"],
+        keywords: "upload carregar ficheiros chordpro sbpbackup import txt pro",
+        section: "Ações Rápidas",
+        icon: <Upload className="w-4 h-4 text-purple-500" />,
+        perform: () => fileInputRef.current?.click(),
+      },
+    ];
+
+    // --- DYNAMIC FOLDERS ---
+    allFolders.forEach((f) => {
+      actions.push({
+        id: `folder-${f.id}`,
+        name: `Pasta: ${f.name}`,
+        subtitle: `Caminho: ${getFolderPathString(f.parentId)} (${f.songCount || 0} cânticos)`,
+        keywords: `pasta pastas folder folders diretoria directory ${f.name} ${getFolderPathString(f.parentId)}`,
+        section: "Pastas",
+        icon: <FolderIcon className="w-4 h-4 text-amber-500" />,
+        perform: () => {
+          handleSelectFolder(f.id);
+          navigate("/folders");
+        },
+      });
+    });
+
+    // --- DYNAMIC SONGS ---
+    allSongs.forEach((s) => {
+      actions.push({
+        id: `song-${s.id}`,
+        name: `Cântico: ${s.title}`,
+        subtitle: `${s.artist || "Artista Desconhecido"} ${s.tags?.length ? "• " + s.tags.join(", ") : ""}`,
+        keywords: `cantico canticos musica musicas song songs louvor ${s.title} ${s.artist || ""} ${(s.tags || []).join(" ")}`,
+        section: "Cânticos",
+        icon: <FileText className="w-4 h-4 text-sky-500" />,
+        perform: () => navigate(`/songs/${s.id}`),
+      });
+    });
+
+    // --- DYNAMIC SERVICES ---
+    allServices.forEach((serv) => {
+      actions.push({
+        id: `service-${serv.id}`,
+        name: `Culto: ${serv.name}`,
+        subtitle: `Data: ${new Date(serv.date).toLocaleDateString("pt-PT")}`,
+        keywords: `culto cultos plano planos service services worship reuniao ${serv.name} ${serv.notes || ""}`,
+        section: "Cultos",
+        icon: <Calendar className="w-4 h-4 text-emerald-500" />,
+        perform: () => navigate(`/services/${serv.id}`),
+      });
+    });
+
+    // --- CURRENT CONTEXT & VIEW ACTIONS ---
+    if (isExplorerView) {
+      actions.push(
+        {
+          id: "view-grid",
+          name: "Alternar Vista para Grelha",
+          keywords: "vista grelha grid view layout",
+          section: "Visualização",
+          icon: <LayoutGrid className="w-4 h-4 text-slate-500" />,
+          perform: () => handleViewModeChange("grid"),
+        },
+        {
+          id: "view-list",
+          name: "Alternar Vista para Lista",
+          keywords: "vista lista list view table layout",
+          section: "Visualização",
+          icon: <List className="w-4 h-4 text-slate-500" />,
+          perform: () => handleViewModeChange("list"),
+        },
+        {
+          id: "open-filters",
+          name: "Abrir Painel de Filtros Avançados",
+          keywords: "filtros filter pesquisar tom tag artista",
+          section: "Visualização",
+          icon: <Filter className="w-4 h-4 text-slate-500" />,
+          perform: () => setIsFilterPanelOpen(true),
+        },
+      );
+    }
+
+    if (isSongEditorView && currentSong) {
+      actions.push(
+        {
+          id: "song-print-current",
+          name: `Imprimir Cântico: "${currentSong.title}"`,
+          keywords: "imprimir print pdf cantico atual",
+          section: "Cântico Atual",
+          icon: <Printer className="w-4 h-4 text-indigo-500" />,
+          perform: () => handlePrintSong(currentSong.id),
+        },
+        {
+          id: "song-move-current",
+          name: `Mover Cântico: "${currentSong.title}"`,
+          keywords: "mover pasta move folder destination",
+          section: "Cântico Atual",
+          icon: <Move className="w-4 h-4 text-sky-500" />,
+          perform: () => {
+            setMoveSongTarget(currentSong);
+            setTargetSongFolderId(currentSong.folderId!);
+          },
+        },
+        {
+          id: "song-delete-current",
+          name: `Eliminar Cântico: "${currentSong.title}"`,
+          keywords: "eliminar apagar remover delete remove",
+          section: "Cântico Atual",
+          icon: <Trash2 className="w-4 h-4 text-rose-500" />,
+          perform: () => setDeleteSongTarget(currentSong),
+        },
+      );
+    }
+
+    if (isServiceEditorView && currentService) {
+      actions.push({
+        id: "service-delete-current",
+        name: `Eliminar Culto: "${currentService.name}"`,
+        keywords: "eliminar apagar culto delete service",
+        section: "Culto Atual",
+        icon: <Trash2 className="w-4 h-4 text-rose-500" />,
+        perform: async () => {
+          await deleteService(currentService.id);
+          navigate("/services");
+        },
+      });
+    }
+
+    // --- CONTA E PREFERÊNCIAS ---
+    actions.push(
+      {
+        id: "toggle-sidebar",
+        name: isSidebarCollapsed
+          ? "Expandir Barra Lateral"
+          : "Recolher Barra Lateral",
+        shortcut: ["b", "s"],
+        keywords: "sidebar menu barras lateral recolher expandir toggle",
+        section: "Definições & Conta",
+        icon: <ChevronRight className="w-4 h-4 text-slate-500" />,
+        perform: () => setIsSidebarCollapsed(!isSidebarCollapsed),
+      },
+      {
+        id: "user-logout",
+        name: "Sair / Terminar Sessão",
+        keywords: "sair logout encerrar sessao exit",
+        section: "Definições & Conta",
+        icon: <LogOut className="w-4 h-4 text-rose-500" />,
+        perform: () => logout(),
+      },
+    );
+
+    return actions;
+  }, [
+    isCommandPaletteEnabled,
+    allFolders,
+    allSongs,
+    allServices,
+    currentFolderId,
+    currentSong,
+    currentService,
+    isExplorerView,
+    isSongEditorView,
+    isServiceEditorView,
+    isSidebarCollapsed,
+    navigate,
+    logout,
+  ]);
 
   // Is searching or filtering active?
   const isSearchingOrFiltering = Boolean(
@@ -1003,7 +1345,7 @@ export const MainLayout: React.FC = () => {
         await moveFolder({
           id: fId,
           parentId: targetFolderId,
-          updatedAt: f.updatedAt,
+          updatedAt: f.updatedAt!,
         });
     }
     for (const sId of songList) {
@@ -1230,7 +1572,7 @@ export const MainLayout: React.FC = () => {
     await renameFolder({
       id: renameTarget.id,
       name,
-      updatedAt: renameTarget.updatedAt,
+      updatedAt: renameTarget.updatedAt!,
     });
     setRenameTarget(null);
   };
@@ -1240,7 +1582,7 @@ export const MainLayout: React.FC = () => {
     await moveFolder({
       id: moveFolderTarget.id,
       parentId: targetParentFolderId,
-      updatedAt: moveFolderTarget.updatedAt,
+      updatedAt: moveFolderTarget.updatedAt!,
     });
     setMoveFolderTarget(null);
   };
@@ -1347,88 +1689,53 @@ export const MainLayout: React.FC = () => {
     navigate(`/services/${newService.id}`);
   };
 
-  const handleRenameSongSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!renameSongTarget || !newSongTitle.trim()) return;
-    await renameSong({
-      id: renameSongTarget.id,
-      newTitle: newSongTitle.trim(),
-      updatedAt: renameSongTarget.updatedAt,
-    });
-    setRenameSongTarget(null);
-    setNewSongTitle("");
-  };
-
   const handleDeleteSongSubmit = async () => {
     if (!deleteSongTarget) return;
     await deleteSong(deleteSongTarget.id);
     setDeleteSongTarget(null);
   };
 
-  const cleanSongTitleFromFilename = (filename: string): string => {
-    let name = filename.replace(/\.[^/.]+$/, "");
-    name = name.replace(/\[.*?\]/g, "");
-    name = name.replace(/\(.*?\)/g, "");
-    name = name.replace(/\{.*?\}/g, "");
-    name = name.replace(/#\w+/g, "");
-    name = name.replace(/_/g, " ");
-    name = name.replace(/\s+/g, " ").trim();
-    return name || filename.replace(/\.[^/.]+$/, "").trim();
+  const showToastImportResult = (result: ProviderImportResult) => {
+    if (result.created > 0) {
+      const targetFolderName = currentFolder
+        ? currentFolder.name
+        : "Diretório Raiz";
+      showToast(
+        `${result.created} ficheiro(s) ${result.fileTypeName} carregado(s) com sucesso para "${targetFolderName}"!`,
+        "success",
+      );
+    }
+
+    if (result.failed > 0) {
+      showToast(
+        `Erro ao carregar ${result.failed} ficheiro(s)  ${result.fileTypeName}`,
+        "error",
+      );
+    }
+
+    if (result.ignored > 0) {
+      showToast(
+        `Ignorado ${result.ignored} ficheiro(s) ${result.fileTypeName}`,
+        "warning",
+      );
+    }
   };
 
   const processAndUploadFiles = async (fileList: File[]) => {
     if (!fileList || fileList.length === 0) return;
 
     setIsUploadingFiles(true);
+    const result = await songImportRegistry.importFiles(fileList, {
+      folderId: currentFolderId,
+    });
 
-    try {
-      const songPayloads: Array<Partial<Song>> = [];
+    result.results.forEach((r) => {
+      showToastImportResult(r);
+    });
 
-      for (const file of fileList) {
-        const fileText = await file.text();
-        const cleanTitle = cleanSongTitleFromFilename(file.name);
+    await Promise.all([songsQuery.refetch(), foldersQuery.refetch()]);
 
-        let finalContent = fileText;
-        if (!/\{title\s*:/i.test(fileText)) {
-          finalContent = `{title: ${cleanTitle}}\n${fileText}`;
-        }
-
-        let artist = "Vários";
-        const artistMatch = fileText.match(/\{artist\s*:\s*([^}]+)\}/i);
-        if (artistMatch && artistMatch[1]) {
-          artist = artistMatch[1].trim();
-        }
-
-        songPayloads.push({
-          title: cleanTitle,
-          artist: artist,
-          content: finalContent,
-          folderId: currentFolderId,
-          tags: ["ChordPro"],
-        });
-      }
-
-      if (songPayloads.length > 0) {
-        const res = await songsApi.createSongsBatch(songPayloads);
-
-        await Promise.all([songsQuery.refetch(), foldersQuery.refetch()]);
-
-        const targetFolderName = currentFolder
-          ? currentFolder.name
-          : "Diretório Raiz";
-        showToast(
-          `${res.count} ficheiro(s) ChordPro carregado(s) com sucesso para "${targetFolderName}"!`,
-          "success",
-        );
-      }
-    } catch (err: any) {
-      showToast(
-        "Erro ao carregar ficheiros: " + (err?.message || "Falha de leitura"),
-        "error",
-      );
-    } finally {
-      setIsUploadingFiles(false);
-    }
+    setIsUploadingFiles(false);
   };
 
   const handleChordProFileUpload = async (
@@ -1534,8 +1841,9 @@ export const MainLayout: React.FC = () => {
 
   const totalItemsCount = filteredSubfolders.length + filteredFiles.length;
 
-  return (
+  const layoutContent = (
     <>
+      {isCommandPaletteEnabled && <KBarCommandPaletteUI />}
       <div className="h-dvh max-h-dvh w-full flex flex-row overflow-hidden bg-m3-bg">
         {/* Mobile Sidebar Overlay */}
         {isSidebarOpen && (
@@ -1546,47 +1854,66 @@ export const MainLayout: React.FC = () => {
         )}
 
         <div
-          className={`${isSidebarOpen ? "flex absolute inset-y-0 left-0 z-50 bg-m3-sidebar shadow-2xl" : "hidden"} md:flex md:static md:bg-m3-sidebar/30 w-72 md:w-64 border-r border-m3-border p-4 flex-col gap-1 select-none shrink-0 overflow-y-auto transition-all duration-300`}
+          className={`${isSidebarOpen ? "flex absolute inset-y-0 left-0 z-50 bg-m3-sidebar shadow-2xl" : "hidden"} md:flex md:relative md:bg-m3-sidebar/30 ${
+            isSidebarCollapsed ? "md:w-20" : "md:w-64"
+          } w-72 border-r border-m3-border p-4 flex-col gap-1 select-none shrink-0 transition-all duration-300 z-30`}
           role="navigation"
         >
+          {/* Integrated Sidebar Header */}
           <div
-            className="flex flex-col items-center text-center mb-4 mt-2 select-none"
+            className="flex items-center justify-between mb-4 mt-2 select-none px-1"
             role="banner"
           >
-            <div className="flex items-center gap-3">
-              <div
-                className="
-                w-12 h-12 rounded-xl
-                flex items-center justify-center
-                border
-                transition-transform
-                hover:scale-105 hover:rotate-2
-              "
-              >
+            <div
+              className={`flex items-center ${isSidebarCollapsed ? "justify-center w-full" : "gap-3"}`}
+            >
+              <div className="w-11 h-11 rounded-xl flex items-center justify-center border border-m3-border/50 bg-m3-card transition-transform hover:scale-105 shadow-xs shrink-0">
                 <img
                   src={logo}
                   alt="Hosanna Studio"
-                  className="w-12 h-12 object-contain rounded-xl"
+                  className="w-10 h-10 object-contain rounded-lg"
                 />
               </div>
-
-              <div className="flex flex-col items-start">
-                <h1 className="font-display font-black text-2xl tracking-tighter text-slate-900 dark:text-slate-100 leading-none">
-                  Hosanna Studio
-                </h1>
-
-                {tenant && (
-                  <span className="mt-1 text-xs font-medium text-slate-500 dark:text-slate-400">
-                    {tenant.name || tenant.slug}
-                  </span>
-                )}
-              </div>
+              {!isSidebarCollapsed && (
+                <div className="flex flex-col items-start min-w-0 flex-1">
+                  <h1 className="font-display font-black text-xl tracking-tighter text-slate-900 dark:text-slate-100 leading-none truncate">
+                    Hosanna Studio
+                  </h1>
+                  {tenant && (
+                    <span className="mt-1 text-xs font-medium text-slate-500 dark:text-slate-400 truncate max-w-32.5">
+                      {tenant.name || tenant.slug}
+                    </span>
+                  )}
+                </div>
+              )}
             </div>
+
+            {!isSidebarCollapsed && (
+              <button
+                onClick={() => setIsSidebarCollapsed(true)}
+                className="hidden md:flex p-1.5 rounded-xl hover:bg-m3-hover text-m3-secondary hover:text-m3-text border border-transparent hover:border-m3-border/60 transition-all cursor-pointer shrink-0"
+                title="Recolher menu"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+            )}
           </div>
 
-          <div className="px-3 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-m3-secondary opacity-60">
-            Menu Principal
-          </div>
+          {isSidebarCollapsed && (
+            <button
+              onClick={() => setIsSidebarCollapsed(false)}
+              className="hidden md:flex w-full py-2 items-center justify-center rounded-xl bg-m3-card/50 hover:bg-m3-hover border border-m3-border/40 text-m3-secondary hover:text-m3-text transition-all cursor-pointer mb-3 shadow-xs"
+              title="Expandir menu"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          )}
+
+          {!isSidebarCollapsed && (
+            <div className="px-3 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-m3-secondary opacity-60">
+              Menu Principal
+            </div>
+          )}
 
           <button
             onClick={() => {
@@ -1594,25 +1921,30 @@ export const MainLayout: React.FC = () => {
               navigate("/folders");
               if (window.innerWidth < 768) setIsSidebarOpen(false);
             }}
-            className={`w-full flex items-center justify-between px-4 py-3 text-[13px] font-bold rounded-2xl transition-all cursor-pointer group ${
+            title={isSidebarCollapsed ? `Drive da ${tenant?.name}` : undefined}
+            className={`w-full flex items-center ${isSidebarCollapsed ? "justify-center" : "justify-between"} px-4 py-3 text-[13px] font-bold rounded-2xl transition-all cursor-pointer group ${
               isExplorerView && currentFolderId === null
                 ? "bg-m3-primary/10 text-m3-primary border border-m3-primary/20 shadow-sm"
                 : "text-m3-secondary hover:bg-m3-hover hover:text-m3-text"
             }`}
           >
-            <div className="flex items-center gap-3">
+            <div
+              className={`flex items-center ${isSidebarCollapsed ? "" : "gap-3"}`}
+            >
               <HardDrive
                 className={`w-4.5 h-4.5 ${isExplorerView && currentFolderId === null ? "text-m3-primary" : "text-m3-secondary"}`}
               />
-              <span>Drive da {tenant?.name}</span>
+              {!isSidebarCollapsed && <span>Drive da {tenant?.name}</span>}
             </div>
-            <Badge
-              variant={
-                isExplorerView && currentFolderId === null ? "sky" : "slate"
-              }
-            >
-              {rootSongsCount}
-            </Badge>
+            {!isSidebarCollapsed && (
+              <Badge
+                variant={
+                  isExplorerView && currentFolderId === null ? "sky" : "slate"
+                }
+              >
+                {rootSongsCount + rootFoldersCount}
+              </Badge>
+            )}
           </button>
 
           <button
@@ -1620,17 +1952,27 @@ export const MainLayout: React.FC = () => {
               navigate("/songs");
               if (window.innerWidth < 768) setIsSidebarOpen(false);
             }}
-            className={`w-full flex items-center justify-between px-4 py-3 text-[13px] font-bold rounded-2xl transition-all cursor-pointer group ${
+            title={isSidebarCollapsed ? `Biblioteca` : undefined}
+            className={`w-full flex items-center ${isSidebarCollapsed ? "justify-center" : "justify-between"} px-4 py-3 text-[13px] font-bold rounded-2xl transition-all cursor-pointer group ${
               isSongsView
                 ? "bg-m3-primary/10 text-m3-primary border border-m3-primary/20 shadow-sm"
                 : "text-m3-secondary hover:bg-m3-hover hover:text-m3-text"
             }`}
           >
-            <div className="flex items-center gap-3">
-              <Music className="w-4.5 h-4.5 text-m3-primary" />
-              <span>Biblioteca</span>
+            <div
+              className={`flex items-center ${isSidebarCollapsed ? "" : "gap-3"}`}
+            >
+              {" "}
+              <Music
+                className={`w-4.5 h-4.5 ${isSongsView ? "text-m3-primary" : "text-m3-secondary"}`}
+              />
+              {!isSidebarCollapsed && <span>Biblioteca</span>}
             </div>
-            <Badge variant={isSongsView ? "sky" : "slate"}>{totalSongs}</Badge>
+            {!isSidebarCollapsed && (
+              <Badge variant={isSongsView ? "sky" : "slate"}>
+                {totalSongs}
+              </Badge>
+            )}{" "}
           </button>
 
           <button
@@ -1638,44 +1980,55 @@ export const MainLayout: React.FC = () => {
               navigate("/services");
               if (window.innerWidth < 768) setIsSidebarOpen(false);
             }}
-            className={`w-full flex items-center justify-between px-4 py-3 text-[13px] font-bold rounded-2xl transition-all cursor-pointer group ${
+            title={isSidebarCollapsed ? `Cultos` : undefined}
+            className={`w-full flex items-center ${isSidebarCollapsed ? "justify-center" : "justify-between"} px-4 py-3 text-[13px] font-bold rounded-2xl transition-all cursor-pointer group ${
               isServicesView
                 ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 shadow-sm"
                 : "text-m3-secondary hover:bg-m3-hover hover:text-m3-text"
             }`}
           >
-            <div className="flex items-center gap-3">
-              <CheckSquare className="w-4.5 h-4.5 text-emerald-500" />
-              <span>Cultos</span>
+            <div
+              className={`flex items-center ${isSidebarCollapsed ? "" : "gap-3"}`}
+            >
+              {" "}
+              <Church
+                className={`w-4.5 h-4.5 ${isServicesView ? "text-emerald-500" : "text-m3-secondary"}`}
+              />
+              {!isSidebarCollapsed && <span>Cultos</span>}
             </div>
-            <Badge variant={isServicesView ? "sky" : "slate"}>
-              {totalServices}
-            </Badge>
+            {!isSidebarCollapsed && (
+              <Badge variant={isServicesView === null ? "sky" : "slate"}>
+                {totalServices}
+              </Badge>
+            )}
           </button>
 
-          <div className="mt-6 px-3 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-m3-secondary opacity-60">
-            Pastas ({allFolders.length})
-          </div>
+          {!isSidebarCollapsed && (
+            <>
+              <div className="mt-6 px-3 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-m3-secondary opacity-60">
+                Pastas ({allFolders.length})
+              </div>
 
-          {/* Hierarchical Folder Tree */}
-          <div className="flex-1 overflow-y-auto flex flex-col gap-1 pr-1 custom-scrollbar">
-            {folderTree.map((node) => (
-              <FolderTreeItem
-                key={node.folder.id}
-                node={node}
-                currentFolderId={currentFolderId}
-                onSelectFolder={(id) => {
-                  handleSelectFolder(id);
-                  if (window.innerWidth < 768) setIsSidebarOpen(false);
-                }}
-                onContextMenu={handleContextMenu}
-                expandedFolderIds={expandedFolderIds}
-                toggleExpand={toggleExpand}
-              />
-            ))}
-          </div>
+              <div className="flex-1 overflow-y-auto flex flex-col gap-1 pr-1 custom-scrollbar">
+                {folderTree.map((node) => (
+                  <FolderTreeItem
+                    key={node.folder.id}
+                    node={node}
+                    currentFolderId={currentFolderId}
+                    onSelectFolder={(id) => {
+                      handleSelectFolder(id);
+                      if (window.innerWidth < 768) setIsSidebarOpen(false);
+                    }}
+                    onContextMenu={handleContextMenu}
+                    expandedFolderIds={expandedFolderIds}
+                    toggleExpand={toggleExpand}
+                  />
+                ))}
+              </div>
+            </>
+          )}
+          {isSidebarCollapsed && <div className="flex-1" />}
 
-          {/* User Dropdown at bottom of sidebar */}
           {user && (
             <div
               className="mt-2 pt-2 border-t border-slate-200 dark:border-slate-800 relative shrink-0"
@@ -1683,27 +2036,33 @@ export const MainLayout: React.FC = () => {
             >
               <button
                 onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                className="w-full flex items-center justify-between p-2 rounded-xl hover:bg-slate-200/60 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                title={isSidebarCollapsed ? user.name : undefined}
+                className={`w-full flex items-center ${isSidebarCollapsed ? "justify-center" : "justify-between"} p-2 rounded-xl hover:bg-slate-200/60 dark:hover:bg-slate-800 transition-colors cursor-pointer`}
               >
-                <div className="flex items-center gap-2 min-w-0">
+                <div
+                  className={`flex items-center ${isSidebarCollapsed ? "" : "gap-2"} min-w-0`}
+                >
                   <div className="w-7 h-7 rounded-full bg-sky-100 dark:bg-sky-950 text-[#0284c7] dark:text-sky-400 flex items-center justify-center font-bold text-xs shrink-0">
                     {user.name
                       .split(" ")
                       .map((n) => n[0])
                       .join("")}
                   </div>
-                  <div className="flex flex-col min-w-0 text-left">
-                    <span className="text-xs font-bold text-slate-900 dark:text-slate-100 truncate">
-                      {user.name}
-                    </span>
-                    <span className="text-[9px] text-emerald-600 dark:text-emerald-400 font-bold uppercase tracking-wider">
-                      {user.role}
-                    </span>
-                  </div>
+                  {!isSidebarCollapsed && (
+                    <div className="flex flex-col min-w-0 text-left">
+                      <span className="text-xs font-bold text-slate-900 dark:text-slate-100 truncate">
+                        {user.name}
+                      </span>
+                      <span className="text-[9px] text-emerald-600 dark:text-emerald-400 font-bold uppercase tracking-wider">
+                        {user.role}
+                      </span>
+                    </div>
+                  )}
                 </div>
-                <Settings className="w-4 h-4 text-slate-400 shrink-0" />
+                {!isSidebarCollapsed && (
+                  <Settings className="w-4 h-4 text-slate-400 shrink-0" />
+                )}
               </button>
-
               {isUserMenuOpen && (
                 <div className="absolute bottom-full left-0 mb-2 w-56 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl z-50 p-2 space-y-1 animate-in fade-in slide-in-from-bottom-2 duration-150">
                   <button
@@ -1979,6 +2338,11 @@ export const MainLayout: React.FC = () => {
                         }
                         value={searchQuery}
                         onChange={(e) => handleSearchChange(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Escape") {
+                            handleSearchChange("");
+                          }
+                        }}
                         icon={<Search className="w-4 h-4 text-m3-secondary" />}
                         className="py-2.5 text-sm pr-9 rounded-2xl"
                       />
@@ -1993,7 +2357,8 @@ export const MainLayout: React.FC = () => {
                       )}
                     </div>
 
-                    {isExplorerView && (
+                    {((isServicesView && serviceAsFolderItem) ||
+                      isExplorerView) && (
                       <>
                         {/* Filter Pop-Up Panel Trigger Button */}
                         <button
@@ -2484,19 +2849,6 @@ export const MainLayout: React.FC = () => {
                   <button
                     onClick={() => {
                       const song = contextMenu.item as Song;
-                      setRenameSongTarget(song);
-                      setNewSongTitle(song.title);
-                      setContextMenu(null);
-                    }}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left"
-                  >
-                    <Edit2 className="w-4 h-4 text-[#0284c7]" />
-                    <span>Mudar Nome do Cântico</span>
-                  </button>
-
-                  <button
-                    onClick={() => {
-                      const song = contextMenu.item as Song;
                       setMoveSongTarget(song);
                       setTargetSongFolderId(song.folderId || null);
                       setContextMenu(null);
@@ -2832,37 +3184,6 @@ export const MainLayout: React.FC = () => {
         )}
       </Modal>
 
-      {/* RENAME SONG MODAL */}
-      <Modal
-        isOpen={!!renameSongTarget}
-        onClose={() => setRenameSongTarget(null)}
-        title={`Mudar Nome do Cântico "${renameSongTarget?.title}"`}
-      >
-        <form onSubmit={handleRenameSongSubmit} className="flex flex-col gap-4">
-          <Input
-            label="Título do Cântico"
-            value={newSongTitle}
-            onChange={(e) => setNewSongTitle(e.target.value)}
-            placeholder="Insira o novo título do cântico..."
-            autoFocus
-            required
-          />
-
-          <div className="flex items-center justify-end gap-3 mt-2 pt-4 border-t border-slate-100 dark:border-slate-800">
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={() => setRenameSongTarget(null)}
-            >
-              Cancelar
-            </Button>
-            <Button type="submit" variant="primary">
-              Guardar Título
-            </Button>
-          </div>
-        </form>
-      </Modal>
-
       {/* MOVE SONG MODAL (TREE HIERARCHY) */}
       <MoveSongModal
         isOpen={!!moveSongTarget}
@@ -3101,4 +3422,10 @@ export const MainLayout: React.FC = () => {
       )}
     </>
   );
+
+  if (isCommandPaletteEnabled) {
+    return <KBarProvider actions={kbarActions}>{layoutContent}</KBarProvider>;
+  }
+
+  return layoutContent;
 };
