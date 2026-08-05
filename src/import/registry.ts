@@ -18,17 +18,19 @@ export class SongImportRegistry {
     return this.providers.get(extension.toLowerCase());
   }
 
-  getProviders(): Set<ProvidersMetadata> {
-    let meta: Set<ProvidersMetadata> = new Set();
-    this.providers.forEach((value) => {
-      meta.add({
-        id: value.id,
-        name: value.name,
-        description: value.description,
-        supportedExtensions: value.supportedExtensions,
+  getProviders(): ProvidersMetadata[] {
+    const providers = new Map<string, ProvidersMetadata>();
+
+    this.providers.forEach((provider) => {
+      providers.set(provider.id, {
+        id: provider.id,
+        name: provider.name,
+        description: provider.description,
+        supportedExtensions: provider.supportedExtensions,
       });
     });
-    return meta;
+
+    return [...providers.values()];
   }
 
   async importFiles(
