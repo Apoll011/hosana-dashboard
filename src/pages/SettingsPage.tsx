@@ -32,6 +32,7 @@ import {
   KeyRound,
   Lock,
   Mail,
+  MonitorSmartphone,
   Moon,
   Palette,
   RefreshCw,
@@ -597,74 +598,93 @@ const MembersTab: React.FC<{
   );
 };
 
-const ApperanceTab: React.FC<{ active: boolean }> = ({ active }) => {
-  const { darkMode, toggleDarkMode } = useTheme();
+const AppearanceTab: React.FC<{ active: boolean }> = ({ active }) => {
+  const { theme, setTheme } = useTheme();
 
-  if (!active) return;
+  if (!active) return null;
+
+  const themes = [
+    {
+      id: "light",
+      title: "Modo Claro",
+      description: "Ideal para ambientes bem iluminados.",
+      icon: Sun,
+      iconClass: "bg-amber-100 text-amber-600",
+    },
+    {
+      id: "system",
+      title: "Sistema",
+      description: "Segue automaticamente o tema do dispositivo.",
+      icon: MonitorSmartphone,
+      iconClass: "bg-sky-100 text-sky-600 dark:bg-sky-950 dark:text-sky-400",
+    },
+    {
+      id: "dark",
+      title: "Modo Escuro",
+      description: "Mais confortável durante a noite.",
+      icon: Moon,
+      iconClass: "bg-slate-800 text-sky-400",
+    },
+  ];
 
   return (
     <div className="space-y-6">
-      {/* Theme and Appearance */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs space-y-4">
-        <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 border-b border-slate-100 dark:border-slate-800 pb-3 flex items-center gap-2">
-          <Palette className="w-4 h-4 text-[#0284c7]" />
-          Aparência e Tema Visual
-        </h3>
+      <div className="rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden">
+        <div className="px-6 py-5 border-b border-slate-200 dark:border-slate-800">
+          <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
+            Aparência
+          </h2>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <button
-            type="button"
-            onClick={() => {
-              if (darkMode) toggleDarkMode();
-            }}
-            className={`p-4 rounded-2xl border flex items-center gap-3.5 transition-all text-left cursor-pointer ${
-              !darkMode
-                ? "border-[#0284c7] bg-sky-50/60 dark:bg-sky-950/40 text-slate-900 dark:text-slate-100 ring-2 ring-[#0284c7]/20 font-bold"
-                : "border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 text-slate-600 dark:text-slate-400"
-            }`}
-          >
-            <div className="p-2.5 rounded-xl bg-amber-100 text-amber-600 dark:bg-amber-950 dark:text-amber-400 shrink-0">
-              <Sun className="w-5 h-5" />
-            </div>
-            <div className="flex flex-col">
-              <span className="text-xs font-bold text-slate-900 dark:text-slate-100">
-                Modo Claro
-              </span>
-              <span className="text-[11px] text-slate-500 dark:text-slate-400">
-                Interface limpa com fundo claro de alto contraste
-              </span>
-            </div>
-          </button>
+          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+            Escolha como pretende visualizar a aplicação.
+          </p>
+        </div>
 
-          <button
-            type="button"
-            onClick={() => {
-              if (!darkMode) toggleDarkMode();
-            }}
-            className={`p-4 rounded-2xl border flex items-center gap-3.5 transition-all text-left cursor-pointer ${
-              darkMode
-                ? "border-[#0284c7] bg-sky-50/60 dark:bg-sky-950/40 text-slate-900 dark:text-slate-100 ring-2 ring-[#0284c7]/20 font-bold"
-                : "border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 text-slate-600 dark:text-slate-400"
-            }`}
-          >
-            <div className="p-2.5 rounded-xl bg-slate-800 text-sky-400 shrink-0">
-              <Moon className="w-5 h-5" />
-            </div>
-            <div className="flex flex-col">
-              <span className="text-xs font-bold text-slate-900 dark:text-slate-100">
-                Modo Escuro
-              </span>
-              <span className="text-[11px] text-slate-500 dark:text-slate-400">
-                Tema escuro confortável para ambientes com pouca luz
-              </span>
-            </div>
-          </button>
+        <div className="p-6">
+          <div className="grid gap-4 sm:grid-cols-3">
+            {themes.map((item) => {
+              const Icon = item.icon;
+              const selected = theme === item.id;
+
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => setTheme(item.id)}
+                  className={`group relative rounded-2xl border p-5 text-left transition-all duration-200 cursor-pointer ${
+                    selected
+                      ? "border-sky-500 bg-sky-50 dark:bg-sky-950/30 ring-2 ring-sky-500/20 shadow-md"
+                      : "border-slate-200 dark:border-slate-800 hover:border-sky-300 hover:shadow-md hover:-translate-y-0.5"
+                  }`}
+                >
+                  {selected && (
+                    <div className="absolute top-4 right-4 h-6 w-6 rounded-full bg-sky-500 flex items-center justify-center">
+                      <Check className="h-4 w-4 text-white" />
+                    </div>
+                  )}
+
+                  <div
+                    className={`mb-4 inline-flex rounded-2xl p-3 ${item.iconClass}`}
+                  >
+                    <Icon className="h-6 w-6" />
+                  </div>
+
+                  <h3 className="font-semibold text-slate-900 dark:text-white">
+                    {item.title}
+                  </h3>
+
+                  <p className="mt-1 text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
+                    {item.description}
+                  </p>
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
     </div>
   );
 };
-
 const AboutTab: React.FC<{ active: boolean }> = ({ active }) => {
   const { tenant } = useAuth();
   const [showLicenses, setShowLicenses] = useState(false);
@@ -1111,7 +1131,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ hideHeader }) => {
           setAdminToRemove={setAdminToRemove}
           setIsInviteModalOpen={setIsInviteModalOpen}
         />
-        <ApperanceTab active={activeTab === "apperance"} />
+        <AppearanceTab active={activeTab === "apperance"} />
         <AboutTab active={activeTab === "about"} />
       </div>
 
