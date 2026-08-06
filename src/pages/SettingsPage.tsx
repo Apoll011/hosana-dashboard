@@ -17,13 +17,18 @@ import {
   AlertTriangle,
   Check,
   CheckCircle2,
+  ChevronDown,
+  ChevronUp,
   Church,
   Clock,
   Database,
   Download,
   FileText,
   FileUp,
+  Github,
   HardDrive,
+  Heart,
+  Info,
   KeyRound,
   Lock,
   Mail,
@@ -32,8 +37,10 @@ import {
   RefreshCw,
   RotateCcw,
   Save,
+  Scale,
   Server,
   Shield,
+  ShieldAlert,
   Sun,
   Trash2,
   Upload,
@@ -185,7 +192,7 @@ const GeneralTab: React.FC<{ active: boolean }> = ({ active }) => {
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs space-y-4">
         <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 border-b border-slate-100 dark:border-slate-800 pb-3 flex items-center gap-2">
           <Shield className="w-4 h-4 text-[#0284c7]" />
-          Definições do Dashboard
+          Definições do Studio
         </h3>
         <div className="space-y-3">
           <label className="flex items-center gap-3.5 p-4 border border-slate-200 dark:border-slate-800 rounded-2xl cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
@@ -660,20 +667,93 @@ const ApperanceTab: React.FC<{ active: boolean }> = ({ active }) => {
 
 const AboutTab: React.FC<{ active: boolean }> = ({ active }) => {
   const { tenant } = useAuth();
+  const [showLicenses, setShowLicenses] = useState(false);
 
-  if (!active) return;
+  if (!active) return null;
+
+  const productionDependencies = [
+    { name: "React & React DOM (v19)", license: "MIT", type: "UI Framework" },
+    {
+      name: "@tanstack/react-query",
+      license: "MIT",
+      type: "State & Data Fetching",
+    },
+    { name: "@dnd-kit (Core/Sortable)", license: "MIT", type: "Drag and Drop" },
+    { name: "Motion (Framer Motion)", license: "MIT", type: "Animações" },
+    { name: "@tailwindcss/vite", license: "MIT", type: "Estilização" },
+    { name: "Lucide React", license: "ISC", type: "Ícones" },
+    { name: "React Router Dom", license: "MIT", type: "Navegação" },
+    { name: "@google/genai", license: "Apache-2.0", type: "Integração AI" },
+    {
+      name: "Zod & React Hook Form",
+      license: "MIT",
+      type: "Formulários & Validação",
+    },
+    { name: "Free Use Bible API", license: "MIT", type: "Integração Bíblica" },
+    { name: "Kbar", license: "MIT", type: "Menu de Comandos (Ctrl+K)" },
+  ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-4xl mx-auto">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex items-start gap-4">
+            <div className="p-3 bg-sky-50 dark:bg-sky-950/50 rounded-xl shrink-0">
+              <Info className="w-6 h-6 text-[#0284c7]" />
+            </div>
+            <div>
+              <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">
+                Sobre o Hosanna
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                Painel de Controlo {tenant?.name ? `• ${tenant.name}` : ""}
+              </p>
+              <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-2">
+                © {new Date().getFullYear()} Tiago Inês. Código sob licença MIT.
+              </p>
+            </div>
+          </div>
+          <div className="sm:text-right shrink-0 px-4 py-2 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-xl self-start sm:self-center">
+            <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400 dark:text-slate-500 block">
+              Versão do Studio
+            </span>
+            <span className="text-sm font-mono font-bold text-slate-700 dark:text-slate-300">
+              {APP_VERSION}
+            </span>
+          </div>
+        </div>
+
+        {/* Banner de Orgulho Open Source */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-emerald-50/40 dark:bg-emerald-950/20 border border-emerald-200/60 dark:border-emerald-900/40 rounded-xl gap-3">
+          <div className="flex items-center gap-2.5">
+            <Heart className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 fill-emerald-500/20" />
+            <p className="text-xs text-emerald-800 dark:text-emerald-300 leading-relaxed">
+              Este projeto é <strong>open-source</strong>! Acreditamos no
+              software livre para equipar e apoiar comunidades globalmente.
+            </p>
+          </div>
+          <a
+            href="https://github.com/Apoll011/Hosana-dashboard"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-emerald-700 dark:text-emerald-300 bg-white dark:bg-slate-800 border border-emerald-200 dark:border-slate-700 rounded-lg hover:bg-emerald-50 dark:hover:bg-slate-700/55 transition-colors shrink-0"
+          >
+            <Github className="w-3.5 h-3.5" />
+            Ver Repositório
+          </a>
+        </div>
+      </div>
+
+      {/* 2. FORMATOS DE IMPORTAÇÃO */}
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs space-y-4">
         <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 border-b border-slate-100 dark:border-slate-800 pb-3 flex items-center gap-2">
           <FileUp className="w-4 h-4 text-[#0284c7]" />
-          Formatos de Importação Suportadas
+          Formatos de Importação Suportados
         </h3>
 
         <p className="text-xs text-slate-500 dark:text-slate-400">
           O sistema suporta a importação automática de cânticos a partir dos
-          seguintes ficheiros e integrações:
+          seguintes ficheiros e integrações registadas:
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
@@ -684,7 +764,7 @@ const AboutTab: React.FC<{ active: boolean }> = ({ active }) => {
             >
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
-                  <FileText className="w-3.5 h-3.5 text-[#0284c7] shrink-0" />
+                  <FileText className="w-3.5 h-3.5 text-[#0284c7]" />
                   <span className="text-xs font-semibold text-slate-900 dark:text-slate-100">
                     {provider.name}
                   </span>
@@ -715,10 +795,112 @@ const AboutTab: React.FC<{ active: boolean }> = ({ active }) => {
           ))}
         </div>
       </div>
+
+      {/* 3. DOCUMENTOS LEGAIS */}
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs space-y-4">
+        <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 border-b border-slate-100 dark:border-slate-800 pb-3 flex items-center gap-2">
+          <Scale className="w-4 h-4 text-[#0284c7]" />
+          Documentação Legal e Termos
+        </h3>
+
+        <p className="text-xs text-slate-500 dark:text-slate-400">
+          Ao utilizar a plataforma Hosanna Studio, concorda com as políticas de
+          termos de licença MIT e integridade de dados locais.
+        </p>
+
+        <div className="flex flex-col sm:flex-row gap-3 pt-1">
+          <a
+            href="/legal/terms"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex-1 flex items-center justify-between p-3 border border-slate-200 dark:border-slate-800 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/40 group transition-colors"
+          >
+            <div className="flex items-center gap-2.5">
+              <Scale className="w-4 h-4 text-slate-400 group-hover:text-[#0284c7] transition-colors" />
+              <div className="text-left">
+                <span className="text-xs font-semibold text-slate-900 dark:text-slate-100 block">
+                  Termos de Serviço
+                </span>
+                <span className="text-[10px] text-slate-400 dark:text-slate-500">
+                  Uso do serviço e licença open-source
+                </span>
+              </div>
+            </div>
+          </a>
+
+          <a
+            href="/legal/privacy"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex-1 flex items-center justify-between p-3 border border-slate-200 dark:border-slate-800 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/40 group transition-colors"
+          >
+            <div className="flex items-center gap-2.5">
+              <ShieldAlert className="w-4 h-4 text-slate-400 group-hover:text-[#0284c7] transition-colors" />
+              <div className="text-left">
+                <span className="text-xs font-semibold text-slate-900 dark:text-slate-100 block">
+                  Política de Privacidade
+                </span>
+                <span className="text-[10px] text-slate-400 dark:text-slate-500">
+                  Privacidade local e telemetria opcional
+                </span>
+              </div>
+            </div>
+          </a>
+        </div>
+      </div>
+
+      {/* 4. LICENÇAS DE TERCEIROS (Dinâmico com o package.json de produção) */}
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xs overflow-hidden">
+        <button
+          onClick={() => setShowLicenses(!showLicenses)}
+          className="w-full flex items-center justify-between p-6 text-left hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors focus:outline-hidden"
+        >
+          <div className="flex items-center gap-2">
+            <FileText className="w-4 h-4 text-[#0284c7]" />
+            <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
+              Dependências e Licenças do Ecossistema
+            </h3>
+          </div>
+          {showLicenses ? (
+            <ChevronUp className="w-4 h-4 text-slate-400" />
+          ) : (
+            <ChevronDown className="w-4 h-4 text-slate-400" />
+          )}
+        </button>
+
+        {showLicenses && (
+          <div className="px-6 pb-6 border-t border-slate-100 dark:border-slate-800 pt-4 bg-slate-50/30 dark:bg-slate-900/50 space-y-4">
+            <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+              O ecossistema Hosanna Studio assenta sobre bases robustas da
+              comunidade open-source. Abaixo encontram-se listados os módulos de
+              produção registados:
+            </p>
+            <div className="divide-y divide-slate-100 dark:divide-slate-800 max-h-64 overflow-y-auto pr-2 custom-scrollbar">
+              {productionDependencies.map((lib) => (
+                <div
+                  key={lib.name}
+                  className="py-2.5 first:pt-0 last:pb-0 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1"
+                >
+                  <div>
+                    <span className="text-xs font-semibold text-slate-800 dark:text-slate-200 block sm:inline mr-2">
+                      {lib.name}
+                    </span>
+                    <span className="text-[10px] text-slate-400 dark:text-slate-500">
+                      {lib.type}
+                    </span>
+                  </div>
+                  <span className="inline-self-start sm:inline-self-auto px-1.5 py-0.5 text-[9px] font-mono font-bold uppercase bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 rounded-sm">
+                    {lib.license}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
-
 interface SettingsPageProps {
   hideHeader?: boolean;
 }
