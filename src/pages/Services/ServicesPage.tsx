@@ -160,7 +160,10 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
     if (!archiveTarget) return;
     await archiveService({
       id: archiveTarget.id,
-      archived: !archiveTarget.archived,
+      data: {
+        archived: !archiveTarget.archived,
+        updatedAt: archiveTarget.updatedAt,
+      },
     });
     setArchiveTarget(null);
   };
