@@ -5,6 +5,11 @@
 import { Button, Modal } from "@hosanna/shared";
 import { FileText } from "lucide-react";
 import { useEffect, useState } from "react";
+import {
+  DurationField,
+  durationInputToSeconds,
+  secondsToDurationInput,
+} from "./DurationField";
 
 interface ReadingModalProps {
   isOpen: boolean;
@@ -14,8 +19,15 @@ interface ReadingModalProps {
     content: string;
     passage: string;
     notes: string;
+    duration: number;
   }) => void;
-  initial?: { title: string; content: string; passage: string; notes: string };
+  initial?: {
+    title: string;
+    content: string;
+    passage: string;
+    notes: string;
+    duration?: number;
+  };
 }
 
 export const ReadingModal: React.FC<ReadingModalProps> = ({
@@ -28,6 +40,9 @@ export const ReadingModal: React.FC<ReadingModalProps> = ({
   const [content, setContent] = useState(initial?.content || "");
   const [passage, setPassage] = useState(initial?.passage || "");
   const [notes, setNotes] = useState(initial?.notes || "");
+  const [duration, setDuration] = useState(
+    secondsToDurationInput(initial?.duration),
+  );
 
   useEffect(() => {
     if (isOpen) {
@@ -35,6 +50,7 @@ export const ReadingModal: React.FC<ReadingModalProps> = ({
       setContent(initial?.content || "");
       setPassage(initial?.passage || "");
       setNotes(initial?.notes || "");
+      setDuration(secondsToDurationInput(initial?.duration));
     }
   }, [isOpen, initial]);
 
@@ -116,6 +132,12 @@ export const ReadingModal: React.FC<ReadingModalProps> = ({
           />
         </div>
 
+        <DurationField
+          value={duration}
+          onChange={setDuration}
+          accentRingClass="focus:ring-purple-500"
+        />
+
         <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-200 dark:border-slate-800">
           <Button type="button" variant="ghost" size="sm" onClick={onClose}>
             Cancelar
@@ -126,7 +148,13 @@ export const ReadingModal: React.FC<ReadingModalProps> = ({
             size="sm"
             onClick={() => {
               if (!title.trim()) return;
-              onSave({ title, content, passage, notes });
+              onSave({
+                title,
+                content,
+                passage,
+                notes,
+                duration: durationInputToSeconds(duration),
+              });
             }}
           >
             Guardar

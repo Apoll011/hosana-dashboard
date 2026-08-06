@@ -5,12 +5,22 @@
 import { Button, Modal } from "@hosanna/shared";
 import { Plus } from "lucide-react";
 import { useEffect, useState } from "react";
+import {
+  DurationField,
+  durationInputToSeconds,
+  secondsToDurationInput,
+} from "./DurationField";
 
 interface CustomModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (data: { title: string; content: string; notes: string }) => void;
-  initial?: { title: string; content: string; notes: string };
+  onSave: (data: {
+    title: string;
+    content: string;
+    notes: string;
+    duration: number;
+  }) => void;
+  initial?: { title: string; content: string; notes: string; duration?: number };
 }
 
 export const CustomModal: React.FC<CustomModalProps> = ({
@@ -22,12 +32,16 @@ export const CustomModal: React.FC<CustomModalProps> = ({
   const [title, setTitle] = useState(initial?.title || "");
   const [content, setContent] = useState(initial?.content || "");
   const [notes, setNotes] = useState(initial?.notes || "");
+  const [duration, setDuration] = useState(
+    secondsToDurationInput(initial?.duration),
+  );
 
   useEffect(() => {
     if (isOpen) {
       setTitle(initial?.title || "");
       setContent(initial?.content || "");
       setNotes(initial?.notes || "");
+      setDuration(secondsToDurationInput(initial?.duration));
     }
   }, [isOpen, initial]);
 
@@ -95,6 +109,12 @@ export const CustomModal: React.FC<CustomModalProps> = ({
           />
         </div>
 
+        <DurationField
+          value={duration}
+          onChange={setDuration}
+          accentRingClass="focus:ring-slate-500"
+        />
+
         <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-200 dark:border-slate-800">
           <Button type="button" variant="ghost" size="sm" onClick={onClose}>
             Cancelar
@@ -105,7 +125,12 @@ export const CustomModal: React.FC<CustomModalProps> = ({
             size="sm"
             onClick={() => {
               if (!title.trim()) return;
-              onSave({ title, content, notes });
+              onSave({
+                title,
+                content,
+                notes,
+                duration: durationInputToSeconds(duration),
+              });
             }}
           >
             Guardar

@@ -17,12 +17,15 @@ import {
 } from "@hosanna/shared";
 import { useStatsigClient } from "@statsig/react-bindings";
 import {
+  Archive,
+  ArchiveRestore,
   ArrowRight,
   Calendar,
   Church,
   Clock,
   Copy,
   Edit2,
+  MoreHorizontal,
   MoreVertical,
   Printer,
   Trash2,
@@ -55,12 +58,18 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
     ? client.checkGate("service_as_folder_item")
     : false;
 
-  const { servicesQuery, createService, updateService, deleteService } =
-    useServices();
+  const {
+    servicesQuery,
+    createService,
+    updateService,
+    deleteService,
+    archiveService,
+  } = useServices();
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<Service | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Service | null>(null);
+  const [archiveTarget, setArchiveTarget] = useState<Service | null>(null);
   const [contextMenu, setContextMenu] = useState<{
     x: number;
     y: number;
@@ -145,6 +154,18 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
     if (!deleteTarget) return;
     await deleteService(deleteTarget.id);
     setDeleteTarget(null);
+  };
+
+  const handleArchive = async () => {
+    if (!archiveTarget) return;
+    await archiveService({
+      id: archiveTarget.id,
+      data: {
+        archived: !archiveTarget.archived,
+        updatedAt: archiveTarget.updatedAt,
+      },
+    });
+    setArchiveTarget(null);
   };
 
   return (
@@ -333,7 +354,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
                 <div className="absolute top-0 left-0 w-2 h-full bg-m3-primary opacity-0 group-hover:opacity-100 transition-opacity" />
 
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between gap-2">
+                  <div className="relative flex items-center justify-between min-h-8">
                     <Badge variant="sky">
                       <Clock className="w-3.5 h-3.5 mr-1.5 opacity-70" />
                       {new Date(service.date).toLocaleDateString("pt-PT", {
@@ -343,56 +364,97 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
                       })}
                     </Badge>
 
-                    {/* Action Buttons list (Position fixed nicely) */}
-                    <div className="flex items-center gap-1 bg-m3-card/90 backdrop-blur-xs p-1 rounded-2xl border border-m3-border/60 shadow-sm transition-all opacity-90 group-hover:opacity-100">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setEditTarget(service);
-                        }}
-                        title="Editar Nome e Data"
-                        aria-label="Editar Nome e Data"
-                        className="p-1.5 text-m3-secondary hover:text-m3-primary hover:bg-m3-primary/10 rounded-xl cursor-pointer transition-all"
+                    <div
+                      tabIndex={0}
+                      className="group/island absolute right-0 z-10 flex items-center justify-end bg-m3-card/90 backdrop-blur-xs rounded-2xl border border-m3-border/60 shadow-sm overflow-hidden transition-[width,opacity] duration-300 ease-out outline-none cursor-default
+                 w-8 h-8 opacity-70 
+                 hover:opacity-100 hover:w-42 
+                 focus-within:opacity-100 focus-within:w-42"
+                    >
+                      {/* Ícone 3 pontos (Só desaparece com o hover/foco NA ILHA) */}
+                      <div
+                        className="absolute right-0 top-0 w-8 h-8 flex items-center justify-center transition-all duration-300 pointer-events-none
+                      opacity-100 scale-100 
+                      group-hover/island:opacity-0 group-hover/island:scale-75 group-hover/island:-translate-x-2 
+                      focus-within:opacity-0 focus-within:scale-75 focus-within:-translate-x-2"
                       >
-                        <Edit2 className="w-4 h-4" />
-                      </button>
+                        <MoreHorizontal className="w-4 h-4 text-m3-secondary" />
+                      </div>
 
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDuplicateService(service);
-                        }}
-                        title="Duplicar Culto"
-                        aria-label="Duplicar Culto"
-                        className="p-1.5 text-m3-secondary hover:text-emerald-600 hover:bg-emerald-500/10 rounded-xl cursor-pointer transition-all"
+                      {/* Botões de Ação (Só aparecem com o hover/foco NA ILHA) */}
+                      <div
+                        className="flex items-center gap-1 p-1 w-max transition-all duration-300
+                      opacity-0 translate-x-4 pointer-events-none
+                      group-hover/island:opacity-100 group-hover/island:translate-x-0 group-hover/island:pointer-events-auto
+                      focus-within:opacity-100 focus-within:translate-x-0 focus-within:pointer-events-auto"
                       >
-                        <Copy className="w-4 h-4" />
-                      </button>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setEditTarget(service);
+                          }}
+                          title="Editar Nome e Data"
+                          className="p-1.5 text-m3-secondary hover:text-m3-primary hover:bg-m3-primary/10 rounded-xl cursor-pointer transition-all focus:outline-none"
+                        >
+                          <Edit2 className="w-4 h-4" />
+                        </button>
 
-                      <button
-                        onClick={async (e) => {
-                          e.stopPropagation();
-                          const html = await printApi.printService(service.id);
-                          printHtmlDirectly(html);
-                        }}
-                        title="Imprimir Culto"
-                        aria-label="Imprimir Culto"
-                        className="p-1.5 text-m3-secondary hover:text-sky-600 hover:bg-sky-500/10 rounded-xl cursor-pointer transition-all"
-                      >
-                        <Printer className="w-4 h-4" />
-                      </button>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDuplicateService(service);
+                          }}
+                          title="Duplicar Culto"
+                          className="p-1.5 text-m3-secondary hover:text-emerald-600 hover:bg-emerald-500/10 rounded-xl cursor-pointer transition-all focus:outline-none"
+                        >
+                          <Copy className="w-4 h-4" />
+                        </button>
 
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setDeleteTarget(service);
-                        }}
-                        title="Apagar Culto"
-                        aria-label="Apagar Culto"
-                        className="p-1.5 text-m3-secondary hover:text-rose-600 hover:bg-rose-500/10 rounded-xl cursor-pointer transition-all"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                        <button
+                          type="button"
+                          onClick={async (e) => {
+                            e.stopPropagation();
+                            const html = await printApi.printService(
+                              service.id,
+                            );
+                            printHtmlDirectly(html);
+                          }}
+                          title="Imprimir Culto"
+                          className="p-1.5 text-m3-secondary hover:text-sky-600 hover:bg-sky-500/10 rounded-xl cursor-pointer transition-all focus:outline-none"
+                        >
+                          <Printer className="w-4 h-4" />
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setArchiveTarget(service);
+                          }}
+                          title={`${archiveTarget?.archived ? "Ativar" : "Arquivar"} Culto`}
+                          className="p-1.5 text-m3-secondary hover:text-rose-600 hover:bg-rose-500/10 rounded-xl cursor-pointer transition-all focus:outline-none"
+                        >
+                          {archiveTarget?.archived ? (
+                            <ArchiveRestore className="w-4 h-4" />
+                          ) : (
+                            <Archive className="w-4 h-4" />
+                          )}
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setDeleteTarget(service);
+                          }}
+                          title="Apagar Culto"
+                          className="p-1.5 text-m3-secondary hover:text-rose-600 hover:bg-rose-500/10 rounded-xl cursor-pointer transition-all focus:outline-none"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
                     </div>
                   </div>
 
@@ -475,6 +537,21 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
             <span>Imprimir Culto</span>
           </button>
 
+          <button
+            onClick={() => {
+              setArchiveTarget(contextMenu.service);
+              setContextMenu(null);
+            }}
+            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left cursor-pointer"
+          >
+            {archiveTarget?.archived ? (
+              <ArchiveRestore className="w-4 h-4 text-orange-500" />
+            ) : (
+              <Archive className="w-4 h-4 text-orange-500" />
+            )}
+            <span>{archiveTarget?.archived ? "Ativar" : "Arquivar"} Culto</span>
+          </button>
+
           <div className="my-1 border-t border-slate-100 dark:border-slate-800/80" />
 
           <button
@@ -529,6 +606,15 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
         title="Apagar Culto"
         message={`Tem a certeza de que deseja apagar o culto "${deleteTarget?.name}"?`}
         confirmText="Apagar Culto"
+      />
+      <ConfirmDialog
+        variant="primary"
+        isOpen={!!archiveTarget}
+        onClose={() => setArchiveTarget(null)}
+        onConfirm={handleArchive}
+        title={`${archiveTarget?.archived ? "Ativar" : "Arquivar"} Culto`}
+        message={`Tem a certeza de que deseja ${archiveTarget?.archived ? "ativar" : "arquivar"} o culto "${archiveTarget?.name}"?`}
+        confirmText={`${archiveTarget?.archived ? "Ativar" : "Arquivar"} Culto`}
       />
     </div>
   );

@@ -24,13 +24,14 @@ function StatsigWrapper({ children }: { children: React.ReactNode }) {
 
   const { client } = useClientAsyncInit(
     "client-4459XEXCHZyP192QOlIwzRAffGVP9zfS33rnXpdquAI",
-    {},
+    { appVersion: APP_VERSION },
   );
 
   useEffect(() => {
     if (!client || isLoading) return;
 
     void client.updateUserAsync({
+      appVersion: APP_VERSION,
       userID: user?.id ?? "anonymous",
       email: user?.email,
       locale: "pt",
