@@ -373,9 +373,10 @@ const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
 
     try {
       setIsSavingTenant(true);
+      const logo = draftLogo;
       await authApi.editTenant({
         name: draftName,
-        logo: draftLogo,
+        logo,
       });
       showToast("Workspace atualizado com sucesso!", "success");
     } catch (err: any) {
