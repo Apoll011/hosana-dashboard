@@ -2042,11 +2042,8 @@ export const MainLayout: React.FC = () => {
                 <div
                   className={`flex items-center ${isSidebarCollapsed ? "" : "gap-2"} min-w-0`}
                 >
-                  <div className="w-7 h-7 rounded-full bg-sky-100 dark:bg-sky-950 text-[#0284c7] dark:text-sky-400 flex items-center justify-center font-bold text-xs shrink-0">
-                    {user.name
-                      .split(" ")
-                      .map((n) => n[0])
-                      .join("")}
+                  <div className="w-7 h-7 rounded-full bg-linear-to-tr from-[#0284c7] to-sky-400 flex items-center justify-center text-white font-extrabold text-xs shadow-sm shrink-0">
+                    {user.name.charAt(0).toUpperCase()}
                   </div>
                   {!isSidebarCollapsed && (
                     <div className="flex flex-col min-w-0 text-left">
