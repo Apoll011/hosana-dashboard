@@ -1,36 +1,68 @@
-/**
- * @license
- * SPDX-License-Identifier: Apache-2.0
- */
+import React, { createContext, useContext, useEffect, useState } from "react";
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+export type Theme = "light" | "dark" | "system";
 
 interface ThemeContextType {
+  theme: Theme;
+  setTheme: (theme: Theme) => void;
+
+  // Convenience values
   darkMode: boolean;
   toggleDarkMode: () => void;
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [darkMode, setDarkMode] = useState<boolean>(() => {
-    const saved = localStorage.getItem('chordpro_dark_mode');
-    return saved ? saved === 'true' : false; // Default to clean Light mode theme per instructions
+export const ThemeProvider: React.FC<{
+  children: React.ReactNode;
+}> = ({ children }) => {
+  const [theme, setTheme] = useState<Theme>(() => {
+    return (localStorage.getItem("chordpro_theme") as Theme) ?? "system";
   });
 
-  useEffect(() => {
-    if (darkMode) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-    localStorage.setItem('chordpro_dark_mode', String(darkMode));
-  }, [darkMode]);
+  const [systemDark, setSystemDark] = useState(
+    () => window.matchMedia("(prefers-color-scheme: dark)").matches,
+  );
 
-  const toggleDarkMode = () => setDarkMode(prev => !prev);
+  // Listen for OS theme changes
+  useEffect(() => {
+    const media = window.matchMedia("(prefers-color-scheme: dark)");
+
+    const listener = (e: MediaQueryListEvent) => {
+      setSystemDark(e.matches);
+    };
+
+    media.addEventListener("change", listener);
+
+    return () => media.removeEventListener("change", listener);
+  }, []);
+
+  const darkMode = theme === "system" ? systemDark : theme === "dark";
+
+  useEffect(() => {
+    document.documentElement.classList.toggle("dark", darkMode);
+    localStorage.setItem("chordpro_theme", theme);
+  }, [theme, darkMode]);
+
+  const toggleDarkMode = () => {
+    if (theme === "system") {
+      // If following the system, toggle to the opposite of the current OS theme.
+      setTheme(systemDark ? "light" : "dark");
+      return;
+    }
+
+    setTheme(theme === "dark" ? "light" : "dark");
+  };
 
   return (
-    <ThemeContext.Provider value={{ darkMode, toggleDarkMode }}>
+    <ThemeContext.Provider
+      value={{
+        theme,
+        setTheme,
+        darkMode,
+        toggleDarkMode,
+      }}
+    >
       {children}
     </ThemeContext.Provider>
   );
@@ -38,8 +70,10 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
 export const useTheme = () => {
   const context = useContext(ThemeContext);
+
   if (!context) {
-    throw new Error('useTheme must be used within a ThemeProvider');
+    throw new Error("useTheme must be used within a ThemeProvider");
   }
+
   return context;
 };
