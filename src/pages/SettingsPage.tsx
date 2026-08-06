@@ -15,6 +15,7 @@ import {
 } from "@hosanna/shared";
 import { useQueryClient } from "@tanstack/react-query";
 import {
+  AlertCircle,
   AlertTriangle,
   Building,
   Camera,
@@ -28,11 +29,13 @@ import {
   Download,
   FileText,
   FileUp,
+  Fingerprint,
   Github,
   HardDrive,
   Heart,
   Info,
   KeyRound,
+  Loader2,
   Lock,
   Mail,
   MonitorSmartphone,
@@ -240,6 +243,40 @@ interface WorkspaceTabProps {
   }) => void;
 }
 
+const compressImage = (
+  file: File,
+  maxWidth = 800,
+  quality = 0.8,
+): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = (event) => {
+      const img = new Image();
+      img.src = event.target?.result as string;
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        let { width, height } = img;
+
+        if (width > maxWidth) {
+          height = Math.round((height * maxWidth) / width);
+          width = maxWidth;
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        ctx?.drawImage(img, 0, 0, width, height);
+
+        // Exportar como JPEG para melhor rácio de compressão vs compatibilidade
+        resolve(canvas.toDataURL("image/jpeg", quality));
+      };
+      img.onerror = (error) => reject(error);
+    };
+    reader.onerror = (error) => reject(error);
+  });
+};
+
 const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
   active,
   showToast,
@@ -252,25 +289,41 @@ const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
   const restoreInputRef = useRef<HTMLInputElement>(null);
   const logoInputRef = useRef<HTMLInputElement>(null);
 
-  // Estados do formulário
-  const [isEditing, setIsEditing] = useState(false);
-  const [tenantName, setTenantName] = useState(tenant?.name || "");
-  const [tenantLogo, setTenantLogo] = useState<string | undefined>(
+  // Estados de Exibição (Fonte da verdade para a UI)
+  const [currentName, setCurrentName] = useState(tenant?.name || "");
+  const [currentLogo, setCurrentLogo] = useState<string | undefined>(
     tenant?.logo,
   );
+
+  // Estados do Formulário (Rascunho enquanto edita)
+  const [isEditing, setIsEditing] = useState(false);
+  const [draftName, setDraftName] = useState(currentName);
+  const [draftLogo, setDraftLogo] = useState<string | undefined>(currentLogo);
+
+  const [isCompressing, setIsCompressing] = useState(false);
   const [isSavingTenant, setIsSavingTenant] = useState(false);
+
+  // Atualizar a UI se o tenant mudar externamente
+  useEffect(() => {
+    if (tenant) {
+      setCurrentName(tenant.name);
+      setCurrentLogo(tenant.logo);
+      setDraftName(tenant.name);
+      setDraftLogo(tenant.logo);
+    }
+  }, [tenant]);
 
   const getWorkspaceInitials = (name: string) => {
     if (!name) return "W";
     return name
       .split(" ")
-      .map((word) => word.charAt(0))
+      .map((w) => w.charAt(0))
       .join("")
       .toUpperCase()
       .slice(0, 2);
   };
 
-  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleLogoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -279,42 +332,62 @@ const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const base64String = event.target?.result as string;
-      setTenantLogo(base64String);
-    };
-    reader.onerror = () => {
-      showToast("Erro ao processar a imagem do logótipo.", "error");
-    };
-    reader.readAsDataURL(file);
+    try {
+      setIsCompressing(true);
+      // Comprimir a imagem (Max 800px, 80% qualidade)
+      const compressedBase64 = await compressImage(file, 800, 0.8);
+      setDraftLogo(compressedBase64);
+    } catch (error) {
+      showToast("Erro ao processar e comprimir a imagem.", "error");
+    } finally {
+      setIsCompressing(false);
+    }
+  };
+
+  const handleStartEdit = () => {
+    setDraftName(currentName);
+    setDraftLogo(currentLogo);
+    setIsEditing(true);
   };
 
   const handleCancelEdit = () => {
-    // Reverter para os dados originais ao cancelar
-    setTenantName(tenant?.name || "");
-    setTenantLogo(tenant?.logo);
+    setDraftName(currentName);
+    setDraftLogo(currentLogo);
     setIsEditing(false);
   };
 
   const handleSaveTenant = async () => {
-    if (!tenantName.trim()) {
+    if (!draftName.trim()) {
       showToast("O nome do workspace não pode estar vazio.", "error");
       return;
     }
 
+    // Guardar estado antigo para caso de falha (Rollback)
+    const previousName = currentName;
+    const previousLogo = currentLogo;
+
+    // 1. Atualização Otimista (Optimistic Update)
+    setCurrentName(draftName);
+    setCurrentLogo(draftLogo);
+    setIsEditing(false);
+
     try {
       setIsSavingTenant(true);
       await authApi.editTenant({
-        name: tenantName,
-        logo: tenantLogo,
+        name: draftName,
+        logo: draftLogo,
       });
       showToast("Workspace atualizado com sucesso!", "success");
-      setIsEditing(false); // Sair do modo de edição após guardar com sucesso
     } catch (err: any) {
+      // 2. Reverter (Rollback) em caso de erro
+      setCurrentName(previousName);
+      setCurrentLogo(previousLogo);
+      setDraftName(previousName);
+      setDraftLogo(previousLogo);
+      setIsEditing(true); // Reabre o formulário para o utilizador tentar de novo
+
       showToast(
-        "Erro ao atualizar workspace: " +
-          (err?.message || "Falha de comunicação"),
+        "Erro ao atualizar: " + (err?.message || "Falha de comunicação"),
         "error",
       );
     } finally {
@@ -333,7 +406,7 @@ const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
       const link = document.createElement("a");
       link.href = url;
       const dateStr = new Date().toISOString().slice(0, 10);
-      link.download = `hosanna-studio-backup-${dateStr}.json`;
+      link.download = `hosanna-backup-${dateStr}.json`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -341,11 +414,7 @@ const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
 
       showToast("Cópia de segurança descarregada com sucesso!", "success");
     } catch (err: any) {
-      showToast(
-        "Erro ao descarregar cópia de segurança: " +
-          (err?.message || "Falha de comunicação"),
-        "error",
-      );
+      showToast("Erro ao descarregar cópia de segurança.", "error");
     } finally {
       setIsDownloading(false);
     }
@@ -363,19 +432,11 @@ const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
           throw new Error("Formato de ficheiro inválido.");
         }
 
-        const songCount = Array.isArray(parsed.songs) ? parsed.songs.length : 0;
-        const folderCount = Array.isArray(parsed.folders)
-          ? parsed.folders.length
-          : 0;
-        const serviceCount = Array.isArray(parsed.services)
-          ? parsed.services.length
-          : 0;
-
         setPendingRestoreData(parsed);
         setRestoreStats({
-          songs: songCount,
-          folders: folderCount,
-          services: serviceCount,
+          songs: Array.isArray(parsed.songs) ? parsed.songs.length : 0,
+          folders: Array.isArray(parsed.folders) ? parsed.folders.length : 0,
+          services: Array.isArray(parsed.services) ? parsed.services.length : 0,
         });
       } catch (err: any) {
         showToast(
@@ -391,21 +452,20 @@ const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
   if (!active) return null;
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-300">
-      {/* Workspace Profile Management Section */}
+    <div className="space-y-6 animate-in fade-in duration-300 pb-10">
+      {/* 1. Secção: Workspace Profile */}
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm transition-all">
         <div className="border-b border-slate-100 dark:border-slate-800 pb-4 flex items-center justify-between">
           <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
             <Building className="w-4 h-4 text-sky-500" />
-            Definições do Workspace
+            Perfil do Workspace
           </h3>
 
-          {/* Botão de Edição (Só visível se não estiver a editar) */}
           {!isEditing && (
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setIsEditing(true)}
+              onClick={handleStartEdit}
               icon={<PenLine className="w-3.5 h-3.5" />}
             >
               Editar Perfil
@@ -414,9 +474,9 @@ const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
         </div>
 
         <div className="flex flex-col sm:flex-row gap-8 items-start sm:items-center mt-6">
-          {/* Logo / Avatar (Cantos perfeitos corrigidos com overflow-hidden) */}
+          {/* Logo / Avatar (Com suporte a loading state durante a compressão) */}
           <div
-            className={`relative group shrink-0 w-24 h-24 rounded-2xl overflow-hidden border shadow-sm transition-all duration-300
+            className={`relative group shrink-0 w-24 h-24 rounded-full overflow-hidden border shadow-sm transition-all duration-300
               ${isEditing ? "border-sky-400 ring-4 ring-sky-500/10" : "border-slate-200 dark:border-slate-700"}
             `}
           >
@@ -426,34 +486,42 @@ const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
               accept="image/*"
               onChange={handleLogoChange}
               className="hidden"
-              disabled={!isEditing}
+              disabled={!isEditing || isCompressing}
             />
 
-            {tenantLogo ? (
+            {(isEditing ? draftLogo : currentLogo) ? (
               <img
-                src={tenantLogo}
-                alt={tenantName}
-                className="w-full h-full object-cover"
+                src={isEditing ? draftLogo : currentLogo}
+                alt={isEditing ? draftName : currentName}
+                className={`w-full h-full object-cover transition-opacity ${isCompressing ? "opacity-50" : "opacity-100"}`}
               />
             ) : (
-              <div className="w-full h-full bg-gradient-to-tr from-[#0284c7] to-sky-400 flex items-center justify-center text-white font-black text-3xl">
-                {getWorkspaceInitials(tenantName || tenant?.name || "")}
+              <div className="w-full h-full bg-linear-to-tr from-[#0284c7] to-sky-400 flex items-center justify-center text-white font-black text-3xl">
+                {getWorkspaceInitials(
+                  (isEditing ? draftName : currentName) || "",
+                )}
               </div>
             )}
 
-            {/* Overlay da Câmara - Só aparece em Hover E quando em modo de edição */}
             {isEditing && (
               <button
                 type="button"
                 onClick={() => logoInputRef.current?.click()}
-                className="absolute inset-0 bg-slate-900/50 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center backdrop-blur-[2px] cursor-pointer"
+                disabled={isCompressing}
+                className={`absolute inset-0 bg-slate-900/50 text-white flex items-center justify-center backdrop-blur-[2px] cursor-pointer transition-opacity duration-200
+                  ${isCompressing ? "opacity-100" : "opacity-0 group-hover:opacity-100"}
+                `}
               >
-                <Camera className="w-7 h-7 mb-1" />
+                {isCompressing ? (
+                  <Loader2 className="w-6 h-6 animate-spin" />
+                ) : (
+                  <Camera className="w-7 h-7 mb-1" />
+                )}
               </button>
             )}
           </div>
 
-          {/* Form Fields / Read-only Info */}
+          {/* Campos / Display */}
           <div className="flex-1 w-full space-y-3">
             {isEditing ? (
               <div className="animate-in fade-in slide-in-from-left-2 duration-300">
@@ -462,8 +530,8 @@ const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
                 </label>
                 <input
                   type="text"
-                  value={tenantName}
-                  onChange={(e) => setTenantName(e.target.value)}
+                  value={draftName}
+                  onChange={(e) => setDraftName(e.target.value)}
                   placeholder="Ex: Minha Igreja"
                   className="block w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-950/50 px-4 py-3 text-sm text-slate-900 dark:text-slate-100 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 transition-all outline-none shadow-sm"
                   autoFocus
@@ -472,7 +540,7 @@ const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
             ) : (
               <div className="space-y-1 py-2 animate-in fade-in duration-300">
                 <h4 className="text-2xl font-bold text-slate-900 dark:text-white">
-                  {tenant?.name || "Workspace sem nome"}
+                  {currentName || "Workspace sem nome"}
                 </h4>
                 <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 text-xs font-mono rounded-md">
                   <span>/</span>
@@ -483,14 +551,13 @@ const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
           </div>
         </div>
 
-        {/* Botões de Ação do Modo de Edição */}
         {isEditing && (
           <div className="flex justify-end gap-3 pt-5 mt-4 border-t border-slate-100 dark:border-slate-800 animate-in fade-in slide-in-from-bottom-2 duration-300">
             <Button
               variant="outline"
               size="sm"
               onClick={handleCancelEdit}
-              disabled={isSavingTenant}
+              disabled={isSavingTenant || isCompressing}
               icon={<X className="w-4 h-4" />}
             >
               Cancelar
@@ -500,6 +567,7 @@ const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
               size="sm"
               onClick={handleSaveTenant}
               isLoading={isSavingTenant}
+              disabled={isCompressing}
               icon={<Save className="w-4 h-4" />}
             >
               Guardar Alterações
@@ -508,20 +576,67 @@ const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
         )}
       </div>
 
-      {/* Backup & Restore Section */}
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm">
+        <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2 mb-4">
+          <Info className="w-4 h-4 text-slate-400" />
+          Detalhes do Workspace
+        </h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="p-4 bg-slate-50 dark:bg-slate-950/50 rounded-xl border border-slate-100 dark:border-slate-800/60">
+            <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 mb-1">
+              <Fingerprint className="w-3.5 h-3.5" />
+              <span className="text-[11px] font-bold uppercase tracking-wider">
+                ID do Tenant
+              </span>
+            </div>
+            <p className="text-sm font-mono text-slate-900 dark:text-slate-200">
+              {tenant?.id?.substring(0, 18) || "N/A"}...
+            </p>
+          </div>
+          <div className="p-4 bg-slate-50 dark:bg-slate-950/50 rounded-xl border border-slate-100 dark:border-slate-800/60">
+            <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 mb-1">
+              <Shield className="w-3.5 h-3.5" />
+              <span className="text-[11px] font-bold uppercase tracking-wider">
+                Permissões
+              </span>
+            </div>
+            <p className="text-sm font-medium text-slate-900 dark:text-slate-200">
+              Administrador
+            </p>
+          </div>
+          <div className="p-4 bg-slate-50 dark:bg-slate-950/50 rounded-xl border border-slate-100 dark:border-slate-800/60">
+            <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 mb-1">
+              <AlertCircle className="w-3.5 h-3.5" />
+              <span className="text-[11px] font-bold uppercase tracking-wider">
+                Estado
+              </span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+              </span>
+              <p className="text-sm font-medium text-slate-900 dark:text-slate-200">
+                Ativo
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm space-y-5">
         <div className="border-b border-slate-100 dark:border-slate-800 pb-4 flex items-center justify-between">
           <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
             <Database className="w-4 h-4 text-emerald-500" />
             Gestão de Dados & Backups
           </h3>
-          <span className="text-[11px] font-mono font-medium text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-full">
-            .JSON
+          <span className="text-[11px] font-mono font-medium text-slate-500 bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-full">
+            Local JSON
           </span>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5 pt-2">
-          {/* Export Section Card */}
+          {/* Export */}
           <div className="group p-6 bg-slate-50/50 dark:bg-slate-950/50 border border-slate-200 dark:border-slate-800 hover:border-sky-300 dark:hover:border-sky-800 hover:bg-sky-50/30 dark:hover:bg-sky-950/20 rounded-2xl flex flex-col justify-between gap-5 transition-all duration-300">
             <div className="flex items-start gap-4">
               <div className="p-3 bg-sky-100 dark:bg-sky-950/80 border border-sky-200 dark:border-sky-800/60 text-[#0284c7] dark:text-sky-400 rounded-xl shrink-0 group-hover:scale-105 transition-transform duration-300 shadow-sm">
@@ -533,11 +648,9 @@ const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
                 </h4>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed">
                   Descarrega a base de dados atual num ficheiro JSON.
-                  Recomendamos que o faças regularmente.
                 </p>
               </div>
             </div>
-
             <Button
               variant="primary"
               size="sm"
@@ -546,11 +659,11 @@ const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
               icon={<Download className="w-4 h-4" />}
               className="w-full justify-center"
             >
-              Transferir Cópia de Segurança
+              Transferir Cópia
             </Button>
           </div>
 
-          {/* Import Section Card */}
+          {/* Import */}
           <div className="group p-6 bg-slate-50/50 dark:bg-slate-950/50 border border-slate-200 dark:border-slate-800 hover:border-amber-300 dark:hover:border-amber-800/60 hover:bg-amber-50/30 dark:hover:bg-amber-950/10 rounded-2xl flex flex-col justify-between gap-5 transition-all duration-300">
             <div className="flex items-start gap-4">
               <div className="p-3 bg-amber-100 dark:bg-amber-950/80 border border-amber-200 dark:border-amber-800/60 text-amber-600 dark:text-amber-400 rounded-xl shrink-0 group-hover:scale-105 transition-transform duration-300 shadow-sm">
@@ -562,11 +675,10 @@ const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
                 </h4>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed">
                   Carrega um ficheiro .json previamente guardado para recuperar
-                  os teus dados em segundos.
+                  os teus dados.
                 </p>
               </div>
             </div>
-
             <input
               type="file"
               ref={restoreInputRef}
@@ -574,7 +686,6 @@ const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
               onChange={handleFileChange}
               className="hidden"
             />
-
             <Button
               variant="outline"
               size="sm"
@@ -586,6 +697,31 @@ const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
             </Button>
           </div>
         </div>
+      </div>
+
+      <div className="border border-red-200 dark:border-red-900/50 bg-red-50/50 dark:bg-red-950/20 rounded-2xl p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div>
+          <h3 className="text-sm font-bold text-red-700 dark:text-red-400 flex items-center gap-2">
+            <Trash2 className="w-4 h-4" />
+            Apagar Workspace
+          </h3>
+          <p className="text-xs text-red-600/80 dark:text-red-400/80 mt-1">
+            Apagar permanentemente este workspace e todos os seus dados. Esta
+            ação não pode ser desfeita.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() =>
+            showToast(
+              "Funcionalidade temporariamente desativada por segurança.",
+              "info",
+            )
+          }
+          className="shrink-0 px-4 py-2 bg-red-100 hover:bg-red-200 dark:bg-red-900/40 dark:hover:bg-red-900/60 text-red-700 dark:text-red-300 text-sm font-semibold rounded-lg transition-colors border border-red-200 dark:border-red-800"
+        >
+          Apagar Workspace
+        </button>
       </div>
     </div>
   );
