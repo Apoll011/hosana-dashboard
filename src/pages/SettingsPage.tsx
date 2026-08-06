@@ -17,6 +17,7 @@ import {
   AlertTriangle,
   Check,
   CheckCircle2,
+  Church,
   Clock,
   Database,
   Download,
@@ -49,44 +50,14 @@ import { useAdmins } from "../hooks/useAdmins";
 import { useSettings } from "../hooks/useSettings";
 import { songImportRegistry } from "../import";
 
-interface SettingsPageProps {
-  hideHeader?: boolean;
-}
-
-export const SettingsPage: React.FC<SettingsPageProps> = ({ hideHeader }) => {
-  const queryClient = useQueryClient();
-  const { showToast } = useSync();
-  const { user: currentUser, logout } = useAuth();
-  const { darkMode, toggleDarkMode } = useTheme();
+const GeneralTab: React.FC<{ active: boolean }> = ({ active }) => {
   const { settingsQuery, updateSettings, isUpdating } = useSettings();
 
-  // Navigation tab inside Settings page
-  const [activeTab, setActiveTab] = useState<"general" | "admins" | "backup">(
-    "general",
-  );
-
-  // Admins Hook
-  const {
-    admins,
-    pendingAdmins,
-    createAdmin,
-    approveAdmin,
-    removeAdmin,
-    adminsQuery,
-    isCreating,
-    isApproving,
-    isRemoving,
-  } = useAdmins();
-
-  // Invite Admin Modal state
-  const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
-  const [inviteName, setInviteName] = useState("");
-  const [inviteEmail, setInviteEmail] = useState("");
-  const [invitePassword, setInvitePassword] = useState("");
-  const [inviteRole, setInviteRole] = useState("admin");
-
-  // Delete Admin Confirmation Modal state
-  const [adminToRemove, setAdminToRemove] = useState<AdminUser | null>(null);
+  useEffect(() => {
+    if (settingsQuery.data) {
+      setFormState((prev) => ({ ...prev, ...settingsQuery.data }));
+    }
+  }, [settingsQuery.data]);
 
   // Server Settings Form state
   const [formState, setFormState] = useState<ServerSettings>({
@@ -101,78 +72,164 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ hideHeader }) => {
     updatedAt: "",
   });
 
-  const [isDownloading, setIsDownloading] = useState(false);
-  const [isRestoring, setIsRestoring] = useState(false);
-  const [pendingRestoreData, setPendingRestoreData] = useState<any | null>(
-    null,
-  );
-  const [restoreStats, setRestoreStats] = useState<{
-    songs: number;
-    folders: number;
-    services: number;
-  } | null>(null);
-
-  const restoreInputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    if (settingsQuery.data) {
-      setFormState((prev) => ({ ...prev, ...settingsQuery.data }));
-    }
-  }, [settingsQuery.data]);
+  if (!active) return;
 
   const handleSubmitSettings = async (e: React.FormEvent) => {
     e.preventDefault();
     await updateSettings(formState);
   };
 
-  const handleInviteSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!inviteEmail.trim() || !invitePassword.trim() || !inviteName.trim()) {
-      showToast("Por favor preencha todos os campos obrigatórios.", "error");
-      return;
-    }
+  if (settingsQuery.isLoading) {
+    return (
+      <div className="flex-1 flex items-center justify-center p-12">
+        <Spinner size="lg" label="A carregar definições do Hosanna Studio..." />
+      </div>
+    );
+  }
 
-    try {
-      await createAdmin({
-        email: inviteEmail.trim(),
-        password: invitePassword,
-        name: inviteName.trim(),
-        role: "admin",
-      });
-      setIsInviteModalOpen(false);
-      setInviteName("");
-      setInviteEmail("");
-      setInvitePassword("");
-      setInviteRole("admin");
-    } catch {
-      // Error handled by mutation
-    }
-  };
+  return (
+    <form onSubmit={handleSubmitSettings} className="space-y-6">
+      {/* Server Configuration Settings */}
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs space-y-5">
+        <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 border-b border-slate-100 dark:border-slate-800 pb-3 flex items-center gap-2">
+          <Server className="w-4 h-4 text-[#0284c7]" />
+          Configuração Geral do Servidor
+        </h3>
 
-  const handleApproveUser = async (adminId: string) => {
-    try {
-      await approveAdmin(adminId);
-    } catch {
-      // Error handled by mutation
-    }
-  };
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Input
+            label="Nome do Servidor"
+            value={formState.serverName}
+            onChange={(e) =>
+              setFormState({ ...formState, serverName: e.target.value })
+            }
+            icon={<Server className="w-4 h-4 text-slate-400" />}
+            placeholder="Ex: Hosana Studio Central"
+          />
 
-  const handleConfirmRemove = async () => {
-    if (!adminToRemove) return;
-    const isRemovingSelf = currentUser?.id === adminToRemove.id;
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+              <KeyRound className="w-3.5 h-3.5 text-slate-400" />
+              Tom Padrão do Sistema
+            </label>
+            <select
+              value={formState.defaultKey}
+              onChange={(e) =>
+                setFormState({ ...formState, defaultKey: e.target.value })
+              }
+              className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#0284c7]"
+            >
+              {[
+                "C",
+                "C#",
+                "D",
+                "Eb",
+                "E",
+                "F",
+                "F#",
+                "G",
+                "Ab",
+                "A",
+                "Bb",
+                "B",
+              ].map((k) => (
+                <option key={k} value={k}>
+                  Tom {k}
+                </option>
+              ))}
+            </select>
+          </div>
 
-    try {
-      await removeAdmin(adminToRemove.id);
-      setAdminToRemove(null);
+          <Input
+            label="Intervalo de Sincronização (Segundos)"
+            type="number"
+            value={formState.syncIntervalSeconds}
+            onChange={(e) =>
+              setFormState({
+                ...formState,
+                syncIntervalSeconds: Number(e.target.value),
+              })
+            }
+            icon={<RefreshCw className="w-4 h-4 text-slate-400" />}
+            placeholder="30"
+          />
 
-      if (isRemovingSelf) {
-        showToast("A sua conta foi eliminada. A terminar sessão...", "success");
-        await logout();
-      }
-    } catch {
-      // Error handled by mutation
-    }
-  };
+          <Input
+            label="Limite Máximo de Upload por Ficheiro (MB)"
+            type="number"
+            value={formState.maxUploadMB}
+            onChange={(e) =>
+              setFormState({
+                ...formState,
+                maxUploadMB: Number(e.target.value),
+              })
+            }
+            icon={<HardDrive className="w-4 h-4 text-slate-400" />}
+            placeholder="50"
+          />
+        </div>
+
+        <div className="flex items-center justify-end pt-2">
+          <Button
+            type="submit"
+            variant="primary"
+            size="sm"
+            isLoading={isUpdating}
+            icon={<Save className="w-4 h-4" />}
+          >
+            Guardar Definições
+          </Button>
+        </div>
+      </div>
+
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs space-y-4">
+        <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 border-b border-slate-100 dark:border-slate-800 pb-3 flex items-center gap-2">
+          <Shield className="w-4 h-4 text-[#0284c7]" />
+          Definições do Dashboard
+        </h3>
+        <div className="space-y-3">
+          <label className="flex items-center gap-3.5 p-4 border border-slate-200 dark:border-slate-800 rounded-2xl cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+            <input
+              type="checkbox"
+              checked={formState.showChordsDefault ?? true}
+              onChange={(e) =>
+                setFormState({
+                  ...formState,
+                  showChordsDefault: e.target.checked,
+                })
+              }
+              className="w-4 h-4 text-[#0284c7] rounded-md focus:ring-[#0284c7] cursor-pointer"
+            />
+            <div className="flex flex-col">
+              <span className="text-xs font-bold text-slate-900 dark:text-slate-100">
+                Mostrar Acordes por Defeito ao Visualizar e Editar Cânticos
+              </span>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                Ativa a apresentação automática de acordes sobre a letra no
+                visualizador ChordPro e no editor.
+              </p>
+            </div>
+          </label>
+        </div>
+      </div>
+    </form>
+  );
+};
+
+const WorkspaceTab: React.FC<{
+  active: boolean;
+  showToast: (text: string, variant: "error" | "success") => void;
+  setPendingRestoreData: (data: any) => void;
+  setRestoreStats: (data: {
+    songs: number;
+    folders: number;
+    services: number;
+  }) => void;
+}> = ({ active, showToast, setPendingRestoreData, setRestoreStats }) => {
+  const { tenant } = useAuth();
+
+  const [isDownloading, setIsDownloading] = useState(false);
+  const restoreInputRef = useRef<HTMLInputElement>(null);
 
   const handleDownloadBackup = async () => {
     try {
@@ -241,6 +298,506 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ hideHeader }) => {
     e.target.value = "";
   };
 
+  if (!active) return;
+
+  return (
+    <>
+      <h1>{tenant?.name}</h1>
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs space-y-5">
+        <div className="border-b border-slate-100 dark:border-slate-800 pb-3 flex items-center justify-between">
+          <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+            <Database className="w-4 h-4 text-emerald-500" />
+            Gestão da Cópia de Segurança
+          </h3>
+          <span className="text-[11px] font-mono text-slate-400">
+            Formato .JSON
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+          {/* Export Section */}
+          <div className="p-5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl flex flex-col justify-between gap-4">
+            <div className="flex items-start gap-3">
+              <div className="p-2.5 bg-sky-100 dark:bg-sky-950/80 border border-sky-200 dark:border-sky-800 text-[#0284c7] rounded-xl shrink-0">
+                <Download className="w-5 h-5" />
+              </div>
+              <div>
+                <h4 className="text-xs font-bold text-slate-900 dark:text-slate-100">
+                  Descarregar Ficheiro de Backup
+                </h4>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
+                  Exporta a base de dados atual num ficheiro JSON estruturado e
+                  seguro.
+                </p>
+              </div>
+            </div>
+
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={handleDownloadBackup}
+              isLoading={isDownloading}
+              icon={<Download className="w-4 h-4" />}
+              className="w-full justify-center"
+            >
+              Transferir Cópia de Segurança (.json)
+            </Button>
+          </div>
+
+          {/* Restore Section */}
+          <div className="p-5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl flex flex-col justify-between gap-4">
+            <div className="flex items-start gap-3">
+              <div className="p-2.5 bg-amber-100 dark:bg-amber-950/80 border border-amber-200 dark:border-amber-800 text-amber-600 dark:text-amber-400 rounded-xl shrink-0">
+                <Upload className="w-5 h-5" />
+              </div>
+              <div>
+                <h4 className="text-xs font-bold text-slate-900 dark:text-slate-100">
+                  Restaurar Base de Dados & API
+                </h4>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
+                  Carregue um ficheiro JSON previamente exportado para recuperar
+                  todos os dados.
+                </p>
+              </div>
+            </div>
+
+            <input
+              type="file"
+              ref={restoreInputRef}
+              accept=".json"
+              onChange={handleFileChange}
+              className="hidden"
+            />
+
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => restoreInputRef.current?.click()}
+              icon={<RotateCcw className="w-4 h-4 text-amber-500" />}
+              className="w-full justify-center"
+            >
+              Selecionar Ficheiro de Backup
+            </Button>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+};
+
+const AccountTab: React.FC<{ active: boolean }> = ({ active }) => {
+  const { tenant } = useAuth();
+
+  if (!active) return;
+
+  return <h1>{tenant?.name}</h1>;
+};
+
+const MembersTab: React.FC<{
+  active: boolean;
+  setAdminToRemove: (admin: AdminUser) => void;
+  setIsInviteModalOpen: (active: boolean) => void;
+}> = ({ active, setAdminToRemove, setIsInviteModalOpen }) => {
+  const { user: currentUser } = useAuth();
+
+  const { admins, pendingAdmins, approveAdmin, adminsQuery, isApproving } =
+    useAdmins();
+
+  const handleApproveUser = async (adminId: string) => {
+    try {
+      await approveAdmin(adminId);
+    } catch {
+      // Error handled by mutation
+    }
+  };
+
+  const pendingCount = pendingAdmins.length;
+
+  if (!active) return;
+
+  return (
+    <div className="space-y-6">
+      {/* Header & Stats */}
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2 className="text-lg font-extrabold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+            <Users className="w-5 h-5 text-[#0284c7]" />
+            Gestão de Administradores
+          </h2>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+            Gira utilizadores com privilégios administrativos e aprove contas
+            pendentes
+          </p>
+        </div>
+
+        <div className="flex items-center gap-3">
+          {/* Stats badges */}
+          <div className="flex items-center gap-2">
+            <span className="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+              <UserCheck className="w-3.5 h-3.5 text-[#0284c7]" />
+              {admins.length} Administrador(es)
+            </span>
+
+            {pendingCount > 0 && (
+              <span className="px-3 py-1.5 bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 rounded-xl text-xs font-extrabold flex items-center gap-1.5 animate-pulse">
+                <Clock className="w-3.5 h-3.5" />
+                {pendingCount} Pendente{pendingCount > 1 ? "s" : ""}
+              </span>
+            )}
+          </div>
+
+          {/* Invite Administrator Button */}
+          <Button
+            variant="primary"
+            size="sm"
+            icon={<UserPlus className="w-4 h-4" />}
+            onClick={() => setIsInviteModalOpen(true)}
+          >
+            Convidar Administrador
+          </Button>
+        </div>
+      </div>
+
+      {/* Pending Approval Section Alert if any */}
+      {pendingCount > 0 && (
+        <div className="p-4 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 rounded-2xl flex items-center justify-between gap-3 text-xs text-amber-800 dark:text-amber-300">
+          <div className="flex items-center gap-2.5">
+            <AlertTriangle className="w-5 h-5 text-amber-500 shrink-0" />
+            <span>
+              Existem <strong>{pendingCount}</strong> conta(s) a aguardar
+              aprovação por um administrador da organização.
+            </span>
+          </div>
+        </div>
+      )}
+
+      {/* Table of Admins */}
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-xs">
+        {adminsQuery.isLoading ? (
+          <div className="p-12 text-center">
+            <Spinner label="A carregar administradores..." />
+          </div>
+        ) : admins.length === 0 ? (
+          <div className="p-12 text-center text-slate-500 text-xs font-medium">
+            Nenhum administrador encontrado.
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/50 text-[11px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                  <th className="py-3.5 px-4 sm:px-6">Nome & E-mail</th>
+                  <th className="py-3.5 px-4">Estado</th>
+                  <th className="py-3.5 px-4">Data de Registo</th>
+                  <th className="py-3.5 px-4 text-right sm:pr-6">Ações</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-xs">
+                {admins.map((admin) => {
+                  const isSelf = currentUser?.id === admin.id;
+                  const isApproved = admin.isApproved;
+
+                  return (
+                    <tr
+                      key={admin.id}
+                      className="hover:bg-slate-50/60 dark:hover:bg-slate-800/40 transition-colors"
+                    >
+                      {/* Name & Email */}
+                      <td className="py-4 px-4 sm:px-6">
+                        <div className="flex items-center gap-3">
+                          <div className="w-9 h-9 rounded-full bg-linear-to-tr from-[#0284c7] to-sky-400 flex items-center justify-center text-white font-extrabold text-xs shadow-sm shrink-0">
+                            {admin.name.charAt(0).toUpperCase()}
+                          </div>
+                          <div className="flex flex-col min-w-0">
+                            <span className="font-bold text-slate-900 dark:text-slate-100 truncate flex items-center gap-1.5">
+                              {admin.name}
+                              {isSelf && (
+                                <span className="text-[10px] font-black uppercase tracking-wider text-[#0284c7] bg-sky-50 dark:bg-sky-950 px-1.5 py-0.5 rounded-md border border-sky-200 dark:border-sky-800">
+                                  Você
+                                </span>
+                              )}
+                            </span>
+                            <span className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
+                              {admin.email}
+                            </span>
+                          </div>
+                        </div>
+                      </td>
+
+                      {/* Status Badge */}
+                      <td className="py-4 px-4">
+                        {isApproved ? (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-700 dark:bg-emerald-950/80 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                            <CheckCircle2 className="w-3.5 h-3.5" />
+                            Aprovado
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-extrabold bg-amber-100 text-amber-700 dark:bg-amber-950/80 dark:text-amber-300 border border-amber-200 dark:border-amber-800 animate-pulse">
+                            <Clock className="w-3.5 h-3.5" />
+                            Aprovação Pendente
+                          </span>
+                        )}
+                      </td>
+
+                      {/* Registered Date */}
+                      <td className="py-4 px-4 text-slate-500 dark:text-slate-400 font-medium">
+                        {admin.createdAt
+                          ? new Date(admin.createdAt).toLocaleDateString()
+                          : "N/A"}
+                      </td>
+
+                      {/* Actions */}
+                      <td className="py-4 px-4 text-right sm:pr-6">
+                        <div className="flex items-center justify-end gap-2">
+                          {!isApproved && (
+                            <Button
+                              variant="primary"
+                              size="sm"
+                              className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs"
+                              isLoading={isApproving}
+                              icon={<Check className="w-3.5 h-3.5" />}
+                              onClick={() => handleApproveUser(admin.id)}
+                            >
+                              Aprovar
+                            </Button>
+                          )}
+
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            title={
+                              isSelf
+                                ? "Apagar a sua própria conta"
+                                : "Apagar conta do utilizador"
+                            }
+                            className="text-rose-600 hover:bg-rose-50 border-rose-200 dark:border-rose-900/50 dark:hover:bg-rose-950/50"
+                            icon={<Trash2 className="w-3.5 h-3.5" />}
+                            onClick={() => setAdminToRemove(admin)}
+                          >
+                            Apagar Conta
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+const ApperanceTab: React.FC<{ active: boolean }> = ({ active }) => {
+  const { darkMode, toggleDarkMode } = useTheme();
+
+  if (!active) return;
+
+  return (
+    <div className="space-y-6">
+      {/* Theme and Appearance */}
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs space-y-4">
+        <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 border-b border-slate-100 dark:border-slate-800 pb-3 flex items-center gap-2">
+          <Palette className="w-4 h-4 text-[#0284c7]" />
+          Aparência e Tema Visual
+        </h3>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <button
+            type="button"
+            onClick={() => {
+              if (darkMode) toggleDarkMode();
+            }}
+            className={`p-4 rounded-2xl border flex items-center gap-3.5 transition-all text-left cursor-pointer ${
+              !darkMode
+                ? "border-[#0284c7] bg-sky-50/60 dark:bg-sky-950/40 text-slate-900 dark:text-slate-100 ring-2 ring-[#0284c7]/20 font-bold"
+                : "border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 text-slate-600 dark:text-slate-400"
+            }`}
+          >
+            <div className="p-2.5 rounded-xl bg-amber-100 text-amber-600 dark:bg-amber-950 dark:text-amber-400 shrink-0">
+              <Sun className="w-5 h-5" />
+            </div>
+            <div className="flex flex-col">
+              <span className="text-xs font-bold text-slate-900 dark:text-slate-100">
+                Modo Claro
+              </span>
+              <span className="text-[11px] text-slate-500 dark:text-slate-400">
+                Interface limpa com fundo claro de alto contraste
+              </span>
+            </div>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              if (!darkMode) toggleDarkMode();
+            }}
+            className={`p-4 rounded-2xl border flex items-center gap-3.5 transition-all text-left cursor-pointer ${
+              darkMode
+                ? "border-[#0284c7] bg-sky-50/60 dark:bg-sky-950/40 text-slate-900 dark:text-slate-100 ring-2 ring-[#0284c7]/20 font-bold"
+                : "border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 text-slate-600 dark:text-slate-400"
+            }`}
+          >
+            <div className="p-2.5 rounded-xl bg-slate-800 text-sky-400 shrink-0">
+              <Moon className="w-5 h-5" />
+            </div>
+            <div className="flex flex-col">
+              <span className="text-xs font-bold text-slate-900 dark:text-slate-100">
+                Modo Escuro
+              </span>
+              <span className="text-[11px] text-slate-500 dark:text-slate-400">
+                Tema escuro confortável para ambientes com pouca luz
+              </span>
+            </div>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const AboutTab: React.FC<{ active: boolean }> = ({ active }) => {
+  const { tenant } = useAuth();
+
+  if (!active) return;
+
+  return (
+    <div className="space-y-6">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs space-y-4">
+        <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 border-b border-slate-100 dark:border-slate-800 pb-3 flex items-center gap-2">
+          <FileUp className="w-4 h-4 text-[#0284c7]" />
+          Formatos de Importação Suportadas
+        </h3>
+
+        <p className="text-xs text-slate-500 dark:text-slate-400">
+          O sistema suporta a importação automática de cânticos a partir dos
+          seguintes ficheiros e integrações:
+        </p>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
+          {songImportRegistry.getProviders().map((provider) => (
+            <div
+              key={provider.id}
+              className="flex flex-col justify-between p-3.5 border border-slate-200 dark:border-slate-800 rounded-xl bg-slate-50/50 dark:bg-slate-800/30 hover:border-slate-300 dark:hover:border-slate-700 transition-colors space-y-2.5"
+            >
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <FileText className="w-3.5 h-3.5 text-[#0284c7] shrink-0" />
+                  <span className="text-xs font-semibold text-slate-900 dark:text-slate-100">
+                    {provider.name}
+                  </span>
+                </div>
+                {provider.description && (
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
+                    {provider.description}
+                  </p>
+                )}
+              </div>
+
+              {provider.supportedExtensions.length > 0 && (
+                <div className="flex items-center gap-1.5 flex-wrap pt-1 border-t border-slate-200/60 dark:border-slate-800/60">
+                  <span className="text-[10px] uppercase font-medium text-slate-400 dark:text-slate-500">
+                    Extensões:
+                  </span>
+                  {provider.supportedExtensions.map((ext) => (
+                    <span
+                      key={ext}
+                      className="px-2 py-0.5 text-[10px] font-mono font-medium bg-slate-200/60 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-md border border-slate-300/50 dark:border-slate-700/50"
+                    >
+                      .{ext.replace(/^\./, "")}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+interface SettingsPageProps {
+  hideHeader?: boolean;
+}
+
+export const SettingsPage: React.FC<SettingsPageProps> = ({ hideHeader }) => {
+  const queryClient = useQueryClient();
+  const { showToast } = useSync();
+  const { user: currentUser, logout } = useAuth();
+
+  // Navigation tab inside Settings page
+  const [activeTab, setActiveTab] = useState<
+    "general" | "workspace" | "account" | "members" | "apperance" | "about"
+  >("general");
+
+  // Admins Hook
+  const { pendingAdmins, createAdmin, removeAdmin, isCreating, isRemoving } =
+    useAdmins();
+
+  // Invite Admin Modal state
+  const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
+  const [inviteName, setInviteName] = useState("");
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [invitePassword, setInvitePassword] = useState("");
+  const [inviteRole, setInviteRole] = useState("admin");
+
+  // Delete Admin Confirmation Modal state
+  const [adminToRemove, setAdminToRemove] = useState<AdminUser | null>(null);
+
+  const [isRestoring, setIsRestoring] = useState(false);
+  const [pendingRestoreData, setPendingRestoreData] = useState<any | null>(
+    null,
+  );
+  const [restoreStats, setRestoreStats] = useState<{
+    songs: number;
+    folders: number;
+    services: number;
+  } | null>(null);
+
+  const handleInviteSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!inviteEmail.trim() || !invitePassword.trim() || !inviteName.trim()) {
+      showToast("Por favor preencha todos os campos obrigatórios.", "error");
+      return;
+    }
+
+    try {
+      await createAdmin({
+        email: inviteEmail.trim(),
+        password: invitePassword,
+        name: inviteName.trim(),
+        role: "admin",
+      });
+      setIsInviteModalOpen(false);
+      setInviteName("");
+      setInviteEmail("");
+      setInvitePassword("");
+      setInviteRole("admin");
+    } catch {
+      // Error handled by mutation
+    }
+  };
+
+  const handleConfirmRemove = async () => {
+    if (!adminToRemove) return;
+    const isRemovingSelf = currentUser?.id === adminToRemove.id;
+
+    try {
+      await removeAdmin(adminToRemove.id);
+      setAdminToRemove(null);
+
+      if (isRemovingSelf) {
+        showToast("A sua conta foi eliminada. A terminar sessão...", "success");
+        await logout();
+      }
+    } catch {
+      // Error handled by mutation
+    }
+  };
+
   const handleConfirmRestore = async () => {
     if (!pendingRestoreData) return;
 
@@ -266,14 +823,6 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ hideHeader }) => {
     }
   };
 
-  if (settingsQuery.isLoading) {
-    return (
-      <div className="flex-1 flex items-center justify-center p-12">
-        <Spinner size="lg" label="A carregar definições do Hosanna Studio..." />
-      </div>
-    );
-  }
-
   const pendingCount = pendingAdmins.length;
 
   return (
@@ -297,15 +846,41 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ hideHeader }) => {
 
         <button
           type="button"
-          onClick={() => setActiveTab("admins")}
+          onClick={() => setActiveTab("workspace")}
+          className={`px-4 py-2.5 rounded-xl text-xs font-extrabold transition-all flex items-center gap-2 cursor-pointer ${
+            activeTab === "workspace"
+              ? "bg-[#0284c7] text-white shadow-md shadow-[#0284c7]/20"
+              : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60"
+          }`}
+        >
+          <Church className="w-4 h-4" />
+          <span>Igreja</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab("account")}
+          className={`px-4 py-2.5 rounded-xl text-xs font-extrabold transition-all flex items-center gap-2 cursor-pointer ${
+            activeTab === "account"
+              ? "bg-[#0284c7] text-white shadow-md shadow-[#0284c7]/20"
+              : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60"
+          }`}
+        >
+          <User className="w-4 h-4" />
+          <span>Conta Pessoal</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab("members")}
           className={`px-4 py-2.5 rounded-xl text-xs font-extrabold transition-all flex items-center gap-2 cursor-pointer relative ${
-            activeTab === "admins"
+            activeTab === "members"
               ? "bg-[#0284c7] text-white shadow-md shadow-[#0284c7]/20"
               : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60"
           }`}
         >
           <Users className="w-4 h-4" />
-          <span>Administradores</span>
+          <span>Membros da Igreja</span>
           {pendingCount > 0 && (
             <span className="px-1.5 py-0.5 rounded-full text-[10px] font-black bg-amber-500 text-white animate-pulse">
               {pendingCount}
@@ -315,517 +890,47 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ hideHeader }) => {
 
         <button
           type="button"
-          onClick={() => setActiveTab("backup")}
+          onClick={() => setActiveTab("apperance")}
           className={`px-4 py-2.5 rounded-xl text-xs font-extrabold transition-all flex items-center gap-2 cursor-pointer ${
-            activeTab === "backup"
+            activeTab === "apperance"
+              ? "bg-[#0284c7] text-white shadow-md shadow-[#0284c7]/20"
+              : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60"
+          }`}
+        >
+          <Palette className="w-4 h-4" />
+          <span>Aparencia</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab("about")}
+          className={`px-4 py-2.5 rounded-xl text-xs font-extrabold transition-all flex items-center gap-2 cursor-pointer ${
+            activeTab === "about"
               ? "bg-[#0284c7] text-white shadow-md shadow-[#0284c7]/20"
               : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60"
           }`}
         >
           <Database className="w-4 h-4" />
-          <span>Cópias de Segurança</span>
+          <span>Sobre Hosanna</span>
         </button>
       </div>
 
       <div className="flex-1 overflow-y-auto p-6">
-        {/* ==================== TAB 1: GENERAL & SERVER SETTINGS ==================== */}
-        {activeTab === "general" && (
-          <form onSubmit={handleSubmitSettings} className="space-y-6">
-            {/* Theme and Appearance */}
-            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs space-y-4">
-              <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 border-b border-slate-100 dark:border-slate-800 pb-3 flex items-center gap-2">
-                <Palette className="w-4 h-4 text-[#0284c7]" />
-                Aparência e Tema Visual
-              </h3>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (darkMode) toggleDarkMode();
-                  }}
-                  className={`p-4 rounded-2xl border flex items-center gap-3.5 transition-all text-left cursor-pointer ${
-                    !darkMode
-                      ? "border-[#0284c7] bg-sky-50/60 dark:bg-sky-950/40 text-slate-900 dark:text-slate-100 ring-2 ring-[#0284c7]/20 font-bold"
-                      : "border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 text-slate-600 dark:text-slate-400"
-                  }`}
-                >
-                  <div className="p-2.5 rounded-xl bg-amber-100 text-amber-600 dark:bg-amber-950 dark:text-amber-400 shrink-0">
-                    <Sun className="w-5 h-5" />
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-xs font-bold text-slate-900 dark:text-slate-100">
-                      Modo Claro
-                    </span>
-                    <span className="text-[11px] text-slate-500 dark:text-slate-400">
-                      Interface limpa com fundo claro de alto contraste
-                    </span>
-                  </div>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (!darkMode) toggleDarkMode();
-                  }}
-                  className={`p-4 rounded-2xl border flex items-center gap-3.5 transition-all text-left cursor-pointer ${
-                    darkMode
-                      ? "border-[#0284c7] bg-sky-50/60 dark:bg-sky-950/40 text-slate-900 dark:text-slate-100 ring-2 ring-[#0284c7]/20 font-bold"
-                      : "border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 text-slate-600 dark:text-slate-400"
-                  }`}
-                >
-                  <div className="p-2.5 rounded-xl bg-slate-800 text-sky-400 shrink-0">
-                    <Moon className="w-5 h-5" />
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-xs font-bold text-slate-900 dark:text-slate-100">
-                      Modo Escuro
-                    </span>
-                    <span className="text-[11px] text-slate-500 dark:text-slate-400">
-                      Tema escuro confortável para ambientes com pouca luz
-                    </span>
-                  </div>
-                </button>
-              </div>
-            </div>
-
-            {/* Server Configuration Settings */}
-            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs space-y-5">
-              <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 border-b border-slate-100 dark:border-slate-800 pb-3 flex items-center gap-2">
-                <Server className="w-4 h-4 text-[#0284c7]" />
-                Configuração Geral do Servidor
-              </h3>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Input
-                  label="Nome do Servidor"
-                  value={formState.serverName}
-                  onChange={(e) =>
-                    setFormState({ ...formState, serverName: e.target.value })
-                  }
-                  icon={<Server className="w-4 h-4 text-slate-400" />}
-                  placeholder="Ex: Hosana Studio Central"
-                />
-
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
-                    <KeyRound className="w-3.5 h-3.5 text-slate-400" />
-                    Tom Padrão do Sistema
-                  </label>
-                  <select
-                    value={formState.defaultKey}
-                    onChange={(e) =>
-                      setFormState({ ...formState, defaultKey: e.target.value })
-                    }
-                    className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#0284c7]"
-                  >
-                    {[
-                      "C",
-                      "C#",
-                      "D",
-                      "Eb",
-                      "E",
-                      "F",
-                      "F#",
-                      "G",
-                      "Ab",
-                      "A",
-                      "Bb",
-                      "B",
-                    ].map((k) => (
-                      <option key={k} value={k}>
-                        Tom {k}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <Input
-                  label="Intervalo de Sincronização (Segundos)"
-                  type="number"
-                  value={formState.syncIntervalSeconds}
-                  onChange={(e) =>
-                    setFormState({
-                      ...formState,
-                      syncIntervalSeconds: Number(e.target.value),
-                    })
-                  }
-                  icon={<RefreshCw className="w-4 h-4 text-slate-400" />}
-                  placeholder="30"
-                />
-
-                <Input
-                  label="Limite Máximo de Upload por Ficheiro (MB)"
-                  type="number"
-                  value={formState.maxUploadMB}
-                  onChange={(e) =>
-                    setFormState({
-                      ...formState,
-                      maxUploadMB: Number(e.target.value),
-                    })
-                  }
-                  icon={<HardDrive className="w-4 h-4 text-slate-400" />}
-                  placeholder="50"
-                />
-              </div>
-            </div>
-
-            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs space-y-4">
-              <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 border-b border-slate-100 dark:border-slate-800 pb-3 flex items-center gap-2">
-                <Shield className="w-4 h-4 text-[#0284c7]" />
-                Definições do Dashboard
-              </h3>
-
-              <div className="space-y-3">
-                <label className="flex items-center gap-3.5 p-4 border border-slate-200 dark:border-slate-800 rounded-2xl cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
-                  <input
-                    type="checkbox"
-                    checked={formState.showChordsDefault ?? true}
-                    onChange={(e) =>
-                      setFormState({
-                        ...formState,
-                        showChordsDefault: e.target.checked,
-                      })
-                    }
-                    className="w-4 h-4 text-[#0284c7] rounded-md focus:ring-[#0284c7] cursor-pointer"
-                  />
-                  <div className="flex flex-col">
-                    <span className="text-xs font-bold text-slate-900 dark:text-slate-100">
-                      Mostrar Acordes por Defeito ao Visualizar e Editar
-                      Cânticos
-                    </span>
-                    <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-                      Ativa a apresentação automática de acordes sobre a letra
-                      no visualizador ChordPro e no editor.
-                    </p>
-                  </div>
-                </label>
-              </div>
-
-              <div className="flex items-center justify-end pt-2">
-                <Button
-                  type="submit"
-                  variant="primary"
-                  size="sm"
-                  isLoading={isUpdating}
-                  icon={<Save className="w-4 h-4" />}
-                >
-                  Guardar Definições
-                </Button>
-              </div>
-            </div>
-
-            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs space-y-4">
-              <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 border-b border-slate-100 dark:border-slate-800 pb-3 flex items-center gap-2">
-                <FileUp className="w-4 h-4 text-[#0284c7]" />
-                Formatos de Importação Suportadas
-              </h3>
-
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                O sistema suporta a importação automática de cânticos a partir
-                dos seguintes ficheiros e integrações:
-              </p>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
-                {songImportRegistry.getProviders().map((provider) => (
-                  <div
-                    key={provider.id}
-                    className="flex flex-col justify-between p-3.5 border border-slate-200 dark:border-slate-800 rounded-xl bg-slate-50/50 dark:bg-slate-800/30 hover:border-slate-300 dark:hover:border-slate-700 transition-colors space-y-2.5"
-                  >
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <FileText className="w-3.5 h-3.5 text-[#0284c7] shrink-0" />
-                        <span className="text-xs font-semibold text-slate-900 dark:text-slate-100">
-                          {provider.name}
-                        </span>
-                      </div>
-                      {provider.description && (
-                        <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
-                          {provider.description}
-                        </p>
-                      )}
-                    </div>
-
-                    {provider.supportedExtensions.length > 0 && (
-                      <div className="flex items-center gap-1.5 flex-wrap pt-1 border-t border-slate-200/60 dark:border-slate-800/60">
-                        <span className="text-[10px] uppercase font-medium text-slate-400 dark:text-slate-500">
-                          Extensões:
-                        </span>
-                        {provider.supportedExtensions.map((ext) => (
-                          <span
-                            key={ext}
-                            className="px-2 py-0.5 text-[10px] font-mono font-medium bg-slate-200/60 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-md border border-slate-300/50 dark:border-slate-700/50"
-                          >
-                            .{ext.replace(/^\./, "")}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </form>
-        )}
-
-        {/* ==================== TAB 2: ADMINISTRATORS MANAGEMENT ==================== */}
-        {activeTab === "admins" && (
-          <div className="space-y-6">
-            {/* Header & Stats */}
-            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div>
-                <h2 className="text-lg font-extrabold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                  <Users className="w-5 h-5 text-[#0284c7]" />
-                  Gestão de Administradores
-                </h2>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                  Gira utilizadores com privilégios administrativos e aprove
-                  contas pendentes
-                </p>
-              </div>
-
-              <div className="flex items-center gap-3">
-                {/* Stats badges */}
-                <div className="flex items-center gap-2">
-                  <span className="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
-                    <UserCheck className="w-3.5 h-3.5 text-[#0284c7]" />
-                    {admins.length} Administrador(es)
-                  </span>
-
-                  {pendingCount > 0 && (
-                    <span className="px-3 py-1.5 bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 rounded-xl text-xs font-extrabold flex items-center gap-1.5 animate-pulse">
-                      <Clock className="w-3.5 h-3.5" />
-                      {pendingCount} Pendente{pendingCount > 1 ? "s" : ""}
-                    </span>
-                  )}
-                </div>
-
-                {/* Invite Administrator Button */}
-                <Button
-                  variant="primary"
-                  size="sm"
-                  icon={<UserPlus className="w-4 h-4" />}
-                  onClick={() => setIsInviteModalOpen(true)}
-                >
-                  Convidar Administrador
-                </Button>
-              </div>
-            </div>
-
-            {/* Pending Approval Section Alert if any */}
-            {pendingCount > 0 && (
-              <div className="p-4 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 rounded-2xl flex items-center justify-between gap-3 text-xs text-amber-800 dark:text-amber-300">
-                <div className="flex items-center gap-2.5">
-                  <AlertTriangle className="w-5 h-5 text-amber-500 shrink-0" />
-                  <span>
-                    Existem <strong>{pendingCount}</strong> conta(s) a aguardar
-                    aprovação por um administrador da organização.
-                  </span>
-                </div>
-              </div>
-            )}
-
-            {/* Table of Admins */}
-            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-xs">
-              {adminsQuery.isLoading ? (
-                <div className="p-12 text-center">
-                  <Spinner label="A carregar administradores..." />
-                </div>
-              ) : admins.length === 0 ? (
-                <div className="p-12 text-center text-slate-500 text-xs font-medium">
-                  Nenhum administrador encontrado.
-                </div>
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left border-collapse">
-                    <thead>
-                      <tr className="border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/50 text-[11px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                        <th className="py-3.5 px-4 sm:px-6">Nome & E-mail</th>
-                        <th className="py-3.5 px-4">Estado</th>
-                        <th className="py-3.5 px-4">Data de Registo</th>
-                        <th className="py-3.5 px-4 text-right sm:pr-6">
-                          Ações
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-xs">
-                      {admins.map((admin) => {
-                        const isSelf = currentUser?.id === admin.id;
-                        const isApproved = admin.isApproved;
-
-                        return (
-                          <tr
-                            key={admin.id}
-                            className="hover:bg-slate-50/60 dark:hover:bg-slate-800/40 transition-colors"
-                          >
-                            {/* Name & Email */}
-                            <td className="py-4 px-4 sm:px-6">
-                              <div className="flex items-center gap-3">
-                                <div className="w-9 h-9 rounded-full bg-linear-to-tr from-[#0284c7] to-sky-400 flex items-center justify-center text-white font-extrabold text-xs shadow-sm shrink-0">
-                                  {admin.name.charAt(0).toUpperCase()}
-                                </div>
-                                <div className="flex flex-col min-w-0">
-                                  <span className="font-bold text-slate-900 dark:text-slate-100 truncate flex items-center gap-1.5">
-                                    {admin.name}
-                                    {isSelf && (
-                                      <span className="text-[10px] font-black uppercase tracking-wider text-[#0284c7] bg-sky-50 dark:bg-sky-950 px-1.5 py-0.5 rounded-md border border-sky-200 dark:border-sky-800">
-                                        Você
-                                      </span>
-                                    )}
-                                  </span>
-                                  <span className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
-                                    {admin.email}
-                                  </span>
-                                </div>
-                              </div>
-                            </td>
-
-                            {/* Status Badge */}
-                            <td className="py-4 px-4">
-                              {isApproved ? (
-                                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-700 dark:bg-emerald-950/80 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
-                                  <CheckCircle2 className="w-3.5 h-3.5" />
-                                  Aprovado
-                                </span>
-                              ) : (
-                                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-extrabold bg-amber-100 text-amber-700 dark:bg-amber-950/80 dark:text-amber-300 border border-amber-200 dark:border-amber-800 animate-pulse">
-                                  <Clock className="w-3.5 h-3.5" />
-                                  Aprovação Pendente
-                                </span>
-                              )}
-                            </td>
-
-                            {/* Registered Date */}
-                            <td className="py-4 px-4 text-slate-500 dark:text-slate-400 font-medium">
-                              {admin.createdAt
-                                ? new Date(admin.createdAt).toLocaleDateString()
-                                : "N/A"}
-                            </td>
-
-                            {/* Actions */}
-                            <td className="py-4 px-4 text-right sm:pr-6">
-                              <div className="flex items-center justify-end gap-2">
-                                {!isApproved && (
-                                  <Button
-                                    variant="primary"
-                                    size="sm"
-                                    className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs"
-                                    isLoading={isApproving}
-                                    icon={<Check className="w-3.5 h-3.5" />}
-                                    onClick={() => handleApproveUser(admin.id)}
-                                  >
-                                    Aprovar
-                                  </Button>
-                                )}
-
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  title={
-                                    isSelf
-                                      ? "Apagar a sua própria conta"
-                                      : "Apagar conta do utilizador"
-                                  }
-                                  className="text-rose-600 hover:bg-rose-50 border-rose-200 dark:border-rose-900/50 dark:hover:bg-rose-950/50"
-                                  icon={<Trash2 className="w-3.5 h-3.5" />}
-                                  onClick={() => setAdminToRemove(admin)}
-                                >
-                                  Apagar Conta
-                                </Button>
-                              </div>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* ==================== TAB 3: BACKUP ENGINE ==================== */}
-        {activeTab === "backup" && (
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs space-y-5">
-            <div className="border-b border-slate-100 dark:border-slate-800 pb-3 flex items-center justify-between">
-              <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                <Database className="w-4 h-4 text-emerald-500" />
-                Gestão da Cópia de Segurança
-              </h3>
-              <span className="text-[11px] font-mono text-slate-400">
-                Formato .JSON
-              </span>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-              {/* Export Section */}
-              <div className="p-5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl flex flex-col justify-between gap-4">
-                <div className="flex items-start gap-3">
-                  <div className="p-2.5 bg-sky-100 dark:bg-sky-950/80 border border-sky-200 dark:border-sky-800 text-[#0284c7] rounded-xl shrink-0">
-                    <Download className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h4 className="text-xs font-bold text-slate-900 dark:text-slate-100">
-                      Descarregar Ficheiro de Backup
-                    </h4>
-                    <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
-                      Exporta a base de dados atual num ficheiro JSON
-                      estruturado e seguro.
-                    </p>
-                  </div>
-                </div>
-
-                <Button
-                  variant="primary"
-                  size="sm"
-                  onClick={handleDownloadBackup}
-                  isLoading={isDownloading}
-                  icon={<Download className="w-4 h-4" />}
-                  className="w-full justify-center"
-                >
-                  Transferir Cópia de Segurança (.json)
-                </Button>
-              </div>
-
-              {/* Restore Section */}
-              <div className="p-5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl flex flex-col justify-between gap-4">
-                <div className="flex items-start gap-3">
-                  <div className="p-2.5 bg-amber-100 dark:bg-amber-950/80 border border-amber-200 dark:border-amber-800 text-amber-600 dark:text-amber-400 rounded-xl shrink-0">
-                    <Upload className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h4 className="text-xs font-bold text-slate-900 dark:text-slate-100">
-                      Restaurar Base de Dados & API
-                    </h4>
-                    <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
-                      Carregue um ficheiro JSON previamente exportado para
-                      recuperar todos os dados.
-                    </p>
-                  </div>
-                </div>
-
-                <input
-                  type="file"
-                  ref={restoreInputRef}
-                  accept=".json"
-                  onChange={handleFileChange}
-                  className="hidden"
-                />
-
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => restoreInputRef.current?.click()}
-                  icon={<RotateCcw className="w-4 h-4 text-amber-500" />}
-                  className="w-full justify-center"
-                >
-                  Selecionar Ficheiro de Backup
-                </Button>
-              </div>
-            </div>
-          </div>
-        )}
+        <GeneralTab active={activeTab === "general"} />
+        <WorkspaceTab
+          active={activeTab === "workspace"}
+          setPendingRestoreData={setPendingRestoreData}
+          setRestoreStats={setRestoreStats}
+          showToast={showToast}
+        />
+        <AccountTab active={activeTab === "account"} />
+        <MembersTab
+          active={activeTab === "members"}
+          setAdminToRemove={setAdminToRemove}
+          setIsInviteModalOpen={setIsInviteModalOpen}
+        />
+        <ApperanceTab active={activeTab === "apperance"} />
+        <AboutTab active={activeTab === "about"} />
       </div>
 
       {/* ==================== MODAL: INVITE ADMINISTRATOR ==================== */}
