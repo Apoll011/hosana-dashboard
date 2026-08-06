@@ -100,14 +100,14 @@ export function useServices() {
   });
 
   const archiveServiceMutation = useMutation({
-    mutationFn: ({ id, archived }: { id: string; archived: boolean }) =>
-      servicesApi.archiveService(id, archived),
-    onMutate: async ({ id, archived }) => {
+    mutationFn: ({ id, data }: { id: string; data: Partial<Service> }) =>
+      servicesApi.archiveService(id, data),
+    onMutate: async ({ id, data }: { id: string; data: Partial<Service> }) => {
       await queryClient.cancelQueries({ queryKey: ["service", id] });
       const previousService = queryClient.getQueryData(["service", id]);
       queryClient.setQueryData(["service", id], (old: any) => ({
         ...old,
-        archived,
+        archived: data?.archived,
       }));
       return { previousService };
     },
