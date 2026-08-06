@@ -38,6 +38,7 @@ import {
   MonitorSmartphone,
   Moon,
   Palette,
+  PenLine,
   RefreshCw,
   RotateCcw,
   Save,
@@ -52,6 +53,7 @@ import {
   UserCheck,
   UserPlus,
   Users,
+  X,
 } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
@@ -248,13 +250,15 @@ const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
 
   const [isDownloading, setIsDownloading] = useState(false);
   const restoreInputRef = useRef<HTMLInputElement>(null);
+  const logoInputRef = useRef<HTMLInputElement>(null);
 
+  // Estados do formulário
+  const [isEditing, setIsEditing] = useState(false);
   const [tenantName, setTenantName] = useState(tenant?.name || "");
   const [tenantLogo, setTenantLogo] = useState<string | undefined>(
     tenant?.logo,
   );
   const [isSavingTenant, setIsSavingTenant] = useState(false);
-  const logoInputRef = useRef<HTMLInputElement>(null);
 
   const getWorkspaceInitials = (name: string) => {
     if (!name) return "W";
@@ -286,6 +290,13 @@ const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
     reader.readAsDataURL(file);
   };
 
+  const handleCancelEdit = () => {
+    // Reverter para os dados originais ao cancelar
+    setTenantName(tenant?.name || "");
+    setTenantLogo(tenant?.logo);
+    setIsEditing(false);
+  };
+
   const handleSaveTenant = async () => {
     if (!tenantName.trim()) {
       showToast("O nome do workspace não pode estar vazio.", "error");
@@ -299,6 +310,7 @@ const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
         logo: tenantLogo,
       });
       showToast("Workspace atualizado com sucesso!", "success");
+      setIsEditing(false); // Sair do modo de edição após guardar com sucesso
     } catch (err: any) {
       showToast(
         "Erro ao atualizar workspace: " +
@@ -379,107 +391,149 @@ const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
   if (!active) return null;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-in fade-in duration-300">
       {/* Workspace Profile Management Section */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs space-y-6">
-        <div className="border-b border-slate-100 dark:border-slate-800 pb-3 flex items-center justify-between">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm transition-all">
+        <div className="border-b border-slate-100 dark:border-slate-800 pb-4 flex items-center justify-between">
           <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
             <Building className="w-4 h-4 text-sky-500" />
             Definições do Workspace
           </h3>
-          <span className="text-[11px] font-mono text-slate-400">
-            /{tenant?.slug}
-          </span>
+
+          {/* Botão de Edição (Só visível se não estiver a editar) */}
+          {!isEditing && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsEditing(true)}
+              icon={<PenLine className="w-3.5 h-3.5" />}
+            >
+              Editar Perfil
+            </Button>
+          )}
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-6 items-start sm:items-center">
-          {/* Logo / Avatar Picker */}
-          <div className="relative group shrink-0">
+        <div className="flex flex-col sm:flex-row gap-8 items-start sm:items-center mt-6">
+          {/* Logo / Avatar (Cantos perfeitos corrigidos com overflow-hidden) */}
+          <div
+            className={`relative group shrink-0 w-24 h-24 rounded-2xl overflow-hidden border shadow-sm transition-all duration-300
+              ${isEditing ? "border-sky-400 ring-4 ring-sky-500/10" : "border-slate-200 dark:border-slate-700"}
+            `}
+          >
             <input
               type="file"
               ref={logoInputRef}
               accept="image/*"
               onChange={handleLogoChange}
               className="hidden"
+              disabled={!isEditing}
             />
 
             {tenantLogo ? (
               <img
                 src={tenantLogo}
                 alt={tenantName}
-                className="w-20 h-20 rounded-2xl object-cover border border-slate-200 dark:border-slate-700 shadow-xs"
+                className="w-full h-full object-cover"
               />
             ) : (
-              <div className="w-20 h-20 rounded-2xl bg-gradient-to-tr from-[#0284c7] to-sky-400 flex items-center justify-center text-white font-extrabold text-xl shadow-md">
+              <div className="w-full h-full bg-gradient-to-tr from-[#0284c7] to-sky-400 flex items-center justify-center text-white font-black text-3xl">
                 {getWorkspaceInitials(tenantName || tenant?.name || "")}
               </div>
             )}
 
-            <button
-              type="button"
-              onClick={() => logoInputRef.current?.click()}
-              className="absolute inset-0 bg-black/40 text-white rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-xs cursor-pointer"
-            >
-              <Camera className="w-5 h-5" />
-            </button>
+            {/* Overlay da Câmara - Só aparece em Hover E quando em modo de edição */}
+            {isEditing && (
+              <button
+                type="button"
+                onClick={() => logoInputRef.current?.click()}
+                className="absolute inset-0 bg-slate-900/50 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center backdrop-blur-[2px] cursor-pointer"
+              >
+                <Camera className="w-7 h-7 mb-1" />
+              </button>
+            )}
           </div>
 
-          {/* Form Fields */}
+          {/* Form Fields / Read-only Info */}
           <div className="flex-1 w-full space-y-3">
-            <div>
-              <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                Nome do Workspace
-              </label>
-              <input
-                type="text"
-                value={tenantName}
-                onChange={(e) => setTenantName(e.target.value)}
-                placeholder="Ex: Minha Igreja"
-                className="mt-1 block w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-4 py-2.5 text-sm text-slate-900 dark:text-slate-100 focus:border-sky-500 focus:ring-sky-500"
-              />
-            </div>
+            {isEditing ? (
+              <div className="animate-in fade-in slide-in-from-left-2 duration-300">
+                <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5 block">
+                  Nome do Workspace
+                </label>
+                <input
+                  type="text"
+                  value={tenantName}
+                  onChange={(e) => setTenantName(e.target.value)}
+                  placeholder="Ex: Minha Igreja"
+                  className="block w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-950/50 px-4 py-3 text-sm text-slate-900 dark:text-slate-100 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 transition-all outline-none shadow-sm"
+                  autoFocus
+                />
+              </div>
+            ) : (
+              <div className="space-y-1 py-2 animate-in fade-in duration-300">
+                <h4 className="text-2xl font-bold text-slate-900 dark:text-white">
+                  {tenant?.name || "Workspace sem nome"}
+                </h4>
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 text-xs font-mono rounded-md">
+                  <span>/</span>
+                  {tenant?.slug || "sem-slug"}
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
-        <div className="flex justify-end pt-2 border-t border-slate-100 dark:border-slate-800">
-          <Button
-            variant="primary"
-            size="sm"
-            onClick={handleSaveTenant}
-            isLoading={isSavingTenant}
-            icon={<Save className="w-4 h-4" />}
-          >
-            Guardar Alterações
-          </Button>
-        </div>
+        {/* Botões de Ação do Modo de Edição */}
+        {isEditing && (
+          <div className="flex justify-end gap-3 pt-5 mt-4 border-t border-slate-100 dark:border-slate-800 animate-in fade-in slide-in-from-bottom-2 duration-300">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleCancelEdit}
+              disabled={isSavingTenant}
+              icon={<X className="w-4 h-4" />}
+            >
+              Cancelar
+            </Button>
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={handleSaveTenant}
+              isLoading={isSavingTenant}
+              icon={<Save className="w-4 h-4" />}
+            >
+              Guardar Alterações
+            </Button>
+          </div>
+        )}
       </div>
 
       {/* Backup & Restore Section */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs space-y-5">
-        <div className="border-b border-slate-100 dark:border-slate-800 pb-3 flex items-center justify-between">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm space-y-5">
+        <div className="border-b border-slate-100 dark:border-slate-800 pb-4 flex items-center justify-between">
           <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
             <Database className="w-4 h-4 text-emerald-500" />
-            Gestão da Cópia de Segurança
+            Gestão de Dados & Backups
           </h3>
-          <span className="text-[11px] font-mono text-slate-400">
-            Formato .JSON
+          <span className="text-[11px] font-mono font-medium text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-full">
+            .JSON
           </span>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-          {/* Export Section */}
-          <div className="p-5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl flex flex-col justify-between gap-4">
-            <div className="flex items-start gap-3">
-              <div className="p-2.5 bg-sky-100 dark:bg-sky-950/80 border border-sky-200 dark:border-sky-800 text-[#0284c7] rounded-xl shrink-0">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 pt-2">
+          {/* Export Section Card */}
+          <div className="group p-6 bg-slate-50/50 dark:bg-slate-950/50 border border-slate-200 dark:border-slate-800 hover:border-sky-300 dark:hover:border-sky-800 hover:bg-sky-50/30 dark:hover:bg-sky-950/20 rounded-2xl flex flex-col justify-between gap-5 transition-all duration-300">
+            <div className="flex items-start gap-4">
+              <div className="p-3 bg-sky-100 dark:bg-sky-950/80 border border-sky-200 dark:border-sky-800/60 text-[#0284c7] dark:text-sky-400 rounded-xl shrink-0 group-hover:scale-105 transition-transform duration-300 shadow-sm">
                 <Download className="w-5 h-5" />
               </div>
               <div>
-                <h4 className="text-xs font-bold text-slate-900 dark:text-slate-100">
-                  Descarregar Ficheiro de Backup
+                <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100">
+                  Exportar Backup
                 </h4>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
-                  Exporta a base de dados atual num ficheiro JSON estruturado e
-                  seguro.
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed">
+                  Descarrega a base de dados atual num ficheiro JSON.
+                  Recomendamos que o faças regularmente.
                 </p>
               </div>
             </div>
@@ -492,22 +546,23 @@ const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
               icon={<Download className="w-4 h-4" />}
               className="w-full justify-center"
             >
-              Transferir Cópia de Segurança (.json)
+              Transferir Cópia de Segurança
             </Button>
           </div>
 
-          <div className="p-5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl flex flex-col justify-between gap-4">
-            <div className="flex items-start gap-3">
-              <div className="p-2.5 bg-amber-100 dark:bg-amber-950/80 border border-amber-200 dark:border-amber-800 text-amber-600 dark:text-amber-400 rounded-xl shrink-0">
+          {/* Import Section Card */}
+          <div className="group p-6 bg-slate-50/50 dark:bg-slate-950/50 border border-slate-200 dark:border-slate-800 hover:border-amber-300 dark:hover:border-amber-800/60 hover:bg-amber-50/30 dark:hover:bg-amber-950/10 rounded-2xl flex flex-col justify-between gap-5 transition-all duration-300">
+            <div className="flex items-start gap-4">
+              <div className="p-3 bg-amber-100 dark:bg-amber-950/80 border border-amber-200 dark:border-amber-800/60 text-amber-600 dark:text-amber-400 rounded-xl shrink-0 group-hover:scale-105 transition-transform duration-300 shadow-sm">
                 <Upload className="w-5 h-5" />
               </div>
               <div>
-                <h4 className="text-xs font-bold text-slate-900 dark:text-slate-100">
-                  Restaurar Base de Dados & API
+                <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100">
+                  Restaurar Dados
                 </h4>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
-                  Carregue um ficheiro JSON previamente exportado para recuperar
-                  todos os dados.
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed">
+                  Carrega um ficheiro .json previamente guardado para recuperar
+                  os teus dados em segundos.
                 </p>
               </div>
             </div>
@@ -525,9 +580,9 @@ const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
               size="sm"
               onClick={() => restoreInputRef.current?.click()}
               icon={<RotateCcw className="w-4 h-4 text-amber-500" />}
-              className="w-full justify-center"
+              className="w-full justify-center hover:bg-amber-50 dark:hover:bg-amber-900/20 hover:text-amber-700 dark:hover:text-amber-300 transition-colors"
             >
-              Selecionar Ficheiro de Backup
+              Carregar Ficheiro
             </Button>
           </div>
         </div>
