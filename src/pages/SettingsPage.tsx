@@ -5,6 +5,7 @@
 
 import {
   AdminUser,
+  authApi,
   Button,
   Input,
   Modal,
@@ -15,6 +16,8 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import {
   AlertTriangle,
+  Building,
+  Camera,
   Check,
   CheckCircle2,
   ChevronDown,
@@ -224,7 +227,7 @@ const GeneralTab: React.FC<{ active: boolean }> = ({ active }) => {
   );
 };
 
-const WorkspaceTab: React.FC<{
+interface WorkspaceTabProps {
   active: boolean;
   showToast: (text: string, variant: "error" | "success") => void;
   setPendingRestoreData: (data: any) => void;
@@ -233,11 +236,79 @@ const WorkspaceTab: React.FC<{
     folders: number;
     services: number;
   }) => void;
-}> = ({ active, showToast, setPendingRestoreData, setRestoreStats }) => {
+}
+
+const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
+  active,
+  showToast,
+  setPendingRestoreData,
+  setRestoreStats,
+}) => {
   const { tenant } = useAuth();
 
   const [isDownloading, setIsDownloading] = useState(false);
   const restoreInputRef = useRef<HTMLInputElement>(null);
+
+  const [tenantName, setTenantName] = useState(tenant?.name || "");
+  const [tenantLogo, setTenantLogo] = useState<string | undefined>(
+    tenant?.logo,
+  );
+  const [isSavingTenant, setIsSavingTenant] = useState(false);
+  const logoInputRef = useRef<HTMLInputElement>(null);
+
+  const getWorkspaceInitials = (name: string) => {
+    if (!name) return "W";
+    return name
+      .split(" ")
+      .map((word) => word.charAt(0))
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
+  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      showToast("Por favor selecione um ficheiro de imagem válido.", "error");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const base64String = event.target?.result as string;
+      setTenantLogo(base64String);
+    };
+    reader.onerror = () => {
+      showToast("Erro ao processar a imagem do logótipo.", "error");
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleSaveTenant = async () => {
+    if (!tenantName.trim()) {
+      showToast("O nome do workspace não pode estar vazio.", "error");
+      return;
+    }
+
+    try {
+      setIsSavingTenant(true);
+      await authApi.editTenant({
+        name: tenantName,
+        logo: tenantLogo,
+      });
+      showToast("Workspace atualizado com sucesso!", "success");
+    } catch (err: any) {
+      showToast(
+        "Erro ao atualizar workspace: " +
+          (err?.message || "Falha de comunicação"),
+        "error",
+      );
+    } finally {
+      setIsSavingTenant(false);
+    }
+  };
 
   const handleDownloadBackup = async () => {
     try {
@@ -302,15 +373,88 @@ const WorkspaceTab: React.FC<{
       }
     };
     reader.readAsText(file);
-
     e.target.value = "";
   };
 
-  if (!active) return;
+  if (!active) return null;
 
   return (
-    <>
-      <h1>{tenant?.name}</h1>
+    <div className="space-y-6">
+      {/* Workspace Profile Management Section */}
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs space-y-6">
+        <div className="border-b border-slate-100 dark:border-slate-800 pb-3 flex items-center justify-between">
+          <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+            <Building className="w-4 h-4 text-sky-500" />
+            Definições do Workspace
+          </h3>
+          <span className="text-[11px] font-mono text-slate-400">
+            /{tenant?.slug}
+          </span>
+        </div>
+
+        <div className="flex flex-col sm:flex-row gap-6 items-start sm:items-center">
+          {/* Logo / Avatar Picker */}
+          <div className="relative group shrink-0">
+            <input
+              type="file"
+              ref={logoInputRef}
+              accept="image/*"
+              onChange={handleLogoChange}
+              className="hidden"
+            />
+
+            {tenantLogo ? (
+              <img
+                src={tenantLogo}
+                alt={tenantName}
+                className="w-20 h-20 rounded-2xl object-cover border border-slate-200 dark:border-slate-700 shadow-xs"
+              />
+            ) : (
+              <div className="w-20 h-20 rounded-2xl bg-gradient-to-tr from-[#0284c7] to-sky-400 flex items-center justify-center text-white font-extrabold text-xl shadow-md">
+                {getWorkspaceInitials(tenantName || tenant?.name || "")}
+              </div>
+            )}
+
+            <button
+              type="button"
+              onClick={() => logoInputRef.current?.click()}
+              className="absolute inset-0 bg-black/40 text-white rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-xs cursor-pointer"
+            >
+              <Camera className="w-5 h-5" />
+            </button>
+          </div>
+
+          {/* Form Fields */}
+          <div className="flex-1 w-full space-y-3">
+            <div>
+              <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                Nome do Workspace
+              </label>
+              <input
+                type="text"
+                value={tenantName}
+                onChange={(e) => setTenantName(e.target.value)}
+                placeholder="Ex: Minha Igreja"
+                className="mt-1 block w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-4 py-2.5 text-sm text-slate-900 dark:text-slate-100 focus:border-sky-500 focus:ring-sky-500"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="flex justify-end pt-2 border-t border-slate-100 dark:border-slate-800">
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={handleSaveTenant}
+            isLoading={isSavingTenant}
+            icon={<Save className="w-4 h-4" />}
+          >
+            Guardar Alterações
+          </Button>
+        </div>
+      </div>
+
+      {/* Backup & Restore Section */}
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs space-y-5">
         <div className="border-b border-slate-100 dark:border-slate-800 pb-3 flex items-center justify-between">
           <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
@@ -352,7 +496,6 @@ const WorkspaceTab: React.FC<{
             </Button>
           </div>
 
-          {/* Restore Section */}
           <div className="p-5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl flex flex-col justify-between gap-4">
             <div className="flex items-start gap-3">
               <div className="p-2.5 bg-amber-100 dark:bg-amber-950/80 border border-amber-200 dark:border-amber-800 text-amber-600 dark:text-amber-400 rounded-xl shrink-0">
@@ -389,7 +532,7 @@ const WorkspaceTab: React.FC<{
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 
