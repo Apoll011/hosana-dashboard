@@ -650,7 +650,9 @@ const AppearanceTab: React.FC<{ active: boolean }> = ({ active }) => {
                 <button
                   key={item.id}
                   type="button"
-                  onClick={() => setTheme(item.id)}
+                  onClick={() =>
+                    setTheme(item.id as "light" | "dark" | "system")
+                  }
                   className={`group relative rounded-2xl border p-5 text-left transition-all duration-200 cursor-pointer ${
                     selected
                       ? "border-sky-500 bg-sky-50 dark:bg-sky-950/30 ring-2 ring-sky-500/20 shadow-md"
