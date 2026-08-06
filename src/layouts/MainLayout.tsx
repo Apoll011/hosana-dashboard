@@ -717,6 +717,10 @@ export const MainLayout: React.FC = () => {
     [allServices, currentServiceId],
   );
 
+  const show_folder_tree = client?.checkGate
+    ? client.checkGate("show_folder_tree")
+    : true;
+
   const isCommandPaletteEnabled = client?.checkGate
     ? client.checkGate("command_palett")
     : false;
@@ -2003,7 +2007,7 @@ export const MainLayout: React.FC = () => {
             )}
           </button>
 
-          {!isSidebarCollapsed && (
+          {!isSidebarCollapsed && show_folder_tree && (
             <>
               <div className="mt-6 px-3 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-m3-secondary opacity-60">
                 Pastas ({allFolders.length})
@@ -2027,7 +2031,9 @@ export const MainLayout: React.FC = () => {
               </div>
             </>
           )}
-          {isSidebarCollapsed && <div className="flex-1" />}
+          {(isSidebarCollapsed || !show_folder_tree) && (
+            <div className="flex-1" />
+          )}
 
           {user && (
             <div
@@ -2042,11 +2048,8 @@ export const MainLayout: React.FC = () => {
                 <div
                   className={`flex items-center ${isSidebarCollapsed ? "" : "gap-2"} min-w-0`}
                 >
-                  <div className="w-7 h-7 rounded-full bg-sky-100 dark:bg-sky-950 text-[#0284c7] dark:text-sky-400 flex items-center justify-center font-bold text-xs shrink-0">
-                    {user.name
-                      .split(" ")
-                      .map((n) => n[0])
-                      .join("")}
+                  <div className="w-7 h-7 rounded-full bg-linear-to-tr from-[#0284c7] to-sky-400 flex items-center justify-center text-white font-extrabold text-xs shadow-sm shrink-0">
+                    {user.name.charAt(0).toUpperCase()}
                   </div>
                   {!isSidebarCollapsed && (
                     <div className="flex flex-col min-w-0 text-left">
