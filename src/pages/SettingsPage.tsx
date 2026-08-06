@@ -60,7 +60,7 @@ import {
 } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
-import { useSync } from "../contexts/SyncContext";
+import { ToastMessage, useSync } from "../contexts/SyncContext";
 import { useTheme } from "../contexts/ThemeContext";
 import { useAdmins } from "../hooks/useAdmins";
 import { useSettings } from "../hooks/useSettings";
@@ -234,7 +234,7 @@ const GeneralTab: React.FC<{ active: boolean }> = ({ active }) => {
 
 interface WorkspaceTabProps {
   active: boolean;
-  showToast: (text: string, variant: "error" | "success") => void;
+  showToast: (text: string, variant: ToastMessage["type"]) => void;
   setPendingRestoreData: (data: any) => void;
   setRestoreStats: (data: {
     songs: number;
@@ -420,6 +420,7 @@ const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
       setIsDownloading(false);
     }
   };
+  // 2. Reverter (Rollback) em caso de erro
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
