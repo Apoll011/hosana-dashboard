@@ -1,6 +1,6 @@
 {
-  "name": "@hosanna/dashboard",
-  "version": "2.0.0",
+  "name": "@hosanna/studio",
+  "version": "2.2.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
