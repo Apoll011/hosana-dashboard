@@ -7,6 +7,7 @@ import {
   AdminUser,
   authApi,
   Button,
+  ConfirmDialog,
   Input,
   Modal,
   ServerSettings,
@@ -236,6 +237,7 @@ interface WorkspaceTabProps {
   active: boolean;
   showToast: (text: string, variant: ToastMessage["type"]) => void;
   setPendingRestoreData: (data: any) => void;
+  setIsTogglingWs: (active: boolean) => void;
   setRestoreStats: (data: {
     songs: number;
     folders: number;
@@ -282,6 +284,7 @@ const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
   showToast,
   setPendingRestoreData,
   setRestoreStats,
+  setIsTogglingWs,
 }) => {
   const { tenant } = useAuth();
 
@@ -592,7 +595,7 @@ const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
               </span>
             </div>
             <p className="text-sm font-mono text-slate-900 dark:text-slate-200">
-              {tenant?.id?.substring(0, 18) || "N/A"}...
+              {tenant?.id || "N/A..."}
             </p>
           </div>
           <div className="p-4 bg-slate-50 dark:bg-slate-950/50 rounded-xl border border-slate-100 dark:border-slate-800/60">
@@ -615,11 +618,15 @@ const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
             </div>
             <div className="flex items-center gap-1.5">
               <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                <span
+                  className={`animate-ping absolute inline-flex h-full w-full rounded-full ${tenant?.active ? "bg-emerald-400" : "bg-red-400"} opacity-75`}
+                ></span>
+                <span
+                  className={`relative inline-flex rounded-full h-2 w-2 ${tenant?.active ? "bg-emerald-500" : "bg-red-500"}`}
+                ></span>
               </span>
               <p className="text-sm font-medium text-slate-900 dark:text-slate-200">
-                Ativo
+                {tenant?.active ? "Ativo" : "Desativo"}
               </p>
             </div>
           </div>
@@ -705,7 +712,7 @@ const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
         <div>
           <h3 className="text-sm font-bold text-red-700 dark:text-red-400 flex items-center gap-2">
             <Trash2 className="w-4 h-4" />
-            Apagar Workspace
+            {tenant?.active ? "Desativar" : "Ativar"} Workspace
           </h3>
           <p className="text-xs text-red-600/80 dark:text-red-400/80 mt-1">
             Apagar permanentemente este workspace e todos os seus dados. Esta
@@ -714,15 +721,10 @@ const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
         </div>
         <button
           type="button"
-          onClick={() =>
-            showToast(
-              "Funcionalidade temporariamente desativada por segurança.",
-              "info",
-            )
-          }
+          onClick={() => setIsTogglingWs(true)}
           className="shrink-0 px-4 py-2 bg-red-100 hover:bg-red-200 dark:bg-red-900/40 dark:hover:bg-red-900/60 text-red-700 dark:text-red-300 text-sm font-semibold rounded-lg transition-colors border border-red-200 dark:border-red-800"
         >
-          Apagar Workspace
+          {tenant?.active ? "Desativar" : "Ativar"} Workspace
         </button>
       </div>
     </div>
@@ -1265,7 +1267,7 @@ interface SettingsPageProps {
 export const SettingsPage: React.FC<SettingsPageProps> = ({ hideHeader }) => {
   const queryClient = useQueryClient();
   const { showToast } = useSync();
-  const { user: currentUser, logout } = useAuth();
+  const { user: currentUser, logout, tenant } = useAuth();
 
   // Navigation tab inside Settings page
   const [activeTab, setActiveTab] = useState<
@@ -1287,6 +1289,8 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ hideHeader }) => {
   const [adminToRemove, setAdminToRemove] = useState<AdminUser | null>(null);
 
   const [isRestoring, setIsRestoring] = useState(false);
+  const [isTogglingWs, setIsTogglingWs] = useState(false);
+
   const [pendingRestoreData, setPendingRestoreData] = useState<any | null>(
     null,
   );
@@ -1360,6 +1364,17 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ hideHeader }) => {
     } finally {
       setIsRestoring(false);
     }
+  };
+
+  const handlerToggleWorkspaceState = async () => {
+    setIsTogglingWs(false);
+    await authApi.editTenant({
+      active: !tenant?.active,
+    });
+    showToast(
+      `${tenant?.name} agora está ${!tenant?.active ? "Ativo" : "Desativo"}`,
+      "info",
+    );
   };
 
   const pendingCount = pendingAdmins.length;
@@ -1461,6 +1476,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ hideHeader }) => {
           setPendingRestoreData={setPendingRestoreData}
           setRestoreStats={setRestoreStats}
           showToast={showToast}
+          setIsTogglingWs={setIsTogglingWs}
         />
         <AccountTab active={activeTab === "account"} />
         <MembersTab
@@ -1648,6 +1664,18 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ hideHeader }) => {
           </div>
         </div>
       </Modal>
+
+      <ConfirmDialog
+        isOpen={isTogglingWs}
+        onConfirm={handlerToggleWorkspaceState}
+        onClose={() => setIsTogglingWs(false)}
+        title={`${tenant?.active ? "Desativar" : "Ativar"} Workspace`}
+        message={
+          tenant?.active
+            ? "Vais perder accesso a ferramentas de edição de musica e cultos, sendo ainda possivel visualizar todos os conteudos."
+            : "Reativar a Igreja"
+        }
+      />
     </div>
   );
 };
