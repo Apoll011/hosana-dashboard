@@ -155,3 +155,13 @@ export async function getCifra(
     };
   }
 }
+
+export const getInitials = (name: string) => {
+  if (!name) return "?";
+  return name
+    .split(" ")
+    .map((w) => w.charAt(0))
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
+};

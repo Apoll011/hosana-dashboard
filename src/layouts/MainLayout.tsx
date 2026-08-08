@@ -74,7 +74,7 @@ import { ServiceForm } from "../components/forms/ServiceForm";
 import { KBarCommandPaletteUI } from "../components/KBarCommandPalette";
 import { CifraClubImportModal } from "../components/modals/CifraModal";
 import { songImportRegistry } from "../import";
-import { printHtmlDirectly } from "../utils";
+import { getInitials, printHtmlDirectly } from "../utils";
 import { ProviderImportResult } from "../utils/import";
 
 interface ContextMenuState {
@@ -2049,7 +2049,15 @@ export const MainLayout: React.FC = () => {
                   className={`flex items-center ${isSidebarCollapsed ? "" : "gap-2"} min-w-0`}
                 >
                   <div className="w-7 h-7 rounded-full bg-linear-to-tr from-[#0284c7] to-sky-400 flex items-center justify-center text-white font-extrabold text-xs shadow-sm shrink-0">
-                    {user.name.charAt(0).toUpperCase()}
+                    {user.logo ? (
+                      <img
+                        src={user.logo}
+                        alt={user.name}
+                        className="w-full h-full rounded-full object-cover"
+                      />
+                    ) : (
+                      getInitials(user.name)
+                    )}
                   </div>
                   {!isSidebarCollapsed && (
                     <div className="flex flex-col min-w-0 text-left">
