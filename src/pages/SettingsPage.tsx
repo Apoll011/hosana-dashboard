@@ -850,17 +850,13 @@ const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
 
 // ─── AccountTab ───────────────────────────────────────────────────────────────
 
-// Importa os ícones necessários, adicionando o Trash2
-
 const AccountTab: React.FC<{ active: boolean }> = ({ active }) => {
   const { user } = useAuth();
   const { showToast } = useSync();
   const avatarInputRef = useRef<HTMLInputElement>(null);
 
-  // Estado para UI otimista - Mostra as mudanças imediatamente na UI
   const [displayUser, setDisplayUser] = useState(user);
 
-  // Sincroniza caso o context do utilizador mude externamente
   useEffect(() => {
     setDisplayUser(user);
   }, [user]);
@@ -913,7 +909,6 @@ const AccountTab: React.FC<{ active: boolean }> = ({ active }) => {
     const previousUser = displayUser;
 
     try {
-      // UI Otimista: Remove a imagem imediatamente
       setDisplayUser((prev) => (prev ? { ...prev, logo: null } : prev));
 
       await authApi.updateUser({ logo: null });
@@ -1034,11 +1029,20 @@ const AccountTab: React.FC<{ active: boolean }> = ({ active }) => {
                   {getInitials(displayUser?.name || "")}
                 </span>
               )}
-              {isCompressingAvatar && (
-                <div className="absolute inset-0 flex items-center justify-center bg-black/30 rounded-full">
-                  <Loader2 className="w-5 h-5 animate-spin text-white" />
-                </div>
-              )}
+              <button
+                type="button"
+                onClick={() => avatarInputRef.current?.click()}
+                disabled={isCompressingAvatar}
+                className={`absolute inset-0 bg-slate-900/50 text-white flex items-center justify-center backdrop-blur-[2px] cursor-pointer transition-opacity duration-200
+                  ${isCompressingAvatar ? "opacity-100" : "opacity-0 group-hover:opacity-100"}
+                `}
+              >
+                {isCompressingAvatar ? (
+                  <Loader2 className="w-6 h-6 animate-spin" />
+                ) : (
+                  <Camera className="w-7 h-7 mb-1" />
+                )}
+              </button>
             </div>
             <input
               type="file"
@@ -1052,22 +1056,12 @@ const AccountTab: React.FC<{ active: boolean }> = ({ active }) => {
               <button
                 type="button"
                 onClick={handleRemoveAvatar}
-                className="absolute bottom-0 left-0 w-7 h-7 rounded-full bg-red-500 border-2 border-white dark:border-slate-900 flex items-center justify-center text-white hover:bg-red-600 transition-colors shadow-md"
+                className="absolute bottom-0 right-0 w-7 h-7 rounded-full bg-red-500 border-2 border-white dark:border-slate-900 flex items-center justify-center text-white hover:bg-red-600 transition-colors shadow-md"
                 title="Remover avatar"
               >
                 <Trash2 className="w-3.5 h-3.5" />
               </button>
             )}
-
-            {/* Editar Foto */}
-            <button
-              type="button"
-              onClick={() => avatarInputRef.current?.click()}
-              className="absolute bottom-0 right-0 w-7 h-7 rounded-full bg-[#0284c7] border-2 border-white dark:border-slate-900 flex items-center justify-center text-white hover:bg-sky-600 transition-colors shadow-md"
-              title="Alterar avatar"
-            >
-              <Camera className="w-3.5 h-3.5" />
-            </button>
           </div>
 
           {/* Name & role */}
