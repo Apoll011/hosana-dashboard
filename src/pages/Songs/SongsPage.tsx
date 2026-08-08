@@ -160,7 +160,10 @@ export const SongsPage: React.FC<SongsPageProps> = ({
     }
 
     if (actualSelectedKey) {
-      result = result.filter((song) => song.key === actualSelectedKey);
+      result = result.filter((song) => {
+        const k = song.content?.match(/\{key:\s*([^}]+)\}/i)?.[1]?.trim();
+        return k === actualSelectedKey;
+      });
     }
 
     if (actualSelectedTag) {
