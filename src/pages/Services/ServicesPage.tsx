@@ -497,8 +497,6 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
   // ─── Context menu opener ──────────────────────────────────────────────────
   const openContextMenu = useCallback(
     (e: React.MouseEvent, service: Service) => {
-      e.preventDefault();
-      e.stopPropagation();
       const x = Math.min(e.clientX, window.innerWidth - 240);
       const y = Math.min(e.clientY, window.innerHeight - 320);
       const isMulti =
