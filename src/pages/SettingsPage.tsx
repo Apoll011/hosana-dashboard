@@ -229,7 +229,18 @@ const GeneralTab: React.FC<{ active: boolean }> = ({ active }) => {
               className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#0284c7]"
             >
               {[
-                "C", "C#", "D", "Eb", "E", "F", "F#", "G", "Ab", "A", "Bb", "B",
+                "C",
+                "C#",
+                "D",
+                "Eb",
+                "E",
+                "F",
+                "F#",
+                "G",
+                "Ab",
+                "A",
+                "Bb",
+                "B",
               ].map((k) => (
                 <option key={k} value={k}>
                   Tom {k}
@@ -905,9 +916,9 @@ const AccountTab: React.FC<{ active: boolean }> = ({ active }) => {
       showToast("Por favor introduza a sua palavra-passe atual.", "error");
       return;
     }
-    if (draftNewPassword.length < 8) {
+    if (draftNewPassword.length < 6) {
       showToast(
-        "A nova palavra-passe deve ter pelo menos 8 caracteres.",
+        "A nova palavra-passe deve ter pelo menos 6 caracteres.",
         "error",
       );
       return;
@@ -933,9 +944,10 @@ const AccountTab: React.FC<{ active: boolean }> = ({ active }) => {
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm">
         {/* Banner */}
         <div className="h-24 bg-linear-to-r from-[#0284c7] via-sky-500 to-sky-400 relative">
-          <div className="absolute inset-0 opacity-20"
+          <div
+            className="absolute inset-0 opacity-20"
             style={{
-              backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
+              backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
             }}
           />
         </div>
@@ -1309,9 +1321,10 @@ const MemberProfilePage: React.FC<MemberProfilePageProps> = ({
             }}
           />
         </div>
+
         <div className="px-6 pb-6">
           <div className="-mt-12 mb-4 flex items-end justify-between">
-            <div className="w-20 h-20 rounded-full border-4 border-white dark:border-slate-900 overflow-hidden shadow-md bg-linear-to-tr from-[#0284c7] to-sky-400 flex items-center justify-center">
+            <div className=" relative w-20 h-20 rounded-full border-4 border-white dark:border-slate-900 overflow-hidden shadow-md bg-linear-to-tr from-[#0284c7] to-sky-400 flex items-center justify-center">
               {(member as any).logo ? (
                 <img
                   src={(member as any).logo}
@@ -1681,9 +1694,7 @@ const MembersTab: React.FC<{
                       </td>
 
                       {/* Role */}
-                      <td className="py-4 px-4">
-                        {getRoleBadge(admin.role)}
-                      </td>
+                      <td className="py-4 px-4">{getRoleBadge(admin.role)}</td>
 
                       {/* Status */}
                       <td className="py-4 px-4">
@@ -1821,14 +1832,22 @@ const AboutTab: React.FC<{ active: boolean }> = ({ active }) => {
 
   const productionDependencies = [
     { name: "React & React DOM (v19)", license: "MIT", type: "UI Framework" },
-    { name: "@tanstack/react-query", license: "MIT", type: "Estado & Data Fetching" },
+    {
+      name: "@tanstack/react-query",
+      license: "MIT",
+      type: "Estado & Data Fetching",
+    },
     { name: "@dnd-kit (Core/Sortable)", license: "MIT", type: "Drag and Drop" },
     { name: "Motion (Framer Motion)", license: "MIT", type: "Animações" },
     { name: "@tailwindcss/vite", license: "MIT", type: "Estilização" },
     { name: "Lucide React", license: "ISC", type: "Ícones" },
     { name: "React Router Dom", license: "MIT", type: "Navegação" },
     { name: "@google/genai", license: "Apache-2.0", type: "Integração IA" },
-    { name: "Zod & React Hook Form", license: "MIT", type: "Formulários & Validação" },
+    {
+      name: "Zod & React Hook Form",
+      license: "MIT",
+      type: "Formulários & Validação",
+    },
     { name: "Free Use Bible API", license: "MIT", type: "Integração Bíblica" },
     { name: "Kbar", license: "MIT", type: "Menu de Comandos (Ctrl+K)" },
   ];
