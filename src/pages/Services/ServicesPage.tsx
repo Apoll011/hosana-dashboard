@@ -23,7 +23,6 @@ import {
   ArrowRight,
   ArrowUpDown,
   Calendar,
-  CheckSquare,
   Church,
   Clock,
   Copy,
@@ -87,22 +86,26 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
       : "date"
     : localSortBy;
   const effectiveSortOrder: SortOrder = serviceAsFolderItem
-    ? (contextSortOrder as SortOrder) ?? "desc"
+    ? ((contextSortOrder as SortOrder) ?? "desc")
     : localSortOrder;
 
-  // ─── Archive toggle ───────────────────────────────────────────────────────
-  const [showArchived, setShowArchived] = useState(false);
+  // ─── Archive toggle (from MainLayout context or local fallback) ──────────
+  const showArchived = context.showArchived ?? false;
+  const setShowArchived = context.setShowArchived ?? (() => {});
 
-  // Fetch archived services — enabled only when toggle is on, cached for 5 min
-  const archivedServicesQuery = useQuery({
+  // Fetch archived services (fallback if context doesn't provide)
+  const localArchivedServicesQuery = useQuery({
     queryKey: ["services", "archived"],
     queryFn: async () => {
       const all = await servicesApi.getServices();
       return (Array.isArray(all) ? all : []).filter((s: Service) => s.archived);
     },
-    enabled: showArchived,
+    enabled: showArchived && !context.archivedServicesQuery,
     staleTime: 1000 * 60 * 5,
   });
+
+  const archivedServicesQuery =
+    context.archivedServicesQuery ?? localArchivedServicesQuery;
 
   // ─── Modal / dialog state ─────────────────────────────────────────────────
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -144,9 +147,16 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
   const archivedServices = useMemo(
     () =>
       showArchived
-        ? (archivedServicesQuery.data ?? allServices.filter((s) => s.archived))
+        ? (context.archivedServices ??
+          archivedServicesQuery.data ??
+          allServices.filter((s) => s.archived))
         : [],
-    [showArchived, archivedServicesQuery.data, allServices],
+    [
+      showArchived,
+      context.archivedServices,
+      archivedServicesQuery.data,
+      allServices,
+    ],
   );
 
   // ─── Filter + sort ────────────────────────────────────────────────────────
@@ -271,7 +281,11 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
     if (!serviceAsFolderItem) return;
 
     const handleMouseMove = (e: MouseEvent) => {
-      if (!isMouseDownRef.current || !startPosRef.current || !containerRef.current)
+      if (
+        !isMouseDownRef.current ||
+        !startPosRef.current ||
+        !containerRef.current
+      )
         return;
 
       const startX = startPosRef.current.x;
@@ -284,9 +298,8 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
       if (width > 4 || height > 4) {
         setSelectionBox({ x: left, y: top, width, height });
 
-        const itemEls = containerRef.current.querySelectorAll<HTMLElement>(
-          "[data-item-id]",
-        );
+        const itemEls =
+          containerRef.current.querySelectorAll<HTMLElement>("[data-item-id]");
         const next = new Set(initialSelectionRef.current);
 
         itemEls.forEach((el) => {
@@ -472,11 +485,14 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
 
   // ─── Formatted date helper ────────────────────────────────────────────────
   const formatDate = (dateStr: string, options?: Intl.DateTimeFormatOptions) =>
-    new Date(dateStr).toLocaleDateString("pt-PT", options ?? {
-      weekday: "long",
-      day: "numeric",
-      month: "long",
-    });
+    new Date(dateStr).toLocaleDateString(
+      "pt-PT",
+      options ?? {
+        weekday: "long",
+        day: "numeric",
+        month: "long",
+      },
+    );
 
   // ─── Context menu opener ──────────────────────────────────────────────────
   const openContextMenu = useCallback(
@@ -517,28 +533,6 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
         <option value="name-desc">Nome (Z-A)</option>
       </select>
     </div>
-  );
-
-  // ─── Archive toggle button ────────────────────────────────────────────────
-  const archiveToggleBtn = (
-    <button
-      type="button"
-      onClick={() => setShowArchived((v) => !v)}
-      className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl border text-xs font-black uppercase tracking-widest transition-all cursor-pointer shrink-0 ${
-        showArchived
-          ? "bg-amber-500/10 border-amber-500 text-amber-600 dark:text-amber-400 shadow-lg shadow-amber-500/10"
-          : "bg-m3-card border-m3-border text-m3-secondary hover:bg-m3-hover hover:text-m3-text hover:border-amber-500/30"
-      }`}
-      title={showArchived ? "Ocultar arquivados" : "Mostrar arquivados"}
-    >
-      <Archive className="w-4 h-4" />
-      <span className="hidden sm:inline">Arquivados</span>
-      {showArchived && archivedServices.length > 0 && (
-        <span className="w-4.5 h-4.5 rounded-full bg-amber-500 text-white text-[10px] font-black flex items-center justify-center">
-          {archivedServices.length}
-        </span>
-      )}
-    </button>
   );
 
   // ─── Service card (standard view) ────────────────────────────────────────
@@ -698,13 +692,6 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
             : "border-m3-border/50 bg-m3-card hover:bg-m3-hover hover:border-m3-primary/40 hover:shadow-xl"
         } active:scale-95`}
       >
-        {/* Selection indicator */}
-        {isSelected && (
-          <div className="absolute top-2 left-2 w-5 h-5 rounded-full bg-m3-primary flex items-center justify-center shadow-sm">
-            <CheckSquare className="w-3 h-3 text-white" />
-          </div>
-        )}
-
         <button
           type="button"
           onClick={(e) => {
@@ -788,9 +775,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
               <Calendar className="w-5 h-5 text-sky-500 opacity-80" />
             )}
             <span>{service.name}</span>
-            {isArchived && (
-              <Badge variant="slate">Arquivado</Badge>
-            )}
+            {isArchived && <Badge variant="slate">Arquivado</Badge>}
           </div>
         </td>
         <td className="py-4 px-6 text-m3-secondary opacity-70">
@@ -883,26 +868,14 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
     >
       {/* ── Toolbar (non-folder-item mode only) ── */}
       {!serviceAsFolderItem && (
-        <div className="flex items-center gap-3 flex-wrap">
-          {sortControl}
-          {archiveToggleBtn}
-        </div>
-      )}
-
-      {/* ── Archive toggle button (folder-item mode gets it from MainLayout toolbar) ── */}
-      {serviceAsFolderItem && (
-        <div className="flex items-center gap-3 flex-wrap">
-          {archiveToggleBtn}
-        </div>
+        <div className="flex items-center gap-3 flex-wrap">{sortControl}</div>
       )}
 
       {/* ── Services Content ── */}
       {serviceAsFolderItem ? (
         /* FEATURE FLAG ACTIVE: SERVICE AS FOLDER/FILE ITEM VIEW */
         viewMode === "grid" ? (
-          <div
-            className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6"
-          >
+          <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
             {filteredServices.length === 0 && !showArchived ? (
               <div className="col-span-full text-center py-20 text-m3-secondary font-black uppercase tracking-widest opacity-60">
                 Nenhum plano corresponde à sua pesquisa.
@@ -925,11 +898,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
                   <div className="h-px flex-1 bg-amber-500/20" />
                 </div>
                 {filteredArchivedServices.map((service) =>
-                  renderFolderItemCard(
-                    service,
-                    filteredArchivedServices,
-                    true,
-                  ),
+                  renderFolderItemCard(service, filteredArchivedServices, true),
                 )}
               </>
             )}
@@ -965,7 +934,10 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
                 {showArchived && filteredArchivedServices.length > 0 && (
                   <>
                     <tr>
-                      <td colSpan={4} className="py-3 px-6 bg-amber-50/50 dark:bg-amber-950/20">
+                      <td
+                        colSpan={4}
+                        className="py-3 px-6 bg-amber-50/50 dark:bg-amber-950/20"
+                      >
                         <span className="text-[10px] font-black uppercase tracking-widest text-amber-600 dark:text-amber-400 flex items-center gap-2">
                           <Archive className="w-3.5 h-3.5" />
                           Cultos Arquivados ({filteredArchivedServices.length})
@@ -1006,9 +978,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
                 <span className="text-[10px] font-black uppercase tracking-widest text-amber-600 dark:text-amber-400 flex items-center gap-2">
                   <Archive className="w-3.5 h-3.5" />
                   Cultos Arquivados
-                  {archivedServicesQuery.isLoading && (
-                    <Spinner />
-                  )}
+                  {archivedServicesQuery.isLoading && <Spinner />}
                 </span>
                 <div className="h-px flex-1 bg-amber-500/20" />
               </div>
