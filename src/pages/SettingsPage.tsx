@@ -70,6 +70,7 @@ import { useTheme } from "../contexts/ThemeContext";
 import { useAdmins } from "../hooks/useAdmins";
 import { useSettings } from "../hooks/useSettings";
 import { songImportRegistry } from "../import";
+import { getInitials } from "../utils";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -116,16 +117,6 @@ const getRoleBadge = (role: string) => {
         </span>
       );
   }
-};
-
-const getInitials = (name: string) => {
-  if (!name) return "?";
-  return name
-    .split(" ")
-    .map((w) => w.charAt(0))
-    .join("")
-    .toUpperCase()
-    .slice(0, 2);
 };
 
 const compressImage = (
