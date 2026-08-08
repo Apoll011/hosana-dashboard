@@ -2053,7 +2053,7 @@ export const MainLayout: React.FC = () => {
                       <img
                         src={user.logo}
                         alt={user.name}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full rounded-full object-cover"
                       />
                     ) : (
                       getInitials(user.name)
