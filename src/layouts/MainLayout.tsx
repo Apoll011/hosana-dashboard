@@ -9,10 +9,13 @@ import {
   Folder,
   Input,
   Modal,
+  Service,
   Song,
   songsApi,
+  servicesApi,
 } from "@hosanna/shared";
 import {
+  Archive,
   AlertTriangle,
   ArrowRightLeft,
   ArrowUpDown,
@@ -69,12 +72,17 @@ import { useAllSongs } from "../hooks/useSongs";
 
 import { ConversionResult, printApi } from "@hosanna/shared";
 import { useStatsigClient } from "@statsig/react-bindings";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Action, KBarProvider } from "kbar";
 import { ServiceForm } from "../components/forms/ServiceForm";
 import { KBarCommandPaletteUI } from "../components/KBarCommandPalette";
 import { CifraClubImportModal } from "../components/modals/CifraModal";
 import { songImportRegistry } from "../import";
+import {
+  SelectionViewItem,
+  useSelectionKeyboardShortcuts,
+  useSharedSelection,
+} from "../hooks/useSharedSelection";
 import { getInitials, printHtmlDirectly } from "../utils";
 import { ProviderImportResult } from "../utils/import";
 
@@ -386,6 +394,23 @@ export const MainLayout: React.FC = () => {
     () => servicesQuery.data || [],
     [servicesQuery.data],
   );
+  const [showArchivedServices, setShowArchivedServices] = useState(false);
+  const archivedServicesQuery = useQuery({
+    queryKey: ["services", "archived"],
+    queryFn: async () => {
+      const all = await servicesApi.getServices();
+      return (Array.isArray(all) ? all : []).filter((s: Service) => s.archived);
+    },
+    enabled: isServicesView && showArchivedServices,
+    staleTime: 1000 * 60 * 5,
+  });
+  const archivedServicesForToolbar = useMemo(
+    () =>
+      showArchivedServices
+        ? (archivedServicesQuery.data ?? allServices.filter((s) => s.archived))
+        : [],
+    [showArchivedServices, archivedServicesQuery.data, allServices],
+  );
 
   const { client } = useStatsigClient();
   const serviceAsFolderItem = client?.checkGate
@@ -491,44 +516,13 @@ export const MainLayout: React.FC = () => {
     prevPathnameRef.current = currPath;
   }, [location.pathname]);
 
-  // Multi-Selection State
-  const [selectedFolderIds, setSelectedFolderIds] = useState<Set<string>>(
-    new Set(),
-  );
-  const [selectedSongIds, setSelectedSongIds] = useState<Set<string>>(
-    new Set(),
-  );
-  const [lastClickedId, setLastClickedId] = useState<string | null>(null);
-
   // Marquee Rubberband Drag Selection State
   const containerRef = useRef<HTMLDivElement>(null);
-  const [selectionBox, setSelectionBox] = useState<{
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-  } | null>(null);
-  const isMouseDownRef = useRef(false);
-  const startPosRef = useRef<{ x: number; y: number } | null>(null);
-  const initialSelectionRef = useRef<{
-    folders: Set<string>;
-    songs: Set<string>;
-  }>({
-    folders: new Set(),
-    songs: new Set(),
-  });
 
   // Batch Modals State
   const [isBatchMoveOpen, setIsBatchMoveOpen] = useState(false);
   const [isBatchDeleteOpen, setIsBatchDeleteOpen] = useState(false);
   const [isBatchTagOpen, setIsBatchTagOpen] = useState(false);
-
-  // Clear selection on folder navigation
-  useEffect(() => {
-    setSelectedFolderIds(new Set());
-    setSelectedSongIds(new Set());
-    setLastClickedId(null);
-  }, [currentFolderId]);
 
   // Drag & Drop & Upload State
   const [isUploadingFiles, setIsUploadingFiles] = useState(false);
@@ -1141,183 +1135,57 @@ export const MainLayout: React.FC = () => {
     return [...folders, ...songs];
   }, [filteredSubfolders, filteredFiles]);
 
-  // Selection Handlers (Click, Ctrl+Click, Shift+Click)
-  const handleItemClick = useCallback((
-    e: React.MouseEvent,
-    id: string,
-    type: "folder" | "song",
-  ) => {
-    e.stopPropagation();
+  const {
+    selectedIdsByType,
+    setSelectedIdsByType,
+    setSelectedIdsForType,
+    setLastClickedId,
+    selectionBox,
+    clearSelection,
+    selectAllInView,
+    handleItemClick,
+    handleWorkspaceMouseDown,
+  } = useSharedSelection({
+    enabled: isExplorerView,
+    itemTypes: ["folder", "song"] as const,
+    viewItems: viewItems as SelectionViewItem<"folder" | "song">[],
+    containerRef,
+  });
+  const selectedFolderIds = selectedIdsByType.folder;
+  const selectedSongIds = selectedIdsByType.song;
 
-    if (e.ctrlKey || e.metaKey) {
-      if (type === "folder") toggleFolderSelect(id);
-      else toggleSongSelect(id);
-      setLastClickedId(id);
-    } else if (e.shiftKey && lastClickedId) {
-      const allIds = viewItems.map((v) => v.id);
-      const idx1 = allIds.indexOf(lastClickedId);
-      const idx2 = allIds.indexOf(id);
+  const setSelectedFolderIds = useCallback(
+    (next: Set<string> | ((prev: Set<string>) => Set<string>)) => {
+      setSelectedIdsByType((prev) => ({
+        ...prev,
+        folder:
+          typeof next === "function"
+            ? next(prev.folder)
+            : new Set(next),
+      }));
+    },
+    [setSelectedIdsByType],
+  );
+  const setSelectedSongIds = useCallback(
+    (next: Set<string> | ((prev: Set<string>) => Set<string>)) => {
+      setSelectedIdsByType((prev) => ({
+        ...prev,
+        song:
+          typeof next === "function"
+            ? next(prev.song)
+            : new Set(next),
+      }));
+    },
+    [setSelectedIdsByType],
+  );
 
-      if (idx1 !== -1 && idx2 !== -1) {
-        const start = Math.min(idx1, idx2);
-        const end = Math.max(idx1, idx2);
-        const range = viewItems.slice(start, end + 1);
-
-        const nextFolders = new Set<string>();
-        const nextSongs = new Set<string>();
-
-        range.forEach((v) => {
-          if (v.type === "folder") nextFolders.add(v.id);
-          else nextSongs.add(v.id);
-        });
-
-        setSelectedFolderIds(nextFolders);
-        setSelectedSongIds(nextSongs);
-      } else {
-        if (type === "folder") {
-          setSelectedFolderIds(new Set([id]));
-          setSelectedSongIds(new Set());
-        } else {
-          setSelectedFolderIds(new Set());
-          setSelectedSongIds(new Set([id]));
-        }
-      }
-      setLastClickedId(id);
-    } else {
-      if (type === "folder") {
-        setSelectedFolderIds(new Set([id]));
-        setSelectedSongIds(new Set());
-      } else {
-        setSelectedFolderIds(new Set());
-        setSelectedSongIds(new Set([id]));
-      }
-      setLastClickedId(id);
-    }
-  }, [viewItems, lastClickedId]);
-
-  const toggleFolderSelect = useCallback((id: string, e?: React.MouseEvent) => {
-    if (e) e.stopPropagation();
-    setSelectedFolderIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  }, []);
-
-  const toggleSongSelect = useCallback((id: string, e?: React.MouseEvent) => {
-    if (e) e.stopPropagation();
-    setSelectedSongIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  }, []);
-
-  const selectAllInCurrentView = () => {
-    setSelectedFolderIds(new Set(filteredSubfolders.map((f) => f.id)));
-    setSelectedSongIds(new Set(filteredFiles.map((s) => s.id)));
-  };
-
-  const clearSelection = () => {
-    setSelectedFolderIds(new Set());
-    setSelectedSongIds(new Set());
-    setLastClickedId(null);
-  };
-
-  // Marquee Drag Selection Handler
-  const handleWorkspaceMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.button !== 0) return;
-
-    const target = e.target as HTMLElement;
-    if (target.closest('button, input, a, [role="dialog"], [data-item-id]')) {
-      return;
-    }
-
-    const isAdditive = e.ctrlKey || e.metaKey;
-
-    isMouseDownRef.current = true;
-    startPosRef.current = { x: e.clientX, y: e.clientY };
-
-    if (!isAdditive) {
-      clearSelection();
-      initialSelectionRef.current = { folders: new Set(), songs: new Set() };
-    } else {
-      initialSelectionRef.current = {
-        folders: new Set(selectedFolderIds),
-        songs: new Set(selectedSongIds),
-      };
-    }
-  }, [selectedFolderIds, selectedSongIds]);
+  const selectAllInCurrentView = useCallback(() => {
+    selectAllInView();
+  }, [selectAllInView]);
 
   useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      if (
-        !isMouseDownRef.current ||
-        !startPosRef.current ||
-        !containerRef.current
-      )
-        return;
-
-      const startX = startPosRef.current.x;
-      const startY = startPosRef.current.y;
-      const currentX = e.clientX;
-      const currentY = e.clientY;
-
-      const left = Math.min(startX, currentX);
-      const top = Math.min(startY, currentY);
-      const width = Math.abs(currentX - startX);
-      const height = Math.abs(currentY - startY);
-
-      if (width > 4 || height > 4) {
-        setSelectionBox({ x: left, y: top, width, height });
-
-        const itemEls =
-          containerRef.current.querySelectorAll<HTMLElement>("[data-item-id]");
-        const nextFolders = new Set(initialSelectionRef.current.folders);
-        const nextSongs = new Set(initialSelectionRef.current.songs);
-
-        itemEls.forEach((el) => {
-          const id = el.getAttribute("data-item-id");
-          const type = el.getAttribute("data-item-type") as "folder" | "song";
-          if (!id || !type) return;
-
-          const rect = el.getBoundingClientRect();
-
-          const intersects = !(
-            rect.right < left ||
-            rect.left > left + width ||
-            rect.bottom < top ||
-            rect.top > top + height
-          );
-
-          if (intersects) {
-            if (type === "folder") nextFolders.add(id);
-            else nextSongs.add(id);
-          }
-        });
-
-        setSelectedFolderIds(nextFolders);
-        setSelectedSongIds(nextSongs);
-      }
-    };
-
-    const handleMouseUp = () => {
-      if (isMouseDownRef.current) {
-        isMouseDownRef.current = false;
-        startPosRef.current = null;
-        setSelectionBox(null);
-      }
-    };
-
-    window.addEventListener("mousemove", handleMouseMove);
-    window.addEventListener("mouseup", handleMouseUp);
-    return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("mouseup", handleMouseUp);
-    };
-  }, []);
+    clearSelection();
+  }, [currentFolderId, clearSelection]);
 
   const totalSelectedCount = selectedFolderIds.size + selectedSongIds.size;
 
@@ -1456,91 +1324,56 @@ export const MainLayout: React.FC = () => {
     }
   }, [currentFolderId, allFolders]);
 
-  // Close context menu on window click or escape
+  // Close context menu on window click
   useEffect(() => {
     const handleCloseMenu = () => setContextMenu(null);
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setContextMenu(null);
-    };
 
     window.addEventListener("click", handleCloseMenu);
-    window.addEventListener("keydown", handleKeyDown);
     return () => {
       window.removeEventListener("click", handleCloseMenu);
-      window.removeEventListener("keydown", handleKeyDown);
     };
   }, []);
 
-  useEffect(() => {
-    const handleCloseMenu = () => setContextMenu(null);
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        setContextMenu(null);
-        clearSelection();
-        return;
-      }
-
-      const target = e.target as HTMLElement;
-      const isTyping =
-        target.tagName === "INPUT" ||
-        target.tagName === "TEXTAREA" ||
-        target.isContentEditable;
-      if (isTyping) return;
-
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "a") {
-        if (!isExplorerView) return;
-        e.preventDefault();
-        selectAllInCurrentView();
-        return;
-      }
-
-      if (e.key === "Delete" || e.key === "Backspace") {
-        if (totalSelectedCount === 0) return;
-        e.preventDefault();
-
-        if (totalSelectedCount === 1) {
-          if (selectedFolderIds.size === 1) {
-            const folder = allFolders.find(
-              (f) => f.id === Array.from(selectedFolderIds)[0],
-            );
-            if (folder) setDeleteTarget(folder);
-          } else {
-            const song = allSongs.find(
-              (s) => s.id === Array.from(selectedSongIds)[0],
-            );
-            if (song) setDeleteSongTarget(song);
-          }
-        } else {
-          setIsBatchDeleteOpen(true);
-        }
-        return;
-      }
-
-      if (e.key === "Enter") {
-        if (totalSelectedCount !== 1) return;
+  useSelectionKeyboardShortcuts({
+    enabled: isExplorerView,
+    onEscape: () => {
+      setContextMenu(null);
+      clearSelection();
+    },
+    onSelectAll: (e) => {
+      e.preventDefault();
+      selectAllInCurrentView();
+    },
+    onDelete: (e) => {
+      if (totalSelectedCount === 0) return;
+      e.preventDefault();
+      if (totalSelectedCount === 1) {
         if (selectedFolderIds.size === 1) {
-          handleSelectFolder(Array.from(selectedFolderIds)[0]);
-        } else if (selectedSongIds.size === 1) {
-          navigate(`/songs/${Array.from(selectedSongIds)[0]}`);
+          const folder = allFolders.find(
+            (f) => f.id === Array.from(selectedFolderIds)[0],
+          );
+          if (folder) setDeleteTarget(folder);
+        } else {
+          const song = allSongs.find((s) => s.id === Array.from(selectedSongIds)[0]);
+          if (song) setDeleteSongTarget(song);
         }
+      } else {
+        setIsBatchDeleteOpen(true);
       }
-    };
+    },
+    onEnter: () => {
+      if (totalSelectedCount !== 1) return;
+      if (selectedFolderIds.size === 1) {
+        handleSelectFolder(Array.from(selectedFolderIds)[0]);
+      } else if (selectedSongIds.size === 1) {
+        navigate(`/songs/${Array.from(selectedSongIds)[0]}`);
+      }
+    },
+  });
 
-    window.addEventListener("click", handleCloseMenu);
-    window.addEventListener("keydown", handleKeyDown);
-    return () => {
-      window.removeEventListener("click", handleCloseMenu);
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [
-    totalSelectedCount,
-    selectedFolderIds,
-    selectedSongIds,
-    allFolders,
-    allSongs,
-    isExplorerView,
-  ]);
+  useEffect(() => {
+    if (!isExplorerView) setContextMenu(null);
+  }, [isExplorerView]);
 
   const toggleExpand = (id: string) => {
     setExpandedFolderIds((prev) => {
@@ -1579,8 +1412,12 @@ export const MainLayout: React.FC = () => {
         }
         setLastClickedId(item.id);
       } else {
-        if (type === "folder") toggleFolderSelect(item.id);
-        else toggleSongSelect(item.id);
+        const typeKey = type === "folder" ? "folder" : "song";
+        const prevSet = selectedIdsByType[typeKey];
+        const nextSet = new Set(prevSet);
+        if (nextSet.has(item.id)) nextSet.delete(item.id);
+        else nextSet.add(item.id);
+        setSelectedIdsForType(typeKey, nextSet);
         setLastClickedId(item.id);
       }
     }
@@ -1589,7 +1426,13 @@ export const MainLayout: React.FC = () => {
     const y = Math.min(e.clientY, window.innerHeight - 280);
 
     setContextMenu({ x, y, type, item });
-  }, [selectedFolderIds, selectedSongIds]);
+  }, [
+    selectedFolderIds,
+    selectedSongIds,
+    selectedIdsByType,
+    setSelectedIdsForType,
+    setLastClickedId,
+  ]);
 
   const handleCanvasContextMenu = useCallback((e: React.MouseEvent) => {
     const target = e.target as HTMLElement;
