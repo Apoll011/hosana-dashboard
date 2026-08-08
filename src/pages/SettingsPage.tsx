@@ -850,17 +850,27 @@ const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
 
 // ─── AccountTab ───────────────────────────────────────────────────────────────
 
+// Importa os ícones necessários, adicionando o Trash2
+
 const AccountTab: React.FC<{ active: boolean }> = ({ active }) => {
   const { user } = useAuth();
   const { showToast } = useSync();
   const avatarInputRef = useRef<HTMLInputElement>(null);
 
+  // Estado para UI otimista - Mostra as mudanças imediatamente na UI
+  const [displayUser, setDisplayUser] = useState(user);
+
+  // Sincroniza caso o context do utilizador mude externamente
+  useEffect(() => {
+    setDisplayUser(user);
+  }, [user]);
+
   const [isEditingName, setIsEditingName] = useState(false);
   const [isEditingEmail, setIsEditingEmail] = useState(false);
   const [isEditingPassword, setIsEditingPassword] = useState(false);
 
-  const [draftName, setDraftName] = useState(user?.name || "");
-  const [draftEmail, setDraftEmail] = useState(user?.email || "");
+  const [draftName, setDraftName] = useState("");
+  const [draftEmail, setDraftEmail] = useState("");
   const [draftOldPassword, setDraftOldPassword] = useState("");
   const [draftNewPassword, setDraftNewPassword] = useState("");
   const [draftConfirmPassword, setDraftConfirmPassword] = useState("");
@@ -875,43 +885,90 @@ const AccountTab: React.FC<{ active: boolean }> = ({ active }) => {
       showToast("Por favor selecione um ficheiro de imagem válido.", "error");
       return;
     }
+
+    const previousUser = displayUser;
+
     try {
       setIsCompressingAvatar(true);
-      await compressImage(file, 400, 0.85);
-      // API not ready yet
-      showToast(
-        "Alteração de avatar registada — API em implementação.",
-        "info",
+      const compressedBase64 = await compressImage(file, 800, 0.8);
+
+      // UI Otimista: Atualiza a imagem imediatamente
+      setDisplayUser((prev) =>
+        prev ? { ...prev, logo: compressedBase64 } : prev,
       );
+
+      await authApi.updateUser({ logo: compressedBase64 });
+      showToast("Avatar atualizado com sucesso!", "success");
     } catch {
-      showToast("Erro ao processar a imagem.", "error");
+      // Reverte em caso de erro
+      setDisplayUser(previousUser);
+      showToast("Erro ao processar e salvar a imagem.", "error");
     } finally {
       setIsCompressingAvatar(false);
       e.target.value = "";
     }
   };
 
-  const handleSaveName = () => {
+  const handleRemoveAvatar = async () => {
+    const previousUser = displayUser;
+
+    try {
+      // UI Otimista: Remove a imagem imediatamente
+      setDisplayUser((prev) => (prev ? { ...prev, logo: null } : prev));
+
+      await authApi.updateUser({ logo: null });
+      showToast("Avatar removido com sucesso!", "success");
+    } catch {
+      // Reverte em caso de erro
+      setDisplayUser(previousUser);
+      showToast("Erro ao remover o avatar.", "error");
+    }
+  };
+
+  const handleSaveName = async () => {
     if (!draftName.trim()) {
       showToast("O nome não pode estar vazio.", "error");
       return;
     }
-    // API not ready yet
-    showToast("Alteração de nome registada — API em implementação.", "info");
+
+    const previousUser = displayUser;
+
+    // UI Otimista
+    setDisplayUser((prev) => (prev ? { ...prev, name: draftName } : prev));
     setIsEditingName(false);
+
+    try {
+      await authApi.updateUser({ name: draftName });
+      showToast("Nome guardado com sucesso!", "success");
+    } catch {
+      // Reverte em caso de erro
+      setDisplayUser(previousUser);
+      showToast("Erro ao guardar o novo nome", "error");
+    }
   };
 
-  const handleSaveEmail = () => {
+  const handleSaveEmail = async () => {
     if (!draftEmail.trim() || !draftEmail.includes("@")) {
       showToast("Por favor introduza um e-mail válido.", "error");
       return;
     }
-    // API not ready yet
-    showToast("Alteração de e-mail registada — API em implementação.", "info");
+
+    const previousUser = displayUser;
+
+    setDisplayUser((prev) => (prev ? { ...prev, email: draftEmail } : prev));
     setIsEditingEmail(false);
+
+    try {
+      await authApi.updateUser({ email: draftEmail });
+      showToast("E-mail guardado com sucesso!", "success");
+    } catch {
+      // Reverte em caso de erro
+      setDisplayUser(previousUser);
+      showToast("Erro ao guardar o novo email", "error");
+    }
   };
 
-  const handleSavePassword = () => {
+  const handleSavePassword = async () => {
     if (!draftOldPassword) {
       showToast("Por favor introduza a sua palavra-passe atual.", "error");
       return;
@@ -927,15 +984,25 @@ const AccountTab: React.FC<{ active: boolean }> = ({ active }) => {
       showToast("As palavras-passe não coincidem.", "error");
       return;
     }
-    // API not ready yet
-    showToast(
-      "Alteração de palavra-passe registada — API em implementação.",
-      "info",
-    );
-    setIsEditingPassword(false);
-    setDraftOldPassword("");
-    setDraftNewPassword("");
-    setDraftConfirmPassword("");
+
+    try {
+      await authApi.updateUser({
+        newPassword: draftNewPassword,
+        currentPassword: draftOldPassword,
+      });
+
+      showToast("Palavra-passe alterada com sucesso!", "success");
+
+      setIsEditingPassword(false);
+      setDraftOldPassword("");
+      setDraftNewPassword("");
+      setDraftConfirmPassword("");
+    } catch {
+      showToast(
+        "Erro ao guardar a nova palavra-passe. Verifique os dados.",
+        "error",
+      );
+    }
   };
 
   return (
@@ -956,15 +1023,15 @@ const AccountTab: React.FC<{ active: boolean }> = ({ active }) => {
           {/* Avatar */}
           <div className="relative -mt-12 mb-4 w-fit">
             <div className="w-20 h-20 rounded-full border-4 border-white dark:border-slate-900 overflow-hidden shadow-md bg-linear-to-tr from-[#0284c7] to-sky-400 flex items-center justify-center">
-              {user?.logo ? (
+              {displayUser?.logo ? (
                 <img
-                  src={user.logo}
-                  alt={user.name}
+                  src={displayUser.logo}
+                  alt={displayUser.name}
                   className={`w-full h-full object-cover ${isCompressingAvatar ? "opacity-50" : ""}`}
                 />
               ) : (
                 <span className="text-2xl font-black text-white">
-                  {getInitials(user?.name || "")}
+                  {getInitials(displayUser?.name || "")}
                 </span>
               )}
               {isCompressingAvatar && (
@@ -980,6 +1047,19 @@ const AccountTab: React.FC<{ active: boolean }> = ({ active }) => {
               onChange={handleAvatarChange}
               className="hidden"
             />
+
+            {displayUser?.logo && (
+              <button
+                type="button"
+                onClick={handleRemoveAvatar}
+                className="absolute bottom-0 left-0 w-7 h-7 rounded-full bg-red-500 border-2 border-white dark:border-slate-900 flex items-center justify-center text-white hover:bg-red-600 transition-colors shadow-md"
+                title="Remover avatar"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
+            )}
+
+            {/* Editar Foto */}
             <button
               type="button"
               onClick={() => avatarInputRef.current?.click()}
@@ -994,21 +1074,21 @@ const AccountTab: React.FC<{ active: boolean }> = ({ active }) => {
           <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
             <div>
               <h2 className="text-xl font-extrabold text-slate-900 dark:text-white">
-                {user?.name || "Utilizador"}
+                {displayUser?.name || "Utilizador"}
               </h2>
               <div className="flex items-center gap-2 mt-1">
                 <span className="text-xs text-slate-500 dark:text-slate-400">
-                  {user?.email}
+                  {displayUser?.email}
                 </span>
                 <span className="text-slate-300 dark:text-slate-700">·</span>
-                {getRoleBadge(user?.role || "")}
+                {getRoleBadge(displayUser?.role || "")}
               </div>
             </div>
             <div className="text-[11px] text-slate-400 dark:text-slate-500 flex items-center gap-1">
               <Clock className="w-3 h-3" />
               Membro desde{" "}
-              {user?.createdAt
-                ? new Date(user.createdAt).toLocaleDateString("pt-PT", {
+              {displayUser?.createdAt
+                ? new Date(displayUser.createdAt).toLocaleDateString("pt-PT", {
                     month: "long",
                     year: "numeric",
                   })
@@ -1035,7 +1115,7 @@ const AccountTab: React.FC<{ active: boolean }> = ({ active }) => {
               variant="outline"
               size="sm"
               onClick={() => {
-                setDraftName(user?.name || "");
+                setDraftName(displayUser?.name || "");
                 setIsEditingName(true);
               }}
               icon={<PenLine className="w-3.5 h-3.5" />}
@@ -1075,7 +1155,7 @@ const AccountTab: React.FC<{ active: boolean }> = ({ active }) => {
           </div>
         ) : (
           <p className="text-base font-semibold text-slate-800 dark:text-slate-200 px-1">
-            {user?.name || "—"}
+            {displayUser?.name || "—"}
           </p>
         )}
       </div>
@@ -1097,7 +1177,7 @@ const AccountTab: React.FC<{ active: boolean }> = ({ active }) => {
               variant="outline"
               size="sm"
               onClick={() => {
-                setDraftEmail(user?.email || "");
+                setDraftEmail(displayUser?.email || "");
                 setIsEditingEmail(true);
               }}
               icon={<PenLine className="w-3.5 h-3.5" />}
@@ -1138,7 +1218,7 @@ const AccountTab: React.FC<{ active: boolean }> = ({ active }) => {
           </div>
         ) : (
           <p className="text-base font-semibold text-slate-800 dark:text-slate-200 px-1">
-            {user?.email || "—"}
+            {displayUser?.email || "—"}
           </p>
         )}
       </div>
@@ -1236,20 +1316,20 @@ const AccountTab: React.FC<{ active: boolean }> = ({ active }) => {
               ID do Utilizador
             </span>
             <p className="text-xs font-mono text-slate-700 dark:text-slate-300 truncate">
-              {user?.id || "—"}
+              {displayUser?.id || "—"}
             </p>
           </div>
           <div className="p-3 bg-slate-50 dark:bg-slate-950/50 rounded-xl border border-slate-100 dark:border-slate-800/60">
             <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 block mb-1">
               Função
             </span>
-            {getRoleBadge(user?.role || "")}
+            {getRoleBadge(displayUser?.role || "")}
           </div>
           <div className="p-3 bg-slate-50 dark:bg-slate-950/50 rounded-xl border border-slate-100 dark:border-slate-800/60">
             <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 block mb-1">
               Estado da Conta
             </span>
-            {user?.isAproved === "true" || user?.isAproved ? (
+            {displayUser?.isAproved === "true" || displayUser?.isAproved ? (
               <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 dark:text-emerald-400">
                 <CheckCircle2 className="w-3.5 h-3.5" />
                 Aprovado
@@ -1674,8 +1754,16 @@ const MembersTab: React.FC<{
                       {/* Name & Email */}
                       <td className="py-4 px-4 sm:px-6">
                         <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-full bg-linear-to-tr from-[#0284c7] to-sky-400 flex items-center justify-center text-white font-extrabold text-xs shadow-sm shrink-0">
-                            {admin.name.charAt(0).toUpperCase()}
+                          <div className="w-9 h-9 rounded-full bg-linear-to-tr from-[#0284c7] to-sky-400 flex items-center justify-center text-white font-extrabold text-xs shadow-sm shrink-0 overflow-hidden">
+                            {admin.logo ? (
+                              <img
+                                src={admin.logo}
+                                alt={admin.name}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              getInitials(admin.name)
+                            )}
                           </div>
                           <div className="flex flex-col min-w-0">
                             <span className="font-bold text-slate-900 dark:text-slate-100 truncate flex items-center gap-1.5">
