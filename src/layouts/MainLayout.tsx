@@ -51,7 +51,7 @@ import {
   User,
   X,
 } from "lucide-react";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import logo from "../assets/images/hosannastudio_logo.png";
 import { FolderForm } from "../components/forms/FolderForm";
@@ -69,6 +69,7 @@ import { useAllSongs } from "../hooks/useSongs";
 
 import { ConversionResult, printApi } from "@hosanna/shared";
 import { useStatsigClient } from "@statsig/react-bindings";
+import { useQueryClient } from "@tanstack/react-query";
 import { Action, KBarProvider } from "kbar";
 import { ServiceForm } from "../components/forms/ServiceForm";
 import { KBarCommandPaletteUI } from "../components/KBarCommandPalette";
@@ -379,6 +380,7 @@ export const MainLayout: React.FC = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
   const { showToast } = useSync();
+  const queryClient = useQueryClient();
   const { servicesQuery, createService, deleteService } = useServices();
   const allServices = useMemo(
     () => servicesQuery.data || [],
@@ -426,12 +428,15 @@ export const MainLayout: React.FC = () => {
 
   const handleViewModeChange = (mode: "grid" | "list") => {
     setViewMode(mode);
+    localStorage.setItem("viewMode", mode);
     if (isMusiciansView || isSettingsView) {
       navigate("/folders");
     }
   };
   const [searchQuery, setSearchQuery] = useState("");
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [viewMode, setViewMode] = useState<"grid" | "list">(
+    () => (localStorage.getItem("viewMode") as "grid" | "list") || "grid",
+  );
 
   // Track page transitions to manage searchQuery persistence like a file system
   const prevPathnameRef = useRef(location.pathname);
@@ -1137,7 +1142,7 @@ export const MainLayout: React.FC = () => {
   }, [filteredSubfolders, filteredFiles]);
 
   // Selection Handlers (Click, Ctrl+Click, Shift+Click)
-  const handleItemClick = (
+  const handleItemClick = useCallback((
     e: React.MouseEvent,
     id: string,
     type: "folder" | "song",
@@ -1188,9 +1193,9 @@ export const MainLayout: React.FC = () => {
       }
       setLastClickedId(id);
     }
-  };
+  }, [viewItems, lastClickedId]);
 
-  const toggleFolderSelect = (id: string, e?: React.MouseEvent) => {
+  const toggleFolderSelect = useCallback((id: string, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
     setSelectedFolderIds((prev) => {
       const next = new Set(prev);
@@ -1198,9 +1203,9 @@ export const MainLayout: React.FC = () => {
       else next.add(id);
       return next;
     });
-  };
+  }, []);
 
-  const toggleSongSelect = (id: string, e?: React.MouseEvent) => {
+  const toggleSongSelect = useCallback((id: string, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
     setSelectedSongIds((prev) => {
       const next = new Set(prev);
@@ -1208,7 +1213,7 @@ export const MainLayout: React.FC = () => {
       else next.add(id);
       return next;
     });
-  };
+  }, []);
 
   const selectAllInCurrentView = () => {
     setSelectedFolderIds(new Set(filteredSubfolders.map((f) => f.id)));
@@ -1222,7 +1227,7 @@ export const MainLayout: React.FC = () => {
   };
 
   // Marquee Drag Selection Handler
-  const handleWorkspaceMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+  const handleWorkspaceMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     if (e.button !== 0) return;
 
     const target = e.target as HTMLElement;
@@ -1244,7 +1249,7 @@ export const MainLayout: React.FC = () => {
         songs: new Set(selectedSongIds),
       };
     }
-  };
+  }, [selectedFolderIds, selectedSongIds]);
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -1339,35 +1344,71 @@ export const MainLayout: React.FC = () => {
   }, [selectedFolderIds, allFolders]);
 
   // Batch Handlers
-  const handleBatchMoveConfirm = async (targetFolderId: string | null) => {
+  const handleBatchMoveConfirm = useCallback(async (targetFolderId: string | null) => {
     const folderList = Array.from(selectedFolderIds) as string[];
     const songList = Array.from(selectedSongIds) as string[];
 
-    for (const fId of folderList) {
-      const f = allFolders.find((x) => x.id === fId);
-      if (f)
-        await moveFolder({
-          id: fId,
-          parentId: targetFolderId,
-          updatedAt: f.updatedAt!,
-        });
-    }
-    for (const sId of songList) {
-      const s = allSongs.find((x) => x.id === sId);
-      if (s)
-        await moveSong({
-          id: sId,
-          folderId: targetFolderId,
-          updatedAt: s.updatedAt,
-        });
+    // OPTIMISTIC UPDATE: snapshot current cache then apply changes immediately
+    const prevFoldersData = queryClient.getQueryData(["folders"]);
+    const prevSongsData = queryClient.getQueryData(["songs", "all", {}]);
+
+    if (folderList.length > 0) {
+      queryClient.setQueryData(["folders"], (old: any) => {
+        if (!old) return old;
+        return {
+          ...old,
+          folders: old.folders.map((f: any) =>
+            folderList.includes(f.id) ? { ...f, parentId: targetFolderId } : f,
+          ),
+        };
+      });
     }
 
-    showToast(
-      `${folderList.length + songList.length} item(ns) movido(s) com sucesso!`,
-      "success",
-    );
+    if (songList.length > 0) {
+      queryClient.setQueryData(["songs", "all", {}], (old: any) => {
+        if (!old || !old.songs) return old;
+        return {
+          ...old,
+          songs: old.songs.map((s: any) =>
+            songList.includes(s.id) ? { ...s, folderId: targetFolderId } : s,
+          ),
+        };
+      });
+    }
+
     clearSelection();
-  };
+
+    try {
+      for (const fId of folderList) {
+        const f = allFolders.find((x) => x.id === fId);
+        if (f)
+          await moveFolder({
+            id: fId,
+            parentId: targetFolderId,
+            updatedAt: f.updatedAt!,
+          });
+      }
+      for (const sId of songList) {
+        const s = allSongs.find((x) => x.id === sId);
+        if (s)
+          await moveSong({
+            id: sId,
+            folderId: targetFolderId,
+            updatedAt: s.updatedAt,
+          });
+      }
+
+      showToast(
+        `${folderList.length + songList.length} item(ns) movido(s) com sucesso!`,
+        "success",
+      );
+    } catch (err) {
+      // ROLLBACK on error
+      if (prevFoldersData) queryClient.setQueryData(["folders"], prevFoldersData);
+      if (prevSongsData) queryClient.setQueryData(["songs", "all", {}], prevSongsData);
+      showToast("Erro ao mover itens. As alterações foram revertidas.", "error");
+    }
+  }, [selectedFolderIds, selectedSongIds, allFolders, allSongs, queryClient, moveFolder, moveSong, showToast, clearSelection]);
 
   const handleBatchDeleteConfirm = async (
     folderAction: "move_to_root" | "delete_songs",
@@ -1514,7 +1555,7 @@ export const MainLayout: React.FC = () => {
   };
 
   // Context Menu trigger
-  const handleContextMenu = (
+  const handleContextMenu = useCallback((
     e: React.MouseEvent,
     type: "folder" | "song",
     item: Folder | Song,
@@ -1548,9 +1589,9 @@ export const MainLayout: React.FC = () => {
     const y = Math.min(e.clientY, window.innerHeight - 280);
 
     setContextMenu({ x, y, type, item });
-  };
+  }, [selectedFolderIds, selectedSongIds]);
 
-  const handleCanvasContextMenu = (e: React.MouseEvent) => {
+  const handleCanvasContextMenu = useCallback((e: React.MouseEvent) => {
     const target = e.target as HTMLElement;
     if (target.closest("[data-item-id]")) {
       return;
@@ -1563,7 +1604,7 @@ export const MainLayout: React.FC = () => {
     const y = Math.min(e.clientY, window.innerHeight - 300);
 
     setContextMenu({ x, y, type: "canvas", item: null });
-  };
+  }, [currentFolder]);
 
   // Folder Actions
   const handleCreateFolderSubmit = async (name: string) => {
@@ -1783,7 +1824,7 @@ export const MainLayout: React.FC = () => {
     }
   };
 
-  const handleItemDragStart = (
+  const handleItemDragStart = useCallback((
     e: React.DragEvent,
     id: string,
     type: "folder" | "song",
@@ -1802,17 +1843,77 @@ export const MainLayout: React.FC = () => {
       setLastClickedId(id);
     }
 
+    // Compute total items that will be dragged
+    const willFolders = !isSelected && type === "folder"
+      ? new Set([id])
+      : isSelected ? selectedFolderIds : (type === "folder" ? new Set([...selectedFolderIds, id]) : selectedFolderIds);
+    const willSongs = !isSelected && type === "song"
+      ? new Set([id])
+      : isSelected ? selectedSongIds : (type === "song" ? new Set([...selectedSongIds, id]) : selectedSongIds);
+    const totalDragging = willFolders.size + willSongs.size;
+
+    if (totalDragging > 1) {
+      // Build a stacked ghost drag image
+      const ghost = document.createElement("div");
+      ghost.style.cssText = [
+        "position:fixed",
+        "top:-2000px",
+        "left:-2000px",
+        "width:150px",
+        "height:60px",
+        "pointer-events:none",
+        "z-index:9999",
+      ].join(";");
+
+      const stackCount = Math.min(totalDragging, 3);
+      for (let i = stackCount - 1; i >= 0; i--) {
+        const card = document.createElement("div");
+        const rotation = (i - Math.floor(stackCount / 2)) * 4;
+        const yOffset = i * -3;
+        card.style.cssText = [
+          "position:absolute",
+          "width:140px",
+          "height:44px",
+          "background:white",
+          "border:2px solid rgba(2,132,199,0.6)",
+          "border-radius:14px",
+          "box-shadow:0 4px 16px rgba(0,0,0,0.18)",
+          "display:flex",
+          "align-items:center",
+          "justify-content:center",
+          `transform:rotate(${rotation}deg) translateY(${yOffset}px)`,
+          "font-size:12px",
+          "font-weight:800",
+          "color:#0284c7",
+          "letter-spacing:0.05em",
+          "font-family:system-ui,sans-serif",
+          `top:${(stackCount - 1 - i) * 3}px`,
+          "left:0",
+        ].join(";");
+        if (i === 0) {
+          card.textContent = `${totalDragging} itens`;
+        }
+        ghost.appendChild(card);
+      }
+
+      document.body.appendChild(ghost);
+      e.dataTransfer.setDragImage(ghost, 70, 22);
+      requestAnimationFrame(() => {
+        if (document.body.contains(ghost)) document.body.removeChild(ghost);
+      });
+    }
+
     setIsInternalDragActive(true);
     e.dataTransfer.effectAllowed = "move";
     e.dataTransfer.setData("application/x-app-internal-drag", "true");
-  };
+  }, [selectedFolderIds, selectedSongIds]);
 
-  const handleItemDragEnd = () => {
+  const handleItemDragEnd = useCallback(() => {
     setIsInternalDragActive(false);
     setDropTargetFolderId(null);
-  };
+  }, []);
 
-  const handleFolderDragOver = (e: React.DragEvent, folderId: string) => {
+  const handleFolderDragOver = useCallback((e: React.DragEvent, folderId: string) => {
     if (!isInternalDragActive) return;
     e.preventDefault();
     e.stopPropagation();
@@ -1823,14 +1924,14 @@ export const MainLayout: React.FC = () => {
     }
     e.dataTransfer.dropEffect = "move";
     setDropTargetFolderId(folderId);
-  };
+  }, [isInternalDragActive, disabledFolderIdsForBatchMove]);
 
-  const handleFolderDragLeave = (e: React.DragEvent, folderId: string) => {
+  const handleFolderDragLeave = useCallback((e: React.DragEvent, folderId: string) => {
     e.stopPropagation();
     setDropTargetFolderId((prev) => (prev === folderId ? null : prev));
-  };
+  }, []);
 
-  const handleFolderDrop = async (e: React.DragEvent, folderId: string) => {
+  const handleFolderDrop = useCallback(async (e: React.DragEvent, folderId: string) => {
     e.preventDefault();
     e.stopPropagation();
     const wasInternalDrag = isInternalDragActive;
@@ -1841,7 +1942,7 @@ export const MainLayout: React.FC = () => {
 
     // Move direto, sem modal de confirmação
     await handleBatchMoveConfirm(folderId);
-  };
+  }, [isInternalDragActive, disabledFolderIdsForBatchMove, handleBatchMoveConfirm]);
 
   const totalItemsCount = filteredSubfolders.length + filteredFiles.length;
 
@@ -2368,30 +2469,31 @@ export const MainLayout: React.FC = () => {
                       )}
                     </div>
 
-                    {((isServicesView && serviceAsFolderItem) ||
-                      isExplorerView) && (
+                    {(isServicesView || isExplorerView) && (
                       <>
                         {/* Filter Pop-Up Panel Trigger Button */}
-                        <button
-                          onClick={() => {
-                            navigateBackToDrive();
-                            setIsFilterPanelOpen(true);
-                          }}
-                          className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl border text-xs font-black uppercase tracking-widest transition-all cursor-pointer relative ${
-                            activeFiltersCount > 0
-                              ? "bg-m3-primary/10 border-m3-primary text-m3-primary shadow-lg shadow-m3-primary/10"
-                              : "bg-m3-card border-m3-border text-m3-secondary hover:bg-m3-hover hover:text-m3-text hover:border-m3-primary/30"
-                          }`}
-                          title="Abrir Filtros Avançados"
-                        >
-                          <Filter className="w-4 h-4" />
-                          <span className="hidden sm:inline">Filtros</span>
-                          {activeFiltersCount > 0 && (
-                            <span className="w-4.5 h-4.5 rounded-full bg-m3-primary text-white text-[10px] font-black flex items-center justify-center shadow-sm">
-                              {activeFiltersCount}
-                            </span>
-                          )}
-                        </button>
+                        {isExplorerView && (
+                          <button
+                            onClick={() => {
+                              navigateBackToDrive();
+                              setIsFilterPanelOpen(true);
+                            }}
+                            className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl border text-xs font-black uppercase tracking-widest transition-all cursor-pointer relative ${
+                              activeFiltersCount > 0
+                                ? "bg-m3-primary/10 border-m3-primary text-m3-primary shadow-lg shadow-m3-primary/10"
+                                : "bg-m3-card border-m3-border text-m3-secondary hover:bg-m3-hover hover:text-m3-text hover:border-m3-primary/30"
+                            }`}
+                            title="Abrir Filtros Avançados"
+                          >
+                            <Filter className="w-4 h-4" />
+                            <span className="hidden sm:inline">Filtros</span>
+                            {activeFiltersCount > 0 && (
+                              <span className="w-4.5 h-4.5 rounded-full bg-m3-primary text-white text-[10px] font-black flex items-center justify-center shadow-sm">
+                                {activeFiltersCount}
+                              </span>
+                            )}
+                          </button>
+                        )}
 
                         {/* Sort Control Button */}
                         <div className="flex items-center gap-2 bg-m3-bg border border-m3-border rounded-2xl px-3 py-2 text-xs transition-all hover:border-m3-primary/30">
@@ -2410,7 +2512,7 @@ export const MainLayout: React.FC = () => {
                           >
                             <option value="title-asc">Nome (A-Z)</option>
                             <option value="title-desc">Nome (Z-A)</option>
-                            <option value="artist-asc">Artista (A-Z)</option>
+                            {!isServicesView && <option value="artist-asc">Artista (A-Z)</option>}
                             <option value="updatedAt-desc">Data Recente</option>
                           </select>
                         </div>
