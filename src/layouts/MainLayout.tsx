@@ -9,11 +9,14 @@ import {
   Folder,
   Input,
   Modal,
+  Service,
+  servicesApi,
   Song,
   songsApi,
 } from "@hosanna/shared";
 import {
   AlertTriangle,
+  Archive,
   ArrowRightLeft,
   ArrowUpDown,
   Calendar,
@@ -69,7 +72,7 @@ import { useAllSongs } from "../hooks/useSongs";
 
 import { ConversionResult, printApi } from "@hosanna/shared";
 import { useStatsigClient } from "@statsig/react-bindings";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Action, KBarProvider } from "kbar";
 import { ServiceForm } from "../components/forms/ServiceForm";
 import { KBarCommandPaletteUI } from "../components/KBarCommandPalette";
@@ -385,6 +388,26 @@ export const MainLayout: React.FC = () => {
   const allServices = useMemo(
     () => servicesQuery.data || [],
     [servicesQuery.data],
+  );
+
+  // Services Archive toggle
+  const [showArchived, setShowArchived] = useState(false);
+  const archivedServicesQuery = useQuery({
+    queryKey: ["services", "archived"],
+    queryFn: async () => {
+      const all = await servicesApi.getServices();
+      return (Array.isArray(all) ? all : []).filter((s: Service) => s.archived);
+    },
+    enabled: showArchived,
+    staleTime: 1000 * 60 * 5,
+  });
+
+  const archivedServices = useMemo(
+    () =>
+      showArchived
+        ? (archivedServicesQuery.data ?? allServices.filter((s) => s.archived))
+        : [],
+    [showArchived, archivedServicesQuery.data, allServices],
   );
 
   const { client } = useStatsigClient();
@@ -2471,6 +2494,32 @@ export const MainLayout: React.FC = () => {
 
                     {(isServicesView || isExplorerView) && (
                       <>
+                        {/* Archive Toggle Button (Services View) */}
+                        {isServicesView && (
+                          <button
+                            type="button"
+                            onClick={() => setShowArchived((v) => !v)}
+                            className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl border text-xs font-black uppercase tracking-widest transition-all cursor-pointer shrink-0 ${
+                              showArchived
+                                ? "bg-amber-500/10 border-amber-500 text-amber-600 dark:text-amber-400 shadow-lg shadow-amber-500/10"
+                                : "bg-m3-card border-m3-border text-m3-secondary hover:bg-m3-hover hover:text-m3-text hover:border-amber-500/30"
+                            }`}
+                            title={
+                              showArchived
+                                ? "Ocultar arquivados"
+                                : "Mostrar arquivados"
+                            }
+                          >
+                            <Archive className="w-4 h-4" />
+                            <span className="hidden sm:inline">Arquivados</span>
+                            {showArchived && archivedServices.length > 0 && (
+                              <span className="w-4.5 h-4.5 rounded-full bg-amber-500 text-white text-[10px] font-black flex items-center justify-center">
+                                {archivedServices.length}
+                              </span>
+                            )}
+                          </button>
+                        )}
+
                         {/* Filter Pop-Up Panel Trigger Button */}
                         {isExplorerView && (
                           <button
@@ -2658,6 +2707,10 @@ export const MainLayout: React.FC = () => {
                   handleFolderDragOver,
                   handleFolderDragLeave,
                   handleFolderDrop,
+                  showArchived,
+                  setShowArchived,
+                  archivedServices,
+                  archivedServicesQuery,
                 }}
               />
             </div>
