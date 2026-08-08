@@ -58,13 +58,8 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
     ? client.checkGate("service_as_folder_item")
     : false;
 
-  const {
-    servicesQuery,
-    createService,
-    updateService,
-    deleteService,
-    archiveService,
-  } = useServices();
+  const { servicesQuery, createService, updateService, deleteService } =
+    useServices();
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<Service | null>(null);
@@ -158,7 +153,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
 
   const handleArchive = async () => {
     if (!archiveTarget) return;
-    await archiveService({
+    await updateService({
       id: archiveTarget.id,
       data: {
         archived: !archiveTarget.archived,
