@@ -30,7 +30,7 @@ import { useNavigate, useOutletContext } from "react-router-dom";
 import { SongForm } from "../../components/forms/SongForm";
 import { MoveSongModal } from "../../components/modals/MoveSongModal";
 import { useFolders } from "../../hooks/useFolders";
-import { useSongs } from "../../hooks/useSongs";
+import { useAllSongs } from "../../hooks/useSongs";
 
 interface SongsPageProps {
   hideHeader?: boolean;
@@ -116,17 +116,10 @@ export const SongsPage: React.FC<SongsPageProps> = ({
     selectedFolder,
   ]);
 
-  const { songsQuery, createSong, deleteSong, moveSong } = useSongs({
-    search: finalSearchQuery,
-    folder: selectedFolder || undefined,
-    sortBy: finalSortBy,
-    sortOrder: finalSortOrder,
-    page,
-    limit: 50, // Increased limit for better library view
-    key: actualSelectedKey || undefined,
-    tag: actualSelectedTag || undefined,
-    searchFields: actualSearchFields,
-  });
+  const ITEMS_PER_PAGE = 50;
+
+  // Fetch the full cached song list — no per-page API calls
+  const { songsQuery, createSong, deleteSong, moveSong } = useAllSongs();
 
   const { foldersQuery } = useFolders();
 
@@ -138,11 +131,72 @@ export const SongsPage: React.FC<SongsPageProps> = ({
   const folders = Array.isArray(foldersQuery.data?.folders)
     ? foldersQuery.data.folders
     : [];
-  const songsData = Array.isArray(songsQuery.data?.songs)
+
+  const allSongs: Song[] = Array.isArray(songsQuery.data?.songs)
     ? songsQuery.data.songs
     : [];
-  const totalPages = Math.max(1, songsQuery.data?.totalPages || 1);
-  const totalSongs = songsQuery.data?.total || 0;
+
+  // Client-side filtering
+  const filteredSongs = React.useMemo(() => {
+    let result = allSongs;
+
+    if (finalSearchQuery) {
+      const q = finalSearchQuery.toLowerCase();
+      result = result.filter((song) => {
+        const inTitle = actualSearchFields.title && song.title?.toLowerCase().includes(q);
+        const inArtist = actualSearchFields.artist && song.artist?.toLowerCase().includes(q);
+        const inContent = actualSearchFields.content && song.content?.toLowerCase().includes(q);
+        const inTags = actualSearchFields.tags && song.tags?.some((t) => t.toLowerCase().includes(q));
+        return inTitle || inArtist || inContent || inTags;
+      });
+    }
+
+    if (selectedFolder) {
+      if (selectedFolder === "root") {
+        result = result.filter((song) => !song.folderId);
+      } else {
+        result = result.filter((song) => song.folderId === selectedFolder);
+      }
+    }
+
+    if (actualSelectedKey) {
+      result = result.filter((song) => {
+        const k = song.content?.match(/\{key:\s*([^}]+)\}/i)?.[1]?.trim();
+        return k === actualSelectedKey;
+      });
+    }
+
+    if (actualSelectedTag) {
+      result = result.filter((song) => song.tags?.includes(actualSelectedTag));
+    }
+
+    // Client-side sorting
+    result = [...result].sort((a, b) => {
+      let valA: string | number = "";
+      let valB: string | number = "";
+
+      if (finalSortBy === "title") {
+        valA = a.title?.toLowerCase() ?? "";
+        valB = b.title?.toLowerCase() ?? "";
+      } else if (finalSortBy === "artist") {
+        valA = a.artist?.toLowerCase() ?? "";
+        valB = b.artist?.toLowerCase() ?? "";
+      } else if (finalSortBy === "updatedAt") {
+        valA = new Date(a.updatedAt).getTime();
+        valB = new Date(b.updatedAt).getTime();
+      }
+
+      if (valA < valB) return finalSortOrder === "asc" ? -1 : 1;
+      if (valA > valB) return finalSortOrder === "asc" ? 1 : -1;
+      return 0;
+    });
+
+    return result;
+  }, [allSongs, finalSearchQuery, selectedFolder, actualSelectedKey, actualSelectedTag, actualSearchFields, finalSortBy, finalSortOrder]);
+
+  const totalSongs = filteredSongs.length;
+  const totalPages = Math.max(1, Math.ceil(totalSongs / ITEMS_PER_PAGE));
+  const songsData = filteredSongs.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
 
   const handleCreateSongSubmit = React.useCallback(
     async (data: {
@@ -410,7 +464,7 @@ export const SongsPage: React.FC<SongsPageProps> = ({
             totalPages={totalPages}
             onPageChange={(p) => setPage(p)}
             total={totalSongs}
-            limit={50}
+            limit={ITEMS_PER_PAGE}
           />
         </div>
       </div>
