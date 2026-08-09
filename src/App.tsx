@@ -1,23 +1,17 @@
 import { configureApiClient, Spinner } from "@hosanna/shared";
 import { StatsigProvider, useClientAsyncInit } from "@statsig/react-bindings";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/react";
 import { useEffect } from "react";
 import { BrowserRouter } from "react-router-dom";
+import { CacheHydrationProvider } from "./contexts/CacheHydrationProvider";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { SyncProvider } from "./contexts/SyncContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import { queryClient } from "./queryClient";
 import { AppRoutes } from "./routes/AppRoutes";
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      refetchOnWindowFocus: false,
-      staleTime: 1000 * 30, // 30 seconds
-    },
-  },
-});
 
 function StatsigWrapper({ children }: { children: React.ReactNode }) {
   const { user, tenant, isLoading } = useAuth();
@@ -74,11 +68,13 @@ export default function App() {
         <StatsigWrapper>
           <ThemeProvider>
             <SyncProvider>
-              <BrowserRouter>
-                <Analytics />
-                <SpeedInsights />
-                <AppRoutes />
-              </BrowserRouter>
+              <CacheHydrationProvider>
+                <BrowserRouter>
+                  <Analytics />
+                  <SpeedInsights />
+                  <AppRoutes />
+                </BrowserRouter>
+              </CacheHydrationProvider>
             </SyncProvider>
           </ThemeProvider>
         </StatsigWrapper>
