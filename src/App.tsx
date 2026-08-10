@@ -1,4 +1,4 @@
-import { configureApiClient, Spinner } from "@hosanna/shared";
+import { Spinner } from "@hosanna/shared";
 import { StatsigProvider, useClientAsyncInit } from "@statsig/react-bindings";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Analytics } from "@vercel/analytics/react";
@@ -30,7 +30,7 @@ function StatsigWrapper({ children }: { children: React.ReactNode }) {
       email: user?.email,
       locale: "pt",
       custom: {
-        role: user?.role ?? "user",
+        role: (user as any)?.role ?? "user",
         tenant_slug: tenant?.slug ?? "default",
       },
     });
@@ -56,12 +56,6 @@ function StatsigWrapper({ children }: { children: React.ReactNode }) {
   );
 }
 export default function App() {
-  configureApiClient(
-    localStorage.getItem("server_url") ||
-      import.meta.env.VITE_API_URL ||
-      "/api",
-  );
-
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>

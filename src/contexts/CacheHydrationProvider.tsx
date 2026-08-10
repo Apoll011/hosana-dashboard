@@ -20,9 +20,9 @@
  * rendering.
  */
 
-import { getApiClient } from "@hosanna/shared";
 import React, { useEffect, useRef } from "react";
 import { clearAllEntries } from "../cache/queryCache";
+import { useAuth } from "./AuthContext";
 import { useSync } from "./SyncContext";
 
 interface Props {
@@ -31,49 +31,27 @@ interface Props {
 
 export const CacheHydrationProvider: React.FC<Props> = ({ children }) => {
   const { triggerSyncCheck } = useSync();
+  const { isAuthenticated } = useAuth();
   const hasSyncedRef = useRef(false);
-  const prevTokenRef = useRef<string | null | undefined>(undefined);
+  const prevAuthRef = useRef<boolean | undefined>(undefined);
 
   useEffect(() => {
-    // Trigger one immediate background sync on first mount (non-blocking).
-    // SyncContext will only invalidate queries whose timestamps have changed
-    // since the cached data was written, so this is safe and lightweight.
-    if (!hasSyncedRef.current) {
+    if (!hasSyncedRef.current && isAuthenticated) {
       hasSyncedRef.current = true;
-      const token = getApiClient().getToken();
-      if (token) {
-        // Fire-and-forget — never await to avoid blocking render
-        void triggerSyncCheck();
+      void triggerSyncCheck();
+    }
+  }, [triggerSyncCheck, isAuthenticated]);
+
+  useEffect(() => {
+    if (prevAuthRef.current !== undefined) {
+      if (prevAuthRef.current && !isAuthenticated) {
+        // User logged out
+        void clearAllEntries();
+        hasSyncedRef.current = false;
       }
     }
-  }, [triggerSyncCheck]);
-
-  // Clear IDB when the user logs out (token disappears after being present).
-  useEffect(() => {
-    const checkToken = () => {
-      const currentToken = getApiClient().getToken();
-
-      if (prevTokenRef.current !== undefined) {
-        const wasAuthenticated = !!prevTokenRef.current;
-        const isNowAuthenticated = !!currentToken;
-
-        if (wasAuthenticated && !isNowAuthenticated) {
-          // User logged out — purge the IDB cache.
-          void clearAllEntries();
-        }
-      }
-
-      prevTokenRef.current = currentToken;
-    };
-
-    // Check on mount
-    checkToken();
-
-    // Re-check periodically to detect logout from another tab or
-    // programmatic token removal.
-    const interval = setInterval(checkToken, 5000);
-    return () => clearInterval(interval);
-  }, []);
+    prevAuthRef.current = isAuthenticated;
+  }, [isAuthenticated]);
 
   return <>{children}</>;
 };

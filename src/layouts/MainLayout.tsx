@@ -52,11 +52,13 @@ import {
   Trash2,
   Upload,
   User,
+  Users,
   X,
 } from "lucide-react";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
-import logo from "../assets/images/hosannastudio_logo.png";
+import { InboxButton } from "../components/Inbox";
+import { authClient } from "../lib/authClient";
 import { FolderForm } from "../components/forms/FolderForm";
 import { SongForm } from "../components/forms/SongForm";
 import { BatchDeleteModal } from "../components/modals/BatchDeleteModal";
@@ -341,7 +343,8 @@ export const MainLayout: React.FC = () => {
   const isServiceEditorView =
     location.pathname.startsWith("/services/") &&
     location.pathname !== "/services";
-  const isMusiciansView = location.pathname.startsWith("/musicians");
+
+  const isTeamsView = location.pathname.startsWith("/teams");
   const isSettingsView = location.pathname.startsWith("/settings");
   const isExplorerView =
     location.pathname.startsWith("/folders") ||
@@ -349,7 +352,7 @@ export const MainLayout: React.FC = () => {
       !isSongEditorView &&
       !isServicesView &&
       !isServiceEditorView &&
-      !isMusiciansView &&
+      !isTeamsView &&
       !isSettingsView);
   const isEditorView = isSongEditorView || isServiceEditorView;
 
@@ -426,7 +429,7 @@ export const MainLayout: React.FC = () => {
 
   const handleSearchChange = (val: string) => {
     setSearchQuery(val);
-    if (isMusiciansView || isSettingsView) {
+    if (isSettingsView) {
       navigate("/folders");
     }
   };
@@ -444,7 +447,7 @@ export const MainLayout: React.FC = () => {
   ) => {
     setSortBy(sb);
     setSortOrder(so);
-    if (isMusiciansView || isSettingsView) {
+    if (isSettingsView) {
       navigate("/folders");
     }
   };
@@ -452,7 +455,7 @@ export const MainLayout: React.FC = () => {
   const handleViewModeChange = (mode: "grid" | "list") => {
     setViewMode(mode);
     localStorage.setItem("viewMode", mode);
-    if (isMusiciansView || isSettingsView) {
+    if (isSettingsView) {
       navigate("/folders");
     }
   };
@@ -1997,7 +2000,7 @@ export const MainLayout: React.FC = () => {
             >
               <div className="w-11 h-11 rounded-xl flex items-center justify-center border border-m3-border/50 bg-m3-card transition-transform hover:scale-105 shadow-xs shrink-0">
                 <img
-                  src={logo}
+                  src="/favicon.png"
                   alt="Hosanna Studio"
                   className="w-10 h-10 object-contain rounded-lg"
                 />
@@ -2131,6 +2134,28 @@ export const MainLayout: React.FC = () => {
             )}
           </button>
 
+          <button
+            onClick={() => {
+              navigate("/teams");
+              if (window.innerWidth < 768) setIsSidebarOpen(false);
+            }}
+            title={isSidebarCollapsed ? `Equipas` : undefined}
+            className={`w-full flex items-center ${isSidebarCollapsed ? "justify-center" : "justify-between"} px-4 py-3 text-[13px] font-bold rounded-2xl transition-all cursor-pointer group ${
+              isTeamsView
+                ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 shadow-sm"
+                : "text-m3-secondary hover:bg-m3-hover hover:text-m3-text"
+            }`}
+          >
+            <div
+              className={`flex items-center ${isSidebarCollapsed ? "" : "gap-3"}`}
+            >
+              <Users
+                className={`w-4.5 h-4.5 ${isTeamsView ? "text-amber-500" : "text-m3-secondary"}`}
+              />
+              {!isSidebarCollapsed && <span>Equipas</span>}
+            </div>
+          </button>
+
           {!isSidebarCollapsed && show_folder_tree && (
             <>
               <div className="mt-6 px-3 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-m3-secondary opacity-60">
@@ -2173,9 +2198,9 @@ export const MainLayout: React.FC = () => {
                   className={`flex items-center ${isSidebarCollapsed ? "" : "gap-2"} min-w-0`}
                 >
                   <div className="w-7 h-7 rounded-full bg-linear-to-tr from-[#0284c7] to-sky-400 flex items-center justify-center text-white font-extrabold text-xs shadow-sm shrink-0">
-                    {user.logo ? (
+                    {user.image ? (
                       <img
-                        src={user.logo}
+                        src={user.image as string}
                         alt={user.name}
                         className="w-full h-full rounded-full object-cover"
                       />
@@ -2189,7 +2214,7 @@ export const MainLayout: React.FC = () => {
                         {user.name}
                       </span>
                       <span className="text-[9px] text-emerald-600 dark:text-emerald-400 font-bold uppercase tracking-wider">
-                        {user.role}
+                        {(user as any).role as string}
                       </span>
                     </div>
                   )}
@@ -2260,7 +2285,6 @@ export const MainLayout: React.FC = () => {
             {(isExplorerView ||
               isSongsView ||
               isServicesView ||
-              isMusiciansView ||
               isSettingsView ||
               isEditorView) && (
               <div className="p-3 sm:p-4 bg-m3-sidebar/40 border-b border-m3-border/50 flex flex-col md:flex-row items-center justify-between gap-3 sm:gap-4">
@@ -2434,22 +2458,22 @@ export const MainLayout: React.FC = () => {
                       </>
                     )}
 
-                    {isMusiciansView && (
-                      <>
-                        <ChevronRight className="w-3.5 h-3.5 text-m3-secondary/40 shrink-0" />
-                        <div className="flex items-center gap-2 font-black text-m3-primary shrink-0 uppercase tracking-wide">
-                          <User className="w-4 h-4" />
-                          <span>Músicos</span>
-                        </div>
-                      </>
-                    )}
-
                     {isSettingsView && (
                       <>
                         <ChevronRight className="w-3.5 h-3.5 text-m3-secondary/40 shrink-0" />
                         <div className="flex items-center gap-2 font-black text-m3-primary shrink-0 uppercase tracking-wide">
                           <Settings className="w-4 h-4" />
                           <span>Definições</span>
+                        </div>
+                      </>
+                    )}
+
+                    {isTeamsView && (
+                      <>
+                        <ChevronRight className="w-3.5 h-3.5 text-m3-secondary/40 shrink-0" />
+                        <div className="flex items-center gap-2 font-black text-m3-primary shrink-0 uppercase tracking-wide">
+                          <Users className="w-4 h-4" />
+                          <span>Equipas</span>
                         </div>
                       </>
                     )}
@@ -2593,6 +2617,8 @@ export const MainLayout: React.FC = () => {
                         </div>
                       </>
                     )}
+
+                    <InboxButton client={authClient} className="shrink-0" />
 
                     <div className="relative shrink-0 ml-1" ref={plusMenuRef}>
                       <button

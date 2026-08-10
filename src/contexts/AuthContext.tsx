@@ -3,22 +3,37 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {
-  authApi,
-  getApiClient,
-  LoginParams,
-  Tenant,
-  User,
-} from "@hosanna/shared";
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
+import { authClient } from "../lib/authClient";
+
+interface SessionUser {
+  id: string;
+  name: string;
+  email: string;
+  image?: string;
+  emailVerified: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+  [key: string]: unknown;
+}
+
+// Tenant shape compatible with legacy code
+interface Tenant {
+  id: string;
+  name: string;
+  slug: string;
+  logo?: string;
+  active: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
 
 interface AuthContextType {
-  user: User | null;
+  user: SessionUser | null;
   tenant: Tenant | null;
-  token: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (params: LoginParams) => Promise<void>;
+  refetch: () => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -27,72 +42,50 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<SessionUser | null>(null);
   const [tenant, setTenant] = useState<Tenant | null>(null);
-  const [token, setToken] = useState<string | null>(() =>
-    getApiClient().getToken(),
-  );
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Initialize auth state from local token
-  useEffect(() => {
-    const initAuth = async () => {
-      const savedToken = getApiClient().getToken();
-      if (!savedToken) {
-        setIsLoading(false);
-        return;
-      }
+  const fetchSession = useCallback(async () => {
+    const { data } = await authClient.getSession();
+    const sessionUser = (data?.user as SessionUser) ?? null;
+    setUser(sessionUser);
 
+    // Fetch active organization if user exists
+    if (sessionUser) {
       try {
-        const data = await authApi.getCurrentUser();
-        setUser(data.user);
-        setToken(savedToken);
-        const t = await authApi.getCurrentTenant();
-        setTenant(t);
-      } catch (err) {
-        console.warn("Failed to validate initial token:", err);
-        setUser(null);
-        setToken(null);
+        const { data: orgData } = await authClient.organization.getFullOrganization();
+        if (orgData) {
+          setTenant({
+            id: orgData.id,
+            name: orgData.name,
+            slug: orgData.slug,
+            logo: orgData.logo ?? undefined,
+            active: true,
+            createdAt: new Date(orgData.createdAt),
+            updatedAt: new Date(orgData.createdAt),
+          });
+        } else {
+          setTenant(null);
+        }
+      } catch {
         setTenant(null);
-        getApiClient().setTokens(null, null);
-      } finally {
-        setIsLoading(false);
       }
-    };
-
-    initAuth();
-
-    // Register 401 callback
-    getApiClient().onUnauthorized(() => {
-      setUser(null);
-      setToken(null);
+    } else {
       setTenant(null);
-    });
+    }
+
+    setIsLoading(false);
   }, []);
 
-  const login = async (params: LoginParams) => {
-    setIsLoading(true);
-    try {
-      const res = await authApi.login(params);
-      setUser(res.user);
-      setToken(res.accessToken);
-      const t = await authApi.getCurrentTenant();
-      setTenant(t);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  useEffect(() => {
+    fetchSession();
+  }, [fetchSession]);
 
   const logout = async () => {
-    setIsLoading(true);
-    try {
-      await authApi.logout();
-    } finally {
-      setUser(null);
-      setToken(null);
-      setTenant(null);
-      setIsLoading(false);
-    }
+    await authClient.signOut();
+    setUser(null);
+    setTenant(null);
   };
 
   return (
@@ -100,10 +93,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       value={{
         user,
         tenant,
-        token,
-        isAuthenticated: !!user && !!token,
+        isAuthenticated: !!user,
         isLoading,
-        login,
+        refetch: fetchSession,
         logout,
       }}
     >

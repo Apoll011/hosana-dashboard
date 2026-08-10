@@ -24,6 +24,8 @@
     "@vercel/node": "^5.9.5",
     "@vercel/speed-insights": "^2.0.0",
     "@vitejs/plugin-react": "^5.0.4",
+    "better-auth": "^1.6.26",
+    "better-inbox": "^0.1.2",
     "cheerio": "^1.2.0",
     "dotenv": "^17.2.3",
     "express": "^4.21.2",
