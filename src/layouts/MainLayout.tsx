@@ -56,7 +56,6 @@ import {
 } from "lucide-react";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
-import logo from "../assets/images/hosannastudio_logo.png";
 import { FolderForm } from "../components/forms/FolderForm";
 import { SongForm } from "../components/forms/SongForm";
 import { BatchDeleteModal } from "../components/modals/BatchDeleteModal";
@@ -341,7 +340,7 @@ export const MainLayout: React.FC = () => {
   const isServiceEditorView =
     location.pathname.startsWith("/services/") &&
     location.pathname !== "/services";
-  const isMusiciansView = location.pathname.startsWith("/musicians");
+
   const isSettingsView = location.pathname.startsWith("/settings");
   const isExplorerView =
     location.pathname.startsWith("/folders") ||
@@ -349,7 +348,7 @@ export const MainLayout: React.FC = () => {
       !isSongEditorView &&
       !isServicesView &&
       !isServiceEditorView &&
-      !isMusiciansView &&
+
       !isSettingsView);
   const isEditorView = isSongEditorView || isServiceEditorView;
 
@@ -426,7 +425,7 @@ export const MainLayout: React.FC = () => {
 
   const handleSearchChange = (val: string) => {
     setSearchQuery(val);
-    if (isMusiciansView || isSettingsView) {
+    if (isSettingsView) {
       navigate("/folders");
     }
   };
@@ -444,7 +443,7 @@ export const MainLayout: React.FC = () => {
   ) => {
     setSortBy(sb);
     setSortOrder(so);
-    if (isMusiciansView || isSettingsView) {
+    if (isSettingsView) {
       navigate("/folders");
     }
   };
@@ -452,7 +451,7 @@ export const MainLayout: React.FC = () => {
   const handleViewModeChange = (mode: "grid" | "list") => {
     setViewMode(mode);
     localStorage.setItem("viewMode", mode);
-    if (isMusiciansView || isSettingsView) {
+    if (isSettingsView) {
       navigate("/folders");
     }
   };
@@ -1997,7 +1996,7 @@ export const MainLayout: React.FC = () => {
             >
               <div className="w-11 h-11 rounded-xl flex items-center justify-center border border-m3-border/50 bg-m3-card transition-transform hover:scale-105 shadow-xs shrink-0">
                 <img
-                  src={logo}
+                  src="/favicon.png"
                   alt="Hosanna Studio"
                   className="w-10 h-10 object-contain rounded-lg"
                 />
@@ -2173,9 +2172,9 @@ export const MainLayout: React.FC = () => {
                   className={`flex items-center ${isSidebarCollapsed ? "" : "gap-2"} min-w-0`}
                 >
                   <div className="w-7 h-7 rounded-full bg-linear-to-tr from-[#0284c7] to-sky-400 flex items-center justify-center text-white font-extrabold text-xs shadow-sm shrink-0">
-                    {user.logo ? (
+                    {user.image ? (
                       <img
-                        src={user.logo}
+                        src={user.image as string}
                         alt={user.name}
                         className="w-full h-full rounded-full object-cover"
                       />
@@ -2189,7 +2188,7 @@ export const MainLayout: React.FC = () => {
                         {user.name}
                       </span>
                       <span className="text-[9px] text-emerald-600 dark:text-emerald-400 font-bold uppercase tracking-wider">
-                        {user.role}
+                        {(user as any).role as string}
                       </span>
                     </div>
                   )}
@@ -2260,7 +2259,6 @@ export const MainLayout: React.FC = () => {
             {(isExplorerView ||
               isSongsView ||
               isServicesView ||
-              isMusiciansView ||
               isSettingsView ||
               isEditorView) && (
               <div className="p-3 sm:p-4 bg-m3-sidebar/40 border-b border-m3-border/50 flex flex-col md:flex-row items-center justify-between gap-3 sm:gap-4">
@@ -2431,16 +2429,6 @@ export const MainLayout: React.FC = () => {
                             </div>
                           </>
                         )}
-                      </>
-                    )}
-
-                    {isMusiciansView && (
-                      <>
-                        <ChevronRight className="w-3.5 h-3.5 text-m3-secondary/40 shrink-0" />
-                        <div className="flex items-center gap-2 font-black text-m3-primary shrink-0 uppercase tracking-wide">
-                          <User className="w-4 h-4" />
-                          <span>Músicos</span>
-                        </div>
                       </>
                     )}
 

@@ -22,6 +22,7 @@
 
 import React, { useEffect, useRef } from "react";
 import { clearAllEntries } from "../cache/queryCache";
+import { useAuth } from "./AuthContext";
 import { useSync } from "./SyncContext";
 
 interface Props {
@@ -30,43 +31,27 @@ interface Props {
 
 export const CacheHydrationProvider: React.FC<Props> = ({ children }) => {
   const { triggerSyncCheck } = useSync();
+  const { isAuthenticated } = useAuth();
   const hasSyncedRef = useRef(false);
-  const prevTokenRef = useRef<string | null | undefined>(undefined);
+  const prevAuthRef = useRef<boolean | undefined>(undefined);
 
   useEffect(() => {
-    // Trigger one immediate background sync on first mount (non-blocking).
-    // SyncContext will only invalidate queries whose timestamps have changed
-    // since the cached data was written, so this is safe and lightweight.
-    if (!hasSyncedRef.current) {
+    if (!hasSyncedRef.current && isAuthenticated) {
       hasSyncedRef.current = true;
       void triggerSyncCheck();
     }
-  }, [triggerSyncCheck]);
+  }, [triggerSyncCheck, isAuthenticated]);
 
-  // Clear IDB when the user logs out (token disappears after being present).
   useEffect(() => {
-    const checkToken = () => {
-      if (prevTokenRef.current !== undefined) {
-        const wasAuthenticated = !!prevTokenRef.current;
-        const isNowAuthenticated = false;
-
-        if (wasAuthenticated && !isNowAuthenticated) {
-          // User logged out — purge the IDB cache.
-          void clearAllEntries();
-        }
+    if (prevAuthRef.current !== undefined) {
+      if (prevAuthRef.current && !isAuthenticated) {
+        // User logged out
+        void clearAllEntries();
+        hasSyncedRef.current = false;
       }
-
-      prevTokenRef.current = null;
-    };
-
-    // Check on mount
-    checkToken();
-
-    // Re-check periodically to detect logout from another tab or
-    // programmatic token removal.
-    const interval = setInterval(checkToken, 5000);
-    return () => clearInterval(interval);
-  }, []);
+    }
+    prevAuthRef.current = isAuthenticated;
+  }, [isAuthenticated]);
 
   return <>{children}</>;
 };

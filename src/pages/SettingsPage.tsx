@@ -14,7 +14,8 @@ import {
   settingsApi,
   Spinner,
 } from "@hosanna/shared";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { authClient } from "../lib/authClient";
 import {
   AlertCircle,
   AlertTriangle,
@@ -64,6 +65,7 @@ import {
   X,
 } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { ToastMessage, useSync } from "../contexts/SyncContext";
 import { useTheme } from "../contexts/ThemeContext";
@@ -840,6 +842,41 @@ const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
 };
 
 // ─── AccountTab ───────────────────────────────────────────────────────────────
+const ActiveSessionsSection = () => {
+  const { data: sessions, refetch } = useQuery({
+    queryKey: ["activeSessions"],
+    queryFn: async () => {
+      const { data } = await authClient.listSessions();
+      return data || [];
+    }
+  });
+
+  const handleRevoke = async (token: string) => {
+    await authClient.revokeSession({ token });
+    refetch();
+  };
+
+  return (
+    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm mt-6">
+      <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2 mb-4">
+        Sessões Ativas
+      </h3>
+      <div className="space-y-3">
+        {sessions?.map((session) => (
+          <div key={session.id} className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
+            <div className="text-sm">
+              <p className="font-semibold text-slate-900 dark:text-slate-100">{session.userAgent || "Unknown Device"}</p>
+              <p className="text-xs text-slate-500">
+                Criada a: {new Date(session.createdAt).toLocaleDateString()}
+              </p>
+            </div>
+            <Button variant="outline" size="sm" onClick={() => handleRevoke(session.token)}>Revogar</Button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
 
 const AccountTab: React.FC<{ active: boolean }> = ({ active }) => {
   const { user } = useAuth();
@@ -1009,9 +1046,9 @@ const AccountTab: React.FC<{ active: boolean }> = ({ active }) => {
           {/* Avatar */}
           <div className="relative -mt-12 mb-4 w-fit">
             <div className="w-20 h-20 rounded-full border-4 border-white dark:border-slate-900 overflow-hidden shadow-md bg-linear-to-tr from-[#0284c7] to-sky-400 flex items-center justify-center">
-              {displayUser?.logo ? (
+              {displayUser?.image ? (
                 <img
-                  src={displayUser.logo}
+                  src={displayUser.image as string}
                   alt={displayUser.name}
                   className={`w-full h-full object-cover ${isCompressingAvatar ? "opacity-50" : ""}`}
                 />
@@ -1043,7 +1080,7 @@ const AccountTab: React.FC<{ active: boolean }> = ({ active }) => {
               className="hidden"
             />
 
-            {displayUser?.logo && (
+            {displayUser?.image && (
               <button
                 type="button"
                 onClick={handleRemoveAvatar}
@@ -1066,7 +1103,7 @@ const AccountTab: React.FC<{ active: boolean }> = ({ active }) => {
                   {displayUser?.email}
                 </span>
                 <span className="text-slate-300 dark:text-slate-700">·</span>
-                {getRoleBadge(displayUser?.role || "")}
+                {getRoleBadge((displayUser as any)?.role as string || "")}
               </div>
             </div>
             <div className="text-[11px] text-slate-400 dark:text-slate-500 flex items-center gap-1">
@@ -1308,7 +1345,7 @@ const AccountTab: React.FC<{ active: boolean }> = ({ active }) => {
             <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 block mb-1">
               Função
             </span>
-            {getRoleBadge(displayUser?.role || "")}
+            {getRoleBadge((displayUser as any)?.role as string || "")}
           </div>
           <div className="p-3 bg-slate-50 dark:bg-slate-950/50 rounded-xl border border-slate-100 dark:border-slate-800/60">
             <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 block mb-1">
@@ -1328,6 +1365,7 @@ const AccountTab: React.FC<{ active: boolean }> = ({ active }) => {
           </div>
         </div>
       </div>
+      <ActiveSessionsSection />
     </div>
   );
 };
@@ -2141,6 +2179,7 @@ interface SettingsPageProps {
 }
 
 export const SettingsPage: React.FC<SettingsPageProps> = ({ hideHeader }) => {
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { showToast } = useSync();
   const { user: currentUser, logout, tenant } = useAuth();
