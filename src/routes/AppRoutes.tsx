@@ -113,6 +113,11 @@ const SettingsPage = lazyImport(() =>
     default: m.SettingsPage,
   })),
 );
+const TeamsPage = lazyImport(() =>
+  import("../pages/TeamsPage").then((m) => ({
+    default: m.TeamsPage,
+  })),
+);
 
 export const AppRoutes: React.FC = () => {
   return (
@@ -135,6 +140,7 @@ export const AppRoutes: React.FC = () => {
               <Route path="/songs/:id" element={<SongEditorPage />} />
               <Route path="/services" element={<ServicesPage hideHeader />} />
               <Route path="/services/:id" element={<ServiceDetailPage />} />
+              <Route path="/teams" element={<TeamsPage />} />
               <Route path="/settings" element={<SettingsPage hideHeader />} />
             </Route>
           </Route>
