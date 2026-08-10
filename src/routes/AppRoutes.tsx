@@ -9,6 +9,7 @@ import { ErrorBoundary } from "react-error-boundary";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { MainLayout } from "../layouts/MainLayout";
 import { ProtectedRoute } from "./ProtectedRoute";
+import { OnboardingPage } from "../pages/OnboardingPage";
 
 const PageLoader = () => (
   <div className="h-screen w-screen flex items-center justify-center bg-m3-bg">
@@ -107,11 +108,6 @@ const ServiceDetailPage = lazyImport(() =>
     default: m.ServiceDetailPage,
   })),
 );
-const MusiciansPage = lazyImport(() =>
-  import("../pages/MusiciansPage").then((m) => ({
-    default: m.MusiciansPage,
-  })),
-);
 const SettingsPage = lazyImport(() =>
   import("../pages/SettingsPage").then((m) => ({
     default: m.SettingsPage,
@@ -131,6 +127,7 @@ export const AppRoutes: React.FC = () => {
           <Route path="/reset-password" element={<ResetPasswordPage />} />
 
           <Route element={<ProtectedRoute />}>
+            <Route path="/onboarding" element={<OnboardingPage />} />
             <Route element={<MainLayout />}>
               <Route path="/" element={<Navigate to="/folders" replace />} />
               <Route path="/folders" element={<FoldersPage />} />
@@ -138,7 +135,6 @@ export const AppRoutes: React.FC = () => {
               <Route path="/songs/:id" element={<SongEditorPage />} />
               <Route path="/services" element={<ServicesPage hideHeader />} />
               <Route path="/services/:id" element={<ServiceDetailPage />} />
-              <Route path="/musicians" element={<MusiciansPage hideHeader />} />
               <Route path="/settings" element={<SettingsPage hideHeader />} />
             </Route>
           </Route>

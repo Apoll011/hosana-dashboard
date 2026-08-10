@@ -1,7 +1,6 @@
 import { AlertCircle, CheckCircle2 } from "lucide-react";
 import React from "react";
 import { Link } from "react-router-dom";
-import logo from "../../assets/images/hosannastudio_logo.png";
 import bg from "../../assets/images/background.webp";
 
 interface LoginLayoutProps {
@@ -55,7 +54,7 @@ export default function LoginLayout({
             "
           >
             <img
-              src={logo}
+              src="/favicon.png"
               alt="Hosanna Studio"
               className="w-20 h-20 sm:w-22 sm:h-22 object-contain rounded-[22px]"
             />

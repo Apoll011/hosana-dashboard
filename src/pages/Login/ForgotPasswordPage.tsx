@@ -21,7 +21,7 @@ export const ForgotPasswordPage: React.FC = () => {
     setErrorMsg("");
     setIsLoading(true);
 
-    const { error } = await authClient.forgetPassword({
+    const { error } = await (authClient as any).forgetPassword({
       email: email.trim(),
       redirectTo: `${window.location.origin}/reset-password`,
     });
