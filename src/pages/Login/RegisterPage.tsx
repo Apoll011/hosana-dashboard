@@ -3,109 +3,162 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { authApi, Button, Input } from "@hosanna/shared";
-import { ArrowRight, Building, Lock, Mail, User } from "lucide-react";
-import React, { useState } from "react";
+import { Button, Input } from "@hosanna/shared";
+import { ArrowRight, CheckCircle2, Lock, Mail, User } from "lucide-react";
+import React, { useRef, useState } from "react";
+import { authClient } from "../../lib/authClient";
 import LoginLayout from "./Layout";
+import { PasswordStrengthMeter } from "./components/PasswordStrengthMeter";
+import { TurnstileWidget } from "./components/TurnstileWidget";
 
 export const RegisterPage: React.FC = () => {
-  const [joinSlug, setJoinSlug] = useState("");
-  const [joinName, setJoinName] = useState("");
-  const [joinEmail, setJoinEmail] = useState("");
-  const [joinPassword, setJoinPassword] = useState("");
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [captchaToken, setCaptchaToken] = useState("");
+  const captchaRef = useRef<{ reset: () => void }>(null);
 
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
-  const [successInfoBanner, setSuccessInfoBanner] = useState("");
+  const [successState, setSuccessState] = useState(false);
 
-  const handleJoinSubmit = async (e: React.FormEvent) => {
+  const passwordMismatch = confirmPassword.length > 0 && password !== confirmPassword;
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg("");
-    setSuccessInfoBanner("");
-    setIsLoading(true);
 
-    try {
-      if (
-        !joinSlug.trim() ||
-        !joinName.trim() ||
-        !joinEmail.trim() ||
-        !joinPassword.trim()
-      ) {
-        throw new Error("Por favor preencha todos os campos obrigatórios.");
-      }
-
-      const res = await authApi.registerUser({
-        tenantSlug: joinSlug.trim(),
-        name: joinName.trim(),
-        email: joinEmail.trim(),
-        password: joinPassword,
-      });
-
-      setSuccessInfoBanner(
-        res.message ||
-          "Registration successful! Your account is pending approval by a tenant administrator. You will be able to log in once approved.",
-      );
-    } catch (err: any) {
-      setErrorMsg(err.message || "Falha ao realizar registo.");
-    } finally {
-      setIsLoading(false);
+    if (!name.trim() || !email.trim() || !password.trim()) {
+      setErrorMsg("Por favor preencha todos os campos obrigatórios.");
+      return;
     }
+    if (password !== confirmPassword) {
+      setErrorMsg("As palavras-passe não coincidem.");
+      return;
+    }
+    if (password.length < 6) {
+      setErrorMsg("A palavra-passe deve ter pelo menos 6 caracteres.");
+      return;
+    }
+    if (!captchaToken) {
+      setErrorMsg("Por favor complete o CAPTCHA.");
+      return;
+    }
+
+    setIsLoading(true);
+    const { error } = await authClient.signUp.email({
+      name: name.trim(),
+      email: email.trim(),
+      password,
+      fetchOptions: {
+        headers: { "x-captcha-token": captchaToken },
+      },
+    });
+    setIsLoading(false);
+
+    captchaRef.current?.reset();
+    setCaptchaToken("");
+
+    if (error) {
+      setErrorMsg(error.message || "Falha ao realizar registo.");
+      return;
+    }
+
+    setSuccessState(true);
   };
+
+  if (successState) {
+    return (
+      <LoginLayout optionalLink="/login" optionalMsg="Iniciar Sessão">
+        <div className="py-8 flex flex-col items-center text-center animate-in zoom-in-95 duration-500">
+          <div className="relative w-20 h-20 mb-5">
+            <div className="absolute inset-0 bg-emerald-100 rounded-full animate-ping opacity-60" />
+            <div className="relative flex items-center justify-center w-20 h-20 bg-emerald-500 text-white rounded-full shadow-lg shadow-emerald-500/30">
+              <CheckCircle2 className="w-10 h-10" />
+            </div>
+          </div>
+          <h2 className="text-2xl font-black text-slate-900 mb-2">Conta Criada!</h2>
+          <p className="text-slate-500 text-sm font-medium max-w-xs">
+            Enviámos um e-mail de verificação para{" "}
+            <span className="font-bold text-slate-700">{email}</span>.
+            Verifique a sua caixa de entrada para ativar a conta.
+          </p>
+        </div>
+      </LoginLayout>
+    );
+  }
 
   return (
     <LoginLayout
-      optionalLink={"/login"}
-      optionalMsg={"Já tem uma conta ativa? Iniciar Sessão"}
-      redirectMessage={successInfoBanner}
+      optionalLink="/login"
+      optionalMsg="Já tem uma conta? Iniciar Sessão"
       errorMsg={errorMsg}
     >
-      <form onSubmit={handleJoinSubmit} className="space-y-3.5">
+      <form onSubmit={handleSubmit} className="space-y-3.5">
         <Input
-          label="Slug da Organização Existente (tenantSlug)"
-          placeholder="ex: graca-paz"
-          value={joinSlug}
-          onChange={(e) => setJoinSlug(e.target.value)}
-          icon={<Building className="w-4 h-4 text-slate-400" />}
-          className="h-10 rounded-xl text-xs font-mono"
-        />
-
-        <Input
-          label="Nome Completo (name)"
+          label="Nome Completo"
           placeholder="Ex: Maria Santos"
-          value={joinName}
-          onChange={(e) => setJoinName(e.target.value)}
-          icon={<User className="w-4 h-4 text-slate-400" />}
-          className="h-10 rounded-xl text-xs"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          icon={<User className="w-4 h-4 opacity-40" />}
+          className="h-11 rounded-xl border-slate-200 focus:border-m3-primary transition-all text-sm"
         />
 
         <Input
           type="email"
-          label="E-mail (email)"
-          placeholder="maria@igreja.org"
-          value={joinEmail}
-          onChange={(e) => setJoinEmail(e.target.value)}
-          icon={<Mail className="w-4 h-4 text-slate-400" />}
-          className="h-10 rounded-xl text-xs"
+          label="E-mail"
+          placeholder="maria@iglesia.org"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          icon={<Mail className="w-4 h-4 opacity-40" />}
+          className="h-11 rounded-xl border-slate-200 focus:border-m3-primary transition-all text-sm"
         />
 
-        <Input
-          type="password"
-          label="Palavra-passe (password)"
-          placeholder="••••••••"
-          value={joinPassword}
-          onChange={(e) => setJoinPassword(e.target.value)}
-          icon={<Lock className="w-4 h-4 text-slate-400" />}
-          className="h-10 rounded-xl text-xs"
-        />
+        <div className="space-y-1">
+          <Input
+            type="password"
+            label="Palavra-passe"
+            placeholder="••••••••"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            icon={<Lock className="w-4 h-4 opacity-40" />}
+            className="h-11 rounded-xl border-slate-200 focus:border-m3-primary transition-all text-sm"
+          />
+          {password.length > 0 && <PasswordStrengthMeter password={password} />}
+        </div>
+
+        <div className="space-y-1">
+          <Input
+            type="password"
+            label="Confirmar Palavra-passe"
+            placeholder="••••••••"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            icon={<Lock className="w-4 h-4 opacity-40" />}
+            className={`h-11 rounded-xl transition-all text-sm ${
+              passwordMismatch
+                ? "border-rose-400 focus:border-rose-500"
+                : "border-slate-200 focus:border-m3-primary"
+            }`}
+          />
+          {passwordMismatch && (
+            <p className="text-xs font-semibold text-rose-500 pl-1 animate-in fade-in">
+              As palavras-passe não coincidem
+            </p>
+          )}
+        </div>
+
+        <TurnstileWidget ref={captchaRef} onVerify={setCaptchaToken} />
 
         <Button
           type="submit"
           variant="primary"
-          className="w-full h-14 bg-m3-primary hover:bg-m3-primary-dark border-0 font-black uppercase tracking-widest text-[10px] text-white mt-4 rounded-[20px] transition-all shadow-xl shadow-m3-primary/20 hover:shadow-m3-primary/40 flex items-center justify-center gap-2 group"
+          className="w-full h-14 bg-m3-primary hover:bg-m3-primary-dark border-0 font-black uppercase tracking-widest text-[10px] text-white mt-2 rounded-[20px] transition-all shadow-xl shadow-m3-primary/20 hover:shadow-m3-primary/40 flex items-center justify-center gap-2 group"
           isLoading={isLoading}
         >
-          <span>Submeter Pedido de Registo</span>
-          <ArrowRight className="w-4 h-4" />
+          <span>Criar Conta</span>
+          <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
         </Button>
       </form>
     </LoginLayout>

@@ -1,15 +1,14 @@
 import { AlertCircle, CheckCircle2 } from "lucide-react";
 import React from "react";
 import { Link } from "react-router-dom";
-import logo from "../../assets/images/hosannastudio_logo.png";
 import bg from "../../assets/images/background.webp";
 
 interface LoginLayoutProps {
   children: React.ReactNode;
   redirectMessage?: string;
   errorMsg?: string;
-  optionalLink: string;
-  optionalMsg: string;
+  optionalLink?: string;
+  optionalMsg?: string;
   titleMb?: number;
 }
 
@@ -55,7 +54,7 @@ export default function LoginLayout({
             "
           >
             <img
-              src={logo}
+              src="/favicon.png"
               alt="Hosanna Studio"
               className="w-20 h-20 sm:w-22 sm:h-22 object-contain rounded-[22px]"
             />
@@ -83,14 +82,16 @@ export default function LoginLayout({
 
         {children}
 
-        <div className="mt-6 text-center">
-          <Link
-            to={optionalLink}
-            className="inline-flex items-center gap-1.5 text-xs font-bold text-m3-primary hover:underline"
-          >
-            <span>{optionalMsg}</span>
-          </Link>
-        </div>
+        {optionalLink && optionalMsg && (
+          <div className="mt-6 text-center">
+            <Link
+              to={optionalLink}
+              className="inline-flex items-center gap-1.5 text-xs font-bold text-m3-primary hover:underline"
+            >
+              <span>{optionalMsg}</span>
+            </Link>
+          </div>
+        )}
       </div>
     </div>
   );

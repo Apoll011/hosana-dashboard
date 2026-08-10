@@ -9,6 +9,7 @@ import { ErrorBoundary } from "react-error-boundary";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { MainLayout } from "../layouts/MainLayout";
 import { ProtectedRoute } from "./ProtectedRoute";
+import { OnboardingPage } from "../pages/OnboardingPage";
 
 const PageLoader = () => (
   <div className="h-screen w-screen flex items-center justify-center bg-m3-bg">
@@ -69,6 +70,21 @@ const RegisterTenantPage = lazyImport(() =>
     default: m.RegisterTenantPage,
   })),
 );
+const VerifyEmailPage = lazyImport(() =>
+  import("../pages/Login/VerifyEmailPage").then((m) => ({
+    default: m.VerifyEmailPage,
+  })),
+);
+const ForgotPasswordPage = lazyImport(() =>
+  import("../pages/Login/ForgotPasswordPage").then((m) => ({
+    default: m.ForgotPasswordPage,
+  })),
+);
+const ResetPasswordPage = lazyImport(() =>
+  import("../pages/Login/ResetPasswordPage").then((m) => ({
+    default: m.ResetPasswordPage,
+  })),
+);
 const FoldersPage = lazyImport(() =>
   import("../pages/FoldersPage").then((m) => ({
     default: m.FoldersPage,
@@ -92,14 +108,14 @@ const ServiceDetailPage = lazyImport(() =>
     default: m.ServiceDetailPage,
   })),
 );
-const MusiciansPage = lazyImport(() =>
-  import("../pages/MusiciansPage").then((m) => ({
-    default: m.MusiciansPage,
-  })),
-);
 const SettingsPage = lazyImport(() =>
   import("../pages/SettingsPage").then((m) => ({
     default: m.SettingsPage,
+  })),
+);
+const TeamsPage = lazyImport(() =>
+  import("../pages/TeamsPage").then((m) => ({
+    default: m.TeamsPage,
   })),
 );
 
@@ -111,8 +127,12 @@ export const AppRoutes: React.FC = () => {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/new" element={<RegisterTenantPage />} />
+          <Route path="/verify-email" element={<VerifyEmailPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
 
           <Route element={<ProtectedRoute />}>
+            <Route path="/onboarding" element={<OnboardingPage />} />
             <Route element={<MainLayout />}>
               <Route path="/" element={<Navigate to="/folders" replace />} />
               <Route path="/folders" element={<FoldersPage />} />
@@ -120,7 +140,7 @@ export const AppRoutes: React.FC = () => {
               <Route path="/songs/:id" element={<SongEditorPage />} />
               <Route path="/services" element={<ServicesPage hideHeader />} />
               <Route path="/services/:id" element={<ServiceDetailPage />} />
-              <Route path="/musicians" element={<MusiciansPage hideHeader />} />
+              <Route path="/teams" element={<TeamsPage />} />
               <Route path="/settings" element={<SettingsPage hideHeader />} />
             </Route>
           </Route>
