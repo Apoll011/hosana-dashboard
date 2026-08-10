@@ -20,7 +20,6 @@
  * rendering.
  */
 
-import { getApiClient } from "@hosanna/shared";
 import React, { useEffect, useRef } from "react";
 import { clearAllEntries } from "../cache/queryCache";
 import { useSync } from "./SyncContext";
@@ -40,22 +39,16 @@ export const CacheHydrationProvider: React.FC<Props> = ({ children }) => {
     // since the cached data was written, so this is safe and lightweight.
     if (!hasSyncedRef.current) {
       hasSyncedRef.current = true;
-      const token = getApiClient().getToken();
-      if (token) {
-        // Fire-and-forget — never await to avoid blocking render
-        void triggerSyncCheck();
-      }
+      void triggerSyncCheck();
     }
   }, [triggerSyncCheck]);
 
   // Clear IDB when the user logs out (token disappears after being present).
   useEffect(() => {
     const checkToken = () => {
-      const currentToken = getApiClient().getToken();
-
       if (prevTokenRef.current !== undefined) {
         const wasAuthenticated = !!prevTokenRef.current;
-        const isNowAuthenticated = !!currentToken;
+        const isNowAuthenticated = false;
 
         if (wasAuthenticated && !isNowAuthenticated) {
           // User logged out — purge the IDB cache.
@@ -63,7 +56,7 @@ export const CacheHydrationProvider: React.FC<Props> = ({ children }) => {
         }
       }
 
-      prevTokenRef.current = currentToken;
+      prevTokenRef.current = null;
     };
 
     // Check on mount

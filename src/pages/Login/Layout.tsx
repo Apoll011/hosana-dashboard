@@ -8,8 +8,8 @@ interface LoginLayoutProps {
   children: React.ReactNode;
   redirectMessage?: string;
   errorMsg?: string;
-  optionalLink: string;
-  optionalMsg: string;
+  optionalLink?: string;
+  optionalMsg?: string;
   titleMb?: number;
 }
 
@@ -83,14 +83,16 @@ export default function LoginLayout({
 
         {children}
 
-        <div className="mt-6 text-center">
-          <Link
-            to={optionalLink}
-            className="inline-flex items-center gap-1.5 text-xs font-bold text-m3-primary hover:underline"
-          >
-            <span>{optionalMsg}</span>
-          </Link>
-        </div>
+        {optionalLink && optionalMsg && (
+          <div className="mt-6 text-center">
+            <Link
+              to={optionalLink}
+              className="inline-flex items-center gap-1.5 text-xs font-bold text-m3-primary hover:underline"
+            >
+              <span>{optionalMsg}</span>
+            </Link>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -69,6 +69,21 @@ const RegisterTenantPage = lazyImport(() =>
     default: m.RegisterTenantPage,
   })),
 );
+const VerifyEmailPage = lazyImport(() =>
+  import("../pages/Login/VerifyEmailPage").then((m) => ({
+    default: m.VerifyEmailPage,
+  })),
+);
+const ForgotPasswordPage = lazyImport(() =>
+  import("../pages/Login/ForgotPasswordPage").then((m) => ({
+    default: m.ForgotPasswordPage,
+  })),
+);
+const ResetPasswordPage = lazyImport(() =>
+  import("../pages/Login/ResetPasswordPage").then((m) => ({
+    default: m.ResetPasswordPage,
+  })),
+);
 const FoldersPage = lazyImport(() =>
   import("../pages/FoldersPage").then((m) => ({
     default: m.FoldersPage,
@@ -111,6 +126,9 @@ export const AppRoutes: React.FC = () => {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/new" element={<RegisterTenantPage />} />
+          <Route path="/verify-email" element={<VerifyEmailPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
 
           <Route element={<ProtectedRoute />}>
             <Route element={<MainLayout />}>
