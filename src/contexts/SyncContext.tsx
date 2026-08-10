@@ -60,9 +60,6 @@ export const SyncProvider: React.FC<{ children: React.ReactNode }> = ({
   );
 
   const triggerSyncCheck = useCallback(async () => {
-    const token = getApiClient().getToken();
-    if (!token) return;
-
     try {
       setSyncStatus("syncing");
       const data = await syncApi.getStatus();

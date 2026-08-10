@@ -16,10 +16,12 @@ import {
   ShieldCheck,
   User,
 } from "lucide-react";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { authApi } from "@hosanna/shared";
+import { authClient } from "../../lib/authClient";
+import { PasswordStrengthMeter } from "./components/PasswordStrengthMeter";
+import { TurnstileWidget } from "./components/TurnstileWidget";
 import LoginLayout from "./Layout";
 
 export const RegisterTenantPage: React.FC = () => {
@@ -31,22 +33,31 @@ export const RegisterTenantPage: React.FC = () => {
   const [step, setStep] = useState(1);
 
   // Form State
-  const [tenantName, setTenantName] = useState("");
-  const [tenantSlug, setTenantSlug] = useState("");
+  const [orgName, setOrgName] = useState("");
+  const [orgSlug, setOrgSlug] = useState("");
   const [adminName, setAdminName] = useState("");
   const [adminEmail, setAdminEmail] = useState("");
   const [adminPassword, setAdminPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState("");
+  const captchaRef = useRef<{ reset: () => void }>(null);
 
   // Status State
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
 
+  const passwordMismatch = confirmPassword.length > 0 && adminPassword !== confirmPassword;
+
   // Validation per step
-  const isStep1Valid = tenantName.trim() !== "" && tenantSlug.trim() !== "";
+  const isStep1Valid = orgName.trim() !== "" && orgSlug.trim() !== "";
   const isStep2Valid = adminName.trim() !== "" && adminEmail.trim() !== "";
-  const isStep3Valid = adminPassword.trim() !== "" && agreedToTerms;
+  const isStep3Valid =
+    adminPassword.trim() !== "" &&
+    adminPassword === confirmPassword &&
+    agreedToTerms &&
+    !!captchaToken;
 
   const handleNext = () => {
     setErrorMsg("");
@@ -67,19 +78,29 @@ export const RegisterTenantPage: React.FC = () => {
     setIsLoading(true);
 
     try {
-      await authApi.registerTenant({
-        tenantName: tenantName.trim(),
-        tenantSlug: tenantSlug.trim(),
-        adminName: adminName.trim(),
-        adminEmail: adminEmail.trim(),
-        adminPassword: adminPassword,
+      // 1. Sign up the admin user
+      const { error: signUpError } = await authClient.signUp.email({
+        name: adminName.trim(),
+        email: adminEmail.trim(),
+        password: adminPassword,
+        fetchOptions: {
+          headers: { "x-captcha-token": captchaToken },
+        },
       });
 
-      // Show success checkmark
+      if (signUpError) throw new Error(signUpError.message || "Falha ao criar conta.");
+
+      // 2. Create the organization
+      const { error: orgError } = await authClient.organization.create({
+        name: orgName.trim(),
+        slug: orgSlug.trim(),
+      });
+
+      if (orgError) throw new Error(orgError.message || "Falha ao criar organização.");
+
       setIsLoading(false);
       setIsSuccess(true);
 
-      // Wait 2 seconds for the user to see the success animation, then redirect
       setTimeout(() => {
         navigate("/login", {
           state: { message: "Organização criada! Já pode fazer login." },
@@ -87,10 +108,10 @@ export const RegisterTenantPage: React.FC = () => {
         });
       }, 2000);
     } catch (err: any) {
-      setErrorMsg(
-        err.message || "Falha ao criar organização. Tente novamente.",
-      );
+      setErrorMsg(err.message || "Falha ao criar organização. Tente novamente.");
       setIsLoading(false);
+      captchaRef.current?.reset();
+      setCaptchaToken("");
     }
   };
 
@@ -211,8 +232,8 @@ export const RegisterTenantPage: React.FC = () => {
                   type="text"
                   label="Nome da Igreja"
                   placeholder="Ex: Hosanna Community Church"
-                  value={tenantName}
-                  onChange={(e) => setTenantName(e.target.value)}
+                  value={orgName}
+                  onChange={(e) => setOrgName(e.target.value)}
                   icon={<Building2 className="w-4 h-4 opacity-40" />}
                   autoFocus
                   className="h-12 rounded-xl border-slate-200 focus:border-m3-primary text-sm bg-slate-50 focus:bg-white transition-colors"
@@ -221,9 +242,9 @@ export const RegisterTenantPage: React.FC = () => {
                   type="text"
                   label="URL Personalizado"
                   placeholder="Ex: hosanna-community"
-                  value={tenantSlug}
+                  value={orgSlug}
                   onChange={(e) =>
-                    setTenantSlug(
+                    setOrgSlug(
                       e.target.value.toLowerCase().replace(/\s+/g, "-"),
                     )
                   }
@@ -277,18 +298,47 @@ export const RegisterTenantPage: React.FC = () => {
                     Proteja a sua conta com uma senha forte.
                   </p>
                 </div>
-                <Input
-                  type="password"
-                  label="Palavra-passe"
-                  placeholder="••••••••••"
-                  value={adminPassword}
-                  onChange={(e) => setAdminPassword(e.target.value)}
-                  icon={<Lock className="w-4 h-4 opacity-40" />}
-                  autoFocus
-                  className="h-12 rounded-xl border-slate-200 focus:border-m3-primary text-sm bg-slate-50 focus:bg-white transition-colors"
-                />
 
-                <div className="flex items-start gap-3 mt-4 p-3 bg-slate-50 rounded-xl border border-slate-100">
+                <div className="space-y-1">
+                  <Input
+                    type="password"
+                    label="Palavra-passe"
+                    placeholder="••••••••••"
+                    value={adminPassword}
+                    onChange={(e) => setAdminPassword(e.target.value)}
+                    icon={<Lock className="w-4 h-4 opacity-40" />}
+                    autoFocus
+                    className="h-12 rounded-xl border-slate-200 focus:border-m3-primary text-sm bg-slate-50 focus:bg-white transition-colors"
+                  />
+                  {adminPassword.length > 0 && (
+                    <PasswordStrengthMeter password={adminPassword} />
+                  )}
+                </div>
+
+                <div className="space-y-1">
+                  <Input
+                    type="password"
+                    label="Confirmar Palavra-passe"
+                    placeholder="••••••••••"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    icon={<Lock className="w-4 h-4 opacity-40" />}
+                    className={`h-12 rounded-xl text-sm bg-slate-50 focus:bg-white transition-colors ${
+                      passwordMismatch
+                        ? "border-rose-400 focus:border-rose-500"
+                        : "border-slate-200 focus:border-m3-primary"
+                    }`}
+                  />
+                  {passwordMismatch && (
+                    <p className="text-xs font-semibold text-rose-500 pl-1 animate-in fade-in">
+                      As palavras-passe não coincidem
+                    </p>
+                  )}
+                </div>
+
+                <TurnstileWidget ref={captchaRef} onVerify={setCaptchaToken} />
+
+                <div className="flex items-start gap-3 p-3 bg-slate-50 rounded-xl border border-slate-100">
                   <input
                     type="checkbox"
                     id="terms"
