@@ -3,34 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-<<<<<<< HEAD
-import React, { useState, useEffect } from "react";
-import {
-  Users,
-  Plus,
-  Trash2,
-  Edit2,
-  UserPlus,
-  Shield,
-  Crown,
-  Settings,
-  Search,
-  CheckCircle2,
-  X,
-  ChevronRight,
-  UserCheck,
-  UserX,
-  Building2,
-  Lock,
-  Music,
-  Calendar,
-  Layers,
-  ArrowLeft,
-  Info,
-} from "lucide-react";
-import { Button, Input, Modal, Spinner } from "@hosanna/shared";
-import { authClient } from "../lib/authClient";
-=======
 import { Button, Input, Modal } from "@hosanna/shared";
 import {
   ArrowLeft,
@@ -45,7 +17,6 @@ import {
   Users,
 } from "lucide-react";
 import React, { useState } from "react";
->>>>>>> 4948d6d (feat: add TeamsPage component with team management features)
 import { useAuth } from "../contexts/AuthContext";
 import { useSync } from "../contexts/SyncContext";
 
@@ -98,12 +69,8 @@ export const TeamsPage: React.FC = () => {
       id: "team-2",
       name: "Técnicos de Som e Multimédia",
       slug: "som-multimedia",
-<<<<<<< HEAD
-      description: "Equipa responsável por som, projeção e transmissão ao vivo.",
-=======
       description:
         "Equipa responsável por som, projeção e transmissão ao vivo.",
->>>>>>> 4948d6d (feat: add TeamsPage component with team management features)
       leaderId: "user-2",
       leaderName: "Carlos Silva",
       membersCount: 4,
@@ -165,13 +132,9 @@ export const TeamsPage: React.FC = () => {
   const [newTeamDesc, setNewTeamDesc] = useState("");
   const [newMemberName, setNewMemberName] = useState("");
   const [newMemberEmail, setNewMemberEmail] = useState("");
-<<<<<<< HEAD
-  const [newMemberRole, setNewMemberRole] = useState<"leader" | "member">("member");
-=======
   const [newMemberRole, setNewMemberRole] = useState<"leader" | "member">(
     "member",
   );
->>>>>>> 4948d6d (feat: add TeamsPage component with team management features)
 
   // User role check
   const userRole = (user as any)?.role || "admin";
@@ -180,11 +143,7 @@ export const TeamsPage: React.FC = () => {
   const filteredTeams = teams.filter(
     (t) =>
       t.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-<<<<<<< HEAD
-      t.slug.toLowerCase().includes(searchQuery.toLowerCase())
-=======
       t.slug.toLowerCase().includes(searchQuery.toLowerCase()),
->>>>>>> 4948d6d (feat: add TeamsPage component with team management features)
   );
 
   const handleCreateTeam = (e: React.FormEvent) => {
@@ -239,12 +198,8 @@ export const TeamsPage: React.FC = () => {
 
   const handleAddMember = (e: React.FormEvent) => {
     e.preventDefault();
-<<<<<<< HEAD
-    if (!selectedTeam || !newMemberName.trim() || !newMemberEmail.trim()) return;
-=======
     if (!selectedTeam || !newMemberName.trim() || !newMemberEmail.trim())
       return;
->>>>>>> 4948d6d (feat: add TeamsPage component with team management features)
 
     const newMember: TeamMember = {
       id: `tm-${Date.now()}`,
@@ -270,24 +225,15 @@ export const TeamsPage: React.FC = () => {
                 ? { leaderId: newMember.userId, leaderName: newMember.name }
                 : {}),
             }
-<<<<<<< HEAD
-          : t
-      )
-=======
           : t,
       ),
->>>>>>> 4948d6d (feat: add TeamsPage component with team management features)
     );
 
     if (newMemberRole === "leader" && selectedTeam) {
       setSelectedTeam((prev) =>
         prev
           ? { ...prev, leaderId: newMember.userId, leaderName: newMember.name }
-<<<<<<< HEAD
-          : null
-=======
           : null,
->>>>>>> 4948d6d (feat: add TeamsPage component with team management features)
       );
     }
 
@@ -305,15 +251,10 @@ export const TeamsPage: React.FC = () => {
 
     setTeams((prev) =>
       prev.map((t) =>
-<<<<<<< HEAD
-        t.id === teamId ? { ...t, membersCount: Math.max(1, t.membersCount - 1) } : t
-      )
-=======
         t.id === teamId
           ? { ...t, membersCount: Math.max(1, t.membersCount - 1) }
           : t,
       ),
->>>>>>> 4948d6d (feat: add TeamsPage component with team management features)
     );
 
     showToast("Membro removido da equipa.", "success");
@@ -332,24 +273,15 @@ export const TeamsPage: React.FC = () => {
       prev.map((t) =>
         t.id === teamId
           ? { ...t, leaderId: member.userId, leaderName: member.name }
-<<<<<<< HEAD
-          : t
-      )
-=======
           : t,
       ),
->>>>>>> 4948d6d (feat: add TeamsPage component with team management features)
     );
 
     if (selectedTeam?.id === teamId) {
       setSelectedTeam((prev) =>
-<<<<<<< HEAD
-        prev ? { ...prev, leaderId: member.userId, leaderName: member.name } : null
-=======
         prev
           ? { ...prev, leaderId: member.userId, leaderName: member.name }
           : null,
->>>>>>> 4948d6d (feat: add TeamsPage component with team management features)
       );
     }
 
@@ -357,11 +289,7 @@ export const TeamsPage: React.FC = () => {
   };
 
   const handleTogglePermission = (
-<<<<<<< HEAD
-    permKey: keyof NonNullable<Team["permissions"]>
-=======
     permKey: keyof NonNullable<Team["permissions"]>,
->>>>>>> 4948d6d (feat: add TeamsPage component with team management features)
   ) => {
     if (!selectedTeam) return;
 
@@ -382,13 +310,9 @@ export const TeamsPage: React.FC = () => {
     });
 
     setTeams((prev) =>
-<<<<<<< HEAD
-      prev.map((t) => (t.id === selectedTeam.id ? { ...t, permissions: updated } : t))
-=======
       prev.map((t) =>
         t.id === selectedTeam.id ? { ...t, permissions: updated } : t,
       ),
->>>>>>> 4948d6d (feat: add TeamsPage component with team management features)
     );
 
     showToast("Permissões da equipa atualizadas.", "success");
@@ -397,12 +321,8 @@ export const TeamsPage: React.FC = () => {
   // If viewing single team detail page (TEAM-05)
   if (selectedTeam) {
     const members = teamMembers[selectedTeam.id] || [];
-<<<<<<< HEAD
-    const isLeaderOfTeam = selectedTeam.leaderId === user?.id || isOrgAdminOrOwner;
-=======
     const isLeaderOfTeam =
       selectedTeam.leaderId === user?.id || isOrgAdminOrOwner;
->>>>>>> 4948d6d (feat: add TeamsPage component with team management features)
 
     return (
       <div className="p-4 sm:p-6 lg:p-8 max-w-6xl mx-auto space-y-6 animate-in fade-in duration-200">
@@ -501,36 +421,24 @@ export const TeamsPage: React.FC = () => {
                     <div className="flex items-center gap-2">
                       {member.role !== "leader" && isOrgAdminOrOwner && (
                         <button
-<<<<<<< HEAD
-                          onClick={() => handleAssignLeader(selectedTeam.id, member)}
-=======
                           onClick={() =>
                             handleAssignLeader(selectedTeam.id, member)
                           }
->>>>>>> 4948d6d (feat: add TeamsPage component with team management features)
                           title="Tornar Líder de Equipa"
                           className="px-2.5 py-1 text-xs font-bold text-amber-600 hover:bg-amber-50 rounded-lg transition-colors border border-amber-200 flex items-center gap-1 cursor-pointer"
                         >
                           <Crown className="w-3.5 h-3.5" />
-<<<<<<< HEAD
-                          <span className="hidden sm:inline">Definir Líder</span>
-=======
                           <span className="hidden sm:inline">
                             Definir Líder
                           </span>
->>>>>>> 4948d6d (feat: add TeamsPage component with team management features)
                         </button>
                       )}
 
                       {member.userId !== user?.id && (
                         <button
-<<<<<<< HEAD
-                          onClick={() => handleRemoveMember(selectedTeam.id, member.id)}
-=======
                           onClick={() =>
                             handleRemoveMember(selectedTeam.id, member.id)
                           }
->>>>>>> 4948d6d (feat: add TeamsPage component with team management features)
                           title="Remover da equipa"
                           className="p-1.5 text-slate-400 hover:text-red-500 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors cursor-pointer"
                         >
@@ -553,12 +461,8 @@ export const TeamsPage: React.FC = () => {
 
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 space-y-4 shadow-xs">
               <p className="text-xs text-slate-500 leading-relaxed">
-<<<<<<< HEAD
-                As permissões da equipa estão limitadas pelas políticas gerais da organização.
-=======
                 As permissões da equipa estão limitadas pelas políticas gerais
                 da organização.
->>>>>>> 4948d6d (feat: add TeamsPage component with team management features)
               </p>
 
               <div className="space-y-3">
@@ -566,17 +470,12 @@ export const TeamsPage: React.FC = () => {
                   <div className="flex items-center gap-2.5">
                     <Music className="w-4 h-4 text-sky-500" />
                     <div>
-<<<<<<< HEAD
-                      <p className="text-xs font-bold text-slate-900 dark:text-slate-100">Gerir Músicas</p>
-                      <p className="text-[10px] text-slate-500">Criar e editar repertório</p>
-=======
                       <p className="text-xs font-bold text-slate-900 dark:text-slate-100">
                         Gerir Músicas
                       </p>
                       <p className="text-[10px] text-slate-500">
                         Criar e editar repertório
                       </p>
->>>>>>> 4948d6d (feat: add TeamsPage component with team management features)
                     </div>
                   </div>
                   <input
@@ -592,28 +491,19 @@ export const TeamsPage: React.FC = () => {
                   <div className="flex items-center gap-2.5">
                     <Calendar className="w-4 h-4 text-emerald-500" />
                     <div>
-<<<<<<< HEAD
-                      <p className="text-xs font-bold text-slate-900 dark:text-slate-100">Gerir Cultos</p>
-                      <p className="text-[10px] text-slate-500">Agendar e alinhar escalas</p>
-=======
                       <p className="text-xs font-bold text-slate-900 dark:text-slate-100">
                         Gerir Cultos
                       </p>
                       <p className="text-[10px] text-slate-500">
                         Agendar e alinhar escalas
                       </p>
->>>>>>> 4948d6d (feat: add TeamsPage component with team management features)
                     </div>
                   </div>
                   <input
                     type="checkbox"
-<<<<<<< HEAD
-                    checked={selectedTeam.permissions?.canManageServices ?? true}
-=======
                     checked={
                       selectedTeam.permissions?.canManageServices ?? true
                     }
->>>>>>> 4948d6d (feat: add TeamsPage component with team management features)
                     onChange={() => handleTogglePermission("canManageServices")}
                     disabled={!isLeaderOfTeam}
                     className="w-4 h-4 accent-m3-primary rounded cursor-pointer"
@@ -624,17 +514,12 @@ export const TeamsPage: React.FC = () => {
                   <div className="flex items-center gap-2.5">
                     <UserPlus className="w-4 h-4 text-amber-500" />
                     <div>
-<<<<<<< HEAD
-                      <p className="text-xs font-bold text-slate-900 dark:text-slate-100">Convidar Membros</p>
-                      <p className="text-[10px] text-slate-500">Adicionar novos membros</p>
-=======
                       <p className="text-xs font-bold text-slate-900 dark:text-slate-100">
                         Convidar Membros
                       </p>
                       <p className="text-[10px] text-slate-500">
                         Adicionar novos membros
                       </p>
->>>>>>> 4948d6d (feat: add TeamsPage component with team management features)
                     </div>
                   </div>
                   <input
@@ -684,13 +569,9 @@ export const TeamsPage: React.FC = () => {
                   className="w-full h-11 px-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-sm font-semibold"
                 >
                   <option value="member">Membro</option>
-<<<<<<< HEAD
-                  {isOrgAdminOrOwner && <option value="leader">Líder de Equipa</option>}
-=======
                   {isOrgAdminOrOwner && (
                     <option value="leader">Líder de Equipa</option>
                   )}
->>>>>>> 4948d6d (feat: add TeamsPage component with team management features)
                 </select>
               </div>
 
@@ -851,15 +732,11 @@ export const TeamsPage: React.FC = () => {
               >
                 Cancelar
               </Button>
-<<<<<<< HEAD
-              <Button variant="primary" type="submit" disabled={!newTeamName.trim()}>
-=======
               <Button
                 variant="primary"
                 type="submit"
                 disabled={!newTeamName.trim()}
               >
->>>>>>> 4948d6d (feat: add TeamsPage component with team management features)
                 Criar Equipa
               </Button>
             </div>
