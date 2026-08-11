@@ -36,9 +36,6 @@ export const BatchDeleteModal: React.FC<BatchDeleteModalProps> = ({
   }, [isOpen]);
 
   const hasFolders = selectedFolders.length > 0;
-  const foldersWithSongs = selectedFolders.filter(
-    (f) => (f.songCount || 0) > 0,
-  );
   const totalItems = selectedFolders.length + selectedSongsCount;
 
   const requiresTypedConfirmation =

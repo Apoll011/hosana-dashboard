@@ -4,7 +4,7 @@
  */
 
 import { Button, Input } from "@hosanna/shared";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import {
   Camera,
   CheckCircle2,
@@ -27,7 +27,6 @@ import { TwoFactorSection } from "./TwoFactor";
 
 const ActiveSessionsSection: React.FC = () => {
   const { showToast } = useSync();
-  const queryClient = useQueryClient();
 
   const {
     data: sessions,
