@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import React, { useState } from "react";
 import { useNavigate, useOutletContext } from "react-router-dom";
+import { useAuth } from "../../contexts/AuthContext";
 import { SongForm } from "../../components/forms/SongForm";
 import { MoveSongModal } from "../../components/modals/MoveSongModal";
 import { useFolders } from "../../hooks/useFolders";
@@ -57,6 +58,8 @@ export const SongsPage: React.FC<SongsPageProps> = ({
   searchFields: externalSearchFields,
 }) => {
   const navigate = useNavigate();
+  const { tenant } = useAuth();
+  const slugPrefix = tenant?.slug ? `/${tenant.slug}` : "";
   const context = useOutletContext<any>() || {};
   const actualHideHeader = hideHeader ?? context.hideHeader;
   //TODO: Add support
@@ -213,9 +216,9 @@ export const SongsPage: React.FC<SongsPageProps> = ({
         content: `{title: ${data.title}}\n{artist: ${data.artist}}\n{key: G}\n\n[G]Enter lyrics and chords...`,
       });
       setIsCreateModalOpen(false);
-      navigate(`/songs/${newSong.id}`);
+      navigate(`${slugPrefix}/songs/${newSong.id}`);
     },
-    [createSong, navigate],
+    [createSong, navigate, slugPrefix],
   );
 
   const handleDeleteConfirm = React.useCallback(async () => {
@@ -247,7 +250,7 @@ export const SongsPage: React.FC<SongsPageProps> = ({
             <Button
               variant="outline"
               icon={<FolderTree className="w-5 h-5" />}
-              onClick={() => navigate("/folders")}
+              onClick={() => navigate(`${slugPrefix}/folders`)}
               className="rounded-2xl py-6 px-6 font-black uppercase tracking-widest text-[11px]"
             >
               Explorador
@@ -373,7 +376,7 @@ export const SongsPage: React.FC<SongsPageProps> = ({
                     <tr
                       key={song.id}
                       className="hover:bg-m3-hover/50 transition-all group cursor-pointer"
-                      onClick={() => navigate(`/songs/${song.id}`)}
+                      onClick={() => navigate(`${slugPrefix}/songs/${song.id}`)}
                     >
                       <td className="py-4 px-6">
                         <div className="flex flex-col group-hover:translate-x-1 transition-transform">
@@ -426,7 +429,7 @@ export const SongsPage: React.FC<SongsPageProps> = ({
                       >
                         <div className="flex items-center justify-end gap-1 group-hover:opacity-100 opacity-40 transition-opacity">
                           <button
-                            onClick={() => navigate(`/songs/${song.id}`)}
+                            onClick={() => navigate(`${slugPrefix}/songs/${song.id}`)}
                             title="Abrir Editor"
                             className="p-2 text-m3-secondary hover:text-m3-primary hover:bg-m3-primary/10 rounded-xl cursor-pointer transition-all"
                           >
