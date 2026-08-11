@@ -4,9 +4,9 @@
  */
 
 import { Button, Spinner } from "@hosanna/shared";
-import { Building2, Check, X, ShieldAlert, ArrowLeft } from "lucide-react";
+import { Building2, Check, ShieldAlert, X } from "lucide-react";
 import React, { useEffect, useState } from "react";
-import { useNavigate, useSearchParams, Link } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import { authClient } from "../../lib/authClient";
 import LoginLayout from "./Layout";
@@ -30,7 +30,9 @@ export const AcceptInvitationPage: React.FC = () => {
 
   const [invitation, setInvitation] = useState<InvitationData | null>(null);
   const [isFetching, setIsFetching] = useState(true);
-  const [actionLoading, setActionLoading] = useState<"accept" | "reject" | null>(null);
+  const [actionLoading, setActionLoading] = useState<
+    "accept" | "reject" | null
+  >(null);
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
 
@@ -52,7 +54,10 @@ export const AcceptInvitationPage: React.FC = () => {
         });
 
         if (error || !data) {
-          setErrorMsg(error?.message || "Não foi possível carregar os detalhes do convite.");
+          setErrorMsg(
+            error?.message ||
+              "Não foi possível carregar os detalhes do convite.",
+          );
         } else {
           setInvitation(data as unknown as InvitationData);
         }
@@ -83,7 +88,7 @@ export const AcceptInvitationPage: React.FC = () => {
       }
 
       setSuccessMsg("Convite aceite com sucesso! A redirecionar...");
-      
+
       await refetch();
       const orgSlug = (data as any)?.organization?.slug || (data as any)?.slug;
       if (orgSlug) {
@@ -134,17 +139,14 @@ export const AcceptInvitationPage: React.FC = () => {
   };
 
   return (
-    <LoginLayout
-      errorMsg={errorMsg}
-      redirectMessage={successMsg}
-      optionalLink="/login"
-      optionalMsg="Voltar ao início de sessão"
-    >
+    <LoginLayout errorMsg={errorMsg} redirectMessage={successMsg}>
       <div className="py-2 text-center">
         {isFetching ? (
           <div className="flex flex-col items-center justify-center py-8 space-y-3">
             <Spinner size="md" />
-            <p className="text-sm text-slate-500 dark:text-slate-400">A verificar detalhes do convite...</p>
+            <p className="text-sm text-slate-500 dark:text-slate-400">
+              A verificar detalhes do convite...
+            </p>
           </div>
         ) : invitation ? (
           <div className="space-y-6">
@@ -161,17 +163,21 @@ export const AcceptInvitationPage: React.FC = () => {
               </p>
               <div className="mt-3 p-4 bg-slate-50 dark:bg-slate-800/80 rounded-2xl border border-slate-100 dark:border-slate-700/60">
                 <span className="text-lg font-bold text-slate-900 dark:text-white block">
-                  {invitation.organizationName || invitation.organizationId || "Organização Hosanna"}
+                  {invitation.organizationName ||
+                    invitation.organizationId ||
+                    "Organização Hosanna"}
                 </span>
                 <span className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 block capitalize">
-                  Função: <strong className="text-m3-primary">{invitation.role}</strong>
+                  Função:{" "}
+                  <strong className="text-m3-primary">{invitation.role}</strong>
                 </span>
               </div>
             </div>
 
             {invitation.status !== "pending" && (
               <div className="p-3 bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-300 text-xs rounded-xl border border-amber-200 dark:border-amber-800">
-                Este convite já se encontra com o estado: <strong>{invitation.status}</strong>.
+                Este convite já se encontra com o estado:{" "}
+                <strong>{invitation.status}</strong>.
               </div>
             )}
 
@@ -191,7 +197,9 @@ export const AcceptInvitationPage: React.FC = () => {
                 variant="primary"
                 onClick={handleAccept}
                 isLoading={actionLoading === "accept"}
-                disabled={actionLoading !== null || invitation.status !== "pending"}
+                disabled={
+                  actionLoading !== null || invitation.status !== "pending"
+                }
                 className="h-12 rounded-xl bg-m3-primary hover:bg-m3-primary-dark text-white font-bold text-xs uppercase tracking-wider transition-all shadow-lg shadow-m3-primary/20 flex items-center justify-center gap-2"
               >
                 <Check className="w-4 h-4" />
@@ -207,13 +215,6 @@ export const AcceptInvitationPage: React.FC = () => {
             <p className="text-sm text-slate-600 dark:text-slate-300">
               Não foi possível encontrar ou validar o convite solicitado.
             </p>
-            <Link
-              to="/login"
-              className="inline-flex items-center gap-2 text-xs font-semibold text-m3-primary hover:underline pt-2"
-            >
-              <ArrowLeft className="w-3.5 h-3.5" />
-              <span>Voltar ao início de sessão</span>
-            </Link>
           </div>
         )}
       </div>
