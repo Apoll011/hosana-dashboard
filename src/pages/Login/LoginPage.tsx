@@ -73,7 +73,7 @@ export const LoginPage: React.FC = () => {
 
     // Refresh session state immediately so ProtectedRoute recognizes authentication
     await refetch();
-    navigate("/songs", { replace: true });
+    navigate("/", { replace: true });
   };
 
   const handleOtpSubmit = async (e: React.FormEvent) => {
@@ -90,7 +90,7 @@ export const LoginPage: React.FC = () => {
       return;
     }
     await refetch();
-    navigate("/songs", { replace: true });
+    navigate("/", { replace: true });
   };
 
   if (twoFactorPending) {
