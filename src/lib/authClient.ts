@@ -14,7 +14,9 @@ export const authClient = createAuthClient({
     credentials: "include",
   },
   plugins: [
-    twoFactorClient(),
+    twoFactorClient({
+      twoFactorPage: "/two-factor",
+    }),
     organizationClient(),
   ],
 });
