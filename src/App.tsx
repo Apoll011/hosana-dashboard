@@ -13,7 +13,7 @@ import { queryClient } from "./queryClient";
 import { AppRoutes } from "./routes/AppRoutes";
 
 function StatsigWrapper({ children }: { children: React.ReactNode }) {
-  const { user, tenant, isLoading } = useAuth();
+  const { user, organization, isLoading } = useAuth();
 
   const { client } = useClientAsyncInit(
     "client-4459XEXCHZyP192QOlIwzRAffGVP9zfS33rnXpdquAI",
@@ -30,10 +30,10 @@ function StatsigWrapper({ children }: { children: React.ReactNode }) {
       locale: "pt",
       custom: {
         role: (user as any)?.role ?? "user",
-        tenant_slug: tenant?.slug ?? "default",
+        organization: organization?.slug ?? "default",
       },
     });
-  }, [client, user, tenant, isLoading]);
+  }, [client, user, organization, isLoading]);
 
   return (
     <StatsigProvider

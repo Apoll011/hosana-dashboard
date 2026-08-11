@@ -24,7 +24,8 @@ export const ResetPasswordPage: React.FC = () => {
   const [errorMsg, setErrorMsg] = useState("");
   const [state, setState] = useState<State>("form");
 
-  const passwordMismatch = confirmPassword.length > 0 && password !== confirmPassword;
+  const passwordMismatch =
+    confirmPassword.length > 0 && password !== confirmPassword;
 
   if (!token) {
     return (
@@ -34,7 +35,9 @@ export const ResetPasswordPage: React.FC = () => {
             <XCircle className="w-10 h-10 text-rose-500 dark:text-rose-400" />
           </div>
           <div>
-            <h2 className="text-xl font-black text-slate-900 dark:text-white">Link Inválido</h2>
+            <h2 className="text-xl font-black text-slate-900 dark:text-white">
+              Link Inválido
+            </h2>
             <p className="text-sm text-slate-500 dark:text-slate-400 mt-2 max-w-xs mx-auto">
               Este link de recuperação é inválido. Solicite um novo abaixo.
             </p>
@@ -64,7 +67,10 @@ export const ResetPasswordPage: React.FC = () => {
     }
 
     setIsLoading(true);
-    const { error } = await authClient.resetPassword({ newPassword: password, token });
+    const { error } = await authClient.resetPassword({
+      newPassword: password,
+      token,
+    });
     setIsLoading(false);
 
     if (error) {
@@ -79,10 +85,14 @@ export const ResetPasswordPage: React.FC = () => {
     }
 
     setState("success");
-    setTimeout(() => navigate("/login", {
-      state: { message: "Palavra-passe redefinida com sucesso!" },
-      replace: true,
-    }), 2500);
+    setTimeout(
+      () =>
+        navigate("/login", {
+          state: { message: "Palavra-passe redefinida com sucesso!" },
+          replace: true,
+        }),
+      2500,
+    );
   };
 
   // ── Success ─────────────────────────────────────────────────────────────
@@ -97,8 +107,12 @@ export const ResetPasswordPage: React.FC = () => {
             </div>
           </div>
           <div>
-            <h2 className="text-2xl font-black text-slate-900 dark:text-white">Palavra-passe Redefinida!</h2>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mt-2">A redirecionar para o login...</p>
+            <h2 className="text-2xl font-black text-slate-900 dark:text-white">
+              Palavra-passe Redefinida!
+            </h2>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mt-2">
+              A redirecionar para o login...
+            </p>
           </div>
         </div>
       </LoginLayout>
@@ -114,7 +128,9 @@ export const ResetPasswordPage: React.FC = () => {
             <Clock className="w-10 h-10 text-amber-500 dark:text-amber-400" />
           </div>
           <div>
-            <h2 className="text-xl font-black text-slate-900 dark:text-white">Link Expirado</h2>
+            <h2 className="text-xl font-black text-slate-900 dark:text-white">
+              Link Expirado
+            </h2>
             <p className="text-sm text-slate-500 dark:text-slate-400 mt-2 max-w-xs mx-auto">
               O link de recuperação expirou. Solicite um novo.
             </p>
@@ -141,7 +157,9 @@ export const ResetPasswordPage: React.FC = () => {
         <div className="w-14 h-14 bg-m3-primary/10 dark:bg-m3-primary/20 rounded-2xl flex items-center justify-center mb-3">
           <Lock className="w-7 h-7 text-m3-primary dark:text-m3-primary-light" />
         </div>
-        <h2 className="font-display font-black text-xl text-slate-900 dark:text-white">Nova Palavra-passe</h2>
+        <h2 className="font-display font-black text-xl text-slate-900 dark:text-white">
+          Nova Palavra-passe
+        </h2>
         <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 text-center max-w-xs">
           Escolha uma palavra-passe forte para proteger a sua conta.
         </p>

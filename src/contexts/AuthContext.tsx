@@ -26,7 +26,7 @@ interface SessionUser {
   [key: string]: unknown;
 }
 
-// Tenant shape compatible with legacy code
+// Organization shape compatible with legacy code
 type Organization = {
   id: string;
   name: string;
@@ -76,7 +76,7 @@ type Organization = {
 };
 interface AuthContextType {
   user: SessionUser | null;
-  tenant: Organization | null;
+  organization: Organization | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   refetch: () => Promise<void>;
@@ -89,7 +89,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const [user, setUser] = useState<SessionUser | null>(null);
-  const [tenant, setTenant] = useState<Organization | null>(null);
+  const [organization, setOrganization] = useState<Organization | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchSession = useCallback(async () => {
@@ -104,10 +104,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         return;
       }
 
-      let activeTenant: Organization | null = null;
+      let activeOrganization: Organization | null = null;
       let userRole: string | null = null;
 
-      const previousTenantSlug = localStorage.getItem("active_org_slug");
+      const previousOrganizationSlug = localStorage.getItem("active_org_slug");
 
       let { data: orgData } =
         await authClient.organization.getFullOrganization();
@@ -127,7 +127,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       }
 
       if (orgData) {
-        if (previousTenantSlug !== orgData.slug) {
+        if (previousOrganizationSlug !== orgData.slug) {
           clearPermissionCache();
         }
 
@@ -148,13 +148,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
             ? roleRes.value.data.role
             : null;
 
-        activeTenant = fullOrgData;
+        activeOrganization = fullOrgData;
       } else {
         localStorage.removeItem("active_org_slug");
         clearPermissionCache();
       }
 
-      setTenant(activeTenant);
+      setOrganization(activeOrganization);
       setUser({
         ...sessionUser,
         role: userRole ?? undefined,
@@ -169,7 +169,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const handleClearSession = useCallback(() => {
     setUser(null);
-    setTenant(null);
+    setOrganization(null);
     localStorage.removeItem("active_org_slug");
     clearPermissionCache();
     setIsLoading(false);
@@ -199,7 +199,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     <AuthContext.Provider
       value={{
         user,
-        tenant,
+        organization,
         isAuthenticated: !!user,
         isLoading,
         refetch: fetchSession,

@@ -27,9 +27,9 @@ import {
 } from "lucide-react";
 import React, { useState } from "react";
 import { useNavigate, useOutletContext } from "react-router-dom";
-import { useAuth } from "../../contexts/AuthContext";
 import { SongForm } from "../../components/forms/SongForm";
 import { MoveSongModal } from "../../components/modals/MoveSongModal";
+import { useAuth } from "../../contexts/AuthContext";
 import { useFolders } from "../../hooks/useFolders";
 import { useAllSongs } from "../../hooks/useSongs";
 
@@ -58,8 +58,8 @@ export const SongsPage: React.FC<SongsPageProps> = ({
   searchFields: externalSearchFields,
 }) => {
   const navigate = useNavigate();
-  const { tenant } = useAuth();
-  const slugPrefix = tenant?.slug ? `/${tenant.slug}` : "";
+  const { organization } = useAuth();
+  const slugPrefix = organization?.slug ? `/${organization.slug}` : "";
   const context = useOutletContext<any>() || {};
   const actualHideHeader = hideHeader ?? context.hideHeader;
   //TODO: Add support
@@ -146,10 +146,15 @@ export const SongsPage: React.FC<SongsPageProps> = ({
     if (finalSearchQuery) {
       const q = finalSearchQuery.toLowerCase();
       result = result.filter((song) => {
-        const inTitle = actualSearchFields.title && song.title?.toLowerCase().includes(q);
-        const inArtist = actualSearchFields.artist && song.artist?.toLowerCase().includes(q);
-        const inContent = actualSearchFields.content && song.content?.toLowerCase().includes(q);
-        const inTags = actualSearchFields.tags && song.tags?.some((t) => t.toLowerCase().includes(q));
+        const inTitle =
+          actualSearchFields.title && song.title?.toLowerCase().includes(q);
+        const inArtist =
+          actualSearchFields.artist && song.artist?.toLowerCase().includes(q);
+        const inContent =
+          actualSearchFields.content && song.content?.toLowerCase().includes(q);
+        const inTags =
+          actualSearchFields.tags &&
+          song.tags?.some((t) => t.toLowerCase().includes(q));
         return inTitle || inArtist || inContent || inTags;
       });
     }
@@ -195,11 +200,23 @@ export const SongsPage: React.FC<SongsPageProps> = ({
     });
 
     return result;
-  }, [allSongs, finalSearchQuery, selectedFolder, actualSelectedKey, actualSelectedTag, actualSearchFields, finalSortBy, finalSortOrder]);
+  }, [
+    allSongs,
+    finalSearchQuery,
+    selectedFolder,
+    actualSelectedKey,
+    actualSelectedTag,
+    actualSearchFields,
+    finalSortBy,
+    finalSortOrder,
+  ]);
 
   const totalSongs = filteredSongs.length;
   const totalPages = Math.max(1, Math.ceil(totalSongs / ITEMS_PER_PAGE));
-  const songsData = filteredSongs.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
+  const songsData = filteredSongs.slice(
+    (page - 1) * ITEMS_PER_PAGE,
+    page * ITEMS_PER_PAGE,
+  );
 
   const handleCreateSongSubmit = React.useCallback(
     async (data: {
@@ -429,7 +446,9 @@ export const SongsPage: React.FC<SongsPageProps> = ({
                       >
                         <div className="flex items-center justify-end gap-1 group-hover:opacity-100 opacity-40 transition-opacity">
                           <button
-                            onClick={() => navigate(`${slugPrefix}/songs/${song.id}`)}
+                            onClick={() =>
+                              navigate(`${slugPrefix}/songs/${song.id}`)
+                            }
                             title="Abrir Editor"
                             className="p-2 text-m3-secondary hover:text-m3-primary hover:bg-m3-primary/10 rounded-xl cursor-pointer transition-all"
                           >

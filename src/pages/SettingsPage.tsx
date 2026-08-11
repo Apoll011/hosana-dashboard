@@ -27,16 +27,11 @@ import { MembersTab } from "../components/settings/MembersTab";
 import { WorkspaceTab } from "../components/settings/WorkspaceTab";
 
 type TabType =
-  | "general"
-  | "workspace"
-  | "account"
-  | "members"
-  | "appearance"
-  | "about";
+  "general" | "workspace" | "account" | "members" | "appearance" | "about";
 
 export const SettingsPage: React.FC = () => {
   const navigate = useNavigate();
-  const { tenant } = useAuth();
+  const { organization } = useAuth();
   const { showToast } = useSync();
 
   const [activeTab, setActiveTab] = useState<TabType>("account");

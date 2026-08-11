@@ -58,8 +58,8 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
   searchQuery: externalSearchQuery,
 }) => {
   const navigate = useNavigate();
-  const { tenant } = useAuth();
-  const slugPrefix = tenant?.slug ? `/${tenant.slug}` : "";
+  const { organization } = useAuth();
+  const slugPrefix = organization?.slug ? `/${organization.slug}` : "";
   const context = useOutletContext<any>() || {};
   const actualHideHeader = hideHeader ?? context.hideHeader;
   const viewMode = context.viewMode ?? "grid";

@@ -216,7 +216,9 @@ export const InboxPanel: React.FC<InboxPanelProps> = ({
   onClose,
 }) => {
   const [filter, setFilter] = useState<"all" | "unread">("all");
-  const [selectedNotif, setSelectedNotif] = useState<InboxNotification | null>(null);
+  const [selectedNotif, setSelectedNotif] = useState<InboxNotification | null>(
+    null,
+  );
 
   const filteredNotifications = inbox.notifications.filter((n) => {
     if (filter === "unread") return !n.read;
@@ -315,12 +317,16 @@ export const InboxPanel: React.FC<InboxPanelProps> = ({
       <div className="flex-1 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800/60 custom-scrollbar">
         {inbox.isLoading && inbox.notifications.length === 0 ? (
           <div className="p-8 text-center text-slate-400 dark:text-slate-600">
-            <p className="text-xs font-semibold animate-pulse">A carregar notificações...</p>
+            <p className="text-xs font-semibold animate-pulse">
+              A carregar notificações...
+            </p>
           </div>
         ) : filteredNotifications.length === 0 ? (
           <div className="p-8 text-center text-slate-400 dark:text-slate-600">
             <Sparkles className="w-8 h-8 mx-auto mb-2 opacity-40" />
-            <p className="text-xs font-semibold">Nenhuma notificação encontrada</p>
+            <p className="text-xs font-semibold">
+              Nenhuma notificação encontrada
+            </p>
           </div>
         ) : (
           <>

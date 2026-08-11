@@ -4,7 +4,15 @@
  */
 
 import React from "react";
-import { Crown, Shield, Users, User, UserCheck, Music, Heart } from "lucide-react";
+import {
+  Crown,
+  Shield,
+  Users,
+  User,
+  UserCheck,
+  Music,
+  Heart,
+} from "lucide-react";
 
 export const getRoleLabel = (role: string) => {
   switch (role?.toLowerCase()) {
@@ -79,7 +87,7 @@ export const getRoleBadge = (role: string) => {
 export const compressImage = (
   file: File,
   maxWidth = 800,
-  quality = 0.8
+  quality = 0.8,
 ): Promise<string> => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
