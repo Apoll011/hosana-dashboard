@@ -3,48 +3,27 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from "react";
+import { Button, Input, Modal } from "@hosanna/shared";
+import { useQuery } from "@tanstack/react-query";
 import {
-  Users,
-  UserPlus,
-  Search,
-  CheckCircle2,
-  Clock,
-  Shield,
-  Trash2,
-  Crown,
   ChevronRight,
-  X,
-  Mail,
-  UserCheck,
   Loader2,
   RefreshCw,
+  Search,
+  UserCheck,
+  UserPlus,
 } from "lucide-react";
-import { Button, Input, Modal } from "@hosanna/shared";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { authClient } from "../../lib/authClient";
+import React, { useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { useSync } from "../../contexts/SyncContext";
-import { useAdmins } from "../../hooks/useAdmins";
-import { getRoleBadge, getRoleLabel } from "./settingsUtils";
+import { authClient } from "../../lib/authClient";
 import { MemberProfilePage } from "./MemberProfilePage";
+import { getRoleBadge } from "./settingsUtils";
 
 export const MembersTab: React.FC<{ active: boolean }> = ({ active }) => {
   const { user, tenant } = useAuth();
   const { showToast } = useSync();
-  const queryClient = useQueryClient();
 
-  const {
-    admins: legacyAdmins,
-    pendingAdmins,
-    createAdmin,
-    approveAdmin,
-    removeAdmin: removeLegacyAdmin,
-    isCreating: isCreatingLegacy,
-    isApproving,
-  } = useAdmins();
-
-  const [activeSubTab, setActiveSubTab] = useState<"members" | "pending">("members");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedMember, setSelectedMember] = useState<any | null>(null);
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
@@ -90,46 +69,37 @@ export const MembersTab: React.FC<{ active: boolean }> = ({ active }) => {
 
   if (!active) return null;
 
-  // Merge members: prefer Better Auth org members if available, fallback/supplement with legacy admins
-  const members = orgMembersData && orgMembersData.length > 0
-    ? orgMembersData
-    : legacyAdmins.map((a: any) => ({
-        ...a,
-        userId: a.id,
-        isBetterAuth: false,
-      }));
+  const members = orgMembersData || [];
 
   const handleRemoveMember = async (member: any) => {
     try {
-      if (member.isBetterAuth) {
-        await authClient.organization.removeMember({
-          memberIdOrEmail: member.id || member.email,
-        });
-        showToast("Membro removido da organização com sucesso!", "success");
-        refetchOrgMembers();
-      } else {
-        await removeLegacyAdmin(member.id);
-      }
+      await authClient.organization.removeMember({
+        memberIdOrEmail: member.id || member.email,
+      });
+      showToast("Membro removido da organização com sucesso!", "success");
+      refetchOrgMembers();
       setSelectedMember(null);
     } catch (err: any) {
-      showToast("Erro ao remover membro: " + (err.message || "Tente novamente"), "error");
+      showToast(
+        "Erro ao remover membro: " + (err.message || "Tente novamente"),
+        "error",
+      );
     }
   };
 
   const handleRoleChange = async (member: any, newRole: string) => {
     try {
-      if (member.isBetterAuth) {
-        await authClient.organization.updateMemberRole({
-          memberId: member.id,
-          role: newRole as any,
-        });
-        showToast("Função do membro atualizada com sucesso!", "success");
-        refetchOrgMembers();
-      } else {
-        showToast("Função atualizada!", "success");
-      }
+      await authClient.organization.updateMemberRole({
+        memberId: member.id,
+        role: newRole as any,
+      });
+      showToast("Função do membro atualizada com sucesso!", "success");
+      refetchOrgMembers();
     } catch (err: any) {
-      showToast("Erro ao atualizar função: " + (err.message || "Tente novamente"), "error");
+      showToast(
+        "Erro ao atualizar função: " + (err.message || "Tente novamente"),
+        "error",
+      );
     }
   };
 
@@ -140,11 +110,9 @@ export const MembersTab: React.FC<{ active: boolean }> = ({ active }) => {
         currentUser={user as any}
         onBack={() => setSelectedMember(null)}
         onRemove={handleRemoveMember}
-        onApprove={async (id) => {
-          await approveAdmin(id);
-        }}
+        onApprove={async () => {}}
         onRoleChange={handleRoleChange}
-        isApproving={isApproving}
+        isApproving={false}
         showToast={showToast}
       />
     );
@@ -163,16 +131,12 @@ export const MembersTab: React.FC<{ active: boolean }> = ({ active }) => {
       });
 
       if (error) {
-        // Fallback to legacy createAdmin
-        const tempPassword = "Hosanna" + Math.floor(1000 + Math.random() * 9000) + "!";
-        await createAdmin({
-          name: inviteName.trim() || inviteEmail.split("@")[0],
-          email: inviteEmail.trim(),
-          password: tempPassword,
-          role: inviteRole as any,
-        });
+        showToast(`Erro convidando ${inviteEmail}!`, "error");
       } else {
-        showToast(`Convite enviado com sucesso para ${inviteEmail}!`, "success");
+        showToast(
+          `Convite enviado com sucesso para ${inviteEmail}!`,
+          "success",
+        );
         refetchOrgMembers();
       }
 
@@ -189,7 +153,7 @@ export const MembersTab: React.FC<{ active: boolean }> = ({ active }) => {
   const filteredMembers = members.filter(
     (a: any) =>
       a.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      a.email.toLowerCase().includes(searchQuery.toLowerCase())
+      a.email.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   return (
@@ -197,29 +161,9 @@ export const MembersTab: React.FC<{ active: boolean }> = ({ active }) => {
       {/* Subtabs & Action Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-1">
-          <button
-            onClick={() => setActiveSubTab("members")}
-            className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-colors cursor-pointer flex items-center gap-1.5 ${
-              activeSubTab === "members"
-                ? "bg-m3-primary/10 text-m3-primary"
-                : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
-            }`}
-          >
+          <span className="px-3 py-1.5 text-xs font-bold rounded-lg bg-m3-primary/10 text-m3-primary flex items-center gap-1.5">
             Membros Ativos ({members.length})
-          </button>
-          <button
-            onClick={() => setActiveSubTab("pending")}
-            className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-colors cursor-pointer flex items-center gap-1.5 ${
-              activeSubTab === "pending"
-                ? "bg-m3-primary/10 text-m3-primary"
-                : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
-            }`}
-          >
-            Aprovações Pendentes
-            {pendingAdmins.length > 0 && (
-              <span className="w-2 h-2 rounded-full bg-amber-500" />
-            )}
-          </button>
+          </span>
         </div>
 
         <div className="flex items-center gap-2">
@@ -257,81 +201,51 @@ export const MembersTab: React.FC<{ active: boolean }> = ({ active }) => {
       </div>
 
       {/* Content List */}
-      {activeSubTab === "members" ? (
-        isLoadingOrgMembers ? (
-          <div className="py-12 text-center text-xs text-slate-400 flex items-center justify-center gap-2">
-            <Loader2 className="w-4 h-4 animate-spin text-m3-primary" />
-            A carregar membros da organização...
-          </div>
-        ) : filteredMembers.length === 0 ? (
-          <div className="py-12 text-center text-xs text-slate-400">
-            Nenhum membro encontrado.
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {filteredMembers.map((member: any) => (
-              <div
-                key={member.id}
-                onClick={() => setSelectedMember(member)}
-                className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 hover:border-m3-primary/50 hover:shadow-md transition-all cursor-pointer flex items-center justify-between group"
-              >
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-10 h-10 rounded-full bg-linear-to-tr from-sky-600 to-indigo-600 text-white font-black text-sm flex items-center justify-center shrink-0 overflow-hidden">
-                    {member.image ? (
-                      <img src={member.image} alt={member.name} className="w-full h-full object-cover" />
-                    ) : (
-                      member.name.charAt(0).toUpperCase()
-                    )}
-                  </div>
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="font-bold text-slate-900 dark:text-slate-100 text-sm truncate">
-                        {member.name}
-                      </span>
-                    </div>
-                    <p className="text-xs text-slate-500 truncate">{member.email}</p>
-                    <div className="mt-1">{getRoleBadge(member.role)}</div>
-                  </div>
-                </div>
-
-                <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-m3-primary transition-colors shrink-0" />
-              </div>
-            ))}
-          </div>
-        )
+      {isLoadingOrgMembers ? (
+        <div className="py-12 text-center text-xs text-slate-400 flex items-center justify-center gap-2">
+          <Loader2 className="w-4 h-4 animate-spin text-m3-primary" />A
+          carregar membros da organização...
+        </div>
+      ) : filteredMembers.length === 0 ? (
+        <div className="py-12 text-center text-xs text-slate-400">
+          Nenhum membro encontrado.
+        </div>
       ) : (
-        <div className="space-y-3">
-          {pendingAdmins.length === 0 ? (
-            <p className="text-xs text-slate-500 text-center py-8">
-              Nenhuma aprovação pendente.
-            </p>
-          ) : (
-            pendingAdmins.map((p: any) => (
-              <div
-                key={p.id}
-                className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 flex items-center justify-between"
-              >
-                <div>
-                  <h4 className="text-xs font-bold text-slate-900 dark:text-slate-100">
-                    {p.name}
-                  </h4>
-                  <p className="text-[11px] text-slate-500">{p.email}</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {filteredMembers.map((member: any) => (
+            <div
+              key={member.id}
+              onClick={() => setSelectedMember(member)}
+              className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 hover:border-m3-primary/50 hover:shadow-md transition-all cursor-pointer flex items-center justify-between group"
+            >
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-10 h-10 rounded-full bg-linear-to-tr from-sky-600 to-indigo-600 text-white font-black text-sm flex items-center justify-center shrink-0 overflow-hidden">
+                  {member.image ? (
+                    <img
+                      src={member.image}
+                      alt={member.name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    member.name.charAt(0).toUpperCase()
+                  )}
                 </div>
-
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="primary"
-                    size="sm"
-                    onClick={() => approveAdmin(p.id)}
-                    disabled={isApproving}
-                    icon={<UserCheck className="w-3.5 h-3.5" />}
-                  >
-                    Aprovar
-                  </Button>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="font-bold text-slate-900 dark:text-slate-100 text-sm truncate">
+                      {member.name}
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-500 truncate">
+                    {member.email}
+                  </p>
+                  <div className="mt-1">{getRoleBadge(member.role)}</div>
                 </div>
               </div>
-            ))
-          )}
+
+              <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-m3-primary transition-colors shrink-0" />
+            </div>
+          ))}
         </div>
       )}
 
@@ -381,8 +295,8 @@ export const MembersTab: React.FC<{ active: boolean }> = ({ active }) => {
               >
                 Cancelar
               </Button>
-              <Button variant="primary" type="submit" disabled={isInviting || isCreatingLegacy}>
-                {isInviting || isCreatingLegacy ? "A Enviar..." : "Enviar Convite"}
+              <Button variant="primary" type="submit" disabled={isInviting}>
+                {isInviting ? "A Enviar..." : "Enviar Convite"}
               </Button>
             </div>
           </form>
@@ -391,4 +305,3 @@ export const MembersTab: React.FC<{ active: boolean }> = ({ active }) => {
     </div>
   );
 };
-
