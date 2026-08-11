@@ -1,0 +1,222 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import { Button, Spinner } from "@hosanna/shared";
+import { Building2, Check, X, ShieldAlert, ArrowLeft } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { useNavigate, useSearchParams, Link } from "react-router-dom";
+import { useAuth } from "../../contexts/AuthContext";
+import { authClient } from "../../lib/authClient";
+import LoginLayout from "./Layout";
+
+interface InvitationData {
+  id: string;
+  organizationId: string;
+  organizationName?: string;
+  email: string;
+  role: string;
+  status: "pending" | "accepted" | "rejected" | "canceled";
+  expiresAt: Date;
+  inviterId: string;
+}
+
+export const AcceptInvitationPage: React.FC = () => {
+  const [searchParams] = useSearchParams();
+  const invitationId = searchParams.get("id");
+  const navigate = useNavigate();
+  const { refetch, user } = useAuth();
+
+  const [invitation, setInvitation] = useState<InvitationData | null>(null);
+  const [isFetching, setIsFetching] = useState(true);
+  const [actionLoading, setActionLoading] = useState<"accept" | "reject" | null>(null);
+  const [errorMsg, setErrorMsg] = useState("");
+  const [successMsg, setSuccessMsg] = useState("");
+
+  useEffect(() => {
+    if (!invitationId) {
+      setErrorMsg("Identificador de convite inválido ou ausente.");
+      setIsFetching(false);
+      return;
+    }
+
+    const fetchInvitation = async () => {
+      setIsFetching(true);
+      setErrorMsg("");
+      try {
+        const { data, error } = await authClient.organization.getInvitation({
+          query: {
+            id: invitationId,
+          },
+        });
+
+        if (error || !data) {
+          setErrorMsg(error?.message || "Não foi possível carregar os detalhes do convite.");
+        } else {
+          setInvitation(data as unknown as InvitationData);
+        }
+      } catch (err: any) {
+        setErrorMsg(err?.message || "Ocorreu um erro ao carregar o convite.");
+      } finally {
+        setIsFetching(false);
+      }
+    };
+
+    fetchInvitation();
+  }, [invitationId]);
+
+  const handleAccept = async () => {
+    if (!invitationId) return;
+    setActionLoading("accept");
+    setErrorMsg("");
+
+    try {
+      const { data, error } = await authClient.organization.acceptInvitation({
+        invitationId,
+      });
+
+      if (error) {
+        setErrorMsg(error.message || "Falha ao aceitar o convite.");
+        setActionLoading(null);
+        return;
+      }
+
+      setSuccessMsg("Convite aceite com sucesso! A redirecionar...");
+      
+      await refetch();
+      const orgSlug = (data as any)?.organization?.slug || (data as any)?.slug;
+      if (orgSlug) {
+        localStorage.setItem("active_org_slug", orgSlug);
+        await authClient.organization.setActive({ organizationSlug: orgSlug });
+        setTimeout(() => {
+          navigate(`/${orgSlug}/folders`, { replace: true });
+        }, 1000);
+      } else {
+        setTimeout(() => {
+          navigate("/onboarding", { replace: true });
+        }, 1000);
+      }
+    } catch (err: any) {
+      setErrorMsg(err?.message || "Erro inesperado ao aceitar convite.");
+      setActionLoading(null);
+    }
+  };
+
+  const handleReject = async () => {
+    if (!invitationId) return;
+    setActionLoading("reject");
+    setErrorMsg("");
+
+    try {
+      const { error } = await authClient.organization.rejectInvitation({
+        invitationId,
+      });
+
+      if (error) {
+        setErrorMsg(error.message || "Falha ao recusar o convite.");
+        setActionLoading(null);
+        return;
+      }
+
+      setSuccessMsg("Convite recusado.");
+      setTimeout(() => {
+        if (user) {
+          navigate("/onboarding", { replace: true });
+        } else {
+          navigate("/login", { replace: true });
+        }
+      }, 1200);
+    } catch (err: any) {
+      setErrorMsg(err?.message || "Erro inesperado ao recusar convite.");
+      setActionLoading(null);
+    }
+  };
+
+  return (
+    <LoginLayout
+      errorMsg={errorMsg}
+      redirectMessage={successMsg}
+      optionalLink="/login"
+      optionalMsg="Voltar ao início de sessão"
+    >
+      <div className="py-2 text-center">
+        {isFetching ? (
+          <div className="flex flex-col items-center justify-center py-8 space-y-3">
+            <Spinner size="md" />
+            <p className="text-sm text-slate-500 dark:text-slate-400">A verificar detalhes do convite...</p>
+          </div>
+        ) : invitation ? (
+          <div className="space-y-6">
+            <div className="w-16 h-16 bg-m3-primary/10 text-m3-primary dark:bg-m3-primary/20 rounded-2xl flex items-center justify-center mx-auto shadow-inner">
+              <Building2 className="w-8 h-8" />
+            </div>
+
+            <div>
+              <h2 className="text-xl font-black text-slate-900 dark:text-white tracking-tight">
+                Convite para Organização
+              </h2>
+              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                Foi convidado(a) para se juntar à organização:
+              </p>
+              <div className="mt-3 p-4 bg-slate-50 dark:bg-slate-800/80 rounded-2xl border border-slate-100 dark:border-slate-700/60">
+                <span className="text-lg font-bold text-slate-900 dark:text-white block">
+                  {invitation.organizationName || invitation.organizationId || "Organização Hosanna"}
+                </span>
+                <span className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 block capitalize">
+                  Função: <strong className="text-m3-primary">{invitation.role}</strong>
+                </span>
+              </div>
+            </div>
+
+            {invitation.status !== "pending" && (
+              <div className="p-3 bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-300 text-xs rounded-xl border border-amber-200 dark:border-amber-800">
+                Este convite já se encontra com o estado: <strong>{invitation.status}</strong>.
+              </div>
+            )}
+
+            <div className="grid grid-cols-2 gap-3 pt-2">
+              <Button
+                variant="outline"
+                onClick={handleReject}
+                isLoading={actionLoading === "reject"}
+                disabled={actionLoading !== null}
+                className="h-12 rounded-xl border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/30 dark:hover:text-red-400 hover:border-red-200 transition-all font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2"
+              >
+                <X className="w-4 h-4" />
+                <span>Recusar</span>
+              </Button>
+
+              <Button
+                variant="primary"
+                onClick={handleAccept}
+                isLoading={actionLoading === "accept"}
+                disabled={actionLoading !== null || invitation.status !== "pending"}
+                className="h-12 rounded-xl bg-m3-primary hover:bg-m3-primary-dark text-white font-bold text-xs uppercase tracking-wider transition-all shadow-lg shadow-m3-primary/20 flex items-center justify-center gap-2"
+              >
+                <Check className="w-4 h-4" />
+                <span>Aceitar</span>
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <div className="py-6 space-y-4 text-center">
+            <div className="w-14 h-14 bg-red-50 text-red-500 dark:bg-red-950/30 rounded-2xl flex items-center justify-center mx-auto">
+              <ShieldAlert className="w-7 h-7" />
+            </div>
+            <p className="text-sm text-slate-600 dark:text-slate-300">
+              Não foi possível encontrar ou validar o convite solicitado.
+            </p>
+            <Link
+              to="/login"
+              className="inline-flex items-center gap-2 text-xs font-semibold text-m3-primary hover:underline pt-2"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" />
+              <span>Voltar ao início de sessão</span>
+            </Link>
+          </div>
+        )}
+      </div>
+    </LoginLayout>
+  );
+};
