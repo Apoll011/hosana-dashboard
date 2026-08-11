@@ -11,6 +11,7 @@ import React, {
   useState,
 } from "react";
 import { authClient } from "../lib/authClient";
+import { clearPermissionCache } from "../lib/permissions/client";
 
 interface SessionUser {
   id: string;
@@ -54,24 +55,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchSession = useCallback(async () => {
-    const { data } = await authClient.getSession();
-    const sessionUser = data?.user ?? null;
-
-    if (!sessionUser) {
-      setUser(null);
-      setTenant(null);
-      localStorage.removeItem("active_org_slug");
-      setIsLoading(false);
-      return;
-    }
-
-    let activeTenant: Tenant | null = null;
+    setIsLoading(true);
 
     try {
+      const { data } = await authClient.getSession();
+      const sessionUser = data?.user ?? null;
+
+      if (!sessionUser) {
+        handleClearSession();
+        return;
+      }
+
+      let activeTenant: Tenant | null = null;
+      let userRole: string | null = null;
+
+      const previousTenantSlug = localStorage.getItem("active_org_slug");
+
       let { data: orgData } =
         await authClient.organization.getFullOrganization();
 
-      // If no active organization in session, search user organizations and set target as active
       if (!orgData) {
         const { data: orgs } = await authClient.organization.list();
         const storedSlug = localStorage.getItem("active_org_slug");
@@ -82,46 +84,64 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           await authClient.organization.setActive({
             organizationSlug: targetOrg.slug,
           });
-          const fullRes = await authClient.organization.getFullOrganization();
-          orgData = fullRes.data ?? (targetOrg as any);
+          orgData = targetOrg as any;
         }
       }
 
       if (orgData) {
+        if (previousTenantSlug !== orgData.slug) {
+          clearPermissionCache();
+        }
+
         localStorage.setItem("active_org_slug", orgData.slug);
+
+        const [fullRes, roleRes] = await Promise.allSettled([
+          authClient.organization.getFullOrganization(),
+          authClient.organization.getActiveMemberRole(),
+        ]);
+
+        const fullOrgData =
+          fullRes.status === "fulfilled" && fullRes.value.data
+            ? fullRes.value.data
+            : orgData;
+
+        userRole =
+          roleRes.status === "fulfilled" && roleRes.value.data
+            ? roleRes.value.data.role
+            : null;
+
         activeTenant = {
-          id: orgData.id,
-          name: orgData.name,
-          slug: orgData.slug,
-          logo: orgData.logo ?? undefined,
+          id: fullOrgData.id,
+          name: fullOrgData.name,
+          slug: fullOrgData.slug,
+          logo: fullOrgData.logo ?? undefined,
           active: true,
-          createdAt: new Date(orgData.createdAt),
-          updatedAt: new Date(orgData.createdAt),
+          createdAt: new Date(fullOrgData.createdAt),
+          updatedAt: new Date(fullOrgData.createdAt),
         };
       } else {
         localStorage.removeItem("active_org_slug");
+        clearPermissionCache();
       }
-    } catch {
-      activeTenant = null;
+
+      setTenant(activeTenant);
+      setUser({
+        ...sessionUser,
+        role: userRole ?? undefined,
+      } as SessionUser);
+    } catch (error) {
+      console.error("Failed to fetch session:", error);
+      handleClearSession();
+    } finally {
+      setIsLoading(false);
     }
+  }, []);
 
-    setTenant(activeTenant);
-
-    // Fetch member role AFTER organization is active
-    let userRole: string | null = null;
-    try {
-      const { data: dataRole } =
-        await authClient.organization.getActiveMemberRole();
-      userRole = dataRole?.role ?? null;
-    } catch {
-      userRole = null;
-    }
-
-    setUser({
-      ...sessionUser,
-      role: userRole ?? undefined,
-    } as SessionUser);
-
+  const handleClearSession = useCallback(() => {
+    setUser(null);
+    setTenant(null);
+    localStorage.removeItem("active_org_slug");
+    clearPermissionCache(); // CRITICAL: Security reset
     setIsLoading(false);
   }, []);
 
@@ -129,11 +149,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     fetchSession();
   }, [fetchSession]);
 
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === "active_org_slug") {
+        fetchSession();
+      }
+    };
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, [fetchSession]);
+
   const logout = async () => {
+    setIsLoading(true);
     await authClient.signOut();
-    localStorage.removeItem("active_org_slug");
-    setUser(null);
-    setTenant(null);
+    handleClearSession();
   };
 
   return (

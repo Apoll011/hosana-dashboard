@@ -3,28 +3,20 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect, useRef } from "react";
+import { Can, CanAny } from "@/src/lib/permissions/components";
+import { Button, Input, settingsApi } from "@hosanna/shared";
 import {
   Building2,
   Camera,
-  Trash2,
+  Download,
+  Lock,
   PenLine,
   Save,
-  Download,
   Upload,
-  AlertTriangle,
-  RotateCcw,
-  Shield,
-  Lock,
-  Loader2,
-  Check,
 } from "lucide-react";
-import { Button, Input, Modal } from "@hosanna/shared";
-import { authClient } from "../../lib/authClient";
+import React, { useEffect, useRef, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
-import { useSync } from "../../contexts/SyncContext";
-import { settingsApi } from "@hosanna/shared";
-import { songImportRegistry } from "../../import";
+import { authClient } from "../../lib/authClient";
 import { compressImage } from "./settingsUtils";
 
 export interface WorkspaceTabProps {
@@ -50,7 +42,7 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
 
   const [currentName, setCurrentName] = useState(tenant?.name || "");
   const [currentLogo, setCurrentLogo] = useState<string | undefined>(
-    tenant?.logo
+    tenant?.logo,
   );
 
   const [isEditing, setIsEditing] = useState(false);
@@ -126,7 +118,10 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
       setDraftName(previousName);
       setDraftLogo(previousLogo);
       setIsEditing(true);
-      showToast("Erro ao atualizar: " + (err?.message || "Erro de rede"), "error");
+      showToast(
+        "Erro ao atualizar: " + (err?.message || "Erro de rede"),
+        "error",
+      );
     } finally {
       setIsSavingTenant(false);
     }
@@ -244,7 +239,8 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
                   {currentName || "Minha Organização"}
                 </h3>
                 <p className="text-xs text-slate-400 font-mono mt-0.5">
-                  ID: {tenant?.id || "org-default"} · Slug: {tenant?.slug || "hosanna"}
+                  ID: {tenant?.id || "org-default"} · Slug:{" "}
+                  {tenant?.slug || "hosanna"}
                 </p>
               </div>
             )}
@@ -286,31 +282,35 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
         </div>
       </div>
 
-      {/* Backup & Restore */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs space-y-4">
-        <div>
-          <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-            <Download className="w-4 h-4 text-m3-primary" />
-            Cópia de Segurança & Dados
-          </h3>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-            Exporte ou restaure todos os repertórios, cultos e definições da organização.
-          </p>
-        </div>
+      <CanAny permissions={["export.backup", "import.backup"]}>
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs space-y-4">
+          <div>
+            <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+              <Download className="w-4 h-4 text-m3-primary" />
+              Cópia de Segurança & Dados
+            </h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+              Exporte ou restaure todos os repertórios, cultos e definições da
+              organização.
+            </p>
+          </div>
 
-        <div className="flex flex-wrap gap-3 pt-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleBackup}
-            disabled={isDownloading}
-            icon={<Download className="w-4 h-4 text-sky-500" />}
-          >
-            {isDownloading ? "A descarregar..." : "Exportar Cópia de Segurança"}
-          </Button>
+          <div className="flex flex-wrap gap-3 pt-2">
+            <Can permission="export.backup">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleBackup}
+                disabled={isDownloading}
+                icon={<Download className="w-4 h-4 text-sky-500" />}
+              >
+                {isDownloading
+                  ? "A descarregar..."
+                  : "Exportar Cópia de Segurança"}
+              </Button>
+            </Can>
 
-          {canManageOrg && (
-            <>
+            <Can permission="import.backup">
               <input
                 ref={restoreInputRef}
                 type="file"
@@ -326,10 +326,10 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
               >
                 Restaurar Dados
               </Button>
-            </>
-          )}
+            </Can>
+          </div>
         </div>
-      </div>
+      </CanAny>
     </div>
   );
 };
