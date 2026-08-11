@@ -4,7 +4,11 @@
  */
 
 import { createAuthClient } from "better-auth/client";
-import { twoFactorClient, organizationClient } from "better-auth/client/plugins";
+import {
+  organizationClient,
+  twoFactorClient,
+} from "better-auth/client/plugins";
+import { ac, roles } from "./permissions";
 
 export const authClient = createAuthClient({
   baseURL: import.meta.env.VITE_API_URL
@@ -17,7 +21,13 @@ export const authClient = createAuthClient({
     twoFactorClient({
       twoFactorPage: "/two-factor",
     }),
-    organizationClient(),
+    organizationClient({
+      ac,
+      roles,
+      teams: {
+        enabled: true,
+      },
+    }),
   ],
 });
 

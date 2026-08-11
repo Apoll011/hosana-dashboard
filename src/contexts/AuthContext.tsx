@@ -20,6 +20,7 @@ interface SessionUser {
   emailVerified: boolean;
   createdAt: Date;
   updatedAt: Date;
+  role?: string;
   [key: string]: unknown;
 }
 
@@ -54,8 +55,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const fetchSession = useCallback(async () => {
     const { data } = await authClient.getSession();
-    const sessionUser = (data?.user as SessionUser) ?? null;
-    setUser(sessionUser);
+    const { data: dataRole } =
+      await authClient.organization.getActiveMemberRole();
+    const sessionUser = data?.user ?? null;
+
+    const sessionUserWithRole = sessionUser
+      ? ({
+          ...sessionUser,
+          role: dataRole?.role ?? null,
+        } as SessionUser)
+      : null;
+
+    setUser(sessionUserWithRole);
 
     // Fetch active organization if user exists
     if (sessionUser) {

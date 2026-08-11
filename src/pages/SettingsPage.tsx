@@ -3,31 +3,36 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from "react";
+import { Button, Modal, settingsApi } from "@hosanna/shared";
 import {
-  Server,
+  AlertTriangle,
   Building2,
+  Info,
+  Palette,
+  RotateCcw,
+  Server,
   User,
   Users,
-  Palette,
-  Info,
-  ArrowLeft,
-  AlertTriangle,
-  RotateCcw,
 } from "lucide-react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button, Modal, ConfirmDialog, settingsApi } from "@hosanna/shared";
 import { useAuth } from "../contexts/AuthContext";
 import { useSync } from "../contexts/SyncContext";
 
-import { GeneralTab } from "../components/settings/GeneralTab";
-import { WorkspaceTab } from "../components/settings/WorkspaceTab";
-import { AccountTab } from "../components/settings/AccountTab";
-import { MembersTab } from "../components/settings/MembersTab";
-import { AppearanceTab } from "../components/settings/AppearanceTab";
 import { AboutTab } from "../components/settings/AboutTab";
+import { AccountTab } from "../components/settings/AccountTab";
+import { AppearanceTab } from "../components/settings/AppearanceTab";
+import { GeneralTab } from "../components/settings/GeneralTab";
+import { MembersTab } from "../components/settings/MembersTab";
+import { WorkspaceTab } from "../components/settings/WorkspaceTab";
 
-type TabType = "general" | "workspace" | "account" | "members" | "appearance" | "about";
+type TabType =
+  | "general"
+  | "workspace"
+  | "account"
+  | "members"
+  | "appearance"
+  | "about";
 
 export const SettingsPage: React.FC = () => {
   const navigate = useNavigate();
@@ -53,7 +58,10 @@ export const SettingsPage: React.FC = () => {
     setIsRestoring(true);
     try {
       await settingsApi.restoreBackup(pendingRestoreData);
-      showToast("Base de dados restaurada com sucesso! A recarregar...", "success");
+      showToast(
+        "Base de dados restaurada com sucesso! A recarregar...",
+        "success",
+      );
       setTimeout(() => {
         window.location.reload();
       }, 1200);
@@ -78,27 +86,6 @@ export const SettingsPage: React.FC = () => {
   return (
     <div className="h-full w-full overflow-y-auto bg-slate-50/50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 p-4 sm:p-6 lg:p-8">
       <div className="max-w-5xl mx-auto space-y-6">
-        {/* Top Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-200 dark:border-slate-800">
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => navigate(-1)}
-              className="p-2 text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-slate-800 rounded-xl transition-colors cursor-pointer"
-              title="Voltar"
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </button>
-            <div>
-              <h1 className="text-xl font-extrabold text-slate-900 dark:text-slate-100">
-                Definições do Studio
-              </h1>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                Gerir conta, organização, utilizadores e preferências da aplicação
-              </p>
-            </div>
-          </div>
-        </div>
-
         {/* Tab Navigation */}
         <div className="flex items-center gap-1 overflow-x-auto pb-2 scrollbar-none border-b border-slate-200 dark:border-slate-800">
           {tabs.map((tab) => {
