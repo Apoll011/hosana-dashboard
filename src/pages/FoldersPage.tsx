@@ -628,7 +628,7 @@ export const FoldersPage: React.FC = () => {
               isSearchingOrFiltering={isSearchingOrFiltering}
               getFolderPathString={getFolderPathString}
               onClick={(e) => handleItemClick(e, song.id, "song")}
-              onDoubleClick={() => navigate(`/songs/${song.id}`)}
+              onDoubleClick={() => navigate(`../songs/${song.id}`)}
               onContextMenu={(e) => handleContextMenu(e, "song", song)}
               onDragStart={(e) => handleItemDragStart(e, song.id, "song")}
               onDragEnd={handleItemDragEnd}
@@ -681,7 +681,7 @@ export const FoldersPage: React.FC = () => {
                   isSearchingOrFiltering={isSearchingOrFiltering}
                   getFolderPathString={getFolderPathString}
                   onClick={(e) => handleItemClick(e, song.id, "song")}
-                  onDoubleClick={() => navigate(`/songs/${song.id}`)}
+                  onDoubleClick={() => navigate(`../songs/${song.id}`)}
                   onContextMenu={(e) => handleContextMenu(e, "song", song)}
                   onDragStart={(e) => handleItemDragStart(e, song.id, "song")}
                   onDragEnd={handleItemDragEnd}

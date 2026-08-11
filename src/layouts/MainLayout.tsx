@@ -52,13 +52,20 @@ import {
   Trash2,
   Upload,
   User,
+  Users,
   X,
 } from "lucide-react";
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
-import logo from "../assets/images/hosannastudio_logo.png";
 import { FolderForm } from "../components/forms/FolderForm";
 import { SongForm } from "../components/forms/SongForm";
+import { InboxButton } from "../components/Inbox";
 import { BatchDeleteModal } from "../components/modals/BatchDeleteModal";
 import { BatchMoveModal } from "../components/modals/BatchMoveModal";
 import { BatchTagModal } from "../components/modals/BatchTagModal";
@@ -69,6 +76,7 @@ import { useSync } from "../contexts/SyncContext";
 import { useFolders } from "../hooks/useFolders";
 import { useServices } from "../hooks/useServices";
 import { useAllSongs } from "../hooks/useSongs";
+import { authClient } from "../lib/authClient";
 
 import { ConversionResult, printApi } from "@hosanna/shared";
 import { useStatsigClient } from "@statsig/react-bindings";
@@ -77,6 +85,7 @@ import { Action, KBarProvider } from "kbar";
 import { ServiceForm } from "../components/forms/ServiceForm";
 import { KBarCommandPaletteUI } from "../components/KBarCommandPalette";
 import { CifraClubImportModal } from "../components/modals/CifraModal";
+import { getRoleLabel } from "../components/settings/settingsUtils";
 import { songImportRegistry } from "../import";
 import { getInitials, printHtmlDirectly } from "../utils";
 import { ProviderImportResult } from "../utils/import";
@@ -334,22 +343,31 @@ export const MainLayout: React.FC = () => {
   const location = useLocation();
   const { user, logout, tenant } = useAuth();
 
-  const isSongsView = location.pathname === "/songs";
+  const slugPrefix = tenant?.slug ? `/${tenant.slug}` : "";
+  const isSongsView =
+    location.pathname === `${slugPrefix}/songs` ||
+    location.pathname === "/songs";
   const isSongEditorView =
-    location.pathname.startsWith("/songs/") && location.pathname !== "/songs";
-  const isServicesView = location.pathname === "/services";
+    (location.pathname.startsWith(`${slugPrefix}/songs/`) ||
+      location.pathname.startsWith("/songs/")) &&
+    !isSongsView;
+  const isServicesView =
+    location.pathname === `${slugPrefix}/services` ||
+    location.pathname === "/services";
   const isServiceEditorView =
-    location.pathname.startsWith("/services/") &&
-    location.pathname !== "/services";
-  const isMusiciansView = location.pathname.startsWith("/musicians");
-  const isSettingsView = location.pathname.startsWith("/settings");
+    (location.pathname.startsWith(`${slugPrefix}/services/`) ||
+      location.pathname.startsWith("/services/")) &&
+    !isServicesView;
+
+  const isTeamsView = location.pathname.includes("/teams");
+  const isSettingsView = location.pathname.includes("/settings");
   const isExplorerView =
-    location.pathname.startsWith("/folders") ||
+    location.pathname.includes("/folders") ||
     (!isSongsView &&
       !isSongEditorView &&
       !isServicesView &&
       !isServiceEditorView &&
-      !isMusiciansView &&
+      !isTeamsView &&
       !isSettingsView);
   const isEditorView = isSongEditorView || isServiceEditorView;
 
@@ -419,22 +437,22 @@ export const MainLayout: React.FC = () => {
   const [currentFolderId, setCurrentFolderId] = useState<string | null>(null);
 
   const navigateBackToDrive = () => {
-    if (location.pathname !== "/folders") {
-      navigate("/folders");
+    if (!isExplorerView) {
+      navigate(`${slugPrefix}/folders`);
     }
   };
 
   const handleSearchChange = (val: string) => {
     setSearchQuery(val);
-    if (isMusiciansView || isSettingsView) {
-      navigate("/folders");
+    if (isSettingsView) {
+      navigate(`${slugPrefix}/folders`);
     }
   };
 
   const handleSelectFolder = (id: string | null) => {
     setCurrentFolderId(id);
     if (!isExplorerView) {
-      navigate("/folders");
+      navigate(`${slugPrefix}/folders`);
     }
   };
 
@@ -444,16 +462,16 @@ export const MainLayout: React.FC = () => {
   ) => {
     setSortBy(sb);
     setSortOrder(so);
-    if (isMusiciansView || isSettingsView) {
-      navigate("/folders");
+    if (isSettingsView) {
+      navigate(`${slugPrefix}/folders`);
     }
   };
 
   const handleViewModeChange = (mode: "grid" | "list") => {
     setViewMode(mode);
     localStorage.setItem("viewMode", mode);
-    if (isMusiciansView || isSettingsView) {
-      navigate("/folders");
+    if (isSettingsView) {
+      navigate(`${slugPrefix}/folders`);
     }
   };
   const [searchQuery, setSearchQuery] = useState("");
@@ -767,7 +785,7 @@ export const MainLayout: React.FC = () => {
         icon: <HardDrive className="w-4 h-4 text-sky-500" />,
         perform: () => {
           setCurrentFolderId(null);
-          navigate("/folders");
+          navigate(`${slugPrefix}/folders`);
         },
       },
       {
@@ -777,7 +795,7 @@ export const MainLayout: React.FC = () => {
         keywords: "biblioteca canticos musicas songs library",
         section: "Navegação",
         icon: <Music className="w-4 h-4 text-sky-500" />,
-        perform: () => navigate("/songs"),
+        perform: () => navigate(`${slugPrefix}/songs`),
       },
       {
         id: "nav-services",
@@ -786,7 +804,7 @@ export const MainLayout: React.FC = () => {
         keywords: "cultos planos servicos services worship",
         section: "Navegação",
         icon: <Church className="w-4 h-4 text-emerald-500" />,
-        perform: () => navigate("/services"),
+        perform: () => navigate(`${slugPrefix}/services`),
       },
       {
         id: "nav-musicians",
@@ -795,7 +813,7 @@ export const MainLayout: React.FC = () => {
         keywords: "musicos equipa team qr code access",
         section: "Navegação",
         icon: <User className="w-4 h-4 text-indigo-500" />,
-        perform: () => navigate("/musicians"),
+        perform: () => navigate(`${slugPrefix}/teams`),
       },
       {
         id: "nav-settings",
@@ -804,7 +822,7 @@ export const MainLayout: React.FC = () => {
         keywords: "definicoes configuracoes settings preferences",
         section: "Navegação",
         icon: <Settings className="w-4 h-4 text-slate-500" />,
-        perform: () => navigate("/settings"),
+        perform: () => navigate(`${slugPrefix}/settings`),
       },
 
       // --- AÇÕES RÁPIDAS ---
@@ -866,7 +884,7 @@ export const MainLayout: React.FC = () => {
         icon: <FolderIcon className="w-4 h-4 text-amber-500" />,
         perform: () => {
           handleSelectFolder(f.id);
-          navigate("/folders");
+          navigate(`${slugPrefix}/folders`);
         },
       });
     });
@@ -880,7 +898,7 @@ export const MainLayout: React.FC = () => {
         keywords: `cantico canticos musica musicas song songs louvor ${s.title} ${s.artist || ""} ${(s.tags || []).join(" ")}`,
         section: "Cânticos",
         icon: <FileText className="w-4 h-4 text-sky-500" />,
-        perform: () => navigate(`/songs/${s.id}`),
+        perform: () => navigate(`${slugPrefix}/songs/${s.id}`),
       });
     });
 
@@ -893,7 +911,7 @@ export const MainLayout: React.FC = () => {
         keywords: `culto cultos plano planos service services worship reuniao ${serv.name} ${serv.notes || ""}`,
         section: "Cultos",
         icon: <Calendar className="w-4 h-4 text-emerald-500" />,
-        perform: () => navigate(`/services/${serv.id}`),
+        perform: () => navigate(`${slugPrefix}/services/${serv.id}`),
       });
     });
 
@@ -968,7 +986,7 @@ export const MainLayout: React.FC = () => {
         icon: <Trash2 className="w-4 h-4 text-rose-500" />,
         perform: async () => {
           await deleteService(currentService.id);
-          navigate("/services");
+          navigate(`${slugPrefix}/services`);
         },
       });
     }
@@ -1165,37 +1183,44 @@ export const MainLayout: React.FC = () => {
   }, [filteredSubfolders, filteredFiles]);
 
   // Selection Handlers (Click, Ctrl+Click, Shift+Click)
-  const handleItemClick = useCallback((
-    e: React.MouseEvent,
-    id: string,
-    type: "folder" | "song",
-  ) => {
-    e.stopPropagation();
+  const handleItemClick = useCallback(
+    (e: React.MouseEvent, id: string, type: "folder" | "song") => {
+      e.stopPropagation();
 
-    if (e.ctrlKey || e.metaKey) {
-      if (type === "folder") toggleFolderSelect(id);
-      else toggleSongSelect(id);
-      setLastClickedId(id);
-    } else if (e.shiftKey && lastClickedId) {
-      const allIds = viewItems.map((v) => v.id);
-      const idx1 = allIds.indexOf(lastClickedId);
-      const idx2 = allIds.indexOf(id);
+      if (e.ctrlKey || e.metaKey) {
+        if (type === "folder") toggleFolderSelect(id);
+        else toggleSongSelect(id);
+        setLastClickedId(id);
+      } else if (e.shiftKey && lastClickedId) {
+        const allIds = viewItems.map((v) => v.id);
+        const idx1 = allIds.indexOf(lastClickedId);
+        const idx2 = allIds.indexOf(id);
 
-      if (idx1 !== -1 && idx2 !== -1) {
-        const start = Math.min(idx1, idx2);
-        const end = Math.max(idx1, idx2);
-        const range = viewItems.slice(start, end + 1);
+        if (idx1 !== -1 && idx2 !== -1) {
+          const start = Math.min(idx1, idx2);
+          const end = Math.max(idx1, idx2);
+          const range = viewItems.slice(start, end + 1);
 
-        const nextFolders = new Set<string>();
-        const nextSongs = new Set<string>();
+          const nextFolders = new Set<string>();
+          const nextSongs = new Set<string>();
 
-        range.forEach((v) => {
-          if (v.type === "folder") nextFolders.add(v.id);
-          else nextSongs.add(v.id);
-        });
+          range.forEach((v) => {
+            if (v.type === "folder") nextFolders.add(v.id);
+            else nextSongs.add(v.id);
+          });
 
-        setSelectedFolderIds(nextFolders);
-        setSelectedSongIds(nextSongs);
+          setSelectedFolderIds(nextFolders);
+          setSelectedSongIds(nextSongs);
+        } else {
+          if (type === "folder") {
+            setSelectedFolderIds(new Set([id]));
+            setSelectedSongIds(new Set());
+          } else {
+            setSelectedFolderIds(new Set());
+            setSelectedSongIds(new Set([id]));
+          }
+        }
+        setLastClickedId(id);
       } else {
         if (type === "folder") {
           setSelectedFolderIds(new Set([id]));
@@ -1204,19 +1229,11 @@ export const MainLayout: React.FC = () => {
           setSelectedFolderIds(new Set());
           setSelectedSongIds(new Set([id]));
         }
+        setLastClickedId(id);
       }
-      setLastClickedId(id);
-    } else {
-      if (type === "folder") {
-        setSelectedFolderIds(new Set([id]));
-        setSelectedSongIds(new Set());
-      } else {
-        setSelectedFolderIds(new Set());
-        setSelectedSongIds(new Set([id]));
-      }
-      setLastClickedId(id);
-    }
-  }, [viewItems, lastClickedId]);
+    },
+    [viewItems, lastClickedId],
+  );
 
   const toggleFolderSelect = useCallback((id: string, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
@@ -1250,29 +1267,32 @@ export const MainLayout: React.FC = () => {
   };
 
   // Marquee Drag Selection Handler
-  const handleWorkspaceMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.button !== 0) return;
+  const handleWorkspaceMouseDown = useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      if (e.button !== 0) return;
 
-    const target = e.target as HTMLElement;
-    if (target.closest('button, input, a, [role="dialog"], [data-item-id]')) {
-      return;
-    }
+      const target = e.target as HTMLElement;
+      if (target.closest('button, input, a, [role="dialog"], [data-item-id]')) {
+        return;
+      }
 
-    const isAdditive = e.ctrlKey || e.metaKey;
+      const isAdditive = e.ctrlKey || e.metaKey;
 
-    isMouseDownRef.current = true;
-    startPosRef.current = { x: e.clientX, y: e.clientY };
+      isMouseDownRef.current = true;
+      startPosRef.current = { x: e.clientX, y: e.clientY };
 
-    if (!isAdditive) {
-      clearSelection();
-      initialSelectionRef.current = { folders: new Set(), songs: new Set() };
-    } else {
-      initialSelectionRef.current = {
-        folders: new Set(selectedFolderIds),
-        songs: new Set(selectedSongIds),
-      };
-    }
-  }, [selectedFolderIds, selectedSongIds]);
+      if (!isAdditive) {
+        clearSelection();
+        initialSelectionRef.current = { folders: new Set(), songs: new Set() };
+      } else {
+        initialSelectionRef.current = {
+          folders: new Set(selectedFolderIds),
+          songs: new Set(selectedSongIds),
+        };
+      }
+    },
+    [selectedFolderIds, selectedSongIds],
+  );
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -1367,71 +1387,91 @@ export const MainLayout: React.FC = () => {
   }, [selectedFolderIds, allFolders]);
 
   // Batch Handlers
-  const handleBatchMoveConfirm = useCallback(async (targetFolderId: string | null) => {
-    const folderList = Array.from(selectedFolderIds) as string[];
-    const songList = Array.from(selectedSongIds) as string[];
+  const handleBatchMoveConfirm = useCallback(
+    async (targetFolderId: string | null) => {
+      const folderList = Array.from(selectedFolderIds) as string[];
+      const songList = Array.from(selectedSongIds) as string[];
 
-    // OPTIMISTIC UPDATE: snapshot current cache then apply changes immediately
-    const prevFoldersData = queryClient.getQueryData(["folders"]);
-    const prevSongsData = queryClient.getQueryData(["songs", "all", {}]);
+      // OPTIMISTIC UPDATE: snapshot current cache then apply changes immediately
+      const prevFoldersData = queryClient.getQueryData(["folders"]);
+      const prevSongsData = queryClient.getQueryData(["songs", "all", {}]);
 
-    if (folderList.length > 0) {
-      queryClient.setQueryData(["folders"], (old: any) => {
-        if (!old) return old;
-        return {
-          ...old,
-          folders: old.folders.map((f: any) =>
-            folderList.includes(f.id) ? { ...f, parentId: targetFolderId } : f,
-          ),
-        };
-      });
-    }
-
-    if (songList.length > 0) {
-      queryClient.setQueryData(["songs", "all", {}], (old: any) => {
-        if (!old || !old.songs) return old;
-        return {
-          ...old,
-          songs: old.songs.map((s: any) =>
-            songList.includes(s.id) ? { ...s, folderId: targetFolderId } : s,
-          ),
-        };
-      });
-    }
-
-    clearSelection();
-
-    try {
-      for (const fId of folderList) {
-        const f = allFolders.find((x) => x.id === fId);
-        if (f)
-          await moveFolder({
-            id: fId,
-            parentId: targetFolderId,
-            updatedAt: f.updatedAt!,
-          });
-      }
-      for (const sId of songList) {
-        const s = allSongs.find((x) => x.id === sId);
-        if (s)
-          await moveSong({
-            id: sId,
-            folderId: targetFolderId,
-            updatedAt: s.updatedAt,
-          });
+      if (folderList.length > 0) {
+        queryClient.setQueryData(["folders"], (old: any) => {
+          if (!old) return old;
+          return {
+            ...old,
+            folders: old.folders.map((f: any) =>
+              folderList.includes(f.id)
+                ? { ...f, parentId: targetFolderId }
+                : f,
+            ),
+          };
+        });
       }
 
-      showToast(
-        `${folderList.length + songList.length} item(ns) movido(s) com sucesso!`,
-        "success",
-      );
-    } catch (err) {
-      // ROLLBACK on error
-      if (prevFoldersData) queryClient.setQueryData(["folders"], prevFoldersData);
-      if (prevSongsData) queryClient.setQueryData(["songs", "all", {}], prevSongsData);
-      showToast("Erro ao mover itens. As alterações foram revertidas.", "error");
-    }
-  }, [selectedFolderIds, selectedSongIds, allFolders, allSongs, queryClient, moveFolder, moveSong, showToast, clearSelection]);
+      if (songList.length > 0) {
+        queryClient.setQueryData(["songs", "all", {}], (old: any) => {
+          if (!old || !old.songs) return old;
+          return {
+            ...old,
+            songs: old.songs.map((s: any) =>
+              songList.includes(s.id) ? { ...s, folderId: targetFolderId } : s,
+            ),
+          };
+        });
+      }
+
+      clearSelection();
+
+      try {
+        for (const fId of folderList) {
+          const f = allFolders.find((x) => x.id === fId);
+          if (f)
+            await moveFolder({
+              id: fId,
+              parentId: targetFolderId,
+              updatedAt: f.updatedAt!,
+            });
+        }
+        for (const sId of songList) {
+          const s = allSongs.find((x) => x.id === sId);
+          if (s)
+            await moveSong({
+              id: sId,
+              folderId: targetFolderId,
+              updatedAt: s.updatedAt,
+            });
+        }
+
+        showToast(
+          `${folderList.length + songList.length} item(ns) movido(s) com sucesso!`,
+          "success",
+        );
+      } catch (err) {
+        // ROLLBACK on error
+        if (prevFoldersData)
+          queryClient.setQueryData(["folders"], prevFoldersData);
+        if (prevSongsData)
+          queryClient.setQueryData(["songs", "all", {}], prevSongsData);
+        showToast(
+          "Erro ao mover itens. As alterações foram revertidas.",
+          "error",
+        );
+      }
+    },
+    [
+      selectedFolderIds,
+      selectedSongIds,
+      allFolders,
+      allSongs,
+      queryClient,
+      moveFolder,
+      moveSong,
+      showToast,
+      clearSelection,
+    ],
+  );
 
   const handleBatchDeleteConfirm = async (
     folderAction: "move_to_root" | "delete_songs",
@@ -1545,7 +1585,7 @@ export const MainLayout: React.FC = () => {
         if (selectedFolderIds.size === 1) {
           handleSelectFolder(Array.from(selectedFolderIds)[0]);
         } else if (selectedSongIds.size === 1) {
-          navigate(`/songs/${Array.from(selectedSongIds)[0]}`);
+          navigate(`${slugPrefix}/songs/${Array.from(selectedSongIds)[0]}`);
         }
       }
     };
@@ -1578,56 +1618,58 @@ export const MainLayout: React.FC = () => {
   };
 
   // Context Menu trigger
-  const handleContextMenu = useCallback((
-    e: React.MouseEvent,
-    type: "folder" | "song",
-    item: Folder | Song,
-  ) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const handleContextMenu = useCallback(
+    (e: React.MouseEvent, type: "folder" | "song", item: Folder | Song) => {
+      e.preventDefault();
+      e.stopPropagation();
 
-    const isAlreadySelected =
-      type === "folder"
-        ? selectedFolderIds.has(item.id)
-        : selectedSongIds.has(item.id);
+      const isAlreadySelected =
+        type === "folder"
+          ? selectedFolderIds.has(item.id)
+          : selectedSongIds.has(item.id);
 
-    if (!isAlreadySelected) {
-      if (!e.ctrlKey && !e.metaKey && !e.shiftKey) {
-        if (type === "folder") {
-          setSelectedFolderIds(new Set([item.id]));
-          setSelectedSongIds(new Set());
+      if (!isAlreadySelected) {
+        if (!e.ctrlKey && !e.metaKey && !e.shiftKey) {
+          if (type === "folder") {
+            setSelectedFolderIds(new Set([item.id]));
+            setSelectedSongIds(new Set());
+          } else {
+            setSelectedFolderIds(new Set());
+            setSelectedSongIds(new Set([item.id]));
+          }
+          setLastClickedId(item.id);
         } else {
-          setSelectedFolderIds(new Set());
-          setSelectedSongIds(new Set([item.id]));
+          if (type === "folder") toggleFolderSelect(item.id);
+          else toggleSongSelect(item.id);
+          setLastClickedId(item.id);
         }
-        setLastClickedId(item.id);
-      } else {
-        if (type === "folder") toggleFolderSelect(item.id);
-        else toggleSongSelect(item.id);
-        setLastClickedId(item.id);
       }
-    }
 
-    const x = Math.min(e.clientX, window.innerWidth - 240);
-    const y = Math.min(e.clientY, window.innerHeight - 280);
+      const x = Math.min(e.clientX, window.innerWidth - 240);
+      const y = Math.min(e.clientY, window.innerHeight - 280);
 
-    setContextMenu({ x, y, type, item });
-  }, [selectedFolderIds, selectedSongIds]);
+      setContextMenu({ x, y, type, item });
+    },
+    [selectedFolderIds, selectedSongIds],
+  );
 
-  const handleCanvasContextMenu = useCallback((e: React.MouseEvent) => {
-    const target = e.target as HTMLElement;
-    if (target.closest("[data-item-id]")) {
-      return;
-    }
+  const handleCanvasContextMenu = useCallback(
+    (e: React.MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.closest("[data-item-id]")) {
+        return;
+      }
 
-    e.preventDefault();
-    e.stopPropagation();
+      e.preventDefault();
+      e.stopPropagation();
 
-    const x = Math.min(e.clientX, window.innerWidth - 240);
-    const y = Math.min(e.clientY, window.innerHeight - 300);
+      const x = Math.min(e.clientX, window.innerWidth - 240);
+      const y = Math.min(e.clientY, window.innerHeight - 300);
 
-    setContextMenu({ x, y, type: "canvas", item: null });
-  }, [currentFolder]);
+      setContextMenu({ x, y, type: "canvas", item: null });
+    },
+    [currentFolder],
+  );
 
   // Folder Actions
   const handleCreateFolderSubmit = async (name: string) => {
@@ -1693,7 +1735,7 @@ export const MainLayout: React.FC = () => {
     await Promise.all([songsQuery.refetch(), foldersQuery.refetch()]);
     setIsCreateSongModalOpen(false);
     showToast("Cântico criado com sucesso!", "success");
-    navigate(`/songs/${song.id}`);
+    navigate(`${slugPrefix}/songs/${song.id}`);
   };
 
   const handlePrintSongs = async () => {
@@ -1739,7 +1781,7 @@ export const MainLayout: React.FC = () => {
     await Promise.all([songsQuery.refetch(), foldersQuery.refetch()]);
     setIsCreateSongModalOpen(false);
     showToast("Cântico importado com sucesso!", "success");
-    navigate(`/songs/${song.id}`);
+    navigate(`${slugPrefix}/songs/${song.id}`);
   };
 
   const handleCreateServiceSubmit = async (data: {
@@ -1754,7 +1796,7 @@ export const MainLayout: React.FC = () => {
       elements: [],
     });
     setIsCreateServiceModalOpen(false);
-    navigate(`/services/${newService.id}`);
+    navigate(`${slugPrefix}/services/${newService.id}`);
   };
 
   const handleDeleteSongSubmit = async () => {
@@ -1847,125 +1889,148 @@ export const MainLayout: React.FC = () => {
     }
   };
 
-  const handleItemDragStart = useCallback((
-    e: React.DragEvent,
-    id: string,
-    type: "folder" | "song",
-  ) => {
-    const isSelected =
-      type === "folder" ? selectedFolderIds.has(id) : selectedSongIds.has(id);
+  const handleItemDragStart = useCallback(
+    (e: React.DragEvent, id: string, type: "folder" | "song") => {
+      const isSelected =
+        type === "folder" ? selectedFolderIds.has(id) : selectedSongIds.has(id);
 
-    if (!isSelected) {
-      if (type === "folder") {
-        setSelectedFolderIds(new Set([id]));
-        setSelectedSongIds(new Set());
-      } else {
-        setSelectedFolderIds(new Set());
-        setSelectedSongIds(new Set([id]));
-      }
-      setLastClickedId(id);
-    }
-
-    // Compute total items that will be dragged
-    const willFolders = !isSelected && type === "folder"
-      ? new Set([id])
-      : isSelected ? selectedFolderIds : (type === "folder" ? new Set([...selectedFolderIds, id]) : selectedFolderIds);
-    const willSongs = !isSelected && type === "song"
-      ? new Set([id])
-      : isSelected ? selectedSongIds : (type === "song" ? new Set([...selectedSongIds, id]) : selectedSongIds);
-    const totalDragging = willFolders.size + willSongs.size;
-
-    if (totalDragging > 1) {
-      // Build a stacked ghost drag image
-      const ghost = document.createElement("div");
-      ghost.style.cssText = [
-        "position:fixed",
-        "top:-2000px",
-        "left:-2000px",
-        "width:150px",
-        "height:60px",
-        "pointer-events:none",
-        "z-index:9999",
-      ].join(";");
-
-      const stackCount = Math.min(totalDragging, 3);
-      for (let i = stackCount - 1; i >= 0; i--) {
-        const card = document.createElement("div");
-        const rotation = (i - Math.floor(stackCount / 2)) * 4;
-        const yOffset = i * -3;
-        card.style.cssText = [
-          "position:absolute",
-          "width:140px",
-          "height:44px",
-          "background:white",
-          "border:2px solid rgba(2,132,199,0.6)",
-          "border-radius:14px",
-          "box-shadow:0 4px 16px rgba(0,0,0,0.18)",
-          "display:flex",
-          "align-items:center",
-          "justify-content:center",
-          `transform:rotate(${rotation}deg) translateY(${yOffset}px)`,
-          "font-size:12px",
-          "font-weight:800",
-          "color:#0284c7",
-          "letter-spacing:0.05em",
-          "font-family:system-ui,sans-serif",
-          `top:${(stackCount - 1 - i) * 3}px`,
-          "left:0",
-        ].join(";");
-        if (i === 0) {
-          card.textContent = `${totalDragging} itens`;
+      if (!isSelected) {
+        if (type === "folder") {
+          setSelectedFolderIds(new Set([id]));
+          setSelectedSongIds(new Set());
+        } else {
+          setSelectedFolderIds(new Set());
+          setSelectedSongIds(new Set([id]));
         }
-        ghost.appendChild(card);
+        setLastClickedId(id);
       }
 
-      document.body.appendChild(ghost);
-      e.dataTransfer.setDragImage(ghost, 70, 22);
-      requestAnimationFrame(() => {
-        if (document.body.contains(ghost)) document.body.removeChild(ghost);
-      });
-    }
+      // Compute total items that will be dragged
+      const willFolders =
+        !isSelected && type === "folder"
+          ? new Set([id])
+          : isSelected
+            ? selectedFolderIds
+            : type === "folder"
+              ? new Set([...selectedFolderIds, id])
+              : selectedFolderIds;
+      const willSongs =
+        !isSelected && type === "song"
+          ? new Set([id])
+          : isSelected
+            ? selectedSongIds
+            : type === "song"
+              ? new Set([...selectedSongIds, id])
+              : selectedSongIds;
+      const totalDragging = willFolders.size + willSongs.size;
 
-    setIsInternalDragActive(true);
-    e.dataTransfer.effectAllowed = "move";
-    e.dataTransfer.setData("application/x-app-internal-drag", "true");
-  }, [selectedFolderIds, selectedSongIds]);
+      if (totalDragging > 1) {
+        // Build a stacked ghost drag image
+        const ghost = document.createElement("div");
+        ghost.style.cssText = [
+          "position:fixed",
+          "top:-2000px",
+          "left:-2000px",
+          "width:150px",
+          "height:60px",
+          "pointer-events:none",
+          "z-index:9999",
+        ].join(";");
+
+        const stackCount = Math.min(totalDragging, 3);
+        for (let i = stackCount - 1; i >= 0; i--) {
+          const card = document.createElement("div");
+          const rotation = (i - Math.floor(stackCount / 2)) * 4;
+          const yOffset = i * -3;
+          card.style.cssText = [
+            "position:absolute",
+            "width:140px",
+            "height:44px",
+            "background:white",
+            "border:2px solid rgba(2,132,199,0.6)",
+            "border-radius:14px",
+            "box-shadow:0 4px 16px rgba(0,0,0,0.18)",
+            "display:flex",
+            "align-items:center",
+            "justify-content:center",
+            `transform:rotate(${rotation}deg) translateY(${yOffset}px)`,
+            "font-size:12px",
+            "font-weight:800",
+            "color:#0284c7",
+            "letter-spacing:0.05em",
+            "font-family:system-ui,sans-serif",
+            `top:${(stackCount - 1 - i) * 3}px`,
+            "left:0",
+          ].join(";");
+          if (i === 0) {
+            card.textContent = `${totalDragging} itens`;
+          }
+          ghost.appendChild(card);
+        }
+
+        document.body.appendChild(ghost);
+        e.dataTransfer.setDragImage(ghost, 70, 22);
+        requestAnimationFrame(() => {
+          if (document.body.contains(ghost)) document.body.removeChild(ghost);
+        });
+      }
+
+      setIsInternalDragActive(true);
+      e.dataTransfer.effectAllowed = "move";
+      e.dataTransfer.setData("application/x-app-internal-drag", "true");
+    },
+    [selectedFolderIds, selectedSongIds],
+  );
 
   const handleItemDragEnd = useCallback(() => {
     setIsInternalDragActive(false);
     setDropTargetFolderId(null);
   }, []);
 
-  const handleFolderDragOver = useCallback((e: React.DragEvent, folderId: string) => {
-    if (!isInternalDragActive) return;
-    e.preventDefault();
-    e.stopPropagation();
+  const handleFolderDragOver = useCallback(
+    (e: React.DragEvent, folderId: string) => {
+      if (!isInternalDragActive) return;
+      e.preventDefault();
+      e.stopPropagation();
 
-    if (disabledFolderIdsForBatchMove.has(folderId)) {
-      e.dataTransfer.dropEffect = "none";
-      return;
-    }
-    e.dataTransfer.dropEffect = "move";
-    setDropTargetFolderId(folderId);
-  }, [isInternalDragActive, disabledFolderIdsForBatchMove]);
+      if (disabledFolderIdsForBatchMove.has(folderId)) {
+        e.dataTransfer.dropEffect = "none";
+        return;
+      }
+      e.dataTransfer.dropEffect = "move";
+      setDropTargetFolderId(folderId);
+    },
+    [isInternalDragActive, disabledFolderIdsForBatchMove],
+  );
 
-  const handleFolderDragLeave = useCallback((e: React.DragEvent, folderId: string) => {
-    e.stopPropagation();
-    setDropTargetFolderId((prev) => (prev === folderId ? null : prev));
-  }, []);
+  const handleFolderDragLeave = useCallback(
+    (e: React.DragEvent, folderId: string) => {
+      e.stopPropagation();
+      setDropTargetFolderId((prev) => (prev === folderId ? null : prev));
+    },
+    [],
+  );
 
-  const handleFolderDrop = useCallback(async (e: React.DragEvent, folderId: string) => {
-    e.preventDefault();
-    e.stopPropagation();
-    const wasInternalDrag = isInternalDragActive;
-    setDropTargetFolderId(null);
-    setIsInternalDragActive(false);
+  const handleFolderDrop = useCallback(
+    async (e: React.DragEvent, folderId: string) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const wasInternalDrag = isInternalDragActive;
+      setDropTargetFolderId(null);
+      setIsInternalDragActive(false);
 
-    if (!wasInternalDrag || disabledFolderIdsForBatchMove.has(folderId)) return;
+      if (!wasInternalDrag || disabledFolderIdsForBatchMove.has(folderId))
+        return;
 
-    // Move direto, sem modal de confirmação
-    await handleBatchMoveConfirm(folderId);
-  }, [isInternalDragActive, disabledFolderIdsForBatchMove, handleBatchMoveConfirm]);
+      // Move direto, sem modal de confirmação
+      await handleBatchMoveConfirm(folderId);
+    },
+    [
+      isInternalDragActive,
+      disabledFolderIdsForBatchMove,
+      handleBatchMoveConfirm,
+    ],
+  );
 
   const totalItemsCount = filteredSubfolders.length + filteredFiles.length;
 
@@ -1997,7 +2062,7 @@ export const MainLayout: React.FC = () => {
             >
               <div className="w-11 h-11 rounded-xl flex items-center justify-center border border-m3-border/50 bg-m3-card transition-transform hover:scale-105 shadow-xs shrink-0">
                 <img
-                  src={logo}
+                  src="/favicon.png"
                   alt="Hosanna Studio"
                   className="w-10 h-10 object-contain rounded-lg"
                 />
@@ -2046,7 +2111,7 @@ export const MainLayout: React.FC = () => {
           <button
             onClick={() => {
               setCurrentFolderId(null);
-              navigate("/folders");
+              navigate(`${slugPrefix}/folders`);
               if (window.innerWidth < 768) setIsSidebarOpen(false);
             }}
             title={isSidebarCollapsed ? `Drive da ${tenant?.name}` : undefined}
@@ -2077,7 +2142,7 @@ export const MainLayout: React.FC = () => {
 
           <button
             onClick={() => {
-              navigate("/songs");
+              navigate(`${slugPrefix}/songs`);
               if (window.innerWidth < 768) setIsSidebarOpen(false);
             }}
             title={isSidebarCollapsed ? `Biblioteca` : undefined}
@@ -2105,7 +2170,7 @@ export const MainLayout: React.FC = () => {
 
           <button
             onClick={() => {
-              navigate("/services");
+              navigate(`${slugPrefix}/services`);
               if (window.innerWidth < 768) setIsSidebarOpen(false);
             }}
             title={isSidebarCollapsed ? `Cultos` : undefined}
@@ -2129,6 +2194,28 @@ export const MainLayout: React.FC = () => {
                 {totalServices}
               </Badge>
             )}
+          </button>
+
+          <button
+            onClick={() => {
+              navigate(`${slugPrefix}/teams`);
+              if (window.innerWidth < 768) setIsSidebarOpen(false);
+            }}
+            title={isSidebarCollapsed ? `Equipas` : undefined}
+            className={`w-full flex items-center ${isSidebarCollapsed ? "justify-center" : "justify-between"} px-4 py-3 text-[13px] font-bold rounded-2xl transition-all cursor-pointer group ${
+              isTeamsView
+                ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 shadow-sm"
+                : "text-m3-secondary hover:bg-m3-hover hover:text-m3-text"
+            }`}
+          >
+            <div
+              className={`flex items-center ${isSidebarCollapsed ? "" : "gap-3"}`}
+            >
+              <Users
+                className={`w-4.5 h-4.5 ${isTeamsView ? "text-amber-500" : "text-m3-secondary"}`}
+              />
+              {!isSidebarCollapsed && <span>Equipas</span>}
+            </div>
           </button>
 
           {!isSidebarCollapsed && show_folder_tree && (
@@ -2173,9 +2260,9 @@ export const MainLayout: React.FC = () => {
                   className={`flex items-center ${isSidebarCollapsed ? "" : "gap-2"} min-w-0`}
                 >
                   <div className="w-7 h-7 rounded-full bg-linear-to-tr from-[#0284c7] to-sky-400 flex items-center justify-center text-white font-extrabold text-xs shadow-sm shrink-0">
-                    {user.logo ? (
+                    {user.image ? (
                       <img
-                        src={user.logo}
+                        src={user.image as string}
                         alt={user.name}
                         className="w-full h-full rounded-full object-cover"
                       />
@@ -2189,7 +2276,7 @@ export const MainLayout: React.FC = () => {
                         {user.name}
                       </span>
                       <span className="text-[9px] text-emerald-600 dark:text-emerald-400 font-bold uppercase tracking-wider">
-                        {user.role}
+                        {getRoleLabel(user.role ?? "guest")}
                       </span>
                     </div>
                   )}
@@ -2203,7 +2290,7 @@ export const MainLayout: React.FC = () => {
                   <button
                     onClick={() => {
                       setIsUserMenuOpen(false);
-                      navigate("/musicians");
+                      navigate(`${slugPrefix}/musicians`);
                       if (window.innerWidth < 768) setIsSidebarOpen(false);
                     }}
                     className="w-full flex items-center gap-3 px-3 py-2 text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors cursor-pointer text-left"
@@ -2214,7 +2301,7 @@ export const MainLayout: React.FC = () => {
                   <button
                     onClick={() => {
                       setIsUserMenuOpen(false);
-                      navigate("/settings");
+                      navigate(`${slugPrefix}/settings`);
                       if (window.innerWidth < 768) setIsSidebarOpen(false);
                     }}
                     className="w-full flex items-center gap-3 px-3 py-2 text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors cursor-pointer text-left"
@@ -2260,7 +2347,6 @@ export const MainLayout: React.FC = () => {
             {(isExplorerView ||
               isSongsView ||
               isServicesView ||
-              isMusiciansView ||
               isSettingsView ||
               isEditorView) && (
               <div className="p-3 sm:p-4 bg-m3-sidebar/40 border-b border-m3-border/50 flex flex-col md:flex-row items-center justify-between gap-3 sm:gap-4">
@@ -2306,7 +2392,7 @@ export const MainLayout: React.FC = () => {
                     <button
                       onClick={() => {
                         handleSelectFolder(null);
-                        navigate("/folders");
+                        navigate(`${slugPrefix}/folders`);
                       }}
                       className={`flex items-center gap-2 font-black uppercase tracking-widest transition-all cursor-pointer shrink-0 ${
                         currentFolderId === null && isExplorerView
@@ -2362,7 +2448,7 @@ export const MainLayout: React.FC = () => {
                             <button
                               onClick={() => {
                                 handleSelectFolder(folder.id);
-                                navigate("/folders");
+                                navigate(`${slugPrefix}/folders`);
                               }}
                               className="flex items-center gap-2 font-bold text-m3-secondary hover:text-m3-text transition-all cursor-pointer shrink-0"
                             >
@@ -2398,7 +2484,7 @@ export const MainLayout: React.FC = () => {
                       <>
                         <ChevronRight className="w-3.5 h-3.5 text-m3-secondary/40 shrink-0" />
                         <button
-                          onClick={() => navigate("/services")}
+                          onClick={() => navigate(`${slugPrefix}/services`)}
                           className="flex items-center gap-2 font-bold text-m3-secondary hover:text-m3-text transition-all cursor-pointer shrink-0"
                         >
                           <Calendar className="w-4 h-4" />
@@ -2434,22 +2520,22 @@ export const MainLayout: React.FC = () => {
                       </>
                     )}
 
-                    {isMusiciansView && (
-                      <>
-                        <ChevronRight className="w-3.5 h-3.5 text-m3-secondary/40 shrink-0" />
-                        <div className="flex items-center gap-2 font-black text-m3-primary shrink-0 uppercase tracking-wide">
-                          <User className="w-4 h-4" />
-                          <span>Músicos</span>
-                        </div>
-                      </>
-                    )}
-
                     {isSettingsView && (
                       <>
                         <ChevronRight className="w-3.5 h-3.5 text-m3-secondary/40 shrink-0" />
                         <div className="flex items-center gap-2 font-black text-m3-primary shrink-0 uppercase tracking-wide">
                           <Settings className="w-4 h-4" />
                           <span>Definições</span>
+                        </div>
+                      </>
+                    )}
+
+                    {isTeamsView && (
+                      <>
+                        <ChevronRight className="w-3.5 h-3.5 text-m3-secondary/40 shrink-0" />
+                        <div className="flex items-center gap-2 font-black text-m3-primary shrink-0 uppercase tracking-wide">
+                          <Users className="w-4 h-4" />
+                          <span>Equipas</span>
                         </div>
                       </>
                     )}
@@ -2561,7 +2647,9 @@ export const MainLayout: React.FC = () => {
                           >
                             <option value="title-asc">Nome (A-Z)</option>
                             <option value="title-desc">Nome (Z-A)</option>
-                            {!isServicesView && <option value="artist-asc">Artista (A-Z)</option>}
+                            {!isServicesView && (
+                              <option value="artist-asc">Artista (A-Z)</option>
+                            )}
                             <option value="updatedAt-desc">Data Recente</option>
                           </select>
                         </div>
@@ -2593,6 +2681,8 @@ export const MainLayout: React.FC = () => {
                         </div>
                       </>
                     )}
+
+                    <InboxButton client={authClient} className="shrink-0" />
 
                     <div className="relative shrink-0 ml-1" ref={plusMenuRef}>
                       <button
@@ -3003,7 +3093,9 @@ export const MainLayout: React.FC = () => {
                 <>
                   <button
                     onClick={() => {
-                      navigate(`/songs/${(contextMenu.item as Song).id}`);
+                      navigate(
+                        `${slugPrefix}/songs/${(contextMenu.item as Song).id}`,
+                      );
                       setContextMenu(null);
                     }}
                     className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left"

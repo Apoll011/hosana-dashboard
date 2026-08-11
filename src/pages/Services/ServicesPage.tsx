@@ -42,6 +42,7 @@ import React, {
 } from "react";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import { ServiceForm } from "../../components/forms/ServiceForm";
+import { useAuth } from "../../contexts/AuthContext";
 import { useServices } from "../../hooks/useServices";
 
 interface ServicesPageProps {
@@ -57,6 +58,8 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
   searchQuery: externalSearchQuery,
 }) => {
   const navigate = useNavigate();
+  const { tenant } = useAuth();
+  const slugPrefix = tenant?.slug ? `/${tenant.slug}` : "";
   const context = useOutletContext<any>() || {};
   const actualHideHeader = hideHeader ?? context.hideHeader;
   const viewMode = context.viewMode ?? "grid";
@@ -339,7 +342,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
   const handleServiceClick = useCallback(
     (e: React.MouseEvent, service: Service, allDisplayed: Service[]) => {
       if (!serviceAsFolderItem) {
-        navigate(`/services/${service.id}`);
+        navigate(`${slugPrefix}/services/${service.id}`);
         return;
       }
       e.stopPropagation();
@@ -371,7 +374,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
           selectedServiceIds.has(service.id)
         ) {
           // Double-click-like: navigate on second click if already selected alone
-          navigate(`/services/${service.id}`);
+          navigate(`${slugPrefix}/services/${service.id}`);
           return;
         }
         setSelectedServiceIds(new Set([service.id]));
@@ -394,7 +397,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
       elements: [],
     });
     setIsCreateModalOpen(false);
-    navigate(`/services/${newService.id}`);
+    navigate(`${slugPrefix}/services/${newService.id}`);
   };
 
   const handleEditServiceSubmit = async (data: {
@@ -497,6 +500,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
   // ─── Context menu opener ──────────────────────────────────────────────────
   const openContextMenu = useCallback(
     (e: React.MouseEvent, service: Service) => {
+      e.stopPropagation();
       const x = Math.min(e.clientX, window.innerWidth - 240);
       const y = Math.min(e.clientY, window.innerHeight - 320);
       const isMulti =
@@ -537,7 +541,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
   const renderServiceCard = (service: Service, isArchived = false) => (
     <div
       key={service.id}
-      onClick={() => navigate(`/services/${service.id}`)}
+      onClick={() => navigate(`${slugPrefix}/services/${service.id}`)}
       onContextMenu={(e) => openContextMenu(e, service)}
       className={`bg-m3-card border border-m3-border rounded-4xl p-8 shadow-xl shadow-black/5 hover:shadow-m3-primary/10 hover:border-m3-primary transition-all cursor-pointer flex flex-col justify-between group relative overflow-hidden ${isArchived ? "opacity-60" : ""}`}
     >
@@ -553,13 +557,13 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
 
           <div
             tabIndex={0}
-            className="group/island absolute right-0 z-10 flex items-center justify-end bg-m3-card/90 backdrop-blur-xs rounded-2xl border border-m3-border/60 shadow-sm overflow-hidden transition-[width,opacity] duration-300 ease-out outline-none cursor-default
+            className="group/island absolute right-0 z-10 flex items-center justify-center bg-m3-card/90 backdrop-blur-xs rounded-2xl border border-m3-border/60 shadow-sm overflow-hidden transition-[width,opacity] duration-300 ease-out outline-none cursor-default
              w-8 h-8 opacity-70
              hover:opacity-100 hover:w-46
              focus-within:opacity-100 focus-within:w-46"
           >
             <div
-              className="absolute right-0 top-0 w-8 h-8 flex items-center justify-center transition-all duration-300 pointer-events-none
+              className="absolute inset-0 w-8 h-8 flex items-center justify-center transition-all duration-300 pointer-events-none
             opacity-100 scale-100
             group-hover/island:opacity-0 group-hover/island:scale-75 group-hover/island:-translate-x-2
             focus-within:opacity-0 focus-within:scale-75 focus-within:-translate-x-2"
@@ -573,18 +577,6 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
             group-hover/island:opacity-100 group-hover/island:translate-x-0 group-hover/island:pointer-events-auto
             focus-within:opacity-100 focus-within:translate-x-0 focus-within:pointer-events-auto"
             >
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setEditTarget(service);
-                }}
-                title="Editar Nome e Data"
-                className="p-1.5 text-m3-secondary hover:text-m3-primary hover:bg-m3-primary/10 rounded-xl cursor-pointer transition-all focus:outline-none"
-              >
-                <Edit2 className="w-4 h-4" />
-              </button>
-
               <button
                 type="button"
                 onClick={(e) => {
@@ -637,6 +629,17 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
               >
                 <Trash2 className="w-4 h-4" />
               </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setEditTarget(service);
+                }}
+                title="Editar Nome e Data"
+                className="p-1.5 text-m3-secondary hover:text-m3-primary hover:bg-m3-primary/10 rounded-xl cursor-pointer transition-all focus:outline-none"
+              >
+                <Edit2 className="w-4 h-4" />
+              </button>
             </div>
           </div>
         </div>
@@ -674,7 +677,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
         data-item-id={service.id}
         data-item-type="service"
         onClick={(e) => handleServiceClick(e, service, allDisplayed)}
-        onDoubleClick={() => navigate(`/services/${service.id}`)}
+        onDoubleClick={() => navigate(`${slugPrefix}/services/${service.id}`)}
         onContextMenu={(e) => {
           if (!isSelected) {
             setSelectedServiceIds(new Set([service.id]));
@@ -749,7 +752,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
         data-item-id={service.id}
         data-item-type="service"
         onClick={(e) => handleServiceClick(e, service, allDisplayed)}
-        onDoubleClick={() => navigate(`/services/${service.id}`)}
+        onDoubleClick={() => navigate(`${slugPrefix}/services/${service.id}`)}
         onContextMenu={(e) => {
           if (!isSelected) {
             setSelectedServiceIds(new Set([service.id]));
@@ -794,7 +797,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
               variant="ghost"
               onClick={(e) => {
                 e.stopPropagation();
-                navigate(`/services/${service.id}`);
+                navigate(`${slugPrefix}/services/${service.id}`);
               }}
             >
               Abrir
@@ -1091,7 +1094,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
 
               <button
                 onClick={() => {
-                  navigate(`/services/${contextMenu.service!.id}`);
+                  navigate(`${slugPrefix}/services/${contextMenu.service!.id}`);
                   setContextMenu(null);
                 }}
                 className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left cursor-pointer"
