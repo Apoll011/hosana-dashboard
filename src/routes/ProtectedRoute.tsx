@@ -9,7 +9,7 @@ import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 
 export const ProtectedRoute: React.FC = () => {
-  const { isAuthenticated, isLoading, tenant } = useAuth();
+  const { isAuthenticated, isLoading, organization } = useAuth();
   const location = useLocation();
 
   if (isLoading) {
@@ -24,15 +24,18 @@ export const ProtectedRoute: React.FC = () => {
     return <Navigate to="/login" replace />;
   }
 
-  // If user is authenticated but has no tenant, redirect to onboarding
+  // If user is authenticated but has no organization, redirect to onboarding
   // unless they are already on the onboarding page
-  if (!tenant && location.pathname !== "/onboarding") {
+  if (!organization && location.pathname !== "/onboarding") {
     return <Navigate to="/onboarding" replace />;
   }
 
-  // If they have a tenant but try to access onboarding or root, send them to the app with tenant slug
-  if (tenant && (location.pathname === "/onboarding" || location.pathname === "/")) {
-    return <Navigate to={`/${tenant.slug}/folders`} replace />;
+  // If they have a organization but try to access onboarding or root, send them to the app with organization slug
+  if (
+    organization &&
+    (location.pathname === "/onboarding" || location.pathname === "/")
+  ) {
+    return <Navigate to={`/${organization.slug}/folders`} replace />;
   }
 
   return <Outlet />;

@@ -340,9 +340,9 @@ const MoveFolderTreeItem: React.FC<{
 export const MainLayout: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, logout, tenant } = useAuth();
+  const { user, logout, organization } = useAuth();
 
-  const slugPrefix = tenant?.slug ? `/${tenant.slug}` : "";
+  const slugPrefix = organization?.slug ? `/${organization.slug}` : "";
   const isSongsView =
     location.pathname === `${slugPrefix}/songs` ||
     location.pathname === "/songs";
@@ -2064,9 +2064,9 @@ export const MainLayout: React.FC = () => {
                   <h1 className="font-display font-black text-xl tracking-tighter text-slate-900 dark:text-slate-100 leading-none truncate">
                     Hosanna Studio
                   </h1>
-                  {tenant && (
+                  {organization && (
                     <span className="mt-1 text-xs font-medium text-slate-500 dark:text-slate-400 truncate max-w-32.5">
-                      {tenant.name || tenant.slug}
+                      {organization.name || organization.slug}
                     </span>
                   )}
                 </div>
@@ -2106,7 +2106,9 @@ export const MainLayout: React.FC = () => {
               navigate(`${slugPrefix}/folders`);
               if (window.innerWidth < 768) setIsSidebarOpen(false);
             }}
-            title={isSidebarCollapsed ? `Drive da ${tenant?.name}` : undefined}
+            title={
+              isSidebarCollapsed ? `Drive da ${organization?.name}` : undefined
+            }
             className={`w-full flex items-center ${isSidebarCollapsed ? "justify-center" : "justify-between"} px-4 py-3 text-[13px] font-bold rounded-2xl transition-all cursor-pointer group ${
               isExplorerView && currentFolderId === null
                 ? "bg-m3-primary/10 text-m3-primary border border-m3-primary/20 shadow-sm"
@@ -2119,7 +2121,9 @@ export const MainLayout: React.FC = () => {
               <HardDrive
                 className={`w-4.5 h-4.5 ${isExplorerView && currentFolderId === null ? "text-m3-primary" : "text-m3-secondary"}`}
               />
-              {!isSidebarCollapsed && <span>Drive da {tenant?.name}</span>}
+              {!isSidebarCollapsed && (
+                <span>Drive da {organization?.name}</span>
+              )}
             </div>
             {!isSidebarCollapsed && (
               <Badge

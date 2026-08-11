@@ -8,8 +8,8 @@ import React, { Suspense, lazy } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { MainLayout } from "../layouts/MainLayout";
-import { ProtectedRoute } from "./ProtectedRoute";
 import { OnboardingPage } from "../pages/OnboardingPage";
+import { ProtectedRoute } from "./ProtectedRoute";
 
 const PageLoader = () => (
   <div className="h-screen w-screen flex items-center justify-center bg-m3-bg">
@@ -61,16 +61,18 @@ const LoginPage = lazyImport(() =>
   import("../pages/Login/LoginPage").then((m) => ({ default: m.LoginPage })),
 );
 const TwoFactorPage = lazyImport(() =>
-  import("../pages/Login/TwoFactorPage").then((m) => ({ default: m.TwoFactorPage })),
+  import("../pages/Login/TwoFactorPage").then((m) => ({
+    default: m.TwoFactorPage,
+  })),
 );
 const RegisterPage = lazyImport(() =>
   import("../pages/Login/RegisterPage").then((m) => ({
     default: m.RegisterPage,
   })),
 );
-const RegisterTenantPage = lazyImport(() =>
+const RegisterOrganizationPage = lazyImport(() =>
   import("../pages/Login/Tenant").then((m) => ({
-    default: m.RegisterTenantPage,
+    default: m.RegisterOrganizationPage,
   })),
 );
 const VerifyEmailPage = lazyImport(() =>
@@ -135,7 +137,7 @@ export const AppRoutes: React.FC = () => {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/two-factor" element={<TwoFactorPage />} />
           <Route path="/register" element={<RegisterPage />} />
-          <Route path="/new" element={<RegisterTenantPage />} />
+          <Route path="/new" element={<RegisterOrganizationPage />} />
           <Route path="/verify-email" element={<VerifyEmailPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />

@@ -20,7 +20,7 @@ import { MemberProfilePage } from "./MemberProfilePage";
 import { getRoleBadge } from "./settingsUtils";
 
 export const MembersTab: React.FC<{ active: boolean }> = ({ active }) => {
-  const { user, tenant } = useAuth();
+  const { user, organization } = useAuth();
   const { showToast } = useSync();
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -42,7 +42,7 @@ export const MembersTab: React.FC<{ active: boolean }> = ({ active }) => {
     isLoading: isLoadingOrgMembers,
     refetch: refetchOrgMembers,
   } = useQuery({
-    queryKey: ["betterAuthOrgMembers", tenant?.id],
+    queryKey: ["betterAuthOrgMembers", organization?.id],
     queryFn: async () => {
       try {
         const { data } = await authClient.organization.getFullOrganization();
@@ -63,7 +63,7 @@ export const MembersTab: React.FC<{ active: boolean }> = ({ active }) => {
       }
       return null;
     },
-    enabled: active && !!tenant,
+    enabled: active && !!organization,
   });
 
   if (!active) return null;

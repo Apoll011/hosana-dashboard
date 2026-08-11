@@ -42,7 +42,7 @@ export const MemberProfilePage: React.FC<MemberProfilePageProps> = ({
 }) => {
   const isSelf = currentUser?.id === member.id;
   const isOrgAdminOrOwner = ["owner", "admin"].includes(
-    (currentUser?.role || "").toLowerCase()
+    (currentUser?.role || "").toLowerCase(),
   );
   const [isEditingRole, setIsEditingRole] = useState(false);
   const [selectedRole, setSelectedRole] = useState(member.role || "member");
@@ -161,7 +161,9 @@ export const MemberProfilePage: React.FC<MemberProfilePageProps> = ({
               >
                 <option value="owner">Proprietário (Owner)</option>
                 <option value="admin">Administrador (Admin)</option>
-                <option value="teamLeader">Líder de Equipa (Team Leader)</option>
+                <option value="teamLeader">
+                  Líder de Equipa (Team Leader)
+                </option>
                 <option value="editor">Editor</option>
                 <option value="musician">Músico</option>
                 <option value="guest">Convidado</option>
@@ -187,7 +189,10 @@ export const MemberProfilePage: React.FC<MemberProfilePageProps> = ({
             </div>
           ) : (
             <p className="text-xs text-slate-500">
-              Função Atual: <strong className="text-slate-800 dark:text-slate-200">{getRoleLabel(member.role)}</strong>
+              Função Atual:{" "}
+              <strong className="text-slate-800 dark:text-slate-200">
+                {getRoleLabel(member.role)}
+              </strong>
             </p>
           )}
         </div>

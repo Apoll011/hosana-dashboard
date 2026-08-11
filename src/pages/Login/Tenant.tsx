@@ -24,7 +24,7 @@ import { PasswordStrengthMeter } from "./components/PasswordStrengthMeter";
 import { TurnstileWidget } from "./components/TurnstileWidget";
 import LoginLayout from "./Layout";
 
-export const RegisterTenantPage: React.FC = () => {
+export const RegisterOrganizationPage: React.FC = () => {
   const navigate = useNavigate();
   const { client } = useStatsigClient();
   const alpha_release = client.checkGate("alpha_release");

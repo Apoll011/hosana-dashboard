@@ -4,7 +4,14 @@
  */
 
 import { Button } from "@hosanna/shared";
-import { ArrowRight, KeyRound, MailCheck, RefreshCw, Shield, Smartphone } from "lucide-react";
+import {
+  ArrowRight,
+  KeyRound,
+  MailCheck,
+  RefreshCw,
+  Shield,
+  Smartphone,
+} from "lucide-react";
 import React, { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
@@ -203,7 +210,9 @@ export const TwoFactorPage: React.FC = () => {
               disabled={isSendingOtp}
               className="inline-flex items-center gap-1.5 text-xs font-bold text-m3-primary hover:underline dark:text-m3-primary-light disabled:opacity-50"
             >
-              <RefreshCw className={`w-3.5 h-3.5 ${isSendingOtp ? "animate-spin" : ""}`} />
+              <RefreshCw
+                className={`w-3.5 h-3.5 ${isSendingOtp ? "animate-spin" : ""}`}
+              />
               <span>Reenviar código por e-mail</span>
             </button>
           </div>
@@ -302,7 +311,9 @@ function OtpInput({
       {Array.from({ length }).map((_, i) => (
         <input
           key={i}
-          ref={(el) => { inputRefs.current[i] = el; }}
+          ref={(el) => {
+            inputRefs.current[i] = el;
+          }}
           type="text"
           inputMode="numeric"
           pattern="[0-9]*"
@@ -317,4 +328,3 @@ function OtpInput({
     </div>
   );
 }
-

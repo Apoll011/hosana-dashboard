@@ -24,8 +24,7 @@ export default function LoginLayout({
   compactBranding = false,
 }: LoginLayoutProps) {
   const { darkMode, toggleDarkMode } = useTheme();
-  const mbClass =
-    titleMb === 2 ? "mb-2" : titleMb === 4 ? "mb-3" : "mb-4";
+  const mbClass = titleMb === 2 ? "mb-2" : titleMb === 4 ? "mb-3" : "mb-4";
 
   return (
     <div className="min-h-screen w-full flex flex-col items-center justify-center p-3 sm:p-6 md:p-8 relative overflow-y-auto font-sans bg-slate-50 dark:bg-slate-950 transition-colors duration-500">
@@ -47,7 +46,11 @@ export default function LoginLayout({
         aria-label="Alternar tema"
         className="fixed top-4 right-4 z-30 p-2.5 rounded-full bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border border-slate-200/80 dark:border-slate-800 text-slate-700 dark:text-slate-200 hover:scale-110 active:scale-95 shadow-lg transition-all duration-200"
       >
-        {darkMode ? <Sun className="w-5 h-5 text-amber-400" /> : <Moon className="w-5 h-5 text-slate-700" />}
+        {darkMode ? (
+          <Sun className="w-5 h-5 text-amber-400" />
+        ) : (
+          <Moon className="w-5 h-5 text-slate-700" />
+        )}
       </button>
 
       <div className="relative max-w-md sm:max-w-lg w-full bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-slate-200/80 dark:border-slate-800/80 rounded-3xl sm:rounded-4xl shadow-2xl shadow-black/30 p-5 sm:p-7 transition-all duration-300 z-20 my-auto max-h-[92vh] flex flex-col overflow-y-auto scrollbar-thin">
@@ -70,7 +73,9 @@ export default function LoginLayout({
               className={`${compactBranding ? "w-12 h-12 rounded-xl" : "w-14 h-14 sm:w-16 sm:h-16 rounded-[18px]"} object-contain`}
             />
           </div>
-          <h1 className={`font-display font-black tracking-tighter text-slate-900 dark:text-white ${compactBranding ? "text-lg sm:text-xl" : "text-xl sm:text-2xl"}`}>
+          <h1
+            className={`font-display font-black tracking-tighter text-slate-900 dark:text-white ${compactBranding ? "text-lg sm:text-xl" : "text-xl sm:text-2xl"}`}
+          >
             Hosanna Studio
           </h1>
         </div>
@@ -91,9 +96,7 @@ export default function LoginLayout({
           </div>
         )}
 
-        <div className="flex-1 overflow-y-auto px-0.5">
-          {children}
-        </div>
+        <div className="flex-1 overflow-y-auto px-0.5">{children}</div>
 
         {optionalLink && optionalMsg && (
           <div className="mt-4 pt-2 text-center shrink-0">
@@ -109,4 +112,3 @@ export default function LoginLayout({
     </div>
   );
 }
-
