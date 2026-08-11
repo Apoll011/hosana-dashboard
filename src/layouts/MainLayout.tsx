@@ -51,7 +51,6 @@ import {
   Tag,
   Trash2,
   Upload,
-  User,
   Users,
   X,
 } from "lucide-react";
@@ -564,6 +563,8 @@ export const MainLayout: React.FC = () => {
   const [isBatchDeleteOpen, setIsBatchDeleteOpen] = useState(false);
   const [isBatchTagOpen, setIsBatchTagOpen] = useState(false);
 
+  const teamsEnabled = client.checkGate("teams");
+
   // Clear selection on folder navigation
   useEffect(() => {
     setSelectedFolderIds(new Set());
@@ -805,15 +806,6 @@ export const MainLayout: React.FC = () => {
         section: "Navegação",
         icon: <Church className="w-4 h-4 text-emerald-500" />,
         perform: () => navigate(`${slugPrefix}/services`),
-      },
-      {
-        id: "nav-musicians",
-        name: "Ir para Músicos & Acessos",
-        shortcut: ["g", "m"],
-        keywords: "musicos equipa team qr code access",
-        section: "Navegação",
-        icon: <User className="w-4 h-4 text-indigo-500" />,
-        perform: () => navigate(`${slugPrefix}/teams`),
       },
       {
         id: "nav-settings",
@@ -2196,27 +2188,29 @@ export const MainLayout: React.FC = () => {
             )}
           </button>
 
-          <button
-            onClick={() => {
-              navigate(`${slugPrefix}/teams`);
-              if (window.innerWidth < 768) setIsSidebarOpen(false);
-            }}
-            title={isSidebarCollapsed ? `Equipas` : undefined}
-            className={`w-full flex items-center ${isSidebarCollapsed ? "justify-center" : "justify-between"} px-4 py-3 text-[13px] font-bold rounded-2xl transition-all cursor-pointer group ${
-              isTeamsView
-                ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 shadow-sm"
-                : "text-m3-secondary hover:bg-m3-hover hover:text-m3-text"
-            }`}
-          >
-            <div
-              className={`flex items-center ${isSidebarCollapsed ? "" : "gap-3"}`}
+          {teamsEnabled && (
+            <button
+              onClick={() => {
+                navigate(`${slugPrefix}/teams`);
+                if (window.innerWidth < 768) setIsSidebarOpen(false);
+              }}
+              title={isSidebarCollapsed ? `Equipas` : undefined}
+              className={`w-full flex items-center ${isSidebarCollapsed ? "justify-center" : "justify-between"} px-4 py-3 text-[13px] font-bold rounded-2xl transition-all cursor-pointer group ${
+                isTeamsView
+                  ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 shadow-sm"
+                  : "text-m3-secondary hover:bg-m3-hover hover:text-m3-text"
+              }`}
             >
-              <Users
-                className={`w-4.5 h-4.5 ${isTeamsView ? "text-amber-500" : "text-m3-secondary"}`}
-              />
-              {!isSidebarCollapsed && <span>Equipas</span>}
-            </div>
-          </button>
+              <div
+                className={`flex items-center ${isSidebarCollapsed ? "" : "gap-3"}`}
+              >
+                <Users
+                  className={`w-4.5 h-4.5 ${isTeamsView ? "text-amber-500" : "text-m3-secondary"}`}
+                />
+                {!isSidebarCollapsed && <span>Equipas</span>}
+              </div>
+            </button>
+          )}
 
           {!isSidebarCollapsed && show_folder_tree && (
             <>
