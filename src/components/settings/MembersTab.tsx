@@ -10,7 +10,6 @@ import {
   Loader2,
   RefreshCw,
   Search,
-  UserCheck,
   UserPlus,
 } from "lucide-react";
 import React, { useState } from "react";
@@ -203,8 +202,8 @@ export const MembersTab: React.FC<{ active: boolean }> = ({ active }) => {
       {/* Content List */}
       {isLoadingOrgMembers ? (
         <div className="py-12 text-center text-xs text-slate-400 flex items-center justify-center gap-2">
-          <Loader2 className="w-4 h-4 animate-spin text-m3-primary" />A
-          carregar membros da organização...
+          <Loader2 className="w-4 h-4 animate-spin text-m3-primary" />A carregar
+          membros da organização...
         </div>
       ) : filteredMembers.length === 0 ? (
         <div className="py-12 text-center text-xs text-slate-400">
@@ -282,8 +281,10 @@ export const MembersTab: React.FC<{ active: boolean }> = ({ active }) => {
                 className="w-full h-11 px-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-semibold"
               >
                 <option value="admin">Administrador</option>
-                <option value="member">Membro</option>
-                <option value="owner">Proprietário</option>
+                <option value="teamLeader">Lider de Equipa</option>
+                <option value="editor">Editor</option>
+                <option value="musician">Músico</option>
+                <option value="guest">Convidado</option>
               </select>
             </div>
 
