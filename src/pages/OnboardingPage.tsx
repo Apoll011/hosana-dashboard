@@ -93,7 +93,11 @@ export const OnboardingPage: React.FC = () => {
       }
 
       await refetch();
-      const orgSlug = (data as any)?.organization?.slug || (data as any)?.slug;
+      const orgData = data as {
+        organization?: { slug?: string };
+        slug?: string;
+      } | null;
+      const orgSlug = orgData?.organization?.slug || orgData?.slug;
       if (orgSlug) {
         localStorage.setItem("active_org_slug", orgSlug);
         await authClient.organization.setActive({ organizationSlug: orgSlug });
@@ -102,8 +106,8 @@ export const OnboardingPage: React.FC = () => {
         await fetchUserInvitations();
         setProcessingInvId(null);
       }
-    } catch (err: any) {
-      setErrorMsg(err?.message || "Erro ao aceitar convite.");
+    } catch (err: unknown) {
+      setErrorMsg((err as Error)?.message || "Erro ao aceitar convite.");
       setProcessingInvId(null);
     }
   };
@@ -123,8 +127,8 @@ export const OnboardingPage: React.FC = () => {
       }
 
       setInvitations((prev) => prev.filter((i) => i.id !== invitationId));
-    } catch (err: any) {
-      setErrorMsg(err?.message || "Erro ao recusar convite.");
+    } catch (err: unknown) {
+      setErrorMsg((err as Error)?.message || "Erro ao recusar convite.");
     } finally {
       setProcessingInvId(null);
     }

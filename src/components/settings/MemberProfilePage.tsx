@@ -9,14 +9,28 @@ import React, { useState } from "react";
 import { getRoleBadge, getRoleLabel } from "./settingsUtils";
 
 interface MemberProfilePageProps {
-  member: any;
+  member: {
+    id: string;
+    name?: string;
+    email?: string;
+    role?: string;
+    status?: string;
+    avatar?: string;
+    [key: string]: unknown;
+  };
   currentUser: { id: string; role?: string } | null;
   onBack: () => void;
-  onRemove: (member: any) => void;
-  onApprove: (id: string) => void;
-  onRoleChange?: (member: any, newRole: string) => Promise<void>;
-  isApproving: boolean;
-  showToast: (text: string, variant: any) => void;
+  onRemove: (member: { id: string; [key: string]: unknown }) => void;
+  onApprove?: (id: string) => void;
+  onRoleChange?: (
+    member: { id: string; [key: string]: unknown },
+    newRole: string,
+  ) => Promise<void>;
+  isApproving?: boolean;
+  showToast: (
+    text: string,
+    variant: "success" | "error" | "info" | "warning",
+  ) => void;
 }
 
 export const MemberProfilePage: React.FC<MemberProfilePageProps> = ({
@@ -24,9 +38,9 @@ export const MemberProfilePage: React.FC<MemberProfilePageProps> = ({
   currentUser,
   onBack,
   onRemove,
-  onApprove,
+  onApprove: _onApprove,
   onRoleChange,
-  isApproving,
+  isApproving: _isApproving,
   showToast,
 }) => {
   const isSelf = currentUser?.id === member.id;

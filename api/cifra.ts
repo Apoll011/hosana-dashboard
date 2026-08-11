@@ -60,8 +60,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // 3. Return the scraped data to your frontend
     return res.status(200).json(result);
-  } catch (err: any) {
-    result.error = err?.message || "Error fetching song details";
+  } catch (err: unknown) {
+    result.error = (err as Error)?.message || "Error fetching song details";
     return res.status(500).json(result);
   }
 }

@@ -150,14 +150,7 @@ function getFolderDescendantIds(
 }
 
 /* Recursive Quick Access Sidebar Item */
-const FolderTreeItem: React.FC<{
-  node: FolderTreeNode;
-  currentFolderId: string | null;
-  onSelectFolder: (id: string) => void;
-  onContextMenu: (e: React.MouseEvent, type: "folder", item: Folder) => void;
-  expandedFolderIds: Set<string>;
-  toggleExpand: (id: string) => void;
-}> = React.memo(
+const FolderTreeItemNode = React.memo(
   ({
     node,
     currentFolderId,
@@ -165,6 +158,13 @@ const FolderTreeItem: React.FC<{
     onContextMenu,
     expandedFolderIds,
     toggleExpand,
+  }: {
+    node: FolderTreeNode;
+    currentFolderId: string | null;
+    onSelectFolder: (id: string) => void;
+    onContextMenu: (e: React.MouseEvent, type: "folder", item: Folder) => void;
+    expandedFolderIds: Set<string>;
+    toggleExpand: (id: string) => void;
   }) => {
     const isActive = currentFolderId === node.folder.id;
     const hasChildren = node.children.length > 0;
@@ -247,16 +247,10 @@ const FolderTreeItem: React.FC<{
     );
   },
 );
+FolderTreeItemNode.displayName = "FolderTreeItemNode";
 
 /* Recursive Move Modal Tree Item */
-const MoveFolderTreeItem: React.FC<{
-  node: FolderTreeNode;
-  selectedFolderId: string | null;
-  onSelect: (id: string) => void;
-  disabledFolderIds?: Set<string>;
-  expandedFolderIds: Set<string>;
-  toggleExpand: (id: string) => void;
-}> = React.memo(
+const MoveFolderTreeItem = React.memo(
   ({
     node,
     selectedFolderId,
@@ -264,6 +258,13 @@ const MoveFolderTreeItem: React.FC<{
     disabledFolderIds,
     expandedFolderIds,
     toggleExpand,
+  }: {
+    node: FolderTreeNode;
+    selectedFolderId: string | null;
+    onSelect: (id: string) => void;
+    disabledFolderIds?: Set<string>;
+    expandedFolderIds: Set<string>;
+    toggleExpand: (id: string) => void;
   }) => {
     const isDisabled = disabledFolderIds?.has(node.folder.id);
     const isSelected = selectedFolderId === node.folder.id;
@@ -336,6 +337,7 @@ const MoveFolderTreeItem: React.FC<{
     );
   },
 );
+MoveFolderTreeItem.displayName = "MoveFolderTreeItem";
 
 export const MainLayout: React.FC = () => {
   const navigate = useNavigate();
@@ -570,7 +572,7 @@ export const MainLayout: React.FC = () => {
   }, [currentFolderId]);
 
   // Drag & Drop & Upload State
-  const [isUploadingFiles, setIsUploadingFiles] = useState(false);
+  const [_isUploadingFiles, setIsUploadingFiles] = useState(false);
   const [isDraggingOver, setIsDraggingOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -1386,29 +1388,37 @@ export const MainLayout: React.FC = () => {
       const prevSongsData = queryClient.getQueryData(["songs", "all", {}]);
 
       if (folderList.length > 0) {
-        queryClient.setQueryData(["folders"], (old: any) => {
-          if (!old) return old;
-          return {
-            ...old,
-            folders: old.folders.map((f: any) =>
-              folderList.includes(f.id)
-                ? { ...f, parentId: targetFolderId }
-                : f,
-            ),
-          };
-        });
+        queryClient.setQueryData(
+          ["folders"],
+          (old: { folders: Folder[] } | undefined) => {
+            if (!old) return old;
+            return {
+              ...old,
+              folders: old.folders.map((f: Folder) =>
+                folderList.includes(f.id)
+                  ? { ...f, parentId: targetFolderId }
+                  : f,
+              ),
+            };
+          },
+        );
       }
 
       if (songList.length > 0) {
-        queryClient.setQueryData(["songs", "all", {}], (old: any) => {
-          if (!old || !old.songs) return old;
-          return {
-            ...old,
-            songs: old.songs.map((s: any) =>
-              songList.includes(s.id) ? { ...s, folderId: targetFolderId } : s,
-            ),
-          };
-        });
+        queryClient.setQueryData(
+          ["songs", "all", {}],
+          (old: { songs: Song[] } | undefined) => {
+            if (!old || !old.songs) return old;
+            return {
+              ...old,
+              songs: old.songs.map((s: Song) =>
+                songList.includes(s.id)
+                  ? { ...s, folderId: targetFolderId }
+                  : s,
+              ),
+            };
+          },
+        );
       }
 
       clearSelection();
@@ -3465,8 +3475,8 @@ export const MainLayout: React.FC = () => {
             <AlertTriangle className="w-4 h-4 shrink-0 text-rose-500 mt-0.5" />
             <span>
               Tem a certeza que deseja apagar permanentemente{" "}
-              <strong>"{deleteSongTarget?.title}"</strong>? Isto também irá
-              removê-lo de quaisquer cultos agendados.
+              <strong>&quot;{deleteSongTarget?.title}&quot;</strong>? Isto também
+              irá removê-lo de quaisquer cultos agendados.
             </span>
           </div>
 

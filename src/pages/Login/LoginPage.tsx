@@ -16,7 +16,8 @@ import { TurnstileWidget } from "./components/TurnstileWidget";
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const redirectMessage = (location.state as any)?.message || "";
+  const redirectMessage =
+    (location.state as { message?: string })?.message || "";
   const { refetch } = useAuth();
 
   const [email, setEmail] = useState("");
@@ -62,7 +63,7 @@ export const LoginPage: React.FC = () => {
     if (error) {
       if (
         error.code === "TWO_FACTOR_REQUIRED" ||
-        (error as any)?.status === 403
+        (error as { status?: number })?.status === 403
       ) {
         navigate("/two-factor");
         return;
@@ -71,7 +72,7 @@ export const LoginPage: React.FC = () => {
       return;
     }
 
-    if ((data as any)?.twoFactorRedirect) {
+    if ((data as { twoFactorRedirect?: boolean })?.twoFactorRedirect) {
       navigate("/two-factor");
       return;
     }

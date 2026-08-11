@@ -414,7 +414,7 @@ export const InboxPanel: React.FC<InboxPanelProps> = ({
 };
 
 export interface InboxButtonProps {
-  client?: any;
+  client?: unknown;
   onNavigate?: (notif: InboxNotification) => void;
   renderItem?: (notif: InboxNotification) => React.ReactNode;
   pollInterval?: number;

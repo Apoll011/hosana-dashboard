@@ -60,7 +60,10 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
   const navigate = useNavigate();
   const { organization } = useAuth();
   const slugPrefix = organization?.slug ? `/${organization.slug}` : "";
-  const context = useOutletContext<any>() || {};
+  const context = (useOutletContext<Record<string, unknown>>() || {}) as Record<
+    string,
+    unknown
+  >;
   const actualHideHeader = hideHeader ?? context.hideHeader;
   const viewMode = context.viewMode ?? "grid";
   const contextSortBy = context.sortBy;
@@ -698,7 +701,10 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
             e.stopPropagation();
             const rect = e.currentTarget.getBoundingClientRect();
             openContextMenu(
-              { ...e, clientX: rect.left, clientY: rect.bottom + 4 } as any,
+              {
+                clientX: rect.left,
+                clientY: rect.bottom + 4,
+              } as unknown as React.MouseEvent,
               service,
             );
           }}
@@ -807,7 +813,10 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
                 e.stopPropagation();
                 const rect = e.currentTarget.getBoundingClientRect();
                 openContextMenu(
-                  { ...e, clientX: rect.left, clientY: rect.bottom + 4 } as any,
+                  {
+                    clientX: rect.left,
+                    clientY: rect.bottom + 4,
+                  } as unknown as React.MouseEvent,
                   service,
                 );
               }}

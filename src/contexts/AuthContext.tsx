@@ -33,7 +33,7 @@ type Organization = {
   slug: string;
   logo?: string | null;
   createdAt: Date;
-  metadata?: Record<string, any> | null;
+  metadata?: Record<string, unknown> | null;
   members: {
     id: string;
     organizationId: string;
@@ -122,7 +122,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           await authClient.organization.setActive({
             organizationSlug: targetOrg.slug,
           });
-          orgData = targetOrg as any;
+          orgData = targetOrg as unknown as Organization;
         }
       }
 

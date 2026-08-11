@@ -33,7 +33,10 @@ export const SettingsPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabType>("account");
 
   // Restore Modal State
-  const [pendingRestoreData, setPendingRestoreData] = useState<any>(null);
+  const [pendingRestoreData, setPendingRestoreData] = useState<Record<
+    string,
+    unknown
+  > | null>(null);
   const [restoreStats, setRestoreStats] = useState<{
     songs: number;
     folders: number;
@@ -42,7 +45,7 @@ export const SettingsPage: React.FC = () => {
   const [isRestoring, setIsRestoring] = useState(false);
 
   // Toggle Workspace State
-  const [isTogglingWs, setIsTogglingWs] = useState(false);
+  const [_isTogglingWs, setIsTogglingWs] = useState(false);
 
   const handleConfirmRestore = async () => {
     if (!pendingRestoreData) return;

@@ -17,7 +17,9 @@ const PageLoader = () => (
   </div>
 );
 
-const lazyImport = (componentImport: () => Promise<any>) =>
+const lazyImport = <T,>(
+  componentImport: () => Promise<{ default: React.ComponentType<T> }>,
+) =>
   lazy(async () => {
     const pageHasAlreadyBeenForceRefreshed = JSON.parse(
       window.localStorage.getItem("page-force-refreshed") || "false",

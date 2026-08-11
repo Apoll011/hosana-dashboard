@@ -115,9 +115,10 @@ export const RegisterOrganizationPage: React.FC = () => {
           replace: true,
         });
       }, 2000);
-    } catch (err: any) {
+    } catch (err: unknown) {
       setErrorMsg(
-        err.message || "Falha ao criar organização. Tente novamente.",
+        (err as Error).message ||
+          "Falha ao criar organização. Tente novamente.",
       );
       setIsLoading(false);
       captchaRef.current?.reset();

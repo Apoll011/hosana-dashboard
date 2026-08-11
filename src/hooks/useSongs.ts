@@ -19,7 +19,7 @@ function useSongMutations() {
       queryClient.invalidateQueries({ queryKey: ["folders"] });
       showToast(`Cântico "${newSong.title}" criado com sucesso!`, "success");
     },
-    onError: (err: any) => {
+    onError: (err: Error) => {
       showToast(err.message || "Falha ao criar cântico", "error");
     },
   });
@@ -27,18 +27,21 @@ function useSongMutations() {
   function updateSong(updatedSong: Song) {
     queryClient.setQueryData(["song", updatedSong.id], updatedSong);
 
-    queryClient.setQueriesData({ queryKey: ["songs"] }, (oldData: any) => {
-      if (!oldData || !Array.isArray(oldData.songs)) {
-        return oldData;
-      }
+    queryClient.setQueriesData(
+      { queryKey: ["songs"] },
+      (oldData: { songs?: Song[] } | undefined) => {
+        if (!oldData || !Array.isArray(oldData.songs)) {
+          return oldData;
+        }
 
-      return {
-        ...oldData,
-        songs: oldData.songs.map((song: Song) =>
-          song.id === updatedSong.id ? updatedSong : song,
-        ),
-      };
-    });
+        return {
+          ...oldData,
+          songs: oldData.songs.map((song: Song) =>
+            song.id === updatedSong.id ? updatedSong : song,
+          ),
+        };
+      },
+    );
   }
 
   const updateSongMutation = useMutation({
@@ -48,7 +51,7 @@ function useSongMutations() {
       updateSong(updatedSong);
       showToast(`Cântico "${updatedSong.title}" guardado`, "success");
     },
-    onError: (err: any) => {
+    onError: (err: Error) => {
       showToast(err.message || "Falha ao guardar cântico", "error");
     },
   });
@@ -61,7 +64,7 @@ function useSongMutations() {
       queryClient.invalidateQueries({ queryKey: ["services"] });
       showToast("Cântico apagado", "info");
     },
-    onError: (err: any) => {
+    onError: (err: Error) => {
       showToast(err.message || "Falha ao apagar cântico", "error");
     },
   });
@@ -83,7 +86,7 @@ function useSongMutations() {
       queryClient.invalidateQueries({ queryKey: ["folders"] });
       showToast("Cântico movido", "success");
     },
-    onError: (err: any) => {
+    onError: (err: Error) => {
       showToast(err.message || "Falha ao mover cântico", "error");
     },
   });
@@ -101,7 +104,7 @@ function useSongMutations() {
         "success",
       );
     },
-    onError: (err: any) => {
+    onError: (err: Error) => {
       showToast(err.message || "Falha ao atualizar etiquetas em lote", "error");
     },
   });
@@ -131,7 +134,7 @@ export function useSongs(params: GetSongsParams = {}) {
         const res = await songsApi.getSongs(params);
         setSyncStatus("synced");
         return res;
-      } catch (err: any) {
+      } catch (err: unknown) {
         setSyncStatus("error");
         throw err;
       }
@@ -154,11 +157,8 @@ export function useAllSongs(params: GetSongsParams = {}) {
     queryFn: async () => {
       setSyncStatus("syncing");
       try {
-        const existingData: any = queryClient.getQueryData([
-          "songs",
-          "all",
-          params,
-        ]);
+        const existingData: { songs?: Song[] } | undefined =
+          queryClient.getQueryData(["songs", "all", params]);
         const isInitialLoad =
           !existingData ||
           !existingData.songs ||
@@ -188,8 +188,8 @@ export function useAllSongs(params: GetSongsParams = {}) {
                     // Injeta os cânticos na cache para aparecerem progressivamente
                     queryClient.setQueryData(
                       ["songs", "all", params],
-                      (oldData: any) => {
-                        if (!oldData) return oldData;
+                      (oldData: { songs?: Song[] } | undefined) => {
+                        if (!oldData || !oldData.songs) return oldData;
                         return {
                           ...oldData,
                           songs: [...oldData.songs, ...pageData.songs],
@@ -208,7 +208,7 @@ export function useAllSongs(params: GetSongsParams = {}) {
 
         setSyncStatus("synced");
         return { ...firstPage, songs: apiSongs };
-      } catch (err: any) {
+      } catch (err: unknown) {
         setSyncStatus("error");
         throw err;
       }

@@ -137,7 +137,7 @@ export const TeamsPage: React.FC = () => {
   );
 
   // User role check
-  const userRole = (user as any)?.role || "admin";
+  const userRole = (user as { role?: string })?.role || "admin";
   const isOrgAdminOrOwner = ["owner", "admin"].includes(userRole);
 
   const filteredTeams = teams.filter(
@@ -565,7 +565,9 @@ export const TeamsPage: React.FC = () => {
                 </label>
                 <select
                   value={newMemberRole}
-                  onChange={(e) => setNewMemberRole(e.target.value as any)}
+                  onChange={(e) =>
+                    setNewMemberRole(e.target.value as "leader" | "member")
+                  }
                   className="w-full h-11 px-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-sm font-semibold"
                 >
                   <option value="member">Membro</option>
