@@ -28,7 +28,7 @@ export const RegisterTenantPage: React.FC = () => {
   const navigate = useNavigate();
   const { client } = useStatsigClient();
   const alpha_release = client.checkGate("alpha_release");
-  const captchaEnabled = client.checkGate("captchaEnabled");
+  const captchaEnabled = client.checkGate("captcha_enabled");
 
   // Step state
   const [step, setStep] = useState(1);

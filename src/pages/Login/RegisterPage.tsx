@@ -16,7 +16,7 @@ import { TurnstileWidget } from "./components/TurnstileWidget";
 export const RegisterPage: React.FC = () => {
   const { refetch } = useAuth();
   const { client } = useStatsigClient();
-  const captchaEnabled = client.checkGate("captchaEnabled");
+  const captchaEnabled = client.checkGate("captcha_enabled");
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -29,7 +29,8 @@ export const RegisterPage: React.FC = () => {
   const [errorMsg, setErrorMsg] = useState("");
   const [successState, setSuccessState] = useState(false);
 
-  const passwordMismatch = confirmPassword.length > 0 && password !== confirmPassword;
+  const passwordMismatch =
+    confirmPassword.length > 0 && password !== confirmPassword;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,9 +58,12 @@ export const RegisterPage: React.FC = () => {
       name: name.trim(),
       email: email.trim(),
       password,
-      fetchOptions: captchaEnabled && captchaToken ? {
-        headers: { "x-captcha-token": captchaToken },
-      } : undefined,
+      fetchOptions:
+        captchaEnabled && captchaToken
+          ? {
+              headers: { "x-captcha-token": captchaToken },
+            }
+          : undefined,
     });
     setIsLoading(false);
 
@@ -85,11 +89,15 @@ export const RegisterPage: React.FC = () => {
               <CheckCircle2 className="w-10 h-10" />
             </div>
           </div>
-          <h2 className="text-2xl font-black text-slate-900 dark:text-white mb-2">Conta Criada!</h2>
+          <h2 className="text-2xl font-black text-slate-900 dark:text-white mb-2">
+            Conta Criada!
+          </h2>
           <p className="text-slate-500 dark:text-slate-400 text-sm font-medium max-w-xs">
             Enviámos um e-mail de verificação para{" "}
-            <span className="font-bold text-slate-700 dark:text-slate-200">{email}</span>.
-            Verifique a sua caixa de entrada para ativar a conta.
+            <span className="font-bold text-slate-700 dark:text-slate-200">
+              {email}
+            </span>
+            . Verifique a sua caixa de entrada para ativar a conta.
           </p>
         </div>
       </LoginLayout>
@@ -157,7 +165,9 @@ export const RegisterPage: React.FC = () => {
           )}
         </div>
 
-        {captchaEnabled && <TurnstileWidget ref={captchaRef} onVerify={setCaptchaToken} />}
+        {captchaEnabled && (
+          <TurnstileWidget ref={captchaRef} onVerify={setCaptchaToken} />
+        )}
 
         <Button
           type="submit"
@@ -172,4 +182,3 @@ export const RegisterPage: React.FC = () => {
     </LoginLayout>
   );
 };
-
