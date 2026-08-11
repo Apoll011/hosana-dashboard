@@ -3,16 +3,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from "react";
+import { Can } from "@/src/lib/permissions/components";
+import { Button, Input, ServerSettings, Spinner } from "@hosanna/shared";
 import {
-  Server,
+  HardDrive,
   KeyRound,
   RefreshCw,
-  HardDrive,
   Save,
+  Server,
   Shield,
 } from "lucide-react";
-import { Button, Input, Spinner, ServerSettings } from "@hosanna/shared";
+import React, { useEffect, useState } from "react";
 import { useSettings } from "../../hooks/useSettings";
 
 export const GeneralTab: React.FC<{ active: boolean }> = ({ active }) => {
@@ -53,98 +54,99 @@ export const GeneralTab: React.FC<{ active: boolean }> = ({ active }) => {
 
   return (
     <form onSubmit={handleSubmitSettings} className="space-y-6">
-      {/* Server Configuration */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs space-y-5">
-        <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 border-b border-slate-100 dark:border-slate-800 pb-3 flex items-center gap-2">
-          <Server className="w-4 h-4 text-m3-primary" />
-          Configuração Geral do Servidor
-        </h3>
+      <Can permission="settings.manage">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs space-y-5">
+          <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 border-b border-slate-100 dark:border-slate-800 pb-3 flex items-center gap-2">
+            <Server className="w-4 h-4 text-m3-primary" />
+            Configuração Geral do Servidor
+          </h3>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Input
-            label="Nome do Servidor"
-            value={formState.serverName}
-            onChange={(e) =>
-              setFormState({ ...formState, serverName: e.target.value })
-            }
-            icon={<Server className="w-4 h-4 text-slate-400" />}
-            placeholder="Ex: Hosanna Studio Central"
-          />
-
-          <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
-              <KeyRound className="w-3.5 h-3.5 text-slate-400" />
-              Tom Padrão do Sistema
-            </label>
-            <select
-              value={formState.defaultKey}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Input
+              label="Nome do Servidor"
+              value={formState.serverName}
               onChange={(e) =>
-                setFormState({ ...formState, defaultKey: e.target.value })
+                setFormState({ ...formState, serverName: e.target.value })
               }
-              className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-m3-primary"
-            >
-              {[
-                "C",
-                "C#",
-                "D",
-                "Eb",
-                "E",
-                "F",
-                "F#",
-                "G",
-                "Ab",
-                "A",
-                "Bb",
-                "B",
-              ].map((k) => (
-                <option key={k} value={k}>
-                  Tom {k}
-                </option>
-              ))}
-            </select>
+              icon={<Server className="w-4 h-4 text-slate-400" />}
+              placeholder="Ex: Hosanna Studio Central"
+            />
+
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                <KeyRound className="w-3.5 h-3.5 text-slate-400" />
+                Tom Padrão do Sistema
+              </label>
+              <select
+                value={formState.defaultKey}
+                onChange={(e) =>
+                  setFormState({ ...formState, defaultKey: e.target.value })
+                }
+                className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-m3-primary"
+              >
+                {[
+                  "C",
+                  "C#",
+                  "D",
+                  "Eb",
+                  "E",
+                  "F",
+                  "F#",
+                  "G",
+                  "Ab",
+                  "A",
+                  "Bb",
+                  "B",
+                ].map((k) => (
+                  <option key={k} value={k}>
+                    Tom {k}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <Input
+              label="Intervalo de Sincronização (segundos)"
+              type="number"
+              value={formState.syncIntervalSeconds}
+              onChange={(e) =>
+                setFormState({
+                  ...formState,
+                  syncIntervalSeconds: Number(e.target.value),
+                })
+              }
+              icon={<RefreshCw className="w-4 h-4 text-slate-400" />}
+              placeholder="30"
+            />
+
+            <Input
+              label="Tamanho Máximo de Upload por Ficheiro (MB)"
+              type="number"
+              value={formState.maxUploadMB}
+              onChange={(e) =>
+                setFormState({
+                  ...formState,
+                  maxUploadMB: Number(e.target.value),
+                })
+              }
+              icon={<HardDrive className="w-4 h-4 text-slate-400" />}
+              placeholder="50"
+            />
           </div>
 
-          <Input
-            label="Intervalo de Sincronização (segundos)"
-            type="number"
-            value={formState.syncIntervalSeconds}
-            onChange={(e) =>
-              setFormState({
-                ...formState,
-                syncIntervalSeconds: Number(e.target.value),
-              })
-            }
-            icon={<RefreshCw className="w-4 h-4 text-slate-400" />}
-            placeholder="30"
-          />
-
-          <Input
-            label="Tamanho Máximo de Upload por Ficheiro (MB)"
-            type="number"
-            value={formState.maxUploadMB}
-            onChange={(e) =>
-              setFormState({
-                ...formState,
-                maxUploadMB: Number(e.target.value),
-              })
-            }
-            icon={<HardDrive className="w-4 h-4 text-slate-400" />}
-            placeholder="50"
-          />
+          <div className="flex items-center justify-end pt-2">
+            <Button
+              type="submit"
+              variant="primary"
+              size="sm"
+              isLoading={isUpdating}
+              icon={<Save className="w-4 h-4" />}
+            >
+              Guardar Definições
+            </Button>
+          </div>
         </div>
-
-        <div className="flex items-center justify-end pt-2">
-          <Button
-            type="submit"
-            variant="primary"
-            size="sm"
-            isLoading={isUpdating}
-            icon={<Save className="w-4 h-4" />}
-          >
-            Guardar Definições
-          </Button>
-        </div>
-      </div>
+      </Can>
 
       {/* Studio Settings */}
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs space-y-4">

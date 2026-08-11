@@ -28,7 +28,7 @@ export const LoginPage: React.FC = () => {
   const captchaRef = useRef<{ reset: () => void }>(null);
 
   const { client } = useStatsigClient();
-  const captchaEnabled = client.checkGate("captchaEnabled");
+  const captchaEnabled = client.checkGate("captcha_enabled");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -121,7 +121,9 @@ export const LoginPage: React.FC = () => {
               onChange={(e) => setRememberMe(e.target.checked)}
               className="w-4 h-4 rounded border-slate-300 dark:border-slate-700 text-m3-primary focus:ring-m3-primary dark:bg-slate-800"
             />
-            <span className="text-sm text-slate-600 dark:text-slate-300">Lembrar-me</span>
+            <span className="text-sm text-slate-600 dark:text-slate-300">
+              Lembrar-me
+            </span>
           </label>
         </div>
 
@@ -151,5 +153,3 @@ export const LoginPage: React.FC = () => {
     </LoginLayout>
   );
 };
-
-
