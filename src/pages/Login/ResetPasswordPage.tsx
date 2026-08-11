@@ -4,9 +4,9 @@
  */
 
 import { Button, Input } from "@hosanna/shared";
-import { ArrowRight, CheckCircle2, Clock, KeyRound, Lock, XCircle } from "lucide-react";
+import { ArrowRight, CheckCircle2, Clock, Lock, XCircle } from "lucide-react";
 import React, { useState } from "react";
-import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { authClient } from "../../lib/authClient";
 import LoginLayout from "./Layout";
 import { PasswordStrengthMeter } from "./components/PasswordStrengthMeter";
@@ -15,14 +15,9 @@ type State = "form" | "success" | "expired" | "error";
 
 export const ResetPasswordPage: React.FC = () => {
   const [searchParams] = useSearchParams();
-  const location = useLocation();
+  const token = searchParams.get("token");
   const navigate = useNavigate();
 
-  const urlToken = searchParams.get("token") || "";
-  const navState = location.state as { email?: string; mode?: string } | null;
-  const isCodeMode = navState?.mode === "code" || !urlToken;
-
-  const [tokenInput, setTokenInput] = useState(urlToken);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -30,16 +25,35 @@ export const ResetPasswordPage: React.FC = () => {
   const [state, setState] = useState<State>("form");
 
   const passwordMismatch = confirmPassword.length > 0 && password !== confirmPassword;
-  const activeToken = urlToken || tokenInput;
+
+  if (!token) {
+    return (
+      <LoginLayout optionalLink="/login" optionalMsg="← Voltar ao login">
+        <div className="py-8 flex flex-col items-center text-center gap-4">
+          <div className="w-20 h-20 bg-rose-100 dark:bg-rose-900/40 rounded-full flex items-center justify-center">
+            <XCircle className="w-10 h-10 text-rose-500 dark:text-rose-400" />
+          </div>
+          <div>
+            <h2 className="text-xl font-black text-slate-900 dark:text-white">Link Inválido</h2>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mt-2 max-w-xs mx-auto">
+              Este link de recuperação é inválido. Solicite um novo abaixo.
+            </p>
+          </div>
+          <Link
+            to="/forgot-password"
+            className="inline-flex items-center gap-2 h-10 px-5 rounded-xl bg-m3-primary text-white text-xs font-bold hover:bg-m3-primary-dark transition-all"
+          >
+            Solicitar novo link
+          </Link>
+        </div>
+      </LoginLayout>
+    );
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg("");
 
-    if (!activeToken.trim()) {
-      setErrorMsg("Insira o código ou token de recuperação.");
-      return;
-    }
     if (password.length < 6) {
       setErrorMsg("A palavra-passe deve ter pelo menos 6 caracteres.");
       return;
@@ -50,10 +64,7 @@ export const ResetPasswordPage: React.FC = () => {
     }
 
     setIsLoading(true);
-    const { error } = await authClient.resetPassword({
-      newPassword: password,
-      token: activeToken.trim(),
-    });
+    const { error } = await authClient.resetPassword({ newPassword: password, token });
     setIsLoading(false);
 
     if (error) {
@@ -103,16 +114,16 @@ export const ResetPasswordPage: React.FC = () => {
             <Clock className="w-10 h-10 text-amber-500 dark:text-amber-400" />
           </div>
           <div>
-            <h2 className="text-xl font-black text-slate-900 dark:text-white">Código ou Link Expirado</h2>
+            <h2 className="text-xl font-black text-slate-900 dark:text-white">Link Expirado</h2>
             <p className="text-sm text-slate-500 dark:text-slate-400 mt-2 max-w-xs mx-auto">
-              O token ou código de recuperação expirou. Solicite um novo abaixo.
+              O link de recuperação expirou. Solicite um novo.
             </p>
           </div>
           <Link
             to="/forgot-password"
             className="inline-flex items-center gap-2 h-10 px-5 rounded-xl bg-m3-primary text-white text-xs font-bold hover:bg-m3-primary-dark transition-all"
           >
-            Solicitar novo código/link
+            Solicitar novo link
           </Link>
         </div>
       </LoginLayout>
@@ -132,27 +143,11 @@ export const ResetPasswordPage: React.FC = () => {
         </div>
         <h2 className="font-display font-black text-xl text-slate-900 dark:text-white">Nova Palavra-passe</h2>
         <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 text-center max-w-xs">
-          {navState?.email ? (
-            <>Código enviado para <span className="font-bold text-slate-700 dark:text-slate-200">{navState.email}</span></>
-          ) : (
-            "Escolha uma palavra-passe forte para proteger a sua conta."
-          )}
+          Escolha uma palavra-passe forte para proteger a sua conta.
         </p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-3.5">
-        {(!urlToken || isCodeMode) && (
-          <Input
-            type="text"
-            label="Código / Token de Recuperação"
-            placeholder="Insira o código do e-mail"
-            value={tokenInput}
-            onChange={(e) => setTokenInput(e.target.value)}
-            icon={<KeyRound className="w-4 h-4 opacity-40" />}
-            className="h-11 rounded-xl border-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white focus:border-m3-primary transition-all text-sm font-mono"
-          />
-        )}
-
         <div className="space-y-1">
           <Input
             type="password"
@@ -200,4 +195,3 @@ export const ResetPasswordPage: React.FC = () => {
     </LoginLayout>
   );
 };
-
