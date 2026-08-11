@@ -285,7 +285,7 @@ export const SongEditorPage: React.FC = () => {
                   setContent(val);
                   setHasUnsavedChanges(true);
                 }}
-                readOnly={readOnly}
+                readOnly={false}
                 onSave={handleSave}
                 mode="chordpro"
               />

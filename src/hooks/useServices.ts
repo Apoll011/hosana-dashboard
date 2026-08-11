@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Service, servicesApi } from "@hosanna/shared";
+import { Service, ServiceElement, servicesApi } from "@hosanna/shared";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSync } from "../contexts/SyncContext";
 
@@ -71,7 +71,7 @@ export function useServices() {
       data,
     }: {
       serviceId: string;
-      data: { elements: unknown[]; updatedAt: string };
+      data: { elements: ServiceElement[]; updatedAt: string };
     }) => servicesApi.updateServiceElements(serviceId, data),
     onMutate: async ({ serviceId, data }) => {
       await queryClient.cancelQueries({ queryKey: ["service", serviceId] });

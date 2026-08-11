@@ -69,10 +69,17 @@ export const SongsPage: React.FC<SongsPageProps> = ({
   const _actualSearchQuery = externalSearchQuery ?? context.searchQuery ?? "";
   const _actualSortBy = externalSortBy ?? context.sortBy ?? "title";
   const _actualSortOrder = externalSortOrder ?? context.sortOrder ?? "asc";
-  const actualSelectedKey = selectedKey ?? context.selectedKey ?? "";
-  const actualSelectedTag = selectedTag ?? context.selectedTag ?? "";
+  const actualSelectedKey =
+    selectedKey ?? (context.selectedKey as string | null) ?? "";
+  const actualSelectedTag =
+    selectedTag ?? (context.selectedTag as string | null) ?? "";
   const actualSearchFields = externalSearchFields ??
-    context.searchFields ?? {
+    (context.searchFields as {
+      title: boolean;
+      artist: boolean;
+      content: boolean;
+      tags: boolean;
+    } | null) ?? {
       title: true,
       artist: true,
       content: true,
@@ -90,11 +97,11 @@ export const SongsPage: React.FC<SongsPageProps> = ({
   );
   const [page, setPage] = useState(1);
 
-  const finalSearchQuery =
+  const finalSearchQuery: string =
     externalSearchQuery !== undefined
       ? externalSearchQuery
       : context.searchQuery !== undefined
-        ? context.searchQuery
+        ? (context.searchQuery as string)
         : internalSearchQuery;
   const finalSortBy =
     externalSortBy !== undefined

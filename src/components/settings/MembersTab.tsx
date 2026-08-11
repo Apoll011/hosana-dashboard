@@ -56,9 +56,8 @@ export const MembersTab: React.FC<{ active: boolean }> = ({ active }) => {
     queryKey: ["betterAuthOrgMembers", organization?.id],
     queryFn: async () => {
       try {
-        const { data } = await authClient.organization.getFullOrganization();
-        if (data && data.members) {
-          return data.members.map(
+        if (organization && organization.members) {
+          return organization.members.map(
             (m: {
               id: string;
               userId?: string;

@@ -345,7 +345,7 @@ export const TeamsPage: React.FC = () => {
         </div>
 
         {/* Team Header Banner */}
-        <div className="bg-gradient-to-r from-sky-600 to-indigo-700 rounded-3xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden">
+        <div className="bg-linear-to-r from-sky-600 to-indigo-700 rounded-3xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden">
           <div className="relative z-10">
             <span className="text-xs font-black uppercase tracking-widest text-sky-200 bg-white/10 px-3 py-1 rounded-full">
               {selectedTeam.slug}
@@ -670,7 +670,7 @@ export const TeamsPage: React.FC = () => {
             <div className="mt-5 pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs">
               <div className="flex items-center gap-1.5 text-slate-600 dark:text-slate-400 font-semibold">
                 <Crown className="w-3.5 h-3.5 text-amber-500" />
-                <span className="truncate max-w-[120px]">
+                <span className="truncate max-w-30">
                   {team.leaderName || "Sem líder"}
                 </span>
               </div>
