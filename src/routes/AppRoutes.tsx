@@ -133,19 +133,19 @@ export const AppRoutes: React.FC = () => {
 
           <Route element={<ProtectedRoute />}>
             <Route path="/onboarding" element={<OnboardingPage />} />
-            <Route element={<MainLayout />}>
-              <Route path="/" element={<Navigate to="/folders" replace />} />
-              <Route path="/folders" element={<FoldersPage />} />
-              <Route path="/songs" element={<SongsPage hideHeader />} />
-              <Route path="/songs/:id" element={<SongEditorPage />} />
-              <Route path="/services" element={<ServicesPage hideHeader />} />
-              <Route path="/services/:id" element={<ServiceDetailPage />} />
-              <Route path="/teams" element={<TeamsPage />} />
-              <Route path="/settings" element={<SettingsPage hideHeader />} />
+            <Route path="/:slug" element={<MainLayout />}>
+              <Route index element={<Navigate to="folders" replace />} />
+              <Route path="folders" element={<FoldersPage />} />
+              <Route path="songs" element={<SongsPage hideHeader />} />
+              <Route path="songs/:id" element={<SongEditorPage />} />
+              <Route path="services" element={<ServicesPage hideHeader />} />
+              <Route path="services/:id" element={<ServiceDetailPage />} />
+              <Route path="teams" element={<TeamsPage />} />
+              <Route path="settings" element={<SettingsPage hideHeader />} />
             </Route>
           </Route>
 
-          <Route path="*" element={<Navigate to="/folders" replace />} />
+          <Route path="*" element={<Navigate to="/onboarding" replace />} />
         </Routes>
       </Suspense>
     </ErrorBoundary>

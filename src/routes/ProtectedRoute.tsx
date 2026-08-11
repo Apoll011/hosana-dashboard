@@ -30,9 +30,9 @@ export const ProtectedRoute: React.FC = () => {
     return <Navigate to="/onboarding" replace />;
   }
 
-  // If they have a tenant but try to access onboarding, send them to the app
-  if (tenant && location.pathname === "/onboarding") {
-    return <Navigate to="/folders" replace />;
+  // If they have a tenant but try to access onboarding or root, send them to the app with tenant slug
+  if (tenant && (location.pathname === "/onboarding" || location.pathname === "/")) {
+    return <Navigate to={`/${tenant.slug}/folders`} replace />;
   }
 
   return <Outlet />;

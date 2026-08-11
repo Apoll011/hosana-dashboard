@@ -22,20 +22,26 @@ export const OnboardingPage: React.FC = () => {
     setErrorMsg("");
     setIsLoading(true);
 
-    const { error } = await authClient.organization.create({
+    const slug = orgSlug.trim();
+    const { data: createdOrg, error } = await authClient.organization.create({
       name: orgName.trim(),
-      slug: orgSlug.trim(),
+      slug: slug,
     });
 
-    setIsLoading(false);
-
     if (error) {
+      setIsLoading(false);
       setErrorMsg(error.message || "Failed to create organization.");
       return;
     }
 
+    localStorage.setItem("active_org_slug", slug);
+    await authClient.organization.setActive({
+      organizationSlug: slug,
+    });
+
     await refetch();
-    navigate("/folders");
+    setIsLoading(false);
+    navigate(`/${slug}/folders`);
   };
 
   const handleJoin = async (e: React.FormEvent) => {
