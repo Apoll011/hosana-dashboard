@@ -102,7 +102,12 @@ export const TwoFactorPage: React.FC = () => {
     }
 
     await refetch();
-    navigate("/", { replace: true });
+    const activeSlug = localStorage.getItem("active_org_slug");
+    if (activeSlug) {
+      navigate(`/${activeSlug}/folders`, { replace: true });
+    } else {
+      navigate("/onboarding", { replace: true });
+    }
   };
 
   return (
@@ -111,51 +116,51 @@ export const TwoFactorPage: React.FC = () => {
       optionalLink="/login"
       optionalMsg="← Voltar ao login"
     >
-      <form onSubmit={handleSubmit} className="space-y-5">
-        <div className="flex flex-col items-center mb-2">
-          <div className="w-14 h-14 bg-m3-primary/10 dark:bg-m3-primary/20 rounded-2xl flex items-center justify-center mb-3">
-            <Shield className="w-7 h-7 text-m3-primary dark:text-m3-primary-light" />
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="flex flex-col items-center mb-1 text-center">
+          <div className="w-12 h-12 bg-m3-primary/10 dark:bg-m3-primary/20 rounded-2xl flex items-center justify-center mb-2 text-m3-primary dark:text-m3-primary-light">
+            <Shield className="w-6 h-6" />
           </div>
-          <h2 className="font-display font-black text-xl text-slate-900 dark:text-white">
+          <h2 className="font-display font-bold text-lg text-slate-900 dark:text-white">
             Verificação em 2 Etapas
           </h2>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 text-center max-w-xs">
-            {method === "totp" && "Introduza o código de 6 dígitos da sua aplicação autenticadora"}
-            {method === "otp" && "Introduza o código enviado para o seu endereço de e-mail"}
-            {method === "backup" && "Introduza um dos seus códigos de recuperação de reserva"}
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-xs leading-relaxed">
+            {method === "totp" && "Introduza o código da sua app autenticadora"}
+            {method === "otp" && "Introduza o código enviado para o seu e-mail"}
+            {method === "backup" && "Introduza um código de recuperação"}
           </p>
         </div>
 
         {/* Method selector tabs */}
-        <div className="flex rounded-xl bg-slate-100 dark:bg-slate-800/80 p-1 border border-slate-200/60 dark:border-slate-700/60">
+        <div className="grid grid-cols-3 gap-1 bg-slate-100 dark:bg-slate-800/80 p-1 rounded-xl border border-slate-200/50 dark:border-slate-700/50">
           <button
             type="button"
             onClick={() => handleSwitchMethod("totp")}
-            className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-2 rounded-lg text-xs font-bold transition-all ${
+            className={`flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg text-xs font-semibold transition-all ${
               method === "totp"
                 ? "bg-white dark:bg-slate-900 text-m3-primary dark:text-m3-primary-light shadow-sm"
                 : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
             }`}
           >
             <Smartphone className="w-3.5 h-3.5" />
-            <span>App Autenticador</span>
+            <span>App</span>
           </button>
           <button
             type="button"
             onClick={() => handleSwitchMethod("otp")}
-            className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-2 rounded-lg text-xs font-bold transition-all ${
+            className={`flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg text-xs font-semibold transition-all ${
               method === "otp"
                 ? "bg-white dark:bg-slate-900 text-m3-primary dark:text-m3-primary-light shadow-sm"
                 : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
             }`}
           >
             <MailCheck className="w-3.5 h-3.5" />
-            <span>Código E-mail</span>
+            <span>E-mail</span>
           </button>
           <button
             type="button"
             onClick={() => handleSwitchMethod("backup")}
-            className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-2 rounded-lg text-xs font-bold transition-all ${
+            className={`flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg text-xs font-semibold transition-all ${
               method === "backup"
                 ? "bg-white dark:bg-slate-900 text-m3-primary dark:text-m3-primary-light shadow-sm"
                 : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"

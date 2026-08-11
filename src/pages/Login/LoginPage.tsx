@@ -76,9 +76,15 @@ export const LoginPage: React.FC = () => {
       return;
     }
 
-    // Refresh session state immediately so ProtectedRoute recognizes authentication
+    // Refresh session state immediately so ProtectedRoute recognizes authentication and active tenant
     await refetch();
-    navigate("/", { replace: true });
+    // Fetch latest tenant slug or fallback to onboarding/root
+    const activeSlug = localStorage.getItem("active_org_slug");
+    if (activeSlug) {
+      navigate(`/${activeSlug}/folders`, { replace: true });
+    } else {
+      navigate("/onboarding", { replace: true });
+    }
   };
 
   return (
