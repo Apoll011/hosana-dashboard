@@ -20,150 +20,192 @@ import {
 } from "lucide-react";
 import { Button } from "@hosanna/shared";
 
-export interface NotificationItem {
+export type InboxNotification = {
   id: string;
-  type: "organization" | "team" | "security" | "billing";
+  userId?: string;
+  organizationId?: string | null;
+  type: string;
   title: string;
-  message: string;
+  body?: string | null;
+  message?: string | null;
+  href?: string | null;
+  data?: Record<string, unknown> | null;
   read: boolean;
-  createdAt: Date;
-  metadata?: Record<string, any>;
-}
+  createdAt: Date | string;
+};
 
-export interface UseInboxOptions {
+type ListQuery = {
+  limit?: number;
+  offset?: number;
+  filter?: "unread" | "all";
   organizationId?: string;
+};
+
+export type InboxFetchClient = {
+  inbox?: {
+    list: (input: { query: ListQuery }) => Promise<{
+      data: { notifications: InboxNotification[]; hasMore: boolean } | null;
+      error: unknown;
+    }>;
+    unreadCount: (input?: { query?: { organizationId?: string } }) => Promise<{
+      data: { count: number } | null;
+      error: unknown;
+    }>;
+    markRead: (input: {
+      id: string;
+    }) => Promise<{ data: unknown; error: unknown }>;
+    markAllRead: (input: {
+      organizationId?: string;
+    }) => Promise<{ data: unknown; error: unknown }>;
+  };
+};
+
+export type UseInboxOptions = {
+  /** Poll interval for the unread count in ms. 0 disables polling. @default 30000 */
   pollInterval?: number;
-}
-
-export interface UseInboxReturn {
-  notifications: NotificationItem[];
-  unreadCount: number;
-  isLoading: boolean;
-  hasMore: boolean;
-  loadMore: () => void;
-  markRead: (id: string) => void;
-  markAllRead: () => void;
-  deleteNotification: (id: string) => void;
-  refresh: () => void;
-}
-
-const DEFAULT_NOTIFICATIONS: NotificationItem[] = [
-  {
-    id: "notif-1",
-    type: "organization",
-    title: "Boas-vindas à Organização",
-    message: "A sua conta foi associada com sucesso à organização principal.",
-    read: false,
-    createdAt: new Date(Date.now() - 1000 * 60 * 30),
-  },
-  {
-    id: "notif-2",
-    type: "team",
-    title: "Adicionado à Equipa de Louvor",
-    message: "Foi promovido a Líder de Equipa de Louvor.",
-    read: false,
-    createdAt: new Date(Date.now() - 1000 * 60 * 120),
-  },
-  {
-    id: "notif-3",
-    type: "security",
-    title: "Nova Sessão Detetada",
-    message: "Novo início de sessão a partir do navegador Chrome.",
-    read: true,
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24),
-  },
-  {
-    id: "notif-4",
-    type: "billing",
-    title: "Subscrição Ativa",
-    message: "O plano de organização está ativo e sincronizado com Sucesso.",
-    read: true,
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 48),
-  },
-];
+  /** Page size for the notification list. @default 20 */
+  pageSize?: number;
+  /** Scope everything to one organization. */
+  organizationId?: string;
+};
 
 export function useInbox(
-  client: any,
-  options?: UseInboxOptions
-): UseInboxReturn {
-  const [notifications, setNotifications] = useState<NotificationItem[]>(() => {
-    const saved = localStorage.getItem("hosanna_inbox_notifications");
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        return parsed.map((n: any) => ({
-          ...n,
-          createdAt: new Date(n.createdAt),
-        }));
-      } catch {
-        return DEFAULT_NOTIFICATIONS;
-      }
-    }
-    return DEFAULT_NOTIFICATIONS;
-  });
+  client: InboxFetchClient,
+  options: UseInboxOptions = {},
+) {
+  const { pollInterval = 30_000, pageSize = 20, organizationId } = options;
 
-  const [isLoading, setIsLoading] = useState(false);
+  const [notifications, setNotifications] = useState<InboxNotification[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
   const [hasMore, setHasMore] = useState(false);
+  const [error, setError] = useState<unknown>(null);
 
-  useEffect(() => {
-    localStorage.setItem(
-      "hosanna_inbox_notifications",
-      JSON.stringify(notifications)
+  const clientRef = useRef(client);
+  clientRef.current = client;
+
+  const listQuery = useCallback(
+    (offset: number): ListQuery => ({
+      limit: pageSize,
+      offset,
+      ...(organizationId ? { organizationId } : {}),
+    }),
+    [pageSize, organizationId],
+  );
+
+  const refreshUnreadCount = useCallback(async () => {
+    if (!clientRef.current?.inbox?.unreadCount) return;
+    const res = await clientRef.current.inbox.unreadCount(
+      organizationId ? { query: { organizationId } } : undefined,
     );
-  }, [notifications]);
+    if (res?.data) setUnreadCount(res.data.count);
+  }, [organizationId]);
 
-  const unreadCount = notifications.filter((n) => !n.read).length;
-
-  const refresh = useCallback(() => {
-    setIsLoading(true);
-    setTimeout(() => {
+  const refresh = useCallback(async () => {
+    try {
+      if (!clientRef.current?.inbox?.list) return;
+      const [list] = await Promise.all([
+        clientRef.current.inbox.list({ query: listQuery(0) }),
+        refreshUnreadCount(),
+      ]);
+      if (list.error) {
+        setError(list.error);
+      } else if (list.data) {
+        setError(null);
+        setNotifications(list.data.notifications);
+        setHasMore(list.data.hasMore);
+      }
+    } finally {
+      // a transport failure still ends the initial load, otherwise a client
+      // that mounts while offline renders a spinner forever
       setIsLoading(false);
-    }, 400);
+    }
+  }, [listQuery, refreshUnreadCount]);
+
+  const notificationsRef = useRef(notifications);
+  notificationsRef.current = notifications;
+
+  const loadMore = useCallback(async () => {
+    if (!clientRef.current?.inbox?.list) return;
+    const res = await clientRef.current.inbox.list({
+      query: listQuery(notificationsRef.current.length),
+    });
+    if (res?.data) {
+      setNotifications((prev) => [...prev, ...res.data!.notifications]);
+      setHasMore(res.data.hasMore);
+    }
+  }, [listQuery]);
+
+  const markRead = useCallback(async (id: string) => {
+    const target = notificationsRef.current.find((n) => n.id === id);
+    if (target && !target.read) {
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === id ? { ...n, read: true } : n)),
+      );
+      setUnreadCount((count) => Math.max(0, count - 1));
+    }
+    if (clientRef.current?.inbox?.markRead) {
+      await clientRef.current.inbox.markRead({ id });
+    }
   }, []);
 
-  const loadMore = useCallback(() => {
-    setHasMore(false);
-  }, []);
-
-  const markRead = useCallback((id: string) => {
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, read: true } : n))
-    );
-  }, []);
-
-  const markAllRead = useCallback(() => {
+  const markAllRead = useCallback(async () => {
     setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
-  }, []);
+    setUnreadCount(0);
+    if (clientRef.current?.inbox?.markAllRead) {
+      await clientRef.current.inbox.markAllRead(
+        organizationId ? { organizationId } : {},
+      );
+    }
+  }, [organizationId]);
 
-  const deleteNotification = useCallback((id: string) => {
-    setNotifications((prev) => prev.filter((n) => n.id !== id));
+  // These three triggers fire on their own, so nothing is awaiting them. The
+  // transport rejects (rather than resolving to { error }) when the request
+  // never reaches the server — an offline or backgrounded tab — and without a
+  // catch that surfaces as an unhandled rejection in the consumer's app.
+  const captureBackgroundError = useCallback((reason: unknown) => {
+    setError(() => reason);
   }, []);
 
   useEffect(() => {
-    const pollInterval = options?.pollInterval ?? 30000;
-    const timer = setInterval(() => {
-      // Periodic check
+    refresh().catch(captureBackgroundError);
+  }, [refresh, captureBackgroundError]);
+
+  useEffect(() => {
+    if (pollInterval <= 0) return;
+    const interval = setInterval(() => {
+      refreshUnreadCount().catch(captureBackgroundError);
     }, pollInterval);
-    return () => clearInterval(timer);
-  }, [options?.pollInterval]);
+    return () => clearInterval(interval);
+  }, [pollInterval, refreshUnreadCount, captureBackgroundError]);
+
+  useEffect(() => {
+    const onFocus = () => {
+      refresh().catch(captureBackgroundError);
+    };
+    window.addEventListener("focus", onFocus);
+    return () => window.removeEventListener("focus", onFocus);
+  }, [refresh, captureBackgroundError]);
 
   return {
     notifications,
     unreadCount,
     isLoading,
     hasMore,
+    error,
+    refresh,
     loadMore,
     markRead,
     markAllRead,
-    deleteNotification,
-    refresh,
   };
 }
 
+export type UseInboxReturn = ReturnType<typeof useInbox>;
+
 export interface InboxPanelProps {
   inbox: UseInboxReturn;
-  onNavigate?: (notif: NotificationItem) => void;
-  renderItem?: (notif: NotificationItem) => React.ReactNode;
+  onNavigate?: (notif: InboxNotification) => void;
+  renderItem?: (notif: InboxNotification) => React.ReactNode;
   onClose?: () => void;
 }
 
@@ -174,14 +216,14 @@ export const InboxPanel: React.FC<InboxPanelProps> = ({
   onClose,
 }) => {
   const [filter, setFilter] = useState<"all" | "unread">("all");
-  const [selectedNotif, setSelectedNotif] = useState<NotificationItem | null>(null);
+  const [selectedNotif, setSelectedNotif] = useState<InboxNotification | null>(null);
 
   const filteredNotifications = inbox.notifications.filter((n) => {
     if (filter === "unread") return !n.read;
     return true;
   });
 
-  const getIcon = (type: NotificationItem["type"]) => {
+  const getIcon = (type: string) => {
     switch (type) {
       case "organization":
         return <Building2 className="w-4 h-4 text-sky-500" />;
@@ -194,6 +236,15 @@ export const InboxPanel: React.FC<InboxPanelProps> = ({
       default:
         return <Info className="w-4 h-4 text-slate-500" />;
     }
+  };
+
+  const formatDate = (date: Date | string) => {
+    const d = typeof date === "string" ? new Date(date) : date;
+    if (isNaN(d.getTime())) return "";
+    return d.toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
   };
 
   return (
@@ -222,7 +273,7 @@ export const InboxPanel: React.FC<InboxPanelProps> = ({
               className="p-1.5 text-xs text-m3-primary hover:bg-m3-primary/10 rounded-lg transition-colors flex items-center gap-1 font-semibold"
             >
               <CheckCheck className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Lerdas todas</span>
+              <span className="hidden sm:inline">Ler todas</span>
             </button>
           )}
           {onClose && (
@@ -262,68 +313,72 @@ export const InboxPanel: React.FC<InboxPanelProps> = ({
 
       {/* List */}
       <div className="flex-1 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800/60 custom-scrollbar">
-        {filteredNotifications.length === 0 ? (
+        {inbox.isLoading && inbox.notifications.length === 0 ? (
+          <div className="p-8 text-center text-slate-400 dark:text-slate-600">
+            <p className="text-xs font-semibold animate-pulse">A carregar notificações...</p>
+          </div>
+        ) : filteredNotifications.length === 0 ? (
           <div className="p-8 text-center text-slate-400 dark:text-slate-600">
             <Sparkles className="w-8 h-8 mx-auto mb-2 opacity-40" />
             <p className="text-xs font-semibold">Nenhuma notificação encontrada</p>
           </div>
         ) : (
-          filteredNotifications.map((notif) => {
-            if (renderItem) return renderItem(notif);
+          <>
+            {filteredNotifications.map((notif) => {
+              if (renderItem) return renderItem(notif);
 
-            return (
-              <div
-                key={notif.id}
-                onClick={() => {
-                  inbox.markRead(notif.id);
-                  if (onNavigate) onNavigate(notif);
-                  setSelectedNotif(notif);
-                }}
-                className={`p-3 transition-colors cursor-pointer flex gap-3 items-start group ${
-                  !notif.read
-                    ? "bg-sky-50/40 dark:bg-sky-950/20 hover:bg-sky-50 dark:hover:bg-sky-950/40"
-                    : "hover:bg-slate-50 dark:hover:bg-slate-800/40"
-                }`}
-              >
-                <div className="p-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700/60 shadow-xs shrink-0 mt-0.5">
-                  {getIcon(notif.type)}
-                </div>
+              const bodyContent = notif.body || notif.message;
 
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between gap-2 mb-0.5">
-                    <span className="text-xs font-bold text-slate-900 dark:text-slate-100 truncate">
-                      {notif.title}
-                    </span>
-                    {!notif.read && (
-                      <span className="w-2 h-2 rounded-full bg-m3-primary shrink-0" />
-                    )}
+              return (
+                <div
+                  key={notif.id}
+                  onClick={() => {
+                    inbox.markRead(notif.id);
+                    if (onNavigate) onNavigate(notif);
+                    setSelectedNotif(notif);
+                  }}
+                  className={`p-3 transition-colors cursor-pointer flex gap-3 items-start group ${
+                    !notif.read
+                      ? "bg-sky-50/40 dark:bg-sky-950/20 hover:bg-sky-50 dark:hover:bg-sky-950/40"
+                      : "hover:bg-slate-50 dark:hover:bg-slate-800/40"
+                  }`}
+                >
+                  <div className="p-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700/60 shadow-xs shrink-0 mt-0.5">
+                    {getIcon(notif.type)}
                   </div>
-                  <p className="text-[11px] text-slate-600 dark:text-slate-400 line-clamp-2 leading-relaxed">
-                    {notif.message}
-                  </p>
-                  <span className="text-[10px] text-slate-400 dark:text-slate-500 mt-1.5 block">
-                    {notif.createdAt.toLocaleTimeString([], {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </span>
-                </div>
 
-                <div className="opacity-0 group-hover:opacity-100 transition-opacity flex flex-col gap-1 shrink-0">
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      inbox.deleteNotification(notif.id);
-                    }}
-                    title="Remover"
-                    className="p-1 text-slate-400 hover:text-red-500 rounded transition-colors"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </button>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-2 mb-0.5">
+                      <span className="text-xs font-bold text-slate-900 dark:text-slate-100 truncate">
+                        {notif.title}
+                      </span>
+                      {!notif.read && (
+                        <span className="w-2 h-2 rounded-full bg-m3-primary shrink-0" />
+                      )}
+                    </div>
+                    {bodyContent && (
+                      <p className="text-[11px] text-slate-600 dark:text-slate-400 line-clamp-2 leading-relaxed">
+                        {bodyContent}
+                      </p>
+                    )}
+                    <span className="text-[10px] text-slate-400 dark:text-slate-500 mt-1.5 block">
+                      {formatDate(notif.createdAt)}
+                    </span>
+                  </div>
                 </div>
+              );
+            })}
+            {inbox.hasMore && (
+              <div className="p-2 text-center">
+                <button
+                  onClick={inbox.loadMore}
+                  className="text-xs font-semibold text-m3-primary hover:underline"
+                >
+                  Carregar mais
+                </button>
               </div>
-            );
-          })
+            )}
+          </>
         )}
       </div>
 
@@ -345,9 +400,11 @@ export const InboxPanel: React.FC<InboxPanelProps> = ({
           <h4 className="text-xs font-bold text-slate-900 dark:text-slate-100 mb-1">
             {selectedNotif.title}
           </h4>
-          <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-            {selectedNotif.message}
-          </p>
+          {(selectedNotif.body || selectedNotif.message) && (
+            <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+              {selectedNotif.body || selectedNotif.message}
+            </p>
+          )}
         </div>
       )}
     </div>
@@ -355,10 +412,11 @@ export const InboxPanel: React.FC<InboxPanelProps> = ({
 };
 
 export interface InboxButtonProps {
-  client: any;
-  onNavigate?: (notif: NotificationItem) => void;
-  renderItem?: (notif: NotificationItem) => React.ReactNode;
+  client?: any;
+  onNavigate?: (notif: InboxNotification) => void;
+  renderItem?: (notif: InboxNotification) => React.ReactNode;
   pollInterval?: number;
+  pageSize?: number;
   organizationId?: string;
   className?: string;
 }
@@ -368,13 +426,14 @@ export const InboxButton: React.FC<InboxButtonProps> = ({
   onNavigate,
   renderItem,
   pollInterval = 30000,
+  pageSize = 20,
   organizationId,
   className = "",
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const inbox = useInbox(client, { pollInterval, organizationId });
+  const inbox = useInbox(client, { pollInterval, pageSize, organizationId });
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
