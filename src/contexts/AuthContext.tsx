@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { InvitationStatus } from "better-auth/plugins/organization";
 import React, {
   createContext,
   useCallback,
@@ -26,19 +27,56 @@ interface SessionUser {
 }
 
 // Tenant shape compatible with legacy code
-interface Tenant {
+type Organization = {
   id: string;
   name: string;
   slug: string;
-  logo?: string;
-  active: boolean;
+  logo?: string | null;
   createdAt: Date;
-  updatedAt: Date;
-}
-
+  metadata?: Record<string, any> | null;
+  members: {
+    id: string;
+    organizationId: string;
+    role:
+      | "admin"
+      | "editor"
+      | "guest"
+      | "member"
+      | "musician"
+      | "owner"
+      | "teamLeader";
+    createdAt: Date;
+    userId: string;
+    teamId?: string | undefined;
+    user: {
+      id: string;
+      email: string;
+      name: string;
+      image?: string | undefined;
+    };
+  }[];
+  invitations: {
+    id: string;
+    organizationId: string;
+    email: string;
+    role:
+      | "admin"
+      | "editor"
+      | "guest"
+      | "member"
+      | "musician"
+      | "owner"
+      | "teamLeader";
+    status: InvitationStatus;
+    inviterId: string;
+    expiresAt: Date;
+    createdAt: Date;
+    teamId?: string | undefined;
+  }[];
+};
 interface AuthContextType {
   user: SessionUser | null;
-  tenant: Tenant | null;
+  tenant: Organization | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   refetch: () => Promise<void>;
@@ -51,7 +89,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const [user, setUser] = useState<SessionUser | null>(null);
-  const [tenant, setTenant] = useState<Tenant | null>(null);
+  const [tenant, setTenant] = useState<Organization | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchSession = useCallback(async () => {
@@ -66,7 +104,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         return;
       }
 
-      let activeTenant: Tenant | null = null;
+      let activeTenant: Organization | null = null;
       let userRole: string | null = null;
 
       const previousTenantSlug = localStorage.getItem("active_org_slug");
@@ -110,15 +148,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
             ? roleRes.value.data.role
             : null;
 
-        activeTenant = {
-          id: fullOrgData.id,
-          name: fullOrgData.name,
-          slug: fullOrgData.slug,
-          logo: fullOrgData.logo ?? undefined,
-          active: true,
-          createdAt: new Date(fullOrgData.createdAt),
-          updatedAt: new Date(fullOrgData.createdAt),
-        };
+        activeTenant = fullOrgData;
       } else {
         localStorage.removeItem("active_org_slug");
         clearPermissionCache();
@@ -141,7 +171,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     setUser(null);
     setTenant(null);
     localStorage.removeItem("active_org_slug");
-    clearPermissionCache(); // CRITICAL: Security reset
+    clearPermissionCache();
     setIsLoading(false);
   }, []);
 
