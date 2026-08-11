@@ -28,7 +28,7 @@ export const RegisterTenantPage: React.FC = () => {
   const navigate = useNavigate();
   const { client } = useStatsigClient();
   const alpha_release = client.checkGate("alpha_release");
-  const captchaEnabled = client.checkGate("captchaEnabled");
+  const captchaEnabled = client.checkGate("captcha_enabled");
 
   // Step state
   const [step, setStep] = useState(1);
@@ -49,7 +49,8 @@ export const RegisterTenantPage: React.FC = () => {
   const [isSuccess, setIsSuccess] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
 
-  const passwordMismatch = confirmPassword.length > 0 && adminPassword !== confirmPassword;
+  const passwordMismatch =
+    confirmPassword.length > 0 && adminPassword !== confirmPassword;
 
   // Validation per step
   const isStep1Valid = orgName.trim() !== "" && orgSlug.trim() !== "";
@@ -80,24 +81,30 @@ export const RegisterTenantPage: React.FC = () => {
 
     try {
       // 1. Sign up the admin user
-      const { error: signUpError } = await authClient.signUp.email({
+      const { error: signUpError, data } = await authClient.signUp.email({
         name: adminName.trim(),
         email: adminEmail.trim(),
         password: adminPassword,
-        fetchOptions: captchaEnabled && captchaToken ? {
-          headers: { "x-captcha-token": captchaToken },
-        } : undefined,
+        fetchOptions:
+          captchaEnabled && captchaToken
+            ? {
+                headers: { "x-captcha-token": captchaToken },
+              }
+            : undefined,
       });
 
-      if (signUpError) throw new Error(signUpError.message || "Falha ao criar conta.");
+      if (signUpError)
+        throw new Error(signUpError.message || "Falha ao criar conta.");
 
       // 2. Create the organization
       const { error: orgError } = await authClient.organization.create({
         name: orgName.trim(),
         slug: orgSlug.trim(),
+        userId: data.user.id,
       });
 
-      if (orgError) throw new Error(orgError.message || "Falha ao criar organização.");
+      if (orgError)
+        throw new Error(orgError.message || "Falha ao criar organização.");
 
       setIsLoading(false);
       setIsSuccess(true);
@@ -109,7 +116,9 @@ export const RegisterTenantPage: React.FC = () => {
         });
       }, 2000);
     } catch (err: any) {
-      setErrorMsg(err.message || "Falha ao criar organização. Tente novamente.");
+      setErrorMsg(
+        err.message || "Falha ao criar organização. Tente novamente.",
+      );
       setIsLoading(false);
       captchaRef.current?.reset();
       setCaptchaToken("");
@@ -185,7 +194,9 @@ export const RegisterTenantPage: React.FC = () => {
                 <div
                   key={s.num}
                   className={`flex items-center gap-1.5 text-xs font-bold transition-colors ${
-                    step >= s.num ? "text-m3-primary dark:text-m3-primary-light" : "text-slate-400 dark:text-slate-500"
+                    step >= s.num
+                      ? "text-m3-primary dark:text-m3-primary-light"
+                      : "text-slate-400 dark:text-slate-500"
                   }`}
                 >
                   <span
@@ -337,7 +348,12 @@ export const RegisterTenantPage: React.FC = () => {
                   )}
                 </div>
 
-                {captchaEnabled && <TurnstileWidget ref={captchaRef} onVerify={setCaptchaToken} />}
+                {captchaEnabled && (
+                  <TurnstileWidget
+                    ref={captchaRef}
+                    onVerify={setCaptchaToken}
+                  />
+                )}
 
                 <div className="flex items-start gap-3 p-3 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-100 dark:border-slate-700/60">
                   <input
@@ -422,4 +438,3 @@ export const RegisterTenantPage: React.FC = () => {
     </LoginLayout>
   );
 };
-
