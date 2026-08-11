@@ -47,7 +47,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchSession = useCallback(async () => {
-    const { data } = await authClient.getSession();
+    const { data } = await authClient.getSession({
+      query: { disableCookieCache: true },
+    });
     const sessionUser = (data?.user as SessionUser) ?? null;
     setUser(sessionUser);
 
