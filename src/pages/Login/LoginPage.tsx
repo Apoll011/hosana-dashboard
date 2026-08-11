@@ -5,7 +5,7 @@
 
 import { Button, Input } from "@hosanna/shared";
 import { useStatsigClient } from "@statsig/react-bindings";
-import { ArrowRight, Lock, Mail, Shield } from "lucide-react";
+import { ArrowRight, Lock, Mail } from "lucide-react";
 import React, { useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
@@ -97,7 +97,7 @@ export const LoginPage: React.FC = () => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             icon={<Mail className="w-4 h-4 opacity-40" />}
-            className="h-11 rounded-xl border-slate-200 focus:border-m3-primary transition-all text-sm"
+            className="h-11 rounded-xl border-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white focus:border-m3-primary transition-all text-sm"
           />
           <Input
             type="password"
@@ -106,23 +106,23 @@ export const LoginPage: React.FC = () => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             icon={<Lock className="w-4 h-4 opacity-40" />}
-            className="h-11 rounded-xl border-slate-200 focus:border-m3-primary transition-all text-sm"
+            className="h-11 rounded-xl border-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white focus:border-m3-primary transition-all text-sm"
           />
-          <label className="flex items-center gap-2 cursor-pointer">
+          <label className="flex items-center gap-2 cursor-pointer select-none">
             <input
               type="checkbox"
               checked={rememberMe}
               onChange={(e) => setRememberMe(e.target.checked)}
-              className="w-4 h-4 rounded border-slate-300 text-m3-primary focus:ring-m3-primary"
+              className="w-4 h-4 rounded border-slate-300 dark:border-slate-700 text-m3-primary focus:ring-m3-primary dark:bg-slate-800"
             />
-            <span className="text-sm text-slate-600">Lembrar-me</span>
+            <span className="text-sm text-slate-600 dark:text-slate-300">Lembrar-me</span>
           </label>
         </div>
 
         <div className="flex justify-end">
           <Link
             to="/forgot-password"
-            className="text-xs font-semibold text-m3-primary hover:underline"
+            className="text-xs font-semibold text-m3-primary dark:text-m3-primary-light hover:underline"
           >
             Esqueceu a palavra-passe?
           </Link>
@@ -145,4 +145,5 @@ export const LoginPage: React.FC = () => {
     </LoginLayout>
   );
 };
+
 
