@@ -101,6 +101,7 @@ export const RegisterPage: React.FC = () => {
       optionalLink="/login"
       optionalMsg="Já tem uma conta? Iniciar Sessão"
       errorMsg={errorMsg}
+      compactBranding
     >
       <form onSubmit={handleSubmit} className="space-y-3.5">
         <Input
