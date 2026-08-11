@@ -1,17 +1,16 @@
-import { Spinner } from "@hosanna/shared";
+import { configureApiClient, Spinner } from "@hosanna/shared";
 import { StatsigProvider, useClientAsyncInit } from "@statsig/react-bindings";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/react";
 import { useEffect } from "react";
 import { BrowserRouter } from "react-router-dom";
-import { CacheHydrationProvider } from "./contexts/CacheHydrationProvider";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import { CacheHydrationProvider } from "./contexts/CacheHydrationProvider";
 import { SyncProvider } from "./contexts/SyncContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { queryClient } from "./queryClient";
 import { AppRoutes } from "./routes/AppRoutes";
-
 
 function StatsigWrapper({ children }: { children: React.ReactNode }) {
   const { user, tenant, isLoading } = useAuth();
@@ -56,6 +55,11 @@ function StatsigWrapper({ children }: { children: React.ReactNode }) {
   );
 }
 export default function App() {
+  configureApiClient(
+    localStorage.getItem("server_url") ||
+      import.meta.env.VITE_API_URL ||
+      "/api",
+  );
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
