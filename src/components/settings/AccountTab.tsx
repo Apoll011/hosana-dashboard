@@ -3,271 +3,37 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect, useRef } from "react";
-import {
-  User,
-  Camera,
-  Trash2,
-  PenLine,
-  Save,
-  X,
-  KeyRound,
-  Mail,
-  Shield,
-  Info,
-  CheckCircle2,
-  Clock,
-  MonitorSmartphone,
-  Lock,
-  RefreshCw,
-  Loader2,
-  Check,
-} from "lucide-react";
-import { Button, Input, Modal } from "@hosanna/shared";
+import { Button, Input } from "@hosanna/shared";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { authClient } from "../../lib/authClient";
+import {
+  Camera,
+  CheckCircle2,
+  Info,
+  KeyRound,
+  Loader2,
+  Lock,
+  MonitorSmartphone,
+  PenLine,
+  RefreshCw,
+  Save,
+  Trash2,
+} from "lucide-react";
+import React, { useEffect, useRef, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { useSync } from "../../contexts/SyncContext";
-import { getRoleBadge, compressImage } from "./settingsUtils";
-
-const TwoFactorSection: React.FC = () => {
-  const { user, refetch: refetchAuth } = useAuth();
-  const { showToast } = useSync();
-  const is2FAEnabled = (user as any)?.twoFactorEnabled || false;
-
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [password, setPassword] = useState("");
-  const [totpURI, setTotpURI] = useState("");
-  const [backupCodes, setBackupCodes] = useState<string[]>([]);
-  const [verificationCode, setVerificationCode] = useState("");
-  const [step, setStep] = useState<"password" | "verify" | "disable">("password");
-  const [isLoading, setIsLoading] = useState(false);
-
-  const handleEnable2FA = async () => {
-    if (!password) {
-      showToast("Por favor insira a palavra-passe.", "error");
-      return;
-    }
-    setIsLoading(true);
-    try {
-      const { data, error } = await authClient.twoFactor.enable({ password });
-      if (error) {
-        showToast(error.message || "Erro ao ativar 2FA", "error");
-      } else if (data) {
-        setTotpURI(data.totpURI);
-        setBackupCodes(data.backupCodes || []);
-        setStep("verify");
-      }
-    } catch (err: any) {
-      showToast(err.message || "Erro ao ativar 2FA", "error");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleVerify2FA = async () => {
-    if (!verificationCode) {
-      showToast("Por favor insira o código de verificação.", "error");
-      return;
-    }
-    setIsLoading(true);
-    try {
-      const { error } = await authClient.twoFactor.verifyTotp({
-        code: verificationCode,
-        trustDevice: true,
-      });
-      if (error) {
-        showToast(error.message || "Código inválido", "error");
-      } else {
-        showToast("Autenticação em 2 Etapas ativada com sucesso!", "success");
-        await refetchAuth();
-        closeModal();
-      }
-    } catch (err: any) {
-      showToast(err.message || "Erro ao verificar código", "error");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleDisable2FA = async () => {
-    if (!password) {
-      showToast("Por favor insira a palavra-passe.", "error");
-      return;
-    }
-    setIsLoading(true);
-    try {
-      const { error } = await authClient.twoFactor.disable({ password });
-      if (error) {
-        showToast(error.message || "Erro ao desativar 2FA", "error");
-      } else {
-        showToast("Autenticação em 2 Etapas desativada.", "success");
-        await refetchAuth();
-        closeModal();
-      }
-    } catch (err: any) {
-      showToast(err.message || "Erro ao desativar 2FA", "error");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const closeModal = () => {
-    setIsModalOpen(false);
-    setPassword("");
-    setTotpURI("");
-    setBackupCodes([]);
-    setVerificationCode("");
-    setStep("password");
-  };
-
-  return (
-    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs">
-      <div className="flex items-center justify-between">
-        <div>
-          <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-            <Shield className="w-4 h-4 text-m3-primary" />
-            Autenticação em 2 Etapas (2FA)
-          </h3>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-            Adicione uma camada extra de segurança à sua conta com um código temporário.
-          </p>
-        </div>
-        <button
-          onClick={() => {
-            setStep(is2FAEnabled ? "disable" : "password");
-            setIsModalOpen(true);
-          }}
-          className={`px-3 py-1.5 text-xs font-bold rounded-xl transition-all cursor-pointer ${
-            is2FAEnabled
-              ? "bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-950/40 dark:text-red-400 border border-red-200 dark:border-red-900/50"
-              : "bg-m3-primary text-white hover:bg-m3-primary-dark shadow-xs"
-          }`}
-        >
-          {is2FAEnabled ? "Desativar 2FA" : "Ativar 2FA"}
-        </button>
-      </div>
-
-      <Modal
-        isOpen={isModalOpen}
-        onClose={closeModal}
-        title={is2FAEnabled ? "Desativar 2FA" : "Configurar 2FA"}
-      >
-        <div className="space-y-4 py-2">
-          {step === "password" && (
-            <>
-              <p className="text-xs text-slate-600 dark:text-slate-400">
-                Para ativar a verificação em duas etapas, confirme a sua palavra-passe atual:
-              </p>
-              <Input
-                type="password"
-                label="Palavra-passe"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-              <div className="flex justify-end gap-2 pt-2">
-                <Button variant="outline" size="sm" onClick={closeModal}>
-                  Cancelar
-                </Button>
-                <Button
-                  variant="primary"
-                  size="sm"
-                  isLoading={isLoading}
-                  onClick={handleEnable2FA}
-                >
-                  Continuar
-                </Button>
-              </div>
-            </>
-          )}
-
-          {step === "verify" && (
-            <>
-              <p className="text-xs text-slate-600 dark:text-slate-400">
-                Digitalize o código QR ou introduza o segredo no seu aplicativo autenticador e introduza o código de 6 dígitos:
-              </p>
-
-              {totpURI && (
-                <div className="p-3 bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-200 dark:border-slate-800 break-all text-[11px] font-mono text-slate-700 dark:text-slate-300">
-                  {totpURI}
-                </div>
-              )}
-
-              {backupCodes.length > 0 && (
-                <div className="bg-slate-50 dark:bg-slate-950 p-3 rounded-xl border border-slate-200 dark:border-slate-800">
-                  <p className="text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                    Códigos de Recuperação (Guarde num local seguro):
-                  </p>
-                  <div className="grid grid-cols-2 gap-1 font-mono text-[11px] text-slate-600 dark:text-slate-400">
-                    {backupCodes.map((code, idx) => (
-                      <span key={idx}>{code}</span>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              <Input
-                type="text"
-                label="Código de Verificação (6 dígitos)"
-                placeholder="123456"
-                value={verificationCode}
-                onChange={(e) => setVerificationCode(e.target.value)}
-              />
-
-              <div className="flex justify-end gap-2 pt-2">
-                <Button variant="outline" size="sm" onClick={closeModal}>
-                  Cancelar
-                </Button>
-                <Button
-                  variant="primary"
-                  size="sm"
-                  isLoading={isLoading}
-                  onClick={handleVerify2FA}
-                >
-                  Confirmar e Ativar
-                </Button>
-              </div>
-            </>
-          )}
-
-          {step === "disable" && (
-            <>
-              <p className="text-xs text-slate-600 dark:text-slate-400">
-                Para desativar a verificação em duas etapas, confirme a sua palavra-passe:
-              </p>
-              <Input
-                type="password"
-                label="Palavra-passe"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-              <div className="flex justify-end gap-2 pt-2">
-                <Button variant="outline" size="sm" onClick={closeModal}>
-                  Cancelar
-                </Button>
-                <Button
-                  variant="primary"
-                  size="sm"
-                  isLoading={isLoading}
-                  onClick={handleDisable2FA}
-                  className="bg-red-600 hover:bg-red-700 text-white border-0"
-                >
-                  Desativar 2FA
-                </Button>
-              </div>
-            </>
-          )}
-        </div>
-      </Modal>
-    </div>
-  );
-};
+import { authClient } from "../../lib/authClient";
+import { compressImage, getRoleBadge } from "./settingsUtils";
+import { TwoFactorSection } from "./TwoFactor";
 
 const ActiveSessionsSection: React.FC = () => {
   const { showToast } = useSync();
   const queryClient = useQueryClient();
 
-  const { data: sessions, refetch, isLoading } = useQuery({
+  const {
+    data: sessions,
+    refetch,
+    isLoading,
+  } = useQuery({
     queryKey: ["activeSessions"],
     queryFn: async () => {
       try {
@@ -312,8 +78,8 @@ const ActiveSessionsSection: React.FC = () => {
 
       {isLoading ? (
         <div className="py-6 text-center text-xs text-slate-400 flex items-center justify-center gap-2">
-          <Loader2 className="w-4 h-4 animate-spin text-m3-primary" />
-          A carregar sessões...
+          <Loader2 className="w-4 h-4 animate-spin text-m3-primary" />A carregar
+          sessões...
         </div>
       ) : sessions && sessions.length > 0 ? (
         <div className="space-y-3">
@@ -392,14 +158,17 @@ export const AccountTab: React.FC<{ active: boolean }> = ({ active }) => {
       const compressedBase64 = await compressImage(file, 800, 0.8);
 
       setDisplayUser((prev) =>
-        prev ? { ...prev, image: compressedBase64 } : prev
+        prev ? { ...prev, image: compressedBase64 } : prev,
       );
 
       await authClient.updateUser({ image: compressedBase64 });
       await refetchAuth();
       showToast("Avatar atualizado com sucesso!", "success");
     } catch (err: any) {
-      showToast("Erro ao atualizar o avatar: " + (err.message || "Erro de rede"), "error");
+      showToast(
+        "Erro ao atualizar o avatar: " + (err.message || "Erro de rede"),
+        "error",
+      );
     } finally {
       setIsCompressingAvatar(false);
       e.target.value = "";
@@ -447,7 +216,10 @@ export const AccountTab: React.FC<{ active: boolean }> = ({ active }) => {
       await refetchAuth();
       showToast("Pedido de alteração de e-mail enviado!", "success");
     } catch (err: any) {
-      showToast("Erro ao alterar o e-mail: " + (err.message || "Tente novamente"), "error");
+      showToast(
+        "Erro ao alterar o e-mail: " + (err.message || "Tente novamente"),
+        "error",
+      );
     }
   };
 
@@ -457,7 +229,10 @@ export const AccountTab: React.FC<{ active: boolean }> = ({ active }) => {
       return;
     }
     if (draftNewPassword.length < 6) {
-      showToast("A nova palavra-passe deve ter pelo menos 6 caracteres.", "error");
+      showToast(
+        "A nova palavra-passe deve ter pelo menos 6 caracteres.",
+        "error",
+      );
       return;
     }
     if (draftNewPassword !== draftConfirmPassword) {
@@ -478,7 +253,11 @@ export const AccountTab: React.FC<{ active: boolean }> = ({ active }) => {
       setDraftNewPassword("");
       setDraftConfirmPassword("");
     } catch (err: any) {
-      showToast("Erro ao alterar palavra-passe: " + (err.message || "Verifique a palavra-passe atual"), "error");
+      showToast(
+        "Erro ao alterar palavra-passe: " +
+          (err.message || "Verifique a palavra-passe atual"),
+        "error",
+      );
     }
   };
 
@@ -502,7 +281,10 @@ export const AccountTab: React.FC<{ active: boolean }> = ({ active }) => {
               <div className="w-16 h-16 rounded-full bg-linear-to-tr from-sky-600 to-indigo-600 flex items-center justify-center font-black text-white text-xl overflow-hidden shadow-md">
                 {displayUser?.image || (displayUser as any)?.logo ? (
                   <img
-                    src={(displayUser?.image || (displayUser as any)?.logo) as string}
+                    src={
+                      (displayUser?.image ||
+                        (displayUser as any)?.logo) as string
+                    }
                     alt={displayUser?.name}
                     className="w-full h-full object-cover"
                   />
