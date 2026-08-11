@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { useCan } from "@/src/lib/permissions/client";
 import { Can, CanAny } from "@/src/lib/permissions/components";
 import { Button, Input, settingsApi } from "@hosanna/shared";
 import {
@@ -49,13 +50,18 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
   const [draftName, setDraftName] = useState(currentName);
   const [draftLogo, setDraftLogo] = useState<string | undefined>(currentLogo);
 
+  const [canManageOrg, setCanManageOrg] = useState<boolean>(false);
+
   const [isCompressing, setIsCompressing] = useState(false);
   const [isSavingTenant, setIsSavingTenant] = useState(false);
-  const [showRemoveLogoConfirm, setShowRemoveLogoConfirm] = useState(false);
 
-  // RBAC Role Check
-  const userRole = (user as any)?.role || "member";
-  const canManageOrg = ["owner", "admin"].includes(userRole.toLowerCase());
+  const { granted, loading: canLoading } = useCan("organization.update");
+
+  useEffect(() => {
+    if (!canLoading) {
+      setCanManageOrg(granted);
+    }
+  }, [granted, canLoading]);
 
   useEffect(() => {
     if (tenant) {
