@@ -4,6 +4,7 @@
  */
 
 import React, { forwardRef, useEffect, useImperativeHandle, useRef } from "react";
+import { useTheme } from "../../../contexts/ThemeContext";
 
 const TURNSTILE_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY || "1x00000000000000000000AA";
 
@@ -28,6 +29,7 @@ export const TurnstileWidget = forwardRef<{ reset: () => void }, TurnstileWidget
   ({ onVerify, onExpire, onError }, ref) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const widgetIdRef = useRef<string | null>(null);
+    const { darkMode } = useTheme();
 
     const renderWidget = () => {
       if (!containerRef.current || !window.turnstile) return;
@@ -37,7 +39,7 @@ export const TurnstileWidget = forwardRef<{ reset: () => void }, TurnstileWidget
       }
       widgetIdRef.current = window.turnstile.render(containerRef.current, {
         sitekey: TURNSTILE_SITE_KEY,
-        theme: "light",
+        theme: darkMode ? "dark" : "light",
         callback: onVerify,
         "expired-callback": () => { onExpire?.(); },
         "error-callback": () => { onError?.(); },
@@ -67,7 +69,7 @@ export const TurnstileWidget = forwardRef<{ reset: () => void }, TurnstileWidget
           widgetIdRef.current = null;
         }
       };
-    }, []);
+    }, [darkMode]);
 
     useImperativeHandle(ref, () => ({
       reset: () => {
@@ -84,5 +86,6 @@ export const TurnstileWidget = forwardRef<{ reset: () => void }, TurnstileWidget
     );
   }
 );
+
 
 TurnstileWidget.displayName = "TurnstileWidget";

@@ -135,7 +135,7 @@ export const RegisterTenantPage: React.FC = () => {
         titleMb={2}
       >
         <div className="py-12 flex flex-col items-center justify-center text-center animate-in zoom-in-95 duration-500">
-          <h2 className="text-2xl font-black text-slate-900 mb-2">
+          <h2 className="text-2xl font-black text-slate-900 dark:text-white mb-2">
             Registro de organizações ainda não está ativo, Espere até o Alpha
             Release no dia 1 de Setembro
           </h2>
@@ -154,22 +154,22 @@ export const RegisterTenantPage: React.FC = () => {
       {isSuccess ? (
         <div className="py-12 flex flex-col items-center justify-center text-center animate-in zoom-in-95 duration-500">
           <div className="relative w-24 h-24 mb-6">
-            <div className="absolute inset-0 bg-emerald-100 rounded-full animate-ping opacity-75" />
+            <div className="absolute inset-0 bg-emerald-100 dark:bg-emerald-900/40 rounded-full animate-ping opacity-75" />
             <div className="relative flex items-center justify-center w-24 h-24 bg-emerald-500 text-white rounded-full shadow-lg shadow-emerald-500/30">
               <CheckCircle2 className="w-12 h-12 animate-in zoom-in duration-300 delay-150" />
             </div>
           </div>
-          <h2 className="text-2xl font-black text-slate-900 mb-2">
+          <h2 className="text-2xl font-black text-slate-900 dark:text-white mb-2">
             Tudo Pronto!
           </h2>
-          <p className="text-slate-500 font-medium">
+          <p className="text-slate-500 dark:text-slate-400 font-medium">
             A redirecionar para o login...
           </p>
         </div>
       ) : (
         <>
           <div className="text-center mb-4">
-            <h2 className="font-display font-black text-2xl sm:text-3xl tracking-tight text-slate-900">
+            <h2 className="font-display font-black text-2xl sm:text-3xl tracking-tight text-slate-900 dark:text-white">
               Criar Organização
             </h2>
           </div>
@@ -185,14 +185,14 @@ export const RegisterTenantPage: React.FC = () => {
                 <div
                   key={s.num}
                   className={`flex items-center gap-1.5 text-xs font-bold transition-colors ${
-                    step >= s.num ? "text-m3-primary" : "text-slate-400"
+                    step >= s.num ? "text-m3-primary dark:text-m3-primary-light" : "text-slate-400 dark:text-slate-500"
                   }`}
                 >
                   <span
                     className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black transition-all ${
                       step >= s.num
                         ? "bg-m3-primary text-white shadow-sm"
-                        : "bg-slate-200 text-slate-500"
+                        : "bg-slate-200 dark:bg-slate-800 text-slate-500 dark:text-slate-400"
                     }`}
                   >
                     {s.num}
@@ -208,7 +208,7 @@ export const RegisterTenantPage: React.FC = () => {
                     className={`h-1.5 rounded-full transition-all duration-500 ${
                       step >= i
                         ? "bg-m3-primary shadow-[0_0_10px_rgba(var(--m3-primary-rgb),0.4)]"
-                        : "bg-slate-200"
+                        : "bg-slate-200 dark:bg-slate-800"
                     }`}
                   />
                 </div>
@@ -222,10 +222,10 @@ export const RegisterTenantPage: React.FC = () => {
             {step === 1 && (
               <div className="space-y-4 animate-in slide-in-from-right-4 fade-in duration-300">
                 <div className="mb-2">
-                  <h3 className="text-lg font-bold text-slate-800">
+                  <h3 className="text-lg font-bold text-slate-800 dark:text-slate-200">
                     Dados da Igreja
                   </h3>
-                  <p className="text-xs text-slate-500">
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
                     Como se chama a sua comunidade?
                   </p>
                 </div>
@@ -237,7 +237,7 @@ export const RegisterTenantPage: React.FC = () => {
                   onChange={(e) => setOrgName(e.target.value)}
                   icon={<Building2 className="w-4 h-4 opacity-40" />}
                   autoFocus
-                  className="h-12 rounded-xl border-slate-200 focus:border-m3-primary text-sm bg-slate-50 focus:bg-white transition-colors"
+                  className="h-12 rounded-xl border-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white focus:border-m3-primary text-sm transition-colors"
                 />
                 <Input
                   type="text"
@@ -250,7 +250,7 @@ export const RegisterTenantPage: React.FC = () => {
                     )
                   }
                   icon={<LinkIcon className="w-4 h-4 opacity-40" />}
-                  className="h-12 rounded-xl border-slate-200 focus:border-m3-primary text-sm bg-slate-50 focus:bg-white transition-colors"
+                  className="h-12 rounded-xl border-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white focus:border-m3-primary text-sm transition-colors"
                 />
               </div>
             )}
@@ -259,10 +259,10 @@ export const RegisterTenantPage: React.FC = () => {
             {step === 2 && (
               <div className="space-y-4 animate-in slide-in-from-right-4 fade-in duration-300">
                 <div className="mb-2">
-                  <h3 className="text-lg font-bold text-slate-800">
+                  <h3 className="text-lg font-bold text-slate-800 dark:text-slate-200">
                     Perfil de Administrador
                   </h3>
-                  <p className="text-xs text-slate-500">
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
                     Quem vai gerir a plataforma?
                   </p>
                 </div>
@@ -274,7 +274,7 @@ export const RegisterTenantPage: React.FC = () => {
                   onChange={(e) => setAdminName(e.target.value)}
                   icon={<User className="w-4 h-4 opacity-40" />}
                   autoFocus
-                  className="h-12 rounded-xl border-slate-200 focus:border-m3-primary text-sm bg-slate-50 focus:bg-white transition-colors"
+                  className="h-12 rounded-xl border-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white focus:border-m3-primary text-sm transition-colors"
                 />
                 <Input
                   type="email"
@@ -283,7 +283,7 @@ export const RegisterTenantPage: React.FC = () => {
                   value={adminEmail}
                   onChange={(e) => setAdminEmail(e.target.value)}
                   icon={<Mail className="w-4 h-4 opacity-40" />}
-                  className="h-12 rounded-xl border-slate-200 focus:border-m3-primary text-sm bg-slate-50 focus:bg-white transition-colors"
+                  className="h-12 rounded-xl border-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white focus:border-m3-primary text-sm transition-colors"
                 />
               </div>
             )}
@@ -292,10 +292,10 @@ export const RegisterTenantPage: React.FC = () => {
             {step === 3 && (
               <div className="space-y-4 animate-in slide-in-from-right-4 fade-in duration-300">
                 <div className="mb-2">
-                  <h3 className="text-lg font-bold text-slate-800">
+                  <h3 className="text-lg font-bold text-slate-800 dark:text-slate-200">
                     Segurança
                   </h3>
-                  <p className="text-xs text-slate-500">
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
                     Proteja a sua conta com uma senha forte.
                   </p>
                 </div>
@@ -309,7 +309,7 @@ export const RegisterTenantPage: React.FC = () => {
                     onChange={(e) => setAdminPassword(e.target.value)}
                     icon={<Lock className="w-4 h-4 opacity-40" />}
                     autoFocus
-                    className="h-12 rounded-xl border-slate-200 focus:border-m3-primary text-sm bg-slate-50 focus:bg-white transition-colors"
+                    className="h-12 rounded-xl border-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white focus:border-m3-primary text-sm transition-colors"
                   />
                   {adminPassword.length > 0 && (
                     <PasswordStrengthMeter password={adminPassword} />
@@ -324,14 +324,14 @@ export const RegisterTenantPage: React.FC = () => {
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     icon={<Lock className="w-4 h-4 opacity-40" />}
-                    className={`h-12 rounded-xl text-sm bg-slate-50 focus:bg-white transition-colors ${
+                    className={`h-12 rounded-xl dark:bg-slate-800 dark:text-white text-sm transition-colors ${
                       passwordMismatch
                         ? "border-rose-400 focus:border-rose-500"
-                        : "border-slate-200 focus:border-m3-primary"
+                        : "border-slate-200 dark:border-slate-700 focus:border-m3-primary"
                     }`}
                   />
                   {passwordMismatch && (
-                    <p className="text-xs font-semibold text-rose-500 pl-1 animate-in fade-in">
+                    <p className="text-xs font-semibold text-rose-500 dark:text-rose-400 pl-1 animate-in fade-in">
                       As palavras-passe não coincidem
                     </p>
                   )}
@@ -339,29 +339,29 @@ export const RegisterTenantPage: React.FC = () => {
 
                 {captchaEnabled && <TurnstileWidget ref={captchaRef} onVerify={setCaptchaToken} />}
 
-                <div className="flex items-start gap-3 p-3 bg-slate-50 rounded-xl border border-slate-100">
+                <div className="flex items-start gap-3 p-3 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-100 dark:border-slate-700/60">
                   <input
                     type="checkbox"
                     id="terms"
                     checked={agreedToTerms}
                     onChange={(e) => setAgreedToTerms(e.target.checked)}
-                    className="mt-0.5 w-4 h-4 rounded border-slate-300 text-m3-primary focus:ring-m3-primary cursor-pointer transition-all"
+                    className="mt-0.5 w-4 h-4 rounded border-slate-300 dark:border-slate-700 text-m3-primary focus:ring-m3-primary dark:bg-slate-800 cursor-pointer transition-all"
                   />
                   <label
                     htmlFor="terms"
-                    className="text-xs text-slate-600 leading-relaxed cursor-pointer select-none"
+                    className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed cursor-pointer select-none"
                   >
                     Concordo com os{" "}
                     <a
                       href="#"
-                      className="font-bold text-m3-primary hover:underline"
+                      className="font-bold text-m3-primary dark:text-m3-primary-light hover:underline"
                     >
                       Termos de Serviço
                     </a>{" "}
                     e a{" "}
                     <a
                       href="#"
-                      className="font-bold text-m3-primary hover:underline"
+                      className="font-bold text-m3-primary dark:text-m3-primary-light hover:underline"
                     >
                       Política de Privacidade
                     </a>
@@ -379,7 +379,7 @@ export const RegisterTenantPage: React.FC = () => {
                 type="button"
                 onClick={handleBack}
                 variant="outline"
-                className="h-12 px-5 rounded-xl border-slate-200 text-slate-600 hover:bg-slate-50 transition-all font-semibold"
+                className="h-12 px-5 rounded-xl border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all font-semibold"
                 disabled={isLoading}
               >
                 <ArrowLeft className="w-4 h-4" />
@@ -422,3 +422,4 @@ export const RegisterTenantPage: React.FC = () => {
     </LoginLayout>
   );
 };
+

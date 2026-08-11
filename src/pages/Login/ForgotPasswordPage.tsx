@@ -4,13 +4,16 @@
  */
 
 import { Button, Input } from "@hosanna/shared";
-import { ArrowRight, CheckCircle2, KeyRound, Mail } from "lucide-react";
+import { ArrowRight, CheckCircle2, KeyRound, Mail, ShieldCheck } from "lucide-react";
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { authClient } from "../../lib/authClient";
 import LoginLayout from "./Layout";
 
 export const ForgotPasswordPage: React.FC = () => {
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
+  const [mode, setMode] = useState<"link" | "code">("link");
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [sent, setSent] = useState(false);
@@ -20,6 +23,24 @@ export const ForgotPasswordPage: React.FC = () => {
     if (!email.trim()) { setErrorMsg("Insira o seu endereço de e-mail."); return; }
     setErrorMsg("");
     setIsLoading(true);
+
+    if (mode === "code") {
+      // Send OTP code for password recovery / email verification
+      const { error } = await authClient.sendVerificationEmail({
+        email: email.trim(),
+        callbackURL: `${window.location.origin}/reset-password`,
+      });
+      setIsLoading(false);
+
+      if (error) {
+        setErrorMsg(error.message || "Erro ao enviar código de recuperação.");
+        return;
+      }
+
+      // Navigate directly to reset-password with email in state
+      navigate("/reset-password", { state: { email: email.trim(), mode: "code" } });
+      return;
+    }
 
     const { error } = await (authClient as any).forgetPassword({
       email: email.trim(),
@@ -38,15 +59,15 @@ export const ForgotPasswordPage: React.FC = () => {
     return (
       <LoginLayout optionalLink="/login" optionalMsg="← Voltar ao login">
         <div className="py-8 flex flex-col items-center text-center gap-4 animate-in zoom-in-95 duration-500">
-          <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center">
-            <CheckCircle2 className="w-10 h-10 text-emerald-500" />
+          <div className="w-20 h-20 bg-emerald-100 dark:bg-emerald-900/40 rounded-full flex items-center justify-center">
+            <CheckCircle2 className="w-10 h-10 text-emerald-500 dark:text-emerald-400" />
           </div>
           <div>
-            <h2 className="text-xl font-black text-slate-900">E-mail Enviado!</h2>
-            <p className="text-sm text-slate-500 mt-2 max-w-xs mx-auto">
-              Se existe uma conta com{" "}
-              <span className="font-bold text-slate-700">{email}</span>, receberá
-              um e-mail com o link para redefinir a palavra-passe.
+            <h2 className="text-xl font-black text-slate-900 dark:text-white">E-mail Enviado!</h2>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mt-2 max-w-xs mx-auto leading-relaxed">
+              Se existe uma conta associada a{" "}
+              <span className="font-bold text-slate-700 dark:text-slate-200">{email}</span>, receberá
+              um e-mail com as instruções para redefinir a palavra-passe.
             </p>
           </div>
         </div>
@@ -60,14 +81,42 @@ export const ForgotPasswordPage: React.FC = () => {
       optionalMsg="← Voltar ao login"
       errorMsg={errorMsg}
     >
-      <div className="flex flex-col items-center mb-5">
-        <div className="w-14 h-14 bg-m3-primary/10 rounded-2xl flex items-center justify-center mb-3">
-          <KeyRound className="w-7 h-7 text-m3-primary" />
+      <div className="flex flex-col items-center mb-4">
+        <div className="w-14 h-14 bg-m3-primary/10 dark:bg-m3-primary/20 rounded-2xl flex items-center justify-center mb-3">
+          <KeyRound className="w-7 h-7 text-m3-primary dark:text-m3-primary-light" />
         </div>
-        <h2 className="font-display font-black text-xl text-slate-900">Esqueceu a palavra-passe?</h2>
-        <p className="text-xs text-slate-500 mt-1 text-center max-w-xs">
-          Introduza o seu e-mail e enviaremos um link para redefinir a sua palavra-passe.
+        <h2 className="font-display font-black text-xl text-slate-900 dark:text-white">Esqueceu a palavra-passe?</h2>
+        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 text-center max-w-xs">
+          Escolha como prefere recuperar o acesso à sua conta
         </p>
+      </div>
+
+      {/* Mode Switcher */}
+      <div className="flex rounded-xl bg-slate-100 dark:bg-slate-800/80 p-1 mb-4 border border-slate-200/60 dark:border-slate-700/60">
+        <button
+          type="button"
+          onClick={() => setMode("link")}
+          className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-2 rounded-lg text-xs font-bold transition-all ${
+            mode === "link"
+              ? "bg-white dark:bg-slate-900 text-m3-primary dark:text-m3-primary-light shadow-sm"
+              : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
+          }`}
+        >
+          <Mail className="w-3.5 h-3.5" />
+          <span>Link Mágico</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => setMode("code")}
+          className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-2 rounded-lg text-xs font-bold transition-all ${
+            mode === "code"
+              ? "bg-white dark:bg-slate-900 text-m3-primary dark:text-m3-primary-light shadow-sm"
+              : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
+          }`}
+        >
+          <ShieldCheck className="w-3.5 h-3.5" />
+          <span>Código OTP</span>
+        </button>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -78,7 +127,7 @@ export const ForgotPasswordPage: React.FC = () => {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           icon={<Mail className="w-4 h-4 opacity-40" />}
-          className="h-11 rounded-xl border-slate-200 focus:border-m3-primary transition-all text-sm"
+          className="h-11 rounded-xl border-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white focus:border-m3-primary transition-all text-sm"
         />
 
         <Button
@@ -87,10 +136,11 @@ export const ForgotPasswordPage: React.FC = () => {
           isLoading={isLoading}
           className="w-full h-14 bg-m3-primary hover:bg-m3-primary-dark border-0 font-black uppercase tracking-widest text-[10px] text-white rounded-[20px] transition-all shadow-xl shadow-m3-primary/20 hover:shadow-m3-primary/40 flex items-center justify-center gap-2 group"
         >
-          <span>Enviar Link de Recuperação</span>
+          <span>{mode === "code" ? "Enviar Código de Recuperação" : "Enviar Link de Recuperação"}</span>
           <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
         </Button>
       </form>
     </LoginLayout>
   );
 };
+
