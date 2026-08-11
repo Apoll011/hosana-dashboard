@@ -55,63 +55,72 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const fetchSession = useCallback(async () => {
     const { data } = await authClient.getSession();
-    const { data: dataRole } =
-      await authClient.organization.getActiveMemberRole();
     const sessionUser = data?.user ?? null;
 
-    const sessionUserWithRole = sessionUser
-      ? ({
-          ...sessionUser,
-          role: dataRole?.role ?? null,
-        } as SessionUser)
-      : null;
-
-    setUser(sessionUserWithRole);
-
-    // Fetch active organization if user exists
-    if (sessionUser) {
-      try {
-        let { data: orgData } =
-          await authClient.organization.getFullOrganization();
-
-        // If no active organization in session, search user organizations and set the first one as active
-        if (!orgData) {
-          const { data: orgs } = await authClient.organization.list();
-          const storedSlug = localStorage.getItem("active_org_slug");
-
-          let targetOrg = orgs?.find((o) => o.slug === storedSlug) || orgs?.[0];
-
-          if (targetOrg) {
-            await authClient.organization.setActive({
-              organizationSlug: targetOrg.slug,
-            });
-            const fullRes = await authClient.organization.getFullOrganization();
-            orgData = fullRes.data ?? (targetOrg as any);
-          }
-        }
-
-        if (orgData) {
-          localStorage.setItem("active_org_slug", orgData.slug);
-          setTenant({
-            id: orgData.id,
-            name: orgData.name,
-            slug: orgData.slug,
-            logo: orgData.logo ?? undefined,
-            active: true,
-            createdAt: new Date(orgData.createdAt),
-            updatedAt: new Date(orgData.createdAt),
-          });
-        } else {
-          localStorage.removeItem("active_org_slug");
-          setTenant(null);
-        }
-      } catch {
-        setTenant(null);
-      }
-    } else {
-      localStorage.removeItem("active_org_slug");
+    if (!sessionUser) {
+      setUser(null);
       setTenant(null);
+      localStorage.removeItem("active_org_slug");
+      setIsLoading(false);
+      return;
     }
+
+    let activeTenant: Tenant | null = null;
+
+    try {
+      let { data: orgData } =
+        await authClient.organization.getFullOrganization();
+
+      // If no active organization in session, search user organizations and set target as active
+      if (!orgData) {
+        const { data: orgs } = await authClient.organization.list();
+        const storedSlug = localStorage.getItem("active_org_slug");
+
+        let targetOrg = orgs?.find((o) => o.slug === storedSlug) || orgs?.[0];
+
+        if (targetOrg) {
+          await authClient.organization.setActive({
+            organizationSlug: targetOrg.slug,
+          });
+          const fullRes = await authClient.organization.getFullOrganization();
+          orgData = fullRes.data ?? (targetOrg as any);
+        }
+      }
+
+      if (orgData) {
+        localStorage.setItem("active_org_slug", orgData.slug);
+        activeTenant = {
+          id: orgData.id,
+          name: orgData.name,
+          slug: orgData.slug,
+          logo: orgData.logo ?? undefined,
+          active: true,
+          createdAt: new Date(orgData.createdAt),
+          updatedAt: new Date(orgData.createdAt),
+        };
+      } else {
+        localStorage.removeItem("active_org_slug");
+      }
+    } catch {
+      activeTenant = null;
+    }
+
+    setTenant(activeTenant);
+
+    // Fetch member role AFTER organization is active
+    let userRole: string | null = null;
+    try {
+      const { data: dataRole } =
+        await authClient.organization.getActiveMemberRole();
+      userRole = dataRole?.role ?? null;
+    } catch {
+      userRole = null;
+    }
+
+    setUser({
+      ...sessionUser,
+      role: userRole ?? undefined,
+    } as SessionUser);
 
     setIsLoading(false);
   }, []);
