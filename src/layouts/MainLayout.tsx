@@ -231,7 +231,7 @@ const FolderTreeItemNode = React.memo(
         {hasChildren && isExpanded && (
           <div className="flex flex-col w-full gap-1 mt-1">
             {node.children.map((child) => (
-              <FolderTreeItem
+              <FolderTreeItemNode
                 key={child.folder.id}
                 node={child}
                 currentFolderId={currentFolderId}
@@ -2230,7 +2230,7 @@ export const MainLayout: React.FC = () => {
 
               <div className="flex-1 overflow-y-auto flex flex-col gap-1 pr-1 custom-scrollbar">
                 {folderTree.map((node) => (
-                  <FolderTreeItem
+                  <FolderTreeItemNode
                     key={node.folder.id}
                     node={node}
                     currentFolderId={currentFolderId}
