@@ -4,9 +4,11 @@
  */
 
 import { Button, Input } from "@hosanna/shared";
+import { useStatsigClient } from "@statsig/react-bindings";
 import { ArrowRight, Lock, Mail, Shield } from "lucide-react";
 import React, { useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "../../contexts/AuthContext";
 import { authClient } from "../../lib/authClient";
 import LoginLayout from "./Layout";
 import { TurnstileWidget } from "./components/TurnstileWidget";
@@ -15,6 +17,7 @@ export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const redirectMessage = (location.state as any)?.message || "";
+  const { refetch } = useAuth();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -26,13 +29,16 @@ export const LoginPage: React.FC = () => {
   const [otpError, setOtpError] = useState("");
   const captchaRef = useRef<{ reset: () => void }>(null);
 
+  const { client } = useStatsigClient();
+  const captchaEnabled = client.checkGate("captchaEnabled");
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email.trim() || !password.trim()) {
       setErrorMsg("Por favor, insira o seu e-mail e a sua palavra-passe");
       return;
     }
-    if (!captchaToken) {
+    if (captchaEnabled && !captchaToken) {
       setErrorMsg("Por favor complete o CAPTCHA");
       return;
     }
@@ -42,9 +48,9 @@ export const LoginPage: React.FC = () => {
     const { data, error } = await authClient.signIn.email({
       email: email.trim(),
       password,
-      fetchOptions: {
+      fetchOptions: captchaEnabled && captchaToken ? {
         headers: { "x-captcha-token": captchaToken },
-      },
+      } : undefined,
     });
 
     setIsLoading(false);
@@ -65,6 +71,8 @@ export const LoginPage: React.FC = () => {
       return;
     }
 
+    // Refresh session state immediately so ProtectedRoute recognizes authentication
+    await refetch();
     navigate("/songs", { replace: true });
   };
 
@@ -81,6 +89,7 @@ export const LoginPage: React.FC = () => {
       setOtpError(error.message || "Código inválido");
       return;
     }
+    await refetch();
     navigate("/songs", { replace: true });
   };
 
@@ -154,10 +163,12 @@ export const LoginPage: React.FC = () => {
           </Link>
         </div>
 
-        <TurnstileWidget
-          ref={captchaRef}
-          onVerify={setCaptchaToken}
-        />
+        {captchaEnabled && (
+          <TurnstileWidget
+            ref={captchaRef}
+            onVerify={setCaptchaToken}
+          />
+        )}
 
         <Button
           type="submit"

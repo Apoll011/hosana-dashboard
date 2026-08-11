@@ -4,14 +4,20 @@
  */
 
 import { Button, Input } from "@hosanna/shared";
+import { useStatsigClient } from "@statsig/react-bindings";
 import { ArrowRight, CheckCircle2, Lock, Mail, User } from "lucide-react";
 import React, { useRef, useState } from "react";
+import { useAuth } from "../../contexts/AuthContext";
 import { authClient } from "../../lib/authClient";
 import LoginLayout from "./Layout";
 import { PasswordStrengthMeter } from "./components/PasswordStrengthMeter";
 import { TurnstileWidget } from "./components/TurnstileWidget";
 
 export const RegisterPage: React.FC = () => {
+  const { refetch } = useAuth();
+  const { client } = useStatsigClient();
+  const captchaEnabled = client.checkGate("captchaEnabled");
+
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -41,7 +47,7 @@ export const RegisterPage: React.FC = () => {
       setErrorMsg("A palavra-passe deve ter pelo menos 6 caracteres.");
       return;
     }
-    if (!captchaToken) {
+    if (captchaEnabled && !captchaToken) {
       setErrorMsg("Por favor complete o CAPTCHA.");
       return;
     }
@@ -51,9 +57,9 @@ export const RegisterPage: React.FC = () => {
       name: name.trim(),
       email: email.trim(),
       password,
-      fetchOptions: {
+      fetchOptions: captchaEnabled && captchaToken ? {
         headers: { "x-captcha-token": captchaToken },
-      },
+      } : undefined,
     });
     setIsLoading(false);
 
@@ -65,6 +71,7 @@ export const RegisterPage: React.FC = () => {
       return;
     }
 
+    await refetch();
     setSuccessState(true);
   };
 
@@ -149,7 +156,7 @@ export const RegisterPage: React.FC = () => {
           )}
         </div>
 
-        <TurnstileWidget ref={captchaRef} onVerify={setCaptchaToken} />
+        {captchaEnabled && <TurnstileWidget ref={captchaRef} onVerify={setCaptchaToken} />}
 
         <Button
           type="submit"
