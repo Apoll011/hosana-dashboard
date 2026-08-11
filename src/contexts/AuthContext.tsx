@@ -3,7 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import { authClient } from "../lib/authClient";
 
 interface SessionUser {
@@ -47,24 +53,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchSession = useCallback(async () => {
-    const { data } = await authClient.getSession({
-      query: { disableCookieCache: true },
-    });
+    const { data } = await authClient.getSession();
     const sessionUser = (data?.user as SessionUser) ?? null;
     setUser(sessionUser);
 
     // Fetch active organization if user exists
     if (sessionUser) {
       try {
-        let { data: orgData } = await authClient.organization.getFullOrganization();
-        
+        let { data: orgData } =
+          await authClient.organization.getFullOrganization();
+
         // If no active organization in session, search user organizations and set the first one as active
         if (!orgData) {
           const { data: orgs } = await authClient.organization.list();
           const storedSlug = localStorage.getItem("active_org_slug");
-          
+
           let targetOrg = orgs?.find((o) => o.slug === storedSlug) || orgs?.[0];
-          
+
           if (targetOrg) {
             await authClient.organization.setActive({
               organizationSlug: targetOrg.slug,
