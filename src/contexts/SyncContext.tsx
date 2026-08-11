@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { getApiClient, syncApi } from "@hosanna/shared";
+import { syncApi } from "@hosanna/shared";
 import { useQueryClient } from "@tanstack/react-query";
 import React, {
   createContext,
@@ -14,6 +14,7 @@ import React, {
   useState,
 } from "react";
 import { SyncStatus } from "../types";
+import { useAuth } from "./AuthContext";
 
 export interface ToastMessage {
   id: string;
@@ -60,9 +61,6 @@ export const SyncProvider: React.FC<{ children: React.ReactNode }> = ({
   );
 
   const triggerSyncCheck = useCallback(async () => {
-    const token = getApiClient().getToken();
-    if (!token) return;
-
     try {
       setSyncStatus("syncing");
       const data = await syncApi.getStatus();
@@ -100,17 +98,24 @@ export const SyncProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   }, [queryClient]);
 
+  const { isAuthenticated } = useAuth();
+  const isAuthenticatedRef = useRef(isAuthenticated);
+
+  useEffect(() => {
+    isAuthenticatedRef.current = isAuthenticated;
+  }, [isAuthenticated]);
+
   // Periodic lightweight poll for background changes
   useEffect(() => {
     const interval = setInterval(() => {
-      if (getApiClient().getToken()) {
-        triggerSyncCheck();
+      if (isAuthenticatedRef.current) {
+        void triggerSyncCheck();
       }
     }, 15000); // 15 seconds poll for fast & lightweight sync check
 
     const handleFocus = () => {
-      if (getApiClient().getToken()) {
-        triggerSyncCheck();
+      if (isAuthenticatedRef.current) {
+        void triggerSyncCheck();
       }
     };
 

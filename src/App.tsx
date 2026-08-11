@@ -5,13 +5,12 @@ import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/react";
 import { useEffect } from "react";
 import { BrowserRouter } from "react-router-dom";
-import { CacheHydrationProvider } from "./contexts/CacheHydrationProvider";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import { CacheHydrationProvider } from "./contexts/CacheHydrationProvider";
 import { SyncProvider } from "./contexts/SyncContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { queryClient } from "./queryClient";
 import { AppRoutes } from "./routes/AppRoutes";
-
 
 function StatsigWrapper({ children }: { children: React.ReactNode }) {
   const { user, tenant, isLoading } = useAuth();
@@ -30,7 +29,7 @@ function StatsigWrapper({ children }: { children: React.ReactNode }) {
       email: user?.email,
       locale: "pt",
       custom: {
-        role: user?.role ?? "user",
+        role: (user as any)?.role ?? "user",
         tenant_slug: tenant?.slug ?? "default",
       },
     });
@@ -61,7 +60,6 @@ export default function App() {
       import.meta.env.VITE_API_URL ||
       "/api",
   );
-
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
