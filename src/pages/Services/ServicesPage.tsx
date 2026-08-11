@@ -556,13 +556,13 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
 
           <div
             tabIndex={0}
-            className="group/island absolute right-0 z-10 flex items-center justify-end bg-m3-card/90 backdrop-blur-xs rounded-2xl border border-m3-border/60 shadow-sm overflow-hidden transition-[width,opacity] duration-300 ease-out outline-none cursor-default
+            className="group/island absolute right-0 z-10 flex items-center justify-center bg-m3-card/90 backdrop-blur-xs rounded-2xl border border-m3-border/60 shadow-sm overflow-hidden transition-[width,opacity] duration-300 ease-out outline-none cursor-default
              w-8 h-8 opacity-70
              hover:opacity-100 hover:w-46
              focus-within:opacity-100 focus-within:w-46"
           >
             <div
-              className="absolute right-0 top-0 w-8 h-8 flex items-center justify-center transition-all duration-300 pointer-events-none
+              className="absolute inset-0 w-8 h-8 flex items-center justify-center transition-all duration-300 pointer-events-none
             opacity-100 scale-100
             group-hover/island:opacity-0 group-hover/island:scale-75 group-hover/island:-translate-x-2
             focus-within:opacity-0 focus-within:scale-75 focus-within:-translate-x-2"
@@ -576,18 +576,6 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
             group-hover/island:opacity-100 group-hover/island:translate-x-0 group-hover/island:pointer-events-auto
             focus-within:opacity-100 focus-within:translate-x-0 focus-within:pointer-events-auto"
             >
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setEditTarget(service);
-                }}
-                title="Editar Nome e Data"
-                className="p-1.5 text-m3-secondary hover:text-m3-primary hover:bg-m3-primary/10 rounded-xl cursor-pointer transition-all focus:outline-none"
-              >
-                <Edit2 className="w-4 h-4" />
-              </button>
-
               <button
                 type="button"
                 onClick={(e) => {
@@ -639,6 +627,17 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
                 className="p-1.5 text-m3-secondary hover:text-rose-600 hover:bg-rose-500/10 rounded-xl cursor-pointer transition-all focus:outline-none"
               >
                 <Trash2 className="w-4 h-4" />
+              </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setEditTarget(service);
+                }}
+                title="Editar Nome e Data"
+                className="p-1.5 text-m3-secondary hover:text-m3-primary hover:bg-m3-primary/10 rounded-xl cursor-pointer transition-all focus:outline-none"
+              >
+                <Edit2 className="w-4 h-4" />
               </button>
             </div>
           </div>
