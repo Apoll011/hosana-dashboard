@@ -25,7 +25,13 @@ export const VerifyEmailPage: React.FC = () => {
   useEffect(() => {
     if (!token) return;
     authClient.verifyEmail({ query: { token } }).then(({ error }) => {
-      if (!error) { setState("success"); return; }
+      if (!error) {
+        setState("success");
+        setTimeout(() => {
+          window.location.href = "/login";
+        }, 2500);
+        return;
+      }
       const msg = error.message?.toLowerCase() || "";
       if (msg.includes("expir")) { setState("expired"); }
       else { setState("error"); }
@@ -116,7 +122,7 @@ export const VerifyEmailPage: React.FC = () => {
           <div>
             <h2 className="text-2xl font-black text-slate-900">E-mail Verificado!</h2>
             <p className="text-sm text-slate-500 mt-2 max-w-xs mx-auto">
-              A sua conta está ativa. Pode agora iniciar sessão.
+              A sua conta está ativa. A redirecionar para o login...
             </p>
           </div>
           <Link

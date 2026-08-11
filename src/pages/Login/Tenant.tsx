@@ -28,6 +28,7 @@ export const RegisterTenantPage: React.FC = () => {
   const navigate = useNavigate();
   const { client } = useStatsigClient();
   const alpha_release = client.checkGate("alpha_release");
+  const captchaEnabled = client.checkGate("captchaEnabled");
 
   // Step state
   const [step, setStep] = useState(1);
@@ -57,7 +58,7 @@ export const RegisterTenantPage: React.FC = () => {
     adminPassword.trim() !== "" &&
     adminPassword === confirmPassword &&
     agreedToTerms &&
-    !!captchaToken;
+    (!captchaEnabled || !!captchaToken);
 
   const handleNext = () => {
     setErrorMsg("");
@@ -83,9 +84,9 @@ export const RegisterTenantPage: React.FC = () => {
         name: adminName.trim(),
         email: adminEmail.trim(),
         password: adminPassword,
-        fetchOptions: {
+        fetchOptions: captchaEnabled && captchaToken ? {
           headers: { "x-captcha-token": captchaToken },
-        },
+        } : undefined,
       });
 
       if (signUpError) throw new Error(signUpError.message || "Falha ao criar conta.");
@@ -336,7 +337,7 @@ export const RegisterTenantPage: React.FC = () => {
                   )}
                 </div>
 
-                <TurnstileWidget ref={captchaRef} onVerify={setCaptchaToken} />
+                {captchaEnabled && <TurnstileWidget ref={captchaRef} onVerify={setCaptchaToken} />}
 
                 <div className="flex items-start gap-3 p-3 bg-slate-50 rounded-xl border border-slate-100">
                   <input
