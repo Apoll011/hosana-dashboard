@@ -40,6 +40,8 @@ import React, {
 } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { HelpModal } from "../../components/modals/HelpModal";
+import { useAuth } from "../../contexts/AuthContext";
+import { useFolders } from "../../hooks/useFolders";
 import { useSong, useSongs } from "../../hooks/useSongs";
 
 // --- Types for our Layout Management ---
@@ -48,6 +50,8 @@ type LayoutMode = "editor" | "split" | "preview";
 export const SongEditorPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { tenant } = useAuth();
+  const slugPrefix = tenant?.slug ? `/${tenant.slug}` : "";
   const queryClient = useQueryClient();
 
   const { data: song, isLoading, isError, error } = useSong(id || null);
@@ -151,7 +155,7 @@ export const SongEditorPage: React.FC = () => {
           variant="primary"
           icon={<ArrowLeft className="w-4 h-4" />}
           onClick={() => {
-            window.history.length > 2 ? navigate(-1) : navigate("/folders");
+            window.history.length > 2 ? navigate(-1) : navigate(`${slugPrefix}/folders`);
           }}
         >
           Voltar

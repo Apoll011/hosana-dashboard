@@ -871,7 +871,7 @@ export const MainLayout: React.FC = () => {
         icon: <FolderIcon className="w-4 h-4 text-amber-500" />,
         perform: () => {
           handleSelectFolder(f.id);
-          navigate("/folders");
+          navigate(`${slugPrefix}/folders`);
         },
       });
     });
@@ -885,7 +885,7 @@ export const MainLayout: React.FC = () => {
         keywords: `cantico canticos musica musicas song songs louvor ${s.title} ${s.artist || ""} ${(s.tags || []).join(" ")}`,
         section: "Cânticos",
         icon: <FileText className="w-4 h-4 text-sky-500" />,
-        perform: () => navigate(`/songs/${s.id}`),
+        perform: () => navigate(`${slugPrefix}/songs/${s.id}`),
       });
     });
 
@@ -898,7 +898,7 @@ export const MainLayout: React.FC = () => {
         keywords: `culto cultos plano planos service services worship reuniao ${serv.name} ${serv.notes || ""}`,
         section: "Cultos",
         icon: <Calendar className="w-4 h-4 text-emerald-500" />,
-        perform: () => navigate(`/services/${serv.id}`),
+        perform: () => navigate(`${slugPrefix}/services/${serv.id}`),
       });
     });
 
@@ -973,7 +973,7 @@ export const MainLayout: React.FC = () => {
         icon: <Trash2 className="w-4 h-4 text-rose-500" />,
         perform: async () => {
           await deleteService(currentService.id);
-          navigate("/services");
+          navigate(`${slugPrefix}/services`);
         },
       });
     }
@@ -1550,7 +1550,7 @@ export const MainLayout: React.FC = () => {
         if (selectedFolderIds.size === 1) {
           handleSelectFolder(Array.from(selectedFolderIds)[0]);
         } else if (selectedSongIds.size === 1) {
-          navigate(`/songs/${Array.from(selectedSongIds)[0]}`);
+          navigate(`${slugPrefix}/songs/${Array.from(selectedSongIds)[0]}`);
         }
       }
     };
@@ -1698,7 +1698,7 @@ export const MainLayout: React.FC = () => {
     await Promise.all([songsQuery.refetch(), foldersQuery.refetch()]);
     setIsCreateSongModalOpen(false);
     showToast("Cântico criado com sucesso!", "success");
-    navigate(`/songs/${song.id}`);
+    navigate(`${slugPrefix}/songs/${song.id}`);
   };
 
   const handlePrintSongs = async () => {
@@ -1744,7 +1744,7 @@ export const MainLayout: React.FC = () => {
     await Promise.all([songsQuery.refetch(), foldersQuery.refetch()]);
     setIsCreateSongModalOpen(false);
     showToast("Cântico importado com sucesso!", "success");
-    navigate(`/songs/${song.id}`);
+    navigate(`${slugPrefix}/songs/${song.id}`);
   };
 
   const handleCreateServiceSubmit = async (data: {
@@ -1759,7 +1759,7 @@ export const MainLayout: React.FC = () => {
       elements: [],
     });
     setIsCreateServiceModalOpen(false);
-    navigate(`/services/${newService.id}`);
+    navigate(`${slugPrefix}/services/${newService.id}`);
   };
 
   const handleDeleteSongSubmit = async () => {
@@ -2051,7 +2051,7 @@ export const MainLayout: React.FC = () => {
           <button
             onClick={() => {
               setCurrentFolderId(null);
-              navigate("/folders");
+              navigate(`${slugPrefix}/folders`);
               if (window.innerWidth < 768) setIsSidebarOpen(false);
             }}
             title={isSidebarCollapsed ? `Drive da ${tenant?.name}` : undefined}
@@ -2082,7 +2082,7 @@ export const MainLayout: React.FC = () => {
 
           <button
             onClick={() => {
-              navigate("/songs");
+              navigate(`${slugPrefix}/songs`);
               if (window.innerWidth < 768) setIsSidebarOpen(false);
             }}
             title={isSidebarCollapsed ? `Biblioteca` : undefined}
@@ -2110,7 +2110,7 @@ export const MainLayout: React.FC = () => {
 
           <button
             onClick={() => {
-              navigate("/services");
+              navigate(`${slugPrefix}/services`);
               if (window.innerWidth < 768) setIsSidebarOpen(false);
             }}
             title={isSidebarCollapsed ? `Cultos` : undefined}
@@ -2138,7 +2138,7 @@ export const MainLayout: React.FC = () => {
 
           <button
             onClick={() => {
-              navigate("/teams");
+              navigate(`${slugPrefix}/teams`);
               if (window.innerWidth < 768) setIsSidebarOpen(false);
             }}
             title={isSidebarCollapsed ? `Equipas` : undefined}
@@ -2230,7 +2230,7 @@ export const MainLayout: React.FC = () => {
                   <button
                     onClick={() => {
                       setIsUserMenuOpen(false);
-                      navigate("/musicians");
+                      navigate(`${slugPrefix}/musicians`);
                       if (window.innerWidth < 768) setIsSidebarOpen(false);
                     }}
                     className="w-full flex items-center gap-3 px-3 py-2 text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors cursor-pointer text-left"
@@ -2241,7 +2241,7 @@ export const MainLayout: React.FC = () => {
                   <button
                     onClick={() => {
                       setIsUserMenuOpen(false);
-                      navigate("/settings");
+                      navigate(`${slugPrefix}/settings`);
                       if (window.innerWidth < 768) setIsSidebarOpen(false);
                     }}
                     className="w-full flex items-center gap-3 px-3 py-2 text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors cursor-pointer text-left"
@@ -2332,7 +2332,7 @@ export const MainLayout: React.FC = () => {
                     <button
                       onClick={() => {
                         handleSelectFolder(null);
-                        navigate("/folders");
+                        navigate(`${slugPrefix}/folders`);
                       }}
                       className={`flex items-center gap-2 font-black uppercase tracking-widest transition-all cursor-pointer shrink-0 ${
                         currentFolderId === null && isExplorerView
@@ -2388,7 +2388,7 @@ export const MainLayout: React.FC = () => {
                             <button
                               onClick={() => {
                                 handleSelectFolder(folder.id);
-                                navigate("/folders");
+                                navigate(`${slugPrefix}/folders`);
                               }}
                               className="flex items-center gap-2 font-bold text-m3-secondary hover:text-m3-text transition-all cursor-pointer shrink-0"
                             >
@@ -2424,7 +2424,7 @@ export const MainLayout: React.FC = () => {
                       <>
                         <ChevronRight className="w-3.5 h-3.5 text-m3-secondary/40 shrink-0" />
                         <button
-                          onClick={() => navigate("/services")}
+                          onClick={() => navigate(`${slugPrefix}/services`)}
                           className="flex items-center gap-2 font-bold text-m3-secondary hover:text-m3-text transition-all cursor-pointer shrink-0"
                         >
                           <Calendar className="w-4 h-4" />
@@ -3031,7 +3031,7 @@ export const MainLayout: React.FC = () => {
                 <>
                   <button
                     onClick={() => {
-                      navigate(`/songs/${(contextMenu.item as Song).id}`);
+                      navigate(`${slugPrefix}/songs/${(contextMenu.item as Song).id}`);
                       setContextMenu(null);
                     }}
                     className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left"
