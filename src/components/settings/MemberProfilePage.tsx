@@ -25,6 +25,7 @@ interface MemberProfilePageProps {
   onBack: () => void;
   onRemove: (member: any) => void;
   onApprove: (id: string) => void;
+  onRoleChange?: (member: any, newRole: string) => Promise<void>;
   isApproving: boolean;
   showToast: (text: string, variant: any) => void;
 }
@@ -35,6 +36,7 @@ export const MemberProfilePage: React.FC<MemberProfilePageProps> = ({
   onBack,
   onRemove,
   onApprove,
+  onRoleChange,
   isApproving,
   showToast,
 }) => {
@@ -43,10 +45,14 @@ export const MemberProfilePage: React.FC<MemberProfilePageProps> = ({
     (currentUser?.role || "").toLowerCase()
   );
   const [isEditingRole, setIsEditingRole] = useState(false);
-  const [selectedRole, setSelectedRole] = useState(member.role || "musician");
+  const [selectedRole, setSelectedRole] = useState(member.role || "member");
 
-  const handleSaveRole = () => {
-    showToast("Função de utilizador atualizada com sucesso!", "success");
+  const handleSaveRole = async () => {
+    if (onRoleChange) {
+      await onRoleChange(member, selectedRole);
+    } else {
+      showToast("Função de utilizador atualizada com sucesso!", "success");
+    }
     setIsEditingRole(false);
   };
 
