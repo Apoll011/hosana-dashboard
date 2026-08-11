@@ -16,7 +16,7 @@ import {
   Spinner,
 } from "@hosanna/shared";
 import { useStatsigClient } from "@statsig/react-bindings";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, UseQueryResult } from "@tanstack/react-query";
 import {
   Archive,
   ArchiveRestore,
@@ -71,7 +71,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
   const actualSearchQuery =
     externalSearchQuery !== undefined
       ? externalSearchQuery
-      : context.searchQuery || "";
+      : (context.searchQuery as string) || "";
 
   const { client } = useStatsigClient();
   const serviceAsFolderItem = client?.checkGate
@@ -96,7 +96,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
     : localSortOrder;
 
   // ─── Archive toggle (from MainLayout context or local fallback) ──────────
-  const showArchived = context.showArchived ?? false;
+  const showArchived = (context.showArchived as boolean) ?? false;
 
   // Fetch archived services (fallback if context doesn't provide)
   const localArchivedServicesQuery = useQuery({
@@ -110,7 +110,10 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
   });
 
   const archivedServicesQuery =
-    context.archivedServicesQuery ?? localArchivedServicesQuery;
+    (context.archivedServicesQuery as UseQueryResult<
+      NoInfer<Service[]>,
+      Error
+    >) ?? localArchivedServicesQuery;
 
   // ─── Modal / dialog state ─────────────────────────────────────────────────
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -152,7 +155,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
   const archivedServices = useMemo(
     () =>
       showArchived
-        ? (context.archivedServices ??
+        ? ((context.archivedServices as Service[] | null) ??
           archivedServicesQuery.data ??
           allServices.filter((s) => s.archived))
         : [],

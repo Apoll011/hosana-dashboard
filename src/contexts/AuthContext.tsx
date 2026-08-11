@@ -31,10 +31,10 @@ type Organization = {
   id: string;
   name: string;
   slug: string;
-  logo?: string | null;
+  logo?: string | null | undefined;
   createdAt: Date;
   metadata?: Record<string, unknown> | null;
-  members: {
+  members?: {
     id: string;
     organizationId: string;
     role:
@@ -55,7 +55,7 @@ type Organization = {
       image?: string | undefined;
     };
   }[];
-  invitations: {
+  invitations?: {
     id: string;
     organizationId: string;
     email: string;
@@ -122,7 +122,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           await authClient.organization.setActive({
             organizationSlug: targetOrg.slug,
           });
-          orgData = targetOrg as unknown as Organization;
+          orgData = targetOrg;
         }
       }
 
