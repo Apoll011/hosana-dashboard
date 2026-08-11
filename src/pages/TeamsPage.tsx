@@ -46,7 +46,7 @@ export interface Team {
 }
 
 export const TeamsPage: React.FC = () => {
-  const { user, organization } = useAuth();
+  const { user } = useAuth();
   const { showToast } = useSync();
 
   const [teams, setTeams] = useState<Team[]>([

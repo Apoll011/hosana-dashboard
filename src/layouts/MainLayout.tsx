@@ -1437,8 +1437,7 @@ export const MainLayout: React.FC = () => {
           `${folderList.length + songList.length} item(ns) movido(s) com sucesso!`,
           "success",
         );
-      } catch (err) {
-        // ROLLBACK on error
+      } catch {
         if (prevFoldersData)
           queryClient.setQueryData(["folders"], prevFoldersData);
         if (prevSongsData)
