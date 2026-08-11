@@ -336,18 +336,20 @@ export const MainLayout: React.FC = () => {
   const location = useLocation();
   const { user, logout, tenant } = useAuth();
 
-  const isSongsView = location.pathname === "/songs";
+  const slugPrefix = tenant?.slug ? `/${tenant.slug}` : "";
+  const isSongsView = location.pathname === `${slugPrefix}/songs` || location.pathname === "/songs";
   const isSongEditorView =
-    location.pathname.startsWith("/songs/") && location.pathname !== "/songs";
-  const isServicesView = location.pathname === "/services";
+    (location.pathname.startsWith(`${slugPrefix}/songs/`) || location.pathname.startsWith("/songs/")) &&
+    !isSongsView;
+  const isServicesView = location.pathname === `${slugPrefix}/services` || location.pathname === "/services";
   const isServiceEditorView =
-    location.pathname.startsWith("/services/") &&
-    location.pathname !== "/services";
+    (location.pathname.startsWith(`${slugPrefix}/services/`) || location.pathname.startsWith("/services/")) &&
+    !isServicesView;
 
-  const isTeamsView = location.pathname.startsWith("/teams");
-  const isSettingsView = location.pathname.startsWith("/settings");
+  const isTeamsView = location.pathname.includes("/teams");
+  const isSettingsView = location.pathname.includes("/settings");
   const isExplorerView =
-    location.pathname.startsWith("/folders") ||
+    location.pathname.includes("/folders") ||
     (!isSongsView &&
       !isSongEditorView &&
       !isServicesView &&
@@ -422,22 +424,22 @@ export const MainLayout: React.FC = () => {
   const [currentFolderId, setCurrentFolderId] = useState<string | null>(null);
 
   const navigateBackToDrive = () => {
-    if (location.pathname !== "/folders") {
-      navigate("/folders");
+    if (!isExplorerView) {
+      navigate(`${slugPrefix}/folders`);
     }
   };
 
   const handleSearchChange = (val: string) => {
     setSearchQuery(val);
     if (isSettingsView) {
-      navigate("/folders");
+      navigate(`${slugPrefix}/folders`);
     }
   };
 
   const handleSelectFolder = (id: string | null) => {
     setCurrentFolderId(id);
     if (!isExplorerView) {
-      navigate("/folders");
+      navigate(`${slugPrefix}/folders`);
     }
   };
 
@@ -448,7 +450,7 @@ export const MainLayout: React.FC = () => {
     setSortBy(sb);
     setSortOrder(so);
     if (isSettingsView) {
-      navigate("/folders");
+      navigate(`${slugPrefix}/folders`);
     }
   };
 
@@ -456,7 +458,7 @@ export const MainLayout: React.FC = () => {
     setViewMode(mode);
     localStorage.setItem("viewMode", mode);
     if (isSettingsView) {
-      navigate("/folders");
+      navigate(`${slugPrefix}/folders`);
     }
   };
   const [searchQuery, setSearchQuery] = useState("");
@@ -770,7 +772,7 @@ export const MainLayout: React.FC = () => {
         icon: <HardDrive className="w-4 h-4 text-sky-500" />,
         perform: () => {
           setCurrentFolderId(null);
-          navigate("/folders");
+          navigate(`${slugPrefix}/folders`);
         },
       },
       {
@@ -780,7 +782,7 @@ export const MainLayout: React.FC = () => {
         keywords: "biblioteca canticos musicas songs library",
         section: "Navegação",
         icon: <Music className="w-4 h-4 text-sky-500" />,
-        perform: () => navigate("/songs"),
+        perform: () => navigate(`${slugPrefix}/songs`),
       },
       {
         id: "nav-services",
@@ -789,7 +791,7 @@ export const MainLayout: React.FC = () => {
         keywords: "cultos planos servicos services worship",
         section: "Navegação",
         icon: <Church className="w-4 h-4 text-emerald-500" />,
-        perform: () => navigate("/services"),
+        perform: () => navigate(`${slugPrefix}/services`),
       },
       {
         id: "nav-musicians",
@@ -798,7 +800,7 @@ export const MainLayout: React.FC = () => {
         keywords: "musicos equipa team qr code access",
         section: "Navegação",
         icon: <User className="w-4 h-4 text-indigo-500" />,
-        perform: () => navigate("/musicians"),
+        perform: () => navigate(`${slugPrefix}/teams`),
       },
       {
         id: "nav-settings",
@@ -807,7 +809,7 @@ export const MainLayout: React.FC = () => {
         keywords: "definicoes configuracoes settings preferences",
         section: "Navegação",
         icon: <Settings className="w-4 h-4 text-slate-500" />,
-        perform: () => navigate("/settings"),
+        perform: () => navigate(`${slugPrefix}/settings`),
       },
 
       // --- AÇÕES RÁPIDAS ---
