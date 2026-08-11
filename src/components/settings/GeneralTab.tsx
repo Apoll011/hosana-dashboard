@@ -52,7 +52,7 @@ export const GeneralTab: React.FC<{ active: boolean }> = ({ active }) => {
   }
 
   return (
-    <form onSubmit={handleSubmitSettings} className="space-y-6 max-w-4xl">
+    <form onSubmit={handleSubmitSettings} className="space-y-6">
       {/* Server Configuration */}
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs space-y-5">
         <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 border-b border-slate-100 dark:border-slate-800 pb-3 flex items-center gap-2">
