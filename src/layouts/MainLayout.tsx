@@ -3475,8 +3475,8 @@ export const MainLayout: React.FC = () => {
             <AlertTriangle className="w-4 h-4 shrink-0 text-rose-500 mt-0.5" />
             <span>
               Tem a certeza que deseja apagar permanentemente{" "}
-              <strong>&quot;{deleteSongTarget?.title}&quot;</strong>? Isto também
-              irá removê-lo de quaisquer cultos agendados.
+              <strong>&quot;{deleteSongTarget?.title}&quot;</strong>? Isto
+              também irá removê-lo de quaisquer cultos agendados.
             </span>
           </div>
 
