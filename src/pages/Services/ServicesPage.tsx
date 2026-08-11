@@ -94,7 +94,6 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
 
   // ─── Archive toggle (from MainLayout context or local fallback) ──────────
   const showArchived = context.showArchived ?? false;
-  const setShowArchived = context.setShowArchived ?? (() => {});
 
   // Fetch archived services (fallback if context doesn't provide)
   const localArchivedServicesQuery = useQuery({

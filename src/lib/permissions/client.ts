@@ -35,15 +35,9 @@ const permCache = new Map<string, boolean>();
 // Stores in-flight Promises so concurrent components share the exact same network request
 const pendingPerms = new Map<string, Promise<boolean>>();
 
-// Role cache
-let cachedRole: AppRole | null = null;
-let pendingRole: Promise<AppRole | null> | null = null;
-
 export function clearPermissionCache(): void {
   permCache.clear();
   pendingPerms.clear();
-  cachedRole = null;
-  pendingRole = null;
 }
 
 // ---------------------------------------------------------------------------

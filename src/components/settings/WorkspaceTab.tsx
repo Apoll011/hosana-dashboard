@@ -116,14 +116,15 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
       });
       await refetchAuth();
       showToast("Organização atualizada com sucesso!", "success");
-    } catch (err: any) {
+    } catch (err) {
       setCurrentName(previousName);
       setCurrentLogo(previousLogo);
       setDraftName(previousName);
       setDraftLogo(previousLogo);
       setIsEditing(true);
       showToast(
-        "Erro ao atualizar: " + (err?.message || "Erro de rede"),
+        "Erro ao atualizar: " +
+          ((err as { message?: string })?.message || "Erro de rede"),
         "error",
       );
     } finally {

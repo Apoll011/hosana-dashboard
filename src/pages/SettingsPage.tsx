@@ -15,8 +15,6 @@ import {
   Users,
 } from "lucide-react";
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "../contexts/AuthContext";
 import { useSync } from "../contexts/SyncContext";
 
 import { AboutTab } from "../components/settings/AboutTab";
@@ -30,8 +28,6 @@ type TabType =
   "general" | "workspace" | "account" | "members" | "appearance" | "about";
 
 export const SettingsPage: React.FC = () => {
-  const navigate = useNavigate();
-  const { organization } = useAuth();
   const { showToast } = useSync();
 
   const [activeTab, setActiveTab] = useState<TabType>("account");
