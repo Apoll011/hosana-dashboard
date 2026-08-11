@@ -60,6 +60,9 @@ const ErrorFallback = ({
 const LoginPage = lazyImport(() =>
   import("../pages/Login/LoginPage").then((m) => ({ default: m.LoginPage })),
 );
+const TwoFactorPage = lazyImport(() =>
+  import("../pages/Login/TwoFactorPage").then((m) => ({ default: m.TwoFactorPage })),
+);
 const RegisterPage = lazyImport(() =>
   import("../pages/Login/RegisterPage").then((m) => ({
     default: m.RegisterPage,
@@ -125,6 +128,7 @@ export const AppRoutes: React.FC = () => {
       <Suspense fallback={<PageLoader />}>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/two-factor" element={<TwoFactorPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/new" element={<RegisterTenantPage />} />
           <Route path="/verify-email" element={<VerifyEmailPage />} />
