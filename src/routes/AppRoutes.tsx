@@ -88,6 +88,11 @@ const ResetPasswordPage = lazyImport(() =>
     default: m.ResetPasswordPage,
   })),
 );
+const AcceptInvitationPage = lazyImport(() =>
+  import("../pages/Login/AcceptInvitationPage").then((m) => ({
+    default: m.AcceptInvitationPage,
+  })),
+);
 const FoldersPage = lazyImport(() =>
   import("../pages/FoldersPage").then((m) => ({
     default: m.FoldersPage,
@@ -134,6 +139,7 @@ export const AppRoutes: React.FC = () => {
           <Route path="/verify-email" element={<VerifyEmailPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
+          <Route path="/accept-invitation" element={<AcceptInvitationPage />} />
 
           <Route element={<ProtectedRoute />}>
             <Route path="/onboarding" element={<OnboardingPage />} />
