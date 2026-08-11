@@ -70,7 +70,6 @@ export const SongEditorPage: React.FC = () => {
 
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
-  const [readOnly, setReadOnly] = useState(false);
 
   const { settings, updateSetting, resetSettings } = usePreviewSettings();
   const {
@@ -106,7 +105,7 @@ export const SongEditorPage: React.FC = () => {
 
       try {
         const currentSong =
-          queryClient.getQueryData<any>(["song", song?.id]) || song;
+          queryClient.getQueryData<Song>(["song", song?.id]) || song;
         if (!currentSong) return;
 
         const parsed = parseChordPro(updatedContent);
@@ -154,9 +153,11 @@ export const SongEditorPage: React.FC = () => {
           variant="primary"
           icon={<ArrowLeft className="w-4 h-4" />}
           onClick={() => {
-            window.history.length > 2
-              ? navigate(-1)
-              : navigate(`${slugPrefix}/folders`);
+            if (window.history.length > 2) {
+              navigate(-1);
+            } else {
+              navigate(`${slugPrefix}/folders`);
+            }
           }}
         >
           Voltar

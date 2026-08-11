@@ -60,12 +60,15 @@ export const SongsPage: React.FC<SongsPageProps> = ({
   const navigate = useNavigate();
   const { organization } = useAuth();
   const slugPrefix = organization?.slug ? `/${organization.slug}` : "";
-  const context = useOutletContext<any>() || {};
+  const context = (useOutletContext<Record<string, unknown>>() || {}) as Record<
+    string,
+    unknown
+  >;
   const actualHideHeader = hideHeader ?? context.hideHeader;
   //TODO: Add support
-  const actualSearchQuery = externalSearchQuery ?? context.searchQuery ?? "";
-  const actualSortBy = externalSortBy ?? context.sortBy ?? "title";
-  const actualSortOrder = externalSortOrder ?? context.sortOrder ?? "asc";
+  const _actualSearchQuery = externalSearchQuery ?? context.searchQuery ?? "";
+  const _actualSortBy = externalSortBy ?? context.sortBy ?? "title";
+  const _actualSortOrder = externalSortOrder ?? context.sortOrder ?? "asc";
   const actualSelectedKey = selectedKey ?? context.selectedKey ?? "";
   const actualSelectedTag = selectedTag ?? context.selectedTag ?? "";
   const actualSearchFields = externalSearchFields ??

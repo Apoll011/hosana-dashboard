@@ -23,7 +23,7 @@ export function useSettings() {
       queryClient.invalidateQueries({ queryKey: ["settings"] });
       showToast("Definições do servidor guardadas com sucesso!", "success");
     },
-    onError: (err: any) => {
+    onError: (err: Error) => {
       showToast(
         err.message || "Falha ao guardar definições do servidor",
         "error",

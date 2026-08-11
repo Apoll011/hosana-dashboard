@@ -53,7 +53,14 @@ export const ForgotPasswordPage: React.FC = () => {
       return;
     }
 
-    const { error } = await (authClient as any).forgetPassword({
+    const { error } = await (
+      authClient as unknown as {
+        forgetPassword: (opts: {
+          email: string;
+          redirectTo: string;
+        }) => Promise<{ error?: { message?: string } }>;
+      }
+    ).forgetPassword({
       email: email.trim(),
       redirectTo: `${window.location.origin}/reset-password`,
     });

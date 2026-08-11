@@ -93,7 +93,9 @@ function fetchPermissionsBatch(
 
   // 3. Fire a single API call for all permissions
   const promise = authClient.organization
-    .hasPermission({ permissions: groupPermissions(permissions) as any })
+    .hasPermission({
+      permissions: groupPermissions(permissions) as Record<string, string[]>,
+    })
     .then(({ data, error }) => {
       if (error) throw new Error(error.message ?? "Permission check failed");
       const granted = data?.success ?? false;

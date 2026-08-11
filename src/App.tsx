@@ -29,7 +29,7 @@ function StatsigWrapper({ children }: { children: React.ReactNode }) {
       email: user?.email,
       locale: "pt",
       custom: {
-        role: (user as any)?.role ?? "user",
+        role: (user as { role?: string })?.role ?? "user",
         organization: organization?.slug ?? "default",
       },
     });

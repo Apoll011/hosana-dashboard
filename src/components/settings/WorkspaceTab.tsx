@@ -22,9 +22,14 @@ import { compressImage } from "./settingsUtils";
 
 export interface WorkspaceTabProps {
   active: boolean;
-  showToast: (text: string, variant: any) => void;
-  setPendingRestoreData: (data: any) => void;
-  setRestoreStats: (stats: any) => void;
+  showToast: (
+    text: string,
+    variant: "success" | "error" | "info" | "warning",
+  ) => void;
+  setPendingRestoreData: (data: Record<string, unknown> | null) => void;
+  setRestoreStats: (
+    stats: { songs: number; folders: number; services: number } | null,
+  ) => void;
   setIsTogglingWs: (toggling: boolean) => void;
 }
 
@@ -33,7 +38,7 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
   showToast,
   setPendingRestoreData,
   setRestoreStats,
-  setIsTogglingWs,
+  setIsTogglingWs: _setIsTogglingWs,
 }) => {
   const { organization, refetch: refetchAuth } = useAuth();
 
@@ -50,7 +55,7 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
 
   const [canManageOrg, setCanManageOrg] = useState<boolean>(false);
 
-  const [isCompressing, setIsCompressing] = useState(false);
+  const [_isCompressing, setIsCompressing] = useState(false);
   const [isSavingOrganization, setIsSavingOrganization] = useState(false);
 
   const { granted, loading: canLoading } = useCan("organization.update");
