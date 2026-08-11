@@ -54,8 +54,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     // Fetch active organization if user exists
     if (sessionUser) {
       try {
-        const { data: orgData } = await authClient.organization.getFullOrganization();
+        let { data: orgData } = await authClient.organization.getFullOrganization();
+        
+        // If no active organization in session, search user organizations and set the first one as active
+        if (!orgData) {
+          const { data: orgs } = await authClient.organization.list();
+          const storedSlug = localStorage.getItem("active_org_slug");
+          
+          let targetOrg = orgs?.find((o) => o.slug === storedSlug) || orgs?.[0];
+          
+          if (targetOrg) {
+            await authClient.organization.setActive({
+              organizationSlug: targetOrg.slug,
+            });
+            const fullRes = await authClient.organization.getFullOrganization();
+            orgData = fullRes.data ?? (targetOrg as any);
+          }
+        }
+
         if (orgData) {
+          localStorage.setItem("active_org_slug", orgData.slug);
           setTenant({
             id: orgData.id,
             name: orgData.name,
@@ -66,12 +84,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
             updatedAt: new Date(orgData.createdAt),
           });
         } else {
+          localStorage.removeItem("active_org_slug");
           setTenant(null);
         }
       } catch {
         setTenant(null);
       }
     } else {
+      localStorage.removeItem("active_org_slug");
       setTenant(null);
     }
 
@@ -84,6 +104,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const logout = async () => {
     await authClient.signOut();
+    localStorage.removeItem("active_org_slug");
     setUser(null);
     setTenant(null);
   };
