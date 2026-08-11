@@ -3,22 +3,18 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect, useRef, useCallback } from "react";
 import {
   Bell,
-  CheckCheck,
-  Check,
-  Trash2,
-  X,
   Building2,
-  Users,
-  Shield,
+  CheckCheck,
   CreditCard,
   Info,
-  ChevronRight,
+  Shield,
   Sparkles,
+  Users,
+  X,
 } from "lucide-react";
-import { Button } from "@hosanna/shared";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 
 export type InboxNotification = {
   id: string;

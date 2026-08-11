@@ -3,20 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from "react";
-import {
-  ArrowLeft,
-  CheckCircle2,
-  Clock,
-  Crown,
-  Shield,
-  Trash2,
-  User,
-  UserCheck,
-  Save,
-  PenLine,
-} from "lucide-react";
 import { Button } from "@hosanna/shared";
+import { ArrowLeft, PenLine, Save, Shield, Trash2 } from "lucide-react";
+import React, { useState } from "react";
 import { getRoleBadge, getRoleLabel } from "./settingsUtils";
 
 interface MemberProfilePageProps {

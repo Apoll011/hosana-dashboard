@@ -428,9 +428,6 @@ export const MainLayout: React.FC = () => {
   );
 
   const { client } = useStatsigClient();
-  const serviceAsFolderItem = client?.checkGate
-    ? client.checkGate("service_as_folder_item")
-    : false;
 
   // Folder state: null = Root directory
   const [currentFolderId, setCurrentFolderId] = useState<string | null>(null);

@@ -3,16 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from "react";
-import {
-  Crown,
-  Shield,
-  Users,
-  User,
-  UserCheck,
-  Music,
-  Heart,
-} from "lucide-react";
+import { Crown, Music, Shield, User, UserCheck, Users } from "lucide-react";
 
 export const getRoleLabel = (role: string) => {
   switch (role?.toLowerCase()) {

@@ -35,7 +35,7 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
   setRestoreStats,
   setIsTogglingWs,
 }) => {
-  const { organization, user, refetch: refetchAuth } = useAuth();
+  const { organization, refetch: refetchAuth } = useAuth();
 
   const [isDownloading, setIsDownloading] = useState(false);
   const restoreInputRef = useRef<HTMLInputElement>(null);
