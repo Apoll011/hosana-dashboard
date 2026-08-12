@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Button, Modal, settingsApi } from "@hosanna/shared";
+import { Button, Modal, backupApi } from "@hosanna/shared";
 import {
   AlertTriangle,
   Building2,
@@ -52,7 +52,7 @@ export const SettingsPage: React.FC = () => {
     if (!pendingRestoreData) return;
     setIsRestoring(true);
     try {
-      await settingsApi.restoreBackup(pendingRestoreData);
+      await backupApi.restoreBackup(pendingRestoreData);
       showToast(
         "Base de dados restaurada com sucesso! A recarregar...",
         "success",
