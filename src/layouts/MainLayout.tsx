@@ -684,6 +684,7 @@ export const MainLayout: React.FC = () => {
   };
 
   const availableTags = useMemo(() => {
+    console.log(organization);
     const tagsSet = new Set<string>();
     allSongs.forEach((s) => {
       if (s.tags) s.tags.forEach((t) => tagsSet.add(t));
