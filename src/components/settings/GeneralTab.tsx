@@ -4,6 +4,7 @@
  */
 
 import { useCan } from "@/src/lib/permissions/client";
+import { Can } from "@/src/lib/permissions/components";
 import { Button, Input, Spinner } from "@hosanna/shared";
 import {
   Calendar,
@@ -77,8 +78,8 @@ export const GeneralTab: React.FC<GeneralTabProps> = ({
         locale: general.locale ?? "pt-PT",
         timezone: general.timezone ?? "Europe/Lisbon",
         weekStartsOn: general.weekStartsOn ?? 1,
-        sermonDuration: durations.sermon ?? 45,
-        songDuration: durations.song ?? 5,
+        sermonDuration: (durations.sermon ?? 2000) / 60,
+        songDuration: (durations.song ?? 230) / 60,
         showNotes: services.showNotes ?? true,
         showServiceDuration: services.showServiceDuration ?? true,
         autoSave: services.autoSave ?? true,
@@ -128,8 +129,8 @@ export const GeneralTab: React.FC<GeneralTabProps> = ({
               services: {
                 ...currentMetadata.settings?.services,
                 defaultDurations: {
-                  sermon: orgFormData.sermonDuration,
-                  song: orgFormData.songDuration,
+                  sermon: orgFormData.sermonDuration * 60,
+                  song: orgFormData.songDuration * 60,
                 },
                 showNotes: orgFormData.showNotes,
                 showServiceDuration: orgFormData.showServiceDuration,
@@ -162,253 +163,261 @@ export const GeneralTab: React.FC<GeneralTabProps> = ({
 
   return (
     <div className="space-y-6 max-w-4xl mx-auto w-full animate-in fade-in slide-in-from-bottom-2 duration-300">
-      {/* ========================================== */}
-      {/* PARTE 1: DEFINIÇÕES DA ORGANIZAÇÃO         */}
-      {/* ========================================== */}
-      <form onSubmit={handleSubmitOrgSettings} className="space-y-6">
-        {/* General Settings Card */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm overflow-hidden">
-          <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-900/50">
-            <div>
-              <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                <Settings2 className="w-5 h-5 text-m3-primary" />
-                Preferências Gerais
-              </h3>
-              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-                Configure a localização, fusos horários e datas para a sua
-                organização.
-              </p>
+      <Can permission="organization.update">
+        <form onSubmit={handleSubmitOrgSettings} className="space-y-6">
+          {/* General Settings Card */}
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm overflow-hidden">
+            <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-900/50">
+              <div>
+                <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                  <Settings2 className="w-5 h-5 text-m3-primary" />
+                  Preferências Gerais
+                </h3>
+                <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                  Configure a localização, fusos horários e datas para a sua
+                  organização.
+                </p>
+              </div>
+              {!canManageOrg && (
+                <span className="text-xs bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 px-3 py-1.5 rounded-full flex items-center gap-1.5 font-semibold">
+                  <Lock className="w-3.5 h-3.5" />
+                  Apenas Leitura
+                </span>
+              )}
             </div>
-            {!canManageOrg && (
-              <span className="text-xs bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 px-3 py-1.5 rounded-full flex items-center gap-1.5 font-semibold">
-                <Lock className="w-3.5 h-3.5" />
-                Apenas Leitura
-              </span>
-            )}
-          </div>
 
-          <div className="p-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="flex flex-col gap-2">
-                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5 uppercase tracking-wide">
-                  <Globe className="w-4 h-4 text-slate-400" />
-                  Idioma Padrão
-                </label>
-                <select
-                  disabled={!canManageOrg || isSaving}
-                  value={orgFormData.locale}
-                  onChange={(e) =>
-                    setOrgFormData({ ...orgFormData, locale: e.target.value })
-                  }
-                  className="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-sm px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-m3-primary/50 disabled:opacity-50 disabled:bg-slate-50 dark:disabled:bg-slate-800/50 transition-colors"
-                >
-                  <option value="pt-PT">Português (Portugal)</option>
-                  <option value="pt-BR">Português (Brasil)</option>
-                  <option value="en-US">English (US)</option>
-                  <option value="es-ES">Español (España)</option>
-                </select>
-              </div>
+            <div className="p-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="flex flex-col gap-2">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5 uppercase tracking-wide">
+                    <Globe className="w-4 h-4 text-slate-400" />
+                    Idioma Padrão
+                  </label>
+                  <select
+                    disabled={!canManageOrg || isSaving}
+                    value={orgFormData.locale}
+                    onChange={(e) =>
+                      setOrgFormData({ ...orgFormData, locale: e.target.value })
+                    }
+                    className="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-sm px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-m3-primary/50 disabled:opacity-50 disabled:bg-slate-50 dark:disabled:bg-slate-800/50 transition-colors"
+                  >
+                    <option value="pt-PT">Português (Portugal)</option>
+                    <option value="pt-BR">Português (Brasil)</option>
+                    <option value="en-US">English (US)</option>
+                    <option value="es-ES">Español (España)</option>
+                  </select>
+                </div>
 
-              <div className="flex flex-col gap-2">
-                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5 uppercase tracking-wide">
-                  <Clock className="w-4 h-4 text-slate-400" />
-                  Fuso Horário
-                </label>
-                <select
-                  disabled={!canManageOrg || isSaving}
-                  value={orgFormData.timezone}
-                  onChange={(e) =>
-                    setOrgFormData({ ...orgFormData, timezone: e.target.value })
-                  }
-                  className="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-sm px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-m3-primary/50 disabled:opacity-50 disabled:bg-slate-50 dark:disabled:bg-slate-800/50 transition-colors"
-                >
-                  <option value="Europe/Lisbon">Lisboa (Europe/Lisbon)</option>
-                  <option value="America/Sao_Paulo">
-                    São Paulo (America/Sao_Paulo)
-                  </option>
-                  <option value="Europe/London">Londres (Europe/London)</option>
-                  <option value="America/New_York">
-                    Nova Iorque (America/New_York)
-                  </option>
-                </select>
-              </div>
+                <div className="flex flex-col gap-2">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5 uppercase tracking-wide">
+                    <Clock className="w-4 h-4 text-slate-400" />
+                    Fuso Horário
+                  </label>
+                  <select
+                    disabled={!canManageOrg || isSaving}
+                    value={orgFormData.timezone}
+                    onChange={(e) =>
+                      setOrgFormData({
+                        ...orgFormData,
+                        timezone: e.target.value,
+                      })
+                    }
+                    className="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-sm px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-m3-primary/50 disabled:opacity-50 disabled:bg-slate-50 dark:disabled:bg-slate-800/50 transition-colors"
+                  >
+                    <option value="Europe/Lisbon">
+                      Lisboa (Europe/Lisbon)
+                    </option>
+                    <option value="America/Sao_Paulo">
+                      São Paulo (America/Sao_Paulo)
+                    </option>
+                    <option value="Europe/London">
+                      Londres (Europe/London)
+                    </option>
+                    <option value="America/New_York">
+                      Nova Iorque (America/New_York)
+                    </option>
+                  </select>
+                </div>
 
-              <div className="flex flex-col gap-2 md:col-span-2">
-                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5 uppercase tracking-wide">
-                  <Calendar className="w-4 h-4 text-slate-400" />
-                  Início da Semana
-                </label>
-                <div className="flex gap-4">
-                  {[
-                    { value: 0, label: "Domingo" },
-                    { value: 1, label: "Segunda-feira" },
-                  ].map((day) => (
-                    <label
-                      key={day.value}
-                      className={`flex items-center gap-2 p-3 rounded-xl border cursor-pointer transition-all ${
-                        orgFormData.weekStartsOn === day.value
-                          ? "border-m3-primary bg-m3-primary/5 text-m3-primary"
-                          : "border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800/50"
-                      } ${!canManageOrg ? "opacity-60 cursor-not-allowed" : ""}`}
-                    >
-                      <input
-                        type="radio"
-                        name="weekStartsOn"
-                        disabled={!canManageOrg || isSaving}
-                        checked={orgFormData.weekStartsOn === day.value}
-                        onChange={() =>
-                          setOrgFormData({
-                            ...orgFormData,
-                            weekStartsOn: day.value,
-                          })
-                        }
-                        className="w-4 h-4 text-m3-primary focus:ring-m3-primary"
-                      />
-                      <span className="text-sm font-semibold">{day.label}</span>
-                    </label>
-                  ))}
+                <div className="flex flex-col gap-2 md:col-span-2">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5 uppercase tracking-wide">
+                    <Calendar className="w-4 h-4 text-slate-400" />
+                    Início da Semana
+                  </label>
+                  <div className="flex gap-4">
+                    {[
+                      { value: 0, label: "Domingo" },
+                      { value: 1, label: "Segunda-feira" },
+                    ].map((day) => (
+                      <label
+                        key={day.value}
+                        className={`flex items-center gap-2 p-3 rounded-xl border cursor-pointer transition-all ${
+                          orgFormData.weekStartsOn === day.value
+                            ? "border-m3-primary bg-m3-primary/5 text-m3-primary"
+                            : "border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800/50"
+                        } ${!canManageOrg ? "opacity-60 cursor-not-allowed" : ""}`}
+                      >
+                        <input
+                          type="radio"
+                          name="weekStartsOn"
+                          disabled={!canManageOrg || isSaving}
+                          checked={orgFormData.weekStartsOn === day.value}
+                          onChange={() =>
+                            setOrgFormData({
+                              ...orgFormData,
+                              weekStartsOn: day.value,
+                            })
+                          }
+                          className="w-4 h-4 text-m3-primary focus:ring-m3-primary"
+                        />
+                        <span className="text-sm font-semibold">
+                          {day.label}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Services Settings Card */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm overflow-hidden">
-          <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
-            <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-              <Timer className="w-5 h-5 text-indigo-500" />
-              Configuração de Cultos e Eventos
-            </h3>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-              Defina tempos padrão e comportamentos para os alinhamentos
-              musicais e eventos.
-            </p>
-          </div>
-
-          <div className="p-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-              <Input
-                label="Duração Média de um Cântico (minutos)"
-                type="number"
-                min={1}
-                disabled={!canManageOrg || isSaving}
-                value={orgFormData.songDuration}
-                onChange={(e) =>
-                  setOrgFormData({
-                    ...orgFormData,
-                    songDuration: Number(e.target.value),
-                  })
-                }
-                icon={<Music className="w-4 h-4 text-slate-400" />}
-                placeholder="5"
-              />
-              <Input
-                label="Duração Média do Sermão/Pregação (minutos)"
-                type="number"
-                min={5}
-                disabled={!canManageOrg || isSaving}
-                value={orgFormData.sermonDuration}
-                onChange={(e) =>
-                  setOrgFormData({
-                    ...orgFormData,
-                    sermonDuration: Number(e.target.value),
-                  })
-                }
-                icon={<Mic2 className="w-4 h-4 text-slate-400" />}
-                placeholder="45"
-              />
+          {/* Services Settings Card */}
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm overflow-hidden">
+            <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
+              <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                <Timer className="w-5 h-5 text-indigo-500" />
+                Configuração de Cultos e Eventos
+              </h3>
+              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                Defina tempos padrão e comportamentos para os alinhamentos
+                musicais e eventos.
+              </p>
             </div>
 
-            <div className="space-y-3">
-              <h4 className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide flex items-center gap-1.5 mb-3">
-                <Shield className="w-4 h-4 text-slate-400" />
-                Funcionalidades do Culto
-              </h4>
+            <div className="p-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <Input
+                  label="Duração Média de um Cântico (minutos)"
+                  type="number"
+                  min={1}
+                  disabled={!canManageOrg || isSaving}
+                  value={orgFormData.songDuration}
+                  onChange={(e) =>
+                    setOrgFormData({
+                      ...orgFormData,
+                      songDuration: Number(e.target.value),
+                    })
+                  }
+                  icon={<Music className="w-4 h-4 text-slate-400" />}
+                  placeholder="5"
+                />
+                <Input
+                  label="Duração Média do Sermão/Pregação (minutos)"
+                  type="number"
+                  min={5}
+                  disabled={!canManageOrg || isSaving}
+                  value={orgFormData.sermonDuration}
+                  onChange={(e) =>
+                    setOrgFormData({
+                      ...orgFormData,
+                      sermonDuration: Number(e.target.value),
+                    })
+                  }
+                  icon={<Mic2 className="w-4 h-4 text-slate-400" />}
+                  placeholder="45"
+                />
+              </div>
 
-              {[
-                {
-                  id: "showServiceDuration",
-                  label: "Mostrar duração total do Culto",
-                  description:
-                    "Calcula e apresenta o tempo estimado total no topo dos alinhamentos.",
-                  checked: orgFormData.showServiceDuration,
-                },
-                {
-                  id: "showNotes",
-                  label: "Ativar notas da equipa",
-                  description:
-                    "Permitir que músicos e técnicos adicionem notas específicas nos itens do culto.",
-                  checked: orgFormData.showNotes,
-                },
-                {
-                  id: "autoSave",
-                  label: "Guardar automaticamente (Autosave)",
-                  description:
-                    "Guarda as edições nos cultos em rascunho de forma contínua para evitar perda de dados.",
-                  checked: orgFormData.autoSave,
-                },
-              ].map((toggle) => (
-                <label
-                  key={toggle.id}
-                  className={`flex items-start gap-3.5 p-4 border border-slate-200 dark:border-slate-800 rounded-xl transition-colors ${
-                    canManageOrg && !isSaving
-                      ? "cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50"
-                      : "opacity-75 cursor-not-allowed"
-                  }`}
-                >
-                  <div className="flex items-center h-5 mt-0.5">
-                    <input
-                      type="checkbox"
-                      disabled={!canManageOrg || isSaving}
-                      checked={toggle.checked}
-                      onChange={(e) =>
-                        setOrgFormData({
-                          ...orgFormData,
-                          [toggle.id]: e.target.checked,
-                        })
-                      }
-                      className="w-4.5 h-4.5 text-m3-primary border-slate-300 rounded focus:ring-m3-primary"
-                    />
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-sm font-bold text-slate-900 dark:text-slate-100">
-                      {toggle.label}
-                    </span>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                      {toggle.description}
-                    </p>
-                  </div>
-                </label>
-              ))}
+              <div className="space-y-3">
+                <h4 className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide flex items-center gap-1.5 mb-3">
+                  <Shield className="w-4 h-4 text-slate-400" />
+                  Funcionalidades do Culto
+                </h4>
+
+                {[
+                  {
+                    id: "showServiceDuration",
+                    label: "Mostrar duração total do Culto",
+                    description:
+                      "Calcula e apresenta o tempo estimado total no topo dos alinhamentos.",
+                    checked: orgFormData.showServiceDuration,
+                  },
+                  {
+                    id: "showNotes",
+                    label: "Ativar notas da equipa",
+                    description:
+                      "Permitir que músicos e técnicos adicionem notas específicas nos itens do culto.",
+                    checked: orgFormData.showNotes,
+                  },
+                  {
+                    id: "autoSave",
+                    label: "Guardar automaticamente (Autosave)",
+                    description:
+                      "Guarda as edições nos cultos em rascunho de forma contínua para evitar perda de dados.",
+                    checked: orgFormData.autoSave,
+                  },
+                ].map((toggle) => (
+                  <label
+                    key={toggle.id}
+                    className={`flex items-start gap-3.5 p-4 border border-slate-200 dark:border-slate-800 rounded-xl transition-colors ${
+                      canManageOrg && !isSaving
+                        ? "cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50"
+                        : "opacity-75 cursor-not-allowed"
+                    }`}
+                  >
+                    <div className="flex items-center h-5 mt-0.5">
+                      <input
+                        type="checkbox"
+                        disabled={!canManageOrg || isSaving}
+                        checked={toggle.checked}
+                        onChange={(e) =>
+                          setOrgFormData({
+                            ...orgFormData,
+                            [toggle.id]: e.target.checked,
+                          })
+                        }
+                        className="w-4.5 h-4.5 text-m3-primary border-slate-300 rounded focus:ring-m3-primary"
+                      />
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-sm font-bold text-slate-900 dark:text-slate-100">
+                        {toggle.label}
+                      </span>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                        {toggle.description}
+                      </p>
+                    </div>
+                  </label>
+                ))}
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Footer Action Org Settings */}
-        {canManageOrg && (
-          <div className="flex items-center justify-end pt-2">
-            <Button
-              type="submit"
-              variant="primary"
-              size="lg"
-              disabled={isSaving}
-              icon={
-                isSaving ? (
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                ) : (
-                  <Save className="w-5 h-5" />
-                )
-              }
-              className="w-full sm:w-auto shadow-md"
-            >
-              {isSaving
-                ? "A guardar organizações..."
-                : "Guardar Definições da Organização"}
-            </Button>
-          </div>
-        )}
-      </form>
+          {/* Footer Action Org Settings */}
+          {canManageOrg && (
+            <div className="flex items-center justify-end pt-2">
+              <Button
+                type="submit"
+                variant="primary"
+                size="lg"
+                disabled={isSaving}
+                icon={
+                  isSaving ? (
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                  ) : (
+                    <Save className="w-5 h-5" />
+                  )
+                }
+                className="w-full sm:w-auto shadow-md"
+              >
+                {isSaving
+                  ? "A guardar organizações..."
+                  : "Guardar Definições da Organização"}
+              </Button>
+            </div>
+          )}
+        </form>
+      </Can>
 
       {/* ========================================== */}
       {/* PARTE 2: DEFINIÇÕES DO STUDIO (INDIVIDUAL) */}
