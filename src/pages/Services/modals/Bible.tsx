@@ -301,7 +301,7 @@ function extractVerseText(
 ): string {
   const lines: string[] = [];
   for (const item of chapterVerses) {
-    const vn = parseInt(item.verse, 10);
+    const vn = parseInt(item.verse as string, 10);
     if (startVerse !== undefined && vn < startVerse) continue;
     if (endVerse !== undefined && vn > endVerse) continue;
 

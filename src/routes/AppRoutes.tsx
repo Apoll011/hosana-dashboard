@@ -6,7 +6,15 @@
 import { Spinner } from "@hosanna/shared";
 import React, { Suspense, lazy } from "react";
 import { ErrorBoundary } from "react-error-boundary";
-import { Navigate, Route, Routes } from "react-router-dom";
+import {
+  Navigate,
+  Outlet,
+  Route,
+  Routes,
+  useLocation,
+  useParams,
+} from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
 import { MainLayout } from "../layouts/MainLayout";
 import { OnboardingPage } from "../pages/OnboardingPage";
 import { ProtectedRoute } from "./ProtectedRoute";
@@ -59,6 +67,37 @@ const ErrorFallback = ({
   </div>
 );
 
+const OrganizationGuard = () => {
+  const { slug } = useParams<{ slug: string }>();
+  const location = useLocation();
+  const { organization, isLoading } = useAuth();
+
+  if (isLoading) return <PageLoader />;
+
+  if (!organization) {
+    return <Navigate to="/onboarding" replace />;
+  }
+
+  if (slug && slug !== organization.slug) {
+    const correctPathname = location.pathname.replace(
+      new RegExp(`^/${slug}`),
+      `/${organization.slug}`,
+    );
+
+    return (
+      <Navigate
+        to={`${correctPathname}${location.search}${location.hash}`}
+        replace
+      />
+    );
+  }
+
+  return <Outlet />;
+};
+
+// ----------------------------------------------------------------------
+// LAZY IMPORTS
+// ----------------------------------------------------------------------
 const LoginPage = lazyImport(() =>
   import("../pages/Login/LoginPage").then((m) => ({ default: m.LoginPage })),
 );
@@ -98,9 +137,7 @@ const AcceptInvitationPage = lazyImport(() =>
   })),
 );
 const FoldersPage = lazyImport(() =>
-  import("../pages/FoldersPage").then((m) => ({
-    default: m.FoldersPage,
-  })),
+  import("../pages/FoldersPage").then((m) => ({ default: m.FoldersPage })),
 );
 const SongsPage = lazyImport(() =>
   import("../pages/Songs/SongsPage").then((m) => ({ default: m.SongsPage })),
@@ -121,14 +158,10 @@ const ServiceDetailPage = lazyImport(() =>
   })),
 );
 const SettingsPage = lazyImport(() =>
-  import("../pages/SettingsPage").then((m) => ({
-    default: m.SettingsPage,
-  })),
+  import("../pages/SettingsPage").then((m) => ({ default: m.SettingsPage })),
 );
 const TeamsPage = lazyImport(() =>
-  import("../pages/TeamsPage").then((m) => ({
-    default: m.TeamsPage,
-  })),
+  import("../pages/TeamsPage").then((m) => ({ default: m.TeamsPage })),
 );
 
 export const AppRoutes: React.FC = () => {
@@ -147,15 +180,19 @@ export const AppRoutes: React.FC = () => {
 
           <Route element={<ProtectedRoute />}>
             <Route path="/onboarding" element={<OnboardingPage />} />
-            <Route path="/:slug" element={<MainLayout />}>
-              <Route index element={<Navigate to="folders" replace />} />
-              <Route path="folders" element={<FoldersPage />} />
-              <Route path="songs" element={<SongsPage hideHeader />} />
-              <Route path="songs/:id" element={<SongEditorPage />} />
-              <Route path="services" element={<ServicesPage hideHeader />} />
-              <Route path="services/:id" element={<ServiceDetailPage />} />
-              <Route path="teams" element={<TeamsPage />} />
-              <Route path="settings" element={<SettingsPage />} />
+
+            {/* Wrap the slug routes with our new OrganizationGuard */}
+            <Route path="/:slug" element={<OrganizationGuard />}>
+              <Route element={<MainLayout />}>
+                <Route index element={<Navigate to="folders" replace />} />
+                <Route path="folders" element={<FoldersPage />} />
+                <Route path="songs" element={<SongsPage hideHeader />} />
+                <Route path="songs/:id" element={<SongEditorPage />} />
+                <Route path="services" element={<ServicesPage hideHeader />} />
+                <Route path="services/:id" element={<ServiceDetailPage />} />
+                <Route path="teams" element={<TeamsPage />} />
+                <Route path="settings" element={<SettingsPage />} />
+              </Route>
             </Route>
           </Route>
 
