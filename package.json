@@ -2,6 +2,7 @@
   "name": "@hosanna/studio",
   "version": "2.5.0",
   "type": "module",
+  "license": "Apache-2.0",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
