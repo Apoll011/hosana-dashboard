@@ -111,6 +111,8 @@ const normalizeOrganization = (org: unknown): Organization => {
     } catch {
       organization.metadata = null;
     }
+  } else if (organization?.metadata?.default) {
+    organization.metadata = organization.metadata.default as Organization;
   }
 
   return organization;
