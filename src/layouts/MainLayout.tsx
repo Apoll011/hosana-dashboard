@@ -684,7 +684,6 @@ export const MainLayout: React.FC = () => {
   };
 
   const availableTags = useMemo(() => {
-    console.log(organization);
     const tagsSet = new Set<string>();
     allSongs.forEach((s) => {
       if (s.tags) s.tags.forEach((t) => tagsSet.add(t));
@@ -2073,7 +2072,7 @@ export const MainLayout: React.FC = () => {
                   </h1>
                   {organization && (
                     <span className="mt-1 text-xs font-medium text-slate-500 dark:text-slate-400 truncate max-w-32.5">
-                      {organization.name || organization.slug}
+                      {organization?.metadata?.shortName || organization.slug}
                     </span>
                   )}
                 </div>

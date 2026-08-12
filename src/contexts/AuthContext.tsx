@@ -103,7 +103,6 @@ const normalizeOrganization = (org: unknown): Organization => {
   const organization = org as Organization & { metadata?: unknown };
 
   if (typeof organization.metadata === "string") {
-    console.log(organization.metadata);
     try {
       organization.metadata = JSON.parse(organization.metadata) as Record<
         string,
@@ -112,8 +111,6 @@ const normalizeOrganization = (org: unknown): Organization => {
     } catch {
       organization.metadata = null;
     }
-  } else if (organization?.metadata?.default) {
-    organization.metadata = organization.metadata.default as Organization;
   }
 
   return organization;
