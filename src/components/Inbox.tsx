@@ -412,7 +412,7 @@ export const InboxPanel: React.FC<InboxPanelProps> = ({
 };
 
 export interface InboxButtonProps {
-  client?: unknown;
+  client?: InboxFetchClient;
   onNavigate?: (notif: InboxNotification) => void;
   renderItem?: (notif: InboxNotification) => React.ReactNode;
   pollInterval?: number;
@@ -433,7 +433,7 @@ export const InboxButton: React.FC<InboxButtonProps> = ({
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const inbox = useInbox(client, { pollInterval, pageSize, organizationId });
+  const inbox = useInbox(client!, { pollInterval, pageSize, organizationId });
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
