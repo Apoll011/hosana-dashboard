@@ -64,7 +64,7 @@ import React, {
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { FolderForm } from "../components/forms/FolderForm";
 import { SongForm } from "../components/forms/SongForm";
-import { InboxButton } from "../components/Inbox";
+import { InboxButton, InboxFetchClient } from "../components/Inbox";
 import { BatchDeleteModal } from "../components/modals/BatchDeleteModal";
 import { BatchMoveModal } from "../components/modals/BatchMoveModal";
 import { BatchTagModal } from "../components/modals/BatchTagModal";
@@ -2686,7 +2686,10 @@ export const MainLayout: React.FC = () => {
                       </>
                     )}
 
-                    <InboxButton client={authClient} className="shrink-0" />
+                    <InboxButton
+                      client={authClient as InboxFetchClient}
+                      className="shrink-0"
+                    />
 
                     <div className="relative shrink-0 ml-1" ref={plusMenuRef}>
                       <button
