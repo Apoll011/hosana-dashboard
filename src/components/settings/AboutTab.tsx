@@ -3,13 +3,21 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import {
+  ChevronDown,
+  ChevronUp,
+  FileText,
+  FileUp,
+  Github,
+  Heart,
+  Info,
+} from "lucide-react";
 import React, { useState } from "react";
-import { Info, Heart, Github, FileUp, FileText, ChevronDown, ChevronUp } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
 import { songImportRegistry } from "../../import";
 
 export const AboutTab: React.FC<{ active: boolean }> = ({ active }) => {
-  const { tenant } = useAuth();
+  const { organization } = useAuth();
   const [showLicenses, setShowLicenses] = useState(false);
 
   if (!active) return null;
@@ -18,7 +26,11 @@ export const AboutTab: React.FC<{ active: boolean }> = ({ active }) => {
 
   const productionDependencies = [
     { name: "React & React DOM (v19)", license: "MIT", type: "UI Framework" },
-    { name: "@tanstack/react-query", license: "MIT", type: "Estado & Data Fetching" },
+    {
+      name: "@tanstack/react-query",
+      license: "MIT",
+      type: "Estado & Data Fetching",
+    },
     { name: "Better Auth", license: "MIT", type: "Autenticação & RBAC" },
     { name: "@dnd-kit (Core/Sortable)", license: "MIT", type: "Drag and Drop" },
     { name: "Motion (Framer Motion)", license: "MIT", type: "Animações" },
@@ -41,7 +53,8 @@ export const AboutTab: React.FC<{ active: boolean }> = ({ active }) => {
                 Sobre o Hosanna Studio
               </h3>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                Painel de Controlo {tenant?.name ? `• ${tenant.name}` : ""}
+                Painel de Controlo{" "}
+                {organization?.name ? `• ${organization.name}` : ""}
               </p>
               <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-2">
                 © {new Date().getFullYear()} Tiago Inês. Código sob licença MIT.
@@ -63,7 +76,8 @@ export const AboutTab: React.FC<{ active: boolean }> = ({ active }) => {
           <div className="flex items-center gap-2.5">
             <Heart className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 fill-emerald-500/20" />
             <p className="text-xs text-emerald-800 dark:text-emerald-300 leading-relaxed">
-              Este projeto é <strong>open-source</strong>! Acreditamos no software livre para equipar e apoiar comunidades.
+              Este projeto é <strong>open-source</strong>! Acreditamos no
+              software livre para equipar e apoiar comunidades.
             </p>
           </div>
           <a
@@ -116,7 +130,8 @@ export const AboutTab: React.FC<{ active: boolean }> = ({ active }) => {
           className="w-full flex items-center justify-between text-left cursor-pointer"
         >
           <span className="text-xs font-bold text-slate-900 dark:text-slate-100 uppercase tracking-wider">
-            Licenças de Bibliotecas de Terceiros ({productionDependencies.length})
+            Licenças de Bibliotecas de Terceiros (
+            {productionDependencies.length})
           </span>
           {showLicenses ? (
             <ChevronUp className="w-4 h-4 text-slate-400" />

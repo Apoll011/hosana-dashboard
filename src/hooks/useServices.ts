@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Service, servicesApi } from "@hosanna/shared";
+import { Service, ServiceElement, servicesApi } from "@hosanna/shared";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSync } from "../contexts/SyncContext";
 
@@ -22,7 +22,7 @@ export function useServices() {
       queryClient.invalidateQueries({ queryKey: ["services"] });
       showToast(`Service "${newService.name}" created`, "success");
     },
-    onError: (err: any) => {
+    onError: (err: Error) => {
       showToast(err.message || "Failed to create service", "error");
     },
   });
@@ -33,13 +33,13 @@ export function useServices() {
     onMutate: async ({ id, data }) => {
       await queryClient.cancelQueries({ queryKey: ["service", id] });
       const previousService = queryClient.getQueryData(["service", id]);
-      queryClient.setQueryData(["service", id], (old: any) => ({
+      queryClient.setQueryData(["service", id], (old: Service | undefined) => ({
         ...old,
         ...data,
       }));
       return { previousService };
     },
-    onError: (err: any, variables, context) => {
+    onError: (err: Error, variables, context) => {
       if (context?.previousService) {
         queryClient.setQueryData(
           ["service", variables.id],
@@ -60,7 +60,7 @@ export function useServices() {
       queryClient.invalidateQueries({ queryKey: ["services"] });
       showToast("Service deleted", "info");
     },
-    onError: (err: any) => {
+    onError: (err: Error) => {
       showToast(err.message || "Failed to delete service", "error");
     },
   });
@@ -71,18 +71,24 @@ export function useServices() {
       data,
     }: {
       serviceId: string;
-      data: { elements: any[]; updatedAt: string };
+      data: { elements: ServiceElement[]; updatedAt: string };
     }) => servicesApi.updateServiceElements(serviceId, data),
     onMutate: async ({ serviceId, data }) => {
       await queryClient.cancelQueries({ queryKey: ["service", serviceId] });
       const previousService = queryClient.getQueryData(["service", serviceId]);
-      queryClient.setQueryData(["service", serviceId], (old: any) => ({
-        ...old,
-        elements: data.elements,
-      }));
+      queryClient.setQueryData(
+        ["service", serviceId],
+        (old: Service | undefined) =>
+          old
+            ? {
+                ...old,
+                elements: data.elements as Service["elements"],
+              }
+            : old,
+      );
       return { previousService };
     },
-    onError: (err: any, variables, context) => {
+    onError: (err: Error, variables, context) => {
       if (context?.previousService) {
         queryClient.setQueryData(
           ["service", variables.serviceId],

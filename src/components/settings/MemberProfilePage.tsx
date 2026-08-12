@@ -3,31 +3,35 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from "react";
-import {
-  ArrowLeft,
-  CheckCircle2,
-  Clock,
-  Crown,
-  Shield,
-  Trash2,
-  User,
-  UserCheck,
-  Save,
-  PenLine,
-} from "lucide-react";
 import { Button } from "@hosanna/shared";
+import { ArrowLeft, PenLine, Save, Shield, Trash2 } from "lucide-react";
+import React, { useState } from "react";
 import { getRoleBadge, getRoleLabel } from "./settingsUtils";
 
 interface MemberProfilePageProps {
-  member: any;
+  member: {
+    id: string;
+    name?: string;
+    email?: string;
+    role: string;
+    status?: string;
+    avatar?: string;
+    image?: string;
+    [key: string]: unknown;
+  };
   currentUser: { id: string; role?: string } | null;
   onBack: () => void;
-  onRemove: (member: any) => void;
-  onApprove: (id: string) => void;
-  onRoleChange?: (member: any, newRole: string) => Promise<void>;
-  isApproving: boolean;
-  showToast: (text: string, variant: any) => void;
+  onRemove: (member: { id: string; [key: string]: unknown }) => void;
+  onApprove?: (id: string) => void;
+  onRoleChange?: (
+    member: { id: string; [key: string]: unknown },
+    newRole: string,
+  ) => Promise<void>;
+  isApproving?: boolean;
+  showToast: (
+    text: string,
+    variant: "success" | "error" | "info" | "warning",
+  ) => void;
 }
 
 export const MemberProfilePage: React.FC<MemberProfilePageProps> = ({
@@ -35,14 +39,14 @@ export const MemberProfilePage: React.FC<MemberProfilePageProps> = ({
   currentUser,
   onBack,
   onRemove,
-  onApprove,
+  onApprove: _onApprove,
   onRoleChange,
-  isApproving,
+  isApproving: _isApproving,
   showToast,
 }) => {
   const isSelf = currentUser?.id === member.id;
   const isOrgAdminOrOwner = ["owner", "admin"].includes(
-    (currentUser?.role || "").toLowerCase()
+    (currentUser?.role || "").toLowerCase(),
   );
   const [isEditingRole, setIsEditingRole] = useState(false);
   const [selectedRole, setSelectedRole] = useState(member.role || "member");
@@ -80,14 +84,14 @@ export const MemberProfilePage: React.FC<MemberProfilePageProps> = ({
 
       {/* Profile Hero */}
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-xs">
-        <div className="h-24 bg-gradient-to-r from-sky-700 via-indigo-700 to-slate-800 relative" />
+        <div className="h-24 bg-linear-to-r from-sky-700 via-indigo-700 to-slate-800 relative" />
 
         <div className="px-6 pb-6">
           <div className="-mt-12 mb-4 flex items-end justify-between">
-            <div className="relative w-20 h-20 rounded-full border-4 border-white dark:border-slate-900 overflow-hidden shadow-md bg-gradient-to-tr from-sky-600 to-indigo-600 flex items-center justify-center">
+            <div className="relative w-20 h-20 rounded-full border-4 border-white dark:border-slate-900 overflow-hidden shadow-md bg-linear-to-tr from-sky-600 to-indigo-600 flex items-center justify-center">
               {member.logo || member.image ? (
                 <img
-                  src={member.logo || member.image}
+                  src={member.image}
                   alt={member.name}
                   className="w-full h-full object-cover"
                 />
@@ -161,7 +165,9 @@ export const MemberProfilePage: React.FC<MemberProfilePageProps> = ({
               >
                 <option value="owner">Proprietário (Owner)</option>
                 <option value="admin">Administrador (Admin)</option>
-                <option value="teamLeader">Líder de Equipa (Team Leader)</option>
+                <option value="teamLeader">
+                  Líder de Equipa (Team Leader)
+                </option>
                 <option value="editor">Editor</option>
                 <option value="musician">Músico</option>
                 <option value="guest">Convidado</option>
@@ -187,7 +193,10 @@ export const MemberProfilePage: React.FC<MemberProfilePageProps> = ({
             </div>
           ) : (
             <p className="text-xs text-slate-500">
-              Função Atual: <strong className="text-slate-800 dark:text-slate-200">{getRoleLabel(member.role)}</strong>
+              Função Atual:{" "}
+              <strong className="text-slate-800 dark:text-slate-200">
+                {getRoleLabel(member.role)}
+              </strong>
             </p>
           )}
         </div>

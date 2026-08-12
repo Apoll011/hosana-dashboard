@@ -4,7 +4,14 @@
  */
 
 import { Button } from "@hosanna/shared";
-import { CheckCircle2, Clock, Loader2, MailCheck, RefreshCw, XCircle } from "lucide-react";
+import {
+  CheckCircle2,
+  Clock,
+  Loader2,
+  MailCheck,
+  RefreshCw,
+  XCircle,
+} from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { authClient } from "../../lib/authClient";
@@ -33,8 +40,11 @@ export const VerifyEmailPage: React.FC = () => {
         return;
       }
       const msg = error.message?.toLowerCase() || "";
-      if (msg.includes("expir")) { setState("expired"); }
-      else { setState("error"); }
+      if (msg.includes("expir")) {
+        setState("expired");
+      } else {
+        setState("error");
+      }
     });
   }, [token]);
 
@@ -43,9 +53,14 @@ export const VerifyEmailPage: React.FC = () => {
     if (!resendEmail.trim()) return;
     setResendLoading(true);
     setResendError("");
-    const { error } = await authClient.sendVerificationEmail({ email: resendEmail.trim() });
+    const { error } = await authClient.sendVerificationEmail({
+      email: resendEmail.trim(),
+    });
     setResendLoading(false);
-    if (error) { setResendError(error.message || "Erro ao reenviar"); return; }
+    if (error) {
+      setResendError(error.message || "Erro ao reenviar");
+      return;
+    }
     setResendSuccess(true);
   };
 
@@ -58,14 +73,19 @@ export const VerifyEmailPage: React.FC = () => {
             <MailCheck className="w-8 h-8 text-sky-600 dark:text-sky-400" />
           </div>
           <div>
-            <h2 className="text-xl font-black text-slate-900 dark:text-white">Verifique o seu e-mail</h2>
+            <h2 className="text-xl font-black text-slate-900 dark:text-white">
+              Verifique o seu e-mail
+            </h2>
             <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 max-w-xs mx-auto">
-              Enviámos um link de verificação. Clique no link para ativar a sua conta.
+              Enviámos um link de verificação. Clique no link para ativar a sua
+              conta.
             </p>
           </div>
 
           <div className="w-full border-t border-slate-100 dark:border-slate-800 pt-4">
-            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-3">Não recebeu o e-mail? Reenviar:</p>
+            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-3">
+              Não recebeu o e-mail? Reenviar:
+            </p>
             {resendSuccess ? (
               <p className="text-sm font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-2 justify-center">
                 <CheckCircle2 className="w-4 h-4" /> E-mail reenviado!
@@ -89,7 +109,11 @@ export const VerifyEmailPage: React.FC = () => {
                 </Button>
               </form>
             )}
-            {resendError && <p className="text-xs text-rose-500 dark:text-rose-400 mt-1">{resendError}</p>}
+            {resendError && (
+              <p className="text-xs text-rose-500 dark:text-rose-400 mt-1">
+                {resendError}
+              </p>
+            )}
           </div>
         </div>
       </LoginLayout>
@@ -102,7 +126,9 @@ export const VerifyEmailPage: React.FC = () => {
       <LoginLayout optionalLink="/login" optionalMsg="← Voltar ao login">
         <div className="py-12 flex flex-col items-center gap-4">
           <Loader2 className="w-10 h-10 text-m3-primary animate-spin" />
-          <p className="text-sm font-semibold text-slate-600 dark:text-slate-300">A verificar o seu e-mail...</p>
+          <p className="text-sm font-semibold text-slate-600 dark:text-slate-300">
+            A verificar o seu e-mail...
+          </p>
         </div>
       </LoginLayout>
     );
@@ -120,7 +146,9 @@ export const VerifyEmailPage: React.FC = () => {
             </div>
           </div>
           <div>
-            <h2 className="text-2xl font-black text-slate-900 dark:text-white">E-mail Verificado!</h2>
+            <h2 className="text-2xl font-black text-slate-900 dark:text-white">
+              E-mail Verificado!
+            </h2>
             <p className="text-sm text-slate-500 dark:text-slate-400 mt-2 max-w-xs mx-auto">
               A sua conta está ativa. A redirecionar para o login...
             </p>
@@ -145,7 +173,9 @@ export const VerifyEmailPage: React.FC = () => {
             <Clock className="w-10 h-10 text-amber-500 dark:text-amber-400" />
           </div>
           <div>
-            <h2 className="text-xl font-black text-slate-900 dark:text-white">Link Expirado</h2>
+            <h2 className="text-xl font-black text-slate-900 dark:text-white">
+              Link Expirado
+            </h2>
             <p className="text-sm text-slate-500 dark:text-slate-400 mt-2 max-w-xs mx-auto">
               O link de verificação expirou. Solicite um novo abaixo.
             </p>
@@ -164,11 +194,23 @@ export const VerifyEmailPage: React.FC = () => {
               isLoading={resendLoading}
               className="h-10 px-4 rounded-xl bg-m3-primary hover:bg-m3-primary-dark border-0 text-white text-xs font-bold"
             >
-              {resendLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
+              {resendLoading ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <RefreshCw className="w-4 h-4" />
+              )}
             </Button>
           </form>
-          {resendSuccess && <p className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">E-mail reenviado!</p>}
-          {resendError && <p className="text-xs text-rose-500 dark:text-rose-400">{resendError}</p>}
+          {resendSuccess && (
+            <p className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">
+              E-mail reenviado!
+            </p>
+          )}
+          {resendError && (
+            <p className="text-xs text-rose-500 dark:text-rose-400">
+              {resendError}
+            </p>
+          )}
         </div>
       </LoginLayout>
     );
@@ -182,9 +224,12 @@ export const VerifyEmailPage: React.FC = () => {
           <XCircle className="w-10 h-10 text-rose-500 dark:text-rose-400" />
         </div>
         <div>
-          <h2 className="text-xl font-black text-slate-900 dark:text-white">Verificação Falhou</h2>
+          <h2 className="text-xl font-black text-slate-900 dark:text-white">
+            Verificação Falhou
+          </h2>
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-2 max-w-xs mx-auto">
-            Não foi possível verificar o link. Tente novamente ou contacte o suporte.
+            Não foi possível verificar o link. Tente novamente ou contacte o
+            suporte.
           </p>
         </div>
         <Link
@@ -197,4 +242,3 @@ export const VerifyEmailPage: React.FC = () => {
     </LoginLayout>
   );
 };
-

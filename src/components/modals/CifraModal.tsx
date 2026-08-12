@@ -81,8 +81,8 @@ export const CifraClubImportModal: React.FC<{
         );
         handleClosed();
       }
-    } catch (err: any) {
-      setError(err?.message || "Ocorreu um erro inesperado.");
+    } catch (err: unknown) {
+      setError((err as Error)?.message || "Ocorreu um erro inesperado.");
     } finally {
       setIsLoading(false);
     }

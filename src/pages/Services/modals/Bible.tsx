@@ -295,13 +295,13 @@ async function fetchWithTimeout(
 
 /** Extract clean text from a chapter response array, filtering to the given verse range. */
 function extractVerseText(
-  chapterVerses: any[],
+  chapterVerses: Array<{ verse?: string | number; text?: string }>,
   startVerse?: number,
   endVerse?: number,
 ): string {
   const lines: string[] = [];
   for (const item of chapterVerses) {
-    const vn = parseInt(item.verse, 10);
+    const vn = parseInt(item.verse as string, 10);
     if (startVerse !== undefined && vn < startVerse) continue;
     if (endVerse !== undefined && vn > endVerse) continue;
 
@@ -489,12 +489,13 @@ export const ScriptureModal: React.FC<ScriptureModalProps> = ({
 
       setFetchedPassageLabel(label);
       setFetchedText(text);
-    } catch (err: any) {
-      if (err.name === "AbortError") {
+    } catch (err: unknown) {
+      const errorObj = err as { name?: string; message?: string };
+      if (errorObj?.name === "AbortError") {
         setFetchError("A busca demorou muito tempo. Tente novamente.");
       } else {
         setFetchError(
-          err?.message ||
+          errorObj?.message ||
             "Erro ao buscar a passagem. Verifique a sua ligação à internet.",
         );
       }

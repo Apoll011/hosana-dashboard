@@ -126,9 +126,7 @@ export async function readAllEntries(): Promise<Map<string, CacheEntry>> {
 /**
  * Remove a single entry (e.g. after a user logs out).
  */
-export async function removeEntry(
-  queryKey: readonly unknown[],
-): Promise<void> {
+export async function removeEntry(queryKey: readonly unknown[]): Promise<void> {
   try {
     const key = serializeKey(queryKey);
     const db = await openDb();

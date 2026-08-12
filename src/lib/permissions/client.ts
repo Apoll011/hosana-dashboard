@@ -35,15 +35,9 @@ const permCache = new Map<string, boolean>();
 // Stores in-flight Promises so concurrent components share the exact same network request
 const pendingPerms = new Map<string, Promise<boolean>>();
 
-// Role cache
-let cachedRole: AppRole | null = null;
-let pendingRole: Promise<AppRole | null> | null = null;
-
 export function clearPermissionCache(): void {
   permCache.clear();
   pendingPerms.clear();
-  cachedRole = null;
-  pendingRole = null;
 }
 
 // ---------------------------------------------------------------------------
@@ -99,7 +93,9 @@ function fetchPermissionsBatch(
 
   // 3. Fire a single API call for all permissions
   const promise = authClient.organization
-    .hasPermission({ permissions: groupPermissions(permissions) as any })
+    .hasPermission({
+      permissions: groupPermissions(permissions) as Record<string, string[]>,
+    })
     .then(({ data, error }) => {
       if (error) throw new Error(error.message ?? "Permission check failed");
       const granted = data?.success ?? false;

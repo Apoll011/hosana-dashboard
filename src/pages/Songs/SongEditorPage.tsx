@@ -41,7 +41,6 @@ import React, {
 import { useNavigate, useParams } from "react-router-dom";
 import { HelpModal } from "../../components/modals/HelpModal";
 import { useAuth } from "../../contexts/AuthContext";
-import { useFolders } from "../../hooks/useFolders";
 import { useSong, useSongs } from "../../hooks/useSongs";
 
 // --- Types for our Layout Management ---
@@ -50,8 +49,8 @@ type LayoutMode = "editor" | "split" | "preview";
 export const SongEditorPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { tenant } = useAuth();
-  const slugPrefix = tenant?.slug ? `/${tenant.slug}` : "";
+  const { organization } = useAuth();
+  const slugPrefix = organization?.slug ? `/${organization.slug}` : "";
   const queryClient = useQueryClient();
 
   const { data: song, isLoading, isError, error } = useSong(id || null);
@@ -71,7 +70,6 @@ export const SongEditorPage: React.FC = () => {
 
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
-  const [readOnly, setReadOnly] = useState(false);
 
   const { settings, updateSetting, resetSettings } = usePreviewSettings();
   const {
@@ -107,7 +105,7 @@ export const SongEditorPage: React.FC = () => {
 
       try {
         const currentSong =
-          queryClient.getQueryData<any>(["song", song?.id]) || song;
+          queryClient.getQueryData<Song>(["song", song?.id]) || song;
         if (!currentSong) return;
 
         const parsed = parseChordPro(updatedContent);
@@ -155,7 +153,11 @@ export const SongEditorPage: React.FC = () => {
           variant="primary"
           icon={<ArrowLeft className="w-4 h-4" />}
           onClick={() => {
-            window.history.length > 2 ? navigate(-1) : navigate(`${slugPrefix}/folders`);
+            if (window.history.length > 2) {
+              navigate(-1);
+            } else {
+              navigate(`${slugPrefix}/folders`);
+            }
           }}
         >
           Voltar
@@ -283,7 +285,7 @@ export const SongEditorPage: React.FC = () => {
                   setContent(val);
                   setHasUnsavedChanges(true);
                 }}
-                readOnly={readOnly}
+                readOnly={false}
                 onSave={handleSave}
                 mode="chordpro"
               />

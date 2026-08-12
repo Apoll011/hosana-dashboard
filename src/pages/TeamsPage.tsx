@@ -46,7 +46,7 @@ export interface Team {
 }
 
 export const TeamsPage: React.FC = () => {
-  const { user, tenant } = useAuth();
+  const { user } = useAuth();
   const { showToast } = useSync();
 
   const [teams, setTeams] = useState<Team[]>([
@@ -137,7 +137,7 @@ export const TeamsPage: React.FC = () => {
   );
 
   // User role check
-  const userRole = (user as any)?.role || "admin";
+  const userRole = (user as { role?: string })?.role || "admin";
   const isOrgAdminOrOwner = ["owner", "admin"].includes(userRole);
 
   const filteredTeams = teams.filter(
@@ -345,7 +345,7 @@ export const TeamsPage: React.FC = () => {
         </div>
 
         {/* Team Header Banner */}
-        <div className="bg-gradient-to-r from-sky-600 to-indigo-700 rounded-3xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden">
+        <div className="bg-linear-to-r from-sky-600 to-indigo-700 rounded-3xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden">
           <div className="relative z-10">
             <span className="text-xs font-black uppercase tracking-widest text-sky-200 bg-white/10 px-3 py-1 rounded-full">
               {selectedTeam.slug}
@@ -565,7 +565,9 @@ export const TeamsPage: React.FC = () => {
                 </label>
                 <select
                   value={newMemberRole}
-                  onChange={(e) => setNewMemberRole(e.target.value as any)}
+                  onChange={(e) =>
+                    setNewMemberRole(e.target.value as "leader" | "member")
+                  }
                   className="w-full h-11 px-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-sm font-semibold"
                 >
                   <option value="member">Membro</option>
@@ -668,7 +670,7 @@ export const TeamsPage: React.FC = () => {
             <div className="mt-5 pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs">
               <div className="flex items-center gap-1.5 text-slate-600 dark:text-slate-400 font-semibold">
                 <Crown className="w-3.5 h-3.5 text-amber-500" />
-                <span className="truncate max-w-[120px]">
+                <span className="truncate max-w-30">
                   {team.leaderName || "Sem líder"}
                 </span>
               </div>

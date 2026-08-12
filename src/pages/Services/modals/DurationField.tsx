@@ -1,7 +1,9 @@
 import { Clock3 } from "lucide-react";
 
 export function secondsToDurationInput(seconds?: number): string {
-  const safe = Number.isFinite(seconds) ? Math.max(0, Math.floor(seconds || 0)) : 0;
+  const safe = Number.isFinite(seconds)
+    ? Math.max(0, Math.floor(seconds || 0))
+    : 0;
   const mm = Math.floor(safe / 60);
   const ss = safe % 60;
   return `${String(mm).padStart(2, "0")}:${String(ss).padStart(2, "0")}`;

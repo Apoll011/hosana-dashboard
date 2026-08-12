@@ -22,9 +22,14 @@ import { compressImage } from "./settingsUtils";
 
 export interface WorkspaceTabProps {
   active: boolean;
-  showToast: (text: string, variant: any) => void;
-  setPendingRestoreData: (data: any) => void;
-  setRestoreStats: (stats: any) => void;
+  showToast: (
+    text: string,
+    variant: "success" | "error" | "info" | "warning",
+  ) => void;
+  setPendingRestoreData: (data: Record<string, unknown> | null) => void;
+  setRestoreStats: (
+    stats: { songs: number; folders: number; services: number } | null,
+  ) => void;
   setIsTogglingWs: (toggling: boolean) => void;
 }
 
@@ -33,27 +38,25 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
   showToast,
   setPendingRestoreData,
   setRestoreStats,
-  setIsTogglingWs,
+  setIsTogglingWs: _setIsTogglingWs,
 }) => {
-  const { tenant, user, refetch: refetchAuth } = useAuth();
+  const { organization, refetch: refetchAuth } = useAuth();
 
   const [isDownloading, setIsDownloading] = useState(false);
   const restoreInputRef = useRef<HTMLInputElement>(null);
   const logoInputRef = useRef<HTMLInputElement>(null);
 
-  const [currentName, setCurrentName] = useState(tenant?.name || "");
-  const [currentLogo, setCurrentLogo] = useState<string | undefined>(
-    tenant?.logo,
-  );
+  const [currentName, setCurrentName] = useState(organization?.name || "");
+  const [currentLogo, setCurrentLogo] = useState(organization?.logo);
 
   const [isEditing, setIsEditing] = useState(false);
   const [draftName, setDraftName] = useState(currentName);
-  const [draftLogo, setDraftLogo] = useState<string | undefined>(currentLogo);
+  const [draftLogo, setDraftLogo] = useState(currentLogo);
 
   const [canManageOrg, setCanManageOrg] = useState<boolean>(false);
 
-  const [isCompressing, setIsCompressing] = useState(false);
-  const [isSavingTenant, setIsSavingTenant] = useState(false);
+  const [_isCompressing, setIsCompressing] = useState(false);
+  const [isSavingOrganization, setIsSavingOrganization] = useState(false);
 
   const { granted, loading: canLoading } = useCan("organization.update");
 
@@ -64,13 +67,13 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
   }, [granted, canLoading]);
 
   useEffect(() => {
-    if (tenant) {
-      setCurrentName(tenant.name);
-      setCurrentLogo(tenant.logo);
-      setDraftName(tenant.name);
-      setDraftLogo(tenant.logo);
+    if (organization) {
+      setCurrentName(organization.name);
+      setCurrentLogo(organization.logo);
+      setDraftName(organization.name);
+      setDraftLogo(organization.logo);
     }
-  }, [tenant]);
+  }, [organization]);
 
   if (!active) return null;
 
@@ -95,7 +98,7 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
     }
   };
 
-  const handleSaveTenant = async () => {
+  const handleSaveOrganization = async () => {
     if (!draftName.trim()) {
       showToast("O nome do workspace não pode estar vazio.", "error");
       return;
@@ -109,7 +112,7 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
     setIsEditing(false);
 
     try {
-      setIsSavingTenant(true);
+      setIsSavingOrganization(true);
       await authClient.organization.update({
         data: {
           name: draftName,
@@ -118,18 +121,19 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
       });
       await refetchAuth();
       showToast("Organização atualizada com sucesso!", "success");
-    } catch (err: any) {
+    } catch (err) {
       setCurrentName(previousName);
       setCurrentLogo(previousLogo);
       setDraftName(previousName);
       setDraftLogo(previousLogo);
       setIsEditing(true);
       showToast(
-        "Erro ao atualizar: " + (err?.message || "Erro de rede"),
+        "Erro ao atualizar: " +
+          ((err as { message?: string })?.message || "Erro de rede"),
         "error",
       );
     } finally {
-      setIsSavingTenant(false);
+      setIsSavingOrganization(false);
     }
   };
 
@@ -245,8 +249,8 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
                   {currentName || "Minha Organização"}
                 </h3>
                 <p className="text-xs text-slate-400 font-mono mt-0.5">
-                  ID: {tenant?.id || "org-default"} · Slug:{" "}
-                  {tenant?.slug || "hosanna"}
+                  ID: {organization?.id || "org-default"} · Slug:{" "}
+                  {organization?.slug || "hosanna"}
                 </p>
               </div>
             )}
@@ -265,8 +269,8 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
                     <Button
                       variant="primary"
                       size="sm"
-                      onClick={handleSaveTenant}
-                      disabled={isSavingTenant}
+                      onClick={handleSaveOrganization}
+                      disabled={isSavingOrganization}
                       icon={<Save className="w-4 h-4" />}
                     >
                       Guardar Alterações

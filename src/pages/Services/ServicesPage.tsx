@@ -16,7 +16,7 @@ import {
   Spinner,
 } from "@hosanna/shared";
 import { useStatsigClient } from "@statsig/react-bindings";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, UseQueryResult } from "@tanstack/react-query";
 import {
   Archive,
   ArchiveRestore,
@@ -58,9 +58,12 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
   searchQuery: externalSearchQuery,
 }) => {
   const navigate = useNavigate();
-  const { tenant } = useAuth();
-  const slugPrefix = tenant?.slug ? `/${tenant.slug}` : "";
-  const context = useOutletContext<any>() || {};
+  const { organization } = useAuth();
+  const slugPrefix = organization?.slug ? `/${organization.slug}` : "";
+  const context = (useOutletContext<Record<string, unknown>>() || {}) as Record<
+    string,
+    unknown
+  >;
   const actualHideHeader = hideHeader ?? context.hideHeader;
   const viewMode = context.viewMode ?? "grid";
   const contextSortBy = context.sortBy;
@@ -68,7 +71,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
   const actualSearchQuery =
     externalSearchQuery !== undefined
       ? externalSearchQuery
-      : context.searchQuery || "";
+      : (context.searchQuery as string) || "";
 
   const { client } = useStatsigClient();
   const serviceAsFolderItem = client?.checkGate
@@ -93,8 +96,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
     : localSortOrder;
 
   // ─── Archive toggle (from MainLayout context or local fallback) ──────────
-  const showArchived = context.showArchived ?? false;
-  const setShowArchived = context.setShowArchived ?? (() => {});
+  const showArchived = (context.showArchived as boolean) ?? false;
 
   // Fetch archived services (fallback if context doesn't provide)
   const localArchivedServicesQuery = useQuery({
@@ -108,7 +110,10 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
   });
 
   const archivedServicesQuery =
-    context.archivedServicesQuery ?? localArchivedServicesQuery;
+    (context.archivedServicesQuery as UseQueryResult<
+      NoInfer<Service[]>,
+      Error
+    >) ?? localArchivedServicesQuery;
 
   // ─── Modal / dialog state ─────────────────────────────────────────────────
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -150,7 +155,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
   const archivedServices = useMemo(
     () =>
       showArchived
-        ? (context.archivedServices ??
+        ? ((context.archivedServices as Service[] | null) ??
           archivedServicesQuery.data ??
           allServices.filter((s) => s.archived))
         : [],
@@ -699,7 +704,10 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
             e.stopPropagation();
             const rect = e.currentTarget.getBoundingClientRect();
             openContextMenu(
-              { ...e, clientX: rect.left, clientY: rect.bottom + 4 } as any,
+              {
+                clientX: rect.left,
+                clientY: rect.bottom + 4,
+              } as unknown as React.MouseEvent,
               service,
             );
           }}
@@ -808,7 +816,10 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
                 e.stopPropagation();
                 const rect = e.currentTarget.getBoundingClientRect();
                 openContextMenu(
-                  { ...e, clientX: rect.left, clientY: rect.bottom + 4 } as any,
+                  {
+                    clientX: rect.left,
+                    clientY: rect.bottom + 4,
+                  } as unknown as React.MouseEvent,
                   service,
                 );
               }}

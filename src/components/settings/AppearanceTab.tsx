@@ -18,7 +18,8 @@ export const AppearanceTab: React.FC<{ active: boolean }> = ({ active }) => {
       title: "Modo Claro",
       description: "Ideal para ambientes bem iluminados.",
       icon: Sun,
-      iconClass: "bg-amber-100 text-amber-600 dark:bg-amber-950 dark:text-amber-400",
+      iconClass:
+        "bg-amber-100 text-amber-600 dark:bg-amber-950 dark:text-amber-400",
     },
     {
       id: "system",

@@ -3,11 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { InvitationStatus } from "better-auth/plugins/organization";
 import React, {
   createContext,
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useState,
 } from "react";
 import { authClient } from "../lib/authClient";
@@ -25,20 +27,57 @@ interface SessionUser {
   [key: string]: unknown;
 }
 
-// Tenant shape compatible with legacy code
-interface Tenant {
+type Organization = {
   id: string;
   name: string;
   slug: string;
-  logo?: string;
-  active: boolean;
+  logo?: string | null;
   createdAt: Date;
-  updatedAt: Date;
-}
+  metadata?: Record<string, unknown> | null;
+  members?: {
+    id: string;
+    organizationId: string;
+    role:
+      | "admin"
+      | "editor"
+      | "guest"
+      | "member"
+      | "musician"
+      | "owner"
+      | "teamLeader";
+    createdAt: Date;
+    userId: string;
+    teamId?: string;
+    user: {
+      id: string;
+      email: string;
+      name: string;
+      image?: string;
+    };
+  }[];
+  invitations?: {
+    id: string;
+    organizationId: string;
+    email: string;
+    role:
+      | "admin"
+      | "editor"
+      | "guest"
+      | "member"
+      | "musician"
+      | "owner"
+      | "teamLeader";
+    status: InvitationStatus;
+    inviterId: string;
+    expiresAt: Date;
+    createdAt: Date;
+    teamId?: string;
+  }[];
+};
 
 interface AuthContextType {
   user: SessionUser | null;
-  tenant: Tenant | null;
+  organization: Organization | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   refetch: () => Promise<void>;
@@ -51,83 +90,81 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const [user, setUser] = useState<SessionUser | null>(null);
-  const [tenant, setTenant] = useState<Tenant | null>(null);
+  const [organization, setOrganization] = useState<Organization | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  const handleClearSession = useCallback(() => {
+    setUser(null);
+    setOrganization(null);
+    localStorage.removeItem("active_org_slug");
+    clearPermissionCache();
+    setIsLoading(false);
+  }, []);
 
   const fetchSession = useCallback(async () => {
     setIsLoading(true);
 
     try {
-      const { data } = await authClient.getSession();
-      const sessionUser = data?.user ?? null;
+      const { data: sessionData, error: sessionError } =
+        await authClient.getSession();
+      const sessionUser = sessionData?.user;
 
-      if (!sessionUser) {
-        handleClearSession();
-        return;
+      if (!sessionUser || sessionError) {
+        return handleClearSession();
       }
 
-      let activeTenant: Tenant | null = null;
-      let userRole: string | null = null;
+      let activeOrg: Organization | null = null;
+      let userRole: string | undefined = undefined;
 
-      const previousTenantSlug = localStorage.getItem("active_org_slug");
-
-      let { data: orgData } =
+      const { data: initialOrg } =
         await authClient.organization.getFullOrganization();
 
-      if (!orgData) {
+      if (initialOrg) {
+        activeOrg = initialOrg as Organization;
+      } else {
         const { data: orgs } = await authClient.organization.list();
-        const storedSlug = localStorage.getItem("active_org_slug");
+        if (orgs && orgs.length > 0) {
+          const storedSlug = localStorage.getItem("active_org_slug");
+          const targetOrg = orgs.find((o) => o.slug === storedSlug) || orgs[0];
 
-        let targetOrg = orgs?.find((o) => o.slug === storedSlug) || orgs?.[0];
-
-        if (targetOrg) {
           await authClient.organization.setActive({
             organizationSlug: targetOrg.slug,
           });
-          orgData = targetOrg as any;
+
+          const { data: newlyActiveOrg } =
+            await authClient.organization.getFullOrganization();
+          activeOrg = newlyActiveOrg as Organization;
         }
       }
 
-      if (orgData) {
-        if (previousTenantSlug !== orgData.slug) {
+      if (activeOrg) {
+        const previousSlug = localStorage.getItem("active_org_slug");
+
+        if (previousSlug !== activeOrg.slug) {
+          localStorage.setItem("active_org_slug", activeOrg.slug);
           clearPermissionCache();
         }
 
-        localStorage.setItem("active_org_slug", orgData.slug);
+        const currentUserMember = activeOrg.members?.find(
+          (m) => m.userId === sessionUser.id,
+        );
 
-        const [fullRes, roleRes] = await Promise.allSettled([
-          authClient.organization.getFullOrganization(),
-          authClient.organization.getActiveMemberRole(),
-        ]);
-
-        const fullOrgData =
-          fullRes.status === "fulfilled" && fullRes.value.data
-            ? fullRes.value.data
-            : orgData;
-
-        userRole =
-          roleRes.status === "fulfilled" && roleRes.value.data
-            ? roleRes.value.data.role
-            : null;
-
-        activeTenant = {
-          id: fullOrgData.id,
-          name: fullOrgData.name,
-          slug: fullOrgData.slug,
-          logo: fullOrgData.logo ?? undefined,
-          active: true,
-          createdAt: new Date(fullOrgData.createdAt),
-          updatedAt: new Date(fullOrgData.createdAt),
-        };
+        if (currentUserMember) {
+          userRole = currentUserMember.role;
+        } else {
+          const { data: roleData } =
+            await authClient.organization.getActiveMemberRole();
+          userRole = roleData?.role || undefined;
+        }
       } else {
         localStorage.removeItem("active_org_slug");
         clearPermissionCache();
       }
 
-      setTenant(activeTenant);
+      setOrganization(activeOrg);
       setUser({
         ...sessionUser,
-        role: userRole ?? undefined,
+        role: userRole,
       } as SessionUser);
     } catch (error) {
       console.error("Failed to fetch session:", error);
@@ -135,49 +172,41 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     } finally {
       setIsLoading(false);
     }
-  }, []);
-
-  const handleClearSession = useCallback(() => {
-    setUser(null);
-    setTenant(null);
-    localStorage.removeItem("active_org_slug");
-    clearPermissionCache(); // CRITICAL: Security reset
-    setIsLoading(false);
-  }, []);
+  }, [handleClearSession]);
 
   useEffect(() => {
     fetchSession();
   }, [fetchSession]);
 
+  // Sync across tabs
   useEffect(() => {
     const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === "active_org_slug") {
-        fetchSession();
-      }
+      if (e.key === "active_org_slug") fetchSession();
     };
     window.addEventListener("storage", handleStorageChange);
     return () => window.removeEventListener("storage", handleStorageChange);
   }, [fetchSession]);
 
-  const logout = async () => {
+  const logout = useCallback(async () => {
     setIsLoading(true);
     await authClient.signOut();
     handleClearSession();
-  };
+  }, [handleClearSession]);
+
+  const contextValue = useMemo<AuthContextType>(
+    () => ({
+      user,
+      organization,
+      isAuthenticated: !!user,
+      isLoading,
+      refetch: fetchSession,
+      logout,
+    }),
+    [user, organization, isLoading, fetchSession, logout],
+  );
 
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        tenant,
-        isAuthenticated: !!user,
-        isLoading,
-        refetch: fetchSession,
-        logout,
-      }}
-    >
-      {children}
-    </AuthContext.Provider>
+    <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>
   );
 };
 

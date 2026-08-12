@@ -10,7 +10,6 @@ import {
   Loader2,
   RefreshCw,
   Search,
-  UserCheck,
   UserPlus,
 } from "lucide-react";
 import React, { useState } from "react";
@@ -20,12 +19,23 @@ import { authClient } from "../../lib/authClient";
 import { MemberProfilePage } from "./MemberProfilePage";
 import { getRoleBadge } from "./settingsUtils";
 
+interface OrgMember {
+  id: string;
+  userId?: string;
+  name: string;
+  email: string;
+  role: string;
+  createdAt?: string | Date;
+  image?: string;
+  [key: string]: unknown;
+}
+
 export const MembersTab: React.FC<{ active: boolean }> = ({ active }) => {
-  const { user, tenant } = useAuth();
+  const { user, organization } = useAuth();
   const { showToast } = useSync();
 
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedMember, setSelectedMember] = useState<any | null>(null);
+  const [selectedMember, setSelectedMember] = useState<OrgMember | null>(null);
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
   const [isInviting, setIsInviting] = useState(false);
 
@@ -34,7 +44,7 @@ export const MembersTab: React.FC<{ active: boolean }> = ({ active }) => {
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteRole, setInviteRole] = useState("member");
 
-  const userRole = (user as any)?.role || "member";
+  const userRole = (user as { role?: string })?.role || "member";
   const isOrgAdminOrOwner = ["owner", "admin"].includes(userRole.toLowerCase());
 
   // Fetch Better Auth Organization Members
@@ -43,35 +53,49 @@ export const MembersTab: React.FC<{ active: boolean }> = ({ active }) => {
     isLoading: isLoadingOrgMembers,
     refetch: refetchOrgMembers,
   } = useQuery({
-    queryKey: ["betterAuthOrgMembers", tenant?.id],
+    queryKey: ["betterAuthOrgMembers", organization?.id],
     queryFn: async () => {
       try {
-        const { data } = await authClient.organization.getFullOrganization();
-        if (data && data.members) {
-          return data.members.map((m: any) => ({
-            id: m.id,
-            userId: m.userId || m.user?.id || m.id,
-            name: m.user?.name || m.name || m.user?.email || "Membro",
-            email: m.user?.email || m.email || "",
-            role: m.role || "member",
-            createdAt: m.createdAt,
-            image: m.user?.image || m.image,
-            isBetterAuth: true,
-          }));
+        if (organization && organization.members) {
+          return organization.members.map(
+            (m: {
+              id: string;
+              userId?: string;
+              user?: {
+                id?: string;
+                name?: string;
+                email?: string;
+                image?: string;
+              };
+              name?: string;
+              email?: string;
+              role?: string;
+              createdAt?: string | Date;
+              image?: string;
+            }) => ({
+              id: m.id,
+              userId: m.userId || m.user?.id || m.id,
+              name: m.user?.name || m.name || m.user?.email || "Membro",
+              email: m.user?.email || m.email || "",
+              role: m.role || "member",
+              createdAt: m.createdAt,
+              image: m.user?.image || m.image,
+            }),
+          );
         }
       } catch {
         // Fallback to empty if endpoint fails
       }
       return null;
     },
-    enabled: active && !!tenant,
+    enabled: active && !!organization,
   });
 
   if (!active) return null;
 
-  const members = orgMembersData || [];
+  const members: OrgMember[] = orgMembersData || [];
 
-  const handleRemoveMember = async (member: any) => {
+  const handleRemoveMember = async (member: OrgMember) => {
     try {
       await authClient.organization.removeMember({
         memberIdOrEmail: member.id || member.email,
@@ -79,25 +103,27 @@ export const MembersTab: React.FC<{ active: boolean }> = ({ active }) => {
       showToast("Membro removido da organização com sucesso!", "success");
       refetchOrgMembers();
       setSelectedMember(null);
-    } catch (err: any) {
+    } catch (err: unknown) {
       showToast(
-        "Erro ao remover membro: " + (err.message || "Tente novamente"),
+        "Erro ao remover membro: " +
+          ((err as Error).message || "Tente novamente"),
         "error",
       );
     }
   };
 
-  const handleRoleChange = async (member: any, newRole: string) => {
+  const handleRoleChange = async (member: OrgMember, newRole: string) => {
     try {
       await authClient.organization.updateMemberRole({
         memberId: member.id,
-        role: newRole as any,
+        role: newRole as "owner" | "admin" | "member",
       });
       showToast("Função do membro atualizada com sucesso!", "success");
       refetchOrgMembers();
-    } catch (err: any) {
+    } catch (err: unknown) {
       showToast(
-        "Erro ao atualizar função: " + (err.message || "Tente novamente"),
+        "Erro ao atualizar função: " +
+          ((err as Error).message || "Tente novamente"),
         "error",
       );
     }
@@ -107,11 +133,13 @@ export const MembersTab: React.FC<{ active: boolean }> = ({ active }) => {
     return (
       <MemberProfilePage
         member={selectedMember}
-        currentUser={user as any}
+        currentUser={
+          user ? { id: user.id, role: (user as { role?: string }).role } : null
+        }
         onBack={() => setSelectedMember(null)}
-        onRemove={handleRemoveMember}
+        onRemove={(m) => handleRemoveMember(m as OrgMember)}
         onApprove={async () => {}}
-        onRoleChange={handleRoleChange}
+        onRoleChange={(m, role) => handleRoleChange(m as OrgMember, role)}
         isApproving={false}
         showToast={showToast}
       />
@@ -127,7 +155,7 @@ export const MembersTab: React.FC<{ active: boolean }> = ({ active }) => {
       // Try Better Auth Organization Invite
       const { error } = await authClient.organization.inviteMember({
         email: inviteEmail.trim(),
-        role: inviteRole as any,
+        role: inviteRole as "owner" | "admin" | "member",
       });
 
       if (error) {
@@ -143,15 +171,15 @@ export const MembersTab: React.FC<{ active: boolean }> = ({ active }) => {
       setInviteName("");
       setInviteEmail("");
       setIsInviteModalOpen(false);
-    } catch (err: any) {
-      showToast(err.message || "Falha ao enviar convite.", "error");
+    } catch (err: unknown) {
+      showToast((err as Error).message || "Falha ao enviar convite.", "error");
     } finally {
       setIsInviting(false);
     }
   };
 
   const filteredMembers = members.filter(
-    (a: any) =>
+    (a: OrgMember) =>
       a.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       a.email.toLowerCase().includes(searchQuery.toLowerCase()),
   );
@@ -203,8 +231,8 @@ export const MembersTab: React.FC<{ active: boolean }> = ({ active }) => {
       {/* Content List */}
       {isLoadingOrgMembers ? (
         <div className="py-12 text-center text-xs text-slate-400 flex items-center justify-center gap-2">
-          <Loader2 className="w-4 h-4 animate-spin text-m3-primary" />A
-          carregar membros da organização...
+          <Loader2 className="w-4 h-4 animate-spin text-m3-primary" />A carregar
+          membros da organização...
         </div>
       ) : filteredMembers.length === 0 ? (
         <div className="py-12 text-center text-xs text-slate-400">
@@ -212,7 +240,7 @@ export const MembersTab: React.FC<{ active: boolean }> = ({ active }) => {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {filteredMembers.map((member: any) => (
+          {filteredMembers.map((member: OrgMember) => (
             <div
               key={member.id}
               onClick={() => setSelectedMember(member)}
@@ -282,8 +310,10 @@ export const MembersTab: React.FC<{ active: boolean }> = ({ active }) => {
                 className="w-full h-11 px-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-semibold"
               >
                 <option value="admin">Administrador</option>
-                <option value="member">Membro</option>
-                <option value="owner">Proprietário</option>
+                <option value="teamLeader">Lider de Equipa</option>
+                <option value="editor">Editor</option>
+                <option value="musician">Músico</option>
+                <option value="guest">Convidado</option>
               </select>
             </div>
 
