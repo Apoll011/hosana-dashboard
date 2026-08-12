@@ -144,11 +144,14 @@ export const RegisterOrganizationPage: React.FC = () => {
         errorMsg={""}
         titleMb={2}
       >
-        <div className="py-12 flex flex-col items-center justify-center text-center animate-in zoom-in-95 duration-500">
-          <h2 className="text-2xl font-black text-slate-900 dark:text-white mb-2">
-            Registro de organizações ainda não está ativo, Espere até o Alpha
-            Release no dia 1 de Setembro
+        <div className="py-14 px-6 flex flex-col items-center justify-center text-center animate-in zoom-in-95 duration-500">
+          <h2 className="text-2xl font-black tracking-tight text-slate-900 dark:text-white mb-3">
+            Registro de organizações ainda não está ativo
           </h2>
+          <p className="text-sm leading-6 text-slate-500 dark:text-slate-400">
+            Aguarde o Alpha Release no dia 1 de Setembro para criar sua
+            organização e fazer login.
+          </p>
         </div>
       </LoginLayout>
     );
