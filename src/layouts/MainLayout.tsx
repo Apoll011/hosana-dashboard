@@ -2113,7 +2113,9 @@ export const MainLayout: React.FC = () => {
               if (window.innerWidth < 768) setIsSidebarOpen(false);
             }}
             title={
-              isSidebarCollapsed ? `Drive da ${organization?.name}` : undefined
+              isSidebarCollapsed
+                ? `Drive da ${organization?.metadata?.shortName}`
+                : undefined
             }
             className={`w-full flex items-center ${isSidebarCollapsed ? "justify-center" : "justify-between"} px-4 py-3 text-[13px] font-bold rounded-2xl transition-all cursor-pointer group ${
               isExplorerView && currentFolderId === null
@@ -2128,7 +2130,7 @@ export const MainLayout: React.FC = () => {
                 className={`w-4.5 h-4.5 ${isExplorerView && currentFolderId === null ? "text-m3-primary" : "text-m3-secondary"}`}
               />
               {!isSidebarCollapsed && (
-                <span>Drive da {organization?.name}</span>
+                <span>Drive da {organization?.metadata?.shortName}</span>
               )}
             </div>
             {!isSidebarCollapsed && (

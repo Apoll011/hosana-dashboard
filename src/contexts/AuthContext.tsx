@@ -33,7 +33,31 @@ type Organization = {
   slug: string;
   logo?: string | null;
   createdAt: Date;
-  metadata?: Record<string, unknown> | null;
+  metadata?: {
+    description?: string;
+    shortName?: string;
+    settings?: {
+      general?: {
+        locale?: string;
+        timezone?: string;
+        weekStartsOn?: number;
+      };
+      services?: {
+        defaultDurations?: {
+          sermon?: number;
+          song?: number;
+        };
+        showNotes?: boolean;
+        showServiceDuration?: boolean;
+        autoSave?: boolean;
+      };
+      appearance?: {
+        accentColor?: string;
+        showBranding?: boolean;
+      };
+    };
+    [key: string]: unknown;
+  } | null;
   members?: {
     id: string;
     organizationId: string;
@@ -73,6 +97,23 @@ type Organization = {
     createdAt: Date;
     teamId?: string;
   }[];
+};
+
+const normalizeOrganization = (org: unknown): Organization => {
+  const organization = org as Organization & { metadata?: unknown };
+
+  if (typeof organization.metadata === "string") {
+    try {
+      organization.metadata = JSON.parse(organization.metadata) as Record<
+        string,
+        unknown
+      >;
+    } catch {
+      organization.metadata = null;
+    }
+  }
+
+  return organization;
 };
 
 interface AuthContextType {
@@ -120,7 +161,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         await authClient.organization.getFullOrganization();
 
       if (initialOrg) {
-        activeOrg = initialOrg as Organization;
+        activeOrg = normalizeOrganization(initialOrg);
       } else {
         const { data: orgs } = await authClient.organization.list();
         if (orgs && orgs.length > 0) {
@@ -133,7 +174,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
           const { data: newlyActiveOrg } =
             await authClient.organization.getFullOrganization();
-          activeOrg = newlyActiveOrg as Organization;
+          activeOrg = normalizeOrganization(newlyActiveOrg);
         }
       }
 
