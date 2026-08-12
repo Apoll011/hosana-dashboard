@@ -29,7 +29,7 @@ export function useFolders() {
       queryClient.invalidateQueries({ queryKey: ["folders"] });
       showToast(`Folder "${newFolder.name}" created`, "success");
     },
-    onError: (err: any) => {
+    onError: (err: Error) => {
       showToast(err.message || "Failed to create folder", "error");
     },
   });
@@ -49,7 +49,7 @@ export function useFolders() {
       queryClient.invalidateQueries({ queryKey: ["songs"] });
       showToast("Folder renamed", "success");
     },
-    onError: (err: any) => {
+    onError: (err: Error) => {
       showToast(err.message || "Failed to rename folder", "error");
     },
   });
@@ -69,7 +69,7 @@ export function useFolders() {
       queryClient.invalidateQueries({ queryKey: ["songs"] });
       showToast("Folder moved", "success");
     },
-    onError: (err: any) => {
+    onError: (err: Error) => {
       showToast(err.message || "Failed to move folder", "error");
     },
   });
@@ -88,7 +88,7 @@ export function useFolders() {
       queryClient.invalidateQueries({ queryKey: ["services"] });
       showToast("Folder deleted", "info");
     },
-    onError: (err: any) => {
+    onError: (err: Error) => {
       showToast(err.message || "Failed to delete folder", "error");
     },
   });

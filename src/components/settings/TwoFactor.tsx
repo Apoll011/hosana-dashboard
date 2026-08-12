@@ -9,7 +9,8 @@ import React, { useState } from "react";
 export const TwoFactorSection: React.FC = () => {
   const { user, refetch: refetchAuth } = useAuth();
   const { showToast } = useSync();
-  const is2FAEnabled = (user as any)?.twoFactorEnabled || false;
+  const is2FAEnabled =
+    (user as { twoFactorEnabled?: boolean })?.twoFactorEnabled || false;
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [password, setPassword] = useState("");
@@ -39,8 +40,8 @@ export const TwoFactorSection: React.FC = () => {
         // Avançar para o ecrã do código QR
         setStep("setup");
       }
-    } catch (err: any) {
-      showToast(err.message || "Erro ao ativar 2FA", "error");
+    } catch (err: unknown) {
+      showToast((err as Error).message || "Erro ao ativar 2FA", "error");
     } finally {
       setIsLoading(false);
     }
@@ -64,8 +65,8 @@ export const TwoFactorSection: React.FC = () => {
         // Em vez de fechar, avança para mostrar os códigos de recuperação
         setStep("backup");
       }
-    } catch (err: any) {
-      showToast(err.message || "Erro ao verificar código", "error");
+    } catch (err: unknown) {
+      showToast((err as Error).message || "Erro ao verificar código", "error");
     } finally {
       setIsLoading(false);
     }
@@ -92,8 +93,8 @@ export const TwoFactorSection: React.FC = () => {
         await refetchAuth();
         closeModal();
       }
-    } catch (err: any) {
-      showToast(err.message || "Erro ao desativar 2FA", "error");
+    } catch (err: unknown) {
+      showToast((err as Error).message || "Erro ao desativar 2FA", "error");
     } finally {
       setIsLoading(false);
     }

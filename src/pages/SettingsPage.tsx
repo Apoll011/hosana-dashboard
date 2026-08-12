@@ -15,8 +15,6 @@ import {
   Users,
 } from "lucide-react";
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "../contexts/AuthContext";
 import { useSync } from "../contexts/SyncContext";
 
 import { AboutTab } from "../components/settings/AboutTab";
@@ -27,22 +25,18 @@ import { MembersTab } from "../components/settings/MembersTab";
 import { WorkspaceTab } from "../components/settings/WorkspaceTab";
 
 type TabType =
-  | "general"
-  | "workspace"
-  | "account"
-  | "members"
-  | "appearance"
-  | "about";
+  "general" | "workspace" | "account" | "members" | "appearance" | "about";
 
 export const SettingsPage: React.FC = () => {
-  const navigate = useNavigate();
-  const { tenant } = useAuth();
   const { showToast } = useSync();
 
   const [activeTab, setActiveTab] = useState<TabType>("account");
 
   // Restore Modal State
-  const [pendingRestoreData, setPendingRestoreData] = useState<any>(null);
+  const [pendingRestoreData, setPendingRestoreData] = useState<Record<
+    string,
+    unknown
+  > | null>(null);
   const [restoreStats, setRestoreStats] = useState<{
     songs: number;
     folders: number;
@@ -51,7 +45,7 @@ export const SettingsPage: React.FC = () => {
   const [isRestoring, setIsRestoring] = useState(false);
 
   // Toggle Workspace State
-  const [isTogglingWs, setIsTogglingWs] = useState(false);
+  const [_isTogglingWs, setIsTogglingWs] = useState(false);
 
   const handleConfirmRestore = async () => {
     if (!pendingRestoreData) return;

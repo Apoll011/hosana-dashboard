@@ -12,11 +12,7 @@ export interface FolderNode {
 }
 
 export type SyncStatus =
-  | "synced"
-  | "syncing"
-  | "error"
-  | "offline"
-  | "local_only";
+  "synced" | "syncing" | "error" | "offline" | "local_only";
 
 export interface CifraResult {
   cifraclub_url: string;

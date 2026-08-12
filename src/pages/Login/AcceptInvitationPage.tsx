@@ -61,8 +61,10 @@ export const AcceptInvitationPage: React.FC = () => {
         } else {
           setInvitation(data as unknown as InvitationData);
         }
-      } catch (err: any) {
-        setErrorMsg(err?.message || "Ocorreu um erro ao carregar o convite.");
+      } catch (err: unknown) {
+        setErrorMsg(
+          (err as Error)?.message || "Ocorreu um erro ao carregar o convite.",
+        );
       } finally {
         setIsFetching(false);
       }
@@ -90,7 +92,11 @@ export const AcceptInvitationPage: React.FC = () => {
       setSuccessMsg("Convite aceite com sucesso! A redirecionar...");
 
       await refetch();
-      const orgSlug = (data as any)?.organization?.slug || (data as any)?.slug;
+      const orgData = data as {
+        organization?: { slug?: string };
+        slug?: string;
+      } | null;
+      const orgSlug = orgData?.organization?.slug || orgData?.slug;
       if (orgSlug) {
         localStorage.setItem("active_org_slug", orgSlug);
         await authClient.organization.setActive({ organizationSlug: orgSlug });
@@ -102,8 +108,10 @@ export const AcceptInvitationPage: React.FC = () => {
           navigate("/onboarding", { replace: true });
         }, 1000);
       }
-    } catch (err: any) {
-      setErrorMsg(err?.message || "Erro inesperado ao aceitar convite.");
+    } catch (err: unknown) {
+      setErrorMsg(
+        (err as Error)?.message || "Erro inesperado ao aceitar convite.",
+      );
       setActionLoading(null);
     }
   };
@@ -132,8 +140,10 @@ export const AcceptInvitationPage: React.FC = () => {
           navigate("/login", { replace: true });
         }
       }, 1200);
-    } catch (err: any) {
-      setErrorMsg(err?.message || "Erro inesperado ao recusar convite.");
+    } catch (err: unknown) {
+      setErrorMsg(
+        (err as Error)?.message || "Erro inesperado ao recusar convite.",
+      );
       setActionLoading(null);
     }
   };

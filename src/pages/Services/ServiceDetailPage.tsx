@@ -671,7 +671,9 @@ export const ServiceDetailPage: React.FC = () => {
                 Biblioteca de Cânticos
               </h2>
               <Input
-                ref={searchInputRef as any}
+                ref={
+                  searchInputRef as unknown as React.RefObject<HTMLInputElement>
+                }
                 placeholder="Pesquisar cânticos..."
                 value={librarySearch}
                 onChange={(e) => setLibrarySearch(e.target.value)}

@@ -148,10 +148,10 @@ export async function getCifra(
 
     const data: CifraResult = await response.json();
     return data;
-  } catch (error: any) {
+  } catch (error) {
     return {
       cifraclub_url: `https://www.cifraclub.com.br/${artist}/${song}/`,
-      error: error.message,
+      error: (error as { message: string }).message,
     };
   }
 }

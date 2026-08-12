@@ -22,7 +22,14 @@ function getStrength(password: string): number {
   return REQUIREMENTS.filter((r) => r.test(password)).length;
 }
 
-const STRENGTH_LABELS = ["", "Muito fraca", "Fraca", "Razoável", "Forte", "Muito forte"];
+const STRENGTH_LABELS = [
+  "",
+  "Muito fraca",
+  "Fraca",
+  "Razoável",
+  "Forte",
+  "Muito forte",
+];
 const STRENGTH_COLORS = [
   "",
   "bg-rose-500",
@@ -51,14 +58,18 @@ export function PasswordStrengthMeter({ password }: { password: string }) {
           <div
             key={i}
             className={`flex-1 rounded-full transition-all duration-300 ${
-              i < strength ? STRENGTH_COLORS[strength] : "bg-slate-200 dark:bg-slate-700"
+              i < strength
+                ? STRENGTH_COLORS[strength]
+                : "bg-slate-200 dark:bg-slate-700"
             }`}
           />
         ))}
       </div>
 
       {/* Label */}
-      <p className={`text-xs font-semibold ${STRENGTH_TEXT_COLORS[strength] || "text-slate-400 dark:text-slate-500"}`}>
+      <p
+        className={`text-xs font-semibold ${STRENGTH_TEXT_COLORS[strength] || "text-slate-400 dark:text-slate-500"}`}
+      >
         {STRENGTH_LABELS[strength] || ""}
       </p>
 
@@ -67,8 +78,13 @@ export function PasswordStrengthMeter({ password }: { password: string }) {
         {REQUIREMENTS.map((req) => {
           const met = req.test(password);
           return (
-            <li key={req.label} className={`text-[11px] flex items-center gap-1.5 font-medium ${met ? "text-emerald-600 dark:text-emerald-400" : "text-slate-400 dark:text-slate-500"}`}>
-              <span className={`w-1.5 h-1.5 rounded-full ${met ? "bg-emerald-500" : "bg-slate-300 dark:bg-slate-700"}`} />
+            <li
+              key={req.label}
+              className={`text-[11px] flex items-center gap-1.5 font-medium ${met ? "text-emerald-600 dark:text-emerald-400" : "text-slate-400 dark:text-slate-500"}`}
+            >
+              <span
+                className={`w-1.5 h-1.5 rounded-full ${met ? "bg-emerald-500" : "bg-slate-300 dark:bg-slate-700"}`}
+              />
               {req.label}
             </li>
           );
@@ -77,4 +93,3 @@ export function PasswordStrengthMeter({ password }: { password: string }) {
     </div>
   );
 }
-

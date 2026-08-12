@@ -4,7 +4,7 @@
  */
 
 import { Button, Input } from "@hosanna/shared";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import {
   Camera,
   CheckCircle2,
@@ -27,7 +27,6 @@ import { TwoFactorSection } from "./TwoFactor";
 
 const ActiveSessionsSection: React.FC = () => {
   const { showToast } = useSync();
-  const queryClient = useQueryClient();
 
   const {
     data: sessions,
@@ -83,34 +82,48 @@ const ActiveSessionsSection: React.FC = () => {
         </div>
       ) : sessions && sessions.length > 0 ? (
         <div className="space-y-3">
-          {sessions.map((sess: any, idx: number) => (
-            <div
-              key={sess.id || idx}
-              className="p-3 bg-slate-50 dark:bg-slate-950/50 rounded-xl border border-slate-100 dark:border-slate-800/60 flex items-center justify-between gap-3"
-            >
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800">
-                  <MonitorSmartphone className="w-4 h-4 text-m3-primary" />
-                </div>
-                <div>
-                  <p className="text-xs font-bold text-slate-900 dark:text-slate-100">
-                    {sess.userAgent || "Sessão do Navegador"}
-                  </p>
-                  <p className="text-[10px] text-slate-400 font-mono mt-0.5">
-                    IP: {sess.ipAddress || "Atual"} · Criada a{" "}
-                    {new Date(sess.createdAt).toLocaleDateString()}
-                  </p>
-                </div>
-              </div>
-
-              <button
-                onClick={() => handleRevoke(sess.token)}
-                className="px-2.5 py-1 text-xs font-bold text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-lg transition-colors border border-red-200 dark:border-red-900/50 cursor-pointer"
+          {sessions.map(
+            (
+              sess: {
+                id: string;
+                createdAt: Date;
+                updatedAt: Date;
+                userId: string;
+                expiresAt: Date;
+                token: string;
+                ipAddress?: string | null | undefined;
+                userAgent?: string | null | undefined;
+              },
+              idx: number,
+            ) => (
+              <div
+                key={sess.id || idx}
+                className="p-3 bg-slate-50 dark:bg-slate-950/50 rounded-xl border border-slate-100 dark:border-slate-800/60 flex items-center justify-between gap-3"
               >
-                Encerrar
-              </button>
-            </div>
-          ))}
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800">
+                    <MonitorSmartphone className="w-4 h-4 text-m3-primary" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-slate-900 dark:text-slate-100">
+                      {sess.userAgent || "Sessão do Navegador"}
+                    </p>
+                    <p className="text-[10px] text-slate-400 font-mono mt-0.5">
+                      IP: {sess.ipAddress || "Atual"} · Criada a{" "}
+                      {new Date(sess.createdAt).toLocaleDateString()}
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => handleRevoke(sess.token)}
+                  className="px-2.5 py-1 text-xs font-bold text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-lg transition-colors border border-red-200 dark:border-red-900/50 cursor-pointer"
+                >
+                  Encerrar
+                </button>
+              </div>
+            ),
+          )}
         </div>
       ) : (
         <p className="text-xs text-slate-500 py-4 text-center">
@@ -164,9 +177,10 @@ export const AccountTab: React.FC<{ active: boolean }> = ({ active }) => {
       await authClient.updateUser({ image: compressedBase64 });
       await refetchAuth();
       showToast("Avatar atualizado com sucesso!", "success");
-    } catch (err: any) {
+    } catch (err: unknown) {
       showToast(
-        "Erro ao atualizar o avatar: " + (err.message || "Erro de rede"),
+        "Erro ao atualizar o avatar: " +
+          ((err as Error).message || "Erro de rede"),
         "error",
       );
     } finally {
@@ -215,9 +229,10 @@ export const AccountTab: React.FC<{ active: boolean }> = ({ active }) => {
       await authClient.changeEmail({ newEmail: draftEmail });
       await refetchAuth();
       showToast("Pedido de alteração de e-mail enviado!", "success");
-    } catch (err: any) {
+    } catch (err: unknown) {
       showToast(
-        "Erro ao alterar o e-mail: " + (err.message || "Tente novamente"),
+        "Erro ao alterar o e-mail: " +
+          ((err as Error).message || "Tente novamente"),
         "error",
       );
     }
@@ -252,10 +267,10 @@ export const AccountTab: React.FC<{ active: boolean }> = ({ active }) => {
       setDraftOldPassword("");
       setDraftNewPassword("");
       setDraftConfirmPassword("");
-    } catch (err: any) {
+    } catch (err: unknown) {
       showToast(
         "Erro ao alterar palavra-passe: " +
-          (err.message || "Verifique a palavra-passe atual"),
+          ((err as Error).message || "Verifique a palavra-passe atual"),
         "error",
       );
     }
@@ -279,11 +294,12 @@ export const AccountTab: React.FC<{ active: boolean }> = ({ active }) => {
           <div className="flex items-center gap-4">
             <div className="relative group">
               <div className="w-16 h-16 rounded-full bg-linear-to-tr from-sky-600 to-indigo-600 flex items-center justify-center font-black text-white text-xl overflow-hidden shadow-md">
-                {displayUser?.image || (displayUser as any)?.logo ? (
+                {displayUser?.image ||
+                (displayUser as { logo?: string })?.logo ? (
                   <img
                     src={
                       (displayUser?.image ||
-                        (displayUser as any)?.logo) as string
+                        (displayUser as { logo?: string })?.logo) as string
                     }
                     alt={displayUser?.name}
                     className="w-full h-full object-cover"
@@ -315,7 +331,9 @@ export const AccountTab: React.FC<{ active: boolean }> = ({ active }) => {
             <div>
               <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
                 {displayUser?.name || "Utilizador"}
-                {getRoleBadge((displayUser as any)?.role || "member")}
+                {getRoleBadge(
+                  (displayUser as { role?: string })?.role || "member",
+                )}
               </h2>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                 {displayUser?.email}
@@ -323,7 +341,7 @@ export const AccountTab: React.FC<{ active: boolean }> = ({ active }) => {
             </div>
           </div>
 
-          {(displayUser?.image || (displayUser as any)?.logo) && (
+          {(displayUser?.image || (displayUser as { logo?: string })?.logo) && (
             <button
               type="button"
               onClick={handleRemoveAvatar}
@@ -535,7 +553,7 @@ export const AccountTab: React.FC<{ active: boolean }> = ({ active }) => {
             <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 block mb-1">
               Função
             </span>
-            {getRoleBadge((displayUser as any)?.role || "member")}
+            {getRoleBadge((displayUser as { role?: string })?.role || "member")}
           </div>
           <div className="p-3 bg-slate-50 dark:bg-slate-950/50 rounded-xl border border-slate-100 dark:border-slate-800/60">
             <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 block mb-1">

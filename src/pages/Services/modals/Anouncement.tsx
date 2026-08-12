@@ -20,7 +20,12 @@ interface AnnouncementModalProps {
     notes: string;
     duration: number;
   }) => void;
-  initial?: { title: string; content: string; notes: string; duration?: number };
+  initial?: {
+    title: string;
+    content: string;
+    notes: string;
+    duration?: number;
+  };
 }
 
 export const AnnouncementModal: React.FC<AnnouncementModalProps> = ({

@@ -4,7 +4,13 @@
  */
 
 import { Button, Input } from "@hosanna/shared";
-import { ArrowRight, CheckCircle2, KeyRound, Mail, ShieldCheck } from "lucide-react";
+import {
+  ArrowRight,
+  CheckCircle2,
+  KeyRound,
+  Mail,
+  ShieldCheck,
+} from "lucide-react";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { authClient } from "../../lib/authClient";
@@ -20,7 +26,10 @@ export const ForgotPasswordPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email.trim()) { setErrorMsg("Insira o seu endereço de e-mail."); return; }
+    if (!email.trim()) {
+      setErrorMsg("Insira o seu endereço de e-mail.");
+      return;
+    }
     setErrorMsg("");
     setIsLoading(true);
 
@@ -38,11 +47,20 @@ export const ForgotPasswordPage: React.FC = () => {
       }
 
       // Navigate directly to reset-password with email in state
-      navigate("/reset-password", { state: { email: email.trim(), mode: "code" } });
+      navigate("/reset-password", {
+        state: { email: email.trim(), mode: "code" },
+      });
       return;
     }
 
-    const { error } = await (authClient as any).forgetPassword({
+    const { error } = await (
+      authClient as unknown as {
+        forgetPassword: (opts: {
+          email: string;
+          redirectTo: string;
+        }) => Promise<{ error?: { message?: string } }>;
+      }
+    ).forgetPassword({
       email: email.trim(),
       redirectTo: `${window.location.origin}/reset-password`,
     });
@@ -63,11 +81,16 @@ export const ForgotPasswordPage: React.FC = () => {
             <CheckCircle2 className="w-10 h-10 text-emerald-500 dark:text-emerald-400" />
           </div>
           <div>
-            <h2 className="text-xl font-black text-slate-900 dark:text-white">E-mail Enviado!</h2>
+            <h2 className="text-xl font-black text-slate-900 dark:text-white">
+              E-mail Enviado!
+            </h2>
             <p className="text-sm text-slate-500 dark:text-slate-400 mt-2 max-w-xs mx-auto leading-relaxed">
               Se existe uma conta associada a{" "}
-              <span className="font-bold text-slate-700 dark:text-slate-200">{email}</span>, receberá
-              um e-mail com as instruções para redefinir a palavra-passe.
+              <span className="font-bold text-slate-700 dark:text-slate-200">
+                {email}
+              </span>
+              , receberá um e-mail com as instruções para redefinir a
+              palavra-passe.
             </p>
           </div>
         </div>
@@ -85,7 +108,9 @@ export const ForgotPasswordPage: React.FC = () => {
         <div className="w-14 h-14 bg-m3-primary/10 dark:bg-m3-primary/20 rounded-2xl flex items-center justify-center mb-3">
           <KeyRound className="w-7 h-7 text-m3-primary dark:text-m3-primary-light" />
         </div>
-        <h2 className="font-display font-black text-xl text-slate-900 dark:text-white">Esqueceu a palavra-passe?</h2>
+        <h2 className="font-display font-black text-xl text-slate-900 dark:text-white">
+          Esqueceu a palavra-passe?
+        </h2>
         <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 text-center max-w-xs">
           Escolha como prefere recuperar o acesso à sua conta
         </p>
@@ -136,11 +161,14 @@ export const ForgotPasswordPage: React.FC = () => {
           isLoading={isLoading}
           className="w-full h-14 bg-m3-primary hover:bg-m3-primary-dark border-0 font-black uppercase tracking-widest text-[10px] text-white rounded-[20px] transition-all shadow-xl shadow-m3-primary/20 hover:shadow-m3-primary/40 flex items-center justify-center gap-2 group"
         >
-          <span>{mode === "code" ? "Enviar Código de Recuperação" : "Enviar Link de Recuperação"}</span>
+          <span>
+            {mode === "code"
+              ? "Enviar Código de Recuperação"
+              : "Enviar Link de Recuperação"}
+          </span>
           <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
         </Button>
       </form>
     </LoginLayout>
   );
 };
-

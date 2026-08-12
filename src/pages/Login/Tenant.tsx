@@ -24,7 +24,7 @@ import { PasswordStrengthMeter } from "./components/PasswordStrengthMeter";
 import { TurnstileWidget } from "./components/TurnstileWidget";
 import LoginLayout from "./Layout";
 
-export const RegisterTenantPage: React.FC = () => {
+export const RegisterOrganizationPage: React.FC = () => {
   const navigate = useNavigate();
   const { client } = useStatsigClient();
   const alpha_release = client.checkGate("alpha_release");
@@ -115,9 +115,10 @@ export const RegisterTenantPage: React.FC = () => {
           replace: true,
         });
       }, 2000);
-    } catch (err: any) {
+    } catch (err: unknown) {
       setErrorMsg(
-        err.message || "Falha ao criar organização. Tente novamente.",
+        (err as Error).message ||
+          "Falha ao criar organização. Tente novamente.",
       );
       setIsLoading(false);
       captchaRef.current?.reset();

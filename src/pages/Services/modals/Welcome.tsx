@@ -20,7 +20,12 @@ interface WelcomeModalProps {
     notes: string;
     duration: number;
   }) => void;
-  initial?: { title: string; content: string; notes: string; duration?: number };
+  initial?: {
+    title: string;
+    content: string;
+    notes: string;
+    duration?: number;
+  };
 }
 
 export const WelcomeModal: React.FC<WelcomeModalProps> = ({
