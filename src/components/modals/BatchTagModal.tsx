@@ -4,7 +4,7 @@
  */
 
 import { Badge, Button, Input, Modal } from "@hosanna/shared";
-import { Check, Plus, Sparkles, Tag as TagIcon, X } from "lucide-react";
+import { Check, Plus, Tag as TagIcon, X } from "lucide-react";
 import React, { useEffect, useState } from "react";
 
 interface BatchTagModalProps {
@@ -164,7 +164,6 @@ export const BatchTagModal: React.FC<BatchTagModalProps> = ({
         {/* Preset Categories */}
         <div className="flex flex-col gap-2">
           <label className="text-[10px] font-bold text-slate-900 dark:text-slate-100 uppercase tracking-wider flex items-center gap-1.5">
-            <Sparkles className="w-3.5 h-3.5 text-amber-500" />
             Categorias & Temas Sugeridos
           </label>
           <div className="flex flex-wrap gap-1.5 max-h-36 overflow-y-auto p-1.5 border border-slate-200 dark:border-slate-800 rounded-xl bg-slate-50/50 dark:bg-slate-900/30">
