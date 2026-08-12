@@ -10,7 +10,6 @@ import {
   CreditCard,
   Info,
   Shield,
-  Sparkles,
   Users,
   X,
 } from "lucide-react";
@@ -319,7 +318,6 @@ export const InboxPanel: React.FC<InboxPanelProps> = ({
           </div>
         ) : filteredNotifications.length === 0 ? (
           <div className="p-8 text-center text-slate-400 dark:text-slate-600">
-            <Sparkles className="w-8 h-8 mx-auto mb-2 opacity-40" />
             <p className="text-xs font-semibold">
               Nenhuma notificação encontrada
             </p>
@@ -414,7 +412,7 @@ export const InboxPanel: React.FC<InboxPanelProps> = ({
 };
 
 export interface InboxButtonProps {
-  client?: unknown;
+  client?: InboxFetchClient;
   onNavigate?: (notif: InboxNotification) => void;
   renderItem?: (notif: InboxNotification) => React.ReactNode;
   pollInterval?: number;
@@ -435,7 +433,7 @@ export const InboxButton: React.FC<InboxButtonProps> = ({
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const inbox = useInbox(client, { pollInterval, pageSize, organizationId });
+  const inbox = useInbox(client!, { pollInterval, pageSize, organizationId });
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {

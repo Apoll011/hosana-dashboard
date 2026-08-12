@@ -64,7 +64,7 @@ import React, {
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { FolderForm } from "../components/forms/FolderForm";
 import { SongForm } from "../components/forms/SongForm";
-import { InboxButton } from "../components/Inbox";
+import { InboxButton, InboxFetchClient } from "../components/Inbox";
 import { BatchDeleteModal } from "../components/modals/BatchDeleteModal";
 import { BatchMoveModal } from "../components/modals/BatchMoveModal";
 import { BatchTagModal } from "../components/modals/BatchTagModal";
@@ -77,7 +77,7 @@ import { useServices } from "../hooks/useServices";
 import { useAllSongs } from "../hooks/useSongs";
 import { authClient } from "../lib/authClient";
 
-import { ConversionResult, printApi } from "@hosanna/shared";
+import { ConversionResult } from "@hosanna/shared";
 import { useStatsigClient } from "@statsig/react-bindings";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Action, KBarProvider } from "kbar";
@@ -86,7 +86,7 @@ import { KBarCommandPaletteUI } from "../components/KBarCommandPalette";
 import { CifraClubImportModal } from "../components/modals/CifraModal";
 import { getRoleLabel } from "../components/settings/settingsUtils";
 import { songImportRegistry } from "../import";
-import { getInitials, printHtmlDirectly } from "../utils";
+import { getInitials } from "../utils";
 import { ProviderImportResult } from "../utils/import";
 
 interface ContextMenuState {
@@ -1739,29 +1739,29 @@ export const MainLayout: React.FC = () => {
   const handlePrintSongs = async () => {
     setContextMenu(null);
     selectedSongIds.forEach(async (id) => {
-      const html = await printApi.printSong(id);
-      printHtmlDirectly(html);
+      //const html = await printApi.printSong(id);
+      //printHtmlDirectly(html);
     });
   };
 
   const handlePrintSong = async (id: string) => {
     setContextMenu(null);
-    const html = await printApi.printSong(id);
-    printHtmlDirectly(html);
+    //const html = await printApi.printSong(id);
+    //printHtmlDirectly(html);
   };
 
   const handlePrintFolders = async () => {
     setContextMenu(null);
     selectedFolderIds.forEach(async (id) => {
-      const html = await printApi.printFolder(id);
-      printHtmlDirectly(html);
+      //const html = await printApi.printFolder(id);
+      //printHtmlDirectly(html);
     });
   };
 
   const handlePrintFolder = async (id: string) => {
     setContextMenu(null);
-    const html = await printApi.printFolder(id);
-    printHtmlDirectly(html);
+    //const html = await printApi.printFolder(id);
+    //printHtmlDirectly(html);
   };
 
   const handleCifraClubSubmit = async (
@@ -2072,7 +2072,7 @@ export const MainLayout: React.FC = () => {
                   </h1>
                   {organization && (
                     <span className="mt-1 text-xs font-medium text-slate-500 dark:text-slate-400 truncate max-w-32.5">
-                      {organization.name || organization.slug}
+                      {organization?.metadata?.shortName || organization.slug}
                     </span>
                   )}
                 </div>
@@ -2113,7 +2113,9 @@ export const MainLayout: React.FC = () => {
               if (window.innerWidth < 768) setIsSidebarOpen(false);
             }}
             title={
-              isSidebarCollapsed ? `Drive da ${organization?.name}` : undefined
+              isSidebarCollapsed
+                ? `Drive da ${organization?.metadata?.shortName}`
+                : undefined
             }
             className={`w-full flex items-center ${isSidebarCollapsed ? "justify-center" : "justify-between"} px-4 py-3 text-[13px] font-bold rounded-2xl transition-all cursor-pointer group ${
               isExplorerView && currentFolderId === null
@@ -2128,7 +2130,7 @@ export const MainLayout: React.FC = () => {
                 className={`w-4.5 h-4.5 ${isExplorerView && currentFolderId === null ? "text-m3-primary" : "text-m3-secondary"}`}
               />
               {!isSidebarCollapsed && (
-                <span>Drive da {organization?.name}</span>
+                <span>Drive da {organization?.metadata?.shortName}</span>
               )}
             </div>
             {!isSidebarCollapsed && (
@@ -2686,7 +2688,10 @@ export const MainLayout: React.FC = () => {
                       </>
                     )}
 
-                    <InboxButton client={authClient} className="shrink-0" />
+                    <InboxButton
+                      client={authClient as InboxFetchClient}
+                      className="shrink-0"
+                    />
 
                     <div className="relative shrink-0 ml-1" ref={plusMenuRef}>
                       <button

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Button, Modal, settingsApi } from "@hosanna/shared";
+import { Button, Modal, backupApi } from "@hosanna/shared";
 import {
   AlertTriangle,
   Building2,
@@ -23,6 +23,7 @@ import { AppearanceTab } from "../components/settings/AppearanceTab";
 import { GeneralTab } from "../components/settings/GeneralTab";
 import { MembersTab } from "../components/settings/MembersTab";
 import { WorkspaceTab } from "../components/settings/WorkspaceTab";
+import { useActiveRole } from "../lib/permissions/client";
 
 type TabType =
   "general" | "workspace" | "account" | "members" | "appearance" | "about";
@@ -51,7 +52,7 @@ export const SettingsPage: React.FC = () => {
     if (!pendingRestoreData) return;
     setIsRestoring(true);
     try {
-      await settingsApi.restoreBackup(pendingRestoreData);
+      await backupApi.restoreBackup(pendingRestoreData);
       showToast(
         "Base de dados restaurada com sucesso! A recarregar...",
         "success",
@@ -68,11 +69,18 @@ export const SettingsPage: React.FC = () => {
     }
   };
 
+  const { role } = useActiveRole();
+  const isServerAdminRole = role === "admin" || role === "owner";
+
   const tabs = [
     { id: "account", label: "Conta & Segurança", icon: User },
     { id: "workspace", label: "Organização", icon: Building2 },
     { id: "members", label: "Membros", icon: Users },
-    { id: "general", label: "Servidor & Geral", icon: Server },
+    {
+      id: "general",
+      label: isServerAdminRole ? "Servidor & Geral" : "Geral",
+      icon: Server,
+    },
     { id: "appearance", label: "Aparência", icon: Palette },
     { id: "about", label: "Sobre", icon: Info },
   ];
