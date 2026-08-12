@@ -419,9 +419,6 @@ export const GeneralTab: React.FC<GeneralTabProps> = ({
         </form>
       </Can>
 
-      {/* ========================================== */}
-      {/* PARTE 2: DEFINIÇÕES DO STUDIO (INDIVIDUAL) */}
-      {/* ========================================== */}
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm overflow-hidden mt-8">
         <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-900/50">
           <div>
