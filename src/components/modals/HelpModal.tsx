@@ -1,4 +1,4 @@
-import { Keyboard, Lightbulb, Sparkles, X } from "lucide-react";
+import { Keyboard, Lightbulb, X } from "lucide-react";
 import React, { useEffect } from "react";
 
 interface HelpModalProps {
@@ -113,7 +113,6 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
           {/* Coluna 1: Snippets */}
           <div>
             <div className="flex items-center gap-2 mb-2 text-primary dark:text-sky-400">
-              <Sparkles className="w-5 h-5" />
               <h3 className="text-lg font-bold">Snippets Inteligentes</h3>
             </div>
             <p className="text-xs text-slate-500 dark:text-slate-400 mb-5 leading-relaxed">
