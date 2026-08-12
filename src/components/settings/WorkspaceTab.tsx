@@ -41,6 +41,8 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
   setIsTogglingWs: _setIsTogglingWs,
 }) => {
   const { organization, refetch: refetchAuth } = useAuth();
+  const orgMetadata =
+    (organization?.metadata as Record<string, unknown> | undefined) || {};
 
   const [isDownloading, setIsDownloading] = useState(false);
   const restoreInputRef = useRef<HTMLInputElement>(null);
@@ -48,10 +50,18 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
 
   const [currentName, setCurrentName] = useState(organization?.name || "");
   const [currentLogo, setCurrentLogo] = useState(organization?.logo);
+  const [currentDescription, setCurrentDescription] = useState(
+    (orgMetadata.description as string) || "",
+  );
+  const [currentShortName, setCurrentShortName] = useState(
+    (orgMetadata.shortName as string) || "",
+  );
 
   const [isEditing, setIsEditing] = useState(false);
   const [draftName, setDraftName] = useState(currentName);
   const [draftLogo, setDraftLogo] = useState(currentLogo);
+  const [draftDescription, setDraftDescription] = useState(currentDescription);
+  const [draftShortName, setDraftShortName] = useState(currentShortName);
 
   const [canManageOrg, setCanManageOrg] = useState<boolean>(false);
 
@@ -68,10 +78,16 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
 
   useEffect(() => {
     if (organization) {
+      const metadata =
+        (organization.metadata as Record<string, unknown> | undefined) || {};
       setCurrentName(organization.name);
       setCurrentLogo(organization.logo);
+      setCurrentDescription((metadata.description as string) || "");
+      setCurrentShortName((metadata.shortName as string) || "");
       setDraftName(organization.name);
       setDraftLogo(organization.logo);
+      setDraftDescription((metadata.description as string) || "");
+      setDraftShortName((metadata.shortName as string) || "");
     }
   }, [organization]);
 
@@ -106,9 +122,13 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
 
     const previousName = currentName;
     const previousLogo = currentLogo;
+    const previousDescription = currentDescription;
+    const previousShortName = currentShortName;
 
     setCurrentName(draftName);
     setCurrentLogo(draftLogo);
+    setCurrentDescription(draftDescription);
+    setCurrentShortName(draftShortName);
     setIsEditing(false);
 
     try {
@@ -117,6 +137,11 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
         data: {
           name: draftName,
           logo: draftLogo,
+          metadata: {
+            ...orgMetadata,
+            description: draftDescription.trim() || undefined,
+            shortName: draftShortName.trim() || undefined,
+          },
         },
       });
       await refetchAuth();
@@ -124,8 +149,12 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
     } catch (err) {
       setCurrentName(previousName);
       setCurrentLogo(previousLogo);
+      setCurrentDescription(previousDescription);
+      setCurrentShortName(previousShortName);
       setDraftName(previousName);
       setDraftLogo(previousLogo);
+      setDraftDescription(previousDescription);
+      setDraftShortName(previousShortName);
       setIsEditing(true);
       showToast(
         "Erro ao atualizar: " +
@@ -135,6 +164,14 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
     } finally {
       setIsSavingOrganization(false);
     }
+  };
+
+  const handleCancelEdit = () => {
+    setDraftName(currentName);
+    setDraftLogo(currentLogo);
+    setDraftDescription(currentDescription);
+    setDraftShortName(currentShortName);
+    setIsEditing(false);
   };
 
   const handleBackup = async () => {
@@ -237,17 +274,45 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
 
           <div className="flex-1 w-full space-y-3">
             {isEditing ? (
-              <Input
-                label="Nome da Organização"
-                value={draftName}
-                onChange={(e) => setDraftName(e.target.value)}
-                placeholder="e.g. Igreja Hosanna Lisboa"
-              />
+              <>
+                <Input
+                  label="Nome da Igreja"
+                  value={draftName}
+                  onChange={(e) => setDraftName(e.target.value)}
+                  placeholder="e.g. Igreja Hosanna Lisboa"
+                />
+                <Input
+                  label="Nome Abreviado"
+                  value={draftShortName}
+                  onChange={(e) => setDraftShortName(e.target.value)}
+                  placeholder="e.g. IHL"
+                />
+                <Input
+                  label="Descrição"
+                  value={draftDescription}
+                  onChange={(e) => setDraftDescription(e.target.value)}
+                  placeholder="Descrição da organização"
+                />
+              </>
             ) : (
               <div>
                 <h3 className="text-xl font-extrabold text-slate-900 dark:text-slate-100">
                   {currentName || "Minha Organização"}
                 </h3>
+                {(currentShortName || currentDescription) && (
+                  <div className="mt-1 space-y-0.5">
+                    {currentShortName && (
+                      <p className="text-sm text-slate-600 dark:text-slate-300">
+                        {currentShortName}
+                      </p>
+                    )}
+                    {currentDescription && (
+                      <p className="text-xs text-slate-500 dark:text-slate-400">
+                        {currentDescription}
+                      </p>
+                    )}
+                  </div>
+                )}
                 <p className="text-xs text-slate-400 font-mono mt-0.5">
                   ID: {organization?.id || "org-default"} · Slug:{" "}
                   {organization?.slug || "hosanna"}
@@ -262,7 +327,7 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => setIsEditing(false)}
+                      onClick={handleCancelEdit}
                     >
                       Cancelar
                     </Button>
