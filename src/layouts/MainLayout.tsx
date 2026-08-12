@@ -77,7 +77,7 @@ import { useServices } from "../hooks/useServices";
 import { useAllSongs } from "../hooks/useSongs";
 import { authClient } from "../lib/authClient";
 
-import { ConversionResult, printApi } from "@hosanna/shared";
+import { ConversionResult } from "@hosanna/shared";
 import { useStatsigClient } from "@statsig/react-bindings";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Action, KBarProvider } from "kbar";
@@ -86,7 +86,7 @@ import { KBarCommandPaletteUI } from "../components/KBarCommandPalette";
 import { CifraClubImportModal } from "../components/modals/CifraModal";
 import { getRoleLabel } from "../components/settings/settingsUtils";
 import { songImportRegistry } from "../import";
-import { getInitials, printHtmlDirectly } from "../utils";
+import { getInitials } from "../utils";
 import { ProviderImportResult } from "../utils/import";
 
 interface ContextMenuState {
@@ -1739,29 +1739,29 @@ export const MainLayout: React.FC = () => {
   const handlePrintSongs = async () => {
     setContextMenu(null);
     selectedSongIds.forEach(async (id) => {
-      const html = await printApi.printSong(id);
-      printHtmlDirectly(html);
+      //const html = await printApi.printSong(id);
+      //printHtmlDirectly(html);
     });
   };
 
   const handlePrintSong = async (id: string) => {
     setContextMenu(null);
-    const html = await printApi.printSong(id);
-    printHtmlDirectly(html);
+    //const html = await printApi.printSong(id);
+    //printHtmlDirectly(html);
   };
 
   const handlePrintFolders = async () => {
     setContextMenu(null);
     selectedFolderIds.forEach(async (id) => {
-      const html = await printApi.printFolder(id);
-      printHtmlDirectly(html);
+      //const html = await printApi.printFolder(id);
+      //printHtmlDirectly(html);
     });
   };
 
   const handlePrintFolder = async (id: string) => {
     setContextMenu(null);
-    const html = await printApi.printFolder(id);
-    printHtmlDirectly(html);
+    //const html = await printApi.printFolder(id);
+    //printHtmlDirectly(html);
   };
 
   const handleCifraClubSubmit = async (

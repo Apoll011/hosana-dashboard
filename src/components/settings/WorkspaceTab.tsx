@@ -5,7 +5,7 @@
 
 import { useCan } from "@/src/lib/permissions/client";
 import { Can, CanAny } from "@/src/lib/permissions/components";
-import { Button, Input, settingsApi } from "@hosanna/shared";
+import { Button, Input, backupApi } from "@hosanna/shared";
 import {
   Building2,
   Camera,
@@ -192,16 +192,7 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
   const handleBackup = async () => {
     setIsDownloading(true);
     try {
-      const data = await settingsApi.downloadBackup();
-      const blob = new Blob([JSON.stringify(data, null, 2)], {
-        type: "application/json",
-      });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `hosanna-backup-${new Date().toISOString().slice(0, 10)}.json`;
-      a.click();
-      URL.revokeObjectURL(url);
+      await backupApi.downloadBackup();
       showToast("Cópia de segurança descarregada com sucesso!", "success");
     } catch {
       showToast("Falha ao exportar cópia de segurança.", "error");

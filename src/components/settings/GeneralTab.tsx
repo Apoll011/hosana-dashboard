@@ -68,7 +68,7 @@ export const GeneralTab: React.FC<GeneralTabProps> = ({
   // Sincronizar dados da organização
   useEffect(() => {
     if (organization) {
-      const metadata = (organization.metadata as any) || {};
+      const metadata = organization.metadata || {};
       const settings = metadata.settings || {};
       const general = settings.general || {};
       const services = settings.services || {};
@@ -112,7 +112,7 @@ export const GeneralTab: React.FC<GeneralTabProps> = ({
 
     try {
       setIsSaving(true);
-      const currentMetadata = (organization.metadata as any) || {};
+      const currentMetadata = organization.metadata || {};
 
       await authClient.organization.update({
         data: {

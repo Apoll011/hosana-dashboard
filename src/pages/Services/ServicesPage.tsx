@@ -10,7 +10,6 @@ import {
   ConfirmDialog,
   EmptyState,
   Modal,
-  printApi,
   Service,
   servicesApi,
   Spinner,
@@ -598,8 +597,8 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
                 type="button"
                 onClick={async (e) => {
                   e.stopPropagation();
-                  const html = await printApi.printService(service.id);
-                  printHtmlDirectly(html);
+                  //const html = await printApi.printService(service.id);
+                  //printHtmlDirectly(html);
                 }}
                 title="Imprimir Culto"
                 className="p-1.5 text-m3-secondary hover:text-sky-600 hover:bg-sky-500/10 rounded-xl cursor-pointer transition-all focus:outline-none"
