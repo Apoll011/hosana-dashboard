@@ -3,22 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-/**
- * Reads all persisted cache entries from IndexedDB and injects them into the
- * given QueryClient via setQueryData — making them immediately available to
- * useQuery hooks without a network round-trip.
- *
- * This function is designed to be called ONCE, before the first React render,
- * so the hydrated data is already in-cache when components mount.
- *
- * Entries are injected with updatedAt preserved as the query's data updatedAt
- * field so that React Query's staleTime logic still applies normally.
- *
- * A failed IDB read (private browsing, quota, etc.) is silently swallowed —
- * the application continues with an empty cache and fetches from the network
- * as usual.
- */
-
 import { QueryClient } from "@tanstack/react-query";
 import { readAllEntries } from "./queryCache";
 
