@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Button, Can, Modal } from "@hosanna/shared";
+import { Can } from "@/src/lib/permissions/components";
+import { Button, Modal } from "@hosanna/shared";
 import {
   AlertTriangle,
   ArrowLeft,
