@@ -86,6 +86,7 @@ import { KBarCommandPaletteUI } from "../components/KBarCommandPalette";
 import { CifraClubImportModal } from "../components/modals/CifraModal";
 import { getRoleLabel } from "../components/settings/settingsUtils";
 import { songImportRegistry } from "../import";
+import { Can, CanAny } from "../lib/permissions/components";
 import { getInitials } from "../utils";
 import { ProviderImportResult } from "../utils/import";
 
@@ -2693,70 +2694,85 @@ export const MainLayout: React.FC = () => {
                       className="shrink-0"
                     />
 
-                    <div className="relative shrink-0 ml-1" ref={plusMenuRef}>
-                      <button
-                        onClick={() => setIsPlusMenuOpen(!isPlusMenuOpen)}
-                        className="w-10 h-10 rounded-2xl bg-m3-primary text-white flex items-center justify-center border border-m3-primary font-black text-lg shadow-xl shadow-m3-primary/20 hover:bg-m3-primary-dark hover:scale-105 active:scale-95 transition-all cursor-pointer"
-                        title="Criar..."
-                      >
-                        <Plus className="w-5 h-5" />
-                      </button>
-                      {isPlusMenuOpen && (
-                        <div className="absolute right-0 top-full mt-3 w-64 bg-m3-card border border-m3-border rounded-3xl shadow-2xl z-50 p-2 space-y-1 animate-in fade-in slide-in-from-top-2 duration-200">
-                          <div className="px-4 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-m3-secondary opacity-60">
-                            Criar Novo
+                    <CanAny
+                      permissions={[
+                        "song.create",
+                        "folder.create",
+                        "song.import",
+                        "service.create",
+                      ]}
+                    >
+                      <div className="relative shrink-0 ml-1" ref={plusMenuRef}>
+                        <button
+                          onClick={() => setIsPlusMenuOpen(!isPlusMenuOpen)}
+                          className="w-10 h-10 rounded-2xl bg-m3-primary text-white flex items-center justify-center border border-m3-primary font-black text-lg shadow-xl shadow-m3-primary/20 hover:bg-m3-primary-dark hover:scale-105 active:scale-95 transition-all cursor-pointer"
+                          title="Criar..."
+                        >
+                          <Plus className="w-5 h-5" />
+                        </button>
+                        {isPlusMenuOpen && (
+                          <div className="absolute right-0 top-full mt-3 w-64 bg-m3-card border border-m3-border rounded-3xl shadow-2xl z-50 p-2 space-y-1 animate-in fade-in slide-in-from-top-2 duration-200">
+                            <div className="px-4 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-m3-secondary opacity-60">
+                              Criar Novo
+                            </div>
+                            <Can permission="song.create">
+                              <button
+                                onClick={() => {
+                                  setIsPlusMenuOpen(false);
+                                  setIsCreateSongModalOpen(true);
+                                }}
+                                className="w-full flex items-center gap-4 px-4 py-3 text-xs font-bold text-m3-text hover:bg-m3-hover rounded-2xl transition-all cursor-pointer text-left group"
+                              >
+                                <div className="w-8 h-8 rounded-xl bg-m3-primary/10 text-m3-primary flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                                  <Music className="w-4 h-4" />
+                                </div>
+                                Novo Cântico
+                              </button>
+                            </Can>
+                            <Can permission="song.import">
+                              <button
+                                onClick={() => {
+                                  setIsPlusMenuOpen(false);
+                                  setIsCifraImportOpen(true);
+                                }}
+                                className="w-full flex items-center gap-4 px-4 py-3 text-xs font-bold text-m3-text hover:bg-m3-hover rounded-2xl transition-all cursor-pointer text-left group"
+                              >
+                                <div className="w-8 h-8 rounded-xl bg-m3-primary/10 text-m3-primary flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                                  <Music className="w-4 h-4" />
+                                </div>
+                                Importar Cânticos de um outro Provedor
+                              </button>
+                            </Can>
+                            <Can permission="service.create">
+                              <button
+                                onClick={() => {
+                                  setIsPlusMenuOpen(false);
+                                  setIsCreateServiceModalOpen(true);
+                                }}
+                                className="w-full flex items-center gap-4 px-4 py-3 text-xs font-bold text-m3-text hover:bg-m3-hover rounded-2xl transition-all cursor-pointer text-left group"
+                              >
+                                <div className="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                                  <Calendar className="w-4 h-4" />
+                                </div>
+                                Novo Plano de Culto
+                              </button>
+                            </Can>
+                            <Can permission="folder.create">
+                              <button
+                                onClick={() => {
+                                  setIsPlusMenuOpen(false);
+                                  setIsCreateModalOpen(true);
+                                }}
+                                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left cursor-pointer"
+                              >
+                                <FolderPlus className="w-4 h-4 text-amber-500" />
+                                <span>Nova Pasta</span>
+                              </button>
+                            </Can>
                           </div>
-                          <button
-                            onClick={() => {
-                              setIsPlusMenuOpen(false);
-                              setIsCreateSongModalOpen(true);
-                            }}
-                            className="w-full flex items-center gap-4 px-4 py-3 text-xs font-bold text-m3-text hover:bg-m3-hover rounded-2xl transition-all cursor-pointer text-left group"
-                          >
-                            <div className="w-8 h-8 rounded-xl bg-m3-primary/10 text-m3-primary flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-                              <Music className="w-4 h-4" />
-                            </div>
-                            Novo Cântico
-                          </button>
-                          <button
-                            onClick={() => {
-                              setIsPlusMenuOpen(false);
-                              setIsCifraImportOpen(true);
-                            }}
-                            className="w-full flex items-center gap-4 px-4 py-3 text-xs font-bold text-m3-text hover:bg-m3-hover rounded-2xl transition-all cursor-pointer text-left group"
-                          >
-                            <div className="w-8 h-8 rounded-xl bg-m3-primary/10 text-m3-primary flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-                              <Music className="w-4 h-4" />
-                            </div>
-                            Importar Cântico do CifraClub
-                          </button>
-                          <button
-                            onClick={() => {
-                              setIsPlusMenuOpen(false);
-                              setIsCreateServiceModalOpen(true);
-                            }}
-                            className="w-full flex items-center gap-4 px-4 py-3 text-xs font-bold text-m3-text hover:bg-m3-hover rounded-2xl transition-all cursor-pointer text-left group"
-                          >
-                            <div className="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-                              <Calendar className="w-4 h-4" />
-                            </div>
-                            Novo Plano de Culto
-                          </button>
-                          <button
-                            onClick={() => {
-                              setIsPlusMenuOpen(false);
-                              setIsCreateModalOpen(true);
-                            }}
-                            className="w-full flex items-center gap-4 px-4 py-3 text-xs font-bold text-m3-text hover:bg-m3-hover rounded-2xl transition-all cursor-pointer text-left group"
-                          >
-                            <div className="w-8 h-8 rounded-xl bg-m3-primary-light/10 text-m3-primary flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-                              <FolderPlus className="w-4 h-4" />
-                            </div>
-                            Nova Pasta
-                          </button>
-                        </div>
-                      )}
-                    </div>
+                        )}
+                      </div>
+                    </CanAny>
                   </div>
                 )}
               </div>
@@ -2846,25 +2862,29 @@ export const MainLayout: React.FC = () => {
 
           <div className="h-6 w-px bg-white/20 dark:bg-slate-900/20" />
 
-          <Button
-            size="sm"
-            variant="ghost"
-            icon={<Move className="w-4 h-4" />}
-            onClick={() => setIsBatchMoveOpen(true)}
-            className="text-white! dark:text-slate-900! hover:bg-white/10! dark:hover:bg-slate-900/10!"
-          >
-            Mover
-          </Button>
+          <CanAny permissions={["song.update", "folder.update"]}>
+            <Button
+              size="sm"
+              variant="ghost"
+              icon={<Move className="w-4 h-4" />}
+              onClick={() => setIsBatchMoveOpen(true)}
+              className="text-white! dark:text-slate-900! hover:bg-white/10! dark:hover:bg-slate-900/10!"
+            >
+              Mover
+            </Button>
+          </CanAny>
 
-          <Button
-            size="sm"
-            variant="ghost"
-            icon={<Trash2 className="w-4 h-4" />}
-            onClick={() => setIsBatchDeleteOpen(true)}
-            className="text-rose-400! hover:bg-rose-500/10!"
-          >
-            Eliminar
-          </Button>
+          <CanAny permissions={["song.delete", "folder.delete"]}>
+            <Button
+              size="sm"
+              variant="ghost"
+              icon={<Trash2 className="w-4 h-4" />}
+              onClick={() => setIsBatchDeleteOpen(true)}
+              className="text-rose-400! hover:bg-rose-500/10!"
+            >
+              Eliminar
+            </Button>
+          </CanAny>
 
           <Button
             size="sm"
@@ -2896,38 +2916,44 @@ export const MainLayout: React.FC = () => {
                 </span>
               </div>
 
-              <button
-                onClick={() => {
-                  setIsCreateModalOpen(true);
-                  setContextMenu(null);
-                }}
-                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left cursor-pointer"
-              >
-                <FolderPlus className="w-4 h-4 text-amber-500" />
-                <span>Nova Pasta</span>
-              </button>
+              <Can permission="folder.create">
+                <button
+                  onClick={() => {
+                    setIsCreateModalOpen(true);
+                    setContextMenu(null);
+                  }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left cursor-pointer"
+                >
+                  <FolderPlus className="w-4 h-4 text-amber-500" />
+                  <span>Nova Pasta</span>
+                </button>
+              </Can>
 
-              <button
-                onClick={() => {
-                  setIsCreateSongModalOpen(true);
-                  setContextMenu(null);
-                }}
-                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left cursor-pointer"
-              >
-                <Plus className="w-4 h-4 text-[#0284c7]" />
-                <span>Novo Cântico</span>
-              </button>
+              <Can permission="song.create">
+                <button
+                  onClick={() => {
+                    setIsCreateSongModalOpen(true);
+                    setContextMenu(null);
+                  }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left cursor-pointer"
+                >
+                  <Plus className="w-4 h-4 text-[#0284c7]" />
+                  <span>Novo Cântico</span>
+                </button>
+              </Can>
 
-              <button
-                onClick={() => {
-                  fileInputRef.current?.click();
-                  setContextMenu(null);
-                }}
-                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left cursor-pointer"
-              >
-                <Upload className="w-4 h-4 text-[#0284c7]" />
-                <span>Carregar Ficheiros ChordPro</span>
-              </button>
+              <Can permission="song.import">
+                <button
+                  onClick={() => {
+                    fileInputRef.current?.click();
+                    setContextMenu(null);
+                  }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left cursor-pointer"
+                >
+                  <Upload className="w-4 h-4 text-[#0284c7]" />
+                  <span>Carregar Ficheiros</span>
+                </button>
+              </Can>
 
               <div className="my-1 border-t border-slate-100 dark:border-slate-800/80" />
 

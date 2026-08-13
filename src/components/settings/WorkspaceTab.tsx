@@ -422,7 +422,7 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
       </div>
 
       {/* Backup & Data Card */}
-      <CanAny permissions={["export.backup", "import.backup"]}>
+      <CanAny permissions={["backup.export", "backup.import"]}>
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm overflow-hidden">
           <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
             <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
@@ -438,7 +438,7 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
           <div className="p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Export Area */}
-              <Can permission="export.backup">
+              <Can permission="backup.export">
                 <div className="flex flex-col p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50">
                   <div className="flex items-start gap-3 mb-4">
                     <div className="p-2 bg-sky-100 dark:bg-sky-500/20 text-sky-600 dark:text-sky-400 rounded-lg shrink-0">
@@ -475,7 +475,7 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
               </Can>
 
               {/* Import Area */}
-              <Can permission="import.backup">
+              <Can permission="backup.import">
                 <div className="flex flex-col p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50">
                   <div className="flex items-start gap-3 mb-4">
                     <div className="p-2 bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded-lg shrink-0">
