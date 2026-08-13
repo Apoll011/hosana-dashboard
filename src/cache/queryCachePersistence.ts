@@ -3,35 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-/**
- * Attaches a single subscription to the React Query QueryCache that writes
- * successful query results to IndexedDB.
- *
- * Call attachQueryCachePersistence(queryClient) once, as early as possible
- * (before the first render). It returns an unsubscribe function.
- *
- * Only queries whose status transitions to "success" are written, ensuring we
- * never persist loading/error states or empty data.
- *
- * We deliberately avoid persisting:
- *   - Authentication data (tokens, passwords)
- *   - Queries with undefined/null data
- *
- * musicianTokens contains token values (bearer strings for musicians) so we
- * explicitly skip them.
- */
-
 import { QueryClient } from "@tanstack/react-query";
 import { persistEntry } from "./queryCache";
 
-/** Query key prefixes that must NOT be persisted to IndexedDB. */
-const SKIP_PREFIXES: string[] = [
-  // Musician tokens are access credentials; skip them.
-  '["musicianTokens"',
-  // Admins-pending has short-lived invite metadata — skip to avoid stale
-  // invite-state being shown offline. The base ["admins"] list IS persisted.
-  '["admins","pending"',
-];
+const SKIP_PREFIXES: string[] = [];
 
 function shouldSkip(serializedKey: string): boolean {
   return SKIP_PREFIXES.some((prefix) => serializedKey.startsWith(prefix));

@@ -499,7 +499,6 @@ export const MainLayout: React.FC = () => {
           return "services";
         if (path === "/folders" || path.startsWith("/folders/"))
           return "explorer";
-        if (path.startsWith("/musicians")) return "musicians";
         if (path.startsWith("/settings")) return "settings";
         return "other";
       };
