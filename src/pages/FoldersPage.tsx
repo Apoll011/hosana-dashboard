@@ -528,7 +528,7 @@ export const FoldersPage: React.FC = () => {
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
       className={`flex-1 p-6 overflow-y-auto bg-white dark:bg-slate-900 relative transition-all select-none min-h-75 h-full ${
-        isDraggingOver
+        isDraggingOver //TODO: Remove with the permission
           ? "ring-4 ring-inset ring-[#0284c7] bg-sky-50/50 dark:bg-sky-950/30"
           : ""
       }`}
