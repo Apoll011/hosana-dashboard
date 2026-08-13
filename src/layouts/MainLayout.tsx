@@ -1739,13 +1739,13 @@ export const MainLayout: React.FC = () => {
 
   const handlePrintSongs = async () => {
     setContextMenu(null);
-    selectedSongIds.forEach(async (id) => {
+    selectedSongIds.forEach(async (_id) => {
       //const html = await printApi.printSong(id);
       //printHtmlDirectly(html);
     });
   };
 
-  const handlePrintSong = async (id: string) => {
+  const handlePrintSong = async (_id: string) => {
     setContextMenu(null);
     //const html = await printApi.printSong(id);
     //printHtmlDirectly(html);
@@ -1753,13 +1753,13 @@ export const MainLayout: React.FC = () => {
 
   const handlePrintFolders = async () => {
     setContextMenu(null);
-    selectedFolderIds.forEach(async (id) => {
+    selectedFolderIds.forEach(async (_id) => {
       //const html = await printApi.printFolder(id);
       //printHtmlDirectly(html);
     });
   };
 
-  const handlePrintFolder = async (id: string) => {
+  const handlePrintFolder = async (_id: string) => {
     setContextMenu(null);
     //const html = await printApi.printFolder(id);
     //printHtmlDirectly(html);

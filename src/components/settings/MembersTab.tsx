@@ -69,8 +69,6 @@ export const MembersTab: React.FC<{ active: boolean }> = ({ active }) => {
   );
   const [isCancelling, setIsCancelling] = useState(false);
 
-  const userRole = (user as { role?: string })?.role || "member";
-
   // Fetch Better Auth Organization Members
   const {
     data: orgMembersData,
