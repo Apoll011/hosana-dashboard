@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import React from "react";
 import { useNavigate, useOutletContext } from "react-router-dom";
+import { Can, CanAll } from "../lib/permissions/components";
 
 interface FolderExplorerContext {
   filteredSubfolders: Folder[];
@@ -534,18 +535,20 @@ export const FoldersPage: React.FC = () => {
     >
       {/* Drag Over Overlay (só para upload externo, nunca durante drag interno) */}
       {isDraggingOver && !isInternalDragActive && (
-        <div className="absolute inset-0 bg-[#0284c7]/10 backdrop-blur-xs z-30 flex flex-col items-center justify-center p-6 text-center pointer-events-none">
-          <div className="w-16 h-16 rounded-3xl bg-[#0284c7] text-white flex items-center justify-center shadow-lg mb-3 animate-bounce">
-            <Upload className="w-8 h-8" />
+        <Can permission="song.import">
+          <div className="absolute inset-0 bg-[#0284c7]/10 backdrop-blur-xs z-30 flex flex-col items-center justify-center p-6 text-center pointer-events-none">
+            <div className="w-16 h-16 rounded-3xl bg-[#0284c7] text-white flex items-center justify-center shadow-lg mb-3 animate-bounce">
+              <Upload className="w-8 h-8" />
+            </div>
+            <h3 className="text-lg font-extrabold text-[#0284c7]">
+              Solte os ficheiros aqui
+            </h3>
+            <p className="text-xs font-semibold text-slate-600 dark:text-slate-300 mt-1">
+              Os ficheiros serão importados para &quot;
+              {currentFolder ? currentFolder.name : "Diretório Raiz"}&quot;
+            </p>
           </div>
-          <h3 className="text-lg font-extrabold text-[#0284c7]">
-            Solte os ficheiros aqui
-          </h3>
-          <p className="text-xs font-semibold text-slate-600 dark:text-slate-300 mt-1">
-            Os ficheiros serão importados para &quot;
-            {currentFolder ? currentFolder.name : "Diretório Raiz"}&quot;
-          </p>
-        </div>
+        </Can>
       )}
 
       {foldersQuery.isLoading || songsQuery.isLoading ? (
@@ -572,28 +575,32 @@ export const FoldersPage: React.FC = () => {
 
           {!searchQuery && (
             <div className="flex flex-col items-center gap-3 mt-6">
-              <Button
-                variant="primary"
-                size="sm"
-                icon={<Plus className="w-4 h-4" />}
-                onClick={() => setIsCreateSongModalOpen(true)}
-              >
-                Novo Cântico
-              </Button>
-
-              <span className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
-                Ou
-              </span>
-
-              <button
-                onClick={() => fileInputRef?.current?.click()}
-                className="text-xs font-medium text-[#0284c7] hover:underline flex items-center gap-1.5 cursor-pointer bg-sky-50/80 dark:bg-sky-950/40 px-4 py-2 rounded-xl border border-sky-200 dark:border-sky-900/50 hover:bg-sky-100 dark:hover:bg-sky-900/50 transition-colors"
-              >
-                <Upload className="w-3.5 h-3.5" />
-                <span>
-                  Arraste e solte ficheiros aqui ou clique para carregar
+              <Can permission="song.create">
+                <Button
+                  variant="primary"
+                  size="sm"
+                  icon={<Plus className="w-4 h-4" />}
+                  onClick={() => setIsCreateSongModalOpen(true)}
+                >
+                  Novo Cântico
+                </Button>
+              </Can>
+              <CanAll permissions={["song.create", "song.import"]}>
+                <span className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
+                  Ou
                 </span>
-              </button>
+              </CanAll>
+              <Can permission="song.import">
+                <button
+                  onClick={() => fileInputRef?.current?.click()}
+                  className="text-xs font-medium text-[#0284c7] hover:underline flex items-center gap-1.5 cursor-pointer bg-sky-50/80 dark:bg-sky-950/40 px-4 py-2 rounded-xl border border-sky-200 dark:border-sky-900/50 hover:bg-sky-100 dark:hover:bg-sky-900/50 transition-colors"
+                >
+                  <Upload className="w-3.5 h-3.5" />
+                  <span>
+                    Arraste e solte ficheiros aqui ou clique para carregar
+                  </span>
+                </button>
+              </Can>
             </div>
           )}
         </div>
