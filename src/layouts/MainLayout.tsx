@@ -86,7 +86,7 @@ import { KBarCommandPaletteUI } from "../components/KBarCommandPalette";
 import { CifraClubImportModal } from "../components/modals/CifraModal";
 import { getRoleLabel } from "../components/settings/settingsUtils";
 import { songImportRegistry } from "../import";
-import { Can, CanAny } from "../lib/permissions/components";
+import { Can, CanAll, CanAny } from "../lib/permissions/components";
 import { getInitials } from "../utils";
 import { ProviderImportResult } from "../utils/import";
 
@@ -2989,28 +2989,32 @@ export const MainLayout: React.FC = () => {
 
               {selectedSongIds.size > 0 && (
                 <>
-                  <button
-                    onClick={() => {
-                      setIsBatchTagOpen(true);
-                      setContextMenu(null);
-                    }}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left cursor-pointer"
-                  >
-                    <Tag className="w-4 h-4 text-[#0284c7]" />
-                    <span>Etiquetar {selectedSongIds.size} cântico(s)</span>
-                  </button>
-                  <button
-                    onClick={handlePrintSongs}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left cursor-pointer"
-                  >
-                    <Printer className="w-4 h-4 text-[#0284c7]" />
-                    <span>Imprimir {selectedSongIds.size} cântico(s)</span>
-                  </button>
+                  <Can permission="song.update">
+                    <button
+                      onClick={() => {
+                        setIsBatchTagOpen(true);
+                        setContextMenu(null);
+                      }}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left cursor-pointer"
+                    >
+                      <Tag className="w-4 h-4 text-[#0284c7]" />
+                      <span>Etiquetar {selectedSongIds.size} cântico(s)</span>
+                    </button>
+                  </Can>
+                  <Can permission="export.pdf">
+                    <button
+                      onClick={handlePrintSongs}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left cursor-pointer"
+                    >
+                      <Printer className="w-4 h-4 text-[#0284c7]" />
+                      <span>Imprimir {selectedSongIds.size} cântico(s)</span>
+                    </button>
+                  </Can>
                 </>
               )}
 
               {selectedFolderIds.size > 0 && (
-                <>
+                <Can permission="export.pdf">
                   <button
                     onClick={handlePrintFolders}
                     className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left cursor-pointer"
@@ -3018,30 +3022,34 @@ export const MainLayout: React.FC = () => {
                     <Printer className="w-4 h-4 text-[#0284c7]" />
                     <span>Imprimir {selectedFolderIds.size} Pastas</span>
                   </button>
-                </>
+                </Can>
               )}
 
-              <button
-                onClick={() => {
-                  setIsBatchMoveOpen(true);
-                  setContextMenu(null);
-                }}
-                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left cursor-pointer"
-              >
-                <Move className="w-4 h-4 text-emerald-500" />
-                <span>Mover {totalSelectedCount} itens</span>
-              </button>
+              <CanAll permissions={["song.update", "folder.update"]}>
+                <button
+                  onClick={() => {
+                    setIsBatchMoveOpen(true);
+                    setContextMenu(null);
+                  }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left cursor-pointer"
+                >
+                  <Move className="w-4 h-4 text-emerald-500" />
+                  <span>Mover {totalSelectedCount} itens</span>
+                </button>
+              </CanAll>
 
-              <button
-                onClick={() => {
-                  setIsBatchDeleteOpen(true);
-                  setContextMenu(null);
-                }}
-                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 font-semibold transition-colors text-left cursor-pointer"
-              >
-                <Trash2 className="w-4 h-4 text-rose-500" />
-                <span>Apagar {totalSelectedCount} itens</span>
-              </button>
+              <CanAll permissions={["song.delete", "folder.delete"]}>
+                <button
+                  onClick={() => {
+                    setIsBatchDeleteOpen(true);
+                    setContextMenu(null);
+                  }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 font-semibold transition-colors text-left cursor-pointer"
+                >
+                  <Trash2 className="w-4 h-4 text-rose-500" />
+                  <span>Apagar {totalSelectedCount} itens</span>
+                </button>
+              </CanAll>
 
               <div className="my-1 border-t border-slate-100 dark:border-slate-800/80" />
 
@@ -3077,52 +3085,60 @@ export const MainLayout: React.FC = () => {
                     <span>Abrir Pasta</span>
                   </button>
 
-                  <button
-                    onClick={() => {
-                      setRenameTarget(contextMenu.item as Folder);
-                      setContextMenu(null);
-                    }}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left"
-                  >
-                    <Edit2 className="w-4 h-4 text-[#0284c7]" />
-                    <span>Mudar Nome da Pasta</span>
-                  </button>
+                  <Can permission="folder.update">
+                    <button
+                      onClick={() => {
+                        setRenameTarget(contextMenu.item as Folder);
+                        setContextMenu(null);
+                      }}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left"
+                    >
+                      <Edit2 className="w-4 h-4 text-[#0284c7]" />
+                      <span>Mudar Nome da Pasta</span>
+                    </button>
 
-                  <button
-                    onClick={() => {
-                      const folder = contextMenu.item as Folder;
-                      setMoveFolderTarget(folder);
-                      setTargetParentFolderId(folder.parentId || null);
-                      setContextMenu(null);
-                    }}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left"
-                  >
-                    <Move className="w-4 h-4 text-emerald-500" />
-                    <span>Mover Pasta</span>
-                  </button>
+                    <button
+                      onClick={() => {
+                        const folder = contextMenu.item as Folder;
+                        setMoveFolderTarget(folder);
+                        setTargetParentFolderId(folder.parentId || null);
+                        setContextMenu(null);
+                      }}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left"
+                    >
+                      <Move className="w-4 h-4 text-emerald-500" />
+                      <span>Mover Pasta</span>
+                    </button>
+                  </Can>
 
-                  <button
-                    onClick={async () => {
-                      await handlePrintFolder((contextMenu.item as Folder).id);
-                    }}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left"
-                  >
-                    <Printer className="w-4 h-4 text-emerald-500" />
-                    <span>Imprimir Pasta</span>
-                  </button>
+                  <Can permission="export.pdf">
+                    <button
+                      onClick={async () => {
+                        await handlePrintFolder(
+                          (contextMenu.item as Folder).id,
+                        );
+                      }}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left"
+                    >
+                      <Printer className="w-4 h-4 text-emerald-500" />
+                      <span>Imprimir Pasta</span>
+                    </button>
+                  </Can>
 
-                  <div className="my-1 border-t border-slate-100 dark:border-slate-800/80" />
+                  <Can permission="folder.delete">
+                    <div className="my-1 border-t border-slate-100 dark:border-slate-800/80" />
 
-                  <button
-                    onClick={() => {
-                      setDeleteTarget(contextMenu.item as Folder);
-                      setContextMenu(null);
-                    }}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 font-semibold transition-colors text-left"
-                  >
-                    <Trash2 className="w-4 h-4 text-rose-500" />
-                    <span>Apagar Pasta</span>
-                  </button>
+                    <button
+                      onClick={() => {
+                        setDeleteTarget(contextMenu.item as Folder);
+                        setContextMenu(null);
+                      }}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 font-semibold transition-colors text-left"
+                    >
+                      <Trash2 className="w-4 h-4 text-rose-500" />
+                      <span>Apagar Pasta</span>
+                    </button>
+                  </Can>
                 </>
               ) : (
                 <>
@@ -3138,55 +3154,59 @@ export const MainLayout: React.FC = () => {
                     <ExternalLink className="w-4 h-4 text-[#0284c7]" />
                     <span>Abrir / Editar Cântico</span>
                   </button>
+                  <Can permission="song.update">
+                    <button
+                      onClick={() => {
+                        const song = contextMenu.item as Song;
+                        setMoveSongTarget(song);
+                        setTargetSongFolderId(song.folderId || null);
+                        setContextMenu(null);
+                      }}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left"
+                    >
+                      <ArrowRightLeft className="w-4 h-4 text-emerald-500" />
+                      <span>Mover Cântico</span>
+                    </button>
 
-                  <button
-                    onClick={() => {
-                      const song = contextMenu.item as Song;
-                      setMoveSongTarget(song);
-                      setTargetSongFolderId(song.folderId || null);
-                      setContextMenu(null);
-                    }}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left"
-                  >
-                    <ArrowRightLeft className="w-4 h-4 text-emerald-500" />
-                    <span>Mover Cântico</span>
-                  </button>
+                    <button
+                      onClick={() => {
+                        const song = contextMenu.item as Song;
+                        setSelectedSongIds(new Set([song.id]));
+                        setIsBatchTagOpen(true);
+                        setContextMenu(null);
+                      }}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left"
+                    >
+                      <Tag className="w-4 h-4 text-[#0284c7]" />
+                      <span>Etiquetar Cântico</span>
+                    </button>
+                  </Can>
+                  <Can permission="export.pdf">
+                    <button
+                      onClick={async () => {
+                        handlePrintSong((contextMenu.item as Song).id);
+                      }}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left"
+                    >
+                      <Printer className="w-4 h-4 text-emerald-500" />
+                      <span>Imprimir Cântico</span>
+                    </button>
+                  </Can>
 
-                  <button
-                    onClick={() => {
-                      const song = contextMenu.item as Song;
-                      setSelectedSongIds(new Set([song.id]));
-                      setIsBatchTagOpen(true);
-                      setContextMenu(null);
-                    }}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left"
-                  >
-                    <Tag className="w-4 h-4 text-[#0284c7]" />
-                    <span>Etiquetar Cântico</span>
-                  </button>
+                  <Can permission="song.delete">
+                    <div className="my-1 border-t border-slate-100 dark:border-slate-800/80" />
 
-                  <button
-                    onClick={async () => {
-                      handlePrintSong((contextMenu.item as Song).id);
-                    }}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left"
-                  >
-                    <Printer className="w-4 h-4 text-emerald-500" />
-                    <span>Imprimir Cântico</span>
-                  </button>
-
-                  <div className="my-1 border-t border-slate-100 dark:border-slate-800/80" />
-
-                  <button
-                    onClick={() => {
-                      setDeleteSongTarget(contextMenu.item as Song);
-                      setContextMenu(null);
-                    }}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 font-semibold transition-colors text-left"
-                  >
-                    <Trash2 className="w-4 h-4 text-rose-500" />
-                    <span>Apagar Cântico</span>
-                  </button>
+                    <button
+                      onClick={() => {
+                        setDeleteSongTarget(contextMenu.item as Song);
+                        setContextMenu(null);
+                      }}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 font-semibold transition-colors text-left"
+                    >
+                      <Trash2 className="w-4 h-4 text-rose-500" />
+                      <span>Apagar Cântico</span>
+                    </button>
+                  </Can>
                 </>
               )}
             </>
