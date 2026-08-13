@@ -414,7 +414,7 @@ export const MainLayout: React.FC = () => {
   const archivedServicesQuery = useQuery({
     queryKey: ["services", "archived"],
     queryFn: async () => {
-      const all = await servicesApi.getServices();
+      const all = await servicesApi.getServices(true);
       return (Array.isArray(all) ? all : []).filter((s: Service) => s.archived);
     },
     enabled: showArchived,
