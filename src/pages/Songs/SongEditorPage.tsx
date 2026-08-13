@@ -106,7 +106,7 @@ export const SongEditorPage: React.FC = () => {
 
   const handleSave = useCallback(
     async (updatedContent: string) => {
-      if (isSavingRef.current || !canUpdateSong) return;
+      if (isSavingRef.current) return;
       isSavingRef.current = true;
 
       try {
