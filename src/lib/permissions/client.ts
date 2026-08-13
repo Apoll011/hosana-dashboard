@@ -138,6 +138,22 @@ export function useCannot(permission: PermissionString): {
 }
 
 /**
+ * Returns a value based on whether the permission is granted or denied.
+ */
+export function usePermissionValue<T, D = null>(
+  permission: PermissionString,
+  grantedValue: T,
+  deniedValue: D = null as unknown as D,
+): { value: T | D; loading: boolean; error: Error | null } {
+  const { granted, loading, error } = useCan(permission);
+  return {
+    value: loading ? deniedValue : granted ? grantedValue : deniedValue,
+    loading,
+    error,
+  };
+}
+
+/**
  * Checks if ALL permissions are granted.
  * Super efficient: Fires exactly ONE batched API request.
  */

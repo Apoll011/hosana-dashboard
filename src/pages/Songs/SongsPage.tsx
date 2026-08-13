@@ -4,6 +4,7 @@
  */
 
 import { OverflowTagList } from "@/src/components/OverflowTagList";
+import { usePermissionValue } from "@/src/lib/permissions/client";
 import { Can } from "@/src/lib/permissions/components";
 import {
   Badge,
@@ -117,6 +118,12 @@ export const SongsPage: React.FC<SongsPageProps> = ({
       : context.sortOrder !== undefined
         ? context.sortOrder
         : internalSortOrder;
+
+  const { value: emptyStateAction } = usePermissionValue(
+    "service.create",
+    "Criar Novo Cântico",
+    undefined,
+  );
 
   // Reset page when filters change
   React.useEffect(() => {
@@ -382,7 +389,7 @@ export const SongsPage: React.FC<SongsPageProps> = ({
                 ? "A sua pesquisa não retornou resultados. Experimente termos mais genéricos."
                 : "A sua biblioteca está vazia. Comece a sua jornada musical agora!"
             }
-            actionLabel="Criar Novo Cântico"
+            actionLabel={emptyStateAction}
             onAction={() => setIsCreateModalOpen(true)}
           />
         ) : (
