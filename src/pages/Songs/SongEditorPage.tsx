@@ -4,6 +4,8 @@
  */
 
 import { usePreviewSettings } from "@/src/hooks/usePreviewSettings";
+import { useCan } from "@/src/lib/permissions/client";
+import { Can } from "@/src/lib/permissions/components";
 import {
   Button,
   ChordProRenderer,
@@ -43,7 +45,6 @@ import { HelpModal } from "../../components/modals/HelpModal";
 import { useAuth } from "../../contexts/AuthContext";
 import { useSong, useSongs } from "../../hooks/useSongs";
 
-// --- Types for our Layout Management ---
 type LayoutMode = "editor" | "split" | "preview";
 
 export const SongEditorPage: React.FC = () => {
@@ -53,17 +54,18 @@ export const SongEditorPage: React.FC = () => {
   const slugPrefix = organization?.slug ? `/${organization.slug}` : "";
   const queryClient = useQueryClient();
 
+  const { granted: canUpdateSong } = useCan("song.update");
+
   const { data: song, isLoading, isError, error } = useSong(id || null);
   const { updateSong, isUpdating } = useSongs();
 
   const [content, setContent] = useState("");
 
-  // PERFORMANCE BOOST: useDeferredValue allows the Editor to update instantly (60fps)
-  // while the heavy ChordPro parser/renderer updates in the background without blocking the UI thread.
   const deferredContent = useDeferredValue(content);
 
-  // VS Code style layout management
-  const [layoutMode, setLayoutMode] = useState<LayoutMode>("split");
+  const [layoutMode, setLayoutMode] = useState<LayoutMode>(
+    canUpdateSong ? "split" : "preview",
+  );
 
   const [showEditorSettings, setShowEditorSettings] = useState(false);
   const [showPreviewSettings, setShowPreviewSettings] = useState(false);
@@ -100,7 +102,7 @@ export const SongEditorPage: React.FC = () => {
 
   const handleSave = useCallback(
     async (updatedContent: string) => {
-      if (isSavingRef.current) return;
+      if (isSavingRef.current || !canUpdateSong) return;
       isSavingRef.current = true;
 
       try {
@@ -133,7 +135,7 @@ export const SongEditorPage: React.FC = () => {
   if (isLoading) {
     return (
       <div className="flex-1 flex items-center justify-center p-12">
-        <Spinner size="lg" label="A carregar a pauta ChordPro..." />
+        <Spinner size="lg" label="A carregar a pauta..." />
       </div>
     );
   }
@@ -168,11 +170,7 @@ export const SongEditorPage: React.FC = () => {
 
   return (
     <div className="flex-1 flex flex-col h-full overflow-hidden bg-m3-sidebar/10">
-      {/* ========================================================= */}
-      {/* GLOBAL NAVBAR (Activity Bar - Handles Layout & Global Save) */}
-      {/* ========================================================= */}
       <div className="h-14 bg-m3-sidebar border-b border-m3-border flex items-center justify-between px-4 shrink-0 gap-4">
-        {/* Left: Breadcrumb / Status */}
         <div className="flex items-center gap-3">
           <Button
             variant="ghost"
@@ -199,60 +197,56 @@ export const SongEditorPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Center: VS Code Style View Toggles */}
-        <div className="hidden md:flex bg-m3-card/50 border border-m3-border rounded-lg p-0.5">
-          <button
-            onClick={() => setLayoutMode("editor")}
-            className={`p-1.5 rounded-md transition-all ${layoutMode === "editor" ? "bg-m3-primary/10 text-m3-primary shadow-sm" : "text-m3-secondary hover:bg-m3-hover"}`}
-            title="Apenas Editor"
-          >
-            <EditIcon className="w-4 h-4" />
-          </button>
-          <button
-            onClick={() => setLayoutMode("split")}
-            className={`p-1.5 rounded-md transition-all ${layoutMode === "split" ? "bg-m3-primary/10 text-m3-primary shadow-sm" : "text-m3-secondary hover:bg-m3-hover"}`}
-            title="Dividir Ecrã"
-          >
-            <Columns className="w-4 h-4" />
-          </button>
-          <button
-            onClick={() => setLayoutMode("preview")}
-            className={`p-1.5 rounded-md transition-all ${layoutMode === "preview" ? "bg-m3-primary/10 text-m3-primary shadow-sm" : "text-m3-secondary hover:bg-m3-hover"}`}
-            title="Apenas Prévia"
-          >
-            <PanelRight className="w-4 h-4" />
-          </button>
-        </div>
+        <Can permission="song.update">
+          <div className="hidden md:flex bg-m3-card/50 border border-m3-border rounded-lg p-0.5">
+            <button
+              onClick={() => setLayoutMode("editor")}
+              className={`p-1.5 rounded-md transition-all ${layoutMode === "editor" ? "bg-m3-primary/10 text-m3-primary shadow-sm" : "text-m3-secondary hover:bg-m3-hover"}`}
+              title="Apenas Editor"
+            >
+              <EditIcon className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => setLayoutMode("split")}
+              className={`p-1.5 rounded-md transition-all ${layoutMode === "split" ? "bg-m3-primary/10 text-m3-primary shadow-sm" : "text-m3-secondary hover:bg-m3-hover"}`}
+              title="Dividir Ecrã"
+            >
+              <Columns className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => setLayoutMode("preview")}
+              className={`p-1.5 rounded-md transition-all ${layoutMode === "preview" ? "bg-m3-primary/10 text-m3-primary shadow-sm" : "text-m3-secondary hover:bg-m3-hover"}`}
+              title="Apenas Prévia"
+            >
+              <PanelRight className="w-4 h-4" />
+            </button>
+          </div>
 
-        {/* Right: Global Actions */}
-        <div className="flex items-center gap-2 shrink-0">
-          <button
-            onClick={() => setShowHelp(true)}
-            className="p-2 text-m3-secondary hover:text-m3-primary hover:bg-m3-primary/10 rounded-lg transition-all"
-            title="Ajuda ChordPro"
-          >
-            <HelpCircle className="w-4 h-4" />
-          </button>
-          <HelpModal isOpen={showHelp} onClose={() => setShowHelp(false)} />
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              onClick={() => setShowHelp(true)}
+              className="p-2 text-m3-secondary hover:text-m3-primary hover:bg-m3-primary/10 rounded-lg transition-all"
+              title="Ajuda ChordPro"
+            >
+              <HelpCircle className="w-4 h-4" />
+            </button>
+            <HelpModal isOpen={showHelp} onClose={() => setShowHelp(false)} />
 
-          <Button
-            variant="primary"
-            size="sm"
-            icon={<Save className="w-4 h-4" />}
-            isLoading={isUpdating}
-            onClick={() => handleSave(content)}
-            className="rounded-xl font-bold text-xs h-8 ml-2"
-          >
-            Guardar
-          </Button>
-        </div>
+            <Button
+              variant="primary"
+              size="sm"
+              icon={<Save className="w-4 h-4" />}
+              isLoading={isUpdating}
+              onClick={() => handleSave(content)}
+              className="rounded-xl font-bold text-xs h-8 ml-2"
+            >
+              Guardar
+            </Button>
+          </div>
+        </Can>
       </div>
 
-      {/* ========================================================= */}
-      {/* MAIN WORKSPACE (Split Panes)                            */}
-      {/* ========================================================= */}
       <div className="flex-1 flex flex-col md:flex-row overflow-hidden relative">
-        {/* --- EDITOR PANE --- */}
         {(layoutMode === "split" || layoutMode === "editor") && (
           <div
             className={`flex flex-col h-1/2 md:h-full transition-all duration-300 relative bg-m3-card ${layoutMode === "split" ? "md:w-1/2 md:border-r border-m3-border" : "w-full"}`}
@@ -285,7 +279,7 @@ export const SongEditorPage: React.FC = () => {
                   setContent(val);
                   setHasUnsavedChanges(true);
                 }}
-                readOnly={false}
+                readOnly={!canUpdateSong}
                 onSave={handleSave}
                 mode="chordpro"
               />
@@ -293,7 +287,6 @@ export const SongEditorPage: React.FC = () => {
           </div>
         )}
 
-        {/* --- PREVIEW PANE --- */}
         {(layoutMode === "split" || layoutMode === "preview") && (
           <div
             className={`flex flex-col h-1/2 md:h-full transition-all duration-300 relative bg-m3-card ${layoutMode === "split" ? "md:w-1/2" : "w-full"}`}
