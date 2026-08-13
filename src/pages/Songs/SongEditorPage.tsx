@@ -67,6 +67,10 @@ export const SongEditorPage: React.FC = () => {
     canUpdateSong ? "split" : "preview",
   );
 
+  useEffect(() => {
+    setLayoutMode(canUpdateSong ? "split" : "preview");
+  }, [canUpdateSong]);
+
   const [showEditorSettings, setShowEditorSettings] = useState(false);
   const [showPreviewSettings, setShowPreviewSettings] = useState(false);
 
