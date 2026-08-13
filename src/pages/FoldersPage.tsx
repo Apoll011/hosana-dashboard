@@ -259,6 +259,12 @@ const SongGridCard: React.FC<SongGridCardProps> = ({
       <MoreVertical className="w-4.5 h-4.5" />
     </button>
 
+    {song.song_number && (
+      <span className="absolute top-5 left-5 text-[10px] font-bold bg-neutral-100 dark:bg-slate-800 text-neutral-600 dark:text-neutral-400 px-2 py-1 rounded-lg border border-neutral-200 dark:border-slate-700">
+        Nº {song.song_number}
+      </span>
+    )}
+
     <div className="w-14 h-14 rounded-2xl bg-m3-primary-light/20 border border-m3-primary/20 flex items-center justify-center text-m3-primary mb-3 group-hover:scale-110 transition-transform">
       <FileText className="w-8 h-8 opacity-80" />
     </div>
@@ -266,11 +272,6 @@ const SongGridCard: React.FC<SongGridCardProps> = ({
     <span className="text-sm font-black text-m3-text transition-colors truncate w-full px-1">
       {song.title}
     </span>
-    {song.song_number && (
-      <span className="text-[10px] font-bold bg-neutral-100 dark:bg-slate-800 text-neutral-600 dark:text-neutral-400 px-2 py-1 rounded-lg border border-neutral-200 dark:border-slate-700">
-        Nº {song.song_number}
-      </span>
-    )}
 
     <span className="text-[10px] text-m3-secondary font-bold truncate w-full px-1 mt-0.5 opacity-70">
       {song.artist || "Cifra"}
