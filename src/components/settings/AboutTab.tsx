@@ -57,7 +57,8 @@ export const AboutTab: React.FC<{ active: boolean }> = ({ active }) => {
                 {organization?.name ? `• ${organization.name}` : ""}
               </p>
               <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-2">
-                © {new Date().getFullYear()} Tiago Inês. Código sob licença MIT.
+                © {new Date().getFullYear()} Embrace & Tiago Inês. Código sob
+                licença Apache 2.0.
               </p>
             </div>
           </div>
