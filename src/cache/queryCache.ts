@@ -3,18 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-/**
- * Thin IndexedDB wrapper that persists React Query cache entries.
- *
- * Design decisions:
- * - One object store ("queries") keyed by the serialised queryKey.
- * - Each record stores { data, updatedAt } so we can skip stale writes.
- * - All operations are fire-and-forget from the call-site perspective; errors
- *   are swallowed so a broken IDB never breaks the application.
- * - No TTL is enforced here — the existing React Query staleTime / the 15-s
- *   sync cycle are the source of truth for freshness.
- */
-
 const DB_NAME = "hosana-query-cache";
 const DB_VERSION = 1;
 const STORE = "queries";

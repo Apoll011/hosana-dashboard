@@ -16,6 +16,7 @@ import {
 } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { MainLayout } from "../layouts/MainLayout";
+import { usePreloadPermissions } from "../lib/permissions/client";
 import { OnboardingPage } from "../pages/OnboardingPage";
 import { ProtectedRoute } from "./ProtectedRoute";
 
@@ -165,6 +166,7 @@ const TeamsPage = lazyImport(() =>
 );
 
 export const AppRoutes: React.FC = () => {
+  usePreloadPermissions();
   return (
     <ErrorBoundary FallbackComponent={ErrorFallback}>
       <Suspense fallback={<PageLoader />}>
