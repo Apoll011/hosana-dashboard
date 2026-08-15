@@ -3,6 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { OverflowTagList } from "@/src/components/OverflowTagList";
+import { usePermissionValue } from "@/src/lib/permissions/client";
+import { Can } from "@/src/lib/permissions/components";
 import {
   Badge,
   Button,
@@ -115,6 +118,12 @@ export const SongsPage: React.FC<SongsPageProps> = ({
       : context.sortOrder !== undefined
         ? context.sortOrder
         : internalSortOrder;
+
+  const { value: emptyStateAction } = usePermissionValue(
+    "service.create",
+    "Criar Novo Cântico",
+    undefined,
+  );
 
   // Reset page when filters change
   React.useEffect(() => {
@@ -380,7 +389,7 @@ export const SongsPage: React.FC<SongsPageProps> = ({
                 ? "A sua pesquisa não retornou resultados. Experimente termos mais genéricos."
                 : "A sua biblioteca está vazia. Comece a sua jornada musical agora!"
             }
-            actionLabel="Criar Novo Cântico"
+            actionLabel={emptyStateAction}
             onAction={() => setIsCreateModalOpen(true)}
           />
         ) : (
@@ -392,7 +401,7 @@ export const SongsPage: React.FC<SongsPageProps> = ({
                   <th className="py-4 px-6">Artista</th>
                   <th className="py-4 px-6">Pasta</th>
                   <th className="py-4 px-6">Etiquetas</th>
-                  <th className="py-4 px-6">Atualização</th>
+                  <th className="py-4 px-6">Ultima Atualização</th>
                   <th className="py-4 px-6 text-right">Ações</th>
                 </tr>
               </thead>
@@ -411,7 +420,7 @@ export const SongsPage: React.FC<SongsPageProps> = ({
                             {song.title}
                           </span>
                           <span className="text-[10px] text-m3-secondary font-black uppercase tracking-widest opacity-60 mt-0.5">
-                            {song.path}
+                            {song.path.split("/")[0]}/
                           </span>
                         </div>
                       </td>
@@ -430,20 +439,8 @@ export const SongsPage: React.FC<SongsPageProps> = ({
                         )}
                       </td>
 
-                      <td className="py-4 px-6">
-                        <div className="flex flex-wrap gap-1.5">
-                          {song.tags && song.tags.length > 0 ? (
-                            song.tags.map((tag) => (
-                              <Badge key={tag} variant="slate">
-                                {tag}
-                              </Badge>
-                            ))
-                          ) : (
-                            <span className="text-xs text-m3-secondary opacity-30">
-                              —
-                            </span>
-                          )}
-                        </div>
+                      <td className="py-4 px-6 min-w-50">
+                        <OverflowTagList tags={song.tags} />
                       </td>
 
                       <td className="py-4 px-6 text-[11px] text-m3-secondary opacity-70 font-black uppercase tracking-tighter">
@@ -464,22 +461,26 @@ export const SongsPage: React.FC<SongsPageProps> = ({
                           >
                             <FileText className="w-4.5 h-4.5" />
                           </button>
-                          <button
-                            onClick={() => {
-                              setMoveTarget(song);
-                            }}
-                            title="Mover"
-                            className="p-2 text-m3-secondary hover:text-sky-500 hover:bg-sky-500/10 rounded-xl cursor-pointer transition-all"
-                          >
-                            <FolderInput className="w-4.5 h-4.5" />
-                          </button>
-                          <button
-                            onClick={() => setDeleteTarget(song)}
-                            title="Apagar"
-                            className="p-2 text-m3-secondary hover:text-rose-500 hover:bg-rose-500/10 rounded-xl cursor-pointer transition-all"
-                          >
-                            <Trash2 className="w-4.5 h-4.5" />
-                          </button>
+                          <Can permission="song.update">
+                            <button
+                              onClick={() => {
+                                setMoveTarget(song);
+                              }}
+                              title="Mover"
+                              className="p-2 text-m3-secondary hover:text-sky-500 hover:bg-sky-500/10 rounded-xl cursor-pointer transition-all"
+                            >
+                              <FolderInput className="w-4.5 h-4.5" />
+                            </button>
+                          </Can>
+                          <Can permission="song.delete">
+                            <button
+                              onClick={() => setDeleteTarget(song)}
+                              title="Apagar"
+                              className="p-2 text-m3-secondary hover:text-rose-500 hover:bg-rose-500/10 rounded-xl cursor-pointer transition-all"
+                            >
+                              <Trash2 className="w-4.5 h-4.5" />
+                            </button>
+                          </Can>
                         </div>
                       </td>
                     </tr>

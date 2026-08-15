@@ -79,15 +79,6 @@ export const SyncProvider: React.FC<{ children: React.ReactNode }> = ({
         if (curr.services && curr.services !== prev.services) {
           queryClient.invalidateQueries({ queryKey: ["services"] });
         }
-        if (curr.musicians && curr.musicians !== prev.musicians) {
-          queryClient.invalidateQueries({ queryKey: ["musicians"] });
-        }
-        if (curr.settings && curr.settings !== prev.settings) {
-          queryClient.invalidateQueries({ queryKey: ["settings"] });
-        }
-        if (curr.admins && curr.admins !== prev.admins) {
-          queryClient.invalidateQueries({ queryKey: ["admins"] });
-        }
       }
 
       lastTimestampsRef.current = curr;

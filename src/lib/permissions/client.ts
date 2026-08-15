@@ -7,12 +7,13 @@
 import { useAuth } from "@/src/contexts/AuthContext";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { authClient } from "../authClient";
-import type {
-  PermissionRequest,
-  PermissionString,
-  Resource,
+import {
+  statement,
+  type PermissionRequest,
+  type PermissionString,
+  type Resource,
 } from "./permission";
-import type { AppRole } from "./roles";
+import { roles, type AppRole } from "./roles";
 
 // ---------------------------------------------------------------------------
 // 1. Core Caching & Promise Deduplication Layer
@@ -67,7 +68,7 @@ function getCacheKey(permissions: PermissionString[]): string {
   const grouped = groupPermissions(permissions);
   return Object.keys(grouped)
     .sort()
-    .map((res) => `${res}:${grouped[res as Resource].sort().join(",")}`)
+    .map((res) => `${res}:${grouped[res as Resource]!.sort().join(",")}`)
     .join("|");
 }
 
@@ -135,6 +136,22 @@ export function useCannot(permission: PermissionString): {
 } {
   const { granted, loading, error } = useCan(permission);
   return { denied: !granted, loading, error };
+}
+
+/**
+ * Returns a value based on whether the permission is granted or denied.
+ */
+export function usePermissionValue<T, D = null>(
+  permission: PermissionString,
+  grantedValue: T,
+  deniedValue: D = null as unknown as D,
+): { value: T | D; loading: boolean; error: Error | null } {
+  const { granted, loading, error } = useCan(permission);
+  return {
+    value: loading ? deniedValue : granted ? grantedValue : deniedValue,
+    loading,
+    error,
+  };
 }
 
 /**
@@ -263,4 +280,57 @@ export function useAnyRole(...roles: AppRole[]) {
     loading,
     error,
   };
+}
+/**
+ * Automatically computes all possible permission strings
+ * (e.g. "song.create", "billing.manage") from your `statement` object.
+ */
+const ALL_PERMISSIONS: PermissionString[] = Object.entries(statement).flatMap(
+  ([resource, actions]) =>
+    (actions as readonly string[]).map(
+      (action) => `${resource}.${action}` as PermissionString,
+    ),
+);
+
+/**
+ * Evaluates and pre-caches all permissions for a given role
+ * using the role's statements directly.
+ */
+export function preloadPermissionsForRole(role: AppRole | null): void {
+  if (!role || !(role in roles)) return;
+
+  const roleConfig = roles[role];
+
+  ALL_PERMISSIONS.forEach((perm) => {
+    const dotIndex = perm.indexOf(".");
+    const resource = perm.slice(
+      0,
+      dotIndex,
+    ) as keyof typeof roleConfig.statements;
+    const action = perm.slice(dotIndex + 1);
+
+    // Check if the action is granted for the resource in this role's statements
+    const allowedActions = roleConfig.statements[resource];
+    const isGranted =
+      Array.isArray(allowedActions) && allowedActions.includes(action);
+
+    const cacheKey = getCacheKey([perm]);
+    permCache.set(cacheKey, isGranted);
+  });
+}
+
+/**
+ * React hook to automatically hydrate the cache
+ * as soon as the authenticated user's role is loaded.
+ */
+export function usePreloadPermissions(): { isReady: boolean } {
+  const { role, loading } = useActiveRole();
+
+  useEffect(() => {
+    if (role && !loading) {
+      preloadPermissionsForRole(role);
+    }
+  }, [role, loading]);
+
+  return { isReady: !loading && role !== null };
 }

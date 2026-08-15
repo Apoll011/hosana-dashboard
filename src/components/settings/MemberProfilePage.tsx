@@ -3,9 +3,20 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Button } from "@hosanna/shared";
-import { ArrowLeft, PenLine, Save, Shield, Trash2 } from "lucide-react";
+import { Can } from "@/src/lib/permissions/components";
+import { Button, Modal } from "@hosanna/shared";
+import {
+  AlertTriangle,
+  ArrowLeft,
+  CalendarDays,
+  LogOut,
+  PenLine,
+  Save,
+  Shield,
+  Trash2,
+} from "lucide-react";
 import React, { useState } from "react";
+import { authClient } from "../../lib/authClient";
 import { getRoleBadge, getRoleLabel } from "./settingsUtils";
 
 interface MemberProfilePageProps {
@@ -17,9 +28,11 @@ interface MemberProfilePageProps {
     status?: string;
     avatar?: string;
     image?: string;
+    createdAt?: string | Date;
     [key: string]: unknown;
   };
   currentUser: { id: string; role?: string } | null;
+  organizationId?: string;
   onBack: () => void;
   onRemove: (member: { id: string; [key: string]: unknown }) => void;
   onApprove?: (id: string) => void;
@@ -37,6 +50,7 @@ interface MemberProfilePageProps {
 export const MemberProfilePage: React.FC<MemberProfilePageProps> = ({
   member,
   currentUser,
+  organizationId,
   onBack,
   onRemove,
   onApprove: _onApprove,
@@ -45,11 +59,11 @@ export const MemberProfilePage: React.FC<MemberProfilePageProps> = ({
   showToast,
 }) => {
   const isSelf = currentUser?.id === member.id;
-  const isOrgAdminOrOwner = ["owner", "admin"].includes(
-    (currentUser?.role || "").toLowerCase(),
-  );
   const [isEditingRole, setIsEditingRole] = useState(false);
   const [selectedRole, setSelectedRole] = useState(member.role || "member");
+  const [showRemoveConfirm, setShowRemoveConfirm] = useState(false);
+  const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
+  const [isLeaving, setIsLeaving] = useState(false);
 
   const handleSaveRole = async () => {
     if (onRoleChange) {
@@ -58,6 +72,25 @@ export const MemberProfilePage: React.FC<MemberProfilePageProps> = ({
       showToast("Função de utilizador atualizada com sucesso!", "success");
     }
     setIsEditingRole(false);
+  };
+
+  const handleLeave = async () => {
+    setIsLeaving(true);
+    try {
+      await authClient.organization.leave({
+        organizationId: organizationId || "",
+      });
+      showToast("Saiu da organização com sucesso.", "success");
+      onBack();
+    } catch (err: unknown) {
+      showToast(
+        (err as Error).message || "Falha ao sair da organização.",
+        "error",
+      );
+    } finally {
+      setIsLeaving(false);
+      setShowLeaveConfirm(false);
+    }
   };
 
   const getUserInitials = (name?: string) => {
@@ -69,6 +102,23 @@ export const MemberProfilePage: React.FC<MemberProfilePageProps> = ({
       .toUpperCase()
       .slice(0, 2);
   };
+
+  const formatDate = (date?: string | Date) => {
+    if (!date) return null;
+    try {
+      return new Intl.DateTimeFormat("pt-PT", {
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+      }).format(new Date(date));
+    } catch {
+      return null;
+    }
+  };
+
+  const joinedDate = formatDate(member.createdAt);
+  const isPromotingToOwner =
+    selectedRole === "owner" && selectedRole !== member.role;
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300 pb-10">
@@ -113,31 +163,54 @@ export const MemberProfilePage: React.FC<MemberProfilePageProps> = ({
               <h2 className="text-xl font-extrabold text-slate-900 dark:text-white">
                 {member.name}
               </h2>
-              <div className="flex items-center gap-2 mt-1">
+              <div className="flex items-center gap-2 mt-1 flex-wrap">
                 <span className="text-xs text-slate-500 dark:text-slate-400">
                   {member.email}
                 </span>
                 <span className="text-slate-300 dark:text-slate-700">·</span>
                 {getRoleBadge(member.role)}
               </div>
+              {joinedDate && (
+                <div className="flex items-center gap-1.5 mt-2 text-[11px] text-slate-400">
+                  <CalendarDays className="w-3.5 h-3.5" />
+                  Membro desde {joinedDate}
+                </div>
+              )}
             </div>
 
-            {isOrgAdminOrOwner && !isSelf && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => onRemove(member)}
-                icon={<Trash2 className="w-3.5 h-3.5 text-red-500" />}
-              >
-                Remover Membro
-              </Button>
-            )}
+            <div className="flex items-center gap-2">
+              {/* Self: leave organization */}
+              {isSelf && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowLeaveConfirm(true)}
+                  icon={<LogOut className="w-3.5 h-3.5 text-red-500" />}
+                >
+                  Sair da Organização
+                </Button>
+              )}
+
+              {/* Others: remove member, gated by permission */}
+              {!isSelf && (
+                <Can permission="member.delete">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowRemoveConfirm(true)}
+                    icon={<Trash2 className="w-3.5 h-3.5 text-red-500" />}
+                  >
+                    Remover Membro
+                  </Button>
+                </Can>
+              )}
+            </div>
           </div>
         </div>
       </div>
 
       {/* Role Management Card */}
-      {isOrgAdminOrOwner && (
+      <Can permission="member.update">
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-xs space-y-3">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
@@ -163,7 +236,10 @@ export const MemberProfilePage: React.FC<MemberProfilePageProps> = ({
                 onChange={(e) => setSelectedRole(e.target.value)}
                 className="w-full h-11 px-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-semibold"
               >
-                <option value="owner">Proprietário (Owner)</option>
+                {/* Only an owner can promote someone else to owner */}
+                <Can permission="organization.update">
+                  <option value="owner">Proprietário (Owner)</option>
+                </Can>
                 <option value="admin">Administrador (Admin)</option>
                 <option value="teamLeader">
                   Líder de Equipa (Team Leader)
@@ -173,11 +249,25 @@ export const MemberProfilePage: React.FC<MemberProfilePageProps> = ({
                 <option value="guest">Convidado</option>
               </select>
 
+              {isPromotingToOwner && (
+                <div className="flex items-start gap-2 p-3 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800">
+                  <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                  <p className="text-[11px] text-amber-800 dark:text-amber-300 leading-relaxed">
+                    Está prestes a tornar {member.name} proprietário da
+                    organização. Esta ação é sensível e deve ser confirmada com
+                    cuidado.
+                  </p>
+                </div>
+              )}
+
               <div className="flex justify-end gap-2">
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => setIsEditingRole(false)}
+                  onClick={() => {
+                    setSelectedRole(member.role || "member");
+                    setIsEditingRole(false);
+                  }}
                 >
                   Cancelar
                 </Button>
@@ -200,6 +290,73 @@ export const MemberProfilePage: React.FC<MemberProfilePageProps> = ({
             </p>
           )}
         </div>
+      </Can>
+
+      {/* Remove confirmation */}
+      {showRemoveConfirm && (
+        <Modal
+          isOpen={showRemoveConfirm}
+          onClose={() => setShowRemoveConfirm(false)}
+          title="Remover Membro"
+        >
+          <div className="space-y-4 pt-2">
+            <p className="text-xs text-slate-600 dark:text-slate-400">
+              Tem a certeza que quer remover <strong>{member.name}</strong> da
+              organização? Esta pessoa perderá o acesso imediatamente.
+            </p>
+            <div className="flex justify-end gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setShowRemoveConfirm(false)}
+              >
+                Voltar
+              </Button>
+              <Button
+                variant="primary"
+                onClick={() => {
+                  onRemove(member);
+                  setShowRemoveConfirm(false);
+                }}
+                icon={<Trash2 className="w-4 h-4" />}
+              >
+                Remover Membro
+              </Button>
+            </div>
+          </div>
+        </Modal>
+      )}
+
+      {/* Leave confirmation */}
+      {showLeaveConfirm && (
+        <Modal
+          isOpen={showLeaveConfirm}
+          onClose={() => setShowLeaveConfirm(false)}
+          title="Sair da Organização"
+        >
+          <div className="space-y-4 pt-2">
+            <p className="text-xs text-slate-600 dark:text-slate-400">
+              Tem a certeza que quer sair desta organização? Vai perder o acesso
+              imediatamente e terá de ser convidado novamente para voltar a
+              entrar.
+            </p>
+            <div className="flex justify-end gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setShowLeaveConfirm(false)}
+              >
+                Voltar
+              </Button>
+              <Button
+                variant="primary"
+                onClick={handleLeave}
+                disabled={isLeaving}
+                icon={<LogOut className="w-4 h-4" />}
+              >
+                {isLeaving ? "A Sair..." : "Sair da Organização"}
+              </Button>
+            </div>
+          </div>
+        </Modal>
       )}
     </div>
   );

@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import React from "react";
 import { useNavigate, useOutletContext } from "react-router-dom";
+import { Can, CanAll } from "../lib/permissions/components";
 
 interface FolderExplorerContext {
   filteredSubfolders: Folder[];
@@ -259,6 +260,12 @@ const SongGridCard: React.FC<SongGridCardProps> = ({
       <MoreVertical className="w-4.5 h-4.5" />
     </button>
 
+    {song.song_number && (
+      <span className="absolute top-5 left-5 text-[10px] font-bold bg-neutral-100 dark:bg-slate-800 text-neutral-600 dark:text-neutral-400 px-2 py-1 rounded-lg border border-neutral-200 dark:border-slate-700">
+        Nº {song.song_number}
+      </span>
+    )}
+
     <div className="w-14 h-14 rounded-2xl bg-m3-primary-light/20 border border-m3-primary/20 flex items-center justify-center text-m3-primary mb-3 group-hover:scale-110 transition-transform">
       <FileText className="w-8 h-8 opacity-80" />
     </div>
@@ -266,11 +273,6 @@ const SongGridCard: React.FC<SongGridCardProps> = ({
     <span className="text-sm font-black text-m3-text transition-colors truncate w-full px-1">
       {song.title}
     </span>
-    {song.song_number && (
-      <span className="text-[10px] font-bold bg-neutral-100 dark:bg-slate-800 text-neutral-600 dark:text-neutral-400 px-2 py-1 rounded-lg border border-neutral-200 dark:border-slate-700">
-        Nº {song.song_number}
-      </span>
-    )}
 
     <span className="text-[10px] text-m3-secondary font-bold truncate w-full px-1 mt-0.5 opacity-70">
       {song.artist || "Cifra"}
@@ -526,25 +528,27 @@ export const FoldersPage: React.FC = () => {
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
       className={`flex-1 p-6 overflow-y-auto bg-white dark:bg-slate-900 relative transition-all select-none min-h-75 h-full ${
-        isDraggingOver
+        isDraggingOver //TODO: Remove with the permission
           ? "ring-4 ring-inset ring-[#0284c7] bg-sky-50/50 dark:bg-sky-950/30"
           : ""
       }`}
     >
       {/* Drag Over Overlay (só para upload externo, nunca durante drag interno) */}
       {isDraggingOver && !isInternalDragActive && (
-        <div className="absolute inset-0 bg-[#0284c7]/10 backdrop-blur-xs z-30 flex flex-col items-center justify-center p-6 text-center pointer-events-none">
-          <div className="w-16 h-16 rounded-3xl bg-[#0284c7] text-white flex items-center justify-center shadow-lg mb-3 animate-bounce">
-            <Upload className="w-8 h-8" />
+        <Can permission="song.import">
+          <div className="absolute inset-0 bg-[#0284c7]/10 backdrop-blur-xs z-30 flex flex-col items-center justify-center p-6 text-center pointer-events-none">
+            <div className="w-16 h-16 rounded-3xl bg-[#0284c7] text-white flex items-center justify-center shadow-lg mb-3 animate-bounce">
+              <Upload className="w-8 h-8" />
+            </div>
+            <h3 className="text-lg font-extrabold text-[#0284c7]">
+              Solte os ficheiros aqui
+            </h3>
+            <p className="text-xs font-semibold text-slate-600 dark:text-slate-300 mt-1">
+              Os ficheiros serão importados para &quot;
+              {currentFolder ? currentFolder.name : "Diretório Raiz"}&quot;
+            </p>
           </div>
-          <h3 className="text-lg font-extrabold text-[#0284c7]">
-            Solte os ficheiros aqui
-          </h3>
-          <p className="text-xs font-semibold text-slate-600 dark:text-slate-300 mt-1">
-            Os ficheiros serão importados para &quot;
-            {currentFolder ? currentFolder.name : "Diretório Raiz"}&quot;
-          </p>
-        </div>
+        </Can>
       )}
 
       {foldersQuery.isLoading || songsQuery.isLoading ? (
@@ -571,28 +575,32 @@ export const FoldersPage: React.FC = () => {
 
           {!searchQuery && (
             <div className="flex flex-col items-center gap-3 mt-6">
-              <Button
-                variant="primary"
-                size="sm"
-                icon={<Plus className="w-4 h-4" />}
-                onClick={() => setIsCreateSongModalOpen(true)}
-              >
-                Novo Cântico
-              </Button>
-
-              <span className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
-                Ou
-              </span>
-
-              <button
-                onClick={() => fileInputRef?.current?.click()}
-                className="text-xs font-medium text-[#0284c7] hover:underline flex items-center gap-1.5 cursor-pointer bg-sky-50/80 dark:bg-sky-950/40 px-4 py-2 rounded-xl border border-sky-200 dark:border-sky-900/50 hover:bg-sky-100 dark:hover:bg-sky-900/50 transition-colors"
-              >
-                <Upload className="w-3.5 h-3.5" />
-                <span>
-                  Arraste e solte ficheiros aqui ou clique para carregar
+              <Can permission="song.create">
+                <Button
+                  variant="primary"
+                  size="sm"
+                  icon={<Plus className="w-4 h-4" />}
+                  onClick={() => setIsCreateSongModalOpen(true)}
+                >
+                  Novo Cântico
+                </Button>
+              </Can>
+              <CanAll permissions={["song.create", "song.import"]}>
+                <span className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
+                  Ou
                 </span>
-              </button>
+              </CanAll>
+              <Can permission="song.import">
+                <button
+                  onClick={() => fileInputRef?.current?.click()}
+                  className="text-xs font-medium text-[#0284c7] hover:underline flex items-center gap-1.5 cursor-pointer bg-sky-50/80 dark:bg-sky-950/40 px-4 py-2 rounded-xl border border-sky-200 dark:border-sky-900/50 hover:bg-sky-100 dark:hover:bg-sky-900/50 transition-colors"
+                >
+                  <Upload className="w-3.5 h-3.5" />
+                  <span>
+                    Arraste e solte ficheiros aqui ou clique para carregar
+                  </span>
+                </button>
+              </Can>
             </div>
           )}
         </div>

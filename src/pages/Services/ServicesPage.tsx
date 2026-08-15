@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { usePermissionValue } from "@/src/lib/permissions/client";
 import {
   Badge,
   Button,
@@ -112,6 +113,12 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
       NoInfer<Service[]>,
       Error
     >) ?? localArchivedServicesQuery;
+
+  const { value: emptyStateAction } = usePermissionValue(
+    "service.create",
+    "Criar Primeiro Culto",
+    undefined,
+  );
 
   // ─── Modal / dialog state ─────────────────────────────────────────────────
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -851,7 +858,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
           icon={<Calendar className="w-12 h-12 text-m3-primary opacity-40" />}
           title="Nenhum culto agendado"
           description="A sua agenda está livre. Que tal planejar o próximo momento de louvor?"
-          actionLabel="Criar Primeiro Culto"
+          actionLabel={emptyStateAction}
           onAction={() => setIsCreateModalOpen(true)}
         />
         {/* CREATE SERVICE MODAL */}
