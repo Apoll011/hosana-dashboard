@@ -2771,14 +2771,23 @@ export const MainLayout: React.FC = () => {
                         handleSortChange(sb, so);
                       }}
                       className="bg-transparent font-bold text-m3-text focus:outline-none cursor-pointer text-[11px] uppercase tracking-wider"
-                      title="Organizar ficheiros"
+                      title={isServicesView ? "Organizar cultos" : "Organizar ficheiros"}
                     >
-                      <option value="title-asc">Nome (A-Z)</option>
-                      <option value="title-desc">Nome (Z-A)</option>
-                      {!isServicesView && (
-                        <option value="artist-asc">Artista (A-Z)</option>
+                      {isServicesView ? (
+                        <>
+                          <option value="updatedAt-desc">Data: Recente</option>
+                          <option value="updatedAt-asc">Data: Antiga</option>
+                          <option value="title-asc">Nome (A-Z)</option>
+                          <option value="title-desc">Nome (Z-A)</option>
+                        </>
+                      ) : (
+                        <>
+                          <option value="title-asc">Nome (A-Z)</option>
+                          <option value="title-desc">Nome (Z-A)</option>
+                          <option value="artist-asc">Artista (A-Z)</option>
+                          <option value="updatedAt-desc">Data Recente</option>
+                        </>
                       )}
-                      <option value="updatedAt-desc">Data Recente</option>
                     </select>
                   </div>
                 </div>

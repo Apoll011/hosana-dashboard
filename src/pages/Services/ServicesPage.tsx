@@ -24,7 +24,6 @@ import {
   Archive,
   ArchiveRestore,
   ArrowRight,
-  ArrowUpDown,
   Calendar,
   Church,
   Clock,
@@ -87,19 +86,11 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
   const { servicesQuery, createService, updateService, deleteService } =
     useServices();
 
-  // ─── Local sort state (only used when not in folder-item mode) ───────────
-  const [localSortBy, setLocalSortBy] = useState<ServiceSortBy>("date");
-  const [localSortOrder, setLocalSortOrder] = useState<SortOrder>("desc");
-
-  // Effective sort: in folder-item mode use context sort, otherwise local
-  const effectiveSortBy: ServiceSortBy = serviceAsFolderItem
-    ? contextSortBy === "title"
-      ? "name"
-      : "date"
-    : localSortBy;
-  const effectiveSortOrder: SortOrder = serviceAsFolderItem
-    ? ((contextSortOrder as SortOrder) ?? "desc")
-    : localSortOrder;
+  // Effective sort (from MainLayout context)
+  const effectiveSortBy: ServiceSortBy =
+    contextSortBy === "title" ? "name" : "date";
+  const effectiveSortOrder: SortOrder =
+    ((contextSortOrder as SortOrder) ?? "desc");
 
   // ─── Archive toggle (from MainLayout context or local fallback) ──────────
   const showArchived = (context.showArchived as boolean) ?? false;
@@ -539,30 +530,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
     [serviceAsFolderItem, selectedServiceIds],
   );
 
-  // ─── Sort control (for non-folder-item mode) ──────────────────────────────
-  const sortControl = !serviceAsFolderItem && (
-    <div className="flex items-center gap-2 bg-m3-bg border border-m3-border rounded-2xl px-3 py-2 text-xs transition-all hover:border-m3-primary/30 shrink-0">
-      <ArrowUpDown className="w-4 h-4 text-m3-secondary shrink-0" />
-      <select
-        value={`${localSortBy}-${localSortOrder}`}
-        onChange={(e) => {
-          const [sb, so] = e.target.value.split("-") as [
-            ServiceSortBy,
-            SortOrder,
-          ];
-          setLocalSortBy(sb);
-          setLocalSortOrder(so);
-        }}
-        className="bg-transparent font-bold text-m3-text focus:outline-none cursor-pointer text-[11px] uppercase tracking-wider"
-        title="Organizar cultos"
-      >
-        <option value="date-desc">Data: Recente</option>
-        <option value="date-asc">Data: Antiga</option>
-        <option value="name-asc">Nome (A-Z)</option>
-        <option value="name-desc">Nome (Z-A)</option>
-      </select>
-    </div>
-  );
+
 
   // ─── Service card (standard view) ────────────────────────────────────────
   const renderServiceCard = (service: Service, isArchived = false) => (
@@ -913,11 +881,6 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
       onMouseDown={handleWorkspaceMouseDown}
       ref={containerRef}
     >
-      {/* ── Toolbar (non-folder-item mode only) ── */}
-      {!serviceAsFolderItem && (
-        <div className="flex items-center gap-3 flex-wrap">{sortControl}</div>
-      )}
-
       {/* ── Services Content ── */}
       {serviceAsFolderItem ? (
         /* FEATURE FLAG ACTIVE: SERVICE AS FOLDER/FILE ITEM VIEW */

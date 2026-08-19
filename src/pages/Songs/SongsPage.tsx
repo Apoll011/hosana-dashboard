@@ -444,7 +444,7 @@ export const SongsPage: React.FC<SongsPageProps> = ({
                         </div>
                       </td>
 
-                      <td className="py-4 px-6 text-m3-secondary max-w-[180px] truncate">
+                      <td className="py-4 px-6 text-m3-secondary max-w-45 truncate">
                         {song.artist || "—"}
                       </td>
 
