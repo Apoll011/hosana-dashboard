@@ -47,7 +47,7 @@ function useSongMutations() {
         setIsCreating(false);
       }
     },
-    [showToast]
+    [showToast],
   );
 
   const updateSong = useCallback(
@@ -55,8 +55,12 @@ function useSongMutations() {
       setIsUpdating(true);
       try {
         const db = await getDatabase();
-        const id = "id" in songUpdate && "data" in songUpdate ? songUpdate.id : (songUpdate as Song).id;
-        const data = "data" in songUpdate ? (songUpdate as any).data : songUpdate;
+        const id =
+          "id" in songUpdate && "data" in songUpdate
+            ? songUpdate.id
+            : (songUpdate as Song).id;
+        const data =
+          "data" in songUpdate ? (songUpdate as any).data : songUpdate;
 
         const doc = await db.songs.findOne(id).exec();
         const now = new Date().toISOString();
@@ -97,7 +101,7 @@ function useSongMutations() {
         setIsUpdating(false);
       }
     },
-    [showToast]
+    [showToast],
   );
 
   const deleteSong = useCallback(
@@ -121,7 +125,7 @@ function useSongMutations() {
         setIsDeleting(false);
       }
     },
-    [showToast]
+    [showToast],
   );
 
   const moveSong = useCallback(
@@ -159,7 +163,7 @@ function useSongMutations() {
         setIsUpdating(false);
       }
     },
-    [showToast]
+    [showToast],
   );
 
   const updateBatchTags = useCallback(
@@ -199,13 +203,16 @@ function useSongMutations() {
         showToast(`Etiquetas atualizadas em ${count} cântico(s)!`, "success");
         return { count };
       } catch (err: any) {
-        showToast(err.message || "Falha ao atualizar etiquetas em lote", "error");
+        showToast(
+          err.message || "Falha ao atualizar etiquetas em lote",
+          "error",
+        );
         throw err;
       } finally {
         setIsUpdatingBatchTags(false);
       }
     },
-    [showToast]
+    [showToast],
   );
 
   return {
@@ -264,7 +271,7 @@ export function useSongs(params: GetSongsParams = {}) {
                 s.title?.toLowerCase().includes(q) ||
                 s.artist?.toLowerCase().includes(q) ||
                 s.content?.toLowerCase().includes(q) ||
-                s.tags?.some((t) => t.toLowerCase().includes(q))
+                s.tags?.some((t) => t.toLowerCase().includes(q)),
             );
           }
 

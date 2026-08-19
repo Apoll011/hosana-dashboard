@@ -69,13 +69,7 @@ export function useFolders() {
   }, []);
 
   const createFolder = useCallback(
-    async ({
-      name,
-      parentId,
-    }: {
-      name: string;
-      parentId?: string | null;
-    }) => {
+    async ({ name, parentId }: { name: string; parentId?: string | null }) => {
       setIsCreating(true);
       try {
         const db = await getDatabase();
@@ -100,18 +94,11 @@ export function useFolders() {
         setIsCreating(false);
       }
     },
-    [showToast]
+    [showToast],
   );
 
   const renameFolder = useCallback(
-    async ({
-      id,
-      name,
-    }: {
-      id: string;
-      name: string;
-      updatedAt?: string;
-    }) => {
+    async ({ id, name }: { id: string; name: string; updatedAt?: string }) => {
       setIsRenaming(true);
       try {
         const db = await getDatabase();
@@ -130,7 +117,7 @@ export function useFolders() {
         setIsRenaming(false);
       }
     },
-    [showToast]
+    [showToast],
   );
 
   const moveFolder = useCallback(
@@ -160,7 +147,7 @@ export function useFolders() {
         setIsMoving(false);
       }
     },
-    [showToast]
+    [showToast],
   );
 
   const deleteFolder = useCallback(
@@ -234,7 +221,7 @@ export function useFolders() {
         setIsDeleting(false);
       }
     },
-    [showToast]
+    [showToast],
   );
 
   return {

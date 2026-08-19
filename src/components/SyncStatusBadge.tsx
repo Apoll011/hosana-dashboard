@@ -1,5 +1,11 @@
 import React from "react";
-import { Cloud, CloudOff, RefreshCw, AlertCircle, CheckCircle2 } from "lucide-react";
+import {
+  Cloud,
+  CloudOff,
+  RefreshCw,
+  AlertCircle,
+  CheckCircle2,
+} from "lucide-react";
 import { useSync } from "../contexts/SyncContext";
 
 interface SyncStatusBadgeProps {
@@ -26,7 +32,8 @@ export const SyncStatusBadge: React.FC<SyncStatusBadgeProps> = ({
         return {
           icon: <CloudOff className="w-4 h-4 text-amber-500" />,
           label: "Offline",
-          tooltip: "Modo offline. As alterações serão sincronizadas quando reconectar.",
+          tooltip:
+            "Modo offline. As alterações serão sincronizadas quando reconectar.",
           bgClass: "bg-amber-500/10 text-amber-500 border-amber-500/20",
         };
       case "error":
@@ -41,8 +48,9 @@ export const SyncStatusBadge: React.FC<SyncStatusBadgeProps> = ({
         return {
           icon: <Cloud className="w-4 h-4 text-emerald-500" />,
           label: "Sincronizado",
-          tooltip: `Sincronizado${lastSyncedAt ? ` (${lastSyncedAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })})` : ""}. Clique para forçar sincronização.`,
-          bgClass: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20",
+          tooltip: `Sincronizado${lastSyncedAt ? ` (${lastSyncedAt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })})` : ""}. Clique para forçar sincronização.`,
+          bgClass:
+            "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20",
         };
     }
   };
