@@ -2561,31 +2561,33 @@ export const MainLayout: React.FC = () => {
 
                 {/* Right Side: View Mode Toggle & Density Selector */}
                 <div className="flex items-center gap-2.5">
-                  {/* View Mode Toggle */}
-                  <div className="flex items-center p-1 bg-m3-bg rounded-2xl border border-m3-border select-none shrink-0 shadow-inner">
-                    <button
-                      onClick={() => handleViewModeChange("grid")}
-                      title="Vista em Grelha"
-                      className={`p-2 rounded-xl transition-all cursor-pointer ${
-                        viewMode === "grid"
-                          ? "bg-m3-card text-m3-primary shadow-lg shadow-black/10"
-                          : "text-m3-secondary hover:text-m3-text"
-                      }`}
-                    >
-                      <LayoutGrid className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => handleViewModeChange("list")}
-                      title="Vista em Lista"
-                      className={`p-2 rounded-xl transition-all cursor-pointer ${
-                        viewMode === "list"
-                          ? "bg-m3-card text-m3-primary shadow-lg shadow-black/10"
-                          : "text-m3-secondary hover:text-m3-text"
-                      }`}
-                    >
-                      <List className="w-4 h-4" />
-                    </button>
-                  </div>
+                  {/* View Mode Toggle (hidden in Songs view) */}
+                  {!isSongsView && (
+                    <div className="flex items-center p-1 bg-m3-bg rounded-2xl border border-m3-border select-none shrink-0 shadow-inner">
+                      <button
+                        onClick={() => handleViewModeChange("grid")}
+                        title="Vista em Grelha"
+                        className={`p-2 rounded-xl transition-all cursor-pointer ${
+                          viewMode === "grid"
+                            ? "bg-m3-card text-m3-primary shadow-lg shadow-black/10"
+                            : "text-m3-secondary hover:text-m3-text"
+                        }`}
+                      >
+                        <LayoutGrid className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => handleViewModeChange("list")}
+                        title="Vista em Lista"
+                        className={`p-2 rounded-xl transition-all cursor-pointer ${
+                          viewMode === "list"
+                            ? "bg-m3-card text-m3-primary shadow-lg shadow-black/10"
+                            : "text-m3-secondary hover:text-m3-text"
+                        }`}
+                      >
+                        <List className="w-4 h-4" />
+                      </button>
+                    </div>
+                  )}
 
                   {/* Density Selector (Confortável / Compacto) */}
                   <div className="flex items-center gap-2 bg-m3-bg border border-m3-border rounded-2xl px-3 py-1.5 text-xs transition-all hover:border-m3-primary/30">
