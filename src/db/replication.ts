@@ -73,9 +73,11 @@ export function setupReplication(db: HosanaDatabase): ReplicationManager {
               _deleted: !!doc._deleted,
             }));
 
+            const checkpoint = res.checkpoint ?? lastCheckpoint ?? undefined;
+
             return {
               documents,
-              checkpoint: res.checkpoint ?? lastCheckpoint ?? null,
+              checkpoint: checkpoint || undefined,
             };
           } catch (err) {
             console.error(`Pull error on ${collectionName}:`, err);
