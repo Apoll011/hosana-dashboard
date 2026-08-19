@@ -66,6 +66,7 @@ import { BatchDeleteModal } from "../components/modals/BatchDeleteModal";
 import { BatchMoveModal } from "../components/modals/BatchMoveModal";
 import { BatchTagModal } from "../components/modals/BatchTagModal";
 import { MoveSongModal } from "../components/modals/MoveSongModal";
+import { SyncStatusBadge } from "../components/SyncStatusBadge";
 import { ToastContainer } from "../components/Toast";
 import { useAuth } from "../contexts/AuthContext";
 import { useSync } from "../contexts/SyncContext";
@@ -172,18 +173,7 @@ export const MainLayout: React.FC = () => {
 
   // Services Archive toggle
   const [showArchived, setShowArchived] = useState(false);
-  const archivedServicesQuery = useQuery({
-    queryKey: ["services", "archived"],
-    queryFn: async () => {
-      const all = await servicesApi.getServices(true);
-      return (Array.isArray(all) ? all : []).map((s: Service) => ({
-        ...s,
-        archived: true,
-      }));
-    },
-    enabled: showArchived,
-    staleTime: 1000 * 60 * 5,
-  });
+  const { servicesQuery: archivedServicesQuery } = useServices(true);
 
   const archivedServices = useMemo(
     () => (showArchived ? (archivedServicesQuery.data ?? []) : []),
@@ -2351,6 +2341,8 @@ export const MainLayout: React.FC = () => {
                       )}
                     </div>
                   )}
+
+                  <SyncStatusBadge className="shrink-0" showText={false} />
 
                   <InboxButton
                     client={authClient as InboxFetchClient}
