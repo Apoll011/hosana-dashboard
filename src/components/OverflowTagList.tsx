@@ -1,5 +1,5 @@
 import { Badge } from "@hosanna/shared";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useLayoutEffect, useRef, useState } from "react";
 
 interface OverflowTagListProps {
   tags?: string[] | null;
@@ -7,65 +7,103 @@ interface OverflowTagListProps {
 
 export const OverflowTagList: React.FC<OverflowTagListProps> = ({ tags }) => {
   const containerRef = useRef<HTMLDivElement>(null);
-
   const safeTags = tags ?? [];
 
   const [visibleCount, setVisibleCount] = useState<number>(safeTags.length);
-  const [isMeasuring, setIsMeasuring] = useState<boolean>(true);
+  const [isMeasured, setIsMeasured] = useState<boolean>(false);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
+    if (safeTags.length === 0) {
+      setVisibleCount(0);
+      setIsMeasured(true);
+      return;
+    }
+
     const calculateOverflow = () => {
-      setIsMeasuring(true);
+      const container = containerRef.current;
+      if (!container) return;
 
-      requestAnimationFrame(() => {
-        if (!containerRef.current) return;
+      const containerWidth = container.clientWidth;
+      if (containerWidth <= 0) return;
 
-        const children = Array.from(
-          containerRef.current.children,
-        ) as HTMLElement[];
-        if (children.length === 0) return;
+      const children = Array.from(container.children) as HTMLElement[];
+      if (children.length === 0) return;
 
-        const firstItemTop = children[0].offsetTop;
-        let cutOffIndex = safeTags.length;
+      const gap = 6; // gap-1.5 = 6px
+      let currentWidth = 0;
+      let count = 0;
+      const badgeWidthEstimate = 32; // reserve width for +N badge
 
-        for (let i = 0; i < children.length; i++) {
-          if (children[i].offsetTop > firstItemTop) {
-            cutOffIndex = i > 0 ? i - 1 : 0;
-            break;
-          }
+      // When checking fit, we measure how many tag elements can fit
+      for (let i = 0; i < safeTags.length; i++) {
+        const child = children[i];
+        if (!child) break;
+
+        const childWidth = child.offsetWidth;
+        const widthNeeded = currentWidth + (count > 0 ? gap : 0) + childWidth;
+
+        // If there are more tags remaining after this one, we must also fit the +N badge
+        const hasMoreAfter = i < safeTags.length - 1;
+        const totalNeededWithBadge =
+          widthNeeded + (hasMoreAfter ? gap + badgeWidthEstimate : 0);
+
+        if (
+          totalNeededWithBadge <= containerWidth ||
+          (!hasMoreAfter && widthNeeded <= containerWidth)
+        ) {
+          currentWidth = widthNeeded;
+          count++;
+        } else {
+          break;
         }
+      }
 
-        setVisibleCount(cutOffIndex);
-        setIsMeasuring(false);
-      });
+      setVisibleCount(count);
+      setIsMeasured(true);
     };
 
     calculateOverflow();
 
-    window.addEventListener("resize", calculateOverflow);
-    return () => window.removeEventListener("resize", calculateOverflow);
+    const resizeObserver = new ResizeObserver(() => {
+      calculateOverflow();
+    });
+
+    if (containerRef.current) {
+      resizeObserver.observe(containerRef.current);
+    }
+
+    return () => {
+      resizeObserver.disconnect();
+    };
   }, [safeTags]);
 
   if (safeTags.length === 0) {
     return <span className="text-xs text-m3-secondary opacity-30">—</span>;
   }
 
-  const tagsToShow = isMeasuring ? safeTags : safeTags.slice(0, visibleCount);
   const hiddenCount = safeTags.length - visibleCount;
 
   return (
     <div
       ref={containerRef}
-      className="flex flex-wrap gap-1.5 overflow-hidden h-6"
+      className="flex flex-nowrap items-center gap-1.5 overflow-hidden w-full max-w-full h-6"
     >
-      {tagsToShow.map((tag) => (
-        <Badge key={tag} variant="slate">
-          {tag}
-        </Badge>
-      ))}
+      {safeTags.map((tag, index) => {
+        const isHidden = isMeasured && index >= visibleCount;
+        return (
+          <div
+            key={tag}
+            className={`shrink-0 ${isHidden ? "hidden" : "inline-flex"}`}
+          >
+            <Badge variant="slate">{tag}</Badge>
+          </div>
+        );
+      })}
 
-      {!isMeasuring && hiddenCount > 0 && (
-        <Badge variant="slate">+{hiddenCount}</Badge>
+      {isMeasured && hiddenCount > 0 && (
+        <div className="shrink-0 inline-flex">
+          <Badge variant="slate">+{hiddenCount}</Badge>
+        </div>
       )}
     </div>
   );

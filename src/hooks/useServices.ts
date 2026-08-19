@@ -51,6 +51,7 @@ export function useServices() {
     onSettled: (data, error, variables) => {
       queryClient.invalidateQueries({ queryKey: ["service", variables.id] });
       queryClient.invalidateQueries({ queryKey: ["services"] });
+      queryClient.invalidateQueries({ queryKey: ["services", "archived"] });
     },
   });
 
@@ -58,6 +59,7 @@ export function useServices() {
     mutationFn: (id: string) => servicesApi.deleteService(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["services"] });
+      queryClient.invalidateQueries({ queryKey: ["services", "archived"] });
       showToast("Service deleted", "info");
     },
     onError: (err: Error) => {

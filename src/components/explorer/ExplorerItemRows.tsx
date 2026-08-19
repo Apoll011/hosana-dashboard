@@ -1,0 +1,215 @@
+import React from "react";
+import { Button, Folder, Song } from "@hosanna/shared";
+import { FileText, Folder as FolderIcon, MoreVertical } from "lucide-react";
+
+export interface FolderTableRowProps {
+  folder: Folder;
+  isSelected: boolean;
+  isSearchingOrFiltering?: boolean;
+  isDropTarget?: boolean;
+  isDropDisabled?: boolean;
+  isInternalDragActive?: boolean;
+  getFolderPathString?: (folderId: string | null | undefined) => string;
+  density?: "comfortable" | "compact";
+  onClick: (e: React.MouseEvent) => void;
+  onDoubleClick: (e: React.MouseEvent) => void;
+  onContextMenu: (e: React.MouseEvent) => void;
+  onDragStart?: (e: React.DragEvent) => void;
+  onDragEnd?: () => void;
+  onDragOver?: (e: React.DragEvent) => void;
+  onDragLeave?: (e: React.DragEvent) => void;
+  onDrop?: (e: React.DragEvent) => void;
+}
+
+export const FolderTableRow: React.FC<FolderTableRowProps> = React.memo(
+  ({
+    folder,
+    isSelected,
+    isSearchingOrFiltering,
+    isDropTarget,
+    isDropDisabled,
+    isInternalDragActive,
+    getFolderPathString,
+    density = "comfortable",
+    onClick,
+    onDoubleClick,
+    onContextMenu,
+    onDragStart,
+    onDragEnd,
+    onDragOver,
+    onDragLeave,
+    onDrop,
+  }) => {
+    const showDisabledDuringDrag = isInternalDragActive && isDropDisabled;
+    const isCompact = density === "compact";
+    const cellPadding = isCompact ? "py-2.5 px-4" : "py-4 px-6";
+
+    return (
+      <tr
+        data-item-id={folder.id}
+        data-item-type="folder"
+        draggable={Boolean(onDragStart)}
+        onClick={onClick}
+        onDoubleClick={(e) => {
+          e.stopPropagation();
+          onDoubleClick(e);
+        }}
+        onContextMenu={onContextMenu}
+        onDragStart={onDragStart}
+        onDragEnd={onDragEnd}
+        onDragOver={onDragOver}
+        onDragLeave={onDragLeave}
+        onDrop={onDrop}
+        className={`cursor-pointer transition-all group select-none ${
+          isDropTarget && !isDropDisabled
+            ? "bg-emerald-50 dark:bg-emerald-950/30 outline outline-dashed outline-emerald-400 -outline-offset-2"
+            : isSelected
+              ? "bg-m3-primary/10 text-m3-primary"
+              : "hover:bg-m3-hover/50 text-m3-text"
+        } ${showDisabledDuringDrag ? "opacity-40 cursor-not-allowed" : ""}`}
+      >
+        <td className={`${cellPadding} max-w-xs sm:max-w-md`}>
+          <div className="flex items-center gap-3 group-hover:translate-x-1 transition-transform min-w-0">
+            <FolderIcon
+              className={`${isCompact ? "w-4 h-4" : "w-5 h-5"} text-m3-primary opacity-80 shrink-0`}
+            />
+            <span className="truncate">{folder.name}</span>
+          </div>
+        </td>
+        <td className={`${cellPadding} text-m3-secondary opacity-70`}>Pasta</td>
+        {isSearchingOrFiltering && getFolderPathString && (
+          <td className={`${cellPadding} text-m3-primary/80`}>
+            {getFolderPathString(folder.parentId)}
+          </td>
+        )}
+        <td className={`${cellPadding} text-m3-secondary`}>
+          {folder.songCount || 0} Musicas
+        </td>
+        <td className={`${cellPadding} text-right`}>
+          <div className="flex items-center justify-end gap-1">
+            <Button
+              size={isCompact ? "sm" : "lg"}
+              variant="ghost"
+              onClick={(e) => {
+                e.stopPropagation();
+                onDoubleClick(e);
+              }}
+            >
+              Abrir
+            </Button>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onContextMenu(e);
+              }}
+              className="p-1.5 rounded-xl text-m3-secondary hover:text-m3-text hover:bg-m3-hover dark:hover:bg-slate-800 transition-colors cursor-pointer"
+              title="Mais opções"
+              aria-label="Mais opções"
+            >
+              <MoreVertical className="w-4 h-4" />
+            </button>
+          </div>
+        </td>
+      </tr>
+    );
+  },
+);
+FolderTableRow.displayName = "FolderTableRow";
+
+export interface SongTableRowProps {
+  song: Song;
+  isSelected: boolean;
+  isSearchingOrFiltering?: boolean;
+  getFolderPathString?: (folderId: string | null | undefined) => string;
+  density?: "comfortable" | "compact";
+  onClick: (e: React.MouseEvent) => void;
+  onDoubleClick: (e: React.MouseEvent) => void;
+  onContextMenu: (e: React.MouseEvent) => void;
+  onDragStart?: (e: React.DragEvent) => void;
+  onDragEnd?: () => void;
+}
+
+export const SongTableRow: React.FC<SongTableRowProps> = React.memo(
+  ({
+    song,
+    isSelected,
+    isSearchingOrFiltering,
+    getFolderPathString,
+    density = "comfortable",
+    onClick,
+    onDoubleClick,
+    onContextMenu,
+    onDragStart,
+    onDragEnd,
+  }) => {
+    const isCompact = density === "compact";
+    const cellPadding = isCompact ? "py-2.5 px-4" : "py-4 px-6";
+
+    return (
+      <tr
+        data-item-id={song.id}
+        data-item-type="song"
+        draggable={Boolean(onDragStart)}
+        onClick={onClick}
+        onDoubleClick={(e) => {
+          e.stopPropagation();
+          onDoubleClick(e);
+        }}
+        onContextMenu={onContextMenu}
+        onDragStart={onDragStart}
+        onDragEnd={onDragEnd}
+        className={`cursor-pointer transition-all group select-none ${
+          isSelected
+            ? "bg-m3-primary/10 text-m3-primary"
+            : "hover:bg-m3-hover/50 text-m3-text"
+        }`}
+      >
+        <td className={`${cellPadding} max-w-xs sm:max-w-md`}>
+          <div className="flex items-center gap-3 group-hover:translate-x-1 transition-transform min-w-0">
+            <FileText
+              className={`${isCompact ? "w-4 h-4" : "w-5 h-5"} text-m3-primary opacity-80 shrink-0`}
+            />
+            <span className="truncate">{song.title}</span>
+          </div>
+        </td>
+        <td className={`${cellPadding} text-m3-secondary opacity-70`}>Cifra</td>
+        {isSearchingOrFiltering && getFolderPathString && (
+          <td className={`${cellPadding} text-m3-secondary font-medium`}>
+            {getFolderPathString(song.folderId)}
+          </td>
+        )}
+        <td className={`${cellPadding} text-m3-secondary`}>
+          {song.artist || "—"}
+        </td>
+        <td className={`${cellPadding} text-right`}>
+          <div className="flex items-center justify-end gap-1">
+            <Button
+              size={isCompact ? "sm" : "lg"}
+              variant="ghost"
+              onClick={(e) => {
+                e.stopPropagation();
+                onDoubleClick(e);
+              }}
+            >
+              Editar
+            </Button>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onContextMenu(e);
+              }}
+              className="p-1.5 rounded-xl text-m3-secondary hover:text-m3-text hover:bg-m3-hover dark:hover:bg-slate-800 transition-colors cursor-pointer"
+              title="Mais opções"
+              aria-label="Mais opções"
+            >
+              <MoreVertical className="w-4 h-4" />
+            </button>
+          </div>
+        </td>
+      </tr>
+    );
+  },
+);
+SongTableRow.displayName = "SongTableRow";
