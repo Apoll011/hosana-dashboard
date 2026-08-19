@@ -1,7 +1,6 @@
 import { usePermissionValue } from "@/src/lib/permissions/client";
 import {
   Badge,
-  Button,
   ConfirmDialog,
   EmptyState,
   Modal,
@@ -9,7 +8,6 @@ import {
   servicesApi,
   Spinner,
 } from "@hosanna/shared";
-import { useStatsigClient } from "@statsig/react-bindings";
 import {
   useQuery,
   useQueryClient,
@@ -21,7 +19,6 @@ import {
   Calendar,
   Copy,
   Edit2,
-  MoreVertical,
   Trash2,
   X,
 } from "lucide-react";
@@ -33,16 +30,16 @@ import React, {
   useState,
 } from "react";
 import { useNavigate, useOutletContext } from "react-router-dom";
-import { ServiceForm } from "../../components/forms/ServiceForm";
-import { useAuth } from "../../contexts/AuthContext";
-import { useServices } from "../../hooks/useServices";
-import { useMarqueeSelection } from "../../hooks/useMarqueeSelection";
 import {
+  BatchActionFloatingBar,
+  MarqueeSelectionBox,
   ServiceGridCard,
   ServiceTableRow,
-  MarqueeSelectionBox,
-  BatchActionFloatingBar,
 } from "../../components/explorer";
+import { ServiceForm } from "../../components/forms/ServiceForm";
+import { useAuth } from "../../contexts/AuthContext";
+import { useMarqueeSelection } from "../../hooks/useMarqueeSelection";
+import { useServices } from "../../hooks/useServices";
 
 interface ServicesPageProps {
   hideHeader?: boolean;
@@ -74,11 +71,6 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
     externalSearchQuery !== undefined
       ? externalSearchQuery
       : (context.searchQuery as string) || "";
-
-  const { client } = useStatsigClient();
-  const serviceAsFolderItem = client?.checkGate
-    ? client.checkGate("service_as_folder_item")
-    : false;
 
   const { servicesQuery, createService, updateService, deleteService } =
     useServices();

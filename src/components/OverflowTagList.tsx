@@ -1,5 +1,5 @@
 import { Badge } from "@hosanna/shared";
-import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
+import React, { useLayoutEffect, useRef, useState } from "react";
 
 interface OverflowTagListProps {
   tags?: string[] | null;
