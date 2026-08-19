@@ -13,12 +13,13 @@ import {
   EmptyState,
   Input,
   Modal,
-  Pagination,
   Song,
   Spinner,
 } from "@hosanna/shared";
 import {
   ArrowUpDown,
+  ChevronLeft,
+  ChevronRight,
   FileText,
   Filter,
   FolderInput,
@@ -233,11 +234,16 @@ export const SongsPage: React.FC<SongsPageProps> = ({
   ]);
 
   const totalSongs = filteredSongs.length;
-  const effectivePerPage = itemsPerPage === 0 ? Math.max(1, totalSongs) : itemsPerPage;
+  const effectivePerPage =
+    itemsPerPage === 0 ? Math.max(1, totalSongs) : itemsPerPage;
   const totalPages = Math.max(1, Math.ceil(totalSongs / effectivePerPage));
-  const songsData = itemsPerPage === 0
-    ? filteredSongs
-    : filteredSongs.slice((page - 1) * effectivePerPage, page * effectivePerPage);
+  const songsData =
+    itemsPerPage === 0
+      ? filteredSongs
+      : filteredSongs.slice(
+          (page - 1) * effectivePerPage,
+          page * effectivePerPage,
+        );
 
   const handleJumpPage = (e: React.FormEvent) => {
     e.preventDefault();
@@ -289,7 +295,8 @@ export const SongsPage: React.FC<SongsPageProps> = ({
               Biblioteca de Cânticos
             </h1>
             <p className="text-sm text-m3-secondary font-bold uppercase tracking-widest mt-2 ml-16 opacity-60">
-              Gerencie a sua coleção de cifras e pautas ({totalSongs} {totalSongs === 1 ? "cântico" : "cânticos"})
+              Gerencie a sua coleção de cifras e pautas ({totalSongs}{" "}
+              {totalSongs === 1 ? "cântico" : "cânticos"})
             </p>
           </div>
 
@@ -521,7 +528,9 @@ export const SongsPage: React.FC<SongsPageProps> = ({
                   ? totalSongs
                   : Math.min(page * effectivePerPage, totalSongs)}
               </strong>{" "}
-              de <strong className="font-bold text-m3-text">{totalSongs}</strong> cânticos
+              de{" "}
+              <strong className="font-bold text-m3-text">{totalSongs}</strong>{" "}
+              cânticos
             </div>
 
             {/* Items Per Page Selector */}
@@ -546,7 +555,6 @@ export const SongsPage: React.FC<SongsPageProps> = ({
           </div>
 
           <div className="flex items-center gap-3 w-full md:w-auto justify-between md:justify-end">
-            {/* Jump to page form */}
             {totalPages > 1 && (
               <form
                 onSubmit={handleJumpPage}
@@ -566,7 +574,11 @@ export const SongsPage: React.FC<SongsPageProps> = ({
                 />
                 <button
                   type="submit"
-                  disabled={!jumpPageInput || parseInt(jumpPageInput, 10) < 1 || parseInt(jumpPageInput, 10) > totalPages}
+                  disabled={
+                    !jumpPageInput ||
+                    parseInt(jumpPageInput, 10) < 1 ||
+                    parseInt(jumpPageInput, 10) > totalPages
+                  }
                   className="text-[10px] font-black uppercase text-m3-primary hover:underline disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
                 >
                   OK
@@ -574,14 +586,27 @@ export const SongsPage: React.FC<SongsPageProps> = ({
               </form>
             )}
 
-            {/* Pagination Controls */}
-            <Pagination
-              page={page}
-              totalPages={totalPages}
-              onPageChange={(p) => setPage(p)}
-              total={totalSongs}
-              limit={effectivePerPage}
-            />
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={() => setPage(page - 1)}
+                disabled={page <= 1}
+                className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                title="Página Anterior"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              <span className="px-2 font-semibold text-slate-700 dark:text-slate-300">
+                {page} / {totalPages}
+              </span>
+              <button
+                onClick={() => setPage(page + 1)}
+                disabled={page >= totalPages}
+                className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                title="Página Seguinte"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
           </div>
         </div>
       </div>
