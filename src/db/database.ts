@@ -1,15 +1,15 @@
-import { createRxDatabase, RxDatabase, addRxPlugin } from "rxdb";
-import { getRxStorageDexie } from "rxdb/plugins/storage-dexie";
+import { addRxPlugin, createRxDatabase, RxDatabase } from "rxdb";
 import { RxDBDevModePlugin } from "rxdb/plugins/dev-mode";
-import { RxDBUpdatePlugin } from "rxdb/plugins/update";
 import { RxDBQueryBuilderPlugin } from "rxdb/plugins/query-builder";
+import { getRxStorageDexie } from "rxdb/plugins/storage-dexie";
+import { RxDBUpdatePlugin } from "rxdb/plugins/update";
 import {
-  songSchema,
+  FolderDocType,
   folderSchema,
+  ServiceDocType,
   serviceSchema,
   SongDocType,
-  FolderDocType,
-  ServiceDocType,
+  songSchema,
 } from "./schemas";
 
 addRxPlugin(RxDBUpdatePlugin);
@@ -35,7 +35,6 @@ export async function getDatabase(): Promise<HosanaDatabase> {
       const db = await createRxDatabase<HosanaDatabaseCollections>({
         name: "hosanadb",
         storage: getRxStorageDexie(),
-        ignoreDuplicate: true,
       });
 
       await db.addCollections({
