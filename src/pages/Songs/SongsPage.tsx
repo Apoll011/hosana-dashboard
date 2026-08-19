@@ -4,10 +4,7 @@
  */
 
 import { OverflowTagList } from "@/src/components/OverflowTagList";
-import {
-  MarqueeSelectionBox,
-  SongGridCard,
-} from "@/src/components/explorer";
+import { MarqueeSelectionBox } from "@/src/components/explorer";
 import { useMarqueeSelection } from "@/src/hooks/useMarqueeSelection";
 import { usePermissionValue } from "@/src/lib/permissions/client";
 import { Can } from "@/src/lib/permissions/components";
@@ -31,8 +28,6 @@ import {
   Filter,
   FolderInput,
   FolderTree,
-  LayoutGrid,
-  List,
   Music,
   Plus,
   Search,
@@ -87,17 +82,8 @@ export const SongsPage: React.FC<SongsPageProps> = ({
 
   const actualHideHeader = hideHeader ?? (context.hideHeader as boolean | undefined);
 
-  // View Mode & Density from context with localStorage fallback
-  const contextViewMode = context.viewMode as "grid" | "list" | undefined;
+  // Density from context with localStorage fallback
   const contextDensity = context.density as "comfortable" | "compact" | undefined;
-
-  const [localViewMode, setLocalViewMode] = useState<"grid" | "list">(() => {
-    try {
-      return (localStorage.getItem("viewMode") as "grid" | "list") || "list";
-    } catch {
-      return "list";
-    }
-  });
 
   const [localDensity, setLocalDensity] = useState<"comfortable" | "compact">(() => {
     try {
@@ -111,16 +97,8 @@ export const SongsPage: React.FC<SongsPageProps> = ({
     }
   });
 
-  const viewMode = contextViewMode ?? localViewMode;
   const density = contextDensity ?? localDensity;
   const isCompact = density === "compact";
-
-  const handleViewModeChange = (mode: "grid" | "list") => {
-    setLocalViewMode(mode);
-    try {
-      localStorage.setItem("viewMode", mode);
-    } catch {}
-  };
 
   const handleDensityChange = (d: "comfortable" | "compact") => {
     setLocalDensity(d);
@@ -235,14 +213,6 @@ export const SongsPage: React.FC<SongsPageProps> = ({
     folders.forEach((f) => map.set(f.id, f.name));
     return map;
   }, [folders]);
-
-  const getFolderPathString = useCallback(
-    (folderId: string | null | undefined): string => {
-      if (!folderId) return "Raiz";
-      return folderMap.get(folderId) || "Raiz";
-    },
-    [folderMap],
-  );
 
   // Client-side filtering & sorting with high performance memoization
   const filteredSongs = useMemo(() => {
@@ -640,34 +610,6 @@ export const SongsPage: React.FC<SongsPageProps> = ({
               </select>
             </div>
 
-            {/* View Mode Toggle */}
-            <div className="flex items-center p-1 bg-m3-card rounded-xl border border-m3-border shrink-0 shadow-xs">
-              <button
-                type="button"
-                onClick={() => handleViewModeChange("grid")}
-                title="Vista em Grelha"
-                className={`p-1.5 rounded-lg transition-all cursor-pointer ${
-                  viewMode === "grid"
-                    ? "bg-m3-primary/10 text-m3-primary shadow-xs"
-                    : "text-m3-secondary hover:text-m3-text"
-                }`}
-              >
-                <LayoutGrid className="w-4 h-4" />
-              </button>
-              <button
-                type="button"
-                onClick={() => handleViewModeChange("list")}
-                title="Vista em Lista"
-                className={`p-1.5 rounded-lg transition-all cursor-pointer ${
-                  viewMode === "list"
-                    ? "bg-m3-primary/10 text-m3-primary shadow-xs"
-                    : "text-m3-secondary hover:text-m3-text"
-                }`}
-              >
-                <List className="w-4 h-4" />
-              </button>
-            </div>
-
             {/* Density Selector */}
             <div className="flex items-center gap-1.5 bg-m3-card border border-m3-border rounded-xl px-2.5 py-1.5 text-xs shadow-xs">
               <select
@@ -710,29 +652,6 @@ export const SongsPage: React.FC<SongsPageProps> = ({
               actionLabel={emptyStateAction}
               onAction={() => setIsCreateModalOpen(true)}
             />
-          </div>
-        ) : viewMode === "grid" ? (
-          /* Grid Cards Layout */
-          <div
-            className={`p-4 sm:p-6 overflow-y-auto flex-1 ${
-              isCompact
-                ? "grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 gap-3"
-                : "grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5"
-            }`}
-          >
-            {songsData.map((song) => (
-              <SongGridCard
-                key={song.id}
-                song={song}
-                isSelected={selectedSongIds.has(song.id)}
-                isSearchingOrFiltering={Boolean(finalSearchQuery || selectedFolder)}
-                getFolderPathString={getFolderPathString}
-                density={density}
-                onClick={(e) => handleSongClick(e, song)}
-                onDoubleClick={() => navigate(`${slugPrefix}/songs/${song.id}`)}
-                onContextMenu={(e) => openContextMenu(e, song)}
-              />
-            ))}
           </div>
         ) : (
           /* Table View Layout */
