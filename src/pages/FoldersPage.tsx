@@ -700,8 +700,12 @@ export const FoldersPage: React.FC = () => {
           <table className="w-full text-left border-collapse select-none">
             <thead>
               <tr className="bg-m3-sidebar/40 border-b border-m3-border text-[10px] font-black text-m3-secondary uppercase tracking-[0.2em]">
-                <th className={isCompact ? "py-2.5 px-4" : "py-4 px-6"}>Nome</th>
-                <th className={isCompact ? "py-2.5 px-4" : "py-4 px-6"}>Tipo</th>
+                <th className={isCompact ? "py-2.5 px-4" : "py-4 px-6"}>
+                  Nome
+                </th>
+                <th className={isCompact ? "py-2.5 px-4" : "py-4 px-6"}>
+                  Tipo
+                </th>
                 {isSearchingOrFiltering && (
                   <th className={isCompact ? "py-2.5 px-4" : "py-4 px-6"}>
                     Localização
@@ -710,12 +714,16 @@ export const FoldersPage: React.FC = () => {
                 <th className={isCompact ? "py-2.5 px-4" : "py-4 px-6"}>
                   Detalhes
                 </th>
-                <th className={`${isCompact ? "py-2.5 px-4" : "py-4 px-6"} text-right`}>
+                <th
+                  className={`${isCompact ? "py-2.5 px-4" : "py-4 px-6"} text-right`}
+                >
                   Ação
                 </th>
               </tr>
             </thead>
-            <tbody className={`divide-y divide-m3-border/30 ${isCompact ? "text-xs" : "text-[13px]"} font-bold`}>
+            <tbody
+              className={`divide-y divide-m3-border/30 ${isCompact ? "text-xs" : "text-[13px]"} font-bold`}
+            >
               {filteredSubfolders.map((folder) => (
                 <FolderTableRow
                   key={folder.id}

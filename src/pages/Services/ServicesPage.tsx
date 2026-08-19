@@ -15,7 +15,11 @@ import {
   Spinner,
 } from "@hosanna/shared";
 import { useStatsigClient } from "@statsig/react-bindings";
-import { useQuery, useQueryClient, UseQueryResult } from "@tanstack/react-query";
+import {
+  useQuery,
+  useQueryClient,
+  UseQueryResult,
+} from "@tanstack/react-query";
 import {
   Archive,
   ArchiveRestore,
@@ -66,7 +70,8 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
   >;
   const actualHideHeader = hideHeader ?? context.hideHeader;
   const viewMode = context.viewMode ?? "grid";
-  const density = (context.density as "comfortable" | "compact") ?? "comfortable";
+  const density =
+    (context.density as "comfortable" | "compact") ?? "comfortable";
   const contextSortBy = context.sortBy;
   const contextSortOrder = context.sortOrder;
   const actualSearchQuery =
@@ -176,11 +181,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
           archivedServicesQuery.data ??
           [])
         : [],
-    [
-      showArchived,
-      context.archivedServices,
-      archivedServicesQuery.data,
-    ],
+    [showArchived, context.archivedServices, archivedServicesQuery.data],
   );
 
   // ─── Filter + sort ────────────────────────────────────────────────────────
@@ -748,13 +749,19 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
           }`}
         >
           {isArchived ? (
-            <Archive className={`${isCompact ? "w-5 h-5" : "w-8 h-8"} opacity-80`} />
+            <Archive
+              className={`${isCompact ? "w-5 h-5" : "w-8 h-8"} opacity-80`}
+            />
           ) : (
-            <Church className={`${isCompact ? "w-5 h-5" : "w-8 h-8"} opacity-80`} />
+            <Church
+              className={`${isCompact ? "w-5 h-5" : "w-8 h-8"} opacity-80`}
+            />
           )}
         </div>
 
-        <span className={`${isCompact ? "text-xs" : "text-sm"} font-black text-m3-text transition-colors truncate w-full px-1`}>
+        <span
+          className={`${isCompact ? "text-xs" : "text-sm"} font-black text-m3-text transition-colors truncate w-full px-1`}
+        >
           {service.name}
         </span>
 
@@ -803,9 +810,13 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
         <td className={cellPadding}>
           <div className="flex items-center gap-4 group-hover:translate-x-1 transition-transform">
             {isArchived ? (
-              <Archive className={`${isCompact ? "w-4 h-4" : "w-5 h-5"} text-amber-500 opacity-80`} />
+              <Archive
+                className={`${isCompact ? "w-4 h-4" : "w-5 h-5"} text-amber-500 opacity-80`}
+              />
             ) : (
-              <Calendar className={`${isCompact ? "w-4 h-4" : "w-5 h-5"} text-sky-500 opacity-80`} />
+              <Calendar
+                className={`${isCompact ? "w-4 h-4" : "w-5 h-5"} text-sky-500 opacity-80`}
+              />
             )}
             <span>{service.name}</span>
             {isArchived && <Badge variant="slate">Arquivado</Badge>}
@@ -950,13 +961,37 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
             <table className="w-full text-left border-collapse select-none">
               <thead>
                 <tr className="bg-m3-sidebar/40 border-b border-m3-border text-[10px] font-black text-m3-secondary uppercase tracking-[0.2em]">
-                  <th className={density === "compact" ? "py-2.5 px-4" : "py-4 px-6"}>Nome do Culto</th>
-                  <th className={density === "compact" ? "py-2.5 px-4" : "py-4 px-6"}>Tipo</th>
-                  <th className={density === "compact" ? "py-2.5 px-4" : "py-4 px-6"}>Data Agendada</th>
-                  <th className={`${density === "compact" ? "py-2.5 px-4" : "py-4 px-6"} text-right`}>Ações</th>
+                  <th
+                    className={
+                      density === "compact" ? "py-2.5 px-4" : "py-4 px-6"
+                    }
+                  >
+                    Nome do Culto
+                  </th>
+                  <th
+                    className={
+                      density === "compact" ? "py-2.5 px-4" : "py-4 px-6"
+                    }
+                  >
+                    Tipo
+                  </th>
+                  <th
+                    className={
+                      density === "compact" ? "py-2.5 px-4" : "py-4 px-6"
+                    }
+                  >
+                    Data Agendada
+                  </th>
+                  <th
+                    className={`${density === "compact" ? "py-2.5 px-4" : "py-4 px-6"} text-right`}
+                  >
+                    Ações
+                  </th>
                 </tr>
               </thead>
-              <tbody className={`divide-y divide-m3-border/30 ${density === "compact" ? "text-xs" : "text-[13px]"} font-bold`}>
+              <tbody
+                className={`divide-y divide-m3-border/30 ${density === "compact" ? "text-xs" : "text-[13px]"} font-bold`}
+              >
                 {filteredServices.length === 0 && !showArchived ? (
                   <tr>
                     <td
