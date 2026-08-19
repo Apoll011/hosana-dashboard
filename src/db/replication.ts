@@ -1,4 +1,7 @@
-import { replicateRxCollection, RxReplicationState } from "rxdb/plugins/replication";
+import {
+  replicateRxCollection,
+  RxReplicationState,
+} from "rxdb/plugins/replication";
 import { HosanaDatabase } from "./database";
 import { getApiClient } from "@hosanna/shared";
 import { Subject } from "rxjs";
@@ -38,9 +41,11 @@ export function setupReplication(db: HosanaDatabase): ReplicationManager {
     }
   };
 
-  const createCollectionReplication = <T extends { id: string; updatedAt: string; _deleted?: boolean }>(
+  const createCollectionReplication = <
+    T extends { id: string; updatedAt: string; _deleted?: boolean },
+  >(
     collectionName: "songs" | "folders" | "services",
-    collection: any
+    collection: any,
   ) => {
     const replicationState = replicateRxCollection<T, Checkpoint>({
       collection,
@@ -68,10 +73,12 @@ export function setupReplication(db: HosanaDatabase): ReplicationManager {
               }),
             });
 
-            const documents: WithDeleted<T>[] = (res.documents || []).map((doc) => ({
-              ...doc,
-              _deleted: !!doc._deleted,
-            }));
+            const documents: WithDeleted<T>[] = (res.documents || []).map(
+              (doc) => ({
+                ...doc,
+                _deleted: !!doc._deleted,
+              }),
+            );
 
             const checkpoint = res.checkpoint ?? lastCheckpoint ?? undefined;
 
@@ -114,7 +121,7 @@ export function setupReplication(db: HosanaDatabase): ReplicationManager {
               {
                 method: "POST",
                 body: JSON.stringify({ changeRows: formattedChanges }),
-              }
+              },
             );
 
             if (Array.isArray(res)) {

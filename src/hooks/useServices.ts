@@ -85,7 +85,7 @@ export function useServices(includeArchived: boolean = false) {
         setIsCreating(false);
       }
     },
-    [showToast]
+    [showToast],
   );
 
   const updateService = useCallback(
@@ -129,7 +129,7 @@ export function useServices(includeArchived: boolean = false) {
         setIsUpdating(false);
       }
     },
-    [showToast]
+    [showToast],
   );
 
   const deleteService = useCallback(
@@ -152,7 +152,7 @@ export function useServices(includeArchived: boolean = false) {
         setIsDeleting(false);
       }
     },
-    [showToast]
+    [showToast],
   );
 
   const updateElements = useCallback(
@@ -181,7 +181,7 @@ export function useServices(includeArchived: boolean = false) {
         setIsUpdating(false);
       }
     },
-    [showToast]
+    [showToast],
   );
 
   return {
