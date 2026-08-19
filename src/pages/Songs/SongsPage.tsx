@@ -35,7 +35,13 @@ import {
   Trash2,
   X,
 } from "lucide-react";
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import { SongForm } from "../../components/forms/SongForm";
 import { BatchDeleteModal } from "../../components/modals/BatchDeleteModal";
@@ -80,22 +86,25 @@ export const SongsPage: React.FC<SongsPageProps> = ({
     unknown
   >;
 
-  const actualHideHeader = hideHeader ?? (context.hideHeader as boolean | undefined);
+  const actualHideHeader =
+    hideHeader ?? (context.hideHeader as boolean | undefined);
 
   // Density from context with localStorage fallback
-  const contextDensity = context.density as "comfortable" | "compact" | undefined;
+  const contextDensity = context.density as
+    "comfortable" | "compact" | undefined;
 
-  const [localDensity, setLocalDensity] = useState<"comfortable" | "compact">(() => {
-    try {
-      return (
-        (localStorage.getItem("explorer_density") as
-          | "comfortable"
-          | "compact") || "comfortable"
-      );
-    } catch {
-      return "comfortable";
-    }
-  });
+  const [localDensity, setLocalDensity] = useState<"comfortable" | "compact">(
+    () => {
+      try {
+        return (
+          (localStorage.getItem("explorer_density") as
+            "comfortable" | "compact") || "comfortable"
+        );
+      } catch {
+        return "comfortable";
+      }
+    },
+  );
 
   const density = contextDensity ?? localDensity;
   const isCompact = density === "compact";
@@ -109,7 +118,8 @@ export const SongsPage: React.FC<SongsPageProps> = ({
 
   // Search & Filter props resolution
   const contextSearchQuery = context.searchQuery as string | undefined;
-  const contextSortBy = context.sortBy as "title" | "artist" | "updatedAt" | undefined;
+  const contextSortBy = context.sortBy as
+    "title" | "artist" | "updatedAt" | undefined;
   const contextSortOrder = context.sortOrder as "asc" | "desc" | undefined;
   const actualSelectedKey =
     selectedKey ?? (context.selectedKey as string | null) ?? "";
@@ -170,7 +180,9 @@ export const SongsPage: React.FC<SongsPageProps> = ({
   const [itemsPerPage, setItemsPerPage] = useState<number>(50);
 
   // Multi-Selection State
-  const [selectedSongIds, setSelectedSongIds] = useState<Set<string>>(new Set());
+  const [selectedSongIds, setSelectedSongIds] = useState<Set<string>>(
+    new Set(),
+  );
   const [lastClickedId, setLastClickedId] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -197,13 +209,14 @@ export const SongsPage: React.FC<SongsPageProps> = ({
 
   const folders = useMemo(
     () =>
-      Array.isArray(foldersQuery.data?.folders) ? foldersQuery.data.folders : [],
+      Array.isArray(foldersQuery.data?.folders)
+        ? foldersQuery.data.folders
+        : [],
     [foldersQuery.data?.folders],
   );
 
   const allSongs: Song[] = useMemo(
-    () =>
-      Array.isArray(songsQuery.data?.songs) ? songsQuery.data.songs : [],
+    () => (Array.isArray(songsQuery.data?.songs) ? songsQuery.data.songs : []),
     [songsQuery.data?.songs],
   );
 
@@ -476,7 +489,10 @@ export const SongsPage: React.FC<SongsPageProps> = ({
           });
         }
       }
-      showToast(`${songList.length} cântico(s) movido(s) com sucesso!`, "success");
+      showToast(
+        `${songList.length} cântico(s) movido(s) com sucesso!`,
+        "success",
+      );
       setSelectedSongIds(new Set());
       setIsBatchMoveOpen(false);
     },
@@ -488,7 +504,10 @@ export const SongsPage: React.FC<SongsPageProps> = ({
     for (const sId of songList) {
       await deleteSong(sId);
     }
-    showToast(`${songList.length} cântico(s) apagado(s) com sucesso!`, "success");
+    showToast(
+      `${songList.length} cântico(s) apagado(s) com sucesso!`,
+      "success",
+    );
     setSelectedSongIds(new Set());
     setIsBatchDeleteOpen(false);
   }, [selectedSongIds, deleteSong, showToast]);
@@ -816,7 +835,9 @@ export const SongsPage: React.FC<SongsPageProps> = ({
                       : Math.min(page * effectivePerPage, totalSongs)}
                   </strong>{" "}
                   de{" "}
-                  <strong className="font-bold text-m3-text">{totalSongs}</strong>{" "}
+                  <strong className="font-bold text-m3-text">
+                    {totalSongs}
+                  </strong>{" "}
                   cânticos
                 </>
               )}
