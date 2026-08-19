@@ -1,11 +1,5 @@
+import { AlertCircle, Cloud, CloudOff, RefreshCw } from "lucide-react";
 import React from "react";
-import {
-  Cloud,
-  CloudOff,
-  RefreshCw,
-  AlertCircle,
-  CheckCircle2,
-} from "lucide-react";
 import { useSync } from "../contexts/SyncContext";
 
 interface SyncStatusBadgeProps {
