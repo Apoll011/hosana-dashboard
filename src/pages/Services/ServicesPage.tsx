@@ -8,11 +8,7 @@ import {
   servicesApi,
   Spinner,
 } from "@hosanna/shared";
-import {
-  useQuery,
-  useQueryClient,
-  UseQueryResult,
-} from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   Archive,
   ArchiveRestore,

@@ -9,8 +9,6 @@ import {
   Folder,
   Input,
   Modal,
-  Service,
-  servicesApi,
   Song,
   songsApi,
 } from "@hosanna/shared";
@@ -77,7 +75,7 @@ import { authClient } from "../lib/authClient";
 
 import { ConversionResult } from "@hosanna/shared";
 import { useStatsigClient } from "@statsig/react-bindings";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { Action, KBarProvider } from "kbar";
 import {
   buildFolderTree,
