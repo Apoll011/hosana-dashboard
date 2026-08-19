@@ -1,20 +1,20 @@
 import { Button, Folder, Song, Spinner } from "@hosanna/shared";
-import {
-  FileText,
-  Folder as FolderIcon,
-  FolderOpen,
-  MoreVertical,
-  Plus,
-  Upload,
-} from "lucide-react";
+import { FolderOpen, Plus, Upload } from "lucide-react";
 import React from "react";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import { Can, CanAll } from "../lib/permissions/components";
+import {
+  FolderGridCard,
+  SongGridCard,
+  FolderTableRow,
+  SongTableRow,
+} from "../components/explorer";
 
 interface FolderExplorerContext {
   filteredSubfolders: Folder[];
   filteredFiles: Song[];
   viewMode: "grid" | "list";
+  density?: "comfortable" | "compact";
   isSearchingOrFiltering: boolean;
   currentFolder: Folder | undefined;
   searchQuery: string;
@@ -66,6 +66,7 @@ const DEFAULT_CONTEXT: FolderExplorerContext = {
   filteredSubfolders: [],
   filteredFiles: [],
   viewMode: "grid",
+  density: "comfortable",
   isSearchingOrFiltering: false,
   currentFolder: undefined,
   searchQuery: "",
@@ -100,382 +101,6 @@ const DEFAULT_CONTEXT: FolderExplorerContext = {
 };
 
 /* ------------------------------------------------------------------ */
-/* Subcomponents                                                       */
-/* ------------------------------------------------------------------ */
-
-interface FolderGridCardProps {
-  folder: Folder;
-  isSelected: boolean;
-  isSearchingOrFiltering: boolean;
-  isDropTarget: boolean;
-  isDropDisabled: boolean;
-  isInternalDragActive: boolean;
-  getFolderPathString: (folderId: string | null | undefined) => string;
-  onClick: (e: React.MouseEvent) => void;
-  onDoubleClick: (e: React.MouseEvent) => void;
-  onContextMenu: (e: React.MouseEvent) => void;
-  onDragStart: (e: React.DragEvent) => void;
-  onDragEnd: () => void;
-  onDragOver: (e: React.DragEvent) => void;
-  onDragLeave: (e: React.DragEvent) => void;
-  onDrop: (e: React.DragEvent) => void;
-}
-
-const FolderGridCard: React.FC<FolderGridCardProps> = ({
-  folder,
-  isSelected,
-  isSearchingOrFiltering,
-  isDropTarget,
-  isDropDisabled,
-  isInternalDragActive,
-  getFolderPathString,
-  onClick,
-  onDoubleClick,
-  onContextMenu,
-  onDragStart,
-  onDragEnd,
-  onDragOver,
-  onDragLeave,
-  onDrop,
-}) => {
-  const showDisabledDuringDrag = isInternalDragActive && isDropDisabled;
-
-  return (
-    <div
-      data-item-id={folder.id}
-      data-item-type="folder"
-      draggable
-      onClick={onClick}
-      onDoubleClick={(e) => {
-        e.stopPropagation();
-        onDoubleClick(e);
-      }}
-      onContextMenu={onContextMenu}
-      onDragStart={onDragStart}
-      onDragEnd={onDragEnd}
-      onDragOver={onDragOver}
-      onDragLeave={onDragLeave}
-      onDrop={onDrop}
-      className={`p-5 rounded-3xl border transition-all cursor-pointer flex flex-col items-center text-center group relative shadow-sm hover:shadow-xl active:scale-95 select-none ${
-        isDropTarget && !isDropDisabled
-          ? "border-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 ring-4 ring-emerald-300/40 border-dashed shadow-lg scale-[1.02]"
-          : isSelected
-            ? "border-m3-primary bg-m3-primary/10 ring-4 ring-m3-primary/10 shadow-lg"
-            : "border-m3-border/50 bg-m3-card hover:bg-m3-hover hover:border-m3-primary/40"
-      } ${showDisabledDuringDrag ? "opacity-40 cursor-not-allowed" : ""}`}
-    >
-      <button
-        type="button"
-        onClick={(e) => {
-          e.stopPropagation();
-          onContextMenu(e);
-        }}
-        className={`absolute top-3 right-3 p-1.5 rounded-xl text-m3-secondary hover:text-m3-text hover:bg-slate-200/60 dark:hover:bg-slate-700/60 transition-all z-10 cursor-pointer ${
-          isSelected
-            ? "opacity-100"
-            : "opacity-0 group-hover:opacity-100 focus:opacity-100"
-        }`}
-        title="Mais opções"
-        aria-label="Mais opções"
-      >
-        <MoreVertical className="w-4.5 h-4.5" />
-      </button>
-
-      <div className="w-14 h-14 rounded-2xl bg-m3-primary/10 border border-m3-primary/20 flex items-center justify-center text-m3-primary mb-3 group-hover:scale-110 transition-transform">
-        <FolderIcon className="w-8 h-8 opacity-80" />
-      </div>
-
-      <span className="text-sm font-black text-m3-text transition-colors truncate w-full px-1">
-        {folder.name}
-      </span>
-
-      <span className="text-[10px] text-m3-secondary font-bold uppercase tracking-wider mt-0.5 opacity-70">
-        {(folder.songCount || 0) + (folder.folderCount || 0)} Items
-      </span>
-
-      {isSearchingOrFiltering && (
-        <span className="text-[10px] font-black text-m3-primary uppercase tracking-widest bg-m3-primary/10 px-2 py-0.5 rounded-lg mt-2 truncate max-w-full">
-          {getFolderPathString(folder.parentId)}
-        </span>
-      )}
-    </div>
-  );
-};
-
-interface SongGridCardProps {
-  song: Song;
-  isSelected: boolean;
-  isSearchingOrFiltering: boolean;
-  getFolderPathString: (folderId: string | null | undefined) => string;
-  onClick: (e: React.MouseEvent) => void;
-  onDoubleClick: (e: React.MouseEvent) => void;
-  onContextMenu: (e: React.MouseEvent) => void;
-  onDragStart: (e: React.DragEvent) => void;
-  onDragEnd: () => void;
-}
-
-const SongGridCard: React.FC<SongGridCardProps> = ({
-  song,
-  isSelected,
-  isSearchingOrFiltering,
-  getFolderPathString,
-  onClick,
-  onDoubleClick,
-  onContextMenu,
-  onDragStart,
-  onDragEnd,
-}) => (
-  <div
-    data-item-id={song.id}
-    data-item-type="song"
-    draggable
-    onClick={onClick}
-    onDoubleClick={(e) => {
-      e.stopPropagation();
-      onDoubleClick(e);
-    }}
-    onContextMenu={onContextMenu}
-    onDragStart={onDragStart}
-    onDragEnd={onDragEnd}
-    className={`p-5 rounded-3xl border transition-all cursor-pointer flex flex-col items-center text-center group relative shadow-sm hover:shadow-xl active:scale-95 select-none ${
-      isSelected
-        ? "border-m3-primary bg-m3-primary/10 ring-4 ring-m3-primary/10 shadow-lg"
-        : "border-m3-border/50 bg-m3-card hover:bg-m3-hover hover:border-m3-primary/40"
-    }`}
-  >
-    <button
-      type="button"
-      onClick={(e) => {
-        e.stopPropagation();
-        onContextMenu(e);
-      }}
-      className={`absolute top-3 right-3 p-1.5 rounded-xl text-m3-secondary hover:text-m3-text hover:bg-slate-200/60 dark:hover:bg-slate-700/60 transition-all z-10 cursor-pointer ${
-        isSelected
-          ? "opacity-100"
-          : "opacity-0 group-hover:opacity-100 focus:opacity-100"
-      }`}
-      title="Mais opções"
-      aria-label="Mais opções"
-    >
-      <MoreVertical className="w-4.5 h-4.5" />
-    </button>
-
-    {song.song_number && (
-      <span className="absolute top-5 left-5 text-[10px] font-bold bg-neutral-100 dark:bg-slate-800 text-neutral-600 dark:text-neutral-400 px-2 py-1 rounded-lg border border-neutral-200 dark:border-slate-700">
-        Nº {song.song_number}
-      </span>
-    )}
-
-    <div className="w-14 h-14 rounded-2xl bg-m3-primary-light/20 border border-m3-primary/20 flex items-center justify-center text-m3-primary mb-3 group-hover:scale-110 transition-transform">
-      <FileText className="w-8 h-8 opacity-80" />
-    </div>
-
-    <span className="text-sm font-black text-m3-text transition-colors truncate w-full px-1">
-      {song.title}
-    </span>
-
-    <span className="text-[10px] text-m3-secondary font-bold truncate w-full px-1 mt-0.5 opacity-70">
-      {song.artist || "Cifra"}
-    </span>
-
-    {isSearchingOrFiltering && (
-      <span className="text-[10px] font-black text-m3-secondary uppercase tracking-widest bg-m3-bg px-2 py-0.5 rounded-lg mt-2 truncate max-w-full border border-m3-border/50">
-        {getFolderPathString(song.folderId)}
-      </span>
-    )}
-  </div>
-);
-
-interface FolderTableRowProps {
-  folder: Folder;
-  isSelected: boolean;
-  isSearchingOrFiltering: boolean;
-  isDropTarget: boolean;
-  isDropDisabled: boolean;
-  isInternalDragActive: boolean;
-  getFolderPathString: (folderId: string | null | undefined) => string;
-  onClick: (e: React.MouseEvent) => void;
-  onDoubleClick: (e: React.MouseEvent) => void;
-  onContextMenu: (e: React.MouseEvent) => void;
-  onDragStart: (e: React.DragEvent) => void;
-  onDragEnd: () => void;
-  onDragOver: (e: React.DragEvent) => void;
-  onDragLeave: (e: React.DragEvent) => void;
-  onDrop: (e: React.DragEvent) => void;
-}
-
-const FolderTableRow: React.FC<FolderTableRowProps> = ({
-  folder,
-  isSelected,
-  isSearchingOrFiltering,
-  isDropTarget,
-  isDropDisabled,
-  isInternalDragActive,
-  getFolderPathString,
-  onClick,
-  onDoubleClick,
-  onContextMenu,
-  onDragStart,
-  onDragEnd,
-  onDragOver,
-  onDragLeave,
-  onDrop,
-}) => {
-  const showDisabledDuringDrag = isInternalDragActive && isDropDisabled;
-
-  return (
-    <tr
-      data-item-id={folder.id}
-      data-item-type="folder"
-      draggable
-      onClick={onClick}
-      onDoubleClick={(e) => {
-        e.stopPropagation();
-        onDoubleClick(e);
-      }}
-      onContextMenu={onContextMenu}
-      onDragStart={onDragStart}
-      onDragEnd={onDragEnd}
-      onDragOver={onDragOver}
-      onDragLeave={onDragLeave}
-      onDrop={onDrop}
-      className={`cursor-pointer transition-all group select-none ${
-        isDropTarget && !isDropDisabled
-          ? "bg-emerald-50 dark:bg-emerald-950/30 outline outline-dashed outline-emerald-400 -outline-offset-2"
-          : isSelected
-            ? "bg-m3-primary/10 text-m3-primary"
-            : "hover:bg-m3-hover/50 text-m3-text"
-      } ${showDisabledDuringDrag ? "opacity-40 cursor-not-allowed" : ""}`}
-    >
-      <td className="py-4 px-6">
-        <div className="flex items-center gap-4 group-hover:translate-x-1 transition-transform">
-          <FolderIcon className="w-5 h-5 text-m3-primary opacity-80" />
-          <span>{folder.name}</span>
-        </div>
-      </td>
-      <td className="py-4 px-6 text-m3-secondary opacity-70">Pasta</td>
-      {isSearchingOrFiltering && (
-        <td className="py-4 px-6 text-m3-primary/80">
-          {getFolderPathString(folder.parentId)}
-        </td>
-      )}
-      <td className="py-4 px-6 text-m3-secondary">
-        {folder.songCount || 0} Musicas
-      </td>
-      <td className="py-4 px-6 text-right">
-        <div className="flex items-center justify-end gap-1">
-          <Button
-            size="lg"
-            variant="ghost"
-            onClick={(e) => {
-              e.stopPropagation();
-              onDoubleClick(e);
-            }}
-          >
-            Abrir
-          </Button>
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              onContextMenu(e);
-            }}
-            className="p-2 rounded-xl text-m3-secondary hover:text-m3-text hover:bg-m3-hover dark:hover:bg-slate-800 transition-colors cursor-pointer"
-            title="Mais opções"
-            aria-label="Mais opções"
-          >
-            <MoreVertical className="w-4.5 h-4.5" />
-          </button>
-        </div>
-      </td>
-    </tr>
-  );
-};
-
-interface SongTableRowProps {
-  song: Song;
-  isSelected: boolean;
-  isSearchingOrFiltering: boolean;
-  getFolderPathString: (folderId: string | null | undefined) => string;
-  onClick: (e: React.MouseEvent) => void;
-  onDoubleClick: (e: React.MouseEvent) => void;
-  onContextMenu: (e: React.MouseEvent) => void;
-  onDragStart: (e: React.DragEvent) => void;
-  onDragEnd: () => void;
-}
-
-const SongTableRow: React.FC<SongTableRowProps> = ({
-  song,
-  isSelected,
-  isSearchingOrFiltering,
-  getFolderPathString,
-  onClick,
-  onDoubleClick,
-  onContextMenu,
-  onDragStart,
-  onDragEnd,
-}) => (
-  <tr
-    data-item-id={song.id}
-    data-item-type="song"
-    draggable
-    onClick={onClick}
-    onDoubleClick={(e) => {
-      e.stopPropagation();
-      onDoubleClick(e);
-    }}
-    onContextMenu={onContextMenu}
-    onDragStart={onDragStart}
-    onDragEnd={onDragEnd}
-    className={`cursor-pointer transition-all group select-none ${
-      isSelected
-        ? "bg-m3-primary/10 text-m3-primary"
-        : "hover:bg-m3-hover/50 text-m3-text"
-    }`}
-  >
-    <td className="py-4 px-6">
-      <div className="flex items-center gap-4 group-hover:translate-x-1 transition-transform">
-        <FileText className="w-5 h-5 text-m3-primary opacity-80" />
-        <span>{song.title}</span>
-      </div>
-    </td>
-    <td className="py-4 px-6 text-m3-secondary opacity-70">Cifra</td>
-    {isSearchingOrFiltering && (
-      <td className="py-4 px-6 text-m3-secondary font-medium">
-        {getFolderPathString(song.folderId)}
-      </td>
-    )}
-    <td className="py-4 px-6 text-m3-secondary">{song.artist || "—"}</td>
-    <td className="py-4 px-6 text-right">
-      <div className="flex items-center justify-end gap-1">
-        <Button
-          size="lg"
-          variant="ghost"
-          onClick={(e) => {
-            e.stopPropagation();
-            onDoubleClick(e);
-          }}
-        >
-          Editar
-        </Button>
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            onContextMenu(e);
-          }}
-          className="p-2 rounded-xl text-m3-secondary hover:text-m3-text hover:bg-m3-hover dark:hover:bg-slate-800 transition-colors cursor-pointer"
-          title="Mais opções"
-          aria-label="Mais opções"
-        >
-          <MoreVertical className="w-4.5 h-4.5" />
-        </button>
-      </div>
-    </td>
-  </tr>
-);
-
-/* ------------------------------------------------------------------ */
 /* Page                                                                 */
 /* ------------------------------------------------------------------ */
 
@@ -487,6 +112,7 @@ export const FoldersPage: React.FC = () => {
     filteredSubfolders,
     filteredFiles,
     viewMode,
+    density = "comfortable",
     isSearchingOrFiltering,
     currentFolder,
     searchQuery,
@@ -518,6 +144,8 @@ export const FoldersPage: React.FC = () => {
     handleFolderDragLeave,
     handleFolderDrop,
   } = context;
+
+  const isCompact = density === "compact";
 
   return (
     <div
@@ -606,7 +234,13 @@ export const FoldersPage: React.FC = () => {
         </div>
       ) : viewMode === "grid" ? (
         /* GRID VIEW */
-        <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+        <div
+          className={
+            isCompact
+              ? "grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 gap-3.5"
+              : "grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6"
+          }
+        >
           {filteredSubfolders.map((folder) => (
             <FolderGridCard
               key={folder.id}
@@ -617,6 +251,7 @@ export const FoldersPage: React.FC = () => {
               isDropDisabled={dragDisabledFolderIds.has(folder.id)}
               isInternalDragActive={isInternalDragActive}
               getFolderPathString={getFolderPathString}
+              density={density}
               onClick={(e) => handleItemClick(e, folder.id, "folder")}
               onDoubleClick={() => handleSelectFolder(folder.id)}
               onContextMenu={(e) => handleContextMenu(e, "folder", folder)}
@@ -635,6 +270,7 @@ export const FoldersPage: React.FC = () => {
               isSelected={selectedSongIds.has(song.id)}
               isSearchingOrFiltering={isSearchingOrFiltering}
               getFolderPathString={getFolderPathString}
+              density={density}
               onClick={(e) => handleItemClick(e, song.id, "song")}
               onDoubleClick={() => navigate(`../songs/${song.id}`)}
               onContextMenu={(e) => handleContextMenu(e, "song", song)}
@@ -648,16 +284,30 @@ export const FoldersPage: React.FC = () => {
           <table className="w-full text-left border-collapse select-none">
             <thead>
               <tr className="bg-m3-sidebar/40 border-b border-m3-border text-[10px] font-black text-m3-secondary uppercase tracking-[0.2em]">
-                <th className="py-4 px-6">Nome</th>
-                <th className="py-4 px-6">Tipo</th>
+                <th className={isCompact ? "py-2.5 px-4" : "py-4 px-6"}>
+                  Nome
+                </th>
+                <th className={isCompact ? "py-2.5 px-4" : "py-4 px-6"}>
+                  Tipo
+                </th>
                 {isSearchingOrFiltering && (
-                  <th className="py-4 px-6">Localização</th>
+                  <th className={isCompact ? "py-2.5 px-4" : "py-4 px-6"}>
+                    Localização
+                  </th>
                 )}
-                <th className="py-4 px-6">Detalhes</th>
-                <th className="py-4 px-6 text-right">Ação</th>
+                <th className={isCompact ? "py-2.5 px-4" : "py-4 px-6"}>
+                  Detalhes
+                </th>
+                <th
+                  className={`${isCompact ? "py-2.5 px-4" : "py-4 px-6"} text-right`}
+                >
+                  Ação
+                </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-m3-border/30 text-[13px] font-bold">
+            <tbody
+              className={`divide-y divide-m3-border/30 ${isCompact ? "text-xs" : "text-[13px]"} font-bold`}
+            >
               {filteredSubfolders.map((folder) => (
                 <FolderTableRow
                   key={folder.id}
@@ -668,6 +318,7 @@ export const FoldersPage: React.FC = () => {
                   isDropDisabled={dragDisabledFolderIds.has(folder.id)}
                   isInternalDragActive={isInternalDragActive}
                   getFolderPathString={getFolderPathString}
+                  density={density}
                   onClick={(e) => handleItemClick(e, folder.id, "folder")}
                   onDoubleClick={() => handleSelectFolder(folder.id)}
                   onContextMenu={(e) => handleContextMenu(e, "folder", folder)}
@@ -688,6 +339,7 @@ export const FoldersPage: React.FC = () => {
                   isSelected={selectedSongIds.has(song.id)}
                   isSearchingOrFiltering={isSearchingOrFiltering}
                   getFolderPathString={getFolderPathString}
+                  density={density}
                   onClick={(e) => handleItemClick(e, song.id, "song")}
                   onDoubleClick={() => navigate(`../songs/${song.id}`)}
                   onContextMenu={(e) => handleContextMenu(e, "song", song)}

@@ -4,6 +4,8 @@
  */
 
 import { OverflowTagList } from "@/src/components/OverflowTagList";
+import { MarqueeSelectionBox } from "@/src/components/explorer";
+import { useMarqueeSelection } from "@/src/hooks/useMarqueeSelection";
 import { usePermissionValue } from "@/src/lib/permissions/client";
 import { Can } from "@/src/lib/permissions/components";
 import {
@@ -13,12 +15,15 @@ import {
   EmptyState,
   Input,
   Modal,
-  Pagination,
   Song,
   Spinner,
 } from "@hosanna/shared";
 import {
   ArrowUpDown,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
   FileText,
   Filter,
   FolderInput,
@@ -26,13 +31,25 @@ import {
   Music,
   Plus,
   Search,
+  Tag,
   Trash2,
+  X,
 } from "lucide-react";
-import React, { useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import { SongForm } from "../../components/forms/SongForm";
+import { BatchDeleteModal } from "../../components/modals/BatchDeleteModal";
+import { BatchMoveModal } from "../../components/modals/BatchMoveModal";
+import { BatchTagModal } from "../../components/modals/BatchTagModal";
 import { MoveSongModal } from "../../components/modals/MoveSongModal";
 import { useAuth } from "../../contexts/AuthContext";
+import { useSync } from "../../contexts/SyncContext";
 import { useFolders } from "../../hooks/useFolders";
 import { useAllSongs } from "../../hooks/useSongs";
 
@@ -62,16 +79,48 @@ export const SongsPage: React.FC<SongsPageProps> = ({
 }) => {
   const navigate = useNavigate();
   const { organization } = useAuth();
+  const { showToast } = useSync();
   const slugPrefix = organization?.slug ? `/${organization.slug}` : "";
   const context = (useOutletContext<Record<string, unknown>>() || {}) as Record<
     string,
     unknown
   >;
-  const actualHideHeader = hideHeader ?? context.hideHeader;
-  //TODO: Add support
-  const _actualSearchQuery = externalSearchQuery ?? context.searchQuery ?? "";
-  const _actualSortBy = externalSortBy ?? context.sortBy ?? "title";
-  const _actualSortOrder = externalSortOrder ?? context.sortOrder ?? "asc";
+
+  const actualHideHeader =
+    hideHeader ?? (context.hideHeader as boolean | undefined);
+
+  // Density from context with localStorage fallback
+  const contextDensity = context.density as
+    "comfortable" | "compact" | undefined;
+
+  const [localDensity, setLocalDensity] = useState<"comfortable" | "compact">(
+    () => {
+      try {
+        return (
+          (localStorage.getItem("explorer_density") as
+            "comfortable" | "compact") || "comfortable"
+        );
+      } catch {
+        return "comfortable";
+      }
+    },
+  );
+
+  const density = contextDensity ?? localDensity;
+  const isCompact = density === "compact";
+
+  const handleDensityChange = (d: "comfortable" | "compact") => {
+    setLocalDensity(d);
+    try {
+      localStorage.setItem("explorer_density", d);
+    } catch {}
+  };
+
+  // Search & Filter props resolution
+  const contextSearchQuery = context.searchQuery as string | undefined;
+  const contextSortBy = context.sortBy as
+    "title" | "artist" | "updatedAt" | undefined;
+  const contextSortOrder = context.sortOrder as "asc" | "desc" | undefined;
   const actualSelectedKey =
     selectedKey ?? (context.selectedKey as string | null) ?? "";
   const actualSelectedTag =
@@ -103,66 +152,86 @@ export const SongsPage: React.FC<SongsPageProps> = ({
   const finalSearchQuery: string =
     externalSearchQuery !== undefined
       ? externalSearchQuery
-      : context.searchQuery !== undefined
-        ? (context.searchQuery as string)
+      : contextSearchQuery !== undefined
+        ? contextSearchQuery
         : internalSearchQuery;
+
   const finalSortBy =
     externalSortBy !== undefined
       ? externalSortBy
-      : context.sortBy !== undefined
-        ? context.sortBy
+      : contextSortBy !== undefined
+        ? contextSortBy
         : internalSortBy;
+
   const finalSortOrder =
     externalSortOrder !== undefined
       ? externalSortOrder
-      : context.sortOrder !== undefined
-        ? context.sortOrder
+      : contextSortOrder !== undefined
+        ? contextSortOrder
         : internalSortOrder;
 
   const { value: emptyStateAction } = usePermissionValue(
-    "service.create",
+    "song.create",
     "Criar Novo Cântico",
     undefined,
   );
 
-  // Reset page when filters change
-  React.useEffect(() => {
-    setPage(1);
-  }, [
-    finalSearchQuery,
-    finalSortBy,
-    finalSortOrder,
-    actualSelectedKey,
-    actualSelectedTag,
-    actualSearchFields,
-    selectedFolder,
-  ]);
+  const [jumpPageInput, setJumpPageInput] = useState("");
+  const [itemsPerPage, setItemsPerPage] = useState<number>(50);
 
-  const ITEMS_PER_PAGE = 50;
+  // Multi-Selection State
+  const [selectedSongIds, setSelectedSongIds] = useState<Set<string>>(
+    new Set(),
+  );
+  const [lastClickedId, setLastClickedId] = useState<string | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  // Fetch the full cached song list — no per-page API calls
-  const { songsQuery, createSong, deleteSong, moveSong } = useAllSongs();
+  // Context Menu State
+  const [contextMenu, setContextMenu] = useState<{
+    x: number;
+    y: number;
+    song: Song | null;
+    isMulti?: boolean;
+  } | null>(null);
 
+  // Fetch full cached song & folder list
+  const { songsQuery, createSong, deleteSong, moveSong, updateBatchTags } =
+    useAllSongs();
   const { foldersQuery } = useFolders();
 
   // Modals state
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [moveTarget, setMoveTarget] = useState<Song | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Song | null>(null);
+  const [isBatchMoveOpen, setIsBatchMoveOpen] = useState(false);
+  const [isBatchDeleteOpen, setIsBatchDeleteOpen] = useState(false);
+  const [isBatchTagOpen, setIsBatchTagOpen] = useState(false);
 
-  const folders = Array.isArray(foldersQuery.data?.folders)
-    ? foldersQuery.data.folders
-    : [];
+  const folders = useMemo(
+    () =>
+      Array.isArray(foldersQuery.data?.folders)
+        ? foldersQuery.data.folders
+        : [],
+    [foldersQuery.data?.folders],
+  );
 
-  const allSongs: Song[] = Array.isArray(songsQuery.data?.songs)
-    ? songsQuery.data.songs
-    : [];
+  const allSongs: Song[] = useMemo(
+    () => (Array.isArray(songsQuery.data?.songs) ? songsQuery.data.songs : []),
+    [songsQuery.data?.songs],
+  );
 
-  // Client-side filtering
-  const filteredSongs = React.useMemo(() => {
+  // Helper: folder map for O(1) lookups
+  const folderMap = useMemo(() => {
+    const map = new Map<string, string>();
+    folders.forEach((f) => map.set(f.id, f.name));
+    return map;
+  }, [folders]);
+
+  // Client-side filtering & sorting with high performance memoization
+  const filteredSongs = useMemo(() => {
     let result = allSongs;
 
-    if (finalSearchQuery) {
+    if (finalSearchQuery.trim()) {
       const q = finalSearchQuery.toLowerCase();
       result = result.filter((song) => {
         const inTitle =
@@ -198,25 +267,27 @@ export const SongsPage: React.FC<SongsPageProps> = ({
     }
 
     // Client-side sorting
-    result = [...result].sort((a, b) => {
-      let valA: string | number = "";
-      let valB: string | number = "";
+    if (result.length > 1) {
+      result = [...result].sort((a, b) => {
+        let valA: string | number = "";
+        let valB: string | number = "";
 
-      if (finalSortBy === "title") {
-        valA = a.title?.toLowerCase() ?? "";
-        valB = b.title?.toLowerCase() ?? "";
-      } else if (finalSortBy === "artist") {
-        valA = a.artist?.toLowerCase() ?? "";
-        valB = b.artist?.toLowerCase() ?? "";
-      } else if (finalSortBy === "updatedAt") {
-        valA = new Date(a.updatedAt).getTime();
-        valB = new Date(b.updatedAt).getTime();
-      }
+        if (finalSortBy === "title") {
+          valA = a.title?.toLowerCase() ?? "";
+          valB = b.title?.toLowerCase() ?? "";
+        } else if (finalSortBy === "artist") {
+          valA = a.artist?.toLowerCase() ?? "";
+          valB = b.artist?.toLowerCase() ?? "";
+        } else if (finalSortBy === "updatedAt") {
+          valA = new Date(a.updatedAt).getTime();
+          valB = new Date(b.updatedAt).getTime();
+        }
 
-      if (valA < valB) return finalSortOrder === "asc" ? -1 : 1;
-      if (valA > valB) return finalSortOrder === "asc" ? 1 : -1;
-      return 0;
-    });
+        if (valA < valB) return finalSortOrder === "asc" ? -1 : 1;
+        if (valA > valB) return finalSortOrder === "asc" ? 1 : -1;
+        return 0;
+      });
+    }
 
     return result;
   }, [
@@ -231,13 +302,150 @@ export const SongsPage: React.FC<SongsPageProps> = ({
   ]);
 
   const totalSongs = filteredSongs.length;
-  const totalPages = Math.max(1, Math.ceil(totalSongs / ITEMS_PER_PAGE));
-  const songsData = filteredSongs.slice(
-    (page - 1) * ITEMS_PER_PAGE,
-    page * ITEMS_PER_PAGE,
+  const effectivePerPage =
+    itemsPerPage === 0 ? Math.max(1, totalSongs) : itemsPerPage;
+  const totalPages = Math.max(1, Math.ceil(totalSongs / effectivePerPage));
+
+  // Reset page when filters change
+  useEffect(() => {
+    setPage(1);
+    setSelectedSongIds(new Set());
+    setLastClickedId(null);
+  }, [
+    finalSearchQuery,
+    finalSortBy,
+    finalSortOrder,
+    actualSelectedKey,
+    actualSelectedTag,
+    selectedFolder,
+    itemsPerPage,
+  ]);
+
+  const songsData = useMemo(() => {
+    if (itemsPerPage === 0) return filteredSongs;
+    const start = (page - 1) * effectivePerPage;
+    return filteredSongs.slice(start, start + effectivePerPage);
+  }, [filteredSongs, page, effectivePerPage, itemsPerPage]);
+
+  // Rubberband marquee selection
+  const { selectionBox, handleMouseDown: handleWorkspaceMouseDown } =
+    useMarqueeSelection({
+      containerRef,
+      enabled: true,
+      selectedIds: selectedSongIds,
+      onSelectionChange: setSelectedSongIds,
+      onClearSelection: () => {
+        setSelectedSongIds(new Set());
+        setLastClickedId(null);
+      },
+    });
+
+  // Keyboard navigation & Shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      const isTyping =
+        target.tagName === "INPUT" ||
+        target.tagName === "TEXTAREA" ||
+        target.isContentEditable;
+      if (isTyping) return;
+
+      if (e.key === "Escape") {
+        setContextMenu(null);
+        setSelectedSongIds(new Set());
+        setLastClickedId(null);
+        return;
+      }
+
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "a") {
+        e.preventDefault();
+        setSelectedSongIds(new Set(songsData.map((s) => s.id)));
+        return;
+      }
+
+      if (e.key === "Delete" || e.key === "Backspace") {
+        if (selectedSongIds.size === 0) return;
+        e.preventDefault();
+        if (selectedSongIds.size === 1) {
+          const songId = Array.from(selectedSongIds)[0];
+          const song = allSongs.find((s) => s.id === songId);
+          if (song) setDeleteTarget(song);
+        } else {
+          setIsBatchDeleteOpen(true);
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [songsData, selectedSongIds, allSongs]);
+
+  // Outside click to close context menu
+  useEffect(() => {
+    const handleClickOutside = () => setContextMenu(null);
+    window.addEventListener("click", handleClickOutside);
+    return () => window.removeEventListener("click", handleClickOutside);
+  }, []);
+
+  const handleJumpPage = (e: React.FormEvent) => {
+    e.preventDefault();
+    const targetPage = parseInt(jumpPageInput, 10);
+    if (!isNaN(targetPage) && targetPage >= 1 && targetPage <= totalPages) {
+      setPage(targetPage);
+      setJumpPageInput("");
+    }
+  };
+
+  const handleSongClick = useCallback(
+    (e: React.MouseEvent, song: Song) => {
+      e.stopPropagation();
+
+      if (e.ctrlKey || e.metaKey) {
+        setSelectedSongIds((prev) => {
+          const next = new Set(prev);
+          if (next.has(song.id)) next.delete(song.id);
+          else next.add(song.id);
+          return next;
+        });
+        setLastClickedId(song.id);
+      } else if (e.shiftKey && lastClickedId) {
+        const allIds = songsData.map((s) => s.id);
+        const idx1 = allIds.indexOf(lastClickedId);
+        const idx2 = allIds.indexOf(song.id);
+        if (idx1 !== -1 && idx2 !== -1) {
+          const start = Math.min(idx1, idx2);
+          const end = Math.max(idx1, idx2);
+          const rangeIds = allIds.slice(start, end + 1);
+          setSelectedSongIds(new Set(rangeIds));
+        } else {
+          setSelectedSongIds(new Set([song.id]));
+        }
+        setLastClickedId(song.id);
+      } else {
+        if (selectedSongIds.size === 1 && selectedSongIds.has(song.id)) {
+          navigate(`${slugPrefix}/songs/${song.id}`);
+          return;
+        }
+        setSelectedSongIds(new Set([song.id]));
+        setLastClickedId(song.id);
+      }
+    },
+    [navigate, slugPrefix, lastClickedId, selectedSongIds, songsData],
   );
 
-  const handleCreateSongSubmit = React.useCallback(
+  const openContextMenu = useCallback(
+    (e: React.MouseEvent, song: Song) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const x = Math.min(e.clientX, window.innerWidth - 240);
+      const y = Math.min(e.clientY, window.innerHeight - 320);
+      const isMulti = selectedSongIds.size > 1 && selectedSongIds.has(song.id);
+      setContextMenu({ x, y, song, isMulti });
+    },
+    [selectedSongIds],
+  );
+
+  const handleCreateSongSubmit = useCallback(
     async (data: {
       title: string;
       artist: string;
@@ -257,46 +465,103 @@ export const SongsPage: React.FC<SongsPageProps> = ({
     [createSong, navigate, slugPrefix],
   );
 
-  const handleDeleteConfirm = React.useCallback(async () => {
+  const handleDeleteConfirm = useCallback(async () => {
     if (!deleteTarget) return;
     await deleteSong(deleteTarget.id);
+    setSelectedSongIds((prev) => {
+      const next = new Set(prev);
+      next.delete(deleteTarget.id);
+      return next;
+    });
     setDeleteTarget(null);
   }, [deleteTarget, deleteSong]);
 
+  const handleBatchMoveConfirm = useCallback(
+    async (targetFolderId: string | null) => {
+      const songList = Array.from(selectedSongIds);
+      for (const sId of songList) {
+        const s = allSongs.find((x) => x.id === sId);
+        if (s) {
+          await moveSong({
+            id: sId,
+            folderId: targetFolderId,
+            updatedAt: s.updatedAt,
+          });
+        }
+      }
+      showToast(
+        `${songList.length} cântico(s) movido(s) com sucesso!`,
+        "success",
+      );
+      setSelectedSongIds(new Set());
+      setIsBatchMoveOpen(false);
+    },
+    [selectedSongIds, allSongs, moveSong, showToast],
+  );
+
+  const handleBatchDeleteConfirm = useCallback(async () => {
+    const songList = Array.from(selectedSongIds);
+    for (const sId of songList) {
+      await deleteSong(sId);
+    }
+    showToast(
+      `${songList.length} cântico(s) apagado(s) com sucesso!`,
+      "success",
+    );
+    setSelectedSongIds(new Set());
+    setIsBatchDeleteOpen(false);
+  }, [selectedSongIds, deleteSong, showToast]);
+
+  const handleBatchTagConfirm = useCallback(
+    async (tags: string[], mode: "append" | "replace" | "remove") => {
+      const songList = Array.from(selectedSongIds);
+      if (songList.length === 0) return;
+      await updateBatchTags({ songIds: songList, tags, mode });
+      setSelectedSongIds(new Set());
+      setIsBatchTagOpen(false);
+    },
+    [selectedSongIds, updateBatchTags],
+  );
+
   return (
     <div
-      className={`flex-1 flex flex-col w-full mx-auto space-y-6 animate-in fade-in duration-500 overflow-y-auto h-full ${hideHeader ? "p-6" : "p-4 sm:p-8 max-w-7xl"}`}
+      ref={containerRef}
+      onMouseDown={handleWorkspaceMouseDown}
+      className={`flex-1 flex flex-col w-full mx-auto space-y-4 animate-in fade-in duration-300 overflow-y-auto h-full relative select-none ${
+        actualHideHeader ? "p-4 sm:p-6" : "p-4 sm:p-8 max-w-7xl"
+      }`}
     >
-      {/* Header Banner */}
+      {/* Header Banner when Standalone */}
       {!actualHideHeader && (
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-black text-m3-text tracking-tighter flex items-center gap-4">
-              <div className="w-12 h-12 rounded-2xl bg-m3-primary/10 text-m3-primary flex items-center justify-center border border-m3-primary/20">
-                <Music className="w-7 h-7" />
+            <h1 className="text-2xl sm:text-3xl font-black text-m3-text tracking-tighter flex items-center gap-3.5">
+              <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-m3-primary/10 text-m3-primary flex items-center justify-center border border-m3-primary/20 shadow-xs">
+                <Music className="w-6 h-6 sm:w-7 sm:h-7" />
               </div>
               Biblioteca de Cânticos
             </h1>
-            <p className="text-sm text-m3-secondary font-bold uppercase tracking-widest mt-2 ml-16 opacity-60">
-              Gerencie a sua coleção de cifras e pautas
+            <p className="text-xs text-m3-secondary font-bold uppercase tracking-widest mt-1.5 ml-14 sm:ml-16 opacity-60">
+              Gerencie a sua coleção de cifras e pautas ({totalSongs}{" "}
+              {totalSongs === 1 ? "cântico" : "cânticos"})
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5">
             <Button
               variant="outline"
-              icon={<FolderTree className="w-5 h-5" />}
+              icon={<FolderTree className="w-4 h-4" />}
               onClick={() => navigate(`${slugPrefix}/folders`)}
-              className="rounded-2xl py-6 px-6 font-black uppercase tracking-widest text-[11px]"
+              className="rounded-2xl py-3 px-4 sm:px-5 font-black uppercase tracking-wider text-[11px]"
             >
               Explorador
             </Button>
 
             <Button
               variant="primary"
-              icon={<Plus className="w-5 h-5" />}
+              icon={<Plus className="w-4 h-4" />}
               onClick={() => setIsCreateModalOpen(true)}
-              className="rounded-2xl py-6 px-6 font-black uppercase tracking-widest text-[11px] shadow-xl shadow-m3-primary/20"
+              className="rounded-2xl py-3 px-4 sm:px-5 font-black uppercase tracking-wider text-[11px] shadow-lg shadow-m3-primary/20"
             >
               Novo Cântico
             </Button>
@@ -304,25 +569,25 @@ export const SongsPage: React.FC<SongsPageProps> = ({
         </div>
       )}
 
-      {/* Search & Filters Toolbar */}
+      {/* Standalone Toolbar (search, folder filter, sort, viewmode & density) */}
       {!actualHideHeader && (
-        <div className="flex flex-wrap items-center justify-between gap-3 p-4 bg-m3-sidebar/30 border border-m3-border rounded-[28px] shadow-lg shadow-black/5 transition-all">
-          <div className="flex-1 min-w-60 max-w-lg">
+        <div className="flex flex-wrap items-center justify-between gap-3 p-3 sm:p-4 bg-m3-sidebar/30 border border-m3-border rounded-3xl shadow-xs transition-all">
+          <div className="flex-1 min-w-56 max-w-md">
             <Input
-              placeholder="Pesquisar cânticos..."
+              placeholder="Pesquisar por título, artista, letra..."
               value={finalSearchQuery}
               onChange={(e) => {
                 setInternalSearchQuery(e.target.value);
                 setPage(1);
               }}
               icon={<Search className="w-4 h-4 text-m3-secondary" />}
-              className="py-2.5 text-sm rounded-xl"
+              className="py-2 text-xs rounded-xl"
             />
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             {/* Folder Filter */}
-            <div className="flex items-center gap-2 bg-m3-card border border-m3-border rounded-xl px-3 py-2 text-xs shadow-sm">
+            <div className="flex items-center gap-2 bg-m3-card border border-m3-border rounded-xl px-3 py-2 text-xs shadow-xs">
               <Filter className="w-3.5 h-3.5 text-m3-primary opacity-70" />
               <select
                 value={selectedFolder}
@@ -330,9 +595,9 @@ export const SongsPage: React.FC<SongsPageProps> = ({
                   setSelectedFolder(e.target.value);
                   setPage(1);
                 }}
-                className="bg-transparent font-black text-m3-text focus:outline-none cursor-pointer uppercase tracking-wider text-[10px]"
+                className="bg-transparent font-bold text-m3-text focus:outline-none cursor-pointer uppercase tracking-wider text-[10px]"
               >
-                <option value="">Todas</option>
+                <option value="">Todas as Pastas</option>
                 <option value="root">Raiz</option>
                 {folders.map((f) => (
                   <option key={f.id} value={f.id}>
@@ -342,7 +607,8 @@ export const SongsPage: React.FC<SongsPageProps> = ({
               </select>
             </div>
 
-            <div className="flex items-center gap-2 bg-m3-card border border-m3-border rounded-xl px-3 py-2 text-xs shadow-sm">
+            {/* Sort Filter */}
+            <div className="flex items-center gap-2 bg-m3-card border border-m3-border rounded-xl px-3 py-2 text-xs shadow-xs">
               <ArrowUpDown className="w-3.5 h-3.5 text-m3-primary opacity-70" />
               <select
                 value={`${finalSortBy}-${finalSortOrder}`}
@@ -351,29 +617,41 @@ export const SongsPage: React.FC<SongsPageProps> = ({
                     "title" | "artist" | "updatedAt",
                     "asc" | "desc",
                   ];
-                  if (externalSortBy !== undefined) {
-                    // If controlled by parent, we might not want to set internal
-                  } else {
-                    setInternalSortBy(sb);
-                    setInternalSortOrder(so);
-                  }
+                  setInternalSortBy(sb);
+                  setInternalSortOrder(so);
                 }}
-                className="bg-transparent font-black text-m3-text focus:outline-none cursor-pointer uppercase tracking-wider text-[10px]"
+                className="bg-transparent font-bold text-m3-text focus:outline-none cursor-pointer uppercase tracking-wider text-[10px]"
               >
-                <option value="title-asc">A-Z</option>
-                <option value="title-desc">Z-A</option>
-                <option value="artist-asc">Artista</option>
-                <option value="updatedAt-desc">Recente</option>
+                <option value="title-asc">Nome (A-Z)</option>
+                <option value="title-desc">Nome (Z-A)</option>
+                <option value="artist-asc">Artista (A-Z)</option>
+                <option value="updatedAt-desc">Mais Recentes</option>
+              </select>
+            </div>
+
+            {/* Density Selector */}
+            <div className="flex items-center gap-1.5 bg-m3-card border border-m3-border rounded-xl px-2.5 py-1.5 text-xs shadow-xs">
+              <select
+                value={density}
+                onChange={(e) =>
+                  handleDensityChange(
+                    e.target.value as "comfortable" | "compact",
+                  )
+                }
+                className="bg-transparent font-bold text-m3-text focus:outline-none cursor-pointer text-[10px] uppercase tracking-wider"
+              >
+                <option value="comfortable">Confortável</option>
+                <option value="compact">Compacto</option>
               </select>
             </div>
           </div>
         </div>
       )}
 
-      {/* Main Table / List View */}
-      <div className="bg-m3-card border border-m3-border rounded-4xl shadow-2xl shadow-black/5 overflow-hidden flex flex-col flex-1 transition-all duration-300">
+      {/* Main Content Area: Grid / Table View */}
+      <div className="bg-m3-card border border-m3-border rounded-3xl shadow-sm overflow-hidden flex flex-col flex-1 transition-all">
         {songsQuery.isLoading ? (
-          <div className="flex-1 flex items-center justify-center p-12">
+          <div className="flex-1 flex items-center justify-center p-12 min-h-64">
             <Spinner label="A carregar biblioteca..." />
           </div>
         ) : songsQuery.isError ? (
@@ -381,57 +659,98 @@ export const SongsPage: React.FC<SongsPageProps> = ({
             Erro ao carregar cânticos: {(songsQuery.error as Error).message}
           </div>
         ) : songsData.length === 0 ? (
-          <EmptyState
-            icon={<Music className="w-12 h-12 text-m3-primary opacity-40" />}
-            title="Nenhum cântico encontrado"
-            description={
-              finalSearchQuery || selectedFolder
-                ? "A sua pesquisa não retornou resultados. Experimente termos mais genéricos."
-                : "A sua biblioteca está vazia. Comece a sua jornada musical agora!"
-            }
-            actionLabel={emptyStateAction}
-            onAction={() => setIsCreateModalOpen(true)}
-          />
+          <div className="p-8">
+            <EmptyState
+              icon={<Music className="w-12 h-12 text-m3-primary opacity-40" />}
+              title="Nenhum cântico encontrado"
+              description={
+                finalSearchQuery || selectedFolder
+                  ? "A sua pesquisa não retornou resultados. Experimente termos mais genéricos."
+                  : "A sua biblioteca está vazia. Comece a sua jornada musical agora!"
+              }
+              actionLabel={emptyStateAction}
+              onAction={() => setIsCreateModalOpen(true)}
+            />
+          </div>
         ) : (
+          /* Table View Layout */
           <div className="overflow-x-auto flex-1">
             <table className="w-full text-left border-collapse select-none">
               <thead>
                 <tr className="bg-m3-sidebar/40 border-b border-m3-border text-[10px] font-black text-m3-secondary uppercase tracking-[0.2em]">
-                  <th className="py-4 px-6">Título & Caminho</th>
-                  <th className="py-4 px-6">Artista</th>
-                  <th className="py-4 px-6">Pasta</th>
-                  <th className="py-4 px-6">Etiquetas</th>
-                  <th className="py-4 px-6">Ultima Atualização</th>
-                  <th className="py-4 px-6 text-right">Ações</th>
+                  <th className={isCompact ? "py-2.5 px-4" : "py-3.5 px-6"}>
+                    Título & Caminho
+                  </th>
+                  <th className={isCompact ? "py-2.5 px-4" : "py-3.5 px-6"}>
+                    Artista
+                  </th>
+                  <th className={isCompact ? "py-2.5 px-4" : "py-3.5 px-6"}>
+                    Pasta
+                  </th>
+                  <th className={isCompact ? "py-2.5 px-4" : "py-3.5 px-6"}>
+                    Etiquetas
+                  </th>
+                  <th className={isCompact ? "py-2.5 px-4" : "py-3.5 px-6"}>
+                    Atualização
+                  </th>
+                  <th
+                    className={`${isCompact ? "py-2.5 px-4" : "py-3.5 px-6"} text-right`}
+                  >
+                    Ações
+                  </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-m3-border/30 text-[13px] font-bold">
+              <tbody
+                className={`divide-y divide-m3-border/30 ${
+                  isCompact ? "text-xs" : "text-[13px]"
+                } font-bold`}
+              >
                 {songsData.map((song) => {
-                  const folder = folders.find((f) => f.id === song.folderId);
+                  const folderName = folderMap.get(song.folderId || "");
+                  const isSelected = selectedSongIds.has(song.id);
+
                   return (
                     <tr
                       key={song.id}
-                      className="hover:bg-m3-hover/50 transition-all group cursor-pointer"
-                      onClick={() => navigate(`${slugPrefix}/songs/${song.id}`)}
+                      data-item-id={song.id}
+                      data-item-type="song"
+                      className={`transition-all group cursor-pointer ${
+                        isSelected
+                          ? "bg-m3-primary/10 text-m3-primary"
+                          : "hover:bg-m3-hover/50 text-m3-text"
+                      }`}
+                      onClick={(e) => handleSongClick(e, song)}
+                      onDoubleClick={() =>
+                        navigate(`${slugPrefix}/songs/${song.id}`)
+                      }
+                      onContextMenu={(e) => openContextMenu(e, song)}
                     >
-                      <td className="py-4 px-6">
-                        <div className="flex flex-col group-hover:translate-x-1 transition-transform">
-                          <span className="text-m3-text group-hover:text-m3-primary transition-colors">
+                      <td
+                        className={`${isCompact ? "py-2.5 px-4" : "py-3.5 px-6"} max-w-xs sm:max-w-md`}
+                      >
+                        <div className="flex flex-col group-hover:translate-x-1 transition-transform min-w-0">
+                          <span className="truncate font-bold">
                             {song.title}
                           </span>
-                          <span className="text-[10px] text-m3-secondary font-black uppercase tracking-widest opacity-60 mt-0.5">
-                            {song.path.split("/")[0]}/
-                          </span>
+                          {song.path && (
+                            <span className="text-[10px] text-m3-secondary font-black uppercase tracking-widest opacity-60 mt-0.5 truncate">
+                              {song.path.split("/")[0]}/
+                            </span>
+                          )}
                         </div>
                       </td>
 
-                      <td className="py-4 px-6 text-m3-secondary">
+                      <td
+                        className={`${isCompact ? "py-2.5 px-4" : "py-3.5 px-6"} text-m3-secondary max-w-40 truncate`}
+                      >
                         {song.artist || "—"}
                       </td>
 
-                      <td className="py-4 px-6">
-                        {folder ? (
-                          <Badge variant="sky">{folder.name}</Badge>
+                      <td
+                        className={`${isCompact ? "py-2.5 px-4" : "py-3.5 px-6"}`}
+                      >
+                        {folderName ? (
+                          <Badge variant="sky">{folderName}</Badge>
                         ) : (
                           <span className="text-[10px] text-m3-secondary font-black uppercase tracking-widest opacity-40 italic">
                             Raiz
@@ -439,46 +758,51 @@ export const SongsPage: React.FC<SongsPageProps> = ({
                         )}
                       </td>
 
-                      <td className="py-4 px-6 min-w-50">
+                      <td
+                        className={`${isCompact ? "py-2.5 px-4" : "py-3.5 px-6"} max-w-56`}
+                      >
                         <OverflowTagList tags={song.tags} />
                       </td>
 
-                      <td className="py-4 px-6 text-[11px] text-m3-secondary opacity-70 font-black uppercase tracking-tighter">
+                      <td
+                        className={`${isCompact ? "py-2.5 px-4" : "py-3.5 px-6"} text-[11px] text-m3-secondary opacity-70 font-black uppercase tracking-tighter whitespace-nowrap`}
+                      >
                         {new Date(song.updatedAt).toLocaleDateString("pt-PT")}
                       </td>
 
                       <td
-                        className="py-4 px-6 text-right"
+                        className={`${isCompact ? "py-2.5 px-4" : "py-3.5 px-6"} text-right`}
                         onClick={(e) => e.stopPropagation()}
                       >
-                        <div className="flex items-center justify-end gap-1 group-hover:opacity-100 opacity-40 transition-opacity">
+                        <div className="flex items-center justify-end gap-1">
                           <button
+                            type="button"
                             onClick={() =>
                               navigate(`${slugPrefix}/songs/${song.id}`)
                             }
                             title="Abrir Editor"
-                            className="p-2 text-m3-secondary hover:text-m3-primary hover:bg-m3-primary/10 rounded-xl cursor-pointer transition-all"
+                            className="p-1.5 text-m3-secondary hover:text-m3-primary hover:bg-m3-primary/10 rounded-xl cursor-pointer transition-all"
                           >
-                            <FileText className="w-4.5 h-4.5" />
+                            <FileText className="w-4 h-4" />
                           </button>
                           <Can permission="song.update">
                             <button
-                              onClick={() => {
-                                setMoveTarget(song);
-                              }}
+                              type="button"
+                              onClick={() => setMoveTarget(song)}
                               title="Mover"
-                              className="p-2 text-m3-secondary hover:text-sky-500 hover:bg-sky-500/10 rounded-xl cursor-pointer transition-all"
+                              className="p-1.5 text-m3-secondary hover:text-sky-500 hover:bg-sky-500/10 rounded-xl cursor-pointer transition-all"
                             >
-                              <FolderInput className="w-4.5 h-4.5" />
+                              <FolderInput className="w-4 h-4" />
                             </button>
                           </Can>
                           <Can permission="song.delete">
                             <button
+                              type="button"
                               onClick={() => setDeleteTarget(song)}
                               title="Apagar"
-                              className="p-2 text-m3-secondary hover:text-rose-500 hover:bg-rose-500/10 rounded-xl cursor-pointer transition-all"
+                              className="p-1.5 text-m3-secondary hover:text-rose-500 hover:bg-rose-500/10 rounded-xl cursor-pointer transition-all"
                             >
-                              <Trash2 className="w-4.5 h-4.5" />
+                              <Trash2 className="w-4 h-4" />
                             </button>
                           </Can>
                         </div>
@@ -491,16 +815,328 @@ export const SongsPage: React.FC<SongsPageProps> = ({
           </div>
         )}
 
-        <div className="p-4 bg-m3-sidebar/20 border-t border-m3-border/50">
-          <Pagination
-            page={page}
-            totalPages={totalPages}
-            onPageChange={(p) => setPage(p)}
-            total={totalSongs}
-            limit={ITEMS_PER_PAGE}
-          />
+        {/* Clean, Modern Pagination & Status Footer Bar */}
+        <div className="px-4 py-3 bg-m3-sidebar/30 border-t border-m3-border flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+          {/* Left: Summary & Per-Page selector */}
+          <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-start">
+            <span className="text-m3-secondary font-medium">
+              {totalSongs === 0 ? (
+                "0 cânticos"
+              ) : (
+                <>
+                  A mostrar{" "}
+                  <strong className="font-bold text-m3-text">
+                    {itemsPerPage === 0 ? 1 : (page - 1) * effectivePerPage + 1}
+                  </strong>{" "}
+                  a{" "}
+                  <strong className="font-bold text-m3-text">
+                    {itemsPerPage === 0
+                      ? totalSongs
+                      : Math.min(page * effectivePerPage, totalSongs)}
+                  </strong>{" "}
+                  de{" "}
+                  <strong className="font-bold text-m3-text">
+                    {totalSongs}
+                  </strong>{" "}
+                  cânticos
+                </>
+              )}
+            </span>
+
+            <div className="flex items-center gap-1.5 bg-m3-card border border-m3-border rounded-xl px-2.5 py-1 shadow-xs">
+              <span className="text-[10px] text-m3-secondary font-bold uppercase tracking-wider">
+                Exibir:
+              </span>
+              <select
+                value={itemsPerPage}
+                onChange={(e) => {
+                  setItemsPerPage(Number(e.target.value));
+                  setPage(1);
+                }}
+                className="bg-transparent font-bold text-m3-text focus:outline-none cursor-pointer text-xs"
+              >
+                <option value={25}>25</option>
+                <option value={50}>50</option>
+                <option value={100}>100</option>
+                <option value={0}>Todos ({totalSongs})</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Right: Clean Page Controls */}
+          {totalPages > 1 && (
+            <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
+              {/* Quick jump form */}
+              <form
+                onSubmit={handleJumpPage}
+                className="flex items-center gap-1.5 bg-m3-card border border-m3-border rounded-xl px-2.5 py-1 shadow-xs"
+              >
+                <span className="text-[10px] text-m3-secondary font-bold uppercase tracking-wider">
+                  Ir para:
+                </span>
+                <input
+                  type="number"
+                  min={1}
+                  max={totalPages}
+                  placeholder={String(page)}
+                  value={jumpPageInput}
+                  onChange={(e) => setJumpPageInput(e.target.value)}
+                  className="w-9 bg-transparent text-center font-bold text-m3-text focus:outline-none border-b border-m3-border focus:border-m3-primary text-xs"
+                />
+                <button
+                  type="submit"
+                  disabled={
+                    !jumpPageInput ||
+                    parseInt(jumpPageInput, 10) < 1 ||
+                    parseInt(jumpPageInput, 10) > totalPages
+                  }
+                  className="text-[10px] font-black uppercase text-m3-primary hover:underline disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+                >
+                  OK
+                </button>
+              </form>
+
+              {/* Navigation button group */}
+              <div className="flex items-center gap-1 bg-m3-card border border-m3-border rounded-xl p-1 shadow-xs">
+                <button
+                  type="button"
+                  onClick={() => setPage(1)}
+                  disabled={page <= 1}
+                  className="p-1.5 rounded-lg text-m3-secondary hover:text-m3-text hover:bg-m3-hover disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer transition-colors"
+                  title="Primeira Página"
+                >
+                  <ChevronsLeft className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPage(page - 1)}
+                  disabled={page <= 1}
+                  className="p-1.5 rounded-lg text-m3-secondary hover:text-m3-text hover:bg-m3-hover disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer transition-colors"
+                  title="Página Anterior"
+                >
+                  <ChevronLeft className="w-3.5 h-3.5" />
+                </button>
+
+                <span className="px-2 font-bold text-m3-text text-xs whitespace-nowrap">
+                  {page} / {totalPages}
+                </span>
+
+                <button
+                  type="button"
+                  onClick={() => setPage(page + 1)}
+                  disabled={page >= totalPages}
+                  className="p-1.5 rounded-lg text-m3-secondary hover:text-m3-text hover:bg-m3-hover disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer transition-colors"
+                  title="Página Seguinte"
+                >
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPage(totalPages)}
+                  disabled={page >= totalPages}
+                  className="p-1.5 rounded-lg text-m3-secondary hover:text-m3-text hover:bg-m3-hover disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer transition-colors"
+                  title="Última Página"
+                >
+                  <ChevronsRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
+
+      {/* Floating Multi-Select Action Bar */}
+      {selectedSongIds.size > 1 && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 rounded-3xl shadow-2xl px-5 py-3 animate-in fade-in slide-in-from-bottom-4 duration-200">
+          <span className="text-xs font-black uppercase tracking-widest px-2">
+            {selectedSongIds.size} cânticos selecionados
+          </span>
+
+          <div className="h-6 w-px bg-white/20 dark:bg-slate-900/20" />
+
+          <Can permission="song.update">
+            <Button
+              size="sm"
+              variant="ghost"
+              icon={<Tag className="w-4 h-4" />}
+              onClick={() => setIsBatchTagOpen(true)}
+              className="text-white! dark:text-slate-900! hover:bg-white/10! dark:hover:bg-slate-900/10!"
+            >
+              Etiquetar
+            </Button>
+
+            <Button
+              size="sm"
+              variant="ghost"
+              icon={<FolderInput className="w-4 h-4" />}
+              onClick={() => setIsBatchMoveOpen(true)}
+              className="text-white! dark:text-slate-900! hover:bg-white/10! dark:hover:bg-slate-900/10!"
+            >
+              Mover
+            </Button>
+          </Can>
+
+          <Can permission="song.delete">
+            <Button
+              size="sm"
+              variant="ghost"
+              icon={<Trash2 className="w-4 h-4" />}
+              onClick={() => setIsBatchDeleteOpen(true)}
+              className="text-rose-400! hover:bg-rose-500/10!"
+            >
+              Eliminar
+            </Button>
+          </Can>
+
+          <Button
+            size="sm"
+            variant="ghost"
+            icon={<X className="w-4 h-4" />}
+            onClick={() => {
+              setSelectedSongIds(new Set());
+              setLastClickedId(null);
+            }}
+            className="text-white/70! dark:text-slate-900/70! hover:bg-white/10! dark:hover:bg-slate-900/10!"
+          >
+            Cancelar
+          </Button>
+        </div>
+      )}
+
+      {/* Floating Context Menu */}
+      {contextMenu && (
+        <div
+          style={{ top: contextMenu.y, left: contextMenu.x }}
+          className="fixed z-50 w-56 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl p-1.5 flex flex-col gap-0.5 text-xs select-none animate-in fade-in zoom-in-95 duration-100"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {contextMenu.isMulti ? (
+            <>
+              <div className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-[#0284c7] border-b border-slate-100 dark:border-slate-800/80 mb-0.5 truncate flex items-center justify-between">
+                <span>Seleção Múltipla</span>
+                <Badge variant="sky">{selectedSongIds.size}</Badge>
+              </div>
+
+              <Can permission="song.update">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsBatchTagOpen(true);
+                    setContextMenu(null);
+                  }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left cursor-pointer"
+                >
+                  <Tag className="w-4 h-4 text-[#0284c7]" />
+                  <span>Etiquetar {selectedSongIds.size} cânticos</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsBatchMoveOpen(true);
+                    setContextMenu(null);
+                  }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left cursor-pointer"
+                >
+                  <FolderInput className="w-4 h-4 text-emerald-500" />
+                  <span>Mover {selectedSongIds.size} cânticos</span>
+                </button>
+              </Can>
+
+              <Can permission="song.delete">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsBatchDeleteOpen(true);
+                    setContextMenu(null);
+                  }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 font-semibold transition-colors text-left cursor-pointer"
+                >
+                  <Trash2 className="w-4 h-4 text-rose-500" />
+                  <span>Apagar {selectedSongIds.size} cânticos</span>
+                </button>
+              </Can>
+
+              <div className="my-1 border-t border-slate-100 dark:border-slate-800/80" />
+
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedSongIds(new Set());
+                  setContextMenu(null);
+                }}
+                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left cursor-pointer"
+              >
+                <X className="w-4 h-4 text-slate-400" />
+                <span>Desmarcar seleção</span>
+              </button>
+            </>
+          ) : contextMenu.song ? (
+            <>
+              <div className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400 border-b border-slate-100 dark:border-slate-800/80 mb-0.5 truncate">
+                {contextMenu.song.title}
+              </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  navigate(`${slugPrefix}/songs/${contextMenu.song!.id}`);
+                  setContextMenu(null);
+                }}
+                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left cursor-pointer"
+              >
+                <FileText className="w-4 h-4 text-sky-500" />
+                <span>Abrir no Editor</span>
+              </button>
+
+              <Can permission="song.update">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMoveTarget(contextMenu.song);
+                    setContextMenu(null);
+                  }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left cursor-pointer"
+                >
+                  <FolderInput className="w-4 h-4 text-sky-500" />
+                  <span>Mover Cântico</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedSongIds(new Set([contextMenu.song!.id]));
+                    setIsBatchTagOpen(true);
+                    setContextMenu(null);
+                  }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left cursor-pointer"
+                >
+                  <Tag className="w-4 h-4 text-[#0284c7]" />
+                  <span>Etiquetar Cântico</span>
+                </button>
+              </Can>
+
+              <Can permission="song.delete">
+                <div className="my-1 border-t border-slate-100 dark:border-slate-800/80" />
+                <button
+                  type="button"
+                  onClick={() => {
+                    setDeleteTarget(contextMenu.song);
+                    setContextMenu(null);
+                  }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 font-semibold transition-colors text-left cursor-pointer"
+                >
+                  <Trash2 className="w-4 h-4 text-rose-500" />
+                  <span>Apagar Cântico</span>
+                </button>
+              </Can>
+            </>
+          ) : null}
+        </div>
+      )}
+
+      {/* Marquee Selection Box */}
+      <MarqueeSelectionBox box={selectionBox} />
 
       {/* CREATE SONG MODAL */}
       <Modal
@@ -531,6 +1167,34 @@ export const SongsPage: React.FC<SongsPageProps> = ({
           });
           setMoveTarget(null);
         }}
+      />
+
+      {/* BATCH MOVE MODAL */}
+      <BatchMoveModal
+        isOpen={isBatchMoveOpen}
+        onClose={() => setIsBatchMoveOpen(false)}
+        selectedFoldersCount={0}
+        selectedSongsCount={selectedSongIds.size}
+        disabledFolderIds={new Set()}
+        folders={folders}
+        onConfirm={handleBatchMoveConfirm}
+      />
+
+      {/* BATCH DELETE MODAL */}
+      <BatchDeleteModal
+        isOpen={isBatchDeleteOpen}
+        onClose={() => setIsBatchDeleteOpen(false)}
+        selectedFolders={[]}
+        selectedSongsCount={selectedSongIds.size}
+        onConfirm={handleBatchDeleteConfirm}
+      />
+
+      {/* BATCH TAG MODAL */}
+      <BatchTagModal
+        isOpen={isBatchTagOpen}
+        onClose={() => setIsBatchTagOpen(false)}
+        selectedSongIds={Array.from(selectedSongIds)}
+        onConfirm={handleBatchTagConfirm}
       />
 
       {/* DELETE CONFIRM DIALOG */}
