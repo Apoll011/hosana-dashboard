@@ -15,7 +15,7 @@ import {
   Spinner,
 } from "@hosanna/shared";
 import { useStatsigClient } from "@statsig/react-bindings";
-import { useQuery, UseQueryResult } from "@tanstack/react-query";
+import { useQuery, useQueryClient, UseQueryResult } from "@tanstack/react-query";
 import {
   Archive,
   ArchiveRestore,
@@ -57,6 +57,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
   searchQuery: externalSearchQuery,
 }) => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { organization } = useAuth();
   const slugPrefix = organization?.slug ? `/${organization.slug}` : "";
   const context = (useOutletContext<Record<string, unknown>>() || {}) as Record<
@@ -65,6 +66,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
   >;
   const actualHideHeader = hideHeader ?? context.hideHeader;
   const viewMode = context.viewMode ?? "grid";
+  const density = (context.density as "comfortable" | "compact") ?? "comfortable";
   const contextSortBy = context.sortBy;
   const contextSortOrder = context.sortOrder;
   const actualSearchQuery =
@@ -101,8 +103,11 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
   const localArchivedServicesQuery = useQuery({
     queryKey: ["services", "archived"],
     queryFn: async () => {
-      const all = await servicesApi.getServices();
-      return (Array.isArray(all) ? all : []).filter((s: Service) => s.archived);
+      const all = await servicesApi.getServices(true);
+      return (Array.isArray(all) ? all : []).map((s: Service) => ({
+        ...s,
+        archived: true,
+      }));
     },
     enabled: showArchived && !context.archivedServicesQuery,
     staleTime: 1000 * 60 * 5,
@@ -151,7 +156,14 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
   const [isBatchArchiveOpen, setIsBatchArchiveOpen] = useState(false);
 
   // ─── Data ─────────────────────────────────────────────────────────────────
-  const allServices: Service[] = servicesQuery.data || [];
+  const allServices: Service[] = useMemo(
+    () =>
+      (servicesQuery.data || []).map((s: Service) => ({
+        ...s,
+        archived: s.archived ?? false,
+      })),
+    [servicesQuery.data],
+  );
   // Active (non-archived) services
   const activeServices = useMemo(
     () => allServices.filter((s) => !s.archived),
@@ -162,13 +174,12 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
       showArchived
         ? ((context.archivedServices as Service[] | null) ??
           archivedServicesQuery.data ??
-          allServices.filter((s) => s.archived))
+          [])
         : [],
     [
       showArchived,
       context.archivedServices,
       archivedServicesQuery.data,
-      allServices,
     ],
   );
 
@@ -463,13 +474,15 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
   };
 
   const handleArchiveToggle = async (service: Service) => {
+    const nextArchived = !service.archived;
     await updateService({
       id: service.id,
       data: {
-        archived: !service.archived,
+        archived: nextArchived,
         updatedAt: service.updatedAt,
       },
     });
+    await queryClient.invalidateQueries({ queryKey: ["services"] });
     setArchiveTarget(null);
     setContextMenu(null);
   };
@@ -484,14 +497,17 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
 
   const handleBatchArchive = async () => {
     for (const id of Array.from(selectedServiceIds)) {
-      const service = filteredServices.find((s) => s.id === id);
+      const service =
+        filteredServices.find((s) => s.id === id) ||
+        filteredArchivedServices.find((s) => s.id === id);
       if (service) {
         await updateService({
           id,
-          data: { archived: true, updatedAt: service.updatedAt },
+          data: { archived: !service.archived, updatedAt: service.updatedAt },
         });
       }
     }
+    await queryClient.invalidateQueries({ queryKey: ["services"] });
     setSelectedServiceIds(new Set());
     setIsBatchArchiveOpen(false);
   };
@@ -681,6 +697,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
     isArchived = false,
   ) => {
     const isSelected = selectedServiceIds.has(service.id);
+    const isCompact = density === "compact";
     return (
       <div
         key={service.id}
@@ -695,7 +712,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
           }
           openContextMenu(e, service);
         }}
-        className={`p-5 rounded-3xl border transition-all cursor-pointer flex flex-col items-center text-center group relative shadow-sm select-none ${
+        className={`${isCompact ? "p-3.5 rounded-2xl" : "p-5 rounded-3xl"} border transition-all cursor-pointer flex flex-col items-center text-center group relative shadow-sm select-none ${
           isArchived ? "opacity-50" : ""
         } ${
           isSelected
@@ -716,28 +733,28 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
               service,
             );
           }}
-          className="absolute top-3 right-3 p-1.5 rounded-xl text-m3-secondary hover:text-m3-text hover:bg-slate-200/60 dark:hover:bg-slate-700/60 transition-all z-10 cursor-pointer opacity-0 group-hover:opacity-100"
+          className={`absolute ${isCompact ? "top-2 right-2 p-1" : "top-3 right-3 p-1.5"} rounded-xl text-m3-secondary hover:text-m3-text hover:bg-slate-200/60 dark:hover:bg-slate-700/60 transition-all z-10 cursor-pointer opacity-0 group-hover:opacity-100`}
           title="Mais opções"
           aria-label="Mais opções"
         >
-          <MoreVertical className="w-4.5 h-4.5" />
+          <MoreVertical className={isCompact ? "w-3.5 h-3.5" : "w-4.5 h-4.5"} />
         </button>
 
         <div
-          className={`w-14 h-14 rounded-2xl border flex items-center justify-center mb-3 group-hover:scale-110 transition-transform ${
+          className={`${isCompact ? "w-10 h-10 rounded-xl mb-2" : "w-14 h-14 rounded-2xl mb-3"} border flex items-center justify-center group-hover:scale-110 transition-transform ${
             isArchived
               ? "bg-amber-500/10 border-amber-500/20 text-amber-600 dark:text-amber-400"
               : "bg-sky-500/10 border-sky-500/20 text-sky-600 dark:text-sky-400"
           }`}
         >
           {isArchived ? (
-            <Archive className="w-8 h-8 opacity-80" />
+            <Archive className={`${isCompact ? "w-5 h-5" : "w-8 h-8"} opacity-80`} />
           ) : (
-            <Church className="w-8 h-8 opacity-80" />
+            <Church className={`${isCompact ? "w-5 h-5" : "w-8 h-8"} opacity-80`} />
           )}
         </div>
 
-        <span className="text-sm font-black text-m3-text transition-colors truncate w-full px-1">
+        <span className={`${isCompact ? "text-xs" : "text-sm"} font-black text-m3-text transition-colors truncate w-full px-1`}>
           {service.name}
         </span>
 
@@ -759,6 +776,8 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
     isArchived = false,
   ) => {
     const isSelected = selectedServiceIds.has(service.id);
+    const isCompact = density === "compact";
+    const cellPadding = isCompact ? "py-2.5 px-4" : "py-4 px-6";
     return (
       <tr
         key={service.id}
@@ -781,21 +800,21 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
             : "hover:bg-m3-hover/50 text-m3-text"
         }`}
       >
-        <td className="py-4 px-6">
+        <td className={cellPadding}>
           <div className="flex items-center gap-4 group-hover:translate-x-1 transition-transform">
             {isArchived ? (
-              <Archive className="w-5 h-5 text-amber-500 opacity-80" />
+              <Archive className={`${isCompact ? "w-4 h-4" : "w-5 h-5"} text-amber-500 opacity-80`} />
             ) : (
-              <Calendar className="w-5 h-5 text-sky-500 opacity-80" />
+              <Calendar className={`${isCompact ? "w-4 h-4" : "w-5 h-5"} text-sky-500 opacity-80`} />
             )}
             <span>{service.name}</span>
             {isArchived && <Badge variant="slate">Arquivado</Badge>}
           </div>
         </td>
-        <td className="py-4 px-6 text-m3-secondary opacity-70">
+        <td className={`${cellPadding} text-m3-secondary opacity-70`}>
           Culto (.service)
         </td>
-        <td className="py-4 px-6 text-m3-secondary">
+        <td className={`${cellPadding} text-m3-secondary`}>
           {formatDate(service.date, {
             weekday: "short",
             day: "numeric",
@@ -803,10 +822,10 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
             year: "numeric",
           })}
         </td>
-        <td className="py-4 px-6 text-right">
+        <td className={`${cellPadding} text-right`}>
           <div className="flex items-center justify-end gap-1">
             <Button
-              size="lg"
+              size={isCompact ? "sm" : "lg"}
               variant="ghost"
               onClick={(e) => {
                 e.stopPropagation();
@@ -828,11 +847,11 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
                   service,
                 );
               }}
-              className="p-2 rounded-xl text-m3-secondary hover:text-m3-text hover:bg-m3-hover transition-colors cursor-pointer"
+              className="p-1.5 rounded-xl text-m3-secondary hover:text-m3-text hover:bg-m3-hover transition-colors cursor-pointer"
               title="Mais opções"
               aria-label="Mais opções"
             >
-              <MoreVertical className="w-4.5 h-4.5" />
+              <MoreVertical className="w-4 h-4" />
             </button>
           </div>
         </td>
@@ -892,7 +911,13 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
       {serviceAsFolderItem ? (
         /* FEATURE FLAG ACTIVE: SERVICE AS FOLDER/FILE ITEM VIEW */
         viewMode === "grid" ? (
-          <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+          <div
+            className={
+              density === "compact"
+                ? "grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 gap-3.5"
+                : "grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6"
+            }
+          >
             {filteredServices.length === 0 && !showArchived ? (
               <div className="col-span-full text-center py-20 text-m3-secondary font-black uppercase tracking-widest opacity-60">
                 Nenhum plano corresponde à sua pesquisa.
@@ -925,13 +950,13 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
             <table className="w-full text-left border-collapse select-none">
               <thead>
                 <tr className="bg-m3-sidebar/40 border-b border-m3-border text-[10px] font-black text-m3-secondary uppercase tracking-[0.2em]">
-                  <th className="py-4 px-6">Nome do Culto</th>
-                  <th className="py-4 px-6">Tipo</th>
-                  <th className="py-4 px-6">Data Agendada</th>
-                  <th className="py-4 px-6 text-right">Ações</th>
+                  <th className={density === "compact" ? "py-2.5 px-4" : "py-4 px-6"}>Nome do Culto</th>
+                  <th className={density === "compact" ? "py-2.5 px-4" : "py-4 px-6"}>Tipo</th>
+                  <th className={density === "compact" ? "py-2.5 px-4" : "py-4 px-6"}>Data Agendada</th>
+                  <th className={`${density === "compact" ? "py-2.5 px-4" : "py-4 px-6"} text-right`}>Ações</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-m3-border/30 text-[13px] font-bold">
+              <tbody className={`divide-y divide-m3-border/30 ${density === "compact" ? "text-xs" : "text-[13px]"} font-bold`}>
                 {filteredServices.length === 0 && !showArchived ? (
                   <tr>
                     <td

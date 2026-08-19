@@ -415,7 +415,10 @@ export const MainLayout: React.FC = () => {
     queryKey: ["services", "archived"],
     queryFn: async () => {
       const all = await servicesApi.getServices(true);
-      return (Array.isArray(all) ? all : []).filter((s: Service) => s.archived);
+      return (Array.isArray(all) ? all : []).map((s: Service) => ({
+        ...s,
+        archived: true,
+      }));
     },
     enabled: showArchived,
     staleTime: 1000 * 60 * 5,
@@ -424,9 +427,9 @@ export const MainLayout: React.FC = () => {
   const archivedServices = useMemo(
     () =>
       showArchived
-        ? (archivedServicesQuery.data ?? allServices.filter((s) => s.archived))
+        ? (archivedServicesQuery.data ?? [])
         : [],
-    [showArchived, archivedServicesQuery.data, allServices],
+    [showArchived, archivedServicesQuery.data],
   );
 
   const { client } = useStatsigClient();
@@ -440,28 +443,34 @@ export const MainLayout: React.FC = () => {
     }
   };
 
-  const handleSearchChange = (val: string) => {
-    setSearchQuery(val);
-    if (isSettingsView) {
-      navigate(`${slugPrefix}/folders`);
-    }
-  };
-
-  const handleSelectFolder = (id: string | null) => {
-    setCurrentFolderId(id);
+  const handleSelectFolder = (folderId: string | null) => {
+    setCurrentFolderId(folderId);
     if (!isExplorerView) {
       navigate(`${slugPrefix}/folders`);
     }
   };
 
-  const handleSortChange = (
-    sb: "title" | "artist" | "updatedAt",
-    so: "asc" | "desc",
-  ) => {
-    setSortBy(sb);
-    setSortOrder(so);
-    if (isSettingsView) {
-      navigate(`${slugPrefix}/folders`);
+  const handleSongsNavClick = () => {
+    if (location.pathname !== `${slugPrefix}/songs`) {
+      navigate(`${slugPrefix}/songs`);
+    }
+  };
+
+  const handleServicesNavClick = () => {
+    if (location.pathname !== `${slugPrefix}/services`) {
+      navigate(`${slugPrefix}/services`);
+    }
+  };
+
+  const handleSettingsNavClick = () => {
+    if (location.pathname !== `${slugPrefix}/settings`) {
+      navigate(`${slugPrefix}/settings`);
+    }
+  };
+
+  const handleTeamsNavClick = () => {
+    if (location.pathname !== `${slugPrefix}/teams`) {
+      navigate(`${slugPrefix}/teams`);
     }
   };
 
@@ -476,6 +485,24 @@ export const MainLayout: React.FC = () => {
   const [viewMode, setViewMode] = useState<"grid" | "list">(
     () => (localStorage.getItem("viewMode") as "grid" | "list") || "grid",
   );
+  const [density, setDensity] = useState<"comfortable" | "compact">(() => {
+    try {
+      return (
+        (localStorage.getItem("explorer_density") as
+          | "comfortable"
+          | "compact") || "comfortable"
+      );
+    } catch {
+      return "comfortable";
+    }
+  });
+
+  const handleDensityChange = (d: "comfortable" | "compact") => {
+    setDensity(d);
+    try {
+      localStorage.setItem("explorer_density", d);
+    } catch {}
+  };
 
   // Track page transitions to manage searchQuery persistence like a file system
   const prevPathnameRef = useRef(location.pathname);
@@ -610,6 +637,25 @@ export const MainLayout: React.FC = () => {
     "title",
   );
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+
+  const handleSearchChange = (val: string) => {
+    setSearchQuery(val);
+    if (isSettingsView) {
+      navigate(`${slugPrefix}/folders`);
+    }
+  };
+
+  const handleSortChange = (
+    sb: "title" | "artist" | "updatedAt",
+    so: "asc" | "desc",
+  ) => {
+    setSortBy(sb);
+    setSortOrder(so);
+    if (isSettingsView) {
+      navigate(`${slugPrefix}/folders`);
+    }
+  };
+
   const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
 
   // Modal States
@@ -2536,10 +2582,10 @@ export const MainLayout: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Search Filter, Sorting & View Mode Toggles */}
-                {(isExplorerView || isSongsView || isServicesView) && (
-                  <div className="flex items-center gap-3 w-full md:w-auto overflow-visible hide-scrollbar pb-1 md:pb-0">
-                    {/* Search Input */}
+                {/* Search, Notifications & Plus Action */}
+                <div className="flex items-center gap-3 w-full md:w-auto overflow-visible hide-scrollbar pb-1 md:pb-0 justify-end">
+                  {/* Search Input */}
+                  {(isExplorerView || isSongsView || isServicesView) && (
                     <div className="relative w-full sm:w-64">
                       <Input
                         placeholder={
@@ -2548,8 +2594,8 @@ export const MainLayout: React.FC = () => {
                             : isSongsView
                               ? "Pesquisar biblioteca..."
                               : currentFolder
-                                ? `Pesquisar em "${currentFolder.name}"...`
-                                : "Pesquisar ficheiros..."
+                                ? `Pesquisar pastas...`
+                                : "Pesquisar pastas..."
                         }
                         value={searchQuery}
                         onChange={(e) => handleSearchChange(e.target.value)}
@@ -2571,197 +2617,222 @@ export const MainLayout: React.FC = () => {
                         </button>
                       )}
                     </div>
+                  )}
 
-                    {(isServicesView || isExplorerView) && (
-                      <>
-                        {/* Archive Toggle Button (Services View) */}
-                        {isServicesView && (
-                          <button
-                            type="button"
-                            onClick={() => setShowArchived((v) => !v)}
-                            className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl border text-xs font-black uppercase tracking-widest transition-all cursor-pointer shrink-0 ${
-                              showArchived
-                                ? "bg-amber-500/10 border-amber-500 text-amber-600 dark:text-amber-400 shadow-lg shadow-amber-500/10"
-                                : "bg-m3-card border-m3-border text-m3-secondary hover:bg-m3-hover hover:text-m3-text hover:border-amber-500/30"
-                            }`}
-                            title={
-                              showArchived
-                                ? "Ocultar arquivados"
-                                : "Mostrar arquivados"
-                            }
-                          >
-                            <Archive className="w-4 h-4" />
-                            <span className="hidden sm:inline">Arquivados</span>
-                            {showArchived && archivedServices.length > 0 && (
-                              <span className="w-4.5 h-4.5 rounded-full bg-amber-500 text-white text-[10px] font-black flex items-center justify-center">
-                                {archivedServices.length}
-                              </span>
-                            )}
-                          </button>
-                        )}
+                  <InboxButton
+                    client={authClient as InboxFetchClient}
+                    className="shrink-0"
+                  />
 
-                        {/* Filter Pop-Up Panel Trigger Button */}
-                        {isExplorerView && (
-                          <button
-                            onClick={() => {
-                              navigateBackToDrive();
-                              setIsFilterPanelOpen(true);
-                            }}
-                            className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl border text-xs font-black uppercase tracking-widest transition-all cursor-pointer relative ${
-                              activeFiltersCount > 0
-                                ? "bg-m3-primary/10 border-m3-primary text-m3-primary shadow-lg shadow-m3-primary/10"
-                                : "bg-m3-card border-m3-border text-m3-secondary hover:bg-m3-hover hover:text-m3-text hover:border-m3-primary/30"
-                            }`}
-                            title="Abrir Filtros Avançados"
-                          >
-                            <Filter className="w-4 h-4" />
-                            <span className="hidden sm:inline">Filtros</span>
-                            {activeFiltersCount > 0 && (
-                              <span className="w-4.5 h-4.5 rounded-full bg-m3-primary text-white text-[10px] font-black flex items-center justify-center shadow-sm">
-                                {activeFiltersCount}
-                              </span>
-                            )}
-                          </button>
-                        )}
-
-                        {/* Sort Control Button */}
-                        <div className="flex items-center gap-2 bg-m3-bg border border-m3-border rounded-2xl px-3 py-2 text-xs transition-all hover:border-m3-primary/30">
-                          <ArrowUpDown className="w-4 h-4 text-m3-secondary shrink-0" />
-                          <select
-                            value={`${sortBy}-${sortOrder}`}
-                            onChange={(e) => {
-                              const [sb, so] = e.target.value.split("-") as [
-                                "title" | "artist" | "updatedAt",
-                                "asc" | "desc",
-                              ];
-                              handleSortChange(sb, so);
-                            }}
-                            className="bg-transparent font-bold text-m3-text focus:outline-none cursor-pointer text-[11px] uppercase tracking-wider"
-                            title="Organizar ficheiros"
-                          >
-                            <option value="title-asc">Nome (A-Z)</option>
-                            <option value="title-desc">Nome (Z-A)</option>
-                            {!isServicesView && (
-                              <option value="artist-asc">Artista (A-Z)</option>
-                            )}
-                            <option value="updatedAt-desc">Data Recente</option>
-                          </select>
-                        </div>
-
-                        {/* View Mode Toggle */}
-                        <div className="flex items-center p-1 bg-m3-bg rounded-2xl border border-m3-border select-none shrink-0 shadow-inner">
-                          <button
-                            onClick={() => handleViewModeChange("grid")}
-                            title="Vista em Grelha"
-                            className={`p-2 rounded-xl transition-all cursor-pointer ${
-                              viewMode === "grid"
-                                ? "bg-m3-card text-m3-primary shadow-lg shadow-black/10"
-                                : "text-m3-secondary hover:text-m3-text"
-                            }`}
-                          >
-                            <LayoutGrid className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => handleViewModeChange("list")}
-                            title="Vista em Lista"
-                            className={`p-2 rounded-xl transition-all cursor-pointer ${
-                              viewMode === "list"
-                                ? "bg-m3-card text-m3-primary shadow-lg shadow-black/10"
-                                : "text-m3-secondary hover:text-m3-text"
-                            }`}
-                          >
-                            <List className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </>
-                    )}
-
-                    <InboxButton
-                      client={authClient as InboxFetchClient}
-                      className="shrink-0"
-                    />
-
-                    <CanAny
-                      permissions={[
-                        "song.create",
-                        "folder.create",
-                        "song.import",
-                        "service.create",
-                      ]}
-                    >
-                      <div className="relative shrink-0 ml-1" ref={plusMenuRef}>
-                        <button
-                          onClick={() => setIsPlusMenuOpen(!isPlusMenuOpen)}
-                          className="w-10 h-10 rounded-2xl bg-m3-primary text-white flex items-center justify-center border border-m3-primary font-black text-lg shadow-xl shadow-m3-primary/20 hover:bg-m3-primary-dark hover:scale-105 active:scale-95 transition-all cursor-pointer"
-                          title="Criar..."
-                        >
-                          <Plus className="w-5 h-5" />
-                        </button>
-                        {isPlusMenuOpen && (
-                          <div className="absolute right-0 top-full mt-3 w-64 bg-m3-card border border-m3-border rounded-3xl shadow-2xl z-50 p-2 space-y-1 animate-in fade-in slide-in-from-top-2 duration-200">
-                            <div className="px-4 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-m3-secondary opacity-60">
-                              Criar Novo
-                            </div>
-                            <Can permission="song.create">
-                              <button
-                                onClick={() => {
-                                  setIsPlusMenuOpen(false);
-                                  setIsCreateSongModalOpen(true);
-                                }}
-                                className="w-full flex items-center gap-4 px-4 py-3 text-xs font-bold text-m3-text hover:bg-m3-hover rounded-2xl transition-all cursor-pointer text-left group"
-                              >
-                                <div className="w-8 h-8 rounded-xl bg-m3-primary/10 text-m3-primary flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-                                  <Music className="w-4 h-4" />
-                                </div>
-                                Novo Cântico
-                              </button>
-                            </Can>
-                            <Can permission="song.import">
-                              <button
-                                onClick={() => {
-                                  setIsPlusMenuOpen(false);
-                                  setIsCifraImportOpen(true);
-                                }}
-                                className="w-full flex items-center gap-4 px-4 py-3 text-xs font-bold text-m3-text hover:bg-m3-hover rounded-2xl transition-all cursor-pointer text-left group"
-                              >
-                                <div className="w-8 h-8 rounded-xl bg-m3-primary/10 text-m3-primary flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-                                  <Music className="w-4 h-4" />
-                                </div>
-                                Importar Cânticos de um outro Provedor
-                              </button>
-                            </Can>
-                            <Can permission="service.create">
-                              <button
-                                onClick={() => {
-                                  setIsPlusMenuOpen(false);
-                                  setIsCreateServiceModalOpen(true);
-                                }}
-                                className="w-full flex items-center gap-4 px-4 py-3 text-xs font-bold text-m3-text hover:bg-m3-hover rounded-2xl transition-all cursor-pointer text-left group"
-                              >
-                                <div className="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-                                  <Calendar className="w-4 h-4" />
-                                </div>
-                                Novo Plano de Culto
-                              </button>
-                            </Can>
-                            <Can permission="folder.create">
-                              <button
-                                onClick={() => {
-                                  setIsPlusMenuOpen(false);
-                                  setIsCreateModalOpen(true);
-                                }}
-                                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left cursor-pointer"
-                              >
-                                <FolderPlus className="w-4 h-4 text-amber-500" />
-                                <span>Nova Pasta</span>
-                              </button>
-                            </Can>
+                  <CanAny
+                    permissions={[
+                      "song.create",
+                      "folder.create",
+                      "song.import",
+                      "service.create",
+                    ]}
+                  >
+                    <div className="relative shrink-0 ml-1" ref={plusMenuRef}>
+                      <button
+                        onClick={() => setIsPlusMenuOpen(!isPlusMenuOpen)}
+                        className="w-10 h-10 rounded-2xl bg-m3-primary text-white flex items-center justify-center border border-m3-primary font-black text-lg shadow-xl shadow-m3-primary/20 hover:bg-m3-primary-dark hover:scale-105 active:scale-95 transition-all cursor-pointer"
+                        title="Criar..."
+                      >
+                        <Plus className="w-5 h-5" />
+                      </button>
+                      {isPlusMenuOpen && (
+                        <div className="absolute right-0 top-full mt-3 w-64 bg-m3-card border border-m3-border rounded-3xl shadow-2xl z-50 p-2 space-y-1 animate-in fade-in slide-in-from-top-2 duration-200">
+                          <div className="px-4 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-m3-secondary opacity-60">
+                            Criar Novo
                           </div>
-                        )}
-                      </div>
-                    </CanAny>
+                          <Can permission="song.create">
+                            <button
+                              onClick={() => {
+                                setIsPlusMenuOpen(false);
+                                setIsCreateSongModalOpen(true);
+                              }}
+                              className="w-full flex items-center gap-4 px-4 py-3 text-xs font-bold text-m3-text hover:bg-m3-hover rounded-2xl transition-all cursor-pointer text-left group"
+                            >
+                              <div className="w-8 h-8 rounded-xl bg-m3-primary/10 text-m3-primary flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                                <Music className="w-4 h-4" />
+                              </div>
+                              Novo Cântico
+                            </button>
+                          </Can>
+                          <Can permission="song.import">
+                            <button
+                              onClick={() => {
+                                setIsPlusMenuOpen(false);
+                                setIsCifraImportOpen(true);
+                              }}
+                              className="w-full flex items-center gap-4 px-4 py-3 text-xs font-bold text-m3-text hover:bg-m3-hover rounded-2xl transition-all cursor-pointer text-left group"
+                            >
+                              <div className="w-8 h-8 rounded-xl bg-m3-primary/10 text-m3-primary flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                                <Music className="w-4 h-4" />
+                              </div>
+                              Importar Cânticos de um outro Provedor
+                            </button>
+                          </Can>
+                          <Can permission="service.create">
+                            <button
+                              onClick={() => {
+                                setIsPlusMenuOpen(false);
+                                setIsCreateServiceModalOpen(true);
+                              }}
+                              className="w-full flex items-center gap-4 px-4 py-3 text-xs font-bold text-m3-text hover:bg-m3-hover rounded-2xl transition-all cursor-pointer text-left group"
+                            >
+                              <div className="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                                <Calendar className="w-4 h-4" />
+                              </div>
+                              Novo Plano de Culto
+                            </button>
+                          </Can>
+                          <Can permission="folder.create">
+                            <button
+                              onClick={() => {
+                                setIsPlusMenuOpen(false);
+                                setIsCreateModalOpen(true);
+                              }}
+                              className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left cursor-pointer"
+                            >
+                              <FolderPlus className="w-4 h-4 text-amber-500" />
+                              <span>Nova Pasta</span>
+                            </button>
+                          </Can>
+                        </div>
+                      )}
+                    </div>
+                  </CanAny>
+                </div>
+              </div>
+            )}
+
+            {/* Secondary Toolbar: Filters, Sorting, View Mode & Density */}
+            {(isExplorerView || isServicesView || isSongsView) && (
+              <div className="px-4 py-2.5 bg-m3-sidebar/20 border-b border-m3-border/40 flex items-center justify-between gap-3 flex-wrap">
+                {/* Left Side: Filter button, Archive button (services), Sort dropdown */}
+                <div className="flex items-center gap-2.5 flex-wrap">
+                  {/* Filter Pop-Up Panel Trigger Button */}
+                  {isExplorerView && (
+                    <button
+                      onClick={() => {
+                        navigateBackToDrive();
+                        setIsFilterPanelOpen(true);
+                      }}
+                      className={`flex items-center gap-2 px-4 py-2 rounded-2xl border text-xs font-black uppercase tracking-widest transition-all cursor-pointer relative ${
+                        activeFiltersCount > 0
+                          ? "bg-m3-primary/10 border-m3-primary text-m3-primary shadow-lg shadow-m3-primary/10"
+                          : "bg-m3-card border-m3-border text-m3-secondary hover:bg-m3-hover hover:text-m3-text hover:border-m3-primary/30"
+                      }`}
+                      title="Abrir Filtros Avançados"
+                    >
+                      <Filter className="w-4 h-4" />
+                      <span>Filtros</span>
+                      {activeFiltersCount > 0 && (
+                        <span className="w-4.5 h-4.5 rounded-full bg-m3-primary text-white text-[10px] font-black flex items-center justify-center shadow-sm">
+                          {activeFiltersCount}
+                        </span>
+                      )}
+                    </button>
+                  )}
+
+                  {/* Archive Toggle Button (Services View) */}
+                  {isServicesView && (
+                    <button
+                      type="button"
+                      onClick={() => setShowArchived((v) => !v)}
+                      className={`flex items-center gap-2 px-4 py-2 rounded-2xl border text-xs font-black uppercase tracking-widest transition-all cursor-pointer shrink-0 ${
+                        showArchived
+                          ? "bg-amber-500/10 border-amber-500 text-amber-600 dark:text-amber-400 shadow-lg shadow-amber-500/10"
+                          : "bg-m3-card border-m3-border text-m3-secondary hover:bg-m3-hover hover:text-m3-text hover:border-amber-500/30"
+                      }`}
+                      title={
+                        showArchived
+                          ? "Ocultar arquivados"
+                          : "Mostrar arquivados"
+                      }
+                    >
+                      <Archive className="w-4 h-4" />
+                      <span>Arquivados</span>
+                      {showArchived && archivedServices.length > 0 && (
+                        <span className="w-4.5 h-4.5 rounded-full bg-amber-500 text-white text-[10px] font-black flex items-center justify-center">
+                          {archivedServices.length}
+                        </span>
+                      )}
+                    </button>
+                  )}
+
+                  {/* Sort Control Button */}
+                  <div className="flex items-center gap-2 bg-m3-bg border border-m3-border rounded-2xl px-3 py-1.5 text-xs transition-all hover:border-m3-primary/30">
+                    <ArrowUpDown className="w-4 h-4 text-m3-secondary shrink-0" />
+                    <select
+                      value={`${sortBy}-${sortOrder}`}
+                      onChange={(e) => {
+                        const [sb, so] = e.target.value.split("-") as [
+                          "title" | "artist" | "updatedAt",
+                          "asc" | "desc",
+                        ];
+                        handleSortChange(sb, so);
+                      }}
+                      className="bg-transparent font-bold text-m3-text focus:outline-none cursor-pointer text-[11px] uppercase tracking-wider"
+                      title="Organizar ficheiros"
+                    >
+                      <option value="title-asc">Nome (A-Z)</option>
+                      <option value="title-desc">Nome (Z-A)</option>
+                      {!isServicesView && (
+                        <option value="artist-asc">Artista (A-Z)</option>
+                      )}
+                      <option value="updatedAt-desc">Data Recente</option>
+                    </select>
                   </div>
-                )}
+                </div>
+
+                {/* Right Side: View Mode Toggle & Density Selector */}
+                <div className="flex items-center gap-2.5">
+                  {/* View Mode Toggle */}
+                  <div className="flex items-center p-1 bg-m3-bg rounded-2xl border border-m3-border select-none shrink-0 shadow-inner">
+                    <button
+                      onClick={() => handleViewModeChange("grid")}
+                      title="Vista em Grelha"
+                      className={`p-2 rounded-xl transition-all cursor-pointer ${
+                        viewMode === "grid"
+                          ? "bg-m3-card text-m3-primary shadow-lg shadow-black/10"
+                          : "text-m3-secondary hover:text-m3-text"
+                      }`}
+                    >
+                      <LayoutGrid className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => handleViewModeChange("list")}
+                      title="Vista em Lista"
+                      className={`p-2 rounded-xl transition-all cursor-pointer ${
+                        viewMode === "list"
+                          ? "bg-m3-card text-m3-primary shadow-lg shadow-black/10"
+                          : "text-m3-secondary hover:text-m3-text"
+                      }`}
+                    >
+                      <List className="w-4 h-4" />
+                    </button>
+                  </div>
+
+                  {/* Density Selector (Confortável / Compacto) */}
+                  <div className="flex items-center gap-2 bg-m3-bg border border-m3-border rounded-2xl px-3 py-1.5 text-xs transition-all hover:border-m3-primary/30">
+                    <LayoutGrid className="w-4 h-4 text-m3-primary shrink-0" />
+                    <select
+                      value={density}
+                      onChange={(e) =>
+                        handleDensityChange(
+                          e.target.value as "comfortable" | "compact",
+                        )
+                      }
+                      className="bg-transparent font-bold text-m3-text focus:outline-none cursor-pointer text-[11px] uppercase tracking-wider"
+                      title="Densidade de visualização"
+                    >
+                      <option value="comfortable">Confortável</option>
+                      <option value="compact">Compacto</option>
+                    </select>
+                  </div>
+                </div>
               </div>
             )}
 
@@ -2772,6 +2843,8 @@ export const MainLayout: React.FC = () => {
                   filteredSubfolders,
                   filteredFiles,
                   viewMode,
+                  density,
+                  setDensity: handleDensityChange,
                   isSearchingOrFiltering,
                   currentFolder,
                   searchQuery,
