@@ -44,9 +44,13 @@ export const OverflowTagList: React.FC<OverflowTagListProps> = ({ tags }) => {
 
         // If there are more tags remaining after this one, we must also fit the +N badge
         const hasMoreAfter = i < safeTags.length - 1;
-        const totalNeededWithBadge = widthNeeded + (hasMoreAfter ? gap + badgeWidthEstimate : 0);
+        const totalNeededWithBadge =
+          widthNeeded + (hasMoreAfter ? gap + badgeWidthEstimate : 0);
 
-        if (totalNeededWithBadge <= containerWidth || (!hasMoreAfter && widthNeeded <= containerWidth)) {
+        if (
+          totalNeededWithBadge <= containerWidth ||
+          (!hasMoreAfter && widthNeeded <= containerWidth)
+        ) {
           currentWidth = widthNeeded;
           count++;
         } else {
@@ -104,4 +108,3 @@ export const OverflowTagList: React.FC<OverflowTagListProps> = ({ tags }) => {
     </div>
   );
 };
-

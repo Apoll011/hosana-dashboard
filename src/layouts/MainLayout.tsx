@@ -2534,7 +2534,11 @@ export const MainLayout: React.FC = () => {
                         handleSortChange(sb, so);
                       }}
                       className="bg-transparent font-bold text-m3-text focus:outline-none cursor-pointer text-[11px] uppercase tracking-wider"
-                      title={isServicesView ? "Organizar cultos" : "Organizar ficheiros"}
+                      title={
+                        isServicesView
+                          ? "Organizar cultos"
+                          : "Organizar ficheiros"
+                      }
                     >
                       {isServicesView ? (
                         <>

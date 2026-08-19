@@ -1,9 +1,5 @@
 import { Button, Folder, Song, Spinner } from "@hosanna/shared";
-import {
-  FolderOpen,
-  Plus,
-  Upload,
-} from "lucide-react";
+import { FolderOpen, Plus, Upload } from "lucide-react";
 import React from "react";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import { Can, CanAll } from "../lib/permissions/components";

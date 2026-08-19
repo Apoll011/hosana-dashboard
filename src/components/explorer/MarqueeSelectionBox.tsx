@@ -5,7 +5,9 @@ interface MarqueeSelectionBoxProps {
   box: SelectionBox | null;
 }
 
-export const MarqueeSelectionBox: React.FC<MarqueeSelectionBoxProps> = ({ box }) => {
+export const MarqueeSelectionBox: React.FC<MarqueeSelectionBoxProps> = ({
+  box,
+}) => {
   if (!box) return null;
 
   return (

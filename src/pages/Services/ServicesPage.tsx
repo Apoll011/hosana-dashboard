@@ -87,7 +87,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
   const effectiveSortBy: ServiceSortBy =
     contextSortBy === "title" ? "name" : "date";
   const effectiveSortOrder: SortOrder =
-    ((contextSortOrder as SortOrder) ?? "desc");
+    (contextSortOrder as SortOrder) ?? "desc";
 
   // ─── Archive toggle (from MainLayout context or local fallback) ──────────
   const showArchived = (context.showArchived as boolean) ?? false;
@@ -495,8 +495,12 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
                 service={service}
                 isSelected={selectedServiceIds.has(service.id)}
                 density={density}
-                onClick={(e) => handleServiceClick(e, service, filteredServices)}
-                onDoubleClick={() => navigate(`${slugPrefix}/services/${service.id}`)}
+                onClick={(e) =>
+                  handleServiceClick(e, service, filteredServices)
+                }
+                onDoubleClick={() =>
+                  navigate(`${slugPrefix}/services/${service.id}`)
+                }
                 onContextMenu={(e) => {
                   if (!selectedServiceIds.has(service.id)) {
                     setSelectedServiceIds(new Set([service.id]));
@@ -520,7 +524,8 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
                 </span>
                 <div className="h-px flex-1 bg-amber-500/20" />
               </div>
-              {filteredArchivedServices.length === 0 && !archivedServicesQuery.isLoading ? (
+              {filteredArchivedServices.length === 0 &&
+              !archivedServicesQuery.isLoading ? (
                 <div className="col-span-full text-center py-8 text-m3-secondary text-xs opacity-60">
                   Nenhum culto arquivado.
                 </div>
@@ -532,8 +537,12 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
                     isSelected={selectedServiceIds.has(service.id)}
                     isArchived
                     density={density}
-                    onClick={(e) => handleServiceClick(e, service, filteredArchivedServices)}
-                    onDoubleClick={() => navigate(`${slugPrefix}/services/${service.id}`)}
+                    onClick={(e) =>
+                      handleServiceClick(e, service, filteredArchivedServices)
+                    }
+                    onDoubleClick={() =>
+                      navigate(`${slugPrefix}/services/${service.id}`)
+                    }
                     onContextMenu={(e) => {
                       if (!selectedServiceIds.has(service.id)) {
                         setSelectedServiceIds(new Set([service.id]));
@@ -599,8 +608,12 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
                     service={service}
                     isSelected={selectedServiceIds.has(service.id)}
                     density={density}
-                    onClick={(e) => handleServiceClick(e, service, filteredServices)}
-                    onDoubleClick={() => navigate(`${slugPrefix}/services/${service.id}`)}
+                    onClick={(e) =>
+                      handleServiceClick(e, service, filteredServices)
+                    }
+                    onDoubleClick={() =>
+                      navigate(`${slugPrefix}/services/${service.id}`)
+                    }
                     onContextMenu={(e) => {
                       if (!selectedServiceIds.has(service.id)) {
                         setSelectedServiceIds(new Set([service.id]));
@@ -623,13 +636,19 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
                       <span className="text-[10px] font-black uppercase tracking-widest text-amber-600 dark:text-amber-400 flex items-center gap-2">
                         <Archive className="w-3.5 h-3.5" />
                         Cultos Arquivados ({filteredArchivedServices.length})
-                        {archivedServicesQuery.isLoading && <Spinner size="sm" />}
+                        {archivedServicesQuery.isLoading && (
+                          <Spinner size="sm" />
+                        )}
                       </span>
                     </td>
                   </tr>
-                  {filteredArchivedServices.length === 0 && !archivedServicesQuery.isLoading ? (
+                  {filteredArchivedServices.length === 0 &&
+                  !archivedServicesQuery.isLoading ? (
                     <tr>
-                      <td colSpan={4} className="text-center py-6 text-m3-secondary text-xs opacity-60">
+                      <td
+                        colSpan={4}
+                        className="text-center py-6 text-m3-secondary text-xs opacity-60"
+                      >
                         Nenhum culto arquivado.
                       </td>
                     </tr>
@@ -641,8 +660,16 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
                         isSelected={selectedServiceIds.has(service.id)}
                         isArchived
                         density={density}
-                        onClick={(e) => handleServiceClick(e, service, filteredArchivedServices)}
-                        onDoubleClick={() => navigate(`${slugPrefix}/services/${service.id}`)}
+                        onClick={(e) =>
+                          handleServiceClick(
+                            e,
+                            service,
+                            filteredArchivedServices,
+                          )
+                        }
+                        onDoubleClick={() =>
+                          navigate(`${slugPrefix}/services/${service.id}`)
+                        }
                         onContextMenu={(e) => {
                           if (!selectedServiceIds.has(service.id)) {
                             setSelectedServiceIds(new Set([service.id]));
