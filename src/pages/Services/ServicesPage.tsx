@@ -8,11 +8,7 @@ import {
   servicesApi,
   Spinner,
 } from "@hosanna/shared";
-import {
-  useQuery,
-  useQueryClient,
-  UseQueryResult,
-} from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   Archive,
   ArchiveRestore,
@@ -85,24 +81,11 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
   const showArchived = (context.showArchived as boolean) ?? false;
 
   // Fetch archived services (fallback if context doesn't provide)
-  const localArchivedServicesQuery = useQuery({
-    queryKey: ["services", "archived"],
-    queryFn: async () => {
-      const all = await servicesApi.getServices(true);
-      return (Array.isArray(all) ? all : []).map((s: Service) => ({
-        ...s,
-        archived: true,
-      }));
-    },
-    enabled: showArchived && !context.archivedServicesQuery,
-    staleTime: 1000 * 60 * 5,
-  });
+  const { servicesQuery: localArchivedServicesQuery } = useServices(true);
 
   const archivedServicesQuery =
-    (context.archivedServicesQuery as UseQueryResult<
-      NoInfer<Service[]>,
-      Error
-    >) ?? localArchivedServicesQuery;
+    (context.archivedServicesQuery as typeof localArchivedServicesQuery) ??
+    localArchivedServicesQuery;
 
   const { value: emptyStateAction } = usePermissionValue(
     "service.create",

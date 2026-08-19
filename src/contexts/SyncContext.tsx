@@ -3,8 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { syncApi } from "@hosanna/shared";
-import { useQueryClient } from "@tanstack/react-query";
 import React, {
   createContext,
   useCallback,
@@ -15,6 +13,7 @@ import React, {
 } from "react";
 import { SyncStatus } from "../types";
 import { useAuth } from "./AuthContext";
+import { getDatabase, setupReplication, ReplicationManager } from "../db";
 
 export interface ToastMessage {
   id: string;
@@ -37,12 +36,10 @@ const SyncContext = createContext<SyncContextType | undefined>(undefined);
 export const SyncProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const queryClient = useQueryClient();
   const [syncStatus, setSyncStatus] = useState<SyncStatus>("synced");
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
   const [lastSyncedAt, setLastSyncedAt] = useState<Date | null>(null);
-
-  const lastTimestampsRef = useRef<Record<string, string>>({});
+  const replicationManagerRef = useRef<ReplicationManager | null>(null);
 
   const removeToast = useCallback((id: string) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
@@ -60,63 +57,50 @@ export const SyncProvider: React.FC<{ children: React.ReactNode }> = ({
     [removeToast],
   );
 
-  const triggerSyncCheck = useCallback(async () => {
-    try {
-      setSyncStatus("syncing");
-      const data = await syncApi.getStatus();
-      setLastSyncedAt(new Date(data.timestamp));
-
-      const prev = lastTimestampsRef.current;
-      const curr = data.timestamps;
-
-      if (Object.keys(prev).length > 0) {
-        if (curr.songs && curr.songs !== prev.songs) {
-          queryClient.invalidateQueries({ queryKey: ["songs"] });
-        }
-        if (curr.folders && curr.folders !== prev.folders) {
-          queryClient.invalidateQueries({ queryKey: ["folders"] });
-        }
-        if (curr.services && curr.services !== prev.services) {
-          queryClient.invalidateQueries({ queryKey: ["services"] });
-        }
-      }
-
-      lastTimestampsRef.current = curr;
-      setSyncStatus("synced");
-    } catch {
-      // Endpoint may not be present or network temporary error
-      setSyncStatus("synced");
-    }
-  }, [queryClient]);
-
   const { isAuthenticated } = useAuth();
-  const isAuthenticatedRef = useRef(isAuthenticated);
 
+  // Initialise database and replication on start
   useEffect(() => {
-    isAuthenticatedRef.current = isAuthenticated;
-  }, [isAuthenticated]);
+    let sub: { unsubscribe: () => void } | null = null;
+    let isMounted = true;
 
-  // Periodic lightweight poll for background changes
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (isAuthenticatedRef.current) {
-        void triggerSyncCheck();
+    async function initDbAndSync() {
+      try {
+        const db = await getDatabase();
+        if (!isMounted) return;
+
+        const repl = setupReplication(db);
+        replicationManagerRef.current = repl;
+
+        sub = repl.status$.subscribe((st) => {
+          setSyncStatus(st);
+          if (st === "synced") {
+            setLastSyncedAt(new Date());
+          }
+        });
+
+        if (isAuthenticated) {
+          repl.start();
+        }
+      } catch (err) {
+        console.error("Failed to initialize RxDB / Replication:", err);
+        setSyncStatus("error");
       }
-    }, 15000); // 15 seconds poll for fast & lightweight sync check
+    }
 
-    const handleFocus = () => {
-      if (isAuthenticatedRef.current) {
-        void triggerSyncCheck();
-      }
-    };
-
-    window.addEventListener("focus", handleFocus);
+    void initDbAndSync();
 
     return () => {
-      clearInterval(interval);
-      window.removeEventListener("focus", handleFocus);
+      isMounted = false;
+      if (sub) sub.unsubscribe();
     };
-  }, [triggerSyncCheck]);
+  }, [isAuthenticated]);
+
+  const triggerSyncCheck = useCallback(async () => {
+    if (replicationManagerRef.current) {
+      await replicationManagerRef.current.replicateNow();
+    }
+  }, []);
 
   return (
     <SyncContext.Provider
