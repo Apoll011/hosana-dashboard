@@ -3,126 +3,254 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Service, ServiceElement, servicesApi } from "@hosanna/shared";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState, useEffect, useCallback } from "react";
+import { Service, ServiceElement } from "@hosanna/shared";
 import { useSync } from "../contexts/SyncContext";
+import { getDatabase, ServiceDocType } from "../db";
 
-export function useServices() {
+export function useServices(includeArchived: boolean = false) {
   const { showToast } = useSync();
-  const queryClient = useQueryClient();
+  const [services, setServices] = useState<Service[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isCreating, setIsCreating] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
-  const servicesQuery = useQuery({
-    queryKey: ["services"],
-    queryFn: () => servicesApi.getServices(),
-  });
+  useEffect(() => {
+    let isSubscribed = true;
+    let rxSub: { unsubscribe: () => void } | null = null;
 
-  const createServiceMutation = useMutation({
-    mutationFn: (data: Partial<Service>) => servicesApi.createService(data),
-    onSuccess: (newService) => {
-      queryClient.invalidateQueries({ queryKey: ["services"] });
-      showToast(`Service "${newService.name}" created`, "success");
-    },
-    onError: (err: Error) => {
-      showToast(err.message || "Failed to create service", "error");
-    },
-  });
+    async function subscribeServices() {
+      try {
+        const db = await getDatabase();
+        if (!isSubscribed) return;
 
-  const updateServiceMutation = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Partial<Service> }) =>
-      servicesApi.updateService(id, data),
-    onMutate: async ({ id, data }) => {
-      await queryClient.cancelQueries({ queryKey: ["service", id] });
-      const previousService = queryClient.getQueryData(["service", id]);
-      queryClient.setQueryData(["service", id], (old: Service | undefined) => ({
-        ...old,
-        ...data,
-      }));
-      return { previousService };
-    },
-    onError: (err: Error, variables, context) => {
-      if (context?.previousService) {
-        queryClient.setQueryData(
-          ["service", variables.id],
-          context.previousService,
-        );
+        const selector: any = {
+          _deleted: { $ne: true },
+        };
+
+        if (!includeArchived) {
+          selector.archived = { $ne: true };
+        }
+
+        rxSub = db.services
+          .find({
+            selector,
+          })
+          .$.subscribe((docs) => {
+            if (!isSubscribed) return;
+            setServices(docs.map((d) => d.toJSON() as Service));
+            setIsLoading(false);
+          });
+      } catch (err) {
+        console.error("Failed to query services from RxDB", err);
+        setIsLoading(false);
       }
-      showToast(err.message || "Failed to update service", "error");
-    },
-    onSettled: (data, error, variables) => {
-      queryClient.invalidateQueries({ queryKey: ["service", variables.id] });
-      queryClient.invalidateQueries({ queryKey: ["services"] });
-      queryClient.invalidateQueries({ queryKey: ["services", "archived"] });
-    },
-  });
+    }
 
-  const deleteServiceMutation = useMutation({
-    mutationFn: (id: string) => servicesApi.deleteService(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["services"] });
-      queryClient.invalidateQueries({ queryKey: ["services", "archived"] });
-      showToast("Service deleted", "info");
-    },
-    onError: (err: Error) => {
-      showToast(err.message || "Failed to delete service", "error");
-    },
-  });
+    void subscribeServices();
 
-  const updateElementsMutation = useMutation({
-    mutationFn: ({
+    return () => {
+      isSubscribed = false;
+      if (rxSub) rxSub.unsubscribe();
+    };
+  }, [includeArchived]);
+
+  const createService = useCallback(
+    async (data: Partial<Service>) => {
+      setIsCreating(true);
+      try {
+        const db = await getDatabase();
+        const now = new Date().toISOString();
+        const newService: ServiceDocType = {
+          id: data.id || crypto.randomUUID(),
+          name: data.name || "Sem nome",
+          date: data.date || now,
+          notes: data.notes ?? null,
+          elements: data.elements || [],
+          archived: !!data.archived,
+          createdAt: data.createdAt || now,
+          updatedAt: now,
+          _deleted: false,
+        };
+
+        const doc = await db.services.insert(newService);
+        const result = doc.toJSON() as Service;
+        showToast(`Service "${result.name}" created`, "success");
+        return result;
+      } catch (err: any) {
+        showToast(err.message || "Failed to create service", "error");
+        throw err;
+      } finally {
+        setIsCreating(false);
+      }
+    },
+    [showToast]
+  );
+
+  const updateService = useCallback(
+    async ({ id, data }: { id: string; data: Partial<Service> }) => {
+      setIsUpdating(true);
+      try {
+        const db = await getDatabase();
+        const doc = await db.services.findOne(id).exec();
+        const now = new Date().toISOString();
+
+        if (doc) {
+          await doc.patch({
+            ...data,
+            updatedAt: now,
+            _deleted: false,
+          });
+          const updated = doc.toJSON() as Service;
+          showToast(`Service updated`, "success");
+          return updated;
+        } else {
+          const newDoc = await db.services.upsert({
+            id,
+            name: data.name || "Sem nome",
+            date: data.date || now,
+            notes: data.notes ?? null,
+            elements: data.elements || [],
+            archived: !!data.archived,
+            createdAt: data.createdAt || now,
+            updatedAt: now,
+            _deleted: false,
+            ...data,
+          });
+          const result = newDoc.toJSON() as Service;
+          showToast(`Service updated`, "success");
+          return result;
+        }
+      } catch (err: any) {
+        showToast(err.message || "Failed to update service", "error");
+        throw err;
+      } finally {
+        setIsUpdating(false);
+      }
+    },
+    [showToast]
+  );
+
+  const deleteService = useCallback(
+    async (id: string) => {
+      setIsDeleting(true);
+      try {
+        const db = await getDatabase();
+        const doc = await db.services.findOne(id).exec();
+        if (doc) {
+          await doc.patch({
+            _deleted: true,
+            updatedAt: new Date().toISOString(),
+          });
+        }
+        showToast("Service deleted", "info");
+      } catch (err: any) {
+        showToast(err.message || "Failed to delete service", "error");
+        throw err;
+      } finally {
+        setIsDeleting(false);
+      }
+    },
+    [showToast]
+  );
+
+  const updateElements = useCallback(
+    async ({
       serviceId,
       data,
     }: {
       serviceId: string;
-      data: { elements: ServiceElement[]; updatedAt: string };
-    }) => servicesApi.updateServiceElements(serviceId, data),
-    onMutate: async ({ serviceId, data }) => {
-      await queryClient.cancelQueries({ queryKey: ["service", serviceId] });
-      const previousService = queryClient.getQueryData(["service", serviceId]);
-      queryClient.setQueryData(
-        ["service", serviceId],
-        (old: Service | undefined) =>
-          old
-            ? {
-                ...old,
-                elements: data.elements as Service["elements"],
-              }
-            : old,
-      );
-      return { previousService };
-    },
-    onError: (err: Error, variables, context) => {
-      if (context?.previousService) {
-        queryClient.setQueryData(
-          ["service", variables.serviceId],
-          context.previousService,
-        );
+      data: { elements: ServiceElement[]; updatedAt?: string };
+    }) => {
+      setIsUpdating(true);
+      try {
+        const db = await getDatabase();
+        const doc = await db.services.findOne(serviceId).exec();
+        const now = new Date().toISOString();
+        if (doc) {
+          await doc.patch({
+            elements: data.elements,
+            updatedAt: now,
+          });
+        }
+      } catch (err: any) {
+        showToast(err.message || "Failed to update elements", "error");
+        throw err;
+      } finally {
+        setIsUpdating(false);
       }
-      showToast(err.message || "Failed to update elements", "error");
     },
-    onSettled: (data, error, variables) => {
-      queryClient.invalidateQueries({
-        queryKey: ["service", variables.serviceId],
-      });
-      queryClient.invalidateQueries({ queryKey: ["services"] });
-    },
-  });
+    [showToast]
+  );
 
   return {
-    servicesQuery,
-    createService: createServiceMutation.mutateAsync,
-    updateService: updateServiceMutation.mutateAsync,
-    deleteService: deleteServiceMutation.mutateAsync,
-    updateElements: updateElementsMutation.mutateAsync,
-    isCreating: createServiceMutation.isPending,
-    isUpdating: updateServiceMutation.isPending,
-    isDeleting: deleteServiceMutation.isPending,
+    servicesQuery: {
+      data: services,
+      isLoading,
+      isPending: isLoading,
+      isError: false,
+      error: null,
+      refetch: async () => {},
+    },
+    createService,
+    updateService,
+    deleteService,
+    updateElements,
+    isCreating,
+    isUpdating,
+    isDeleting,
   };
 }
 
 export function useService(id: string | null) {
-  return useQuery({
-    queryKey: ["service", id],
-    queryFn: () => (id ? servicesApi.getServiceById(id) : null),
-    enabled: !!id,
-  });
+  const [service, setService] = useState<Service | null>(null);
+  const [isLoading, setIsLoading] = useState(!!id);
+
+  useEffect(() => {
+    if (!id) {
+      setService(null);
+      setIsLoading(false);
+      return;
+    }
+
+    let isSubscribed = true;
+    let rxSub: { unsubscribe: () => void } | null = null;
+
+    async function subscribeService() {
+      try {
+        const db = await getDatabase();
+        if (!isSubscribed) return;
+
+        rxSub = db.services.findOne(id).$.subscribe((doc) => {
+          if (!isSubscribed) return;
+          if (doc && !doc._deleted) {
+            setService(doc.toJSON() as Service);
+          } else {
+            setService(null);
+          }
+          setIsLoading(false);
+        });
+      } catch (err) {
+        console.error("Failed to query service by id from RxDB", err);
+        setIsLoading(false);
+      }
+    }
+
+    void subscribeService();
+
+    return () => {
+      isSubscribed = false;
+      if (rxSub) rxSub.unsubscribe();
+    };
+  }, [id]);
+
+  return {
+    data: service,
+    isLoading,
+    isPending: isLoading,
+    isError: false,
+    error: null,
+    refetch: async () => {},
+  };
 }
