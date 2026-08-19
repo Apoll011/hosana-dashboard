@@ -21,7 +21,6 @@ import {
   ArrowUpDown,
   Calendar,
   CheckSquare,
-  ChevronDown,
   ChevronLeft,
   ChevronRight,
   Church,
@@ -39,7 +38,6 @@ import {
   List,
   LogOut,
   Menu,
-  MoreVertical,
   Move,
   Music,
   Plus,
@@ -80,6 +78,12 @@ import { ConversionResult } from "@hosanna/shared";
 import { useStatsigClient } from "@statsig/react-bindings";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Action, KBarProvider } from "kbar";
+import {
+  buildFolderTree,
+  FolderTreeItemNode,
+  getFolderDescendantIds,
+  MoveFolderTreeItem,
+} from "../components/explorer";
 import { ServiceForm } from "../components/forms/ServiceForm";
 import { KBarCommandPaletteUI } from "../components/KBarCommandPalette";
 import { CifraClubImportModal } from "../components/modals/CifraModal";
@@ -88,12 +92,6 @@ import { songImportRegistry } from "../import";
 import { Can, CanAll, CanAny } from "../lib/permissions/components";
 import { getInitials } from "../utils";
 import { ProviderImportResult } from "../utils/import";
-import {
-  FolderTreeItemNode,
-  MoveFolderTreeItem,
-  buildFolderTree,
-  getFolderDescendantIds,
-} from "../components/explorer";
 
 interface ContextMenuState {
   x: number;
@@ -207,30 +205,6 @@ export const MainLayout: React.FC = () => {
     setCurrentFolderId(folderId);
     if (!isExplorerView) {
       navigate(`${slugPrefix}/folders`);
-    }
-  };
-
-  const handleSongsNavClick = () => {
-    if (location.pathname !== `${slugPrefix}/songs`) {
-      navigate(`${slugPrefix}/songs`);
-    }
-  };
-
-  const handleServicesNavClick = () => {
-    if (location.pathname !== `${slugPrefix}/services`) {
-      navigate(`${slugPrefix}/services`);
-    }
-  };
-
-  const handleSettingsNavClick = () => {
-    if (location.pathname !== `${slugPrefix}/settings`) {
-      navigate(`${slugPrefix}/settings`);
-    }
-  };
-
-  const handleTeamsNavClick = () => {
-    if (location.pathname !== `${slugPrefix}/teams`) {
-      navigate(`${slugPrefix}/teams`);
     }
   };
 
