@@ -425,10 +425,7 @@ export const MainLayout: React.FC = () => {
   });
 
   const archivedServices = useMemo(
-    () =>
-      showArchived
-        ? (archivedServicesQuery.data ?? [])
-        : [],
+    () => (showArchived ? (archivedServicesQuery.data ?? []) : []),
     [showArchived, archivedServicesQuery.data],
   );
 
@@ -489,8 +486,7 @@ export const MainLayout: React.FC = () => {
     try {
       return (
         (localStorage.getItem("explorer_density") as
-          | "comfortable"
-          | "compact") || "comfortable"
+          "comfortable" | "compact") || "comfortable"
       );
     } catch {
       return "comfortable";
