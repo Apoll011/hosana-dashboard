@@ -375,12 +375,12 @@ const FolderTableRow: React.FC<FolderTableRowProps> = ({
             : "hover:bg-m3-hover/50 text-m3-text"
       } ${showDisabledDuringDrag ? "opacity-40 cursor-not-allowed" : ""}`}
     >
-      <td className={cellPadding}>
-        <div className="flex items-center gap-3 group-hover:translate-x-1 transition-transform">
+      <td className={`${cellPadding} max-w-xs sm:max-w-md`}>
+        <div className="flex items-center gap-3 group-hover:translate-x-1 transition-transform min-w-0">
           <FolderIcon
-            className={`${isCompact ? "w-4 h-4" : "w-5 h-5"} text-m3-primary opacity-80`}
+            className={`${isCompact ? "w-4 h-4" : "w-5 h-5"} text-m3-primary opacity-80 shrink-0`}
           />
-          <span>{folder.name}</span>
+          <span className="truncate">{folder.name}</span>
         </div>
       </td>
       <td className={`${cellPadding} text-m3-secondary opacity-70`}>Pasta</td>
@@ -469,12 +469,12 @@ const SongTableRow: React.FC<SongTableRowProps> = ({
           : "hover:bg-m3-hover/50 text-m3-text"
       }`}
     >
-      <td className={cellPadding}>
-        <div className="flex items-center gap-3 group-hover:translate-x-1 transition-transform">
+      <td className={`${cellPadding} max-w-xs sm:max-w-md`}>
+        <div className="flex items-center gap-3 group-hover:translate-x-1 transition-transform min-w-0">
           <FileText
-            className={`${isCompact ? "w-4 h-4" : "w-5 h-5"} text-m3-primary opacity-80`}
+            className={`${isCompact ? "w-4 h-4" : "w-5 h-5"} text-m3-primary opacity-80 shrink-0`}
           />
-          <span>{song.title}</span>
+          <span className="truncate">{song.title}</span>
         </div>
       </td>
       <td className={`${cellPadding} text-m3-secondary opacity-70`}>Cifra</td>

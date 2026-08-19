@@ -125,6 +125,9 @@ export const SongsPage: React.FC<SongsPageProps> = ({
     undefined,
   );
 
+  const [jumpPageInput, setJumpPageInput] = useState("");
+  const [itemsPerPage, setItemsPerPage] = useState<number>(50);
+
   // Reset page when filters change
   React.useEffect(() => {
     setPage(1);
@@ -136,9 +139,8 @@ export const SongsPage: React.FC<SongsPageProps> = ({
     actualSelectedTag,
     actualSearchFields,
     selectedFolder,
+    itemsPerPage,
   ]);
-
-  const ITEMS_PER_PAGE = 50;
 
   // Fetch the full cached song list — no per-page API calls
   const { songsQuery, createSong, deleteSong, moveSong } = useAllSongs();
@@ -231,11 +233,20 @@ export const SongsPage: React.FC<SongsPageProps> = ({
   ]);
 
   const totalSongs = filteredSongs.length;
-  const totalPages = Math.max(1, Math.ceil(totalSongs / ITEMS_PER_PAGE));
-  const songsData = filteredSongs.slice(
-    (page - 1) * ITEMS_PER_PAGE,
-    page * ITEMS_PER_PAGE,
-  );
+  const effectivePerPage = itemsPerPage === 0 ? Math.max(1, totalSongs) : itemsPerPage;
+  const totalPages = Math.max(1, Math.ceil(totalSongs / effectivePerPage));
+  const songsData = itemsPerPage === 0
+    ? filteredSongs
+    : filteredSongs.slice((page - 1) * effectivePerPage, page * effectivePerPage);
+
+  const handleJumpPage = (e: React.FormEvent) => {
+    e.preventDefault();
+    const targetPage = parseInt(jumpPageInput, 10);
+    if (!isNaN(targetPage) && targetPage >= 1 && targetPage <= totalPages) {
+      setPage(targetPage);
+      setJumpPageInput("");
+    }
+  };
 
   const handleCreateSongSubmit = React.useCallback(
     async (data: {
@@ -278,7 +289,7 @@ export const SongsPage: React.FC<SongsPageProps> = ({
               Biblioteca de Cânticos
             </h1>
             <p className="text-sm text-m3-secondary font-bold uppercase tracking-widest mt-2 ml-16 opacity-60">
-              Gerencie a sua coleção de cifras e pautas
+              Gerencie a sua coleção de cifras e pautas ({totalSongs} {totalSongs === 1 ? "cântico" : "cânticos"})
             </p>
           </div>
 
@@ -320,7 +331,7 @@ export const SongsPage: React.FC<SongsPageProps> = ({
             />
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             {/* Folder Filter */}
             <div className="flex items-center gap-2 bg-m3-card border border-m3-border rounded-xl px-3 py-2 text-xs shadow-sm">
               <Filter className="w-3.5 h-3.5 text-m3-primary opacity-70" />
@@ -342,6 +353,7 @@ export const SongsPage: React.FC<SongsPageProps> = ({
               </select>
             </div>
 
+            {/* Sort Filter */}
             <div className="flex items-center gap-2 bg-m3-card border border-m3-border rounded-xl px-3 py-2 text-xs shadow-sm">
               <ArrowUpDown className="w-3.5 h-3.5 text-m3-primary opacity-70" />
               <select
@@ -414,18 +426,18 @@ export const SongsPage: React.FC<SongsPageProps> = ({
                       className="hover:bg-m3-hover/50 transition-all group cursor-pointer"
                       onClick={() => navigate(`${slugPrefix}/songs/${song.id}`)}
                     >
-                      <td className="py-4 px-6">
-                        <div className="flex flex-col group-hover:translate-x-1 transition-transform">
-                          <span className="text-m3-text group-hover:text-m3-primary transition-colors">
+                      <td className="py-4 px-6 max-w-xs sm:max-w-md">
+                        <div className="flex flex-col group-hover:translate-x-1 transition-transform min-w-0">
+                          <span className="text-m3-text group-hover:text-m3-primary transition-colors truncate">
                             {song.title}
                           </span>
-                          <span className="text-[10px] text-m3-secondary font-black uppercase tracking-widest opacity-60 mt-0.5">
+                          <span className="text-[10px] text-m3-secondary font-black uppercase tracking-widest opacity-60 mt-0.5 truncate">
                             {song.path.split("/")[0]}/
                           </span>
                         </div>
                       </td>
 
-                      <td className="py-4 px-6 text-m3-secondary">
+                      <td className="py-4 px-6 text-m3-secondary max-w-[180px] truncate">
                         {song.artist || "—"}
                       </td>
 
@@ -439,11 +451,11 @@ export const SongsPage: React.FC<SongsPageProps> = ({
                         )}
                       </td>
 
-                      <td className="py-4 px-6 min-w-50">
+                      <td className="py-4 px-6 max-w-64">
                         <OverflowTagList tags={song.tags} />
                       </td>
 
-                      <td className="py-4 px-6 text-[11px] text-m3-secondary opacity-70 font-black uppercase tracking-tighter">
+                      <td className="py-4 px-6 text-[11px] text-m3-secondary opacity-70 font-black uppercase tracking-tighter whitespace-nowrap">
                         {new Date(song.updatedAt).toLocaleDateString("pt-PT")}
                       </td>
 
@@ -491,14 +503,86 @@ export const SongsPage: React.FC<SongsPageProps> = ({
           </div>
         )}
 
-        <div className="p-4 bg-m3-sidebar/20 border-t border-m3-border/50">
-          <Pagination
-            page={page}
-            totalPages={totalPages}
-            onPageChange={(p) => setPage(p)}
-            total={totalSongs}
-            limit={ITEMS_PER_PAGE}
-          />
+        {/* Enhanced Pagination Bar with Jump to Page & Items Per Page Controls */}
+        <div className="p-4 bg-m3-sidebar/20 border-t border-m3-border/50 flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-4 w-full md:w-auto justify-between md:justify-start">
+            <div className="text-xs text-m3-secondary font-medium">
+              A mostrar{" "}
+              <strong className="font-bold text-m3-text">
+                {totalSongs === 0
+                  ? 0
+                  : itemsPerPage === 0
+                    ? 1
+                    : (page - 1) * effectivePerPage + 1}
+              </strong>{" "}
+              a{" "}
+              <strong className="font-bold text-m3-text">
+                {itemsPerPage === 0
+                  ? totalSongs
+                  : Math.min(page * effectivePerPage, totalSongs)}
+              </strong>{" "}
+              de <strong className="font-bold text-m3-text">{totalSongs}</strong> cânticos
+            </div>
+
+            {/* Items Per Page Selector */}
+            <div className="flex items-center gap-1.5 bg-m3-card border border-m3-border rounded-xl px-2.5 py-1 text-xs shadow-xs">
+              <span className="text-[10px] text-m3-secondary font-bold uppercase tracking-wider">
+                Exibir:
+              </span>
+              <select
+                value={itemsPerPage}
+                onChange={(e) => {
+                  setItemsPerPage(Number(e.target.value));
+                  setPage(1);
+                }}
+                className="bg-transparent font-black text-m3-text focus:outline-none cursor-pointer text-xs"
+              >
+                <option value={25}>25</option>
+                <option value={50}>50</option>
+                <option value={100}>100</option>
+                <option value={0}>Todos ({totalSongs})</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3 w-full md:w-auto justify-between md:justify-end">
+            {/* Jump to page form */}
+            {totalPages > 1 && (
+              <form
+                onSubmit={handleJumpPage}
+                className="flex items-center gap-1.5 bg-m3-card border border-m3-border rounded-xl px-2.5 py-1 text-xs shadow-xs"
+              >
+                <span className="text-[10px] text-m3-secondary font-bold uppercase tracking-wider">
+                  Ir para:
+                </span>
+                <input
+                  type="number"
+                  min={1}
+                  max={totalPages}
+                  placeholder={String(page)}
+                  value={jumpPageInput}
+                  onChange={(e) => setJumpPageInput(e.target.value)}
+                  className="w-10 bg-transparent text-center font-black text-m3-text focus:outline-none border-b border-m3-border focus:border-m3-primary text-xs"
+                />
+                <button
+                  type="submit"
+                  disabled={!jumpPageInput || parseInt(jumpPageInput, 10) < 1 || parseInt(jumpPageInput, 10) > totalPages}
+                  className="text-[10px] font-black uppercase text-m3-primary hover:underline disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+                >
+                  OK
+                </button>
+              </form>
+            )}
+
+            {/* Pagination Controls */}
+            <Pagination
+              page={page}
+              totalPages={totalPages}
+              onPageChange={(p) => setPage(p)}
+              total={totalSongs}
+              limit={effectivePerPage}
+            />
+          </div>
         </div>
       </div>
 
