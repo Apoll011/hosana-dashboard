@@ -60,7 +60,7 @@ export const songSchema: RxJsonSchema<SongDocType> = {
     },
   },
   required: ["id", "title", "updatedAt"],
-  indexes: ["updatedAt", "folderId"],
+  indexes: ["updatedAt"],
 };
 
 export interface FolderDocType {
@@ -100,7 +100,7 @@ export const folderSchema: RxJsonSchema<FolderDocType> = {
     },
   },
   required: ["id", "name", "updatedAt"],
-  indexes: ["updatedAt", "parentId"],
+  indexes: ["updatedAt"],
 };
 
 export interface ServiceDocType {

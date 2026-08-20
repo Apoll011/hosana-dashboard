@@ -3,6 +3,7 @@ import { RxDBDevModePlugin } from "rxdb/plugins/dev-mode";
 import { RxDBQueryBuilderPlugin } from "rxdb/plugins/query-builder";
 import { getRxStorageDexie } from "rxdb/plugins/storage-dexie";
 import { RxDBUpdatePlugin } from "rxdb/plugins/update";
+import { wrappedValidateAjvStorage } from "rxdb/plugins/validate-ajv";
 import {
   FolderDocType,
   folderSchema,
@@ -34,7 +35,9 @@ export async function getDatabase(): Promise<HosanaDatabase> {
     dbPromise = (async () => {
       const db = await createRxDatabase<HosanaDatabaseCollections>({
         name: "hosanadb",
-        storage: getRxStorageDexie(),
+        storage: wrappedValidateAjvStorage({
+          storage: getRxStorageDexie(),
+        }),
       });
 
       await db.addCollections({
