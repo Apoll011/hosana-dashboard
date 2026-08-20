@@ -1,4 +1,5 @@
 import { configureApiClient, Spinner } from "@hosanna/shared";
+import { preloadEditor } from "@hosanna/shared/editor";
 import { StatsigProvider, useClientAsyncInit } from "@statsig/react-bindings";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Analytics } from "@vercel/analytics/react";
@@ -60,6 +61,21 @@ export default function App() {
       import.meta.env.VITE_API_URL ||
       "/api",
   );
+
+  useEffect(() => {
+    // Preload Ace editor during idle time so first song click opens editor instantly
+    if (typeof window !== "undefined") {
+      if ("requestIdleCallback" in window) {
+        (window as any).requestIdleCallback(() => {
+          void preloadEditor();
+        });
+      } else {
+        setTimeout(() => {
+          void preloadEditor();
+        }, 1500);
+      }
+    }
+  }, []);
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
