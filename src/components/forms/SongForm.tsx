@@ -3,20 +3,40 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { zodResolver } from "@hookform/resolvers/zod";
 import { Button, Folder, Input } from "@hosanna/shared";
 import React from "react";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
+import { Resolver, useForm } from "react-hook-form";
 
-const songSchema = z.object({
-  title: z.string().min(1, "O título do cântico é obrigatório"),
-  artist: z.string().min(1, "O nome do artista é obrigatório"),
-  folderId: z.string().optional(),
-  tags: z.string().optional(),
-});
+interface SongFormData {
+  title: string;
+  artist: string;
+  folderId?: string;
+  tags?: string;
+}
 
-type SongFormData = z.infer<typeof songSchema>;
+// Custom resolver logic handling required field validations
+const customSongResolver: Resolver<SongFormData> = async (values) => {
+  const errors: Record<string, any> = {};
+
+  if (!values.title?.trim()) {
+    errors.title = {
+      type: "required",
+      message: "O título do cântico é obrigatório",
+    };
+  }
+
+  if (!values.artist?.trim()) {
+    errors.artist = {
+      type: "required",
+      message: "O nome do artista é obrigatório",
+    };
+  }
+
+  return {
+    values: Object.keys(errors).length === 0 ? values : {},
+    errors,
+  };
+};
 
 interface SongFormProps {
   initialValues?: {
@@ -48,7 +68,7 @@ export const SongForm: React.FC<SongFormProps> = ({
     handleSubmit,
     formState: { errors },
   } = useForm<SongFormData>({
-    resolver: zodResolver(songSchema),
+    resolver: customSongResolver,
     defaultValues: {
       title: initialValues?.title || "",
       artist: initialValues?.artist || "Unknown Artist",

@@ -3,19 +3,39 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { zodResolver } from "@hookform/resolvers/zod";
 import { Button, Input } from "@hosanna/shared";
 import React from "react";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
+import { Resolver, useForm } from "react-hook-form";
 
-const serviceSchema = z.object({
-  name: z.string().min(1, "O título do culto é obrigatório"),
-  date: z.string().min(1, "A data do culto é obrigatória"),
-  notes: z.string().optional(),
-});
+interface ServiceFormData {
+  name: string;
+  date: string;
+  notes?: string;
+}
 
-type ServiceFormData = z.infer<typeof serviceSchema>;
+// Custom resolver implementing required field validation for name and date
+const customServiceResolver: Resolver<ServiceFormData> = async (values) => {
+  const errors: Record<string, any> = {};
+
+  if (!values.name?.trim()) {
+    errors.name = {
+      type: "required",
+      message: "O título do culto é obrigatório",
+    };
+  }
+
+  if (!values.date?.trim()) {
+    errors.date = {
+      type: "required",
+      message: "A data do culto é obrigatória",
+    };
+  }
+
+  return {
+    values: Object.keys(errors).length === 0 ? values : {},
+    errors,
+  };
+};
 
 interface ServiceFormProps {
   initialValues?: {
@@ -43,7 +63,7 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
     handleSubmit,
     formState: { errors },
   } = useForm<ServiceFormData>({
-    resolver: zodResolver(serviceSchema),
+    resolver: customServiceResolver,
     defaultValues: {
       name: initialValues?.name || "",
       date: initialValues?.date

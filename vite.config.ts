@@ -1,5 +1,5 @@
+import preact from "@preact/preset-vite";
 import tailwindcss from "@tailwindcss/vite";
-import react from "@vitejs/plugin-react";
 import path from "path";
 import { defineConfig } from "vite";
 import { VitePWA } from "vite-plugin-pwa";
@@ -7,7 +7,7 @@ import { VitePWA } from "vite-plugin-pwa";
 export default defineConfig(() => {
   return {
     plugins: [
-      react(),
+      preact(),
       tailwindcss(),
       VitePWA({
         registerType: "prompt",
@@ -63,6 +63,9 @@ export default defineConfig(() => {
     resolve: {
       alias: {
         "@": path.resolve(__dirname, "."),
+        react: "preact/compat",
+        "react-dom": "preact/compat",
+        "react-dom/client": "preact/compat",
       },
     },
     build: {
