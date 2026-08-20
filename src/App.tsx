@@ -1,4 +1,5 @@
 import { configureApiClient, Spinner } from "@hosanna/shared";
+import { preloadEditor } from "@hosanna/shared/editor";
 import { StatsigProvider, useClientAsyncInit } from "@statsig/react-bindings";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Analytics } from "@vercel/analytics/react";
@@ -17,23 +18,42 @@ function StatsigWrapper({ children }: { children: React.ReactNode }) {
 
   const { client } = useClientAsyncInit(
     "client-4459XEXCHZyP192QOlIwzRAffGVP9zfS33rnXpdquAI",
-    { appVersion: APP_VERSION },
+    {
+      appVersion: APP_VERSION,
+    },
   );
 
   useEffect(() => {
     if (!client || isLoading) return;
 
-    void client.updateUserAsync({
-      appVersion: APP_VERSION,
-      userID: user?.id ?? "anonymous",
-      email: user?.email,
-      locale: "pt",
-      custom: {
-        role: (user as { role?: string })?.role ?? "user",
-        organization: organization?.slug ?? "default",
-      },
-    });
+    client
+      .updateUserAsync({
+        appVersion: APP_VERSION,
+        userID: user?.id ?? "anonymous",
+        email: user?.email,
+        locale: "pt",
+        custom: {
+          role: (user as { role?: string })?.role ?? "user",
+          organization: organization?.slug ?? "default",
+        },
+      })
+      .catch((err) => {
+        console.warn("Failed to update statsig user (probably offline):", err);
+      });
   }, [client, user, organization, isLoading]);
+
+  // When offline or if client is still initializing, don't block the UI if user is already loaded
+  const content = isLoading ? (
+    <div className="h-screen w-screen flex items-center justify-center bg-m3-bg">
+      <Spinner size="lg" label="A autenticar o Utilizador..." />
+    </div>
+  ) : (
+    children
+  );
+
+  if (!client) {
+    return <>{content}</>;
+  }
 
   return (
     <StatsigProvider
@@ -44,13 +64,7 @@ function StatsigWrapper({ children }: { children: React.ReactNode }) {
         </div>
       }
     >
-      {isLoading ? (
-        <div className="h-screen w-screen flex items-center justify-center bg-m3-bg">
-          <Spinner size="lg" label="A autenticar o Utilizador..." />
-        </div>
-      ) : (
-        children
-      )}
+      {content}
     </StatsigProvider>
   );
 }
@@ -60,6 +74,21 @@ export default function App() {
       import.meta.env.VITE_API_URL ||
       "/api",
   );
+
+  useEffect(() => {
+    // Preload Ace editor during idle time so first song click opens editor instantly
+    if (typeof window !== "undefined") {
+      if ("requestIdleCallback" in window) {
+        (window as any).requestIdleCallback(() => {
+          void preloadEditor();
+        });
+      } else {
+        setTimeout(() => {
+          void preloadEditor();
+        }, 1500);
+      }
+    }
+  }, []);
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>

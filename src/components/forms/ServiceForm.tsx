@@ -3,19 +3,32 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { zodResolver } from "@hookform/resolvers/zod";
 import { Button, Input } from "@hosanna/shared";
-import React from "react";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
+import React, { useState } from "react";
 
-const serviceSchema = z.object({
-  name: z.string().min(1, "O título do culto é obrigatório"),
-  date: z.string().min(1, "A data do culto é obrigatória"),
-  notes: z.string().optional(),
-});
+// --- SERVICE FORM ---
 
-type ServiceFormData = z.infer<typeof serviceSchema>;
+interface ServiceFormData {
+  name: string;
+  date: string;
+  notes: string;
+}
+
+// Extracted pure validation function
+const validateServiceForm = (
+  values: ServiceFormData,
+): Record<string, string> | undefined => {
+  const errors: Record<string, string> = {};
+
+  if (!values.name.trim()) {
+    errors.name = "O título do culto é obrigatório";
+  }
+  if (!values.date.trim()) {
+    errors.date = "A data do culto é obrigatória";
+  }
+
+  return Object.keys(errors).length > 0 ? errors : undefined;
+};
 
 interface ServiceFormProps {
   initialValues?: {
@@ -38,44 +51,67 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
   onCancel,
   isLoading = false,
 }) => {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<ServiceFormData>({
-    resolver: zodResolver(serviceSchema),
-    defaultValues: {
-      name: initialValues?.name || "",
-      date: initialValues?.date
-        ? new Date(initialValues.date).toISOString().split("T")[0]
-        : new Date().toISOString().split("T")[0],
-      notes: initialValues?.notes || "",
-    },
+  const [formData, setFormData] = useState<ServiceFormData>({
+    name: initialValues?.name || "",
+    date: initialValues?.date
+      ? new Date(initialValues.date).toISOString().split("T")[0]
+      : new Date().toISOString().split("T")[0],
+    notes: initialValues?.notes || "",
   });
 
-  const onFormSubmit = async (data: ServiceFormData) => {
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
+    const { name, value } = e.target;
+
+    setFormData((prev) => ({ ...prev, [name]: value }));
+
+    // Clear the specific field error when the user starts typing
+    if (errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: "" }));
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const validationErrors = validateServiceForm(formData);
+
+    if (validationErrors) {
+      setErrors(validationErrors);
+      return;
+    }
+
     await onSubmit({
-      name: data.name.trim(),
-      date: new Date(data.date).toISOString(),
-      notes: data.notes || "",
+      name: formData.name.trim(),
+      date: new Date(formData.date).toISOString(),
+      notes: formData.notes.trim(),
     });
   };
 
   return (
-    <form onSubmit={handleSubmit(onFormSubmit)} className="flex flex-col gap-4">
+    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
       <Input
+        name="name"
         label="Título do Culto"
         placeholder="Ex: Culto de Domingo de Manhã"
-        error={errors.name?.message}
+        error={errors.name}
         autoFocus
-        {...register("name")}
+        value={formData.name}
+        onChange={handleChange}
+        disabled={isLoading}
       />
 
       <Input
+        name="date"
         label="Data Agendada"
         type="date"
-        error={errors.date?.message}
-        {...register("date")}
+        error={errors.date}
+        value={formData.date}
+        onChange={handleChange}
+        disabled={isLoading}
       />
 
       <div className="flex flex-col gap-1.5">
@@ -83,10 +119,13 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
           Notas Gerais de Planeamento
         </label>
         <textarea
+          name="notes"
           rows={3}
           placeholder="Ex: Tema: Graça e Esperança. Ensaio da banda às 8:15."
-          {...register("notes")}
-          className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-sm p-3 focus:outline-none focus:ring-2 focus:ring-[#0284c7]"
+          value={formData.notes}
+          onChange={handleChange}
+          disabled={isLoading}
+          className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-sm p-3 focus:outline-none focus:ring-2 focus:ring-[#0284c7] disabled:opacity-50 disabled:cursor-not-allowed"
         />
       </div>
 
