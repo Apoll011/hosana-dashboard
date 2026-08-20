@@ -86,6 +86,7 @@ import { ServiceForm } from "../components/forms/ServiceForm";
 import { HosannaCommandPalette } from "../components/HosannaCommandPalette";
 import { CifraClubImportModal } from "../components/modals/CifraModal";
 import { getRoleLabel } from "../components/settings/settingsUtils";
+import { usePersonalSettings } from "../hooks/usePersonalSettings";
 import { songImportRegistry } from "../import";
 import { Can, CanAll, CanAny } from "../lib/permissions/components";
 import { getInitials } from "../utils";
@@ -130,6 +131,8 @@ export const MainLayout: React.FC = () => {
       !isTeamsView &&
       !isSettingsView);
   const isEditorView = isSongEditorView || isServiceEditorView;
+
+  const { settings } = usePersonalSettings();
 
   // Plus Dropdown State
   const [isPlusMenuOpen, setIsPlusMenuOpen] = useState(false);
@@ -1761,7 +1764,7 @@ export const MainLayout: React.FC = () => {
             </button>
           )}
 
-          {!isSidebarCollapsed && (
+          {!isSidebarCollapsed && settings.showFolderTree && (
             <>
               <div className="mt-6 px-3 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-m3-secondary opacity-60">
                 Pastas ({allFolders.length})
