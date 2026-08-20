@@ -228,11 +228,52 @@ function useSongMutations() {
   };
 }
 
+let cachedSongsByFolder: Map<string, Song[]> = new Map();
+let cachedAllSongs: Song[] | null = null;
+let cachedSingleSongs: Map<string, Song> = new Map();
+
 export function useSongs(params: GetSongsParams = {}) {
-  const [songs, setSongs] = useState<Song[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const mutations = useSongMutations();
   const folder = params.folder;
+  const folderKey = folder === undefined ? "__all__" : folder === null ? "__root__" : folder;
+
+  const [songs, setSongs] = useState<Song[]>(() => {
+    if (folderKey === "__all__" && cachedAllSongs) {
+      let items = cachedAllSongs;
+      if (params.search) {
+        const q = params.search.toLowerCase();
+        items = items.filter(
+          (s) =>
+            s.title?.toLowerCase().includes(q) ||
+            s.artist?.toLowerCase().includes(q) ||
+            s.content?.toLowerCase().includes(q) ||
+            s.tags?.some((t) => t.toLowerCase().includes(q)),
+        );
+      }
+      return items;
+    }
+    const cached = cachedSongsByFolder.get(folderKey);
+    if (cached) {
+      let items = cached;
+      if (params.search) {
+        const q = params.search.toLowerCase();
+        items = items.filter(
+          (s) =>
+            s.title?.toLowerCase().includes(q) ||
+            s.artist?.toLowerCase().includes(q) ||
+            s.content?.toLowerCase().includes(q) ||
+            s.tags?.some((t) => t.toLowerCase().includes(q)),
+        );
+      }
+      return items;
+    }
+    return [];
+  });
+
+  const [isLoading, setIsLoading] = useState(() => {
+    if (folderKey === "__all__") return cachedAllSongs === null;
+    return !cachedSongsByFolder.has(folderKey);
+  });
+  const mutations = useSongMutations();
 
   useEffect(() => {
     let isSubscribed = true;
@@ -262,8 +303,17 @@ export function useSongs(params: GetSongsParams = {}) {
 
         rxSub = query.$.subscribe((docs) => {
           if (!isSubscribed) return;
-          let items = docs.map((d) => d.toJSON() as Song);
+          const rawItems = docs.map((d) => d.toJSON() as Song);
 
+          if (folderKey === "__all__") {
+            cachedAllSongs = rawItems;
+          }
+          cachedSongsByFolder.set(folderKey, rawItems);
+          for (const s of rawItems) {
+            cachedSingleSongs.set(s.id, s);
+          }
+
+          let items = rawItems;
           if (params.search) {
             const q = params.search.toLowerCase();
             items = items.filter(
@@ -290,7 +340,7 @@ export function useSongs(params: GetSongsParams = {}) {
       isSubscribed = false;
       if (rxSub) rxSub.unsubscribe();
     };
-  }, [folder, params.search]);
+  }, [folder, folderKey, params.search]);
 
   const songsQuery = {
     data: {
@@ -314,8 +364,8 @@ export function useAllSongs(params: GetSongsParams = {}) {
 }
 
 export function useSong(id: string | null) {
-  const [song, setSong] = useState<Song | null>(null);
-  const [isLoading, setIsLoading] = useState(!!id);
+  const [song, setSong] = useState<Song | null>(() => (id ? cachedSingleSongs.get(id) ?? null : null));
+  const [isLoading, setIsLoading] = useState(() => (id ? !cachedSingleSongs.has(id) : false));
 
   useEffect(() => {
     if (!id) {
@@ -335,8 +385,11 @@ export function useSong(id: string | null) {
         rxSub = db.songs.findOne(id).$.subscribe((doc) => {
           if (!isSubscribed) return;
           if (doc && !doc._deleted) {
-            setSong(doc.toJSON() as Song);
+            const data = doc.toJSON() as Song;
+            cachedSingleSongs.set(id, data);
+            setSong(data);
           } else {
+            cachedSingleSongs.delete(id);
             setSong(null);
           }
           setIsLoading(false);

@@ -237,10 +237,7 @@ export function CommandPaletteModal({
         </div>
 
         {/* Results List */}
-        <div
-          ref={listContainerRef}
-          className="max-h-[380px] overflow-y-auto py-2"
-        >
+        <div ref={listContainerRef} className="max-h-95 overflow-y-auto py-2">
           {flatVisibleActions.length === 0 ? (
             <div className="py-12 flex flex-col items-center justify-center text-center px-4">
               <div className="w-12 h-12 rounded-2xl bg-m3-hover flex items-center justify-center mb-3">
@@ -249,7 +246,7 @@ export function CommandPaletteModal({
               <p className="text-sm font-medium text-m3-text">
                 Nenhum resultado encontrado
               </p>
-              <p className="text-xs text-m3-secondary mt-1 max-w-[280px]">
+              <p className="text-xs text-m3-secondary mt-1 max-w-70">
                 Não encontramos nada para{" "}
                 <span className="font-semibold text-m3-primary">
                   "{searchQuery}"
