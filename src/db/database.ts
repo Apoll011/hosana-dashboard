@@ -48,6 +48,7 @@ export async function getDatabase(): Promise<HosanaDatabase> {
         },
         folders: {
           schema: folderSchema,
+          migrationStrategies: {},
         },
         services: {
           schema: serviceSchema,
