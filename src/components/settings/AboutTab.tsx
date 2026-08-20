@@ -21,8 +21,8 @@ export const AboutTab: React.FC<{ active: boolean }> = ({ active }) => {
   const [showLicenses, setShowLicenses] = useState(false);
 
   if (!active) return null;
-
   const productionDependencies = [
+    // --- Dependências Existentes ---
     {
       name: "@tanstack/react-query",
       license: "MIT",
@@ -32,8 +32,71 @@ export const AboutTab: React.FC<{ active: boolean }> = ({ active }) => {
     { name: "@tailwindcss/vite", license: "MIT", type: "Estilização" },
     { name: "Lucide React", license: "ISC", type: "Ícones" },
     { name: "React Router Dom", license: "MIT", type: "Navegação" },
-  ];
 
+    // --- Adicionadas do @hosanna/studio ---
+    {
+      name: "@atlaskit/pragmatic-drag-and-drop",
+      license: "Apache-2.0",
+      type: "Drag & Drop",
+    },
+    {
+      name: "@atlaskit/pragmatic-drag-and-drop-hitbox",
+      license: "Apache-2.0",
+      type: "Drag & Drop",
+    },
+    {
+      name: "@hosanna/shared",
+      license: "Proprietário",
+      type: "Biblioteca Partilhada",
+    },
+    { name: "@statsig/react-bindings", license: "MIT", type: "Feature Flags" },
+    { name: "@vercel/analytics", license: "MIT", type: "Analítica" },
+    { name: "@vercel/node", license: "MIT", type: "Serverless Functions" },
+    {
+      name: "@vercel/speed-insights",
+      license: "MIT",
+      type: "Métricas de Performance",
+    },
+    { name: "ace-builds", license: "BSD-3-Clause", type: "Editor de Código" },
+    { name: "autoprefixer", license: "MIT", type: "Processador CSS" },
+    {
+      name: "better-inbox",
+      license: "MIT",
+      type: "Comunicação / Notificações",
+    },
+    { name: "cheerio", license: "MIT", type: "Parsing & Scraping HTML" },
+    {
+      name: "dotenv",
+      license: "BSD-2-Clause",
+      type: "Gestão de Variáveis de Ambiente",
+    },
+    { name: "kbar", license: "MIT", type: "Menu de Comandos (Command Bar)" },
+    { name: "preact", license: "MIT", type: "Framework UI" },
+    { name: "qrcode.react", license: "ISC", type: "Geração de QR Code" },
+    {
+      name: "react-ace",
+      license: "MIT",
+      type: "Componente de Editor de Código",
+    },
+    {
+      name: "react-error-boundary",
+      license: "MIT",
+      type: "Tratamento de Erros UI",
+    },
+    { name: "react-hook-form", license: "MIT", type: "Gestão de Formulários" },
+    {
+      name: "rxdb",
+      license: "Apache-2.0",
+      type: "Base de Dados Reativa (Client-Side)",
+    },
+    { name: "rxjs", license: "Apache-2.0", type: "Programação Reativa" },
+    { name: "tailwindcss", license: "MIT", type: "Estilização" },
+
+    // --- Adicionadas do @hosanna/shared ---
+    { name: "react", license: "MIT", type: "Framework UI" },
+    { name: "react-dom", license: "MIT", type: "Renderização UI" },
+    { name: "react-youtube", license: "MIT", type: "Integração Vídeo YouTube" },
+  ];
   return (
     <div className="space-y-6">
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs space-y-4">
