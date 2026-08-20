@@ -10,12 +10,11 @@ import { Can } from "@/src/lib/permissions/components";
 import {
   Button,
   ChordProRenderer,
-  Editor,
-  EditorSettingsPanel,
   parseChordPro,
   Song,
   Spinner,
 } from "@hosanna/shared";
+import { Editor, EditorSettingsPanel } from "@hosanna/shared/editor";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   ArrowLeft,
@@ -282,6 +281,11 @@ export const SongEditorPage: React.FC = () => {
                 readOnly={!canUpdateSong}
                 onSave={handleSave}
                 mode="chordpro"
+                fallback={
+                  <div className="h-full w-full flex items-center justify-center">
+                    <Spinner size="md" label="A carregar o editor..." />
+                  </div>
+                }
               />
             </div>
           </div>

@@ -29,7 +29,6 @@ export const AboutTab: React.FC<{ active: boolean }> = ({ active }) => {
       type: "Estado & Data Fetching",
     },
     { name: "Better Auth", license: "MIT", type: "Autenticação & RBAC" },
-    { name: "Motion (Framer Motion)", license: "MIT", type: "Animações" },
     { name: "@tailwindcss/vite", license: "MIT", type: "Estilização" },
     { name: "Lucide React", license: "ISC", type: "Ícones" },
     { name: "React Router Dom", license: "MIT", type: "Navegação" },
