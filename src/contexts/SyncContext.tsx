@@ -15,17 +15,38 @@ import { SyncStatus } from "../types";
 import { useAuth } from "./AuthContext";
 import { getDatabase, setupReplication, ReplicationManager } from "../db";
 
+export interface ToastAction {
+  label: string;
+  onClick: () => void;
+  variant?: "primary" | "secondary";
+}
+
 export interface ToastMessage {
   id: string;
   type: "success" | "error" | "info" | "warning";
-  text: string;
+  text?: string;
+  title?: string;
+  description?: string;
+  action?: ToastAction;
+  duration?: number;
+}
+
+interface ShowToastOptions {
+  type?: ToastMessage["type"];
+  title?: string;
+  description?: string;
+  action?: ToastAction;
+  duration?: number;
 }
 
 interface SyncContextType {
   syncStatus: SyncStatus;
   setSyncStatus: (status: SyncStatus) => void;
   toasts: ToastMessage[];
-  showToast: (text: string, type?: ToastMessage["type"]) => void;
+  showToast: (
+    textOrOptions: string | ShowToastOptions,
+    type?: ToastMessage["type"],
+  ) => void;
   removeToast: (id: string) => void;
   triggerSyncCheck: () => Promise<void>;
   lastSyncedAt: Date | null;
@@ -46,13 +67,34 @@ export const SyncProvider: React.FC<{ children: React.ReactNode }> = ({
   }, []);
 
   const showToast = useCallback(
-    (text: string, type: ToastMessage["type"] = "info") => {
+    (
+      textOrOptions: string | ShowToastOptions,
+      type: ToastMessage["type"] = "info",
+    ) => {
       const id = `toast-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
-      setToasts((prev) => [...prev, { id, type, text }]);
+      let toastItem: ToastMessage;
 
-      setTimeout(() => {
-        removeToast(id);
-      }, 4000);
+      if (typeof textOrOptions === "string") {
+        toastItem = { id, type, text: textOrOptions };
+      } else {
+        toastItem = {
+          id,
+          type: textOrOptions.type || "info",
+          title: textOrOptions.title,
+          description: textOrOptions.description,
+          action: textOrOptions.action,
+          duration: textOrOptions.duration,
+        };
+      }
+
+      setToasts((prev) => [...prev, toastItem]);
+
+      const duration = toastItem.duration !== undefined ? toastItem.duration : 4000;
+      if (duration > 0) {
+        setTimeout(() => {
+          removeToast(id);
+        }, duration);
+      }
     },
     [removeToast],
   );
