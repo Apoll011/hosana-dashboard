@@ -78,6 +78,8 @@ export function useFolders() {
           id: crypto.randomUUID(),
           name,
           parentId: parentId ?? null,
+          songCount: 0,
+          folderCount: 0,
           createdAt: now,
           updatedAt: now,
           _deleted: false,
