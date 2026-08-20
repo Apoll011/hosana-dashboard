@@ -812,7 +812,6 @@ export const ServiceDetailPage: React.FC = () => {
 
         <div className="flex-1 flex flex-col min-w-0 overflow-hidden bg-m3-background relative p-4 lg:p-6">
           <div className="max-w-5xl w-full mx-auto flex flex-col h-full">
-            {/* Elements Container */}
             <div className="flex-1 flex flex-col bg-m3-card rounded-3xl border border-m3-border shadow-sm overflow-hidden min-h-0">
               <div className="flex flex-wrap items-center justify-between px-5 py-3 border-b border-m3-border shrink-0 bg-m3-sidebar/30 gap-3">
                 <div className="flex items-center gap-3">
@@ -862,7 +861,6 @@ export const ServiceDetailPage: React.FC = () => {
                 </div>
               </div>
 
-              {/* General Notes Inline */}
               <div className="px-5 py-2.5 border-b border-m3-border/40 shrink-0 bg-m3-background/30 flex flex-col justify-center min-h-[44px]">
                 {isEditingGeneralNotes ? (
                   <div className="flex items-start gap-2">
