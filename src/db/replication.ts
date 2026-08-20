@@ -1,11 +1,11 @@
+import { getApiClient } from "@hosanna/shared";
+import { WithDeleted } from "rxdb";
 import {
   replicateRxCollection,
   RxReplicationState,
 } from "rxdb/plugins/replication";
-import { HosanaDatabase } from "./database";
-import { getApiClient } from "@hosanna/shared";
 import { Subject } from "rxjs";
-import { WithDeleted } from "rxdb";
+import { HosanaDatabase } from "./database";
 
 export type ReplicationSyncState = "syncing" | "synced" | "offline" | "error";
 
