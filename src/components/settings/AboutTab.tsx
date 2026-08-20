@@ -70,7 +70,11 @@ export const AboutTab: React.FC<{ active: boolean }> = ({ active }) => {
       license: "BSD-2-Clause",
       type: "Gestão de Variáveis de Ambiente",
     },
-    { name: "kbar", license: "MIT", type: "Menu de Comandos (Command Bar)" },
+    {
+      name: "Hosanna Command Palette",
+      license: "MIT",
+      type: "Menu de Comandos (Personalizado)",
+    },
     { name: "preact", license: "MIT", type: "Framework UI" },
     { name: "qrcode.react", license: "ISC", type: "Geração de QR Code" },
     {
