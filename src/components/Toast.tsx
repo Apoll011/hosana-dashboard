@@ -37,7 +37,9 @@ export const ToastContainer: React.FC = () => {
             <div className="flex-1 min-w-0">
               {toast.title ? (
                 <>
-                  <p className="text-[13px] font-bold text-m3-text">{toast.title}</p>
+                  <p className="text-[13px] font-bold text-m3-text">
+                    {toast.title}
+                  </p>
                   {toast.description && (
                     <p className="text-[12px] text-m3-secondary mt-1">
                       {toast.description}
@@ -45,7 +47,9 @@ export const ToastContainer: React.FC = () => {
                   )}
                 </>
               ) : (
-                <p className="text-[13px] font-bold text-m3-text">{toast.text}</p>
+                <p className="text-[13px] font-bold text-m3-text">
+                  {toast.text}
+                </p>
               )}
               {toast.action && (
                 <div className="mt-3 flex items-center gap-2">

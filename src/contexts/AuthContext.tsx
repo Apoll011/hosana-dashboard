@@ -314,7 +314,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   // Sync across tabs
   useEffect(() => {
     const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === "active_org_slug" || e.key === CACHED_USER_KEY) fetchSession();
+      if (e.key === "active_org_slug" || e.key === CACHED_USER_KEY)
+        fetchSession();
     };
     window.addEventListener("storage", handleStorageChange);
     return () => window.removeEventListener("storage", handleStorageChange);
