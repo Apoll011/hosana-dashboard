@@ -77,8 +77,18 @@ export const SettingsPage: React.FC = () => {
   const isServerAdminRole = role === "admin" || role === "owner";
 
   const tabs = [
-    { id: "account", label: "Conta & Segurança", icon: User, requiresNetwork: true },
-    { id: "workspace", label: "Organização", icon: Building2, requiresNetwork: true },
+    {
+      id: "account",
+      label: "Conta & Segurança",
+      icon: User,
+      requiresNetwork: true,
+    },
+    {
+      id: "workspace",
+      label: "Organização",
+      icon: Building2,
+      requiresNetwork: true,
+    },
     { id: "members", label: "Membros", icon: Users, requiresNetwork: true },
     {
       id: "general",
@@ -86,7 +96,12 @@ export const SettingsPage: React.FC = () => {
       icon: Server,
       requiresNetwork: true,
     },
-    { id: "appearance", label: "Aparência", icon: Palette, requiresNetwork: false },
+    {
+      id: "appearance",
+      label: "Aparência",
+      icon: Palette,
+      requiresNetwork: false,
+    },
     { id: "about", label: "Sobre", icon: Info, requiresNetwork: false },
   ];
 
@@ -99,7 +114,8 @@ export const SettingsPage: React.FC = () => {
             <div>
               <span className="font-bold block">Modo Offline</span>
               <span className="opacity-90">
-                As definições de conta, organização e membros requerem ligação à internet e estão desativadas.
+                As definições de conta, organização e membros requerem ligação à
+                internet e estão desativadas.
               </span>
             </div>
           </div>

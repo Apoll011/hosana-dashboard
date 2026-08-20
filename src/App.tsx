@@ -20,9 +20,6 @@ function StatsigWrapper({ children }: { children: React.ReactNode }) {
     "client-4459XEXCHZyP192QOlIwzRAffGVP9zfS33rnXpdquAI",
     {
       appVersion: APP_VERSION,
-      options: {
-        initTimeoutMs: 2000, // Do not block offline start
-      },
     },
   );
 

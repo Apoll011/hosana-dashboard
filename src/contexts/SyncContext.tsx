@@ -89,7 +89,8 @@ export const SyncProvider: React.FC<{ children: React.ReactNode }> = ({
 
       setToasts((prev) => [...prev, toastItem]);
 
-      const duration = toastItem.duration !== undefined ? toastItem.duration : 4000;
+      const duration =
+        toastItem.duration !== undefined ? toastItem.duration : 4000;
       if (duration > 0) {
         setTimeout(() => {
           removeToast(id);
