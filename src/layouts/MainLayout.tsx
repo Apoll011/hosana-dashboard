@@ -166,7 +166,7 @@ export const MainLayout: React.FC = () => {
   useEffect(() => {
     const interval = setInterval(() => {
       void triggerSyncCheck();
-    }, 15000);
+    }, 60000);
     return () => clearInterval(interval);
   }, [triggerSyncCheck]);
 
