@@ -26,14 +26,14 @@ const PageLoader = () => (
   </div>
 );
 
-type LazyImportFn<T> = () => Promise<{ default: React.ComponentType<T> }>;
+type LazyImportFn = () => Promise<{ default: React.ComponentType<any> }>;
 
 const prefetchQueue: Array<() => Promise<unknown>> = [];
 
-const lazyImport = <T,>(componentImport: LazyImportFn<T>) => {
+const lazyImport = (componentImport: LazyImportFn) => {
   prefetchQueue.push(componentImport);
 
-  return lazy(async (): Promise<{ default: React.ComponentType<T> }> => {
+  return lazy(async () => {
     const pageHasAlreadyBeenForceRefreshed = JSON.parse(
       window.localStorage.getItem("page-force-refreshed") || "false",
     );
@@ -48,15 +48,12 @@ const lazyImport = <T,>(componentImport: LazyImportFn<T>) => {
       if (!pageHasAlreadyBeenForceRefreshed) {
         window.localStorage.setItem("page-force-refreshed", "true");
         window.location.reload();
-        return {
-          default: (() => <PageLoader />) as unknown as React.ComponentType<T>,
-        };
+        return new Promise<never>(() => {});
       }
       throw error;
     }
   });
 };
-
 function canPrefetch(): boolean {
   if (typeof navigator === "undefined") return false;
   const connection = (navigator as any).connection;
