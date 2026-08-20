@@ -3,17 +3,36 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { zodResolver } from "@hookform/resolvers/zod";
 import { Button, Input } from "@hosanna/shared";
 import React from "react";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
+import { Resolver, useForm } from "react-hook-form";
 
-const folderSchema = z.object({
-  name: z.string().min(1, "O nome da pasta é obrigatório"),
-});
+interface FolderFormData {
+  name: string;
+}
 
-type FolderFormData = z.infer<typeof folderSchema>;
+const customFolderResolver: Resolver<FolderFormData> = async (values) => {
+  const errors: Record<string, any> = {};
+
+  const trimmedName = values.name?.trim();
+
+  if (!trimmedName) {
+    errors.name = {
+      type: "required",
+      message: "O nome da pasta é obrigatório",
+    };
+  } else if (trimmedName.length < 2) {
+    errors.name = {
+      type: "minLength",
+      message: "O nome deve ter pelo menos 2 caracteres",
+    };
+  }
+
+  return {
+    values: Object.keys(errors).length === 0 ? values : {},
+    errors,
+  };
+};
 
 interface FolderFormProps {
   initialName?: string;
@@ -35,7 +54,7 @@ export const FolderForm: React.FC<FolderFormProps> = ({
     handleSubmit,
     formState: { errors },
   } = useForm<FolderFormData>({
-    resolver: zodResolver(folderSchema),
+    resolver: customFolderResolver,
     defaultValues: {
       name: initialName,
     },
