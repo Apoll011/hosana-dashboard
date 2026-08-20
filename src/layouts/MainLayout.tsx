@@ -161,7 +161,15 @@ export const MainLayout: React.FC = () => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
-  const { showToast } = useSync();
+  const { showToast, triggerSyncCheck } = useSync();
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      void triggerSyncCheck();
+    }, 15000);
+    return () => clearInterval(interval);
+  }, [triggerSyncCheck]);
+
   const queryClient = useQueryClient();
   const { servicesQuery, createService, deleteService } = useServices();
   const allServices = useMemo(
