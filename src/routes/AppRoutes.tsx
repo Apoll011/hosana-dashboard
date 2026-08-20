@@ -33,7 +33,7 @@ const prefetchQueue: Array<() => Promise<unknown>> = [];
 const lazyImport = <T,>(componentImport: LazyImportFn<T>) => {
   prefetchQueue.push(componentImport);
 
-  return lazy(async () => {
+  return lazy(async (): Promise<{ default: React.ComponentType<T> }> => {
     const pageHasAlreadyBeenForceRefreshed = JSON.parse(
       window.localStorage.getItem("page-force-refreshed") || "false",
     );
@@ -48,7 +48,9 @@ const lazyImport = <T,>(componentImport: LazyImportFn<T>) => {
       if (!pageHasAlreadyBeenForceRefreshed) {
         window.localStorage.setItem("page-force-refreshed", "true");
         window.location.reload();
-        return { default: () => <PageLoader /> };
+        return {
+          default: (() => <PageLoader />) as unknown as React.ComponentType<T>,
+        };
       }
       throw error;
     }
