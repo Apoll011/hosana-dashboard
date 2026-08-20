@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useEffect, useCallback } from "react";
 import { Service, ServiceElement } from "@hosanna/shared";
+import { useCallback, useEffect, useState } from "react";
 import { useSync } from "../contexts/SyncContext";
 import { getDatabase, ServiceDocType } from "../db";
 
@@ -14,8 +14,12 @@ let cachedSingleServices: Map<string, Service> = new Map();
 export function useServices(includeArchived: boolean = false) {
   const { showToast } = useSync();
   const cacheKey = includeArchived ? "archived_included" : "active_only";
-  const [services, setServices] = useState<Service[]>(() => cachedServicesMap.get(cacheKey) ?? []);
-  const [isLoading, setIsLoading] = useState(() => !cachedServicesMap.has(cacheKey));
+  const [services, setServices] = useState<Service[]>(
+    () => cachedServicesMap.get(cacheKey) ?? [],
+  );
+  const [isLoading, setIsLoading] = useState(
+    () => !cachedServicesMap.has(cacheKey),
+  );
   const [isCreating, setIsCreating] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -213,8 +217,12 @@ export function useServices(includeArchived: boolean = false) {
 }
 
 export function useService(id: string | null) {
-  const [service, setService] = useState<Service | null>(() => (id ? cachedSingleServices.get(id) ?? null : null));
-  const [isLoading, setIsLoading] = useState(() => (id ? !cachedSingleServices.has(id) : false));
+  const [service, setService] = useState<Service | null>(() =>
+    id ? (cachedSingleServices.get(id) ?? null) : null,
+  );
+  const [isLoading, setIsLoading] = useState(() =>
+    id ? !cachedSingleServices.has(id) : false,
+  );
 
   useEffect(() => {
     if (!id) {
@@ -222,6 +230,7 @@ export function useService(id: string | null) {
       setIsLoading(false);
       return;
     }
+    setIsLoading(true);
 
     let isSubscribed = true;
     let rxSub: { unsubscribe: () => void } | null = null;

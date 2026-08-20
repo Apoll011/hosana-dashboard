@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useEffect, useCallback } from "react";
 import { GetSongsParams, Song } from "@hosanna/shared";
+import { useCallback, useEffect, useState } from "react";
 import { useSync } from "../contexts/SyncContext";
 import { getDatabase, SongDocType } from "../db";
 
@@ -234,7 +234,8 @@ let cachedSingleSongs: Map<string, Song> = new Map();
 
 export function useSongs(params: GetSongsParams = {}) {
   const folder = params.folder;
-  const folderKey = folder === undefined ? "__all__" : folder === null ? "__root__" : folder;
+  const folderKey =
+    folder === undefined ? "__all__" : folder === null ? "__root__" : folder;
 
   const [songs, setSongs] = useState<Song[]>(() => {
     if (folderKey === "__all__" && cachedAllSongs) {
@@ -364,8 +365,12 @@ export function useAllSongs(params: GetSongsParams = {}) {
 }
 
 export function useSong(id: string | null) {
-  const [song, setSong] = useState<Song | null>(() => (id ? cachedSingleSongs.get(id) ?? null : null));
-  const [isLoading, setIsLoading] = useState(() => (id ? !cachedSingleSongs.has(id) : false));
+  const [song, setSong] = useState<Song | null>(() =>
+    id ? (cachedSingleSongs.get(id) ?? null) : null,
+  );
+  const [isLoading, setIsLoading] = useState(() =>
+    id ? !cachedSingleSongs.has(id) : false,
+  );
 
   useEffect(() => {
     if (!id) {
@@ -373,6 +378,7 @@ export function useSong(id: string | null) {
       setIsLoading(false);
       return;
     }
+    setIsLoading(true);
 
     let isSubscribed = true;
     let rxSub: { unsubscribe: () => void } | null = null;
