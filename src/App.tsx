@@ -18,23 +18,45 @@ function StatsigWrapper({ children }: { children: React.ReactNode }) {
 
   const { client } = useClientAsyncInit(
     "client-4459XEXCHZyP192QOlIwzRAffGVP9zfS33rnXpdquAI",
-    { appVersion: APP_VERSION },
+    {
+      appVersion: APP_VERSION,
+      options: {
+        initTimeoutMs: 2000, // Do not block offline start
+      },
+    },
   );
 
   useEffect(() => {
     if (!client || isLoading) return;
 
-    void client.updateUserAsync({
-      appVersion: APP_VERSION,
-      userID: user?.id ?? "anonymous",
-      email: user?.email,
-      locale: "pt",
-      custom: {
-        role: (user as { role?: string })?.role ?? "user",
-        organization: organization?.slug ?? "default",
-      },
-    });
+    client
+      .updateUserAsync({
+        appVersion: APP_VERSION,
+        userID: user?.id ?? "anonymous",
+        email: user?.email,
+        locale: "pt",
+        custom: {
+          role: (user as { role?: string })?.role ?? "user",
+          organization: organization?.slug ?? "default",
+        },
+      })
+      .catch((err) => {
+        console.warn("Failed to update statsig user (probably offline):", err);
+      });
   }, [client, user, organization, isLoading]);
+
+  // When offline or if client is still initializing, don't block the UI if user is already loaded
+  const content = isLoading ? (
+    <div className="h-screen w-screen flex items-center justify-center bg-m3-bg">
+      <Spinner size="lg" label="A autenticar o Utilizador..." />
+    </div>
+  ) : (
+    children
+  );
+
+  if (!client) {
+    return <>{content}</>;
+  }
 
   return (
     <StatsigProvider
@@ -45,13 +67,7 @@ function StatsigWrapper({ children }: { children: React.ReactNode }) {
         </div>
       }
     >
-      {isLoading ? (
-        <div className="h-screen w-screen flex items-center justify-center bg-m3-bg">
-          <Spinner size="lg" label="A autenticar o Utilizador..." />
-        </div>
-      ) : (
-        children
-      )}
+      {content}
     </StatsigProvider>
   );
 }
