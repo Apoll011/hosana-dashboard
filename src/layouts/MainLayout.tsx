@@ -1788,7 +1788,9 @@ export const MainLayout: React.FC = () => {
               </div>
             </>
           )}
-          {isSidebarCollapsed && <div className="flex-1" />}
+          {(isSidebarCollapsed || settings.showFolderTree) && (
+            <div className="flex-1" />
+          )}
 
           {user && (
             <div
