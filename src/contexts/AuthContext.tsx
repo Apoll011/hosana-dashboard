@@ -127,23 +127,73 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+const CACHED_USER_KEY = "cached_auth_user";
+const CACHED_ORG_KEY = "cached_auth_org";
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const [user, setUser] = useState<SessionUser | null>(null);
-  const [organization, setOrganization] = useState<Organization | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [user, setUser] = useState<SessionUser | null>(() => {
+    try {
+      const stored = localStorage.getItem(CACHED_USER_KEY);
+      return stored ? JSON.parse(stored) : null;
+    } catch {
+      return null;
+    }
+  });
+  const [organization, setOrganization] = useState<Organization | null>(() => {
+    try {
+      const stored = localStorage.getItem(CACHED_ORG_KEY);
+      return stored ? JSON.parse(stored) : null;
+    } catch {
+      return null;
+    }
+  });
+  // Stale-While-Revalidate: If we have a cached user, start with isLoading = false immediately!
+  const [isLoading, setIsLoading] = useState<boolean>(() => {
+    try {
+      const stored = localStorage.getItem(CACHED_USER_KEY);
+      return !stored;
+    } catch {
+      return true;
+    }
+  });
 
   const handleClearSession = useCallback(() => {
     setUser(null);
     setOrganization(null);
     localStorage.removeItem("active_org_slug");
+    localStorage.removeItem(CACHED_USER_KEY);
+    localStorage.removeItem(CACHED_ORG_KEY);
     clearPermissionCache();
     setIsLoading(false);
   }, []);
 
   const fetchSession = useCallback(async () => {
-    setIsLoading(true);
+    // Only show full blocking loader if we don't have a cached session yet
+    const hasCachedUser = Boolean(localStorage.getItem(CACHED_USER_KEY));
+    if (!hasCachedUser) {
+      setIsLoading(true);
+    }
+
+    // If offline, restore from cache without clearing or network call
+    if (typeof navigator !== "undefined" && !navigator.onLine) {
+      try {
+        const cachedUserStr = localStorage.getItem(CACHED_USER_KEY);
+        const cachedOrgStr = localStorage.getItem(CACHED_ORG_KEY);
+        if (cachedUserStr) {
+          setUser(JSON.parse(cachedUserStr));
+        }
+        if (cachedOrgStr) {
+          setOrganization(JSON.parse(cachedOrgStr));
+        }
+      } catch (err) {
+        console.error("Failed to restore offline cached session:", err);
+      } finally {
+        setIsLoading(false);
+      }
+      return;
+    }
 
     try {
       const { data: sessionData, error: sessionError } =
@@ -151,6 +201,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       const sessionUser = sessionData?.user;
 
       if (!sessionUser || sessionError) {
+        // If fetch failed due to network error/offline, keep cached session if available
+        if (typeof navigator !== "undefined" && !navigator.onLine) {
+          setIsLoading(false);
+          return;
+        }
         return handleClearSession();
       }
 
@@ -202,14 +257,42 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         clearPermissionCache();
       }
 
-      setOrganization(activeOrg);
-      setUser({
+      const fullUser = {
         ...sessionUser,
         role: userRole,
-      } as SessionUser);
+      } as SessionUser;
+
+      setOrganization(activeOrg);
+      setUser(fullUser);
+
+      // Cache for offline usage
+      try {
+        localStorage.setItem(CACHED_USER_KEY, JSON.stringify(fullUser));
+        if (activeOrg) {
+          localStorage.setItem(CACHED_ORG_KEY, JSON.stringify(activeOrg));
+        } else {
+          localStorage.removeItem(CACHED_ORG_KEY);
+        }
+      } catch (err) {
+        console.warn("Failed to persist session to localStorage:", err);
+      }
     } catch (error) {
       console.error("Failed to fetch session:", error);
-      handleClearSession();
+      // If error occurred (e.g. network failure while fetching), keep cached session if available
+      const cachedUserStr = localStorage.getItem(CACHED_USER_KEY);
+      if (cachedUserStr) {
+        try {
+          setUser(JSON.parse(cachedUserStr));
+          const cachedOrgStr = localStorage.getItem(CACHED_ORG_KEY);
+          if (cachedOrgStr) {
+            setOrganization(JSON.parse(cachedOrgStr));
+          }
+        } catch {
+          handleClearSession();
+        }
+      } else {
+        handleClearSession();
+      }
     } finally {
       setIsLoading(false);
     }
@@ -219,10 +302,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     fetchSession();
   }, [fetchSession]);
 
+  // Re-check session on returning online
+  useEffect(() => {
+    const handleOnline = () => {
+      fetchSession();
+    };
+    window.addEventListener("online", handleOnline);
+    return () => window.removeEventListener("online", handleOnline);
+  }, [fetchSession]);
+
   // Sync across tabs
   useEffect(() => {
     const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === "active_org_slug") fetchSession();
+      if (e.key === "active_org_slug" || e.key === CACHED_USER_KEY) fetchSession();
     };
     window.addEventListener("storage", handleStorageChange);
     return () => window.removeEventListener("storage", handleStorageChange);
