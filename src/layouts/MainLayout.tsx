@@ -56,6 +56,7 @@ import React, {
   useRef,
   useState,
 } from "react";
+import { useRegisterSW } from "virtual:pwa-register/react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { FolderForm } from "../components/forms/FolderForm";
 import { SongForm } from "../components/forms/SongForm";
@@ -162,6 +163,32 @@ export const MainLayout: React.FC = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
   const { showToast, triggerSyncCheck } = useSync();
+
+  const {
+    needRefresh: [needRefresh, setNeedRefresh],
+    updateServiceWorker,
+  } = useRegisterSW({
+    onNeedRefresh() {
+      // Handled via effect watching needRefresh
+    },
+  });
+
+  useEffect(() => {
+    if (needRefresh) {
+      showToast({
+        type: "info",
+        title: "Nova versão disponível",
+        description: "Uma nova versão do Hosanna Studio está disponível.",
+        duration: 0, // Keep persistent until user interacts or dismisses
+        action: {
+          label: "Recarregar",
+          onClick: () => {
+            void updateServiceWorker(true);
+          },
+        },
+      });
+    }
+  }, [needRefresh, showToast, updateServiceWorker]);
 
   useEffect(() => {
     const interval = setInterval(() => {

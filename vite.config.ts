@@ -2,10 +2,63 @@ import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
 import { defineConfig } from "vite";
+import { VitePWA } from "vite-plugin-pwa";
 
 export default defineConfig(() => {
   return {
-    plugins: [react(), tailwindcss()],
+    plugins: [
+      react(),
+      tailwindcss(),
+      VitePWA({
+        registerType: "prompt",
+        workbox: {
+          cleanupOutdatedCaches: true,
+          globPatterns: ["**/*.{js,css,html,ico,png,svg}"],
+        },
+        includeAssets: [
+          "favicon.png",
+          "apple-touch-icon.png",
+          "apple-touch-icon-180x180.png",
+          "apple-touch-icon-167x167.png",
+          "apple-touch-icon-152x152.png",
+          "hosanna_favicon.svg",
+        ],
+        devOptions: {
+          enabled: false,
+        },
+        manifest: {
+          name: "Hosanna Studio",
+          short_name: "Hosanna",
+          description:
+            "Planeie e organize os seus serviços de culto, músicas e setlists de forma simples, rápida e eficiente.",
+          theme_color: "#007AFF",
+          background_color: "#ffffff",
+          display: "standalone",
+          icons: [
+            {
+              src: "apple-touch-icon-180x180.png",
+              sizes: "180x180",
+              type: "image/png",
+            },
+            {
+              src: "apple-touch-icon-167x167.png",
+              sizes: "167x167",
+              type: "image/png",
+            },
+            {
+              src: "apple-touch-icon-152x152.png",
+              sizes: "152x152",
+              type: "image/png",
+            },
+            {
+              src: "apple-touch-icon.png",
+              sizes: "192x192",
+              type: "image/png",
+            },
+          ],
+        },
+      }),
+    ],
     resolve: {
       alias: {
         "@": path.resolve(__dirname, "."),
