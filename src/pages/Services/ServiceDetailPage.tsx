@@ -6,6 +6,16 @@
 import { ChordProPreviewSettings } from "@/src/components/ChorproSettings";
 import { usePreviewSettings } from "@/src/hooks/usePreviewSettings";
 import {
+  attachClosestEdge,
+  extractClosestEdge,
+  type Edge,
+} from "@atlaskit/pragmatic-drag-and-drop-hitbox/closest-edge";
+import {
+  draggable,
+  dropTargetForElements,
+  monitorForElements,
+} from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
+import {
   Button,
   ChordProRenderer,
   Input,
@@ -49,6 +59,13 @@ import { CustomModal } from "./modals/Custom";
 import { MessageModal } from "./modals/Message";
 import { ReadingModal } from "./modals/Reading";
 import { WelcomeModal } from "./modals/Welcome";
+
+function arrayMove<T>(array: T[], fromIndex: number, toIndex: number): T[] {
+  const newArray = [...array];
+  const [removed] = newArray.splice(fromIndex, 1);
+  newArray.splice(toIndex, 0, removed);
+  return newArray;
+}
 
 const formatDuration = (seconds: number) => {
   const safe = Math.max(0, Math.floor(seconds || 0));
@@ -105,13 +122,6 @@ const getElementBadge = (type: string) => {
       };
   }
 };
-
-function arrayMove<T>(array: T[], fromIndex: number, toIndex: number): T[] {
-  const newArray = [...array];
-  const [removed] = newArray.splice(fromIndex, 1);
-  newArray.splice(toIndex, 0, removed);
-  return newArray;
-}
 
 const SongPreview: React.FC<{ element: ServiceElement }> = ({ element }) => {
   const { data: song, isLoading } = useSong(element.songId || null);
@@ -177,19 +187,81 @@ const SongPreview: React.FC<{ element: ServiceElement }> = ({ element }) => {
   );
 };
 
+interface LibrarySongItemProps {
+  song: { id: string; title: string; artist?: string };
+  countInService: number;
+  isPending: boolean;
+  onAdd: (songId: string) => void;
+}
+
+const LibrarySongItem: React.FC<LibrarySongItemProps> = ({
+  song,
+  countInService,
+  isPending,
+  onAdd,
+}) => {
+  const itemRef = useRef<HTMLDivElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
+
+  useEffect(() => {
+    const el = itemRef.current;
+    if (!el) return;
+
+    return draggable({
+      element: el,
+      getInitialData: () => ({
+        type: "library-song",
+        songId: song.id,
+      }),
+      onDragStart: () => setIsDragging(true),
+      onDrop: () => setIsDragging(false),
+    });
+  }, [song.id]);
+
+  return (
+    <div
+      ref={itemRef}
+      className={`flex items-center justify-between gap-3 px-3 py-2 bg-m3-card hover:bg-m3-hover rounded-xl border border-m3-border/50 cursor-grab active:cursor-grabbing transition-all shadow-sm ${
+        isDragging ? "opacity-40 scale-95" : "opacity-100"
+      }`}
+    >
+      <div className="min-w-0 flex-1">
+        <p className="text-sm font-semibold truncate text-m3-text">
+          {song.title}
+        </p>
+        <p className="text-xs text-m3-secondary truncate">
+          {song.artist || "—"}
+        </p>
+      </div>
+      <div className="flex items-center gap-2 shrink-0">
+        {countInService > 0 && (
+          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400">
+            Na Lista ×{countInService}
+          </span>
+        )}
+        <button
+          type="button"
+          onClick={() => onAdd(song.id)}
+          disabled={isPending}
+          className="p-1.5 rounded-lg bg-m3-primary/10 text-m3-primary hover:bg-m3-primary/20 disabled:opacity-50 transition-colors"
+        >
+          {isPending ? (
+            <Loader2 className="w-4 h-4 animate-spin" />
+          ) : (
+            <Plus className="w-4 h-4" />
+          )}
+        </button>
+      </div>
+    </div>
+  );
+};
+
 interface ServiceRowProps {
   element: ServiceElement;
   index: number;
   onRemove: (id: string) => void;
   onEdit: (el: ServiceElement) => void;
   onNoteChange: (id: string, note: string) => void;
-  onDragStart: (e: React.DragEvent, id: string) => void;
-  onDragOver: (e: React.DragEvent, id: string) => void;
-  onDrop: (e: React.DragEvent, id: string) => void;
-  onDragLeave: () => void;
-  onDragEnd: () => void;
-  isDragOver: boolean;
-  draggedElementId: string | null;
 }
 
 const ServiceRow: React.FC<ServiceRowProps> = ({
@@ -198,14 +270,71 @@ const ServiceRow: React.FC<ServiceRowProps> = ({
   onRemove,
   onEdit,
   onNoteChange,
-  onDragStart,
-  onDragOver,
-  onDrop,
-  onDragLeave,
-  onDragEnd,
-  isDragOver,
-  draggedElementId,
 }) => {
+  const rowRef = useRef<HTMLDivElement>(null);
+  const dragHandleRef = useRef<HTMLButtonElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [closestEdge, setClosestEdge] = useState<Edge | null>(null);
+
+  useEffect(() => {
+    const rowEl = rowRef.current;
+    const handleEl = dragHandleRef.current;
+    if (!rowEl || !handleEl) return;
+
+    const cleanupDraggable = draggable({
+      element: rowEl,
+      dragHandle: handleEl,
+      getInitialData: () => ({
+        type: "service-element",
+        elementId: element.id,
+        index,
+      }),
+      onDragStart: () => setIsDragging(true),
+      onDrop: () => {
+        setIsDragging(false);
+        setClosestEdge(null);
+      },
+    });
+
+    const cleanupDropTarget = dropTargetForElements({
+      element: rowEl,
+      getData: ({ input, element: targetEl }) => {
+        const data = {
+          type: "service-element",
+          elementId: element.id,
+          index,
+        };
+        return attachClosestEdge(data, {
+          input,
+          element: targetEl,
+          allowedEdges: ["top", "bottom"],
+        });
+      },
+      canDrop: ({ source }) => {
+        return (
+          source.data.type === "library-song" ||
+          (source.data.type === "service-element" &&
+            source.data.elementId !== element.id)
+        );
+      },
+      onDragEnter: (args) => {
+        const edge = extractClosestEdge(args.self.data);
+        setClosestEdge(edge);
+      },
+      onDrag: (args) => {
+        const edge = extractClosestEdge(args.self.data);
+        setClosestEdge(edge);
+      },
+      onDragLeave: () => setClosestEdge(null),
+      onDrop: () => setClosestEdge(null),
+    });
+
+    return () => {
+      cleanupDraggable();
+      cleanupDropTarget();
+    };
+  }, [element.id, index]);
+
   const [isExpanded, setIsExpanded] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [isEditingNote, setIsEditingNote] = useState(false);
@@ -218,28 +347,26 @@ const ServiceRow: React.FC<ServiceRowProps> = ({
 
   return (
     <div
-      draggable
-      onDragStart={(e) => {
-        if (isExpanded || isEditingNote) e.preventDefault();
-        else onDragStart(e, element.id);
-      }}
-      onDragOver={(e) => onDragOver(e, element.id)}
-      onDrop={(e) => onDrop(e, element.id)}
-      onDragLeave={onDragLeave}
-      onDragEnd={onDragEnd}
-      className={`bg-white dark:bg-m3-card rounded-2xl border transition-all ${
-        isDragOver
-          ? "border-m3-primary border-t-4 shadow-lg scale-[1.01]"
-          : "border-m3-border dark:border-m3-border/30 hover:border-m3-primary/30"
-      } ${draggedElementId === element.id ? "opacity-50 scale-[0.98]" : "opacity-100"} flex flex-col`}
+      ref={rowRef}
+      className={`bg-white dark:bg-m3-card rounded-2xl border transition-all duration-150 relative ${
+        isDragging ? "opacity-40 scale-[0.98]" : "opacity-100"
+      } ${
+        closestEdge === "top"
+          ? "border-t-m3-primary border-t-2 shadow-sm"
+          : closestEdge === "bottom"
+            ? "border-b-m3-primary border-b-2 shadow-sm"
+            : "border-m3-border dark:border-m3-border/30 hover:border-m3-primary/30"
+      } flex flex-col`}
     >
       <div className="flex items-center gap-3 px-4 py-3">
-        <div
-          className="text-slate-300 hover:text-slate-500 cursor-grab active:cursor-grabbing shrink-0 p-1"
-          title="Arrastar"
+        <button
+          ref={dragHandleRef}
+          type="button"
+          className="text-slate-300 hover:text-slate-500 cursor-grab active:cursor-grabbing shrink-0 p-1 rounded hover:bg-m3-hover touch-none"
+          title="Arrastar para reordenar"
         >
           <GripVertical className="w-4 h-4" />
-        </div>
+        </button>
 
         <span className="text-xs font-semibold text-slate-400 w-4 shrink-0 text-center">
           {index + 1}
@@ -287,7 +414,7 @@ const ServiceRow: React.FC<ServiceRowProps> = ({
 
         <div className="flex items-center gap-1 shrink-0">
           {(isEditingNote || element.notes) && !isExpanded && (
-            <div className="text-[10px] max-w-[140px] truncate italic px-2 py-1 rounded bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-200 border border-amber-200 dark:border-amber-800/50 mr-2">
+            <div className="text-[10px] max-w-35 truncate italic px-2 py-1 rounded bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-200 border border-amber-200 dark:border-amber-800/50 mr-2">
               {element.notes}
             </div>
           )}
@@ -397,7 +524,7 @@ const ServiceRow: React.FC<ServiceRowProps> = ({
           )}
 
           {isSong ? (
-            <div className="mt-2 h-[500px] border border-m3-border dark:border-m3-border/50 rounded-xl overflow-hidden shadow-inner bg-m3-card">
+            <div className="mt-2 h-125 border border-m3-border dark:border-m3-border/50 rounded-xl overflow-hidden shadow-inner bg-m3-card">
               <SongPreview element={element} />
             </div>
           ) : (
@@ -440,11 +567,8 @@ export const ServiceDetailPage: React.FC = () => {
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   const [showLibrary, setShowLibrary] = useState(true);
-  const [draggedElementId, setDraggedElementId] = useState<string | null>(null);
-  const [dragOverElementId, setDragOverElementId] = useState<string | null>(
-    null,
-  );
   const [isDropTargetActive, setIsDropTargetActive] = useState(false);
+  const dropContainerRef = useRef<HTMLDivElement>(null);
 
   const [activeModal, setActiveModal] = useState<ModalType>(null);
   const [editingElement, setEditingElement] = useState<ServiceElement | null>(
@@ -468,38 +592,19 @@ export const ServiceDetailPage: React.FC = () => {
     elementsRef.current = elements;
   }, [elements]);
 
-  if (isLoading)
-    return (
-      <div className="flex-1 flex items-center justify-center p-12">
-        <Spinner size="lg" label="A carregar plano de culto..." />
-      </div>
-    );
-  if (isError || !service)
-    return (
-      <div className="flex-1 flex flex-col items-center justify-center gap-4 p-12 text-center">
-        <h2 className="text-lg font-bold text-m3-text">
-          Plano de Culto Não Encontrado
-        </h2>
-        <Button
-          variant="primary"
-          icon={<ArrowLeft className="w-4 h-4" />}
-          onClick={() => navigate(-1)}
-        >
-          Voltar
-        </Button>
-      </div>
-    );
-
+  // Derived state (Must be defined before usage in hooks and renders)
   const allAvailableSongs = songsQuery.data?.songs || [];
   const songCountById = elements.reduce<Record<string, number>>((acc, el) => {
     if (el.type === "song" && el.songId)
       acc[el.songId] = (acc[el.songId] || 0) + 1;
     return acc;
   }, {});
+
   const totalDurationSeconds = elements.reduce(
     (acc, el) => acc + Math.max(0, Number(el.duration || 0)),
     0,
   );
+
   const filteredLibrarySongs = allAvailableSongs.filter(
     (s) =>
       s.title.toLowerCase().includes(librarySearch.toLowerCase()) ||
@@ -510,6 +615,7 @@ export const ServiceDetailPage: React.FC = () => {
     newElements: ServiceElement[],
     fallbackElements: ServiceElement[] = elementsRef.current,
   ) => {
+    if (!service) return;
     const updated = newElements.map((e, index) => ({ ...e, position: index }));
     setElements(updated);
     try {
@@ -524,46 +630,6 @@ export const ServiceDetailPage: React.FC = () => {
     }
   };
 
-  const handleDragStart = (e: React.DragEvent, id: string) => {
-    setDraggedElementId(id);
-    e.dataTransfer.effectAllowed = "move";
-    e.dataTransfer.setData("text/plain", id);
-  };
-
-  const handleDragOver = (e: React.DragEvent, id: string) => {
-    e.preventDefault();
-    if (draggedElementId === id) return;
-    if (dragOverElementId !== id) setDragOverElementId(id);
-  };
-
-  const handleDragLeave = () => setDragOverElementId(null);
-
-  const handleDragEnd = () => {
-    setDraggedElementId(null);
-    setDragOverElementId(null);
-    setIsDropTargetActive(false);
-  };
-
-  const handleDrop = async (e: React.DragEvent, targetId?: string) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    const songId = e.dataTransfer.getData("text/x-song-id");
-    const draggedId = e.dataTransfer.getData("text/plain");
-
-    if (songId) {
-      await handleAddSongToService(songId, targetId);
-    } else if (draggedId && targetId && draggedId !== targetId) {
-      const oldIndex = elements.findIndex((el) => el.id === draggedId);
-      const newIndex = elements.findIndex((el) => el.id === targetId);
-      if (oldIndex !== -1 && newIndex !== -1) {
-        const updated = arrayMove(elements, oldIndex, newIndex);
-        await syncElements(updated);
-      }
-    }
-    handleDragEnd();
-  };
-
   const handleRemoveElement = async (elementId: string) => {
     await syncElements(elements.filter((e) => e.id !== elementId));
   };
@@ -575,6 +641,7 @@ export const ServiceDetailPage: React.FC = () => {
   };
 
   const handleSaveGeneralNotes = async () => {
+    if (!service) return;
     await updateService({
       id: service.id,
       data: { notes: generalNotes, updatedAt: service.updatedAt },
@@ -630,27 +697,6 @@ export const ServiceDetailPage: React.FC = () => {
     }
   };
 
-  const openAddModal = (type: ModalType) => {
-    setEditingElement(null);
-    setActiveModal(type);
-  };
-  const openEditModal = (element: ServiceElement) => {
-    setEditingElement(element);
-    const knownTypes: ModalType[] = [
-      "welcome",
-      "scripture",
-      "message",
-      "reading",
-      "announcement",
-      "custom",
-    ];
-    setActiveModal(
-      knownTypes.includes(element.type as ModalType)
-        ? (element.type as ModalType)
-        : "custom",
-    );
-  };
-
   const handleModalSave = async (
     type: string,
     data: {
@@ -692,6 +738,119 @@ export const ServiceDetailPage: React.FC = () => {
     setEditingElement(null);
   };
 
+  const openAddModal = (type: ModalType) => {
+    setEditingElement(null);
+    setActiveModal(type);
+  };
+
+  const openEditModal = (element: ServiceElement) => {
+    setEditingElement(element);
+    const knownTypes: ModalType[] = [
+      "welcome",
+      "scripture",
+      "message",
+      "reading",
+      "announcement",
+      "custom",
+    ];
+    setActiveModal(
+      knownTypes.includes(element.type as ModalType)
+        ? (element.type as ModalType)
+        : "custom",
+    );
+  };
+
+  // Pragmatic DnD drop target for the entire elements container
+  useEffect(() => {
+    const el = dropContainerRef.current;
+    if (!el) return;
+
+    return dropTargetForElements({
+      element: el,
+      canDrop: ({ source }) => source.data.type === "library-song",
+      onDragEnter: () => setIsDropTargetActive(true),
+      onDragLeave: () => setIsDropTargetActive(false),
+      onDrop: () => setIsDropTargetActive(false),
+    });
+  }, []);
+
+  // Monitor all pragmatic drag-and-drop operations
+  useEffect(() => {
+    return monitorForElements({
+      onDrop: async ({ source, location }) => {
+        const destination = location.current.dropTargets[0];
+        if (!destination) return;
+
+        const currentElements = elementsRef.current;
+
+        // Case 1: Reordering service elements within the list
+        if (source.data.type === "service-element") {
+          const sourceId = source.data.elementId as string;
+          const targetData = destination.data;
+
+          if (targetData.type === "service-element") {
+            const targetId = targetData.elementId as string;
+            if (sourceId === targetId) return;
+
+            const oldIndex = currentElements.findIndex(
+              (e) => e.id === sourceId,
+            );
+            const targetIndex = currentElements.findIndex(
+              (e) => e.id === targetId,
+            );
+            if (oldIndex === -1 || targetIndex === -1) return;
+
+            const edge = extractClosestEdge(targetData);
+            let newIndex = targetIndex;
+            if (edge === "bottom" && oldIndex > targetIndex) {
+              newIndex = targetIndex + 1;
+            } else if (edge === "top" && oldIndex < targetIndex) {
+              newIndex = targetIndex - 1;
+            }
+
+            const reordered = arrayMove(
+              currentElements,
+              oldIndex,
+              Math.max(0, Math.min(newIndex, currentElements.length - 1)),
+            );
+            await syncElements(reordered);
+          }
+          return;
+        }
+
+        // Case 2: Dropping a song from the library
+        if (source.data.type === "library-song") {
+          const songId = source.data.songId as string;
+          if (!songId) return;
+
+          const targetData = destination.data;
+          let insertBeforeId: string | undefined = undefined;
+
+          if (targetData.type === "service-element") {
+            const targetId = targetData.elementId as string;
+            const edge = extractClosestEdge(targetData);
+            if (edge === "top") {
+              insertBeforeId = targetId;
+            } else {
+              const targetIndex = currentElements.findIndex(
+                (e) => e.id === targetId,
+              );
+              if (
+                targetIndex !== -1 &&
+                targetIndex + 1 < currentElements.length
+              ) {
+                insertBeforeId = currentElements[targetIndex + 1].id;
+              }
+            }
+          }
+
+          await handleAddSongToService(songId, insertBeforeId);
+        }
+      },
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const editInitial = editingElement
     ? {
         title: editingElement.title,
@@ -701,6 +860,29 @@ export const ServiceDetailPage: React.FC = () => {
         duration: Number(editingElement.duration || 0),
       }
     : undefined;
+
+  // IMPORTANT: Hooks cannot be called conditionally. This early return must stay here at the bottom.
+  if (isLoading)
+    return (
+      <div className="flex-1 flex items-center justify-center p-12">
+        <Spinner size="lg" label="A carregar plano de culto..." />
+      </div>
+    );
+  if (isError || !service)
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center gap-4 p-12 text-center">
+        <h2 className="text-lg font-bold text-m3-text">
+          Plano de Culto Não Encontrado
+        </h2>
+        <Button
+          variant="primary"
+          icon={<ArrowLeft className="w-4 h-4" />}
+          onClick={() => navigate(-1)}
+        >
+          Voltar
+        </Button>
+      </div>
+    );
 
   return (
     <div className="flex-1 flex flex-col h-full overflow-hidden bg-m3-sidebar/10">
@@ -768,43 +950,13 @@ export const ServiceDetailPage: React.FC = () => {
               </div>
             ) : (
               filteredLibrarySongs.map((s) => (
-                <div
+                <LibrarySongItem
                   key={s.id}
-                  draggable
-                  onDragStart={(e) => {
-                    e.dataTransfer.setData("text/x-song-id", s.id);
-                    e.dataTransfer.effectAllowed = "copy";
-                  }}
-                  className="flex items-center justify-between gap-3 px-3 py-2 bg-m3-card hover:bg-m3-hover rounded-xl border border-m3-border/50 cursor-grab active:cursor-grabbing transition-colors shadow-sm"
-                >
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm font-semibold truncate text-m3-text">
-                      {s.title}
-                    </p>
-                    <p className="text-xs text-m3-secondary truncate">
-                      {s.artist || "—"}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2 shrink-0">
-                    {(songCountById[s.id] || 0) > 0 && (
-                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400">
-                        Na Lista ×{songCountById[s.id]}
-                      </span>
-                    )}
-                    <button
-                      type="button"
-                      onClick={() => handleAddSongToService(s.id)}
-                      disabled={Boolean(pendingSongIds[s.id])}
-                      className="p-1.5 rounded-lg bg-m3-primary/10 text-m3-primary hover:bg-m3-primary/20 disabled:opacity-50 transition-colors"
-                    >
-                      {pendingSongIds[s.id] ? (
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                      ) : (
-                        <Plus className="w-4 h-4" />
-                      )}
-                    </button>
-                  </div>
-                </div>
+                  song={s}
+                  countInService={songCountById[s.id] || 0}
+                  isPending={Boolean(pendingSongIds[s.id])}
+                  onAdd={handleAddSongToService}
+                />
               ))
             )}
           </div>
@@ -861,7 +1013,7 @@ export const ServiceDetailPage: React.FC = () => {
                 </div>
               </div>
 
-              <div className="px-5 py-2.5 border-b border-m3-border/40 shrink-0 bg-m3-background/30 flex flex-col justify-center min-h-[44px]">
+              <div className="px-5 py-2.5 border-b border-m3-border/40 shrink-0 bg-m3-background/30 flex flex-col justify-center min-h-11">
                 {isEditingGeneralNotes ? (
                   <div className="flex items-start gap-2">
                     <textarea
@@ -869,7 +1021,7 @@ export const ServiceDetailPage: React.FC = () => {
                       value={generalNotes}
                       onChange={(e) => setGeneralNotes(e.target.value)}
                       placeholder="Ex: Horário do ensaio: 8:30..."
-                      className="flex-1 text-xs rounded-lg border border-m3-border p-2 bg-white dark:bg-m3-card focus:outline-none focus:ring-1 focus:ring-m3-primary text-m3-text resize-y min-h-[36px]"
+                      className="flex-1 text-xs rounded-lg border border-m3-border p-2 bg-white dark:bg-m3-card focus:outline-none focus:ring-1 focus:ring-m3-primary text-m3-text resize-y min-h-9"
                       autoFocus
                     />
                     <Button
@@ -925,18 +1077,8 @@ export const ServiceDetailPage: React.FC = () => {
               </div>
 
               <div
-                className={`flex-1 overflow-y-auto p-4 flex flex-col gap-3 relative custom-scrollbar transition-colors ${isDropTargetActive ? "bg-m3-primary/5" : ""}`}
-                onDragOver={(e) => {
-                  e.preventDefault();
-                  if (e.dataTransfer.types.includes("text/x-song-id"))
-                    setIsDropTargetActive(true);
-                }}
-                onDragLeave={() => setIsDropTargetActive(false)}
-                onDrop={(e) => {
-                  if (e.dataTransfer.types.includes("text/x-song-id"))
-                    handleDrop(e);
-                  setIsDropTargetActive(false);
-                }}
+                ref={dropContainerRef}
+                className={`flex-1 overflow-y-auto p-4 flex flex-col gap-3 relative custom-scrollbar transition-colors ${isDropTargetActive ? "bg-m3-primary/5 ring-2 ring-m3-primary/20 rounded-2xl" : ""}`}
               >
                 {elements.length === 0 ? (
                   <div className="m-auto text-center rounded-2xl border border-dashed border-m3-border flex flex-col items-center justify-center p-12 shrink-0">
@@ -946,13 +1088,13 @@ export const ServiceDetailPage: React.FC = () => {
                     <h4 className="text-sm font-bold text-m3-text">
                       O plano ainda está vazio
                     </h4>
-                    <p className="text-xs text-m3-secondary mt-1 max-w-[200px]">
+                    <p className="text-xs text-m3-secondary mt-1 max-w-50">
                       Arraste cânticos da biblioteca ou adicione elementos
                       acima.
                     </p>
                   </div>
                 ) : (
-                  <>
+                  <div className="flex flex-col gap-3">
                     {elements.map((el, i) => (
                       <ServiceRow
                         key={el.id}
@@ -961,16 +1103,9 @@ export const ServiceDetailPage: React.FC = () => {
                         onRemove={handleRemoveElement}
                         onEdit={openEditModal}
                         onNoteChange={handleNoteChange}
-                        onDragStart={handleDragStart}
-                        onDragOver={handleDragOver}
-                        onDrop={handleDrop}
-                        onDragLeave={handleDragLeave}
-                        onDragEnd={handleDragEnd}
-                        isDragOver={dragOverElementId === el.id}
-                        draggedElementId={draggedElementId}
                       />
                     ))}
-                  </>
+                  </div>
                 )}
 
                 <div className="flex gap-3 mt-auto pt-4 shrink-0">
