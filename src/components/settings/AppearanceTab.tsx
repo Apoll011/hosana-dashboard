@@ -3,11 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { usePersonalSettings } from "@/src/hooks/usePersonalSettings";
 import { useCan } from "@/src/lib/permissions/client";
 import { Can } from "@/src/lib/permissions/components";
 import { Button, Input } from "@hosanna/shared";
 import {
   Check,
+  FolderTree,
   Image as ImageIcon,
   Loader2,
   MonitorSmartphone,
@@ -35,6 +37,7 @@ export const AppearanceTab: React.FC<AppearanceTabProps> = ({
   showToast,
 }) => {
   const { theme, setTheme } = useTheme();
+  const { settings, updateSetting } = usePersonalSettings();
   const { organization, refetch: refetchAuth } = useAuth();
   const { granted: canManageOrg } = useCan("organization.update");
 
@@ -183,6 +186,35 @@ export const AppearanceTab: React.FC<AppearanceTabProps> = ({
               );
             })}
           </div>
+        </div>
+        <div className="p-6">
+          <label
+            className={`flex items-start gap-3.5 p-4 border border-slate-200 dark:border-slate-800 rounded-xl transition-colors ${
+              !isSaving
+                ? "cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50"
+                : "opacity-75 cursor-not-allowed"
+            }`}
+          >
+            <div className="flex items-center h-5 mt-0.5">
+              <input
+                type="checkbox"
+                checked={settings.showFolderTree}
+                onChange={(e) =>
+                  updateSetting("showFolderTree", e.target.checked)
+                }
+                className="w-4.5 h-4.5 text-rose-500 border-slate-300 rounded focus:ring-rose-500"
+              />
+            </div>
+            <div className="flex flex-col">
+              <span className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                <FolderTree className="w-4 h-4 text-slate-400" />
+                Mostrar Árvore de Pastas
+              </span>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                Apresenta a árvore de pastas na barra lateral.
+              </p>
+            </div>
+          </label>
         </div>
       </div>
 

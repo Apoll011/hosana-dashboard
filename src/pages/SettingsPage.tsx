@@ -25,8 +25,8 @@ import { MembersTab } from "../components/settings/MembersTab";
 import { WorkspaceTab } from "../components/settings/WorkspaceTab";
 import { useActiveRole } from "../lib/permissions/client";
 
-import { useOnline } from "../hooks/useOnline";
 import { CloudOff } from "lucide-react";
+import { useOnline } from "../hooks/useOnline";
 
 type TabType =
   "general" | "workspace" | "account" | "members" | "appearance" | "about";
@@ -35,7 +35,7 @@ export const SettingsPage: React.FC = () => {
   const { showToast } = useSync();
   const isOnline = useOnline();
 
-  const [activeTab, setActiveTab] = useState<TabType>("appearance");
+  const [activeTab, setActiveTab] = useState<TabType>("account");
 
   // Restore Modal State
   const [pendingRestoreData, setPendingRestoreData] = useState<Record<
