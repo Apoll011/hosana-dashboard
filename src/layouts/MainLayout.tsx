@@ -56,8 +56,8 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { useRegisterSW } from "virtual:pwa-register/react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import { useRegisterSW } from "virtual:pwa-register/react";
 import { FolderForm } from "../components/forms/FolderForm";
 import { SongForm } from "../components/forms/SongForm";
 import { InboxButton, InboxFetchClient } from "../components/Inbox";
