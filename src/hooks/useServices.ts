@@ -8,10 +8,14 @@ import { Service, ServiceElement } from "@hosanna/shared";
 import { useSync } from "../contexts/SyncContext";
 import { getDatabase, ServiceDocType } from "../db";
 
+let cachedServicesMap: Map<string, Service[]> = new Map();
+let cachedSingleServices: Map<string, Service> = new Map();
+
 export function useServices(includeArchived: boolean = false) {
   const { showToast } = useSync();
-  const [services, setServices] = useState<Service[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const cacheKey = includeArchived ? "archived_included" : "active_only";
+  const [services, setServices] = useState<Service[]>(() => cachedServicesMap.get(cacheKey) ?? []);
+  const [isLoading, setIsLoading] = useState(() => !cachedServicesMap.has(cacheKey));
   const [isCreating, setIsCreating] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -39,7 +43,12 @@ export function useServices(includeArchived: boolean = false) {
           })
           .$.subscribe((docs) => {
             if (!isSubscribed) return;
-            setServices(docs.map((d) => d.toJSON() as Service));
+            const data = docs.map((d) => d.toJSON() as Service);
+            cachedServicesMap.set(cacheKey, data);
+            for (const s of data) {
+              cachedSingleServices.set(s.id, s);
+            }
+            setServices(data);
             setIsLoading(false);
           });
       } catch (err) {
@@ -54,7 +63,7 @@ export function useServices(includeArchived: boolean = false) {
       isSubscribed = false;
       if (rxSub) rxSub.unsubscribe();
     };
-  }, [includeArchived]);
+  }, [includeArchived, cacheKey]);
 
   const createService = useCallback(
     async (data: Partial<Service>) => {
@@ -204,8 +213,8 @@ export function useServices(includeArchived: boolean = false) {
 }
 
 export function useService(id: string | null) {
-  const [service, setService] = useState<Service | null>(null);
-  const [isLoading, setIsLoading] = useState(!!id);
+  const [service, setService] = useState<Service | null>(() => (id ? cachedSingleServices.get(id) ?? null : null));
+  const [isLoading, setIsLoading] = useState(() => (id ? !cachedSingleServices.has(id) : false));
 
   useEffect(() => {
     if (!id) {
@@ -225,8 +234,11 @@ export function useService(id: string | null) {
         rxSub = db.services.findOne(id).$.subscribe((doc) => {
           if (!isSubscribed) return;
           if (doc && !doc._deleted) {
-            setService(doc.toJSON() as Service);
+            const data = doc.toJSON() as Service;
+            cachedSingleServices.set(id, data);
+            setService(data);
           } else {
+            cachedSingleServices.delete(id);
             setService(null);
           }
           setIsLoading(false);

@@ -8,11 +8,14 @@ import { Folder } from "@hosanna/shared";
 import { useSync } from "../contexts/SyncContext";
 import { getDatabase, FolderDocType } from "../db";
 
+let cachedFolders: Folder[] | null = null;
+let cachedRootSongsCount: number = 0;
+
 export function useFolders() {
   const { showToast } = useSync();
-  const [folders, setFolders] = useState<Folder[]>([]);
-  const [rootSongsCount, setRootSongsCount] = useState<number>(0);
-  const [isLoading, setIsLoading] = useState(true);
+  const [folders, setFolders] = useState<Folder[]>(() => cachedFolders ?? []);
+  const [rootSongsCount, setRootSongsCount] = useState<number>(() => cachedRootSongsCount);
+  const [isLoading, setIsLoading] = useState(() => cachedFolders === null);
   const [isCreating, setIsCreating] = useState(false);
   const [isRenaming, setIsRenaming] = useState(false);
   const [isMoving, setIsMoving] = useState(false);
@@ -38,7 +41,9 @@ export function useFolders() {
           })
           .$.subscribe((docs) => {
             if (!isSubscribed) return;
-            setFolders(docs.map((d) => d.toJSON() as Folder));
+            const data = docs.map((d) => d.toJSON() as Folder);
+            cachedFolders = data;
+            setFolders(data);
             setIsLoading(false);
           });
 
@@ -51,6 +56,7 @@ export function useFolders() {
           })
           .$.subscribe((docs) => {
             if (!isSubscribed) return;
+            cachedRootSongsCount = docs.length;
             setRootSongsCount(docs.length);
           });
       } catch (err) {

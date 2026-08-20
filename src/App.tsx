@@ -20,17 +20,10 @@ export default function App() {
   );
 
   useEffect(() => {
-    // Preload Ace editor during idle time so first song click opens editor instantly
     if (typeof window !== "undefined") {
-      if ("requestIdleCallback" in window) {
-        (window as any).requestIdleCallback(() => {
-          void preloadEditor();
-        });
-      } else {
-        setTimeout(() => {
-          void preloadEditor();
-        }, 1500);
-      }
+      setTimeout(() => {
+        void preloadEditor();
+      }, 3000);
     }
   }, []);
   return (
