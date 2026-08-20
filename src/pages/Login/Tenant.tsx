@@ -4,7 +4,6 @@
  */
 
 import { Button, Input } from "@hosanna/shared";
-import { useStatsigClient } from "@statsig/react-bindings";
 import {
   ArrowLeft,
   ArrowRight,
@@ -26,9 +25,8 @@ import LoginLayout from "./Layout";
 
 export const RegisterOrganizationPage: React.FC = () => {
   const navigate = useNavigate();
-  const { client } = useStatsigClient();
-  const alpha_release = client.checkGate("alpha_release");
-  const captchaEnabled = client.checkGate("captcha_enabled");
+  const alpha_release = false;
+  const captchaEnabled = false;
 
   // Step state
   const [step, setStep] = useState(1);

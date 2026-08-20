@@ -4,7 +4,7 @@
  */
 
 import { Spinner } from "@hosanna/shared";
-import React, { Suspense, lazy } from "react";
+import React, { Suspense, lazy, useEffect } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import {
   Navigate,
@@ -26,27 +26,64 @@ const PageLoader = () => (
   </div>
 );
 
-const lazyImport = <T,>(
-  componentImport: () => Promise<{ default: React.ComponentType<T> }>,
-) =>
-  lazy(async () => {
+type LazyImportFn = () => Promise<{ default: React.ComponentType<any> }>;
+
+const prefetchQueue: Array<() => Promise<unknown>> = [];
+
+const lazyImport = (componentImport: LazyImportFn) => {
+  prefetchQueue.push(componentImport);
+
+  return lazy(async () => {
     const pageHasAlreadyBeenForceRefreshed = JSON.parse(
       window.localStorage.getItem("page-force-refreshed") || "false",
     );
 
     try {
       const component = await componentImport();
-      window.localStorage.setItem("page-force-refreshed", "false");
+      if (pageHasAlreadyBeenForceRefreshed) {
+        window.localStorage.setItem("page-force-refreshed", "false");
+      }
       return component;
     } catch (error) {
       if (!pageHasAlreadyBeenForceRefreshed) {
         window.localStorage.setItem("page-force-refreshed", "true");
         window.location.reload();
-        return { default: () => <PageLoader /> };
+        return new Promise<never>(() => {});
       }
       throw error;
     }
   });
+};
+function canPrefetch(): boolean {
+  if (typeof navigator === "undefined") return false;
+  const connection = (navigator as any).connection;
+  if (!connection) return true;
+  if (connection.saveData) return false;
+  return !["slow-2g", "2g"].includes(connection.effectiveType);
+}
+
+function runWhenIdle(cb: () => void, timeout = 2000) {
+  if (typeof window === "undefined") return;
+  if ("requestIdleCallback" in window) {
+    (window as any).requestIdleCallback(cb, { timeout });
+  } else {
+    setTimeout(cb, 1);
+  }
+}
+
+function prefetchRemainingRoutes() {
+  if (!canPrefetch()) return;
+
+  let i = 0;
+  const step = () => {
+    if (i >= prefetchQueue.length) return;
+    const importFn = prefetchQueue[i++];
+    importFn().catch(() => {});
+    runWhenIdle(step);
+  };
+
+  runWhenIdle(step);
+}
 
 const ErrorFallback = ({
   resetErrorBoundary,
@@ -167,6 +204,11 @@ const TeamsPage = lazyImport(() =>
 
 export const AppRoutes: React.FC = () => {
   usePreloadPermissions();
+
+  useEffect(() => {
+    prefetchRemainingRoutes();
+  }, []);
+
   return (
     <ErrorBoundary FallbackComponent={ErrorFallback}>
       <Suspense fallback={<PageLoader />}>
