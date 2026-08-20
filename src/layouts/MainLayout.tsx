@@ -74,7 +74,6 @@ import { useAllSongs } from "../hooks/useSongs";
 import { authClient } from "../lib/authClient";
 
 import { ConversionResult } from "@hosanna/shared";
-import { useStatsigClient } from "@statsig/react-bindings";
 import { useQueryClient } from "@tanstack/react-query";
 import { FolderItem, ServiceItem, SongItem } from "../command-palette.types";
 import {
@@ -212,8 +211,6 @@ export const MainLayout: React.FC = () => {
     [showArchived, archivedServicesQuery.data],
   );
 
-  const { client } = useStatsigClient();
-
   // Folder state: null = Root directory
   const [currentFolderId, setCurrentFolderId] = useState<string | null>(null);
 
@@ -343,7 +340,7 @@ export const MainLayout: React.FC = () => {
   const [isBatchDeleteOpen, setIsBatchDeleteOpen] = useState(false);
   const [isBatchTagOpen, setIsBatchTagOpen] = useState(false);
 
-  const teamsEnabled = client.checkGate("teams");
+  const teamsEnabled = false;
 
   // Clear selection on folder navigation
   useEffect(() => {
