@@ -23,7 +23,6 @@ import {
   ChevronRight,
   Church,
   CornerLeftUp,
-  Download,
   Edit2,
   ExternalLink,
   FileText,
@@ -77,7 +76,7 @@ import { authClient } from "../lib/authClient";
 import { ConversionResult } from "@hosanna/shared";
 import { useStatsigClient } from "@statsig/react-bindings";
 import { useQueryClient } from "@tanstack/react-query";
-import { Action, KBarProvider } from "kbar";
+import { FolderItem, ServiceItem, SongItem } from "../command-palette.types";
 import {
   buildFolderTree,
   FolderTreeItemNode,
@@ -85,7 +84,7 @@ import {
   MoveFolderTreeItem,
 } from "../components/explorer";
 import { ServiceForm } from "../components/forms/ServiceForm";
-import { KBarCommandPaletteUI } from "../components/KBarCommandPalette";
+import { HosannaCommandPalette } from "../components/HosannaCommandPalette";
 import { CifraClubImportModal } from "../components/modals/CifraModal";
 import { getRoleLabel } from "../components/settings/settingsUtils";
 import { songImportRegistry } from "../import";
@@ -563,261 +562,6 @@ export const MainLayout: React.FC = () => {
     () => allServices.find((s) => s.id === currentServiceId),
     [allServices, currentServiceId],
   );
-
-  const isCommandPaletteEnabled = client?.checkGate
-    ? client.checkGate("command_palett")
-    : false;
-
-  const kbarActions = useMemo<Action[]>(() => {
-    if (!isCommandPaletteEnabled) return [];
-
-    const actions: Action[] = [
-      // --- NAVEGAÇÃO ---
-      {
-        id: "nav-drive",
-        name: "Ir para Drive (Início)",
-        shortcut: ["g", "d"],
-        keywords: "drive inicio home pastas root folders",
-        section: "Navegação",
-        icon: <HardDrive className="w-4 h-4 text-sky-500" />,
-        perform: () => {
-          setCurrentFolderId(null);
-          navigate(`${slugPrefix}/folders`);
-        },
-      },
-      {
-        id: "nav-songs",
-        name: "Ir para Biblioteca de Cânticos",
-        shortcut: ["g", "s"],
-        keywords: "biblioteca canticos musicas songs library",
-        section: "Navegação",
-        icon: <Music className="w-4 h-4 text-sky-500" />,
-        perform: () => navigate(`${slugPrefix}/songs`),
-      },
-      {
-        id: "nav-services",
-        name: "Ir para Cultos / Planos",
-        shortcut: ["g", "c"],
-        keywords: "cultos planos servicos services worship",
-        section: "Navegação",
-        icon: <Church className="w-4 h-4 text-emerald-500" />,
-        perform: () => navigate(`${slugPrefix}/services`),
-      },
-      {
-        id: "nav-settings",
-        name: "Ir para Definições do Sistema",
-        shortcut: ["g", "t"],
-        keywords: "definicoes configuracoes settings preferences",
-        section: "Navegação",
-        icon: <Settings className="w-4 h-4 text-slate-500" />,
-        perform: () => navigate(`${slugPrefix}/settings`),
-      },
-
-      // --- AÇÕES RÁPIDAS ---
-      {
-        id: "action-create-song",
-        name: "Criar Novo Cântico",
-        shortcut: ["c", "s"],
-        keywords: "novo cantico musica adicionar song create add",
-        section: "Ações Rápidas",
-        icon: <Plus className="w-4 h-4 text-sky-500" />,
-        perform: () => setIsCreateSongModalOpen(true),
-      },
-      {
-        id: "action-import-cifra",
-        name: "Importar Cântico do CifraClub",
-        shortcut: ["c", "i"],
-        keywords: "importar cifraclub cifra web url fetch",
-        section: "Ações Rápidas",
-        icon: <Download className="w-4 h-4 text-sky-500" />,
-        perform: () => setIsCifraImportOpen(true),
-      },
-      {
-        id: "action-create-service",
-        name: "Criar Novo Plano de Culto",
-        shortcut: ["c", "c"],
-        keywords: "novo culto plano servico create service worship date",
-        section: "Ações Rápidas",
-        icon: <Calendar className="w-4 h-4 text-emerald-500" />,
-        perform: () => setIsCreateServiceModalOpen(true),
-      },
-      {
-        id: "action-create-folder",
-        name: "Criar Nova Pasta",
-        shortcut: ["c", "f"],
-        keywords: "nova pasta diretorio novapasta create folder directory",
-        section: "Ações Rápidas",
-        icon: <FolderPlus className="w-4 h-4 text-amber-500" />,
-        perform: () => setIsCreateModalOpen(true),
-      },
-      {
-        id: "action-upload-files",
-        name: "Importar Ficheiros",
-        shortcut: ["u"],
-        keywords: "upload carregar ficheiros chordpro sbpbackup import txt pro",
-        section: "Ações Rápidas",
-        icon: <Upload className="w-4 h-4 text-purple-500" />,
-        perform: () => fileInputRef.current?.click(),
-      },
-    ];
-
-    // --- DYNAMIC FOLDERS ---
-    allFolders.forEach((f) => {
-      actions.push({
-        id: `folder-${f.id}`,
-        name: `Pasta: ${f.name}`,
-        subtitle: `Caminho: ${getFolderPathString(f.parentId)} (${f.songCount || 0} cânticos)`,
-        keywords: `pasta pastas folder folders diretoria directory ${f.name} ${getFolderPathString(f.parentId)}`,
-        section: "Pastas",
-        icon: <FolderIcon className="w-4 h-4 text-amber-500" />,
-        perform: () => {
-          handleSelectFolder(f.id);
-          navigate(`${slugPrefix}/folders`);
-        },
-      });
-    });
-
-    // --- DYNAMIC SONGS ---
-    allSongs.forEach((s) => {
-      actions.push({
-        id: `song-${s.id}`,
-        name: `Cântico: ${s.title}`,
-        subtitle: `${s.artist || "Artista Desconhecido"} ${s.tags?.length ? "• " + s.tags.join(", ") : ""}`,
-        keywords: `cantico canticos musica musicas song songs louvor ${s.title} ${s.artist || ""} ${(s.tags || []).join(" ")}`,
-        section: "Cânticos",
-        icon: <FileText className="w-4 h-4 text-sky-500" />,
-        perform: () => navigate(`${slugPrefix}/songs/${s.id}`),
-      });
-    });
-
-    // --- DYNAMIC SERVICES ---
-    allServices.forEach((serv) => {
-      actions.push({
-        id: `service-${serv.id}`,
-        name: `Culto: ${serv.name}`,
-        subtitle: `Data: ${new Date(serv.date).toLocaleDateString("pt-PT")}`,
-        keywords: `culto cultos plano planos service services worship reuniao ${serv.name} ${serv.notes || ""}`,
-        section: "Cultos",
-        icon: <Calendar className="w-4 h-4 text-emerald-500" />,
-        perform: () => navigate(`${slugPrefix}/services/${serv.id}`),
-      });
-    });
-
-    // --- CURRENT CONTEXT & VIEW ACTIONS ---
-    if (isExplorerView) {
-      actions.push(
-        {
-          id: "view-grid",
-          name: "Alternar Vista para Grelha",
-          keywords: "vista grelha grid view layout",
-          section: "Visualização",
-          icon: <LayoutGrid className="w-4 h-4 text-slate-500" />,
-          perform: () => handleViewModeChange("grid"),
-        },
-        {
-          id: "view-list",
-          name: "Alternar Vista para Lista",
-          keywords: "vista lista list view table layout",
-          section: "Visualização",
-          icon: <List className="w-4 h-4 text-slate-500" />,
-          perform: () => handleViewModeChange("list"),
-        },
-        {
-          id: "open-filters",
-          name: "Abrir Painel de Filtros Avançados",
-          keywords: "filtros filter pesquisar tom tag artista",
-          section: "Visualização",
-          icon: <Filter className="w-4 h-4 text-slate-500" />,
-          perform: () => setIsFilterPanelOpen(true),
-        },
-      );
-    }
-
-    if (isSongEditorView && currentSong) {
-      actions.push(
-        {
-          id: "song-print-current",
-          name: `Imprimir Cântico: "${currentSong.title}"`,
-          keywords: "imprimir print pdf cantico atual",
-          section: "Cântico Atual",
-          icon: <Printer className="w-4 h-4 text-indigo-500" />,
-          perform: () => handlePrintSong(currentSong.id),
-        },
-        {
-          id: "song-move-current",
-          name: `Mover Cântico: "${currentSong.title}"`,
-          keywords: "mover pasta move folder destination",
-          section: "Cântico Atual",
-          icon: <Move className="w-4 h-4 text-sky-500" />,
-          perform: () => {
-            setMoveSongTarget(currentSong);
-            setTargetSongFolderId(currentSong.folderId!);
-          },
-        },
-        {
-          id: "song-delete-current",
-          name: `Eliminar Cântico: "${currentSong.title}"`,
-          keywords: "eliminar apagar remover delete remove",
-          section: "Cântico Atual",
-          icon: <Trash2 className="w-4 h-4 text-rose-500" />,
-          perform: () => setDeleteSongTarget(currentSong),
-        },
-      );
-    }
-
-    if (isServiceEditorView && currentService) {
-      actions.push({
-        id: "service-delete-current",
-        name: `Eliminar Culto: "${currentService.name}"`,
-        keywords: "eliminar apagar culto delete service",
-        section: "Culto Atual",
-        icon: <Trash2 className="w-4 h-4 text-rose-500" />,
-        perform: async () => {
-          await deleteService(currentService.id);
-          navigate(`${slugPrefix}/services`);
-        },
-      });
-    }
-
-    // --- CONTA E PREFERÊNCIAS ---
-    actions.push(
-      {
-        id: "toggle-sidebar",
-        name: isSidebarCollapsed
-          ? "Expandir Barra Lateral"
-          : "Recolher Barra Lateral",
-        shortcut: ["b", "s"],
-        keywords: "sidebar menu barras lateral recolher expandir toggle",
-        section: "Definições & Conta",
-        icon: <ChevronRight className="w-4 h-4 text-slate-500" />,
-        perform: () => setIsSidebarCollapsed(!isSidebarCollapsed),
-      },
-      {
-        id: "user-logout",
-        name: "Sair / Terminar Sessão",
-        keywords: "sair logout encerrar sessao exit",
-        section: "Definições & Conta",
-        icon: <LogOut className="w-4 h-4 text-rose-500" />,
-        perform: () => logout(),
-      },
-    );
-
-    return actions;
-  }, [
-    isCommandPaletteEnabled,
-    allFolders,
-    allSongs,
-    allServices,
-    currentFolderId,
-    currentSong,
-    currentService,
-    isExplorerView,
-    isSongEditorView,
-    isServiceEditorView,
-    isSidebarCollapsed,
-    navigate,
-    logout,
-  ]);
 
   // Is searching or filtering active?
   const isSearchingOrFiltering = Boolean(
@@ -1831,7 +1575,6 @@ export const MainLayout: React.FC = () => {
 
   const layoutContent = (
     <>
-      {isCommandPaletteEnabled && <KBarCommandPaletteUI />}
       <div className="h-dvh max-h-dvh w-full flex flex-row overflow-hidden bg-m3-bg">
         {/* Mobile Sidebar Overlay */}
         {isSidebarOpen && (
@@ -3565,9 +3308,105 @@ export const MainLayout: React.FC = () => {
     </>
   );
 
-  if (isCommandPaletteEnabled) {
-    return <KBarProvider actions={kbarActions}>{layoutContent}</KBarProvider>;
-  }
+  return (
+    <HosannaCommandPalette
+      slugPrefix={organization?.slug || ""}
+      isDataLoading={
+        songsQuery.isLoading ||
+        foldersQuery.isLoading ||
+        servicesQuery.isLoading
+      }
+      // --- SONGS SEARCH ---
+      searchSongsDb={async (query) => {
+        // If still loading or no data yet, return empty safely
+        if (songsQuery.isLoading || !songsQuery.data?.songs) return [];
 
-  return layoutContent;
+        const lowerQuery = query.toLowerCase().trim();
+        const allSongs = songsQuery.data.songs;
+
+        // Filter in-memory with limit to keep palette instant
+        const matches: SongItem[] = [];
+        for (const song of allSongs) {
+          const matchTitle = song.title?.toLowerCase().includes(lowerQuery);
+          const matchArtist = song.artist?.toLowerCase().includes(lowerQuery);
+          const matchTags = song.tags?.some((t: string) =>
+            t.toLowerCase().includes(lowerQuery),
+          );
+
+          if (matchTitle || matchArtist || matchTags) {
+            matches.push(song);
+            if (matches.length >= 8) break; // Limit to top 8
+          }
+        }
+        return matches;
+      }}
+      // --- FOLDERS SEARCH ---
+      searchFoldersDb={async (query) => {
+        if (foldersQuery.isLoading || !foldersQuery.data?.folders) return [];
+
+        const lowerQuery = query.toLowerCase().trim();
+        const allFolders = foldersQuery.data.folders;
+
+        const matches: FolderItem[] = [];
+        for (const folder of allFolders) {
+          if (folder.name?.toLowerCase().includes(lowerQuery)) {
+            matches.push(folder);
+            if (matches.length >= 5) break; // Limit to top 5
+          }
+        }
+        return matches;
+      }}
+      // --- SERVICES SEARCH ---
+      searchServicesDb={async (query) => {
+        const rawServices = servicesQuery.data;
+        if (servicesQuery.isLoading || !Array.isArray(rawServices)) return [];
+
+        const lowerQuery = query.toLowerCase().trim();
+        const matches: ServiceItem[] = [];
+
+        for (const service of rawServices) {
+          const matchName = service.name?.toLowerCase().includes(lowerQuery);
+          const matchNotes = service.notes?.toLowerCase().includes(lowerQuery);
+
+          if (matchName || matchNotes) {
+            matches.push(service);
+            if (matches.length >= 5) break; // Limit to top 5
+          }
+        }
+        return matches;
+      }}
+      getFolderPathString={(parentId) => {
+        if (!parentId || !foldersQuery.data?.folders) return "Raiz";
+        const found = foldersQuery.data.folders.find(
+          (f: FolderItem) => f.id === parentId,
+        );
+        return found ? found.name : "Raiz";
+      }}
+      navigate={navigate}
+      logout={logout}
+      currentFolderId={currentFolderId}
+      currentSong={currentSong}
+      currentService={currentService}
+      isExplorerView={isExplorerView}
+      isSongEditorView={isSongEditorView}
+      isServiceEditorView={isServiceEditorView}
+      isSidebarCollapsed={isSidebarCollapsed}
+      setIsSidebarCollapsed={setIsSidebarCollapsed}
+      setCurrentFolderId={setCurrentFolderId}
+      setIsCreateSongModalOpen={setIsCreateSongModalOpen}
+      setIsCifraImportOpen={setIsCifraImportOpen}
+      setIsCreateServiceModalOpen={setIsCreateServiceModalOpen}
+      setIsCreateModalOpen={setIsCreateModalOpen}
+      setIsFilterPanelOpen={setIsFilterPanelOpen}
+      handleViewModeChange={handleViewModeChange}
+      handlePrintSong={handlePrintSong}
+      setMoveSongTarget={setMoveSongTarget}
+      setTargetSongFolderId={setTargetSongFolderId}
+      setDeleteSongTarget={setDeleteSongTarget}
+      deleteService={deleteService}
+      fileInputRef={fileInputRef}
+    >
+      {layoutContent}
+    </HosannaCommandPalette>
+  );
 };
