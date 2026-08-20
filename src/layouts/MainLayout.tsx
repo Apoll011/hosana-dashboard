@@ -564,10 +564,6 @@ export const MainLayout: React.FC = () => {
     [allServices, currentServiceId],
   );
 
-  const show_folder_tree = client?.checkGate
-    ? client.checkGate("show_folder_tree")
-    : true;
-
   const isCommandPaletteEnabled = client?.checkGate
     ? client.checkGate("command_palett")
     : false;
@@ -2025,7 +2021,7 @@ export const MainLayout: React.FC = () => {
             </button>
           )}
 
-          {!isSidebarCollapsed && show_folder_tree && (
+          {!isSidebarCollapsed && (
             <>
               <div className="mt-6 px-3 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-m3-secondary opacity-60">
                 Pastas ({allFolders.length})
@@ -2049,9 +2045,7 @@ export const MainLayout: React.FC = () => {
               </div>
             </>
           )}
-          {(isSidebarCollapsed || !show_folder_tree) && (
-            <div className="flex-1" />
-          )}
+          {isSidebarCollapsed && <div className="flex-1" />}
 
           {user && (
             <div

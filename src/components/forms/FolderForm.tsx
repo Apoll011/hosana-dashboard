@@ -4,35 +4,7 @@
  */
 
 import { Button, Input } from "@hosanna/shared";
-import React from "react";
-import { Resolver, useForm } from "react-hook-form";
-
-interface FolderFormData {
-  name: string;
-}
-
-const customFolderResolver: Resolver<FolderFormData> = async (values) => {
-  const errors: Record<string, any> = {};
-
-  const trimmedName = values.name?.trim();
-
-  if (!trimmedName) {
-    errors.name = {
-      type: "required",
-      message: "O nome da pasta é obrigatório",
-    };
-  } else if (trimmedName.length < 2) {
-    errors.name = {
-      type: "minLength",
-      message: "O nome deve ter pelo menos 2 caracteres",
-    };
-  }
-
-  return {
-    values: Object.keys(errors).length === 0 ? values : {},
-    errors,
-  };
-};
+import React, { useState } from "react";
 
 interface FolderFormProps {
   initialName?: string;
@@ -42,6 +14,20 @@ interface FolderFormProps {
   title?: string;
 }
 
+// Extracted validation logic to a pure function for better testability
+const validateFolderName = (name: string): string | undefined => {
+  const trimmedName = name.trim();
+
+  if (!trimmedName) {
+    return "O nome da pasta é obrigatório";
+  }
+  if (trimmedName.length < 2) {
+    return "O nome deve ter pelo menos 2 caracteres";
+  }
+
+  return undefined;
+};
+
 export const FolderForm: React.FC<FolderFormProps> = ({
   initialName = "",
   onSubmit,
@@ -49,29 +35,41 @@ export const FolderForm: React.FC<FolderFormProps> = ({
   isLoading = false,
   title = "Criar Pasta",
 }) => {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<FolderFormData>({
-    resolver: customFolderResolver,
-    defaultValues: {
-      name: initialName,
-    },
-  });
+  const [name, setName] = useState(initialName);
+  const [error, setError] = useState<string | undefined>();
 
-  const onFormSubmit = async (data: FolderFormData) => {
-    await onSubmit(data.name.trim());
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const validationError = validateFolderName(name);
+
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+
+    await onSubmit(name.trim());
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setName(e.target.value);
+
+    // Clear the error state as soon as the user starts interacting again
+    if (error) {
+      setError(undefined);
+    }
   };
 
   return (
-    <form onSubmit={handleSubmit(onFormSubmit)} className="flex flex-col gap-4">
+    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
       <Input
         label="Nome da Pasta"
         placeholder="Ex: Natal 2026"
-        error={errors.name?.message}
+        error={error}
         autoFocus
-        {...register("name")}
+        value={name}
+        onChange={handleChange}
+        disabled={isLoading}
       />
 
       <div className="flex items-center justify-end gap-3 mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
