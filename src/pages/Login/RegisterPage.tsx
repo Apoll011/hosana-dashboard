@@ -4,7 +4,6 @@
  */
 
 import { Button, Input } from "@hosanna/shared";
-import { useStatsigClient } from "@statsig/react-bindings";
 import { ArrowRight, CheckCircle2, Lock, Mail, User } from "lucide-react";
 import React, { useRef, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
@@ -15,8 +14,7 @@ import { TurnstileWidget } from "./components/TurnstileWidget";
 
 export const RegisterPage: React.FC = () => {
   const { refetch } = useAuth();
-  const { client } = useStatsigClient();
-  const captchaEnabled = client.checkGate("captcha_enabled");
+  const captchaEnabled = false;
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");

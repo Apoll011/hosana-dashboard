@@ -49,7 +49,6 @@ export const AboutTab: React.FC<{ active: boolean }> = ({ active }) => {
       license: "Proprietário",
       type: "Biblioteca Partilhada",
     },
-    { name: "@statsig/react-bindings", license: "MIT", type: "Feature Flags" },
     { name: "@vercel/analytics", license: "MIT", type: "Analítica" },
     { name: "@vercel/node", license: "MIT", type: "Serverless Functions" },
     {

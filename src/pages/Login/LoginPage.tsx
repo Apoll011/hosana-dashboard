@@ -4,7 +4,6 @@
  */
 
 import { Button, Input } from "@hosanna/shared";
-import { useStatsigClient } from "@statsig/react-bindings";
 import { ArrowRight, Lock, Mail } from "lucide-react";
 import React, { useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -28,8 +27,7 @@ export const LoginPage: React.FC = () => {
   const [rememberMe, setRememberMe] = useState(true);
   const captchaRef = useRef<{ reset: () => void }>(null);
 
-  const { client } = useStatsigClient();
-  const captchaEnabled = client.checkGate("captcha_enabled");
+  const captchaEnabled = false;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
