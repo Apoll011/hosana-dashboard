@@ -30,15 +30,45 @@ export const ToastContainer: React.FC = () => {
       {toasts.map((toast) => (
         <div
           key={toast.id}
-          className="pointer-events-auto flex items-center justify-between gap-4 p-5 bg-m3-card/80 backdrop-blur-xl border border-m3-border/50 rounded-2xl shadow-2xl shadow-black/20 animate-in slide-in-from-right-10 duration-300"
+          className="pointer-events-auto flex items-start justify-between gap-4 p-5 bg-m3-card/80 backdrop-blur-xl border border-m3-border/50 rounded-2xl shadow-2xl shadow-black/20 animate-in slide-in-from-right-10 duration-300"
         >
-          <div className="flex items-center gap-4">
-            {icons[toast.type]}
-            <p className="text-[13px] font-bold text-m3-text">{toast.text}</p>
+          <div className="flex items-start gap-4 flex-1">
+            <div className="mt-0.5">{icons[toast.type]}</div>
+            <div className="flex-1 min-w-0">
+              {toast.title ? (
+                <>
+                  <p className="text-[13px] font-bold text-m3-text">
+                    {toast.title}
+                  </p>
+                  {toast.description && (
+                    <p className="text-[12px] text-m3-secondary mt-1">
+                      {toast.description}
+                    </p>
+                  )}
+                </>
+              ) : (
+                <p className="text-[13px] font-bold text-m3-text">
+                  {toast.text}
+                </p>
+              )}
+              {toast.action && (
+                <div className="mt-3 flex items-center gap-2">
+                  <button
+                    onClick={() => {
+                      toast.action?.onClick();
+                      removeToast(toast.id);
+                    }}
+                    className="px-3 py-1.5 text-xs font-semibold rounded-xl bg-m3-primary text-white hover:bg-m3-primary/90 transition-all cursor-pointer shadow-sm"
+                  >
+                    {toast.action.label}
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
           <button
             onClick={() => removeToast(toast.id)}
-            className="p-2 text-m3-secondary hover:text-m3-text hover:bg-m3-hover rounded-xl transition-all cursor-pointer"
+            className="p-1.5 text-m3-secondary hover:text-m3-text hover:bg-m3-hover rounded-xl transition-all cursor-pointer shrink-0 -mr-1 -mt-1"
           >
             <X className="w-4 h-4" />
           </button>

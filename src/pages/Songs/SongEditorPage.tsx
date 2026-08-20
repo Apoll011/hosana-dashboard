@@ -3,32 +3,27 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { ChordProPreviewSettings } from "@/src/components/ChorproSettings";
 import { usePreviewSettings } from "@/src/hooks/usePreviewSettings";
 import { useCan } from "@/src/lib/permissions/client";
 import { Can } from "@/src/lib/permissions/components";
 import {
   Button,
   ChordProRenderer,
-  Editor,
-  EditorSettingsPanel,
   parseChordPro,
   Song,
   Spinner,
 } from "@hosanna/shared";
+import { Editor, EditorSettingsPanel } from "@hosanna/shared/editor";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   ArrowLeft,
   Columns,
   EditIcon,
-  Eye,
-  EyeOff,
   File,
   HelpCircle,
   LayoutTemplate,
-  Minus,
   PanelRight,
-  Plus,
-  RotateCcw,
   Save,
   Settings,
   Settings2,
@@ -286,6 +281,11 @@ export const SongEditorPage: React.FC = () => {
                 readOnly={!canUpdateSong}
                 onSave={handleSave}
                 mode="chordpro"
+                fallback={
+                  <div className="h-full w-full flex items-center justify-center">
+                    <Spinner size="md" label="A carregar o editor..." />
+                  </div>
+                }
               />
             </div>
           </div>
@@ -310,154 +310,13 @@ export const SongEditorPage: React.FC = () => {
               </button>
             </div>
 
-            {/* Contextual Preview Settings Popover (scoped to this pane) */}
             {showPreviewSettings && (
-              <div className="absolute right-2 top-11 w-64 bg-m3-card dark:bg-m3-dark-card border border-m3-border dark:border-m3-dark-border rounded-xl shadow-2xl z-40 p-4 space-y-4 animate-in fade-in slide-in-from-top-1 duration-200">
-                <div className="border-b border-m3-border/30 pb-2 flex items-center justify-between">
-                  <span className="text-xs font-bold text-m3-text uppercase tracking-wider">
-                    Ajustes Visuais
-                  </span>
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={resetSettings}
-                      className="text-m3-secondary hover:text-m3-primary transition-colors"
-                      title="Repor predefinições"
-                    >
-                      <RotateCcw className="w-3 h-3" />
-                    </button>
-                  </div>
-                </div>
-
-                {/* Exibição */}
-                <div className="space-y-2">
-                  <span className="text-[10px] font-bold text-m3-secondary uppercase">
-                    Exibição
-                  </span>
-                  <div className="flex bg-m3-sidebar p-0.5 rounded-lg border border-m3-border/30">
-                    <button
-                      onClick={() => updateSetting("showChords", false)}
-                      className={`flex-1 py-1.5 text-[10px] font-bold rounded-md transition-all flex items-center justify-center gap-1 ${!showChords ? "bg-m3-primary text-white" : "text-m3-secondary hover:text-m3-text"}`}
-                    >
-                      <EyeOff className="w-3 h-3" /> Apenas Letra
-                    </button>
-                    <button
-                      onClick={() => updateSetting("showChords", true)}
-                      className={`flex-1 py-1.5 text-[10px] font-bold rounded-md transition-all flex items-center justify-center gap-1 ${showChords ? "bg-m3-primary text-white" : "text-m3-secondary hover:text-m3-text"}`}
-                    >
-                      <Eye className="w-3 h-3" /> Cifras
-                    </button>
-                  </div>
-                </div>
-
-                {showChords && (
-                  <>
-                    <div className="space-y-2 border-t border-m3-border/30 pt-3">
-                      <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-bold text-m3-secondary uppercase">
-                          Transposição
-                        </span>
-                        <span className="text-[10px] font-bold px-1.5 py-0.5 bg-m3-primary/10 text-m3-primary rounded font-mono">
-                          {transposeVal > 0 ? `+${transposeVal}` : transposeVal}{" "}
-                          semitons
-                        </span>
-                      </div>
-                      <div className="grid grid-cols-3 gap-1 bg-m3-sidebar p-0.5 rounded-lg border border-m3-border/30">
-                        <button
-                          onClick={() => handleTranspose(-1)}
-                          className="py-1 text-xs font-bold rounded-md hover:bg-m3-hover flex items-center justify-center text-m3-text"
-                        >
-                          <Minus className="w-3 h-3" />
-                        </button>
-                        <button
-                          onClick={() => updateSetting("transposeVal", 0)}
-                          className={`py-1 text-[10px] font-bold rounded-md ${transposeVal === 0 ? "bg-m3-primary text-white" : "text-m3-secondary hover:bg-m3-hover"}`}
-                        >
-                          Original
-                        </button>
-                        <button
-                          onClick={() => handleTranspose(1)}
-                          className="py-1 text-xs font-bold rounded-md hover:bg-m3-hover flex items-center justify-center text-m3-text"
-                        >
-                          <Plus className="w-3 h-3" />
-                        </button>
-                      </div>
-                    </div>
-
-                    <div className="space-y-3 border-t border-m3-border/30 pt-3">
-                      <div className="flex justify-between items-center">
-                        <span className="text-[10px] font-bold text-m3-secondary uppercase">
-                          Diagramas
-                        </span>
-                        <div className="flex bg-m3-sidebar p-0.5 rounded-lg border border-m3-border/30 w-24">
-                          <button
-                            onClick={() => updateSetting("showDiagrams", false)}
-                            className={`flex-1 py-1 text-[9px] font-bold rounded-md ${!showDiagrams ? "bg-m3-primary text-white" : "text-m3-secondary"}`}
-                          >
-                            Off
-                          </button>
-                          <button
-                            onClick={() => updateSetting("showDiagrams", true)}
-                            className={`flex-1 py-1 text-[9px] font-bold rounded-md ${showDiagrams ? "bg-m3-primary text-white" : "text-m3-secondary"}`}
-                          >
-                            On
-                          </button>
-                        </div>
-                      </div>
-
-                      <div className="flex justify-between items-center">
-                        <span className="text-[10px] font-bold text-m3-secondary uppercase">
-                          Instrumento
-                        </span>
-                        <div className="flex bg-m3-sidebar p-0.5 rounded-lg border border-m3-border/30 w-32">
-                          <button
-                            onClick={() =>
-                              updateSetting("instrument", "guitar")
-                            }
-                            className={`flex-1 py-1 text-[9px] font-bold rounded-md ${instrument === "guitar" ? "bg-m3-primary text-white" : "text-m3-secondary"}`}
-                          >
-                            Guitar
-                          </button>
-                          <button
-                            onClick={() => updateSetting("instrument", "piano")}
-                            className={`flex-1 py-1 text-[9px] font-bold rounded-md ${instrument === "piano" ? "bg-m3-primary text-white" : "text-m3-secondary"}`}
-                          >
-                            Piano
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </>
-                )}
-
-                <div className="flex items-center justify-between border-t border-m3-border/30 pt-3">
-                  <span className="text-[10px] font-bold text-m3-secondary uppercase">
-                    Tamanho Letra
-                  </span>
-                  <div className="flex items-center gap-1">
-                    <button
-                      onClick={() =>
-                        updateSetting("fontSize", Math.max(10, fontSize - 1))
-                      }
-                      className="w-6 h-6 rounded-md bg-m3-sidebar hover:bg-m3-hover flex items-center justify-center border border-m3-border/20"
-                    >
-                      <Minus className="w-3 h-3 text-m3-secondary" />
-                    </button>
-                    <span className="text-[10px] font-mono font-bold text-m3-text min-w-5 text-center">
-                      {fontSize}
-                    </span>
-                    <button
-                      onClick={() =>
-                        updateSetting("fontSize", Math.min(28, fontSize + 1))
-                      }
-                      className="w-6 h-6 rounded-md bg-m3-sidebar hover:bg-m3-hover flex items-center justify-center border border-m3-border/20"
-                    >
-                      <Plus className="w-3 h-3 text-m3-secondary" />
-                    </button>
-                  </div>
-                </div>
-              </div>
+              <ChordProPreviewSettings
+                settings={settings}
+                updateSetting={updateSetting}
+                resetSettings={resetSettings}
+              />
             )}
-
             <div
               className="flex-1 overflow-auto bg-m3-card relative"
               onClick={() =>

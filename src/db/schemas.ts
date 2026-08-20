@@ -60,12 +60,14 @@ export const songSchema: RxJsonSchema<SongDocType> = {
     },
   },
   required: ["id", "title", "updatedAt"],
-  indexes: ["updatedAt", "folderId"],
+  indexes: ["updatedAt"],
 };
 
 export interface FolderDocType {
   id: string;
   name: string;
+  songCount: number | null;
+  folderCount: number | null;
   parentId: string | null;
   createdAt: string;
   updatedAt: string;
@@ -73,7 +75,7 @@ export interface FolderDocType {
 }
 
 export const folderSchema: RxJsonSchema<FolderDocType> = {
-  version: 0,
+  version: 1,
   primaryKey: "id",
   type: "object",
   properties: {
@@ -91,6 +93,12 @@ export const folderSchema: RxJsonSchema<FolderDocType> = {
     createdAt: {
       type: "string",
     },
+    songCount: {
+      type: ["number", "null"],
+    },
+    folderCount: {
+      type: ["number", "null"],
+    },
     updatedAt: {
       type: "string",
       maxLength: 50,
@@ -100,7 +108,7 @@ export const folderSchema: RxJsonSchema<FolderDocType> = {
     },
   },
   required: ["id", "name", "updatedAt"],
-  indexes: ["updatedAt", "parentId"],
+  indexes: ["updatedAt"],
 };
 
 export interface ServiceDocType {

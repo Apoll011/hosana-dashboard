@@ -3,20 +3,31 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { zodResolver } from "@hookform/resolvers/zod";
 import { Button, Folder, Input } from "@hosanna/shared";
-import React from "react";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
+import { useState } from "react";
 
-const songSchema = z.object({
-  title: z.string().min(1, "O título do cântico é obrigatório"),
-  artist: z.string().min(1, "O nome do artista é obrigatório"),
-  folderId: z.string().optional(),
-  tags: z.string().optional(),
-});
+interface SongFormData {
+  title: string;
+  artist: string;
+  folderId: string;
+  tags: string;
+}
 
-type SongFormData = z.infer<typeof songSchema>;
+// Extracted pure validation function
+const validateSongForm = (
+  values: SongFormData,
+): Record<string, string> | undefined => {
+  const errors: Record<string, string> = {};
+
+  if (!values.title.trim()) {
+    errors.title = "O título do cântico é obrigatório";
+  }
+  if (!values.artist.trim()) {
+    errors.artist = "O nome do artista é obrigatório";
+  }
+
+  return Object.keys(errors).length > 0 ? errors : undefined;
+};
 
 interface SongFormProps {
   initialValues?: {
@@ -43,50 +54,73 @@ export const SongForm: React.FC<SongFormProps> = ({
   onCancel,
   isLoading = false,
 }) => {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<SongFormData>({
-    resolver: zodResolver(songSchema),
-    defaultValues: {
-      title: initialValues?.title || "",
-      artist: initialValues?.artist || "Unknown Artist",
-      folderId: initialValues?.folderId || "",
-      tags: initialValues?.tags ? initialValues.tags.join(", ") : "",
-    },
+  const [formData, setFormData] = useState<SongFormData>({
+    title: initialValues?.title || "",
+    artist: initialValues?.artist || "Unknown Artist",
+    folderId: initialValues?.folderId || "",
+    tags: initialValues?.tags ? initialValues.tags.join(", ") : "",
   });
 
-  const onFormSubmit = async (data: SongFormData) => {
-    const parsedTags = data.tags
-      ? data.tags
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+  ) => {
+    const { name, value } = e.target;
+
+    setFormData((prev) => ({ ...prev, [name]: value }));
+
+    // Clear the specific field error when the user starts modifying it
+    if (errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: "" }));
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const validationErrors = validateSongForm(formData);
+
+    if (validationErrors) {
+      setErrors(validationErrors);
+      return;
+    }
+
+    const parsedTags = formData.tags
+      ? formData.tags
           .split(",")
           .map((t) => t.trim())
           .filter(Boolean)
       : [];
 
     await onSubmit({
-      title: data.title,
-      artist: data.artist,
-      folderId: data.folderId || null,
+      title: formData.title.trim(),
+      artist: formData.artist.trim(),
+      folderId: formData.folderId || null,
       tags: parsedTags,
     });
   };
 
   return (
-    <form onSubmit={handleSubmit(onFormSubmit)} className="flex flex-col gap-4">
+    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
       <Input
+        name="title"
         label="Título do Cântico"
         placeholder="Ex: Caminho no Deserto"
-        error={errors.title?.message}
-        {...register("title")}
+        error={errors.title}
+        value={formData.title}
+        onChange={handleChange}
+        disabled={isLoading}
       />
 
       <Input
+        name="artist"
         label="Artista / Autor"
         placeholder="Ex: Sinach"
-        error={errors.artist?.message}
-        {...register("artist")}
+        error={errors.artist}
+        value={formData.artist}
+        onChange={handleChange}
+        disabled={isLoading}
       />
 
       <div className="flex flex-col gap-1.5">
@@ -94,8 +128,11 @@ export const SongForm: React.FC<SongFormProps> = ({
           Categoria de Pasta
         </label>
         <select
-          {...register("folderId")}
-          className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#0284c7]"
+          name="folderId"
+          value={formData.folderId}
+          onChange={handleChange}
+          disabled={isLoading}
+          className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#0284c7] disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <option value="">Nível Raiz (Sem pasta)</option>
           {folders.map((f) => (
@@ -107,10 +144,13 @@ export const SongForm: React.FC<SongFormProps> = ({
       </div>
 
       <Input
+        name="tags"
         label="Etiquetas (separadas por vírgulas)"
         placeholder="Ex: Hino, Louvor, Graça"
-        error={errors.tags?.message}
-        {...register("tags")}
+        error={errors.tags}
+        value={formData.tags}
+        onChange={handleChange}
+        disabled={isLoading}
       />
 
       <div className="flex items-center justify-end gap-3 mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">

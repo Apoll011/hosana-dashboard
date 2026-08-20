@@ -22,22 +22,16 @@ export const AboutTab: React.FC<{ active: boolean }> = ({ active }) => {
 
   if (!active) return null;
 
-  const APP_VERSION = "v2.3.0";
-
   const productionDependencies = [
-    { name: "React & React DOM (v19)", license: "MIT", type: "UI Framework" },
     {
       name: "@tanstack/react-query",
       license: "MIT",
       type: "Estado & Data Fetching",
     },
     { name: "Better Auth", license: "MIT", type: "Autenticação & RBAC" },
-    { name: "@dnd-kit (Core/Sortable)", license: "MIT", type: "Drag and Drop" },
-    { name: "Motion (Framer Motion)", license: "MIT", type: "Animações" },
     { name: "@tailwindcss/vite", license: "MIT", type: "Estilização" },
     { name: "Lucide React", license: "ISC", type: "Ícones" },
     { name: "React Router Dom", license: "MIT", type: "Navegação" },
-    { name: "@google/genai", license: "Apache-2.0", type: "Integração IA" },
   ];
 
   return (

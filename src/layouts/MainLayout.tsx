@@ -57,6 +57,7 @@ import React, {
   useState,
 } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import { useRegisterSW } from "virtual:pwa-register/react";
 import { FolderForm } from "../components/forms/FolderForm";
 import { SongForm } from "../components/forms/SongForm";
 import { InboxButton, InboxFetchClient } from "../components/Inbox";
@@ -161,7 +162,41 @@ export const MainLayout: React.FC = () => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
-  const { showToast } = useSync();
+  const { showToast, triggerSyncCheck } = useSync();
+
+  const {
+    needRefresh: [needRefresh, setNeedRefresh],
+    updateServiceWorker,
+  } = useRegisterSW({
+    onNeedRefresh() {
+      // Handled via effect watching needRefresh
+    },
+  });
+
+  useEffect(() => {
+    if (needRefresh) {
+      showToast({
+        type: "info",
+        title: "Nova versão disponível",
+        description: "Uma nova versão do Hosanna Studio está disponível.",
+        duration: 0, // Keep persistent until user interacts or dismisses
+        action: {
+          label: "Recarregar",
+          onClick: () => {
+            void updateServiceWorker(true);
+          },
+        },
+      });
+    }
+  }, [needRefresh, showToast, updateServiceWorker]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      void triggerSyncCheck();
+    }, 60000);
+    return () => clearInterval(interval);
+  }, [triggerSyncCheck]);
+
   const queryClient = useQueryClient();
   const { servicesQuery, createService, deleteService } = useServices();
   const allServices = useMemo(
@@ -528,10 +563,6 @@ export const MainLayout: React.FC = () => {
     () => allServices.find((s) => s.id === currentServiceId),
     [allServices, currentServiceId],
   );
-
-  const show_folder_tree = client?.checkGate
-    ? client.checkGate("show_folder_tree")
-    : true;
 
   const isCommandPaletteEnabled = client?.checkGate
     ? client.checkGate("command_palett")
@@ -1990,7 +2021,7 @@ export const MainLayout: React.FC = () => {
             </button>
           )}
 
-          {!isSidebarCollapsed && show_folder_tree && (
+          {!isSidebarCollapsed && (
             <>
               <div className="mt-6 px-3 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-m3-secondary opacity-60">
                 Pastas ({allFolders.length})
@@ -2014,9 +2045,7 @@ export const MainLayout: React.FC = () => {
               </div>
             </>
           )}
-          {(isSidebarCollapsed || !show_folder_tree) && (
-            <div className="flex-1" />
-          )}
+          {isSidebarCollapsed && <div className="flex-1" />}
 
           {user && (
             <div
@@ -2416,10 +2445,12 @@ export const MainLayout: React.FC = () => {
                                 setIsPlusMenuOpen(false);
                                 setIsCreateModalOpen(true);
                               }}
-                              className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left cursor-pointer"
+                              className="w-full flex items-center gap-4 px-4 py-3 text-xs font-bold text-m3-text hover:bg-m3-hover rounded-2xl transition-all cursor-pointer text-left group"
                             >
-                              <FolderPlus className="w-4 h-4 text-amber-500" />
-                              <span>Nova Pasta</span>
+                              <div className="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                                <FolderPlus className="w-4 h-4" />
+                              </div>
+                              Nova Pasta
                             </button>
                           </Can>
                         </div>
