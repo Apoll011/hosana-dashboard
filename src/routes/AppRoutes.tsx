@@ -131,7 +131,6 @@ export const AppRoutes: React.FC = () => {
     prefetchRemainingRoutes();
   }, []);
 
-
   return (
     <ErrorBoundary FallbackComponent={ErrorFallback}>
       <Suspense fallback={<PageLoader />}>
