@@ -7,6 +7,7 @@ import { useEffect } from "react";
 import { BrowserRouter } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import { CacheHydrationProvider } from "./contexts/CacheHydrationProvider";
+import { NavigationTransitionProvider } from "./contexts/NavigationTransitionContext";
 import { SyncProvider } from "./contexts/SyncContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { queryClient } from "./queryClient";
@@ -28,19 +29,21 @@ export default function App() {
   }, []);
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <ThemeProvider>
-          <SyncProvider>
-            <CacheHydrationProvider>
-              <BrowserRouter>
-                <Analytics />
-                <SpeedInsights />
-                <AppRoutes />
-              </BrowserRouter>
-            </CacheHydrationProvider>
-          </SyncProvider>
-        </ThemeProvider>
-      </AuthProvider>
+      <NavigationTransitionProvider>
+        <AuthProvider>
+          <ThemeProvider>
+            <SyncProvider>
+              <CacheHydrationProvider>
+                <BrowserRouter>
+                  <Analytics />
+                  <SpeedInsights />
+                  <AppRoutes />
+                </BrowserRouter>
+              </CacheHydrationProvider>
+            </SyncProvider>
+          </ThemeProvider>
+        </AuthProvider>
+      </NavigationTransitionProvider>
     </QueryClientProvider>
   );
 }

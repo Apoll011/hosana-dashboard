@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { AppLink } from "@/src/components/AppLink";
 import { Button } from "@hosanna/shared";
 import {
   CheckCircle2,
@@ -153,12 +154,12 @@ export const VerifyEmailPage: React.FC = () => {
               A sua conta está ativa. A redirecionar para o login...
             </p>
           </div>
-          <Link
+          <AppLink
             to="/login"
             className="mt-2 inline-flex items-center gap-2 h-12 px-6 rounded-[20px] bg-m3-primary text-white text-xs font-black uppercase tracking-widest shadow-xl shadow-m3-primary/20 hover:bg-m3-primary-dark transition-all"
           >
             Iniciar Sessão
-          </Link>
+          </AppLink>
         </div>
       </LoginLayout>
     );

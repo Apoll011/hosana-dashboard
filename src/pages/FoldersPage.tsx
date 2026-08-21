@@ -1,14 +1,15 @@
 import { Button, Folder, Song, Spinner } from "@hosanna/shared";
 import { FolderOpen, Plus, Upload } from "lucide-react";
 import React from "react";
-import { useNavigate, useOutletContext } from "react-router-dom";
-import { Can, CanAll } from "../lib/permissions/components";
+import { useOutletContext } from "react-router-dom";
 import {
   FolderGridCard,
-  SongGridCard,
   FolderTableRow,
+  SongGridCard,
   SongTableRow,
 } from "../components/explorer";
+import { useAppNavigate } from "../hooks/useAppNavigate";
+import { Can, CanAll } from "../lib/permissions/components";
 
 interface FolderExplorerContext {
   filteredSubfolders: Folder[];
@@ -105,7 +106,7 @@ const DEFAULT_CONTEXT: FolderExplorerContext = {
 /* ------------------------------------------------------------------ */
 
 export const FoldersPage: React.FC = () => {
-  const navigate = useNavigate();
+  const { navigate } = useAppNavigate();
   const context = useOutletContext<FolderExplorerContext>() ?? DEFAULT_CONTEXT;
 
   const {

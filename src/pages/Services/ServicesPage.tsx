@@ -1,36 +1,37 @@
+import { useAppNavigate } from "@/src/hooks/useAppNavigate";
 import { usePermissionValue } from "@/src/lib/permissions/client";
 import {
-  Badge,
-  ConfirmDialog,
-  EmptyState,
-  Modal,
-  Service,
-  servicesApi,
-  Spinner,
+    Badge,
+    ConfirmDialog,
+    EmptyState,
+    Modal,
+    Service,
+    servicesApi,
+    Spinner,
 } from "@hosanna/shared";
 import { useQueryClient } from "@tanstack/react-query";
 import {
-  Archive,
-  ArchiveRestore,
-  Calendar,
-  Copy,
-  Edit2,
-  Trash2,
-  X,
+    Archive,
+    ArchiveRestore,
+    Calendar,
+    Copy,
+    Edit2,
+    Trash2,
+    X,
 } from "lucide-react";
 import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
+    useCallback,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
 } from "react";
-import { useNavigate, useOutletContext } from "react-router-dom";
+import { useOutletContext } from "react-router-dom";
 import {
-  BatchActionFloatingBar,
-  MarqueeSelectionBox,
-  ServiceGridCard,
-  ServiceTableRow,
+    BatchActionFloatingBar,
+    MarqueeSelectionBox,
+    ServiceGridCard,
+    ServiceTableRow,
 } from "../../components/explorer";
 import { ServiceForm } from "../../components/forms/ServiceForm";
 import { useAuth } from "../../contexts/AuthContext";
@@ -49,7 +50,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
   hideHeader,
   searchQuery: externalSearchQuery,
 }) => {
-  const navigate = useNavigate();
+  const { navigate } = useAppNavigate();
   const queryClient = useQueryClient();
   const { organization } = useAuth();
   const slugPrefix = organization?.slug ? `/${organization.slug}` : "";
