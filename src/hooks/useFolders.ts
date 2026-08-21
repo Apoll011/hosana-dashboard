@@ -3,10 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useEffect, useCallback } from "react";
 import { Folder } from "@hosanna/shared";
+import { useCallback, useEffect, useState } from "react";
 import { useSync } from "../contexts/SyncContext";
-import { getDatabase, FolderDocType } from "../db";
+import { FolderDocType, getDatabase } from "../db";
 
 let cachedFolders: Folder[] | null = null;
 let cachedRootSongsCount: number = 0;
@@ -14,7 +14,9 @@ let cachedRootSongsCount: number = 0;
 export function useFolders() {
   const { showToast } = useSync();
   const [folders, setFolders] = useState<Folder[]>(() => cachedFolders ?? []);
-  const [rootSongsCount, setRootSongsCount] = useState<number>(() => cachedRootSongsCount);
+  const [rootSongsCount, setRootSongsCount] = useState<number>(
+    () => cachedRootSongsCount,
+  );
   const [isLoading, setIsLoading] = useState(() => cachedFolders === null);
   const [isCreating, setIsCreating] = useState(false);
   const [isRenaming, setIsRenaming] = useState(false);
@@ -95,8 +97,9 @@ export function useFolders() {
         const result = doc.toJSON() as Folder;
         showToast(`Folder "${result.name}" created`, "success");
         return result;
-      } catch (err: any) {
-        showToast(err.message || "Failed to create folder", "error");
+      } catch (err: unknown) {
+        if (err && typeof err === "object" && "message" in err)
+          showToast(err.message || "Failed to create folder", "error");
         throw err;
       } finally {
         setIsCreating(false);
@@ -118,8 +121,9 @@ export function useFolders() {
           });
         }
         showToast("Folder renamed", "success");
-      } catch (err: any) {
-        showToast(err.message || "Failed to rename folder", "error");
+      } catch (err: unknown) {
+        if (err && typeof err === "object" && "message" in err)
+          showToast(err.message || "Failed to rename folder", "error");
         throw err;
       } finally {
         setIsRenaming(false);
@@ -148,8 +152,9 @@ export function useFolders() {
           });
         }
         showToast("Folder moved", "success");
-      } catch (err: any) {
-        showToast(err.message || "Failed to move folder", "error");
+      } catch (err: unknown) {
+        if (err && typeof err === "object" && "message" in err)
+          showToast(err.message || "Failed to move folder", "error");
         throw err;
       } finally {
         setIsMoving(false);
@@ -222,8 +227,9 @@ export function useFolders() {
         }
 
         showToast("Folder deleted", "info");
-      } catch (err: any) {
-        showToast(err.message || "Failed to delete folder", "error");
+      } catch (err: unknown) {
+        if (err && typeof err === "object" && "message" in err)
+          showToast(err.message || "Failed to delete folder", "error");
         throw err;
       } finally {
         setIsDeleting(false);

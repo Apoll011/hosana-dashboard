@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { useAppNavigate } from "@/src/hooks/useAppNavigate";
 import { Button } from "@hosanna/shared";
 import {
   ArrowRight,
@@ -13,7 +14,6 @@ import {
   Smartphone,
 } from "lucide-react";
 import React, { useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import { authClient } from "../../lib/authClient";
 import LoginLayout from "./Layout";
@@ -21,7 +21,7 @@ import LoginLayout from "./Layout";
 type TwoFactorMethod = "totp" | "otp" | "backup";
 
 export const TwoFactorPage: React.FC = () => {
-  const navigate = useNavigate();
+  const { navigate } = useAppNavigate();
   const { refetch } = useAuth();
 
   const [method, setMethod] = useState<TwoFactorMethod>("totp");

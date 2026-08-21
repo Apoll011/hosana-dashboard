@@ -7,6 +7,8 @@ import { useEffect } from "react";
 import { BrowserRouter } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import { CacheHydrationProvider } from "./contexts/CacheHydrationProvider";
+import { NavigationProgressBar } from "./components/NavigationProgressBar";
+import { NavigationTransitionProvider } from "./contexts/NavigationTransitionContext";
 import { SyncProvider } from "./contexts/SyncContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { queryClient } from "./queryClient";
@@ -34,8 +36,11 @@ export default function App() {
             <CacheHydrationProvider>
               <BrowserRouter>
                 <Analytics />
+                <NavigationTransitionProvider>
+                  <NavigationProgressBar />
+                  <AppRoutes />
+                </NavigationTransitionProvider>
                 <SpeedInsights />
-                <AppRoutes />
               </BrowserRouter>
             </CacheHydrationProvider>
           </SyncProvider>

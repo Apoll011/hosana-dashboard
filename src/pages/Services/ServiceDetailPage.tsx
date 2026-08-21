@@ -4,6 +4,7 @@
  */
 
 import { ChordProPreviewSettings } from "@/src/components/ChorproSettings";
+import { useAppNavigate } from "@/src/hooks/useAppNavigate";
 import { usePreviewSettings } from "@/src/hooks/usePreviewSettings";
 import {
   attachClosestEdge,
@@ -49,7 +50,7 @@ import {
   Trash2,
 } from "lucide-react";
 import React, { useDeferredValue, useEffect, useRef, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useSync } from "../../contexts/SyncContext";
 import { useService, useServices } from "../../hooks/useServices";
 import { useSong, useSongs } from "../../hooks/useSongs";
@@ -549,7 +550,7 @@ type ModalType =
 
 export const ServiceDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
+  const { navigate } = useAppNavigate();
 
   const { data: service, isLoading, isError } = useService(id || null);
   const { updateElements, updateService } = useServices();
@@ -848,7 +849,6 @@ export const ServiceDetailPage: React.FC = () => {
         }
       },
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const editInitial = editingElement

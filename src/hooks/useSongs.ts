@@ -27,7 +27,7 @@ function useSongMutations() {
           title: data.title || "Sem título",
           artist: data.artist || "",
           content: data.content || "",
-          folderId: data.folderId ?? (data as any).folder ?? null,
+          folderId: data.folderId ?? null,
           path: data.path || `${data.title || "Sem título"}.pro`,
           tags: Array.isArray(data.tags) ? data.tags : [],
           song_number: data.song_number ?? null,
@@ -40,8 +40,9 @@ function useSongMutations() {
         const result = doc.toJSON() as Song;
         showToast(`Cântico "${result.title}" criado com sucesso!`, "success");
         return result;
-      } catch (err: any) {
-        showToast(err.message || "Falha ao criar cântico", "error");
+      } catch (err: unknown) {
+        if (err && typeof err === "object" && "message" in err)
+          showToast(err.message || "Falha ao criar cântico", "error");
         throw err;
       } finally {
         setIsCreating(false);
@@ -60,7 +61,9 @@ function useSongMutations() {
             ? songUpdate.id
             : (songUpdate as Song).id;
         const data =
-          "data" in songUpdate ? (songUpdate as any).data : songUpdate;
+          "data" in songUpdate
+            ? (songUpdate as { data: Partial<Song> }).data
+            : (songUpdate as Song);
 
         const doc = await db.songs.findOne(id).exec();
         const now = new Date().toISOString();
@@ -81,7 +84,7 @@ function useSongMutations() {
             title: data.title || "Sem título",
             artist: data.artist || "",
             content: data.content || "",
-            folderId: data.folderId ?? data.folder ?? null,
+            folderId: data.folderId ?? null,
             path: data.path || `${data.title || "Sem título"}.pro`,
             tags: data.tags || [],
             song_number: data.song_number ?? null,
@@ -94,8 +97,9 @@ function useSongMutations() {
           showToast(`Cântico "${result.title}" guardado`, "success");
           return result;
         }
-      } catch (err: any) {
-        showToast(err.message || "Falha ao guardar cântico", "error");
+      } catch (err: unknown) {
+        if (err && typeof err === "object" && "message" in err)
+          showToast(err.message || "Falha ao guardar cântico", "error");
         throw err;
       } finally {
         setIsUpdating(false);
@@ -118,8 +122,9 @@ function useSongMutations() {
           });
         }
         showToast("Cântico apagado", "info");
-      } catch (err: any) {
-        showToast(err.message || "Falha ao apagar cântico", "error");
+      } catch (err: unknown) {
+        if (err && typeof err === "object" && "message" in err)
+          showToast(err.message || "Falha ao apagar cântico", "error");
         throw err;
       } finally {
         setIsDeleting(false);
@@ -156,8 +161,9 @@ function useSongMutations() {
           showToast("Cântico movido", "success");
           return doc.toJSON() as Song;
         }
-      } catch (err: any) {
-        showToast(err.message || "Falha ao mover cântico", "error");
+      } catch (err: unknown) {
+        if (err && typeof err === "object" && "message" in err)
+          showToast(err.message || "Falha ao mover cântico", "error");
         throw err;
       } finally {
         setIsUpdating(false);
@@ -202,11 +208,12 @@ function useSongMutations() {
 
         showToast(`Etiquetas atualizadas em ${count} cântico(s)!`, "success");
         return { count };
-      } catch (err: any) {
-        showToast(
-          err.message || "Falha ao atualizar etiquetas em lote",
-          "error",
-        );
+      } catch (err: unknown) {
+        if (err && typeof err === "object" && "message" in err)
+          showToast(
+            err.message || "Falha ao atualizar etiquetas em lote",
+            "error",
+          );
         throw err;
       } finally {
         setIsUpdatingBatchTags(false);
