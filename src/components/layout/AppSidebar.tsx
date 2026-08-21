@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useRef, useState, useEffect } from "react";
 import { Badge, Folder } from "@hosanna/shared";
+import { Organization } from "better-auth/client";
 import {
   ChevronLeft,
   ChevronRight,
@@ -15,21 +15,17 @@ import {
   Settings,
   Users,
 } from "lucide-react";
+import React, { useEffect, useRef, useState } from "react";
+import { getInitials } from "../../utils";
 import { FolderTreeItemNode, FolderTreeNode } from "../explorer";
 import { getRoleLabel } from "../settings/settingsUtils";
-import { getInitials } from "../../utils";
 
 interface AppSidebarProps {
   isSidebarOpen: boolean;
   setIsSidebarOpen: (v: boolean) => void;
   isSidebarCollapsed: boolean;
   setIsSidebarCollapsed: (v: boolean) => void;
-  organization?: {
-    slug: string;
-    metadata?: {
-      shortName?: string;
-    };
-  } | null;
+  organization?: Organization | null;
   slugPrefix: string;
   isExplorerView: boolean;
   isSongsView: boolean;
