@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { ConversionResult, Folder, Song, songsApi } from "@hosanna/shared";
+import { useQueryClient } from "@tanstack/react-query";
 import React, {
   useCallback,
   useEffect,
@@ -10,28 +12,27 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { Outlet, useLocation, useNavigate } from "react-router-dom";
-import { useQueryClient } from "@tanstack/react-query";
+import { Outlet, useLocation } from "react-router-dom";
 import { useRegisterSW } from "virtual:pwa-register/react";
-import { ConversionResult, Folder, Song, songsApi } from "@hosanna/shared";
 import { FolderItem, ServiceItem, SongItem } from "../command-palette.types";
 import {
+  BatchActionFloatingBar,
   buildFolderTree,
   getFolderDescendantIds,
-  BatchActionFloatingBar,
 } from "../components/explorer";
 import { HosannaCommandPalette } from "../components/HosannaCommandPalette";
-import { ToastContainer } from "../components/Toast";
 import {
   AppSidebar,
+  ContextMenuState,
   ExplorerAddressBar,
   ExplorerContextMenu,
   ExplorerModals,
   ExplorerToolbar,
-  ContextMenuState,
 } from "../components/layout";
+import { ToastContainer } from "../components/Toast";
 import { useAuth } from "../contexts/AuthContext";
 import { useSync } from "../contexts/SyncContext";
+import { useAppNavigate } from "../hooks/useAppNavigate";
 import { useFolders } from "../hooks/useFolders";
 import { usePersonalSettings } from "../hooks/usePersonalSettings";
 import { useServices } from "../hooks/useServices";
@@ -40,7 +41,7 @@ import { songImportRegistry } from "../import";
 import { ProviderImportResult } from "../utils/import";
 
 export const MainLayout: React.FC = () => {
-  const navigate = useNavigate();
+  const { navigate } = useAppNavigate();
   const location = useLocation();
   const { user, logout, organization } = useAuth();
 

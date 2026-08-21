@@ -16,7 +16,6 @@ import {
   User,
 } from "lucide-react";
 import React, { useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
 
 import { authClient } from "../../lib/authClient";
 import { PasswordStrengthMeter } from "./components/PasswordStrengthMeter";
@@ -24,7 +23,7 @@ import { TurnstileWidget } from "./components/TurnstileWidget";
 import LoginLayout from "./Layout";
 
 export const RegisterOrganizationPage: React.FC = () => {
-  const navigate = useNavigate();
+  const { navigate } = useAppNavigate();
   const alpha_release = false;
   const captchaEnabled = false;
 

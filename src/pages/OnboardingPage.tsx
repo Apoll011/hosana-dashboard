@@ -19,10 +19,10 @@ import {
   X,
 } from "lucide-react";
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import bg from "../assets/images/background.webp";
 import { useAuth } from "../contexts/AuthContext";
 import { useTheme } from "../contexts/ThemeContext";
+import { useAppNavigate } from "../hooks/useAppNavigate";
 import { authClient } from "../lib/authClient";
 
 interface UserInvitation {
@@ -39,8 +39,7 @@ interface UserInvitation {
 export const OnboardingPage: React.FC = () => {
   const { user, logout, refetch } = useAuth();
   const { darkMode, toggleDarkMode } = useTheme();
-  const navigate = useNavigate();
-
+  const { navigate } = useAppNavigate();
   const [mode, setMode] = useState<"choose" | "create" | "join" | "pending">(
     "choose",
   );

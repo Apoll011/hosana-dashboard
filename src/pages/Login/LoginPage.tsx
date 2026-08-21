@@ -3,17 +3,19 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { AppLink } from "@/src/components/AppLink";
+import { useAppNavigate } from "@/src/hooks/useAppNavigate";
 import { Button, Input } from "@hosanna/shared";
 import { ArrowRight, Lock, Mail } from "lucide-react";
 import React, { useRef, useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import { authClient } from "../../lib/authClient";
 import LoginLayout from "./Layout";
 import { TurnstileWidget } from "./components/TurnstileWidget";
 
 export const LoginPage: React.FC = () => {
-  const navigate = useNavigate();
+  const { navigate } = useAppNavigate();
   const location = useLocation();
   const redirectMessage =
     (location.state as { message?: string })?.message || "";
@@ -127,12 +129,12 @@ export const LoginPage: React.FC = () => {
         </div>
 
         <div className="flex justify-end">
-          <Link
+          <AppLink
             to="/forgot-password"
             className="text-xs font-semibold text-m3-primary dark:text-m3-primary-light hover:underline"
           >
             Esqueceu a palavra-passe?
-          </Link>
+          </AppLink>
         </div>
 
         {captchaEnabled && (
