@@ -849,7 +849,6 @@ export const ServiceDetailPage: React.FC = () => {
         }
       },
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const editInitial = editingElement

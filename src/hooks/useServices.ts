@@ -91,7 +91,7 @@ export function useServices(includeArchived: boolean = false) {
         const result = doc.toJSON() as Service;
         showToast(`Service "${result.name}" created`, "success");
         return result;
-      } catch (err: any) {
+      } catch (err: { message?: string | null }) {
         showToast(err.message || "Failed to create service", "error");
         throw err;
       } finally {
@@ -135,7 +135,7 @@ export function useServices(includeArchived: boolean = false) {
           showToast(`Service updated`, "success");
           return result;
         }
-      } catch (err: any) {
+      } catch (err: { message?: string | null }) {
         showToast(err.message || "Failed to update service", "error");
         throw err;
       } finally {
@@ -158,7 +158,7 @@ export function useServices(includeArchived: boolean = false) {
           });
         }
         showToast("Service deleted", "info");
-      } catch (err: any) {
+      } catch (err: { message?: string | null }) {
         showToast(err.message || "Failed to delete service", "error");
         throw err;
       } finally {
@@ -187,7 +187,7 @@ export function useServices(includeArchived: boolean = false) {
             updatedAt: now,
           });
         }
-      } catch (err: any) {
+      } catch (err: { message?: string | null }) {
         showToast(err.message || "Failed to update elements", "error");
         throw err;
       } finally {

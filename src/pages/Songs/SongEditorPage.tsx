@@ -92,14 +92,6 @@ export const SongEditorPage: React.FC = () => {
     }
   }, [song?.id]);
 
-  // Memoized handlers to prevent unnecessary re-renders
-  const handleTranspose = useCallback(
-    (delta: number) => {
-      updateSetting("transposeVal", transposeVal + delta);
-    },
-    [transposeVal, updateSetting],
-  );
-
   const handleSave = useCallback(
     async (updatedContent: string) => {
       if (isSavingRef.current) return;
