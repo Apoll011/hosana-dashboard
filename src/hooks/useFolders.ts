@@ -14,7 +14,9 @@ let cachedRootSongsCount: number = 0;
 export function useFolders() {
   const { showToast } = useSync();
   const [folders, setFolders] = useState<Folder[]>(() => cachedFolders ?? []);
-  const [rootSongsCount, setRootSongsCount] = useState<number>(() => cachedRootSongsCount);
+  const [rootSongsCount, setRootSongsCount] = useState<number>(
+    () => cachedRootSongsCount,
+  );
   const [isLoading, setIsLoading] = useState(() => cachedFolders === null);
   const [isCreating, setIsCreating] = useState(false);
   const [isRenaming, setIsRenaming] = useState(false);

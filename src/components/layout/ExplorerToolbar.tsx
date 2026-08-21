@@ -4,13 +4,7 @@
  */
 
 import React from "react";
-import {
-  Archive,
-  ArrowUpDown,
-  Filter,
-  LayoutGrid,
-  List,
-} from "lucide-react";
+import { Archive, ArrowUpDown, Filter, LayoutGrid, List } from "lucide-react";
 import { Service } from "@hosanna/shared";
 
 interface ExplorerToolbarProps {
@@ -88,9 +82,7 @@ export const ExplorerToolbar: React.FC<ExplorerToolbarProps> = ({
                 ? "bg-amber-500/10 border-amber-500 text-amber-600 dark:text-amber-400 shadow-lg shadow-amber-500/10"
                 : "bg-m3-card border-m3-border text-m3-secondary hover:bg-m3-hover hover:text-m3-text hover:border-amber-500/30"
             }`}
-            title={
-              showArchived ? "Ocultar arquivados" : "Mostrar arquivados"
-            }
+            title={showArchived ? "Ocultar arquivados" : "Mostrar arquivados"}
           >
             <Archive className="w-4 h-4" />
             <span>Arquivados</span>
@@ -115,11 +107,7 @@ export const ExplorerToolbar: React.FC<ExplorerToolbarProps> = ({
               onSortChange(sb, so);
             }}
             className="bg-transparent font-bold text-m3-text focus:outline-none cursor-pointer text-[11px] uppercase tracking-wider"
-            title={
-              isServicesView
-                ? "Organizar cultos"
-                : "Organizar ficheiros"
-            }
+            title={isServicesView ? "Organizar cultos" : "Organizar ficheiros"}
           >
             {isServicesView ? (
               <>

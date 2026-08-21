@@ -102,9 +102,7 @@ export const ExplorerContextMenu: React.FC<ExplorerContextMenuProps> = ({
       {contextMenu.type === "canvas" ? (
         <>
           <div className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400 border-b border-slate-100 dark:border-slate-800/80 mb-0.5 truncate flex items-center justify-between">
-            <span>
-              {currentFolder ? currentFolder.name : "Diretório Raiz"}
-            </span>
+            <span>{currentFolder ? currentFolder.name : "Diretório Raiz"}</span>
             <span className="text-[9px] text-slate-400 font-normal">
               Opções
             </span>

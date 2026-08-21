@@ -13,12 +13,7 @@ import React, {
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRegisterSW } from "virtual:pwa-register/react";
-import {
-  ConversionResult,
-  Folder,
-  Song,
-  songsApi,
-} from "@hosanna/shared";
+import { ConversionResult, Folder, Song, songsApi } from "@hosanna/shared";
 import { FolderItem, ServiceItem, SongItem } from "../command-palette.types";
 import {
   buildFolderTree,

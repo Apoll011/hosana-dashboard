@@ -354,4 +354,3 @@ export const HosannaCommandPaletteTriggerButton: React.FC<{
     </button>
   );
 };
-
