@@ -61,9 +61,7 @@ export const NavigationTransitionProvider: React.FC<{
   const isPending = isPreloading || transitionPending;
 
   return (
-    <Ctx.Provider value={{ navigate: go, isPending }}>
-      {children}
-    </Ctx.Provider>
+    <Ctx.Provider value={{ navigate: go, isPending }}>{children}</Ctx.Provider>
   );
 };
 
@@ -75,5 +73,3 @@ export const useNavTransition = () => {
     );
   return ctx;
 };
-
-

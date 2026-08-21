@@ -1,9 +1,12 @@
 import React, { lazy } from "react";
 
-export type LazyImportFn<T = any> = () => Promise<{ default: React.ComponentType<T> }>;
+export type LazyImportFn<T = any> = () => Promise<{
+  default: React.ComponentType<T>;
+}>;
 
-export interface LazyPreloadableComponent<T = any>
-  extends React.LazyExoticComponent<React.ComponentType<T>> {
+export interface LazyPreloadableComponent<
+  T = any,
+> extends React.LazyExoticComponent<React.ComponentType<T>> {
   preload: () => Promise<{ default: React.ComponentType<T> }>;
 }
 
@@ -129,13 +132,31 @@ export const routePreloaders: Array<{
   { pattern: /\/teams(\/|\?|#|$)/, preload: () => TeamsPage.preload() },
   { pattern: /\/settings(\/|\?|#|$)/, preload: () => SettingsPage.preload() },
   { pattern: /\/login(\/|\?|#|$)/, preload: () => LoginPage.preload() },
-  { pattern: /\/two-factor(\/|\?|#|$)/, preload: () => TwoFactorPage.preload() },
+  {
+    pattern: /\/two-factor(\/|\?|#|$)/,
+    preload: () => TwoFactorPage.preload(),
+  },
   { pattern: /\/register(\/|\?|#|$)/, preload: () => RegisterPage.preload() },
-  { pattern: /\/new(\/|\?|#|$)/, preload: () => RegisterOrganizationPage.preload() },
-  { pattern: /\/verify-email(\/|\?|#|$)/, preload: () => VerifyEmailPage.preload() },
-  { pattern: /\/forgot-password(\/|\?|#|$)/, preload: () => ForgotPasswordPage.preload() },
-  { pattern: /\/reset-password(\/|\?|#|$)/, preload: () => ResetPasswordPage.preload() },
-  { pattern: /\/accept-invitation(\/|\?|#|$)/, preload: () => AcceptInvitationPage.preload() },
+  {
+    pattern: /\/new(\/|\?|#|$)/,
+    preload: () => RegisterOrganizationPage.preload(),
+  },
+  {
+    pattern: /\/verify-email(\/|\?|#|$)/,
+    preload: () => VerifyEmailPage.preload(),
+  },
+  {
+    pattern: /\/forgot-password(\/|\?|#|$)/,
+    preload: () => ForgotPasswordPage.preload(),
+  },
+  {
+    pattern: /\/reset-password(\/|\?|#|$)/,
+    preload: () => ResetPasswordPage.preload(),
+  },
+  {
+    pattern: /\/accept-invitation(\/|\?|#|$)/,
+    preload: () => AcceptInvitationPage.preload(),
+  },
 ];
 
 export function preloadRoute(pathname: string): Promise<unknown> | null {
