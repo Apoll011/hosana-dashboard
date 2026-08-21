@@ -3,51 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {
-  Badge,
-  Button,
-  Folder,
-  Input,
-  Modal,
-  Song,
-  songsApi,
-} from "@hosanna/shared";
-import {
-  AlertTriangle,
-  Archive,
-  ArrowRightLeft,
-  ArrowUpDown,
-  Calendar,
-  CheckSquare,
-  ChevronLeft,
-  ChevronRight,
-  Church,
-  CornerLeftUp,
-  Edit2,
-  ExternalLink,
-  FileText,
-  Filter,
-  Folder as FolderIcon,
-  FolderOpen,
-  FolderPlus,
-  HardDrive,
-  LayoutGrid,
-  List,
-  LogOut,
-  Menu,
-  Move,
-  Music,
-  Plus,
-  Printer,
-  RotateCw,
-  Search,
-  Settings,
-  Tag,
-  Trash2,
-  Upload,
-  Users,
-  X,
-} from "lucide-react";
 import React, {
   useCallback,
   useEffect,
@@ -56,48 +11,38 @@ import React, {
   useState,
 } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
-import { useRegisterSW } from "virtual:pwa-register/react";
-import { FolderForm } from "../components/forms/FolderForm";
-import { SongForm } from "../components/forms/SongForm";
-import { InboxButton, InboxFetchClient } from "../components/Inbox";
-import { BatchDeleteModal } from "../components/modals/BatchDeleteModal";
-import { BatchMoveModal } from "../components/modals/BatchMoveModal";
-import { BatchTagModal } from "../components/modals/BatchTagModal";
-import { MoveSongModal } from "../components/modals/MoveSongModal";
-import { SyncStatusBadge } from "../components/SyncStatusBadge";
-import { ToastContainer } from "../components/Toast";
-import { useAuth } from "../contexts/AuthContext";
-import { useSync } from "../contexts/SyncContext";
-import { useFolders } from "../hooks/useFolders";
-import { useServices } from "../hooks/useServices";
-import { useAllSongs } from "../hooks/useSongs";
-import { authClient } from "../lib/authClient";
-
-import { ConversionResult } from "@hosanna/shared";
 import { useQueryClient } from "@tanstack/react-query";
+import { useRegisterSW } from "virtual:pwa-register/react";
+import {
+  ConversionResult,
+  Folder,
+  Song,
+  songsApi,
+} from "@hosanna/shared";
 import { FolderItem, ServiceItem, SongItem } from "../command-palette.types";
 import {
   buildFolderTree,
-  FolderTreeItemNode,
   getFolderDescendantIds,
-  MoveFolderTreeItem,
+  BatchActionFloatingBar,
 } from "../components/explorer";
-import { ServiceForm } from "../components/forms/ServiceForm";
 import { HosannaCommandPalette } from "../components/HosannaCommandPalette";
-import { CifraClubImportModal } from "../components/modals/CifraModal";
-import { getRoleLabel } from "../components/settings/settingsUtils";
+import { ToastContainer } from "../components/Toast";
+import {
+  AppSidebar,
+  ExplorerAddressBar,
+  ExplorerContextMenu,
+  ExplorerModals,
+  ExplorerToolbar,
+  ContextMenuState,
+} from "../components/layout";
+import { useAuth } from "../contexts/AuthContext";
+import { useSync } from "../contexts/SyncContext";
+import { useFolders } from "../hooks/useFolders";
 import { usePersonalSettings } from "../hooks/usePersonalSettings";
+import { useServices } from "../hooks/useServices";
+import { useAllSongs } from "../hooks/useSongs";
 import { songImportRegistry } from "../import";
-import { Can, CanAll, CanAny } from "../lib/permissions/components";
-import { getInitials } from "../utils";
 import { ProviderImportResult } from "../utils/import";
-
-interface ContextMenuState {
-  x: number;
-  y: number;
-  type: "folder" | "song" | "canvas";
-  item?: Folder | Song | null;
-}
 
 export const MainLayout: React.FC = () => {
   const navigate = useNavigate();
@@ -134,44 +79,23 @@ export const MainLayout: React.FC = () => {
 
   const { settings } = usePersonalSettings();
 
-  // Plus Dropdown State
-  const [isPlusMenuOpen, setIsPlusMenuOpen] = useState(false);
+  // Sidebar & Responsive State
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const plusMenuRef = useRef<HTMLDivElement>(null);
-  const [isCreateServiceModalOpen, setIsCreateServiceModalOpen] =
-    useState(false);
-
-  // User Dropdown State
-  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-  const userMenuRef = useRef<HTMLDivElement>(null);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(
+    () => localStorage.getItem("sidebarCollapsed") === "true",
+  );
 
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        userMenuRef.current &&
-        !userMenuRef.current.contains(event.target as Node)
-      ) {
-        setIsUserMenuOpen(false);
-      }
-      if (
-        plusMenuRef.current &&
-        !plusMenuRef.current.contains(event.target as Node)
-      ) {
-        setIsPlusMenuOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-  const { showToast, triggerSyncCheck } = useSync();
+    localStorage.setItem("sidebarCollapsed", String(isSidebarCollapsed));
+  }, [isSidebarCollapsed]);
 
+  // Service Worker & Sync
+  const { showToast, triggerSyncCheck } = useSync();
   const {
-    needRefresh: [needRefresh, setNeedRefresh],
+    needRefresh: [needRefresh],
     updateServiceWorker,
   } = useRegisterSW({
-    onNeedRefresh() {
-      // Handled via effect watching needRefresh
-    },
+    onNeedRefresh() {},
   });
 
   useEffect(() => {
@@ -180,7 +104,7 @@ export const MainLayout: React.FC = () => {
         type: "info",
         title: "Nova versão disponível",
         description: "Uma nova versão do Hosanna Studio está disponível.",
-        duration: 0, // Keep persistent until user interacts or dismisses
+        duration: 0,
         action: {
           label: "Recarregar",
           onClick: () => {
@@ -198,6 +122,7 @@ export const MainLayout: React.FC = () => {
     return () => clearInterval(interval);
   }, [triggerSyncCheck]);
 
+  // Queries & Mutations
   const queryClient = useQueryClient();
   const { servicesQuery, createService, deleteService } = useServices();
   const allServices = useMemo(
@@ -205,42 +130,54 @@ export const MainLayout: React.FC = () => {
     [servicesQuery.data],
   );
 
-  // Services Archive toggle
   const [showArchived, setShowArchived] = useState(false);
   const { servicesQuery: archivedServicesQuery } = useServices(true);
-
   const archivedServices = useMemo(
     () => (showArchived ? (archivedServicesQuery.data ?? []) : []),
     [showArchived, archivedServicesQuery.data],
   );
 
-  // Folder state: null = Root directory
+  const { foldersQuery, createFolder, renameFolder, moveFolder, deleteFolder } =
+    useFolders();
+
+  const songParams = useMemo(() => ({}), []);
+  const { songsQuery, moveSong, deleteSong, updateBatchTags } =
+    useAllSongs(songParams);
+
+  // Folder & Navigation State
   const [currentFolderId, setCurrentFolderId] = useState<string | null>(null);
 
-  const navigateBackToDrive = () => {
+  const navigateBackToDrive = useCallback(() => {
     if (!isExplorerView) {
       navigate(`${slugPrefix}/folders`);
     }
-  };
+  }, [isExplorerView, navigate, slugPrefix]);
 
-  const handleSelectFolder = (folderId: string | null) => {
-    setCurrentFolderId(folderId);
-    if (!isExplorerView) {
-      navigate(`${slugPrefix}/folders`);
-    }
-  };
+  const handleSelectFolder = useCallback(
+    (folderId: string | null) => {
+      setCurrentFolderId(folderId);
+      if (!isExplorerView) {
+        navigate(`${slugPrefix}/folders`);
+      }
+    },
+    [isExplorerView, navigate, slugPrefix],
+  );
 
-  const handleViewModeChange = (mode: "grid" | "list") => {
-    setViewMode(mode);
-    localStorage.setItem("viewMode", mode);
-    if (isSettingsView) {
-      navigate(`${slugPrefix}/folders`);
-    }
-  };
-  const [searchQuery, setSearchQuery] = useState("");
+  // View Mode & Density
   const [viewMode, setViewMode] = useState<"grid" | "list">(
     () => (localStorage.getItem("viewMode") as "grid" | "list") || "grid",
   );
+  const handleViewModeChange = useCallback(
+    (mode: "grid" | "list") => {
+      setViewMode(mode);
+      localStorage.setItem("viewMode", mode);
+      if (isSettingsView) {
+        navigate(`${slugPrefix}/folders`);
+      }
+    },
+    [isSettingsView, navigate, slugPrefix],
+  );
+
   const [density, setDensity] = useState<"comfortable" | "compact">(() => {
     try {
       return (
@@ -251,25 +188,52 @@ export const MainLayout: React.FC = () => {
       return "comfortable";
     }
   });
-
-  const handleDensityChange = (d: "comfortable" | "compact") => {
+  const handleDensityChange = useCallback((d: "comfortable" | "compact") => {
     setDensity(d);
     try {
       localStorage.setItem("explorer_density", d);
     } catch {}
-  };
+  }, []);
 
-  // Track page transitions to manage searchQuery persistence like a file system
-  const prevPathnameRef = useRef(location.pathname);
+  // Search & Filter State
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedKey, setSelectedKey] = useState<string>("");
+  const [selectedTag, setSelectedTag] = useState<string>("");
+  const [searchFields, setSearchFields] = useState({
+    title: true,
+    artist: true,
+    content: true,
+    tags: true,
+  });
+  const [sortBy, setSortBy] = useState<"title" | "artist" | "updatedAt">(
+    "title",
+  );
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+  const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
 
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(
-    () => localStorage.getItem("sidebarCollapsed") === "true",
+  const handleSearchChange = useCallback(
+    (val: string) => {
+      setSearchQuery(val);
+      if (isSettingsView) {
+        navigate(`${slugPrefix}/folders`);
+      }
+    },
+    [isSettingsView, navigate, slugPrefix],
   );
 
-  useEffect(() => {
-    localStorage.setItem("sidebarCollapsed", String(isSidebarCollapsed));
-  }, [isSidebarCollapsed]);
+  const handleSortChange = useCallback(
+    (sb: "title" | "artist" | "updatedAt", so: "asc" | "desc") => {
+      setSortBy(sb);
+      setSortOrder(so);
+      if (isSettingsView) {
+        navigate(`${slugPrefix}/folders`);
+      }
+    },
+    [isSettingsView, navigate, slugPrefix],
+  );
 
+  // Search Context Persistence
+  const prevPathnameRef = useRef(location.pathname);
   useEffect(() => {
     const prevPath = prevPathnameRef.current;
     const currPath = location.pathname;
@@ -288,9 +252,6 @@ export const MainLayout: React.FC = () => {
       const prevDomain = getDomain(prevPath);
       const currDomain = getDomain(currPath);
 
-      // Search persists when remaining in same context domain:
-      // - Songs domain (songs list, song editor, folder explorer)
-      // - Services domain (services list, service editor)
       const isSongDomain =
         (prevDomain === "songs" || prevDomain === "explorer") &&
         (currDomain === "songs" || currDomain === "explorer");
@@ -311,133 +272,7 @@ export const MainLayout: React.FC = () => {
     prevPathnameRef.current = currPath;
   }, [location.pathname]);
 
-  // Multi-Selection State
-  const [selectedFolderIds, setSelectedFolderIds] = useState<Set<string>>(
-    new Set(),
-  );
-  const [selectedSongIds, setSelectedSongIds] = useState<Set<string>>(
-    new Set(),
-  );
-  const [lastClickedId, setLastClickedId] = useState<string | null>(null);
-
-  // Marquee Rubberband Drag Selection State
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [selectionBox, setSelectionBox] = useState<{
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-  } | null>(null);
-  const isMouseDownRef = useRef(false);
-  const startPosRef = useRef<{ x: number; y: number } | null>(null);
-  const initialSelectionRef = useRef<{
-    folders: Set<string>;
-    songs: Set<string>;
-  }>({
-    folders: new Set(),
-    songs: new Set(),
-  });
-
-  // Batch Modals State
-  const [isBatchMoveOpen, setIsBatchMoveOpen] = useState(false);
-  const [isBatchDeleteOpen, setIsBatchDeleteOpen] = useState(false);
-  const [isBatchTagOpen, setIsBatchTagOpen] = useState(false);
-
-  const teamsEnabled = false;
-
-  // Clear selection on folder navigation
-  useEffect(() => {
-    setSelectedFolderIds(new Set());
-    setSelectedSongIds(new Set());
-    setLastClickedId(null);
-  }, [currentFolderId]);
-
-  // Drag & Drop & Upload State
-  const [_isUploadingFiles, setIsUploadingFiles] = useState(false);
-  const [isDraggingOver, setIsDraggingOver] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const [isInternalDragActive, setIsInternalDragActive] = useState(false);
-  const [dropTargetFolderId, setDropTargetFolderId] = useState<string | null>(
-    null,
-  );
-
-  // Context Menu state
-  const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
-
-  // Expanded Folders in Tree View State
-  const [expandedFolderIds, setExpandedFolderIds] = useState<Set<string>>(
-    new Set(),
-  );
-
-  // API Hooks
-  const { foldersQuery, createFolder, renameFolder, moveFolder, deleteFolder } =
-    useFolders();
-
-  const songParams = useMemo(() => ({}), []);
-
-  const { songsQuery, moveSong, deleteSong, updateBatchTags } =
-    useAllSongs(songParams);
-
-  // Search & Filters State
-  const [selectedKey, setSelectedKey] = useState<string>("");
-  const [selectedTag, setSelectedTag] = useState<string>("");
-  const [searchFields, setSearchFields] = useState({
-    title: true,
-    artist: true,
-    content: true,
-    tags: true,
-  });
-  const [sortBy, setSortBy] = useState<"title" | "artist" | "updatedAt">(
-    "title",
-  );
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
-
-  const handleSearchChange = (val: string) => {
-    setSearchQuery(val);
-    if (isSettingsView) {
-      navigate(`${slugPrefix}/folders`);
-    }
-  };
-
-  const handleSortChange = (
-    sb: "title" | "artist" | "updatedAt",
-    so: "asc" | "desc",
-  ) => {
-    setSortBy(sb);
-    setSortOrder(so);
-    if (isSettingsView) {
-      navigate(`${slugPrefix}/folders`);
-    }
-  };
-
-  const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
-
-  // Modal States
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [isCreateSongModalOpen, setIsCreateSongModalOpen] = useState(false);
-
-  const [renameTarget, setRenameTarget] = useState<Folder | null>(null);
-  const [moveFolderTarget, setMoveFolderTarget] = useState<Folder | null>(null);
-  const [targetParentFolderId, setTargetParentFolderId] = useState<
-    string | null
-  >(null);
-
-  const [isCifraImportOpen, setIsCifraImportOpen] = useState(false);
-
-  const [deleteTarget, setDeleteTarget] = useState<Folder | null>(null);
-  const [deleteAção, setDeleteAção] = useState<"move_to_root" | "delete_songs">(
-    "move_to_root",
-  );
-  const [confirmFolderName, setConfirmFolderName] = useState("");
-
-  const [moveSongTarget, setMoveSongTarget] = useState<Song | null>(null);
-  const [targetSongFolderId, setTargetSongFolderId] = useState<string | null>(
-    null,
-  );
-
-  const [deleteSongTarget, setDeleteSongTarget] = useState<Song | null>(null);
-
+  // Data Memos
   const allFolders = useMemo(
     () => foldersQuery.data?.folders || [],
     [foldersQuery.data?.folders],
@@ -451,13 +286,12 @@ export const MainLayout: React.FC = () => {
   const rootSongsCount = foldersQuery.data?.rootSongsCount || 0;
   const rootFoldersCount = foldersQuery.data?.folders.length || 0;
 
-  // Build tree structure from folders
   const folderTree = useMemo(() => buildFolderTree(allFolders), [allFolders]);
+  const currentFolder = useMemo(
+    () => allFolders.find((f) => f.id === currentFolderId),
+    [allFolders, currentFolderId],
+  );
 
-  // Current active folder object (if inside a folder)
-  const currentFolder = allFolders.find((f) => f.id === currentFolderId);
-
-  // Set of descendant folder IDs for current active directory
   const descendantFolderIds = useMemo(() => {
     if (currentFolderId === null) {
       return new Set(allFolders.map((f) => f.id));
@@ -465,23 +299,25 @@ export const MainLayout: React.FC = () => {
     return getFolderDescendantIds(currentFolderId, allFolders);
   }, [currentFolderId, allFolders]);
 
-  // Helper: folder path display string
-  const getFolderPathString = (folderId: string | null | undefined): string => {
-    if (!folderId) return "Raiz";
-    const pathList: string[] = [];
-    let curr: Folder | undefined = allFolders.find((f) => f.id === folderId);
-    const visited = new Set<string>();
+  const getFolderPathString = useCallback(
+    (folderId: string | null | undefined): string => {
+      if (!folderId) return "Raiz";
+      const pathList: string[] = [];
+      let curr: Folder | undefined = allFolders.find((f) => f.id === folderId);
+      const visited = new Set<string>();
 
-    while (curr && !visited.has(curr.id)) {
-      visited.add(curr.id);
-      pathList.unshift(curr.name);
-      curr = curr.parentId
-        ? allFolders.find((f) => f.id === curr?.parentId)
-        : undefined;
-    }
+      while (curr && !visited.has(curr.id)) {
+        visited.add(curr.id);
+        pathList.unshift(curr.name);
+        curr = curr.parentId
+          ? allFolders.find((f) => f.id === curr?.parentId)
+          : undefined;
+      }
 
-    return pathList.length > 0 ? pathList.join(" / ") : "Raiz";
-  };
+      return pathList.length > 0 ? pathList.join(" / ") : "Raiz";
+    },
+    [allFolders],
+  );
 
   const availableTags = useMemo(() => {
     const tagsSet = new Set<string>();
@@ -491,7 +327,6 @@ export const MainLayout: React.FC = () => {
     return Array.from(tagsSet).sort();
   }, [allSongs]);
 
-  // Compute folder breadcrumbs path from root down to currentFolder
   const folderBreadcrumbs = useMemo(() => {
     if (!currentFolderId) return [];
     const trail: Folder[] = [];
@@ -538,7 +373,7 @@ export const MainLayout: React.FC = () => {
 
   const currentSongFileName = useMemo(() => {
     if (!currentSong) return "";
-    let title = currentSong.title || "";
+    const title = currentSong.title || "";
     if (
       title.endsWith(".chordpro") ||
       title.endsWith(".pro") ||
@@ -563,17 +398,15 @@ export const MainLayout: React.FC = () => {
     [allServices, currentServiceId],
   );
 
-  // Is searching or filtering active?
   const isSearchingOrFiltering = Boolean(
     searchQuery.trim() || selectedKey || selectedTag,
   );
-
   const activeFiltersCount =
     (searchQuery.trim() ? 1 : 0) +
     (selectedKey ? 1 : 0) +
     (selectedTag ? 1 : 0);
 
-  // Subfolders inside current directory or scope search results
+  // Filtered Folders & Files
   const filteredSubfolders = useMemo(() => {
     let list: Folder[];
 
@@ -619,7 +452,6 @@ export const MainLayout: React.FC = () => {
     sortOrder,
   ]);
 
-  // Songs inside current directory or scope search results
   const filteredFiles = useMemo(() => {
     let list: Song[];
 
@@ -699,7 +531,15 @@ export const MainLayout: React.FC = () => {
     allFolders,
   ]);
 
-  // Ordered view items for shift-click range selection
+  // Selection State
+  const [selectedFolderIds, setSelectedFolderIds] = useState<Set<string>>(
+    new Set(),
+  );
+  const [selectedSongIds, setSelectedSongIds] = useState<Set<string>>(
+    new Set(),
+  );
+  const [lastClickedId, setLastClickedId] = useState<string | null>(null);
+
   const viewItems = useMemo(() => {
     const folders = filteredSubfolders.map((f) => ({
       id: f.id,
@@ -714,7 +554,41 @@ export const MainLayout: React.FC = () => {
     return [...folders, ...songs];
   }, [filteredSubfolders, filteredFiles]);
 
-  // Selection Handlers (Click, Ctrl+Click, Shift+Click)
+  const toggleFolderSelect = useCallback((id: string, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    setSelectedFolderIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }, []);
+
+  const toggleSongSelect = useCallback((id: string, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    setSelectedSongIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }, []);
+
+  const clearSelection = useCallback(() => {
+    setSelectedFolderIds(new Set());
+    setSelectedSongIds(new Set());
+    setLastClickedId(null);
+  }, []);
+
+  const selectAllInCurrentView = useCallback(() => {
+    setSelectedFolderIds(new Set(filteredSubfolders.map((f) => f.id)));
+    setSelectedSongIds(new Set(filteredFiles.map((s) => s.id)));
+  }, [filteredSubfolders, filteredFiles]);
+
+  useEffect(() => {
+    clearSelection();
+  }, [currentFolderId, clearSelection]);
+
   const handleItemClick = useCallback(
     (e: React.MouseEvent, id: string, type: "folder" | "song") => {
       e.stopPropagation();
@@ -764,41 +638,27 @@ export const MainLayout: React.FC = () => {
         setLastClickedId(id);
       }
     },
-    [viewItems, lastClickedId],
+    [viewItems, lastClickedId, toggleFolderSelect, toggleSongSelect],
   );
 
-  const toggleFolderSelect = useCallback((id: string, e?: React.MouseEvent) => {
-    if (e) e.stopPropagation();
-    setSelectedFolderIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  }, []);
+  // Marquee Rubberband Selection
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [selectionBox, setSelectionBox] = useState<{
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  } | null>(null);
+  const isMouseDownRef = useRef(false);
+  const startPosRef = useRef<{ x: number; y: number } | null>(null);
+  const initialSelectionRef = useRef<{
+    folders: Set<string>;
+    songs: Set<string>;
+  }>({
+    folders: new Set(),
+    songs: new Set(),
+  });
 
-  const toggleSongSelect = useCallback((id: string, e?: React.MouseEvent) => {
-    if (e) e.stopPropagation();
-    setSelectedSongIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  }, []);
-
-  const selectAllInCurrentView = () => {
-    setSelectedFolderIds(new Set(filteredSubfolders.map((f) => f.id)));
-    setSelectedSongIds(new Set(filteredFiles.map((s) => s.id)));
-  };
-
-  const clearSelection = () => {
-    setSelectedFolderIds(new Set());
-    setSelectedSongIds(new Set());
-    setLastClickedId(null);
-  };
-
-  // Marquee Drag Selection Handler
   const handleWorkspaceMouseDown = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
       if (e.button !== 0) return;
@@ -823,7 +683,7 @@ export const MainLayout: React.FC = () => {
         };
       }
     },
-    [selectedFolderIds, selectedSongIds],
+    [selectedFolderIds, selectedSongIds, clearSelection],
   );
 
   useEffect(() => {
@@ -859,7 +719,6 @@ export const MainLayout: React.FC = () => {
           if (!id || !type) return;
 
           const rect = el.getBoundingClientRect();
-
           const intersects = !(
             rect.right < left ||
             rect.left > left + width ||
@@ -895,7 +754,6 @@ export const MainLayout: React.FC = () => {
   }, []);
 
   const totalSelectedCount = selectedFolderIds.size + selectedSongIds.size;
-
   const selectedFolderObjects = useMemo(
     () => allFolders.filter((f) => selectedFolderIds.has(f.id)),
     [allFolders, selectedFolderIds],
@@ -903,7 +761,7 @@ export const MainLayout: React.FC = () => {
 
   const disabledFolderIdsForBatchMove = useMemo(() => {
     const disabled = new Set<string>();
-    const selectedList = Array.from(selectedFolderIds) as string[];
+    const selectedList = Array.from(selectedFolderIds);
     selectedList.forEach((id) => disabled.add(id));
 
     function addDescendants(folderId: string) {
@@ -918,13 +776,313 @@ export const MainLayout: React.FC = () => {
     return disabled;
   }, [selectedFolderIds, allFolders]);
 
-  // Batch Handlers
+  // Modals & Context Menu State
+  const [isBatchMoveOpen, setIsBatchMoveOpen] = useState(false);
+  const [isBatchDeleteOpen, setIsBatchDeleteOpen] = useState(false);
+  const [isBatchTagOpen, setIsBatchTagOpen] = useState(false);
+
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isCreateSongModalOpen, setIsCreateSongModalOpen] = useState(false);
+  const [isCreateServiceModalOpen, setIsCreateServiceModalOpen] =
+    useState(false);
+  const [isCifraImportOpen, setIsCifraImportOpen] = useState(false);
+
+  const [renameTarget, setRenameTarget] = useState<Folder | null>(null);
+  const [moveFolderTarget, setMoveFolderTarget] = useState<Folder | null>(null);
+  const [targetParentFolderId, setTargetParentFolderId] = useState<
+    string | null
+  >(null);
+
+  const [deleteTarget, setDeleteTarget] = useState<Folder | null>(null);
+  const [deleteAcao, setDeleteAcao] = useState<"move_to_root" | "delete_songs">(
+    "move_to_root",
+  );
+  const [confirmFolderName, setConfirmFolderName] = useState("");
+
+  const [moveSongTarget, setMoveSongTarget] = useState<Song | null>(null);
+  const [targetSongFolderId, setTargetSongFolderId] = useState<string | null>(
+    null,
+  );
+  const [deleteSongTarget, setDeleteSongTarget] = useState<Song | null>(null);
+
+  const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
+  const [expandedFolderIds, setExpandedFolderIds] = useState<Set<string>>(
+    new Set(),
+  );
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [_isUploadingFiles, setIsUploadingFiles] = useState(false);
+  const [isDraggingOver, setIsDraggingOver] = useState(false);
+  const [isInternalDragActive, setIsInternalDragActive] = useState(false);
+  const [dropTargetFolderId, setDropTargetFolderId] = useState<string | null>(
+    null,
+  );
+
+  // Auto-expand folder tree
+  useEffect(() => {
+    if (currentFolderId && allFolders.length > 0) {
+      setExpandedFolderIds((prev) => {
+        const next = new Set(prev);
+        let curr = allFolders.find((f) => f.id === currentFolderId);
+        while (curr) {
+          next.add(curr.id);
+          if (!curr.parentId) break;
+          curr = allFolders.find((f) => f.id === curr?.parentId);
+        }
+        return next;
+      });
+    }
+  }, [currentFolderId, allFolders]);
+
+  const toggleExpand = useCallback((id: string) => {
+    setExpandedFolderIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }, []);
+
+  // Context Menu Trigger Handlers
+  const handleContextMenu = useCallback(
+    (e: React.MouseEvent, type: "folder" | "song", item: Folder | Song) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const isAlreadySelected =
+        type === "folder"
+          ? selectedFolderIds.has(item.id)
+          : selectedSongIds.has(item.id);
+
+      if (!isAlreadySelected) {
+        if (!e.ctrlKey && !e.metaKey && !e.shiftKey) {
+          if (type === "folder") {
+            setSelectedFolderIds(new Set([item.id]));
+            setSelectedSongIds(new Set());
+          } else {
+            setSelectedFolderIds(new Set());
+            setSelectedSongIds(new Set([item.id]));
+          }
+          setLastClickedId(item.id);
+        } else {
+          if (type === "folder") toggleFolderSelect(item.id);
+          else toggleSongSelect(item.id);
+          setLastClickedId(item.id);
+        }
+      }
+
+      const x = Math.min(e.clientX, window.innerWidth - 240);
+      const y = Math.min(e.clientY, window.innerHeight - 280);
+
+      setContextMenu({ x, y, type, item });
+    },
+    [selectedFolderIds, selectedSongIds, toggleFolderSelect, toggleSongSelect],
+  );
+
+  const handleCanvasContextMenu = useCallback((e: React.MouseEvent) => {
+    const target = e.target as HTMLElement;
+    if (target.closest("[data-item-id]")) {
+      return;
+    }
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    const x = Math.min(e.clientX, window.innerWidth - 240);
+    const y = Math.min(e.clientY, window.innerHeight - 300);
+
+    setContextMenu({ x, y, type: "canvas", item: null });
+  }, []);
+
+  // Keyboard Shortcuts
+  useEffect(() => {
+    const handleCloseMenu = () => setContextMenu(null);
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setContextMenu(null);
+        clearSelection();
+        return;
+      }
+
+      const target = e.target as HTMLElement;
+      const isTyping =
+        target.tagName === "INPUT" ||
+        target.tagName === "TEXTAREA" ||
+        target.isContentEditable;
+      if (isTyping) return;
+
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "a") {
+        if (!isExplorerView) return;
+        e.preventDefault();
+        selectAllInCurrentView();
+        return;
+      }
+
+      if (e.key === "Delete" || e.key === "Backspace") {
+        if (totalSelectedCount === 0) return;
+        e.preventDefault();
+
+        if (totalSelectedCount === 1) {
+          if (selectedFolderIds.size === 1) {
+            const folder = allFolders.find(
+              (f) => f.id === Array.from(selectedFolderIds)[0],
+            );
+            if (folder) setDeleteTarget(folder);
+          } else {
+            const song = allSongs.find(
+              (s) => s.id === Array.from(selectedSongIds)[0],
+            );
+            if (song) setDeleteSongTarget(song);
+          }
+        } else {
+          setIsBatchDeleteOpen(true);
+        }
+        return;
+      }
+
+      if (e.key === "Enter") {
+        if (totalSelectedCount !== 1) return;
+        if (selectedFolderIds.size === 1) {
+          handleSelectFolder(Array.from(selectedFolderIds)[0]);
+        } else if (selectedSongIds.size === 1) {
+          navigate(`${slugPrefix}/songs/${Array.from(selectedSongIds)[0]}`);
+        }
+      }
+    };
+
+    window.addEventListener("click", handleCloseMenu);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("click", handleCloseMenu);
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [
+    totalSelectedCount,
+    selectedFolderIds,
+    selectedSongIds,
+    allFolders,
+    allSongs,
+    isExplorerView,
+    clearSelection,
+    selectAllInCurrentView,
+    handleSelectFolder,
+    navigate,
+    slugPrefix,
+  ]);
+
+  // Folder Actions
+  const handleCreateFolderSubmit = async (name: string) => {
+    await createFolder({ name, parentId: currentFolderId });
+    setIsCreateModalOpen(false);
+  };
+
+  const handleRenameFolderSubmit = async (name: string) => {
+    if (!renameTarget) return;
+    await renameFolder({
+      id: renameTarget.id,
+      name,
+      updatedAt: renameTarget.updatedAt!,
+    });
+    setRenameTarget(null);
+  };
+
+  const handleMoveFolderSubmit = async () => {
+    if (!moveFolderTarget) return;
+    await moveFolder({
+      id: moveFolderTarget.id,
+      parentId: targetParentFolderId,
+      updatedAt: moveFolderTarget.updatedAt!,
+    });
+    setMoveFolderTarget(null);
+  };
+
+  const handleDeleteFolderSubmit = async () => {
+    if (!deleteTarget) return;
+    if (
+      deleteAcao === "delete_songs" &&
+      confirmFolderName.trim() !== deleteTarget.name.trim()
+    ) {
+      showToast(
+        "O nome da pasta inserido não é igual ao nome da pasta.",
+        "error",
+      );
+      return;
+    }
+    await deleteFolder({ id: deleteTarget.id, action: deleteAcao });
+    if (currentFolderId === deleteTarget.id) {
+      setCurrentFolderId(null);
+    }
+    setDeleteTarget(null);
+    setConfirmFolderName("");
+    setDeleteAcao("move_to_root");
+  };
+
+  // Song Actions
+  const handleCreateSongSubmit = async (data: {
+    title: string;
+    artist: string;
+    folderId: string | null;
+    tags: string[];
+  }) => {
+    const song = await songsApi.createSong({
+      title: data.title,
+      artist: data.artist,
+      folderId: data.folderId,
+      content: `{title: ${data.title}}\n{artist: ${data.artist}}\n\n[G] Exemplo de tom e cifra...`,
+      tags: data.tags,
+    });
+    await Promise.all([songsQuery.refetch(), foldersQuery.refetch()]);
+    setIsCreateSongModalOpen(false);
+    showToast("Cântico criado com sucesso!", "success");
+    navigate(`${slugPrefix}/songs/${song.id}`);
+  };
+
+  const handleCifraClubSubmit = async (
+    chordpro: ConversionResult,
+    artist: string,
+    title: string,
+  ) => {
+    const song = await songsApi.createSong({
+      title,
+      artist,
+      folderId: currentFolderId,
+      content: `{title: ${title}}\n{artist: ${artist}}\n\n${chordpro.chordpro}`,
+      tags: ["cifraclub"],
+    });
+    await Promise.all([songsQuery.refetch(), foldersQuery.refetch()]);
+    setIsCreateSongModalOpen(false);
+    showToast("Cântico importado com sucesso!", "success");
+    navigate(`${slugPrefix}/songs/${song.id}`);
+  };
+
+  const handleCreateServiceSubmit = async (data: {
+    name: string;
+    date: string;
+    notes: string;
+  }) => {
+    const newService = await createService({
+      name: data.name,
+      date: data.date,
+      notes: data.notes,
+      elements: [],
+    });
+    setIsCreateServiceModalOpen(false);
+    navigate(`${slugPrefix}/services/${newService.id}`);
+  };
+
+  const handleDeleteSongSubmit = async () => {
+    if (!deleteSongTarget) return;
+    await deleteSong(deleteSongTarget.id);
+    setDeleteSongTarget(null);
+  };
+
+  // Batch Operations
   const handleBatchMoveConfirm = useCallback(
     async (targetFolderId: string | null) => {
-      const folderList = Array.from(selectedFolderIds) as string[];
-      const songList = Array.from(selectedSongIds) as string[];
+      const folderList = Array.from(selectedFolderIds);
+      const songList = Array.from(selectedSongIds);
 
-      // OPTIMISTIC UPDATE: snapshot current cache then apply changes immediately
       const prevFoldersData = queryClient.getQueryData(["folders"]);
       const prevSongsData = queryClient.getQueryData(["songs", "all", {}]);
 
@@ -1015,8 +1173,8 @@ export const MainLayout: React.FC = () => {
   const handleBatchDeleteConfirm = async (
     folderAction: "move_to_root" | "delete_songs",
   ) => {
-    const folderList = Array.from(selectedFolderIds) as string[];
-    const songList = Array.from(selectedSongIds) as string[];
+    const folderList = Array.from(selectedFolderIds);
+    const songList = Array.from(selectedSongIds);
 
     for (const fId of folderList) {
       await deleteFolder({ id: fId, action: folderAction });
@@ -1036,314 +1194,13 @@ export const MainLayout: React.FC = () => {
     tags: string[],
     mode: "append" | "replace" | "remove",
   ) => {
-    const songList = Array.from(selectedSongIds) as string[];
+    const songList = Array.from(selectedSongIds);
     if (songList.length === 0) return;
     await updateBatchTags({ songIds: songList, tags, mode });
     clearSelection();
   };
 
-  // Auto-expand parent folders when selecting a folder
-  useEffect(() => {
-    if (currentFolderId && allFolders.length > 0) {
-      setExpandedFolderIds((prev) => {
-        const next = new Set(prev);
-        let curr = allFolders.find((f) => f.id === currentFolderId);
-        while (curr) {
-          next.add(curr.id);
-          if (!curr.parentId) break;
-          curr = allFolders.find((f) => f.id === curr?.parentId);
-        }
-        return next;
-      });
-    }
-  }, [currentFolderId, allFolders]);
-
-  // Close context menu on window click or escape
-  useEffect(() => {
-    const handleCloseMenu = () => setContextMenu(null);
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setContextMenu(null);
-    };
-
-    window.addEventListener("click", handleCloseMenu);
-    window.addEventListener("keydown", handleKeyDown);
-    return () => {
-      window.removeEventListener("click", handleCloseMenu);
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, []);
-
-  useEffect(() => {
-    const handleCloseMenu = () => setContextMenu(null);
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        setContextMenu(null);
-        clearSelection();
-        return;
-      }
-
-      const target = e.target as HTMLElement;
-      const isTyping =
-        target.tagName === "INPUT" ||
-        target.tagName === "TEXTAREA" ||
-        target.isContentEditable;
-      if (isTyping) return;
-
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "a") {
-        if (!isExplorerView) return;
-        e.preventDefault();
-        selectAllInCurrentView();
-        return;
-      }
-
-      if (e.key === "Delete" || e.key === "Backspace") {
-        if (totalSelectedCount === 0) return;
-        e.preventDefault();
-
-        if (totalSelectedCount === 1) {
-          if (selectedFolderIds.size === 1) {
-            const folder = allFolders.find(
-              (f) => f.id === Array.from(selectedFolderIds)[0],
-            );
-            if (folder) setDeleteTarget(folder);
-          } else {
-            const song = allSongs.find(
-              (s) => s.id === Array.from(selectedSongIds)[0],
-            );
-            if (song) setDeleteSongTarget(song);
-          }
-        } else {
-          setIsBatchDeleteOpen(true);
-        }
-        return;
-      }
-
-      if (e.key === "Enter") {
-        if (totalSelectedCount !== 1) return;
-        if (selectedFolderIds.size === 1) {
-          handleSelectFolder(Array.from(selectedFolderIds)[0]);
-        } else if (selectedSongIds.size === 1) {
-          navigate(`${slugPrefix}/songs/${Array.from(selectedSongIds)[0]}`);
-        }
-      }
-    };
-
-    window.addEventListener("click", handleCloseMenu);
-    window.addEventListener("keydown", handleKeyDown);
-    return () => {
-      window.removeEventListener("click", handleCloseMenu);
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [
-    totalSelectedCount,
-    selectedFolderIds,
-    selectedSongIds,
-    allFolders,
-    allSongs,
-    isExplorerView,
-  ]);
-
-  const toggleExpand = (id: string) => {
-    setExpandedFolderIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) {
-        next.delete(id);
-      } else {
-        next.add(id);
-      }
-      return next;
-    });
-  };
-
-  // Context Menu trigger
-  const handleContextMenu = useCallback(
-    (e: React.MouseEvent, type: "folder" | "song", item: Folder | Song) => {
-      e.preventDefault();
-      e.stopPropagation();
-
-      const isAlreadySelected =
-        type === "folder"
-          ? selectedFolderIds.has(item.id)
-          : selectedSongIds.has(item.id);
-
-      if (!isAlreadySelected) {
-        if (!e.ctrlKey && !e.metaKey && !e.shiftKey) {
-          if (type === "folder") {
-            setSelectedFolderIds(new Set([item.id]));
-            setSelectedSongIds(new Set());
-          } else {
-            setSelectedFolderIds(new Set());
-            setSelectedSongIds(new Set([item.id]));
-          }
-          setLastClickedId(item.id);
-        } else {
-          if (type === "folder") toggleFolderSelect(item.id);
-          else toggleSongSelect(item.id);
-          setLastClickedId(item.id);
-        }
-      }
-
-      const x = Math.min(e.clientX, window.innerWidth - 240);
-      const y = Math.min(e.clientY, window.innerHeight - 280);
-
-      setContextMenu({ x, y, type, item });
-    },
-    [selectedFolderIds, selectedSongIds],
-  );
-
-  const handleCanvasContextMenu = useCallback(
-    (e: React.MouseEvent) => {
-      const target = e.target as HTMLElement;
-      if (target.closest("[data-item-id]")) {
-        return;
-      }
-
-      e.preventDefault();
-      e.stopPropagation();
-
-      const x = Math.min(e.clientX, window.innerWidth - 240);
-      const y = Math.min(e.clientY, window.innerHeight - 300);
-
-      setContextMenu({ x, y, type: "canvas", item: null });
-    },
-    [currentFolder],
-  );
-
-  // Folder Actions
-  const handleCreateFolderSubmit = async (name: string) => {
-    await createFolder({ name, parentId: currentFolderId });
-    setIsCreateModalOpen(false);
-  };
-
-  const handleRenameFolderSubmit = async (name: string) => {
-    if (!renameTarget) return;
-    await renameFolder({
-      id: renameTarget.id,
-      name,
-      updatedAt: renameTarget.updatedAt!,
-    });
-    setRenameTarget(null);
-  };
-
-  const handleMoveFolderSubmit = async () => {
-    if (!moveFolderTarget) return;
-    await moveFolder({
-      id: moveFolderTarget.id,
-      parentId: targetParentFolderId,
-      updatedAt: moveFolderTarget.updatedAt!,
-    });
-    setMoveFolderTarget(null);
-  };
-
-  const handleDeleteFolderSubmit = async () => {
-    if (!deleteTarget) return;
-    if (
-      deleteAção === "delete_songs" &&
-      confirmFolderName.trim() !== deleteTarget.name.trim()
-    ) {
-      showToast(
-        "O nome da pasta inserido não é igual ao nome da pasta.",
-        "error",
-      );
-      return;
-    }
-    await deleteFolder({ id: deleteTarget.id, action: deleteAção });
-    if (currentFolderId === deleteTarget.id) {
-      setCurrentFolderId(null);
-    }
-    setDeleteTarget(null);
-    setConfirmFolderName("");
-    setDeleteAção("move_to_root");
-  };
-
-  // Song Actions
-  const handleCreateSongSubmit = async (data: {
-    title: string;
-    artist: string;
-    folderId: string | null;
-    tags: string[];
-  }) => {
-    const song = await songsApi.createSong({
-      title: data.title,
-      artist: data.artist,
-      folderId: data.folderId,
-      content: `{title: ${data.title}}\n{artist: ${data.artist}}\n\n[G] Exemplo de tom e cifra...`,
-      tags: data.tags,
-    });
-    await Promise.all([songsQuery.refetch(), foldersQuery.refetch()]);
-    setIsCreateSongModalOpen(false);
-    showToast("Cântico criado com sucesso!", "success");
-    navigate(`${slugPrefix}/songs/${song.id}`);
-  };
-
-  const handlePrintSongs = async () => {
-    setContextMenu(null);
-    selectedSongIds.forEach(async (_id) => {
-      //const html = await printApi.printSong(id);
-      //printHtmlDirectly(html);
-    });
-  };
-
-  const handlePrintSong = async (_id: string) => {
-    setContextMenu(null);
-    //const html = await printApi.printSong(id);
-    //printHtmlDirectly(html);
-  };
-
-  const handlePrintFolders = async () => {
-    setContextMenu(null);
-    selectedFolderIds.forEach(async (_id) => {
-      //const html = await printApi.printFolder(id);
-      //printHtmlDirectly(html);
-    });
-  };
-
-  const handlePrintFolder = async (_id: string) => {
-    setContextMenu(null);
-    //const html = await printApi.printFolder(id);
-    //printHtmlDirectly(html);
-  };
-
-  const handleCifraClubSubmit = async (
-    chordpro: ConversionResult,
-    artist: string,
-    title: string,
-  ) => {
-    const song = await songsApi.createSong({
-      title,
-      artist,
-      folderId: currentFolderId,
-      content: `{title: ${title}}\n{artist: ${artist}}\n\n${chordpro.chordpro}`,
-      tags: ["cifraclub"],
-    });
-    await Promise.all([songsQuery.refetch(), foldersQuery.refetch()]);
-    setIsCreateSongModalOpen(false);
-    showToast("Cântico importado com sucesso!", "success");
-    navigate(`${slugPrefix}/songs/${song.id}`);
-  };
-
-  const handleCreateServiceSubmit = async (data: {
-    name: string;
-    date: string;
-    notes: string;
-  }) => {
-    const newService = await createService({
-      name: data.name,
-      date: data.date,
-      notes: data.notes,
-      elements: [],
-    });
-    setIsCreateServiceModalOpen(false);
-    navigate(`${slugPrefix}/services/${newService.id}`);
-  };
-
-  const handleDeleteSongSubmit = async () => {
-    if (!deleteSongTarget) return;
-    await deleteSong(deleteSongTarget.id);
-    setDeleteSongTarget(null);
-  };
-
+  // File Upload
   const showToastImportResult = (result: ProviderImportResult) => {
     if (result.created > 0) {
       const targetFolderName = currentFolder
@@ -1357,7 +1214,7 @@ export const MainLayout: React.FC = () => {
 
     if (result.failed > 0) {
       showToast(
-        `Erro ao carregar ${result.failed} ficheiro(s)  ${result.fileTypeName}`,
+        `Erro ao carregar ${result.failed} ficheiro(s) ${result.fileTypeName}`,
         "error",
       );
     }
@@ -1383,7 +1240,6 @@ export const MainLayout: React.FC = () => {
     });
 
     await Promise.all([songsQuery.refetch(), foldersQuery.refetch()]);
-
     setIsUploadingFiles(false);
   };
 
@@ -1397,11 +1253,11 @@ export const MainLayout: React.FC = () => {
     if (e.target) e.target.value = "";
   };
 
-  // Drag & Drop Handlers for Folder Canvas
+  // Drag and Drop
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (isInternalDragActive) return; // não mostra overlay de upload durante drag interno
+    if (isInternalDragActive) return;
     if (!isDraggingOver) setIsDraggingOver(true);
   };
 
@@ -1419,7 +1275,7 @@ export const MainLayout: React.FC = () => {
 
     if (isInternalDragActive) {
       setIsInternalDragActive(false);
-      return; // era um drag interno que escapou de uma pasta — ignora como upload
+      return;
     }
 
     const files = e.dataTransfer.files;
@@ -1444,7 +1300,6 @@ export const MainLayout: React.FC = () => {
         setLastClickedId(id);
       }
 
-      // Compute total items that will be dragged
       const willFolders =
         !isSelected && type === "folder"
           ? new Set([id])
@@ -1464,7 +1319,6 @@ export const MainLayout: React.FC = () => {
       const totalDragging = willFolders.size + willSongs.size;
 
       if (totalDragging > 1) {
-        // Build a stacked ghost drag image
         const ghost = document.createElement("div");
         ghost.style.cssText = [
           "position:fixed",
@@ -1561,7 +1415,6 @@ export const MainLayout: React.FC = () => {
       if (!wasInternalDrag || disabledFolderIdsForBatchMove.has(folderId))
         return;
 
-      // Move direto, sem modal de confirmação
       await handleBatchMoveConfirm(folderId);
     },
     [
@@ -1576,290 +1429,34 @@ export const MainLayout: React.FC = () => {
   const layoutContent = (
     <>
       <div className="h-dvh max-h-dvh w-full flex flex-row overflow-hidden bg-m3-bg">
-        {/* Mobile Sidebar Overlay */}
-        {isSidebarOpen && (
-          <div
-            className="md:hidden fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-40"
-            onClick={() => setIsSidebarOpen(false)}
-          />
-        )}
-
-        <div
-          className={`${isSidebarOpen ? "flex absolute inset-y-0 left-0 z-50 bg-m3-sidebar shadow-2xl" : "hidden"} md:flex md:relative md:bg-m3-sidebar/30 ${
-            isSidebarCollapsed ? "md:w-20" : "md:w-64"
-          } w-72 border-r border-m3-border p-4 flex-col gap-1 select-none shrink-0 transition-all duration-300 z-30`}
-          role="navigation"
-        >
-          {/* Integrated Sidebar Header */}
-          <div
-            className="flex items-center justify-between mb-4 mt-2 select-none px-1"
-            role="banner"
-          >
-            <div
-              className={`flex items-center ${isSidebarCollapsed ? "justify-center w-full" : "gap-3"}`}
-            >
-              <div className="w-11 h-11 rounded-xl flex items-center justify-center border border-m3-border/50 bg-m3-card transition-transform hover:scale-105 shadow-xs shrink-0">
-                <img
-                  src="/favicon.png"
-                  alt="Hosanna Studio"
-                  className="w-10 h-10 object-contain rounded-lg"
-                />
-              </div>
-              {!isSidebarCollapsed && (
-                <div className="flex flex-col items-start min-w-0 flex-1">
-                  <h1 className="font-display font-black text-xl tracking-tighter text-slate-900 dark:text-slate-100 leading-none truncate">
-                    Hosanna Studio
-                  </h1>
-                  {organization && (
-                    <span className="mt-1 text-xs font-medium text-slate-500 dark:text-slate-400 truncate max-w-32.5">
-                      {organization?.metadata?.shortName || organization.slug}
-                    </span>
-                  )}
-                </div>
-              )}
-            </div>
-
-            {!isSidebarCollapsed && (
-              <button
-                onClick={() => setIsSidebarCollapsed(true)}
-                className="hidden md:flex p-1.5 rounded-xl hover:bg-m3-hover text-m3-secondary hover:text-m3-text border border-transparent hover:border-m3-border/60 transition-all cursor-pointer shrink-0"
-                title="Recolher menu"
-              >
-                <ChevronLeft className="w-4 h-4" />
-              </button>
-            )}
-          </div>
-
-          {isSidebarCollapsed && (
-            <button
-              onClick={() => setIsSidebarCollapsed(false)}
-              className="hidden md:flex w-full py-2 items-center justify-center rounded-xl bg-m3-card/50 hover:bg-m3-hover border border-m3-border/40 text-m3-secondary hover:text-m3-text transition-all cursor-pointer mb-3 shadow-xs"
-              title="Expandir menu"
-            >
-              <ChevronRight className="w-4 h-4" />
-            </button>
-          )}
-
-          {!isSidebarCollapsed && (
-            <div className="px-3 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-m3-secondary opacity-60">
-              Menu Principal
-            </div>
-          )}
-
-          <button
-            onClick={() => {
-              setCurrentFolderId(null);
-              navigate(`${slugPrefix}/folders`);
-              if (window.innerWidth < 768) setIsSidebarOpen(false);
-            }}
-            title={
-              isSidebarCollapsed
-                ? `Drive da ${organization?.metadata?.shortName}`
-                : undefined
-            }
-            className={`w-full flex items-center ${isSidebarCollapsed ? "justify-center" : "justify-between"} px-4 py-3 text-[13px] font-bold rounded-2xl transition-all cursor-pointer group ${
-              isExplorerView && currentFolderId === null
-                ? "bg-m3-primary/10 text-m3-primary border border-m3-primary/20 shadow-sm"
-                : "text-m3-secondary hover:bg-m3-hover hover:text-m3-text"
-            }`}
-          >
-            <div
-              className={`flex items-center ${isSidebarCollapsed ? "" : "gap-3"}`}
-            >
-              <HardDrive
-                className={`w-4.5 h-4.5 ${isExplorerView && currentFolderId === null ? "text-m3-primary" : "text-m3-secondary"}`}
-              />
-              {!isSidebarCollapsed && (
-                <span>Drive da {organization?.metadata?.shortName}</span>
-              )}
-            </div>
-            {!isSidebarCollapsed && (
-              <Badge
-                variant={
-                  isExplorerView && currentFolderId === null ? "sky" : "slate"
-                }
-              >
-                {rootSongsCount + rootFoldersCount}
-              </Badge>
-            )}
-          </button>
-
-          <button
-            onClick={() => {
-              navigate(`${slugPrefix}/songs`);
-              if (window.innerWidth < 768) setIsSidebarOpen(false);
-            }}
-            title={isSidebarCollapsed ? `Biblioteca` : undefined}
-            className={`w-full flex items-center ${isSidebarCollapsed ? "justify-center" : "justify-between"} px-4 py-3 text-[13px] font-bold rounded-2xl transition-all cursor-pointer group ${
-              isSongsView
-                ? "bg-m3-primary/10 text-m3-primary border border-m3-primary/20 shadow-sm"
-                : "text-m3-secondary hover:bg-m3-hover hover:text-m3-text"
-            }`}
-          >
-            <div
-              className={`flex items-center ${isSidebarCollapsed ? "" : "gap-3"}`}
-            >
-              {" "}
-              <Music
-                className={`w-4.5 h-4.5 ${isSongsView ? "text-m3-primary" : "text-m3-secondary"}`}
-              />
-              {!isSidebarCollapsed && <span>Biblioteca</span>}
-            </div>
-            {!isSidebarCollapsed && (
-              <Badge variant={isSongsView ? "sky" : "slate"}>
-                {totalSongs}
-              </Badge>
-            )}{" "}
-          </button>
-
-          <button
-            onClick={() => {
-              navigate(`${slugPrefix}/services`);
-              if (window.innerWidth < 768) setIsSidebarOpen(false);
-            }}
-            title={isSidebarCollapsed ? `Cultos` : undefined}
-            className={`w-full flex items-center ${isSidebarCollapsed ? "justify-center" : "justify-between"} px-4 py-3 text-[13px] font-bold rounded-2xl transition-all cursor-pointer group ${
-              isServicesView
-                ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 shadow-sm"
-                : "text-m3-secondary hover:bg-m3-hover hover:text-m3-text"
-            }`}
-          >
-            <div
-              className={`flex items-center ${isSidebarCollapsed ? "" : "gap-3"}`}
-            >
-              {" "}
-              <Church
-                className={`w-4.5 h-4.5 ${isServicesView ? "text-emerald-500" : "text-m3-secondary"}`}
-              />
-              {!isSidebarCollapsed && <span>Cultos</span>}
-            </div>
-            {!isSidebarCollapsed && (
-              <Badge variant={isServicesView === null ? "sky" : "slate"}>
-                {totalServices}
-              </Badge>
-            )}
-          </button>
-
-          {teamsEnabled && (
-            <button
-              onClick={() => {
-                navigate(`${slugPrefix}/teams`);
-                if (window.innerWidth < 768) setIsSidebarOpen(false);
-              }}
-              title={isSidebarCollapsed ? `Equipas` : undefined}
-              className={`w-full flex items-center ${isSidebarCollapsed ? "justify-center" : "justify-between"} px-4 py-3 text-[13px] font-bold rounded-2xl transition-all cursor-pointer group ${
-                isTeamsView
-                  ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 shadow-sm"
-                  : "text-m3-secondary hover:bg-m3-hover hover:text-m3-text"
-              }`}
-            >
-              <div
-                className={`flex items-center ${isSidebarCollapsed ? "" : "gap-3"}`}
-              >
-                <Users
-                  className={`w-4.5 h-4.5 ${isTeamsView ? "text-amber-500" : "text-m3-secondary"}`}
-                />
-                {!isSidebarCollapsed && <span>Equipas</span>}
-              </div>
-            </button>
-          )}
-
-          {!isSidebarCollapsed && settings.showFolderTree && (
-            <>
-              <div className="mt-6 px-3 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-m3-secondary opacity-60">
-                Pastas ({allFolders.length})
-              </div>
-
-              <div className="flex-1 overflow-y-auto flex flex-col gap-1 pr-1 custom-scrollbar">
-                {folderTree.map((node) => (
-                  <FolderTreeItemNode
-                    key={node.folder.id}
-                    node={node}
-                    currentFolderId={currentFolderId}
-                    onSelectFolder={(id) => {
-                      handleSelectFolder(id);
-                      if (window.innerWidth < 768) setIsSidebarOpen(false);
-                    }}
-                    onContextMenu={handleContextMenu}
-                    expandedFolderIds={expandedFolderIds}
-                    toggleExpand={toggleExpand}
-                  />
-                ))}
-              </div>
-            </>
-          )}
-          {(isSidebarCollapsed || !settings.showFolderTree) && (
-            <div className="flex-1" />
-          )}
-
-          {user && (
-            <div
-              className="mt-2 pt-2 border-t border-slate-200 dark:border-slate-800 relative shrink-0"
-              ref={userMenuRef}
-            >
-              <button
-                onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                title={isSidebarCollapsed ? user.name : undefined}
-                className={`w-full flex items-center ${isSidebarCollapsed ? "justify-center" : "justify-between"} p-2 rounded-xl hover:bg-slate-200/60 dark:hover:bg-slate-800 transition-colors cursor-pointer`}
-              >
-                <div
-                  className={`flex items-center ${isSidebarCollapsed ? "" : "gap-2"} min-w-0`}
-                >
-                  <div className="w-7 h-7 rounded-full bg-linear-to-tr from-[#0284c7] to-sky-400 flex items-center justify-center text-white font-extrabold text-xs shadow-sm shrink-0">
-                    {user.image ? (
-                      <img
-                        src={user.image as string}
-                        alt={user.name}
-                        className="w-full h-full rounded-full object-cover"
-                      />
-                    ) : (
-                      getInitials(user.name)
-                    )}
-                  </div>
-                  {!isSidebarCollapsed && (
-                    <div className="flex flex-col min-w-0 text-left">
-                      <span className="text-xs font-bold text-slate-900 dark:text-slate-100 truncate">
-                        {user.name}
-                      </span>
-                      <span className="text-[9px] text-emerald-600 dark:text-emerald-400 font-bold uppercase tracking-wider">
-                        {getRoleLabel(user.role ?? "guest")}
-                      </span>
-                    </div>
-                  )}
-                </div>
-                {!isSidebarCollapsed && (
-                  <Settings className="w-4 h-4 text-slate-400 shrink-0" />
-                )}
-              </button>
-              {isUserMenuOpen && (
-                <div className="absolute bottom-full left-0 mb-2 w-56 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl z-50 p-2 space-y-1 animate-in fade-in slide-in-from-bottom-2 duration-150">
-                  <button
-                    onClick={() => {
-                      setIsUserMenuOpen(false);
-                      navigate(`${slugPrefix}/settings`);
-                      if (window.innerWidth < 768) setIsSidebarOpen(false);
-                    }}
-                    className="w-full flex items-center gap-3 px-3 py-2 text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors cursor-pointer text-left"
-                  >
-                    <Settings className="w-4 h-4 text-[#0284c7]" />
-                    Definições
-                  </button>
-                  <div className="my-1 border-t border-slate-100 dark:border-slate-800" />
-                  <button
-                    onClick={() => {
-                      setIsUserMenuOpen(false);
-                      logout();
-                    }}
-                    className="w-full flex items-center gap-3 px-3 py-2 text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-xl transition-colors cursor-pointer text-left"
-                  >
-                    <LogOut className="w-4 h-4 text-rose-500" />
-                    Sair
-                  </button>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
+        <AppSidebar
+          isSidebarOpen={isSidebarOpen}
+          setIsSidebarOpen={setIsSidebarOpen}
+          isSidebarCollapsed={isSidebarCollapsed}
+          setIsSidebarCollapsed={setIsSidebarCollapsed}
+          organization={organization}
+          slugPrefix={slugPrefix}
+          isExplorerView={isExplorerView}
+          isSongsView={isSongsView}
+          isServicesView={isServicesView}
+          isTeamsView={isTeamsView}
+          currentFolderId={currentFolderId}
+          rootSongsCount={rootSongsCount}
+          rootFoldersCount={rootFoldersCount}
+          totalSongs={totalSongs}
+          totalServices={totalServices}
+          allFolders={allFolders}
+          folderTree={folderTree}
+          expandedFolderIds={expandedFolderIds}
+          showFolderTree={settings.showFolderTree}
+          teamsEnabled={false}
+          user={user}
+          onSelectFolder={handleSelectFolder}
+          onContextMenu={handleContextMenu}
+          toggleExpand={toggleExpand}
+          navigate={navigate}
+          logout={logout}
+        />
 
         {/* Main Container (Toolbar + Content) */}
         <div className="flex-1 flex flex-col p-2 sm:p-4 md:p-0 h-full w-full overflow-hidden">
@@ -1873,482 +1470,72 @@ export const MainLayout: React.FC = () => {
             className="hidden"
           />
 
-          {/* Explorador de Ficheiros Window Container */}
+          {/* Window Container */}
           <div
             className="bg-m3-card border md:border-none border-m3-border rounded-4xl md:rounded-none shadow-2xl md:shadow-none shadow-black/10 overflow-hidden flex flex-col flex-1 h-full transition-all duration-300"
             role="main"
           >
-            {/* Explorer Address Bar & Toolbar */}
             {(isExplorerView ||
               isSongsView ||
               isServicesView ||
               isSettingsView ||
               isEditorView) && (
-              <div className="p-3 sm:p-4 bg-m3-sidebar/40 border-b border-m3-border/50 flex flex-col md:flex-row items-center justify-between gap-3 sm:gap-4">
-                {/* Navigation Controls & Address Bar */}
-                <div className="flex items-center gap-2 sm:gap-3 flex-1 w-full md:w-auto">
-                  {/* Mobile Sidebar Toggle */}
-                  <button
-                    onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                    className="md:hidden p-2.5 rounded-2xl border transition-all text-m3-primary border-m3-primary/30 hover:bg-m3-primary hover:text-white bg-m3-card cursor-pointer shadow-sm shrink-0"
-                  >
-                    <Menu className="w-4.5 h-4.5" />
-                  </button>
-                  {/* Up / Back Button */}
-                  <button
-                    onClick={() => {
-                      if (isExplorerView) {
-                        handleSelectFolder(currentFolder?.parentId || null);
-                      } else {
-                        navigate(-1);
-                      }
-                    }}
-                    disabled={isExplorerView && currentFolderId === null}
-                    title={
-                      isExplorerView
-                        ? currentFolderId === null
-                          ? "No Nível Raiz"
-                          : currentFolder?.parentId
-                            ? "Subir um nível"
-                            : "Subir para a pasta Raiz"
-                        : "Voltar"
-                    }
-                    className={`p-2.5 rounded-2xl border transition-all ${
-                      isExplorerView && currentFolderId === null
-                        ? "text-m3-secondary/30 bg-m3-bg border-m3-border/30 cursor-not-allowed opacity-50"
-                        : "text-m3-primary border-m3-primary/30 hover:bg-m3-primary hover:text-white bg-m3-card cursor-pointer shadow-sm hover:shadow-m3-primary/20"
-                    }`}
-                  >
-                    <CornerLeftUp className="w-4.5 h-4.5" />
-                  </button>
-
-                  {/* Address Path Bar */}
-                  <div className="flex-1 flex items-center gap-2 px-4 py-2.5 bg-m3-bg border border-m3-border rounded-2xl text-[13px] overflow-x-auto select-none hide-scrollbar shadow-inner min-w-0">
-                    <button
-                      onClick={() => {
-                        handleSelectFolder(null);
-                        navigate(`${slugPrefix}/folders`);
-                      }}
-                      className={`flex items-center gap-2 font-black uppercase tracking-widest transition-all cursor-pointer shrink-0 ${
-                        currentFolderId === null && isExplorerView
-                          ? "text-m3-primary"
-                          : "text-m3-secondary hover:text-m3-text"
-                      }`}
-                    >
-                      <HardDrive
-                        className={`w-4 h-4 ${currentFolderId === null && isExplorerView ? "text-m3-primary" : "text-m3-secondary"}`}
-                      />
-                      <span>Início</span>
-                    </button>
-
-                    {isExplorerView &&
-                      folderBreadcrumbs.map((folder, index) => {
-                        const isLast = index === folderBreadcrumbs.length - 1;
-                        return (
-                          <React.Fragment key={folder.id}>
-                            <ChevronRight className="w-3.5 h-3.5 text-m3-secondary/40 shrink-0" />
-                            {isLast ? (
-                              <div className="flex items-center gap-2 font-black text-m3-primary shrink-0 uppercase tracking-wide">
-                                <FolderOpen className="w-4 h-4" />
-                                <span>{folder.name}</span>
-                              </div>
-                            ) : (
-                              <button
-                                onClick={() => handleSelectFolder(folder.id)}
-                                className="flex items-center gap-2 font-bold text-m3-secondary hover:text-m3-text transition-all cursor-pointer shrink-0"
-                              >
-                                <FolderIcon className="w-4 h-4 opacity-70" />
-                                <span>{folder.name}</span>
-                              </button>
-                            )}
-                          </React.Fragment>
-                        );
-                      })}
-
-                    {isSongsView && (
-                      <>
-                        <ChevronRight className="w-3.5 h-3.5 text-m3-secondary/40 shrink-0" />
-                        <div className="flex items-center gap-2 font-black text-m3-primary shrink-0 uppercase tracking-wide">
-                          <Music className="w-4 h-4" />
-                          <span>Biblioteca</span>
-                        </div>
-                      </>
-                    )}
-
-                    {isSongEditorView && (
-                      <>
-                        {songBreadcrumbs.map((folder) => (
-                          <React.Fragment key={folder.id}>
-                            <ChevronRight className="w-3.5 h-3.5 text-m3-secondary/40 shrink-0" />
-                            <button
-                              onClick={() => {
-                                handleSelectFolder(folder.id);
-                                navigate(`${slugPrefix}/folders`);
-                              }}
-                              className="flex items-center gap-2 font-bold text-m3-secondary hover:text-m3-text transition-all cursor-pointer shrink-0"
-                            >
-                              <FolderIcon className="w-4 h-4 opacity-70" />
-                              <span>{folder.name}</span>
-                            </button>
-                          </React.Fragment>
-                        ))}
-
-                        {currentSong && (
-                          <>
-                            <ChevronRight className="w-3.5 h-3.5 text-m3-secondary/40 shrink-0" />
-                            <div className="flex items-center gap-2 font-black text-m3-primary shrink-0 uppercase tracking-wide">
-                              <FileText className="w-4 h-4" />
-                              <span>{currentSongFileName}</span>
-                            </div>
-                          </>
-                        )}
-                      </>
-                    )}
-
-                    {isServicesView && (
-                      <>
-                        <ChevronRight className="w-3.5 h-3.5 text-m3-secondary/40 shrink-0" />
-                        <div className="flex items-center gap-2 font-black text-m3-primary shrink-0 uppercase tracking-wide">
-                          <Calendar className="w-4 h-4" />
-                          <span>Cultos</span>
-                        </div>
-                      </>
-                    )}
-
-                    {isServiceEditorView && (
-                      <>
-                        <ChevronRight className="w-3.5 h-3.5 text-m3-secondary/40 shrink-0" />
-                        <button
-                          onClick={() => navigate(`${slugPrefix}/services`)}
-                          className="flex items-center gap-2 font-bold text-m3-secondary hover:text-m3-text transition-all cursor-pointer shrink-0"
-                        >
-                          <Calendar className="w-4 h-4" />
-                          <span>Cultos</span>
-                        </button>
-                        {currentService && (
-                          <>
-                            <ChevronRight className="w-3.5 h-3.5 text-m3-secondary/40 shrink-0" />
-                            <div className="flex items-center gap-2 font-black text-m3-primary shrink-0 uppercase tracking-wide">
-                              <Calendar className="w-4 h-4" />
-                              <span>{currentService.name}.service</span>
-                            </div>
-                            <div
-                              className="ml-auto mr-2 inline-flex items-center gap-1.5 rounded-full
-                                    px-3 py-1.5 text-xs font-semibold
-                                    bg-m3-primary-light text-m3-primary
-                                    border border-m3-primary"
-                            >
-                              <Calendar className="h-3.5 w-3.5" />
-                              <span>
-                                {new Date(
-                                  currentService.date,
-                                ).toLocaleDateString("pt-PT", {
-                                  weekday: "long",
-                                  year: "numeric",
-                                  month: "long",
-                                  day: "numeric",
-                                })}
-                              </span>
-                            </div>
-                          </>
-                        )}
-                      </>
-                    )}
-
-                    {isSettingsView && (
-                      <>
-                        <ChevronRight className="w-3.5 h-3.5 text-m3-secondary/40 shrink-0" />
-                        <div className="flex items-center gap-2 font-black text-m3-primary shrink-0 uppercase tracking-wide">
-                          <Settings className="w-4 h-4" />
-                          <span>Definições</span>
-                        </div>
-                      </>
-                    )}
-
-                    {isTeamsView && (
-                      <>
-                        <ChevronRight className="w-3.5 h-3.5 text-m3-secondary/40 shrink-0" />
-                        <div className="flex items-center gap-2 font-black text-m3-primary shrink-0 uppercase tracking-wide">
-                          <Users className="w-4 h-4" />
-                          <span>Equipas</span>
-                        </div>
-                      </>
-                    )}
-                  </div>
-                </div>
-
-                {/* Search, Notifications & Plus Action */}
-                <div className="flex items-center gap-3 w-full md:w-auto overflow-visible hide-scrollbar pb-1 md:pb-0 justify-end">
-                  {/* Search Input */}
-                  {(isExplorerView || isSongsView || isServicesView) && (
-                    <div className="relative w-full sm:w-64">
-                      <Input
-                        placeholder={
-                          isServicesView
-                            ? "Pesquisar cultos..."
-                            : isSongsView
-                              ? "Pesquisar biblioteca..."
-                              : currentFolder
-                                ? `Pesquisar pastas...`
-                                : "Pesquisar pastas..."
-                        }
-                        value={searchQuery}
-                        onChange={(e) => handleSearchChange(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Escape") {
-                            handleSearchChange("");
-                          }
-                        }}
-                        icon={<Search className="w-4 h-4 text-m3-secondary" />}
-                        className="py-2.5 text-sm pr-9 rounded-2xl"
-                      />
-                      {searchQuery && (
-                        <button
-                          onClick={() => handleSearchChange("")}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-m3-secondary hover:text-m3-text hover:bg-m3-hover rounded-lg cursor-pointer transition-all"
-                          title="Limpar pesquisa"
-                        >
-                          <X className="w-3.5 h-3.5" />
-                        </button>
-                      )}
-                    </div>
-                  )}
-
-                  <SyncStatusBadge className="shrink-0" showText={false} />
-
-                  <InboxButton
-                    client={authClient as InboxFetchClient}
-                    className="shrink-0"
-                  />
-
-                  <CanAny
-                    permissions={[
-                      "song.create",
-                      "folder.create",
-                      "song.import",
-                      "service.create",
-                    ]}
-                  >
-                    <div className="relative shrink-0 ml-1" ref={plusMenuRef}>
-                      <button
-                        onClick={() => setIsPlusMenuOpen(!isPlusMenuOpen)}
-                        className="w-10 h-10 rounded-2xl bg-m3-primary text-white flex items-center justify-center border border-m3-primary font-black text-lg shadow-xl shadow-m3-primary/20 hover:bg-m3-primary-dark hover:scale-105 active:scale-95 transition-all cursor-pointer"
-                        title="Criar..."
-                      >
-                        <Plus className="w-5 h-5" />
-                      </button>
-                      {isPlusMenuOpen && (
-                        <div className="absolute right-0 top-full mt-3 w-64 bg-m3-card border border-m3-border rounded-3xl shadow-2xl z-50 p-2 space-y-1 animate-in fade-in slide-in-from-top-2 duration-200">
-                          <div className="px-4 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-m3-secondary opacity-60">
-                            Criar Novo
-                          </div>
-                          <Can permission="song.create">
-                            <button
-                              onClick={() => {
-                                setIsPlusMenuOpen(false);
-                                setIsCreateSongModalOpen(true);
-                              }}
-                              className="w-full flex items-center gap-4 px-4 py-3 text-xs font-bold text-m3-text hover:bg-m3-hover rounded-2xl transition-all cursor-pointer text-left group"
-                            >
-                              <div className="w-8 h-8 rounded-xl bg-m3-primary/10 text-m3-primary flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-                                <Music className="w-4 h-4" />
-                              </div>
-                              Novo Cântico
-                            </button>
-                          </Can>
-                          <Can permission="song.import">
-                            <button
-                              onClick={() => {
-                                setIsPlusMenuOpen(false);
-                                setIsCifraImportOpen(true);
-                              }}
-                              className="w-full flex items-center gap-4 px-4 py-3 text-xs font-bold text-m3-text hover:bg-m3-hover rounded-2xl transition-all cursor-pointer text-left group"
-                            >
-                              <div className="w-8 h-8 rounded-xl bg-m3-primary/10 text-m3-primary flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-                                <Music className="w-4 h-4" />
-                              </div>
-                              Importar Cânticos de um outro Provedor
-                            </button>
-                          </Can>
-                          <Can permission="service.create">
-                            <button
-                              onClick={() => {
-                                setIsPlusMenuOpen(false);
-                                setIsCreateServiceModalOpen(true);
-                              }}
-                              className="w-full flex items-center gap-4 px-4 py-3 text-xs font-bold text-m3-text hover:bg-m3-hover rounded-2xl transition-all cursor-pointer text-left group"
-                            >
-                              <div className="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-                                <Calendar className="w-4 h-4" />
-                              </div>
-                              Novo Plano de Culto
-                            </button>
-                          </Can>
-                          <Can permission="folder.create">
-                            <button
-                              onClick={() => {
-                                setIsPlusMenuOpen(false);
-                                setIsCreateModalOpen(true);
-                              }}
-                              className="w-full flex items-center gap-4 px-4 py-3 text-xs font-bold text-m3-text hover:bg-m3-hover rounded-2xl transition-all cursor-pointer text-left group"
-                            >
-                              <div className="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-                                <FolderPlus className="w-4 h-4" />
-                              </div>
-                              Nova Pasta
-                            </button>
-                          </Can>
-                        </div>
-                      )}
-                    </div>
-                  </CanAny>
-                </div>
-              </div>
+              <ExplorerAddressBar
+                isExplorerView={isExplorerView}
+                isSongsView={isSongsView}
+                isSongEditorView={isSongEditorView}
+                isServicesView={isServicesView}
+                isServiceEditorView={isServiceEditorView}
+                isSettingsView={isSettingsView}
+                isTeamsView={isTeamsView}
+                isSidebarOpen={isSidebarOpen}
+                setIsSidebarOpen={setIsSidebarOpen}
+                currentFolder={currentFolder}
+                currentFolderId={currentFolderId}
+                slugPrefix={slugPrefix}
+                folderBreadcrumbs={folderBreadcrumbs}
+                songBreadcrumbs={songBreadcrumbs}
+                currentSong={currentSong}
+                currentSongFileName={currentSongFileName}
+                currentService={currentService}
+                searchQuery={searchQuery}
+                onSearchChange={handleSearchChange}
+                onSelectFolder={handleSelectFolder}
+                onNavigateBack={() => {
+                  if (isExplorerView) {
+                    handleSelectFolder(currentFolder?.parentId || null);
+                  } else {
+                    navigate(-1);
+                  }
+                }}
+                navigate={navigate}
+                onOpenCreateSong={() => setIsCreateSongModalOpen(true)}
+                onOpenCifraImport={() => setIsCifraImportOpen(true)}
+                onOpenCreateService={() => setIsCreateServiceModalOpen(true)}
+                onOpenCreateFolder={() => setIsCreateModalOpen(true)}
+              />
             )}
 
-            {/* Secondary Toolbar: Filters, Sorting, View Mode & Density */}
-            {(isExplorerView || isServicesView || isSongsView) && (
-              <div className="px-4 py-2.5 bg-m3-sidebar/20 border-b border-m3-border/40 flex items-center justify-between gap-3 flex-wrap">
-                {/* Left Side: Filter button, Archive button (services), Sort dropdown */}
-                <div className="flex items-center gap-2.5 flex-wrap">
-                  {/* Filter Pop-Up Panel Trigger Button */}
-                  {isExplorerView && (
-                    <button
-                      onClick={() => {
-                        navigateBackToDrive();
-                        setIsFilterPanelOpen(true);
-                      }}
-                      className={`flex items-center gap-2 px-4 py-2 rounded-2xl border text-xs font-black uppercase tracking-widest transition-all cursor-pointer relative ${
-                        activeFiltersCount > 0
-                          ? "bg-m3-primary/10 border-m3-primary text-m3-primary shadow-lg shadow-m3-primary/10"
-                          : "bg-m3-card border-m3-border text-m3-secondary hover:bg-m3-hover hover:text-m3-text hover:border-m3-primary/30"
-                      }`}
-                      title="Abrir Filtros Avançados"
-                    >
-                      <Filter className="w-4 h-4" />
-                      <span>Filtros</span>
-                      {activeFiltersCount > 0 && (
-                        <span className="w-4.5 h-4.5 rounded-full bg-m3-primary text-white text-[10px] font-black flex items-center justify-center shadow-sm">
-                          {activeFiltersCount}
-                        </span>
-                      )}
-                    </button>
-                  )}
-
-                  {/* Archive Toggle Button (Services View) */}
-                  {isServicesView && (
-                    <button
-                      type="button"
-                      onClick={() => setShowArchived((v) => !v)}
-                      className={`flex items-center gap-2 px-4 py-2 rounded-2xl border text-xs font-black uppercase tracking-widest transition-all cursor-pointer shrink-0 ${
-                        showArchived
-                          ? "bg-amber-500/10 border-amber-500 text-amber-600 dark:text-amber-400 shadow-lg shadow-amber-500/10"
-                          : "bg-m3-card border-m3-border text-m3-secondary hover:bg-m3-hover hover:text-m3-text hover:border-amber-500/30"
-                      }`}
-                      title={
-                        showArchived
-                          ? "Ocultar arquivados"
-                          : "Mostrar arquivados"
-                      }
-                    >
-                      <Archive className="w-4 h-4" />
-                      <span>Arquivados</span>
-                      {showArchived && archivedServices.length > 0 && (
-                        <span className="w-4.5 h-4.5 rounded-full bg-amber-500 text-white text-[10px] font-black flex items-center justify-center">
-                          {archivedServices.length}
-                        </span>
-                      )}
-                    </button>
-                  )}
-
-                  {/* Sort Control Button */}
-                  <div className="flex items-center gap-2 bg-m3-bg border border-m3-border rounded-2xl px-3 py-1.5 text-xs transition-all hover:border-m3-primary/30">
-                    <ArrowUpDown className="w-4 h-4 text-m3-secondary shrink-0" />
-                    <select
-                      value={`${sortBy}-${sortOrder}`}
-                      onChange={(e) => {
-                        const [sb, so] = e.target.value.split("-") as [
-                          "title" | "artist" | "updatedAt",
-                          "asc" | "desc",
-                        ];
-                        handleSortChange(sb, so);
-                      }}
-                      className="bg-transparent font-bold text-m3-text focus:outline-none cursor-pointer text-[11px] uppercase tracking-wider"
-                      title={
-                        isServicesView
-                          ? "Organizar cultos"
-                          : "Organizar ficheiros"
-                      }
-                    >
-                      {isServicesView ? (
-                        <>
-                          <option value="updatedAt-desc">Data: Recente</option>
-                          <option value="updatedAt-asc">Data: Antiga</option>
-                          <option value="title-asc">Nome (A-Z)</option>
-                          <option value="title-desc">Nome (Z-A)</option>
-                        </>
-                      ) : (
-                        <>
-                          <option value="title-asc">Nome (A-Z)</option>
-                          <option value="title-desc">Nome (Z-A)</option>
-                          <option value="artist-asc">Artista (A-Z)</option>
-                          <option value="updatedAt-desc">Data Recente</option>
-                        </>
-                      )}
-                    </select>
-                  </div>
-                </div>
-
-                {/* Right Side: View Mode Toggle & Density Selector */}
-                <div className="flex items-center gap-2.5">
-                  {/* View Mode Toggle (hidden in Songs view) */}
-                  {!isSongsView && (
-                    <div className="flex items-center p-1 bg-m3-bg rounded-2xl border border-m3-border select-none shrink-0 shadow-inner">
-                      <button
-                        onClick={() => handleViewModeChange("grid")}
-                        title="Vista em Grelha"
-                        className={`p-2 rounded-xl transition-all cursor-pointer ${
-                          viewMode === "grid"
-                            ? "bg-m3-card text-m3-primary shadow-lg shadow-black/10"
-                            : "text-m3-secondary hover:text-m3-text"
-                        }`}
-                      >
-                        <LayoutGrid className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() => handleViewModeChange("list")}
-                        title="Vista em Lista"
-                        className={`p-2 rounded-xl transition-all cursor-pointer ${
-                          viewMode === "list"
-                            ? "bg-m3-card text-m3-primary shadow-lg shadow-black/10"
-                            : "text-m3-secondary hover:text-m3-text"
-                        }`}
-                      >
-                        <List className="w-4 h-4" />
-                      </button>
-                    </div>
-                  )}
-
-                  {/* Density Selector (Confortável / Compacto) */}
-                  <div className="flex items-center gap-2 bg-m3-bg border border-m3-border rounded-2xl px-3 py-1.5 text-xs transition-all hover:border-m3-primary/30">
-                    <LayoutGrid className="w-4 h-4 text-m3-primary shrink-0" />
-                    <select
-                      value={density}
-                      onChange={(e) =>
-                        handleDensityChange(
-                          e.target.value as "comfortable" | "compact",
-                        )
-                      }
-                      className="bg-transparent font-bold text-m3-text focus:outline-none cursor-pointer text-[11px] uppercase tracking-wider"
-                      title="Densidade de visualização"
-                    >
-                      <option value="comfortable">Confortável</option>
-                      <option value="compact">Compacto</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-            )}
+            <ExplorerToolbar
+              isExplorerView={isExplorerView}
+              isServicesView={isServicesView}
+              isSongsView={isSongsView}
+              activeFiltersCount={activeFiltersCount}
+              showArchived={showArchived}
+              setShowArchived={setShowArchived}
+              archivedServices={archivedServices}
+              sortBy={sortBy}
+              sortOrder={sortOrder}
+              onSortChange={handleSortChange}
+              viewMode={viewMode}
+              onViewModeChange={handleViewModeChange}
+              density={density}
+              onDensityChange={handleDensityChange}
+              onOpenFilterPanel={() => {
+                navigateBackToDrive();
+                setIsFilterPanelOpen(true);
+              }}
+            />
 
             {/* Main Content Area */}
             <div className="flex-1 flex flex-col relative bg-white dark:bg-slate-900 overflow-hidden">
@@ -2409,14 +1596,14 @@ export const MainLayout: React.FC = () => {
               <div className="h-10 bg-m3-sidebar/40 border-t border-m3-border px-6 flex items-center justify-between text-[10px] text-m3-secondary font-black uppercase tracking-widest select-none">
                 <div className="flex items-center gap-4">
                   <span className="flex items-center gap-1.5">
-                    <HardDrive className="w-3.5 h-3.5 opacity-60" />
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-xs" />
                     {currentFolder ? `/${currentFolder.name}` : "/ (Raiz)"}
                   </span>
                 </div>
                 <div className="flex items-center gap-6">
                   <span>{filteredSubfolders.length} Pastas</span>
                   <span>{filteredFiles.length} Ficheiros</span>
-                  <span className="text-m3-primary">
+                  <span className="text-m3-primary font-bold">
                     {totalItemsCount} Total
                   </span>
                 </div>
@@ -2428,657 +1615,90 @@ export const MainLayout: React.FC = () => {
 
       <ToastContainer />
 
-      {totalSelectedCount > 1 && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 rounded-3xl shadow-2xl px-5 py-3 animate-in fade-in slide-in-from-bottom-4 duration-200">
-          <span className="text-xs font-black uppercase tracking-widest px-2">
-            {totalSelectedCount} itens selecionados
-          </span>
-
-          <div className="h-6 w-px bg-white/20 dark:bg-slate-900/20" />
-
-          <CanAny permissions={["song.update", "folder.update"]}>
-            <Button
-              size="sm"
-              variant="ghost"
-              icon={<Move className="w-4 h-4" />}
-              onClick={() => setIsBatchMoveOpen(true)}
-              className="text-white! dark:text-slate-900! hover:bg-white/10! dark:hover:bg-slate-900/10!"
-            >
-              Mover
-            </Button>
-          </CanAny>
-
-          <CanAny permissions={["song.delete", "folder.delete"]}>
-            <Button
-              size="sm"
-              variant="ghost"
-              icon={<Trash2 className="w-4 h-4" />}
-              onClick={() => setIsBatchDeleteOpen(true)}
-              className="text-rose-400! hover:bg-rose-500/10!"
-            >
-              Eliminar
-            </Button>
-          </CanAny>
-
-          <Button
-            size="sm"
-            variant="ghost"
-            icon={<X className="w-4 h-4" />}
-            onClick={clearSelection}
-            className="text-white/70! dark:text-slate-900/70! hover:bg-white/10! dark:hover:bg-slate-900/10!"
-          >
-            Cancelar
-          </Button>
-        </div>
-      )}
-
-      {/* FLOATING CONTEXT MENU */}
-      {contextMenu && (
-        <div
-          style={{ top: contextMenu.y, left: contextMenu.x }}
-          className="fixed z-50 w-56 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl p-1.5 flex flex-col gap-0.5 text-xs select-none animate-in fade-in zoom-in-95 duration-100"
-          onClick={(e) => e.stopPropagation()}
-        >
-          {contextMenu.type === "canvas" ? (
-            <>
-              <div className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400 border-b border-slate-100 dark:border-slate-800/80 mb-0.5 truncate flex items-center justify-between">
-                <span>
-                  {currentFolder ? currentFolder.name : "Diretório Raiz"}
-                </span>
-                <span className="text-[9px] text-slate-400 font-normal">
-                  Opções
-                </span>
-              </div>
-
-              <Can permission="folder.create">
-                <button
-                  onClick={() => {
-                    setIsCreateModalOpen(true);
-                    setContextMenu(null);
-                  }}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left cursor-pointer"
-                >
-                  <FolderPlus className="w-4 h-4 text-amber-500" />
-                  <span>Nova Pasta</span>
-                </button>
-              </Can>
-
-              <Can permission="song.create">
-                <button
-                  onClick={() => {
-                    setIsCreateSongModalOpen(true);
-                    setContextMenu(null);
-                  }}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left cursor-pointer"
-                >
-                  <Plus className="w-4 h-4 text-[#0284c7]" />
-                  <span>Novo Cântico</span>
-                </button>
-              </Can>
-
-              <Can permission="song.import">
-                <button
-                  onClick={() => {
-                    fileInputRef.current?.click();
-                    setContextMenu(null);
-                  }}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left cursor-pointer"
-                >
-                  <Upload className="w-4 h-4 text-[#0284c7]" />
-                  <span>Carregar Ficheiros</span>
-                </button>
-              </Can>
-
-              <div className="my-1 border-t border-slate-100 dark:border-slate-800/80" />
-
-              <button
-                onClick={() => {
-                  selectAllInCurrentView();
-                  setContextMenu(null);
-                }}
-                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left cursor-pointer"
-              >
-                <CheckSquare className="w-4 h-4 text-slate-500" />
-                <span>Selecionar Tudo</span>
-              </button>
-
-              <button
-                onClick={() => {
-                  foldersQuery.refetch();
-                  songsQuery.refetch();
-                  setContextMenu(null);
-                }}
-                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left cursor-pointer"
-              >
-                <RotateCw className="w-4 h-4 text-slate-500" />
-                <span>Atualizar Vista</span>
-              </button>
-            </>
-          ) : totalSelectedCount > 1 ? (
-            <>
-              <div className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-[#0284c7] border-b border-slate-100 dark:border-slate-800/80 mb-0.5 truncate flex items-center justify-between">
-                <span>Seleção Múltipla</span>
-                <Badge variant="sky">{totalSelectedCount}</Badge>
-              </div>
-
-              {selectedSongIds.size > 0 && (
-                <>
-                  <Can permission="song.update">
-                    <button
-                      onClick={() => {
-                        setIsBatchTagOpen(true);
-                        setContextMenu(null);
-                      }}
-                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left cursor-pointer"
-                    >
-                      <Tag className="w-4 h-4 text-[#0284c7]" />
-                      <span>Etiquetar {selectedSongIds.size} cântico(s)</span>
-                    </button>
-                  </Can>
-                  <Can permission="export.pdf">
-                    <button
-                      onClick={handlePrintSongs}
-                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left cursor-pointer"
-                    >
-                      <Printer className="w-4 h-4 text-[#0284c7]" />
-                      <span>Imprimir {selectedSongIds.size} cântico(s)</span>
-                    </button>
-                  </Can>
-                </>
-              )}
-
-              {selectedFolderIds.size > 0 && (
-                <Can permission="export.pdf">
-                  <button
-                    onClick={handlePrintFolders}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left cursor-pointer"
-                  >
-                    <Printer className="w-4 h-4 text-[#0284c7]" />
-                    <span>Imprimir {selectedFolderIds.size} Pastas</span>
-                  </button>
-                </Can>
-              )}
-
-              <CanAll permissions={["song.update", "folder.update"]}>
-                <button
-                  onClick={() => {
-                    setIsBatchMoveOpen(true);
-                    setContextMenu(null);
-                  }}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left cursor-pointer"
-                >
-                  <Move className="w-4 h-4 text-emerald-500" />
-                  <span>Mover {totalSelectedCount} itens</span>
-                </button>
-              </CanAll>
-
-              <CanAll permissions={["song.delete", "folder.delete"]}>
-                <button
-                  onClick={() => {
-                    setIsBatchDeleteOpen(true);
-                    setContextMenu(null);
-                  }}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 font-semibold transition-colors text-left cursor-pointer"
-                >
-                  <Trash2 className="w-4 h-4 text-rose-500" />
-                  <span>Apagar {totalSelectedCount} itens</span>
-                </button>
-              </CanAll>
-
-              <div className="my-1 border-t border-slate-100 dark:border-slate-800/80" />
-
-              <button
-                onClick={() => {
-                  clearSelection();
-                  setContextMenu(null);
-                }}
-                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left cursor-pointer"
-              >
-                <X className="w-4 h-4 text-slate-400" />
-                <span>Desmarcar seleção</span>
-              </button>
-            </>
-          ) : (
-            <>
-              <div className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400 border-b border-slate-100 dark:border-slate-800/80 mb-0.5 truncate">
-                {contextMenu.type === "folder"
-                  ? (contextMenu.item as Folder).name
-                  : (contextMenu.item as Song).title}
-              </div>
-
-              {contextMenu.type === "folder" ? (
-                <>
-                  <button
-                    onClick={() => {
-                      handleSelectFolder((contextMenu.item as Folder).id);
-                      setContextMenu(null);
-                    }}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left"
-                  >
-                    <FolderOpen className="w-4 h-4 text-amber-500" />
-                    <span>Abrir Pasta</span>
-                  </button>
-
-                  <Can permission="folder.update">
-                    <button
-                      onClick={() => {
-                        setRenameTarget(contextMenu.item as Folder);
-                        setContextMenu(null);
-                      }}
-                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left"
-                    >
-                      <Edit2 className="w-4 h-4 text-[#0284c7]" />
-                      <span>Mudar Nome da Pasta</span>
-                    </button>
-
-                    <button
-                      onClick={() => {
-                        const folder = contextMenu.item as Folder;
-                        setMoveFolderTarget(folder);
-                        setTargetParentFolderId(folder.parentId || null);
-                        setContextMenu(null);
-                      }}
-                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left"
-                    >
-                      <Move className="w-4 h-4 text-emerald-500" />
-                      <span>Mover Pasta</span>
-                    </button>
-                  </Can>
-
-                  <Can permission="export.pdf">
-                    <button
-                      onClick={async () => {
-                        await handlePrintFolder(
-                          (contextMenu.item as Folder).id,
-                        );
-                      }}
-                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left"
-                    >
-                      <Printer className="w-4 h-4 text-emerald-500" />
-                      <span>Imprimir Pasta</span>
-                    </button>
-                  </Can>
-
-                  <Can permission="folder.delete">
-                    <div className="my-1 border-t border-slate-100 dark:border-slate-800/80" />
-
-                    <button
-                      onClick={() => {
-                        setDeleteTarget(contextMenu.item as Folder);
-                        setContextMenu(null);
-                      }}
-                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 font-semibold transition-colors text-left"
-                    >
-                      <Trash2 className="w-4 h-4 text-rose-500" />
-                      <span>Apagar Pasta</span>
-                    </button>
-                  </Can>
-                </>
-              ) : (
-                <>
-                  <button
-                    onClick={() => {
-                      navigate(
-                        `${slugPrefix}/songs/${(contextMenu.item as Song).id}`,
-                      );
-                      setContextMenu(null);
-                    }}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left"
-                  >
-                    <ExternalLink className="w-4 h-4 text-[#0284c7]" />
-                    <span>Abrir / Editar Cântico</span>
-                  </button>
-                  <Can permission="song.update">
-                    <button
-                      onClick={() => {
-                        const song = contextMenu.item as Song;
-                        setMoveSongTarget(song);
-                        setTargetSongFolderId(song.folderId || null);
-                        setContextMenu(null);
-                      }}
-                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left"
-                    >
-                      <ArrowRightLeft className="w-4 h-4 text-emerald-500" />
-                      <span>Mover Cântico</span>
-                    </button>
-
-                    <button
-                      onClick={() => {
-                        const song = contextMenu.item as Song;
-                        setSelectedSongIds(new Set([song.id]));
-                        setIsBatchTagOpen(true);
-                        setContextMenu(null);
-                      }}
-                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left"
-                    >
-                      <Tag className="w-4 h-4 text-[#0284c7]" />
-                      <span>Etiquetar Cântico</span>
-                    </button>
-                  </Can>
-                  <Can permission="export.pdf">
-                    <button
-                      onClick={async () => {
-                        handlePrintSong((contextMenu.item as Song).id);
-                      }}
-                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left"
-                    >
-                      <Printer className="w-4 h-4 text-emerald-500" />
-                      <span>Imprimir Cântico</span>
-                    </button>
-                  </Can>
-
-                  <Can permission="song.delete">
-                    <div className="my-1 border-t border-slate-100 dark:border-slate-800/80" />
-
-                    <button
-                      onClick={() => {
-                        setDeleteSongTarget(contextMenu.item as Song);
-                        setContextMenu(null);
-                      }}
-                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 font-semibold transition-colors text-left"
-                    >
-                      <Trash2 className="w-4 h-4 text-rose-500" />
-                      <span>Apagar Cântico</span>
-                    </button>
-                  </Can>
-                </>
-              )}
-            </>
-          )}
-        </div>
-      )}
-
-      <CifraClubImportModal
-        isOpen={isCifraImportOpen}
-        handleClose={() => {
-          setIsCifraImportOpen(false);
-        }}
-        handleSave={handleCifraClubSubmit}
+      <BatchActionFloatingBar
+        selectedCount={totalSelectedCount}
+        itemLabel="itens"
+        onDelete={() => setIsBatchDeleteOpen(true)}
+        onCancel={clearSelection}
       />
 
-      {/* CREATE SONG MODAL */}
-      <Modal
-        isOpen={isCreateSongModalOpen}
-        onClose={() => setIsCreateSongModalOpen(false)}
-        title={
-          currentFolder
-            ? `Criar Novo Cântico em "${currentFolder.name}"`
-            : "Criar Novo Cântico na Raiz"
-        }
-      >
-        <SongForm
-          initialValues={{ folderId: currentFolderId }}
-          folders={allFolders}
-          onSubmit={handleCreateSongSubmit}
-          onCancel={() => setIsCreateSongModalOpen(false)}
-        />
-      </Modal>
-
-      {/* CREATE SERVICE MODAL */}
-      <Modal
-        isOpen={isCreateServiceModalOpen}
-        onClose={() => setIsCreateServiceModalOpen(false)}
-        title="Criar Plano de Culto"
-      >
-        <ServiceForm
-          onSubmit={handleCreateServiceSubmit}
-          onCancel={() => setIsCreateServiceModalOpen(false)}
-        />
-      </Modal>
-
-      {/* CREATE FOLDER MODAL */}
-      <Modal
-        isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
-        title={
-          currentFolder
-            ? `Criar Pasta dentro de "${currentFolder.name}"`
-            : "Criar Nova Pasta na Raiz"
-        }
-      >
-        <FolderForm
-          onSubmit={handleCreateFolderSubmit}
-          onCancel={() => setIsCreateModalOpen(false)}
-        />
-      </Modal>
-
-      {/* RENAME FOLDER MODAL */}
-      <Modal
-        isOpen={!!renameTarget}
-        onClose={() => setRenameTarget(null)}
-        title={`Mudar Nome da Pasta "${renameTarget?.name}"`}
-      >
-        <FolderForm
-          initialName={renameTarget?.name || ""}
-          title="Atualizar Nome da Pasta"
-          onSubmit={handleRenameFolderSubmit}
-          onCancel={() => setRenameTarget(null)}
-        />
-      </Modal>
-
-      {/* MOVE FOLDER MODAL (TREE HIERARCHY) */}
-      <Modal
-        isOpen={!!moveFolderTarget}
-        onClose={() => setMoveFolderTarget(null)}
-        title={`Mover Pasta "${moveFolderTarget?.name}"`}
-      >
-        <div className="flex flex-col gap-4">
-          <p className="text-xs text-slate-500 dark:text-slate-400">
-            Selecione uma nova pasta de destino para{" "}
-            <strong className="text-slate-900 dark:text-slate-100">
-              {moveFolderTarget?.name}
-            </strong>
-            :
-          </p>
-
-          <div className="flex flex-col gap-2 max-h-72 overflow-y-auto pr-1">
-            <label className="flex items-center gap-3 p-3 border border-slate-200 dark:border-slate-800 rounded-xl cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50">
-              <input
-                type="radio"
-                name="targetFolderParent"
-                value="root"
-                checked={targetParentFolderId === null}
-                onChange={() => setTargetParentFolderId(null)}
-                className="text-[#0284c7] focus:ring-[#0284c7]"
-              />
-              <div className="flex items-center gap-2 text-xs font-bold text-slate-900 dark:text-slate-100">
-                <HardDrive className="w-4 h-4 text-[#0284c7]" />
-                <span>Diretório Raiz (Top Level)</span>
-              </div>
-            </label>
-
-            {/* Hierarchical Tree of Folders with Disabled Check for Self/Descendants */}
-            <div className="flex flex-col gap-1.5 mt-1">
-              {folderTree.map((node) => (
-                <MoveFolderTreeItem
-                  key={node.folder.id}
-                  node={node}
-                  selectedFolderId={targetParentFolderId}
-                  onSelect={setTargetParentFolderId}
-                  disabledFolderIds={
-                    moveFolderTarget
-                      ? getFolderDescendantIds(moveFolderTarget.id, allFolders)
-                      : undefined
-                  }
-                  expandedFolderIds={expandedFolderIds}
-                  toggleExpand={toggleExpand}
-                />
-              ))}
-            </div>
-          </div>
-
-          <div className="flex items-center justify-end gap-3 mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
-            <Button variant="ghost" onClick={() => setMoveFolderTarget(null)}>
-              Cancelar
-            </Button>
-            <Button variant="primary" onClick={handleMoveFolderSubmit}>
-              Mover Pasta
-            </Button>
-          </div>
-        </div>
-      </Modal>
-
-      {/* DELETE FOLDER MODAL */}
-      <Modal
-        isOpen={!!deleteTarget}
-        onClose={() => {
-          setDeleteTarget(null);
-          setConfirmFolderName("");
-          setDeleteAção("move_to_root");
+      <ExplorerContextMenu
+        contextMenu={contextMenu}
+        currentFolder={currentFolder}
+        totalSelectedCount={totalSelectedCount}
+        selectedSongIds={selectedSongIds}
+        selectedFolderIds={selectedFolderIds}
+        slugPrefix={slugPrefix}
+        navigate={navigate}
+        fileInputRef={fileInputRef}
+        onClose={() => setContextMenu(null)}
+        onOpenCreateFolder={() => setIsCreateModalOpen(true)}
+        onOpenCreateSong={() => setIsCreateSongModalOpen(true)}
+        onSelectAll={selectAllInCurrentView}
+        onRefreshView={() => {
+          foldersQuery.refetch();
+          songsQuery.refetch();
         }}
-        title={`Apagar Pasta "${deleteTarget?.name}"`}
-      >
-        {(deleteTarget?.folderCount || 0) + (deleteTarget?.songCount || 0) >
-        0 ? (
-          <div className="flex flex-col gap-4">
-            <div className="p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-xl flex items-start gap-2.5 text-xs text-amber-800 dark:text-amber-300">
-              <AlertTriangle className="w-4 h-4 shrink-0 text-amber-500 mt-0.5" />
-              <span>
-                Selecione como tratar os conteúdos dentro desta pasta:
-              </span>
-            </div>
+        onOpenBatchTag={() => setIsBatchTagOpen(true)}
+        onOpenBatchMove={() => setIsBatchMoveOpen(true)}
+        onOpenBatchDelete={() => setIsBatchDeleteOpen(true)}
+        onClearSelection={clearSelection}
+        onSelectFolder={handleSelectFolder}
+        onRenameFolder={setRenameTarget}
+        onMoveFolder={(f) => {
+          setMoveFolderTarget(f);
+          setTargetParentFolderId(f.parentId || null);
+        }}
+        onDeleteFolder={setDeleteTarget}
+        onMoveSong={(s) => {
+          setMoveSongTarget(s);
+          setTargetSongFolderId(s.folderId || null);
+        }}
+        onTagSong={(s) => {
+          setSelectedSongIds(new Set([s.id]));
+          setIsBatchTagOpen(true);
+        }}
+        onDeleteSong={setDeleteSongTarget}
+      />
 
-            <div className="flex flex-col gap-2.5">
-              <label className="flex items-center gap-3 p-3 border border-slate-200 dark:border-slate-800 rounded-xl cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50">
-                <input
-                  type="radio"
-                  name="deleteAção"
-                  value="move_to_root"
-                  checked={deleteAção === "move_to_root"}
-                  onChange={() => {
-                    setDeleteAção("move_to_root");
-                    setConfirmFolderName("");
-                  }}
-                  className="text-[#0284c7] focus:ring-[#0284c7]"
-                />
-                <div className="flex flex-col">
-                  <span className="text-xs font-bold text-slate-900 dark:text-slate-100">
-                    Mover Conteúdos para a Raiz (Recomendado)
-                  </span>
-                  <span className="text-[11px] text-slate-500">
-                    Mantém as cifras dos cânticos na biblioteca sem categoria de
-                    pasta.
-                  </span>
-                </div>
-              </label>
-
-              <label className="flex items-center gap-3 p-3 border border-rose-200 dark:border-rose-950 rounded-xl cursor-pointer hover:bg-rose-50/50 dark:hover:bg-rose-950/20">
-                <input
-                  type="radio"
-                  name="deleteAção"
-                  value="delete_songs"
-                  checked={deleteAção === "delete_songs"}
-                  onChange={() => setDeleteAção("delete_songs")}
-                  className="text-rose-600 focus:ring-rose-500"
-                />
-                <div className="flex flex-col">
-                  <span className="text-xs font-bold text-rose-600 dark:text-rose-400">
-                    Apagar pasta e todos os conteúdos nela contidos
-                  </span>
-                  <span className="text-[11px] text-slate-500">
-                    Apaga permanentemente a pasta E todos os ficheiros de
-                    cânticos e pastas e os conteudoes das mesmas, dentro dela.
-                  </span>
-                </div>
-              </label>
-            </div>
-
-            {deleteAção === "delete_songs" && (
-              <div className="p-4 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 rounded-2xl flex flex-col gap-3 text-xs">
-                <div className="flex items-center gap-2 font-bold text-rose-700 dark:text-rose-300">
-                  <AlertTriangle className="w-4 h-4 text-rose-500 shrink-0" />
-                  <span>Confirmação Adicional de Segurança</span>
-                </div>
-                <p className="text-rose-900 dark:text-rose-200 text-[11px] leading-relaxed">
-                  Esta ação é irreversível. Para confirmar a eliminação
-                  permanente da pasta e de todos os seus cânticos, escreva o
-                  nome da pasta{" "}
-                  <strong className="font-extrabold underline">
-                    {deleteTarget?.name}
-                  </strong>{" "}
-                  abaixo:
-                </p>
-                <Input
-                  placeholder={`Escreva "${deleteTarget?.name}" para confirmar`}
-                  value={confirmFolderName}
-                  onChange={(e) => setConfirmFolderName(e.target.value)}
-                  className="bg-white dark:bg-slate-900 border-rose-300 dark:border-rose-800 text-xs"
-                />
-              </div>
-            )}
-
-            <div className="flex items-center justify-end gap-3 mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
-              <Button
-                variant="ghost"
-                onClick={() => {
-                  setDeleteTarget(null);
-                  setConfirmFolderName("");
-                  setDeleteAção("move_to_root");
-                }}
-              >
-                Cancelar
-              </Button>
-              <Button
-                variant="danger"
-                disabled={
-                  deleteAção === "delete_songs" &&
-                  confirmFolderName.trim() !== deleteTarget?.name?.trim()
-                }
-                onClick={handleDeleteFolderSubmit}
-              >
-                Confirmar Eliminação
-              </Button>
-            </div>
-          </div>
-        ) : (
-          <div className="flex flex-col gap-4">
-            <div className="flex flex-col gap-2.5">
-              <label className="flex items-center gap-3 p-3 border border-slate-200 dark:border-slate-800 rounded-xl cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50">
-                <div className="flex flex-col">
-                  <span className="text-xs font-bold text-slate-900 dark:text-slate-100">
-                    Apagar pasta
-                  </span>
-                  <span className="text-[11px] text-slate-500">
-                    A pasta está vazia e será eliminada
-                  </span>
-                </div>
-              </label>
-
-              <div className="flex items-center justify-end gap-3 mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
-                <Button
-                  variant="ghost"
-                  onClick={() => {
-                    setDeleteTarget(null);
-                    setConfirmFolderName("");
-                    setDeleteAção("move_to_root");
-                  }}
-                >
-                  Cancelar
-                </Button>
-                <Button
-                  variant="danger"
-                  disabled={
-                    deleteAção === "delete_songs" &&
-                    confirmFolderName.trim() !== deleteTarget?.name?.trim()
-                  }
-                  onClick={handleDeleteFolderSubmit}
-                >
-                  Confirmar Eliminação
-                </Button>
-              </div>
-            </div>
-          </div>
-        )}
-      </Modal>
-
-      {/* MOVE SONG MODAL (TREE HIERARCHY) */}
-      <MoveSongModal
-        isOpen={!!moveSongTarget}
-        onClose={() => setMoveSongTarget(null)}
-        songTitle={moveSongTarget?.title}
-        initialFolderId={targetSongFolderId}
-        folders={allFolders}
-        onConfirm={async (targetFolderId) => {
+      <ExplorerModals
+        isCifraImportOpen={isCifraImportOpen}
+        setIsCifraImportOpen={setIsCifraImportOpen}
+        onCifraClubSubmit={handleCifraClubSubmit}
+        isCreateSongModalOpen={isCreateSongModalOpen}
+        setIsCreateSongModalOpen={setIsCreateSongModalOpen}
+        currentFolder={currentFolder}
+        currentFolderId={currentFolderId}
+        allFolders={allFolders}
+        onCreateSongSubmit={handleCreateSongSubmit}
+        isCreateServiceModalOpen={isCreateServiceModalOpen}
+        setIsCreateServiceModalOpen={setIsCreateServiceModalOpen}
+        onCreateServiceSubmit={handleCreateServiceSubmit}
+        isCreateModalOpen={isCreateModalOpen}
+        setIsCreateModalOpen={setIsCreateModalOpen}
+        onCreateFolderSubmit={handleCreateFolderSubmit}
+        renameTarget={renameTarget}
+        setRenameTarget={setRenameTarget}
+        onRenameFolderSubmit={handleRenameFolderSubmit}
+        moveFolderTarget={moveFolderTarget}
+        setMoveFolderTarget={setMoveFolderTarget}
+        targetParentFolderId={targetParentFolderId}
+        setTargetParentFolderId={setTargetParentFolderId}
+        folderTree={folderTree}
+        expandedFolderIds={expandedFolderIds}
+        toggleExpand={toggleExpand}
+        onMoveFolderSubmit={handleMoveFolderSubmit}
+        deleteTarget={deleteTarget}
+        setDeleteTarget={setDeleteTarget}
+        deleteAcao={deleteAcao}
+        setDeleteAcao={setDeleteAcao}
+        confirmFolderName={confirmFolderName}
+        setConfirmFolderName={setConfirmFolderName}
+        onDeleteFolderSubmit={handleDeleteFolderSubmit}
+        moveSongTarget={moveSongTarget}
+        setMoveSongTarget={setMoveSongTarget}
+        targetSongFolderId={targetSongFolderId}
+        onMoveSongConfirm={async (targetFolderId) => {
           if (!moveSongTarget) return;
           await moveSong({
             id: moveSongTarget.id,
@@ -3087,210 +1707,41 @@ export const MainLayout: React.FC = () => {
           });
           setMoveSongTarget(null);
         }}
+        deleteSongTarget={deleteSongTarget}
+        setDeleteSongTarget={setDeleteSongTarget}
+        onDeleteSongSubmit={handleDeleteSongSubmit}
+        isBatchMoveOpen={isBatchMoveOpen}
+        setIsBatchMoveOpen={setIsBatchMoveOpen}
+        selectedFolderIds={selectedFolderIds}
+        selectedSongIds={selectedSongIds}
+        disabledFolderIdsForBatchMove={disabledFolderIdsForBatchMove}
+        onBatchMoveConfirm={handleBatchMoveConfirm}
+        isBatchDeleteOpen={isBatchDeleteOpen}
+        setIsBatchDeleteOpen={setIsBatchDeleteOpen}
+        selectedFolderObjects={selectedFolderObjects}
+        onBatchDeleteConfirm={handleBatchDeleteConfirm}
+        isBatchTagOpen={isBatchTagOpen}
+        setIsBatchTagOpen={setIsBatchTagOpen}
+        onBatchTagConfirm={handleBatchTagConfirm}
+        isFilterPanelOpen={isFilterPanelOpen}
+        setIsFilterPanelOpen={setIsFilterPanelOpen}
+        selectedTag={selectedTag}
+        setSelectedTag={setSelectedTag}
+        availableTags={availableTags}
+        searchFields={searchFields}
+        setSearchFields={setSearchFields}
+        onClearFilters={() => {
+          setSelectedKey("");
+          setSelectedTag("");
+          setSearchQuery("");
+          setSearchFields({
+            title: true,
+            artist: true,
+            content: true,
+            tags: true,
+          });
+        }}
       />
-
-      {/* DELETE SONG MODAL */}
-      <Modal
-        isOpen={!!deleteSongTarget}
-        onClose={() => setDeleteSongTarget(null)}
-        title={`Apagar Cântico "${deleteSongTarget?.title}"`}
-      >
-        <div className="flex flex-col gap-4">
-          <div className="p-3 bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900 rounded-xl flex items-start gap-2.5 text-xs text-rose-800 dark:text-rose-300">
-            <AlertTriangle className="w-4 h-4 shrink-0 text-rose-500 mt-0.5" />
-            <span>
-              Tem a certeza que deseja apagar permanentemente{" "}
-              <strong>&quot;{deleteSongTarget?.title}&quot;</strong>? Isto
-              também irá removê-lo de quaisquer cultos agendados.
-            </span>
-          </div>
-
-          <div className="flex items-center justify-end gap-3 mt-2 pt-4 border-t border-slate-100 dark:border-slate-800">
-            <Button variant="ghost" onClick={() => setDeleteSongTarget(null)}>
-              Cancelar
-            </Button>
-            <Button variant="danger" onClick={handleDeleteSongSubmit}>
-              Apagar Cântico
-            </Button>
-          </div>
-        </div>
-      </Modal>
-
-      {/* BATCH MOVE MODAL */}
-      <BatchMoveModal
-        isOpen={isBatchMoveOpen}
-        onClose={() => setIsBatchMoveOpen(false)}
-        selectedFoldersCount={selectedFolderIds.size}
-        selectedSongsCount={selectedSongIds.size}
-        disabledFolderIds={disabledFolderIdsForBatchMove}
-        folders={allFolders}
-        onConfirm={handleBatchMoveConfirm}
-      />
-
-      {/* BATCH DELETE MODAL */}
-      <BatchDeleteModal
-        isOpen={isBatchDeleteOpen}
-        onClose={() => setIsBatchDeleteOpen(false)}
-        selectedFolders={selectedFolderObjects}
-        selectedSongsCount={selectedSongIds.size}
-        onConfirm={handleBatchDeleteConfirm}
-      />
-
-      {/* BATCH TAG MODAL */}
-      <BatchTagModal
-        isOpen={isBatchTagOpen}
-        onClose={() => setIsBatchTagOpen(false)}
-        selectedSongIds={Array.from(selectedSongIds)}
-        onConfirm={handleBatchTagConfirm}
-      />
-
-      {/* ADVANCED FILTER POPUP MODAL */}
-      <Modal
-        isOpen={isFilterPanelOpen}
-        onClose={() => setIsFilterPanelOpen(false)}
-        title="Filtros Avançados de Pesquisa"
-      >
-        <div className="space-y-5 py-2">
-          <p className="text-xs text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800/60 p-2.5 rounded-xl border border-slate-200 dark:border-slate-700">
-            Âmbito de pesquisa:{" "}
-            <span className="font-bold text-[#0284c7]">
-              {currentFolder
-                ? `Pasta "${currentFolder.name}" e Subpastas`
-                : "Todo o Explorador (Diretório Raiz)"}
-            </span>
-          </p>
-
-          {/* Tag / Category Filter */}
-          <div className="space-y-2">
-            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
-              Categoria / Etiqueta
-            </label>
-            <div className="flex flex-wrap gap-1.5 max-h-28 overflow-y-auto p-1.5 border border-slate-200 dark:border-slate-800 rounded-xl bg-slate-50/50 dark:bg-slate-900/50">
-              <button
-                type="button"
-                onClick={() => setSelectedTag("")}
-                className={`px-2.5 py-1 rounded-lg text-xs font-semibold cursor-pointer border transition-colors ${
-                  selectedTag === ""
-                    ? "bg-[#0284c7] text-white border-[#0284c7]"
-                    : "bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700"
-                }`}
-              >
-                Todas as Categorias
-              </button>
-              {availableTags.map((tag) => (
-                <button
-                  type="button"
-                  key={tag}
-                  onClick={() => setSelectedTag(tag)}
-                  className={`px-2.5 py-1 rounded-lg text-xs font-semibold cursor-pointer border transition-colors ${
-                    selectedTag === tag
-                      ? "bg-[#0284c7] text-white border-[#0284c7]"
-                      : "bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700"
-                  }`}
-                >
-                  {tag}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Search Fields Toggles */}
-          <div className="space-y-2">
-            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
-              Campos de Pesquisa de Texto
-            </label>
-            <div className="grid grid-cols-2 gap-2 text-xs p-3 border border-slate-200 dark:border-slate-800 rounded-xl bg-slate-50/50 dark:bg-slate-900/50">
-              <label className="flex items-center gap-2 cursor-pointer font-medium text-slate-700 dark:text-slate-300">
-                <input
-                  type="checkbox"
-                  checked={searchFields.title}
-                  onChange={(e) =>
-                    setSearchFields((prev) => ({
-                      ...prev,
-                      title: e.target.checked,
-                    }))
-                  }
-                  className="w-4 h-4 text-[#0284c7] rounded focus:ring-[#0284c7]"
-                />
-                <span>Título / Nome</span>
-              </label>
-              <label className="flex items-center gap-2 cursor-pointer font-medium text-slate-700 dark:text-slate-300">
-                <input
-                  type="checkbox"
-                  checked={searchFields.artist}
-                  onChange={(e) =>
-                    setSearchFields((prev) => ({
-                      ...prev,
-                      artist: e.target.checked,
-                    }))
-                  }
-                  className="w-4 h-4 text-[#0284c7] rounded focus:ring-[#0284c7]"
-                />
-                <span>Artista / Autor</span>
-              </label>
-              <label className="flex items-center gap-2 cursor-pointer font-medium text-slate-700 dark:text-slate-300">
-                <input
-                  type="checkbox"
-                  checked={searchFields.content}
-                  onChange={(e) =>
-                    setSearchFields((prev) => ({
-                      ...prev,
-                      content: e.target.checked,
-                    }))
-                  }
-                  className="w-4 h-4 text-[#0284c7] rounded focus:ring-[#0284c7]"
-                />
-                <span>Letra / Conteúdo</span>
-              </label>
-              <label className="flex items-center gap-2 cursor-pointer font-medium text-slate-700 dark:text-slate-300">
-                <input
-                  type="checkbox"
-                  checked={searchFields.tags}
-                  onChange={(e) =>
-                    setSearchFields((prev) => ({
-                      ...prev,
-                      tags: e.target.checked,
-                    }))
-                  }
-                  className="w-4 h-4 text-[#0284c7] rounded focus:ring-[#0284c7]"
-                />
-                <span>Etiquetas / Tags</span>
-              </label>
-            </div>
-          </div>
-
-          {/* Footer buttons */}
-          <div className="flex items-center justify-between pt-4 border-t border-slate-200 dark:border-slate-800">
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={() => {
-                setSelectedKey("");
-                setSelectedTag("");
-                setSearchQuery("");
-                setSearchFields({
-                  title: true,
-                  artist: true,
-                  content: true,
-                  tags: true,
-                });
-              }}
-            >
-              Limpar Filtros
-            </Button>
-
-            <Button
-              type="button"
-              variant="primary"
-              size="sm"
-              onClick={() => setIsFilterPanelOpen(false)}
-            >
-              Aplicar Filtros
-            </Button>
-          </div>
-        </div>
-      </Modal>
 
       {/* Marquee rubberband drag selection box */}
       {selectionBox && (
@@ -3318,17 +1769,12 @@ export const MainLayout: React.FC = () => {
         foldersQuery.isLoading ||
         servicesQuery.isLoading
       }
-      // --- SONGS SEARCH ---
       searchSongsDb={async (query) => {
-        // If still loading or no data yet, return empty safely
         if (songsQuery.isLoading || !songsQuery.data?.songs) return [];
-
         const lowerQuery = query.toLowerCase().trim();
-        const allSongs = songsQuery.data.songs;
-
-        // Filter in-memory with limit to keep palette instant
+        const allSongsList = songsQuery.data.songs;
         const matches: SongItem[] = [];
-        for (const song of allSongs) {
+        for (const song of allSongsList) {
           const matchTitle = song.title?.toLowerCase().includes(lowerQuery);
           const matchArtist = song.artist?.toLowerCase().includes(lowerQuery);
           const matchTags = song.tags?.some((t: string) =>
@@ -3337,53 +1783,41 @@ export const MainLayout: React.FC = () => {
 
           if (matchTitle || matchArtist || matchTags) {
             matches.push(song);
-            if (matches.length >= 8) break; // Limit to top 8
+            if (matches.length >= 8) break;
           }
         }
         return matches;
       }}
-      // --- FOLDERS SEARCH ---
       searchFoldersDb={async (query) => {
         if (foldersQuery.isLoading || !foldersQuery.data?.folders) return [];
-
         const lowerQuery = query.toLowerCase().trim();
-        const allFolders = foldersQuery.data.folders;
-
+        const allFoldersList = foldersQuery.data.folders;
         const matches: FolderItem[] = [];
-        for (const folder of allFolders) {
+        for (const folder of allFoldersList) {
           if (folder.name?.toLowerCase().includes(lowerQuery)) {
             matches.push(folder);
-            if (matches.length >= 5) break; // Limit to top 5
+            if (matches.length >= 5) break;
           }
         }
         return matches;
       }}
-      // --- SERVICES SEARCH ---
       searchServicesDb={async (query) => {
         const rawServices = servicesQuery.data;
         if (servicesQuery.isLoading || !Array.isArray(rawServices)) return [];
-
         const lowerQuery = query.toLowerCase().trim();
         const matches: ServiceItem[] = [];
-
         for (const service of rawServices) {
           const matchName = service.name?.toLowerCase().includes(lowerQuery);
           const matchNotes = service.notes?.toLowerCase().includes(lowerQuery);
 
           if (matchName || matchNotes) {
             matches.push(service);
-            if (matches.length >= 5) break; // Limit to top 5
+            if (matches.length >= 5) break;
           }
         }
         return matches;
       }}
-      getFolderPathString={(parentId) => {
-        if (!parentId || !foldersQuery.data?.folders) return "Raiz";
-        const found = foldersQuery.data.folders.find(
-          (f: FolderItem) => f.id === parentId,
-        );
-        return found ? found.name : "Raiz";
-      }}
+      getFolderPathString={getFolderPathString}
       navigate={navigate}
       logout={logout}
       currentFolderId={currentFolderId}
@@ -3401,7 +1835,7 @@ export const MainLayout: React.FC = () => {
       setIsCreateModalOpen={setIsCreateModalOpen}
       setIsFilterPanelOpen={setIsFilterPanelOpen}
       handleViewModeChange={handleViewModeChange}
-      handlePrintSong={handlePrintSong}
+      handlePrintSong={() => {}}
       setMoveSongTarget={setMoveSongTarget}
       setTargetSongFolderId={setTargetSongFolderId}
       setDeleteSongTarget={setDeleteSongTarget}
