@@ -29,21 +29,21 @@ export default function App() {
   }, []);
   return (
     <QueryClientProvider client={queryClient}>
-      <NavigationTransitionProvider>
-        <AuthProvider>
-          <ThemeProvider>
-            <SyncProvider>
-              <CacheHydrationProvider>
-                <BrowserRouter>
-                  <Analytics />
-                  <SpeedInsights />
+      <AuthProvider>
+        <ThemeProvider>
+          <SyncProvider>
+            <CacheHydrationProvider>
+              <BrowserRouter>
+                <Analytics />
+                <NavigationTransitionProvider>
                   <AppRoutes />
-                </BrowserRouter>
-              </CacheHydrationProvider>
-            </SyncProvider>
-          </ThemeProvider>
-        </AuthProvider>
-      </NavigationTransitionProvider>
+                </NavigationTransitionProvider>
+                <SpeedInsights />
+              </BrowserRouter>
+            </CacheHydrationProvider>
+          </SyncProvider>
+        </ThemeProvider>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }
