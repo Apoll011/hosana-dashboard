@@ -91,8 +91,9 @@ export function useServices(includeArchived: boolean = false) {
         const result = doc.toJSON() as Service;
         showToast(`Service "${result.name}" created`, "success");
         return result;
-      } catch (err: { message?: string | null }) {
-        showToast(err.message || "Failed to create service", "error");
+      } catch (err: unknown) {
+        if (err && typeof err === "object" && "message" in err)
+          showToast(err.message || "Failed to create service", "error");
         throw err;
       } finally {
         setIsCreating(false);
@@ -135,8 +136,9 @@ export function useServices(includeArchived: boolean = false) {
           showToast(`Service updated`, "success");
           return result;
         }
-      } catch (err: { message?: string | null }) {
-        showToast(err.message || "Failed to update service", "error");
+      } catch (err: unknown) {
+        if (err && typeof err === "object" && "message" in err)
+          showToast(err.message || "Failed to update service", "error");
         throw err;
       } finally {
         setIsUpdating(false);
@@ -158,8 +160,9 @@ export function useServices(includeArchived: boolean = false) {
           });
         }
         showToast("Service deleted", "info");
-      } catch (err: { message?: string | null }) {
-        showToast(err.message || "Failed to delete service", "error");
+      } catch (err: unknown) {
+        if (err && typeof err === "object" && "message" in err)
+          showToast(err.message || "Failed to delete service", "error");
         throw err;
       } finally {
         setIsDeleting(false);
@@ -187,8 +190,9 @@ export function useServices(includeArchived: boolean = false) {
             updatedAt: now,
           });
         }
-      } catch (err: { message?: string | null }) {
-        showToast(err.message || "Failed to update elements", "error");
+      } catch (err: unknown) {
+        if (err && typeof err === "object" && "message" in err)
+          showToast(err.message || "Failed to update elements", "error");
         throw err;
       } finally {
         setIsUpdating(false);
