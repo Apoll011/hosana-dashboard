@@ -3,14 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useRef, useState, useEffect } from "react";
-import { Folder, Song, Service } from "@hosanna/shared";
+import { Folder, Input, Service, Song } from "@hosanna/shared";
 import {
   Calendar,
   ChevronRight,
   CornerLeftUp,
   FileText,
-  Filter,
   Folder as FolderIcon,
   FolderOpen,
   FolderPlus,
@@ -23,11 +21,11 @@ import {
   Users,
   X,
 } from "lucide-react";
-import { Input } from "@hosanna/shared";
-import { SyncStatusBadge } from "../SyncStatusBadge";
-import { InboxButton, InboxFetchClient } from "../Inbox";
+import React, { useEffect, useRef, useState } from "react";
 import { authClient } from "../../lib/authClient";
 import { Can, CanAny } from "../../lib/permissions/components";
+import { InboxButton, InboxFetchClient } from "../Inbox";
+import { SyncStatusBadge } from "../SyncStatusBadge";
 
 interface ExplorerAddressBarProps {
   isExplorerView: boolean;

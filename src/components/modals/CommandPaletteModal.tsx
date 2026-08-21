@@ -249,7 +249,7 @@ export function CommandPaletteModal({
               <p className="text-xs text-m3-secondary mt-1 max-w-70">
                 Não encontramos nada para{" "}
                 <span className="font-semibold text-m3-primary">
-                  "{searchQuery}"
+                  &quot;{searchQuery}&quot;
                 </span>
                 .
               </p>

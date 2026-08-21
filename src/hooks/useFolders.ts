@@ -3,10 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useEffect, useCallback } from "react";
 import { Folder } from "@hosanna/shared";
+import { useCallback, useEffect, useState } from "react";
 import { useSync } from "../contexts/SyncContext";
-import { getDatabase, FolderDocType } from "../db";
+import { FolderDocType, getDatabase } from "../db";
 
 let cachedFolders: Folder[] | null = null;
 let cachedRootSongsCount: number = 0;
@@ -97,7 +97,7 @@ export function useFolders() {
         const result = doc.toJSON() as Folder;
         showToast(`Folder "${result.name}" created`, "success");
         return result;
-      } catch (err: any) {
+      } catch (err: { message?: string | null }) {
         showToast(err.message || "Failed to create folder", "error");
         throw err;
       } finally {
@@ -120,7 +120,7 @@ export function useFolders() {
           });
         }
         showToast("Folder renamed", "success");
-      } catch (err: any) {
+      } catch (err: { message?: string | null }) {
         showToast(err.message || "Failed to rename folder", "error");
         throw err;
       } finally {
@@ -150,7 +150,7 @@ export function useFolders() {
           });
         }
         showToast("Folder moved", "success");
-      } catch (err: any) {
+      } catch (err: { message?: string | null }) {
         showToast(err.message || "Failed to move folder", "error");
         throw err;
       } finally {
@@ -224,7 +224,7 @@ export function useFolders() {
         }
 
         showToast("Folder deleted", "info");
-      } catch (err: any) {
+      } catch (err: { message?: string | null }) {
         showToast(err.message || "Failed to delete folder", "error");
         throw err;
       } finally {
