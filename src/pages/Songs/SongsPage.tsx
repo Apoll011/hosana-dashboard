@@ -5,6 +5,7 @@
 
 import { OverflowTagList } from "@/src/components/OverflowTagList";
 import { MarqueeSelectionBox } from "@/src/components/explorer";
+import { useAppNavigate } from "@/src/hooks/useAppNavigate";
 import { useMarqueeSelection } from "@/src/hooks/useMarqueeSelection";
 import { usePermissionValue } from "@/src/lib/permissions/client";
 import { Can } from "@/src/lib/permissions/components";
@@ -42,7 +43,7 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { useNavigate, useOutletContext } from "react-router-dom";
+import { useOutletContext } from "react-router-dom";
 import { SongForm } from "../../components/forms/SongForm";
 import { BatchDeleteModal } from "../../components/modals/BatchDeleteModal";
 import { BatchMoveModal } from "../../components/modals/BatchMoveModal";
@@ -77,7 +78,7 @@ export const SongsPage: React.FC<SongsPageProps> = ({
   selectedTag,
   searchFields: externalSearchFields,
 }) => {
-  const navigate = useNavigate();
+  const { navigate } = useAppNavigate();
   const { organization } = useAuth();
   const { showToast } = useSync();
   const slugPrefix = organization?.slug ? `/${organization.slug}` : "";
@@ -656,7 +657,8 @@ export const SongsPage: React.FC<SongsPageProps> = ({
           </div>
         ) : songsQuery.isError ? (
           <div className="p-12 text-center text-rose-500 font-bold">
-            Erro ao carregar cânticos: {(songsQuery.error as Error).message}
+            Erro ao carregar cânticos:{" "}
+            {(songsQuery.error as unknown as Error).message}
           </div>
         ) : songsData.length === 0 ? (
           <div className="p-8">

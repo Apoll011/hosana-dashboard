@@ -3,10 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { AppLink } from "@/src/components/AppLink";
+import { useAppNavigate } from "@/src/hooks/useAppNavigate";
 import { Button, Input } from "@hosanna/shared";
 import { ArrowRight, CheckCircle2, Clock, Lock, XCircle } from "lucide-react";
 import React, { useState } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { authClient } from "../../lib/authClient";
 import LoginLayout from "./Layout";
 import { PasswordStrengthMeter } from "./components/PasswordStrengthMeter";
@@ -16,7 +18,7 @@ type State = "form" | "success" | "expired" | "error";
 export const ResetPasswordPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const token = searchParams.get("token");
-  const navigate = useNavigate();
+  const { navigate } = useAppNavigate();
 
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -42,12 +44,12 @@ export const ResetPasswordPage: React.FC = () => {
               Este link de recuperação é inválido. Solicite um novo abaixo.
             </p>
           </div>
-          <Link
+          <AppLink
             to="/forgot-password"
             className="inline-flex items-center gap-2 h-10 px-5 rounded-xl bg-m3-primary text-white text-xs font-bold hover:bg-m3-primary-dark transition-all"
           >
             Solicitar novo link
-          </Link>
+          </AppLink>
         </div>
       </LoginLayout>
     );
@@ -135,12 +137,12 @@ export const ResetPasswordPage: React.FC = () => {
               O link de recuperação expirou. Solicite um novo.
             </p>
           </div>
-          <Link
+          <AppLink
             to="/forgot-password"
             className="inline-flex items-center gap-2 h-10 px-5 rounded-xl bg-m3-primary text-white text-xs font-bold hover:bg-m3-primary-dark transition-all"
           >
             Solicitar novo link
-          </Link>
+          </AppLink>
         </div>
       </LoginLayout>
     );

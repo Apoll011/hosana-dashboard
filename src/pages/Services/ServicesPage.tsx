@@ -1,3 +1,4 @@
+import { useAppNavigate } from "@/src/hooks/useAppNavigate";
 import { usePermissionValue } from "@/src/lib/permissions/client";
 import {
   Badge,
@@ -25,7 +26,7 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { useNavigate, useOutletContext } from "react-router-dom";
+import { useOutletContext } from "react-router-dom";
 import {
   BatchActionFloatingBar,
   MarqueeSelectionBox,
@@ -49,7 +50,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
   hideHeader,
   searchQuery: externalSearchQuery,
 }) => {
-  const navigate = useNavigate();
+  const { navigate } = useAppNavigate();
   const queryClient = useQueryClient();
   const { organization } = useAuth();
   const slugPrefix = organization?.slug ? `/${organization.slug}` : "";

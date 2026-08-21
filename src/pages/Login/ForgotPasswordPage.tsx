@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { useAppNavigate } from "@/src/hooks/useAppNavigate";
 import { Button, Input } from "@hosanna/shared";
 import {
   ArrowRight,
@@ -12,12 +13,11 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { authClient } from "../../lib/authClient";
 import LoginLayout from "./Layout";
 
 export const ForgotPasswordPage: React.FC = () => {
-  const navigate = useNavigate();
+  const { navigate } = useAppNavigate();
   const [email, setEmail] = useState("");
   const [mode, setMode] = useState<"link" | "code">("link");
   const [isLoading, setIsLoading] = useState(false);

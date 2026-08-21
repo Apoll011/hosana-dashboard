@@ -3,10 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { useAppNavigate } from "@/src/hooks/useAppNavigate";
 import { Button, Spinner } from "@hosanna/shared";
 import { Building2, Check, ShieldAlert, X } from "lucide-react";
 import React, { useEffect, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import { authClient } from "../../lib/authClient";
 import LoginLayout from "./Layout";
@@ -25,7 +26,7 @@ interface InvitationData {
 export const AcceptInvitationPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const invitationId = searchParams.get("id");
-  const navigate = useNavigate();
+  const { navigate } = useAppNavigate();
   const { refetch, user } = useAuth();
 
   const [invitation, setInvitation] = useState<InvitationData | null>(null);

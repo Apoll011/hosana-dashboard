@@ -26,7 +26,10 @@ import {
   ServiceItem,
   SongItem,
 } from "../command-palette.types";
-import { CommandPaletteProvider } from "../contexts/CommandPaletteContext";
+import {
+  CommandPaletteProvider,
+  useCommandPalette,
+} from "../contexts/CommandPaletteContext";
 import { useRxDbSearch } from "../hooks/useRxDbSearch";
 import { CommandPaletteModal } from "./modals/CommandPaletteModal";
 
@@ -351,4 +354,3 @@ export const HosannaCommandPaletteTriggerButton: React.FC<{
     </button>
   );
 };
-

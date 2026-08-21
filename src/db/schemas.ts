@@ -1,3 +1,4 @@
+import { ServiceElement } from "@hosanna/shared";
 import { RxJsonSchema } from "rxdb";
 
 export interface SongDocType {
@@ -116,7 +117,7 @@ export interface ServiceDocType {
   name: string;
   date: string;
   notes: string | null;
-  elements: any[];
+  elements: ServiceElement[];
   archived: boolean;
   createdAt: string;
   updatedAt: string;

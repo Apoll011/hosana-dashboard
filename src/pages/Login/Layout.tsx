@@ -1,6 +1,6 @@
+import { AppLink } from "@/src/components/AppLink";
 import { AlertCircle, CheckCircle2, Moon, Sun } from "lucide-react";
 import React from "react";
-import { Link } from "react-router-dom";
 import bg from "../../assets/images/background.webp";
 import { useTheme } from "../../contexts/ThemeContext";
 
@@ -100,12 +100,12 @@ export default function LoginLayout({
 
         {optionalLink && optionalMsg && (
           <div className="mt-4 pt-2 text-center shrink-0">
-            <Link
+            <AppLink
               to={optionalLink}
               className="inline-flex items-center gap-1.5 text-xs font-bold text-m3-primary hover:underline dark:text-m3-primary-light"
             >
               <span>{optionalMsg}</span>
-            </Link>
+            </AppLink>
           </div>
         )}
       </div>

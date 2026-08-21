@@ -1,5 +1,5 @@
 import { getApiClient } from "@hosanna/shared";
-import { WithDeleted } from "rxdb";
+import { RxCollection, WithDeleted } from "rxdb";
 import {
   replicateRxCollection,
   RxReplicationState,
@@ -31,7 +31,10 @@ export function setupReplication(db: HosanaDatabase): ReplicationManager {
 
   const status$ = new Subject<ReplicationSyncState>();
   let currentStatus: ReplicationSyncState = "synced";
-  let activeReplications: RxReplicationState<any, Checkpoint>[] = [];
+  let activeReplications: RxReplicationState<
+    { id: string; updatedAt: string; _deleted?: boolean },
+    Checkpoint
+  >[] = [];
   const activeStateMap = new Map<string, boolean>();
 
   const updateStatus = (status: ReplicationSyncState) => {
@@ -45,7 +48,7 @@ export function setupReplication(db: HosanaDatabase): ReplicationManager {
     T extends { id: string; updatedAt: string; _deleted?: boolean },
   >(
     collectionName: "songs" | "folders" | "services",
-    collection: any,
+    collection: RxCollection,
   ) => {
     const replicationState = replicateRxCollection<T, Checkpoint>({
       collection,
@@ -58,7 +61,10 @@ export function setupReplication(db: HosanaDatabase): ReplicationManager {
           try {
             if (!navigator.onLine) {
               updateStatus("offline");
-              return { documents: [], checkpoint: lastCheckpoint };
+              return {
+                documents: [],
+                checkpoint: lastCheckpoint,
+              };
             }
 
             const client = getApiClient();
@@ -95,7 +101,7 @@ export function setupReplication(db: HosanaDatabase): ReplicationManager {
         batchSize: 100,
       },
       push: {
-        async handler(changeRows) {
+        async handler(changeRows): Promise<WithDeleted<T>[]> {
           try {
             if (!navigator.onLine) {
               updateStatus("offline");
@@ -120,14 +126,17 @@ export function setupReplication(db: HosanaDatabase): ReplicationManager {
               `/replication/${collectionName}/push`,
               {
                 method: "POST",
-                body: JSON.stringify({ changeRows: formattedChanges }),
+                body: JSON.stringify({
+                  changeRows: formattedChanges,
+                }),
               },
             );
 
-            if (Array.isArray(res)) {
-              return res;
-            }
-            return (res as any)?.conflicts || [];
+            const conflicts = Array.isArray(res) ? res : res?.conflicts || [];
+            return conflicts.map((doc) => ({
+              ...doc,
+              _deleted: !!doc._deleted,
+            })) as WithDeleted<T>[];
           } catch (err) {
             console.error(`Push error on ${collectionName}:`, err);
             updateStatus(navigator.onLine ? "error" : "offline");

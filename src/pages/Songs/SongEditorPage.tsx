@@ -4,6 +4,7 @@
  */
 
 import { ChordProPreviewSettings } from "@/src/components/ChorproSettings";
+import { useAppNavigate } from "@/src/hooks/useAppNavigate";
 import { usePreviewSettings } from "@/src/hooks/usePreviewSettings";
 import { useCan } from "@/src/lib/permissions/client";
 import { Can } from "@/src/lib/permissions/components";
@@ -35,7 +36,7 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { HelpModal } from "../../components/modals/HelpModal";
 import { useAuth } from "../../contexts/AuthContext";
 import { useSong, useSongs } from "../../hooks/useSongs";
@@ -44,7 +45,7 @@ type LayoutMode = "editor" | "split" | "preview";
 
 export const SongEditorPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
+  const { navigate } = useAppNavigate();
   const { organization } = useAuth();
   const slugPrefix = organization?.slug ? `/${organization.slug}` : "";
   const queryClient = useQueryClient();
@@ -90,14 +91,6 @@ export const SongEditorPage: React.FC = () => {
       setHasUnsavedChanges(false);
     }
   }, [song?.id]);
-
-  // Memoized handlers to prevent unnecessary re-renders
-  const handleTranspose = useCallback(
-    (delta: number) => {
-      updateSetting("transposeVal", transposeVal + delta);
-    },
-    [transposeVal, updateSetting],
-  );
 
   const handleSave = useCallback(
     async (updatedContent: string) => {
