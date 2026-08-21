@@ -21,7 +21,6 @@ import {
   X,
 } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
-import { useNavTransition } from "../../contexts/NavigationTransitionContext";
 import { authClient } from "../../lib/authClient";
 import { Can, CanAny } from "../../lib/permissions/components";
 import { InboxButton, InboxFetchClient } from "../Inbox";
@@ -86,7 +85,6 @@ export const ExplorerAddressBar: React.FC<ExplorerAddressBarProps> = ({
 }) => {
   const [isPlusMenuOpen, setIsPlusMenuOpen] = useState(false);
   const plusMenuRef = useRef<HTMLDivElement>(null);
-  const { isPending } = useNavTransition();
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -102,13 +100,6 @@ export const ExplorerAddressBar: React.FC<ExplorerAddressBarProps> = ({
 
   return (
     <div className="relative p-3 sm:p-4 bg-m3-sidebar/40 border-b border-m3-border/50 flex flex-col md:flex-row items-center justify-between gap-3 sm:gap-4">
-      {/* Top progress bar */}
-      {isPending && (
-        <div className="absolute top-0 left-0 right-0 h-0.5 overflow-hidden rounded-t-2xl">
-          <div className="h-full bg-m3-primary animate-[loading-bar_1s_ease-in-out_infinite]" />
-        </div>
-      )}
-
       {/* Navigation Controls & Address Bar */}
       <div className="flex items-center gap-2 sm:gap-3 flex-1 w-full md:w-auto">
         {/* Mobile Sidebar Toggle */}

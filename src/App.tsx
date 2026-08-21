@@ -7,6 +7,7 @@ import { useEffect } from "react";
 import { BrowserRouter } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import { CacheHydrationProvider } from "./contexts/CacheHydrationProvider";
+import { NavigationProgressBar } from "./components/NavigationProgressBar";
 import { NavigationTransitionProvider } from "./contexts/NavigationTransitionContext";
 import { SyncProvider } from "./contexts/SyncContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
@@ -36,6 +37,7 @@ export default function App() {
               <BrowserRouter>
                 <Analytics />
                 <NavigationTransitionProvider>
+                  <NavigationProgressBar />
                   <AppRoutes />
                 </NavigationTransitionProvider>
                 <SpeedInsights />
@@ -47,3 +49,4 @@ export default function App() {
     </QueryClientProvider>
   );
 }
+

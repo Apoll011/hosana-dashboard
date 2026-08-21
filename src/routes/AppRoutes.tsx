@@ -26,34 +26,25 @@ const PageLoader = () => (
   </div>
 );
 
-type LazyImportFn = () => Promise<{ default: React.ComponentType<any> }>;
+import {
+  AcceptInvitationPage,
+  FoldersPage,
+  ForgotPasswordPage,
+  LoginPage,
+  RegisterOrganizationPage,
+  RegisterPage,
+  ResetPasswordPage,
+  ServiceDetailPage,
+  ServicesPage,
+  SettingsPage,
+  SongEditorPage,
+  SongsPage,
+  TeamsPage,
+  TwoFactorPage,
+  VerifyEmailPage,
+  prefetchQueue,
+} from "./routePreloader";
 
-const prefetchQueue: Array<() => Promise<unknown>> = [];
-
-const lazyImport = (componentImport: LazyImportFn) => {
-  prefetchQueue.push(componentImport);
-
-  return lazy(async () => {
-    const pageHasAlreadyBeenForceRefreshed = JSON.parse(
-      window.localStorage.getItem("page-force-refreshed") || "false",
-    );
-
-    try {
-      const component = await componentImport();
-      if (pageHasAlreadyBeenForceRefreshed) {
-        window.localStorage.setItem("page-force-refreshed", "false");
-      }
-      return component;
-    } catch (error) {
-      if (!pageHasAlreadyBeenForceRefreshed) {
-        window.localStorage.setItem("page-force-refreshed", "true");
-        window.location.reload();
-        return new Promise<never>(() => {});
-      }
-      throw error;
-    }
-  });
-};
 function canPrefetch(): boolean {
   if (typeof navigator === "undefined") return false;
   const connection = (navigator as any).connection;
@@ -133,81 +124,13 @@ const OrganizationGuard = () => {
   return <Outlet />;
 };
 
-// ----------------------------------------------------------------------
-// LAZY IMPORTS
-// ----------------------------------------------------------------------
-const LoginPage = lazyImport(() =>
-  import("../pages/Login/LoginPage").then((m) => ({ default: m.LoginPage })),
-);
-const TwoFactorPage = lazyImport(() =>
-  import("../pages/Login/TwoFactorPage").then((m) => ({
-    default: m.TwoFactorPage,
-  })),
-);
-const RegisterPage = lazyImport(() =>
-  import("../pages/Login/RegisterPage").then((m) => ({
-    default: m.RegisterPage,
-  })),
-);
-const RegisterOrganizationPage = lazyImport(() =>
-  import("../pages/Login/Tenant").then((m) => ({
-    default: m.RegisterOrganizationPage,
-  })),
-);
-const VerifyEmailPage = lazyImport(() =>
-  import("../pages/Login/VerifyEmailPage").then((m) => ({
-    default: m.VerifyEmailPage,
-  })),
-);
-const ForgotPasswordPage = lazyImport(() =>
-  import("../pages/Login/ForgotPasswordPage").then((m) => ({
-    default: m.ForgotPasswordPage,
-  })),
-);
-const ResetPasswordPage = lazyImport(() =>
-  import("../pages/Login/ResetPasswordPage").then((m) => ({
-    default: m.ResetPasswordPage,
-  })),
-);
-const AcceptInvitationPage = lazyImport(() =>
-  import("../pages/Login/AcceptInvitationPage").then((m) => ({
-    default: m.AcceptInvitationPage,
-  })),
-);
-const FoldersPage = lazyImport(() =>
-  import("../pages/FoldersPage").then((m) => ({ default: m.FoldersPage })),
-);
-const SongsPage = lazyImport(() =>
-  import("../pages/Songs/SongsPage").then((m) => ({ default: m.SongsPage })),
-);
-const SongEditorPage = lazyImport(() =>
-  import("../pages/Songs/SongEditorPage").then((m) => ({
-    default: m.SongEditorPage,
-  })),
-);
-const ServicesPage = lazyImport(() =>
-  import("../pages/Services/ServicesPage").then((m) => ({
-    default: m.ServicesPage,
-  })),
-);
-const ServiceDetailPage = lazyImport(() =>
-  import("../pages/Services/ServiceDetailPage").then((m) => ({
-    default: m.ServiceDetailPage,
-  })),
-);
-const SettingsPage = lazyImport(() =>
-  import("../pages/SettingsPage").then((m) => ({ default: m.SettingsPage })),
-);
-const TeamsPage = lazyImport(() =>
-  import("../pages/TeamsPage").then((m) => ({ default: m.TeamsPage })),
-);
-
 export const AppRoutes: React.FC = () => {
   usePreloadPermissions();
 
   useEffect(() => {
     prefetchRemainingRoutes();
   }, []);
+
 
   return (
     <ErrorBoundary FallbackComponent={ErrorFallback}>
