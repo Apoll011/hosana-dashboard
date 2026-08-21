@@ -8,6 +8,7 @@ import {
   SongGridCard,
   SongTableRow,
 } from "../components/explorer";
+import { useAuth } from "../contexts/AuthContext";
 import { useAppNavigate } from "../hooks/useAppNavigate";
 import { Can, CanAll } from "../lib/permissions/components";
 
@@ -108,6 +109,8 @@ const DEFAULT_CONTEXT: FolderExplorerContext = {
 export const FoldersPage: React.FC = () => {
   const { navigate } = useAppNavigate();
   const context = useOutletContext<FolderExplorerContext>() ?? DEFAULT_CONTEXT;
+  const { organization } = useAuth();
+  const slugPrefix = organization?.slug ? `/${organization.slug}` : "";
 
   const {
     filteredSubfolders,
@@ -273,7 +276,7 @@ export const FoldersPage: React.FC = () => {
               getFolderPathString={getFolderPathString}
               density={density}
               onClick={(e) => handleItemClick(e, song.id, "song")}
-              onDoubleClick={() => navigate(`../songs/${song.id}`)}
+              onDoubleClick={() => navigate(`${slugPrefix}/songs/${song.id}`)}
               onContextMenu={(e) => handleContextMenu(e, "song", song)}
               onDragStart={(e) => handleItemDragStart(e, song.id, "song")}
               onDragEnd={handleItemDragEnd}
@@ -342,7 +345,9 @@ export const FoldersPage: React.FC = () => {
                   getFolderPathString={getFolderPathString}
                   density={density}
                   onClick={(e) => handleItemClick(e, song.id, "song")}
-                  onDoubleClick={() => navigate(`../songs/${song.id}`)}
+                  onDoubleClick={() =>
+                    navigate(`${slugPrefix}/songs/${song.id}`)
+                  }
                   onContextMenu={(e) => handleContextMenu(e, "song", song)}
                   onDragStart={(e) => handleItemDragStart(e, song.id, "song")}
                   onDragEnd={handleItemDragEnd}
