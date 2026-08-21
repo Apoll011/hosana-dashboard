@@ -97,8 +97,9 @@ export function useFolders() {
         const result = doc.toJSON() as Folder;
         showToast(`Folder "${result.name}" created`, "success");
         return result;
-      } catch (err: { message?: string | null }) {
-        showToast(err.message || "Failed to create folder", "error");
+      } catch (err: unknown) {
+        if (err && typeof err === "object" && "message" in err)
+          showToast(err.message || "Failed to create folder", "error");
         throw err;
       } finally {
         setIsCreating(false);
@@ -120,8 +121,9 @@ export function useFolders() {
           });
         }
         showToast("Folder renamed", "success");
-      } catch (err: { message?: string | null }) {
-        showToast(err.message || "Failed to rename folder", "error");
+      } catch (err: unknown) {
+        if (err && typeof err === "object" && "message" in err)
+          showToast(err.message || "Failed to rename folder", "error");
         throw err;
       } finally {
         setIsRenaming(false);
@@ -150,8 +152,9 @@ export function useFolders() {
           });
         }
         showToast("Folder moved", "success");
-      } catch (err: { message?: string | null }) {
-        showToast(err.message || "Failed to move folder", "error");
+      } catch (err: unknown) {
+        if (err && typeof err === "object" && "message" in err)
+          showToast(err.message || "Failed to move folder", "error");
         throw err;
       } finally {
         setIsMoving(false);
@@ -224,8 +227,9 @@ export function useFolders() {
         }
 
         showToast("Folder deleted", "info");
-      } catch (err: { message?: string | null }) {
-        showToast(err.message || "Failed to delete folder", "error");
+      } catch (err: unknown) {
+        if (err && typeof err === "object" && "message" in err)
+          showToast(err.message || "Failed to delete folder", "error");
         throw err;
       } finally {
         setIsDeleting(false);
