@@ -13,6 +13,7 @@ import {
   FolderOpen,
   FolderPlus,
   Move,
+  Palette,
   Plus,
   Printer,
   RotateCw,
@@ -49,6 +50,7 @@ export interface ExplorerContextMenuProps {
   onOpenBatchDelete: () => void;
   onClearSelection: () => void;
   onSelectFolder: (id: string) => void;
+  onCustomizeFolder?: (folder: Folder) => void;
   onRenameFolder: (folder: Folder) => void;
   onMoveFolder: (folder: Folder) => void;
   onDeleteFolder: (folder: Folder) => void;
@@ -80,6 +82,7 @@ export const ExplorerContextMenu: React.FC<ExplorerContextMenuProps> = ({
   onOpenBatchDelete,
   onClearSelection,
   onSelectFolder,
+  onCustomizeFolder,
   onRenameFolder,
   onMoveFolder,
   onDeleteFolder,
@@ -283,6 +286,17 @@ export const ExplorerContextMenu: React.FC<ExplorerContextMenuProps> = ({
               </button>
 
               <Can permission="folder.update">
+                <button
+                  onClick={() => {
+                    onCustomizeFolder?.(contextMenu.item as Folder);
+                    onClose();
+                  }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left cursor-pointer"
+                >
+                  <Palette className="w-4 h-4 text-purple-500" />
+                  <span>Personalizar Pasta</span>
+                </button>
+
                 <button
                   onClick={() => {
                     onRenameFolder(contextMenu.item as Folder);

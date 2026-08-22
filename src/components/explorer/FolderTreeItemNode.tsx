@@ -7,6 +7,10 @@ import {
   FolderOpen,
   MoreVertical,
 } from "lucide-react";
+import {
+  getFolderColorStyle,
+  getFolderIconComponent,
+} from "../../utils/folderCustomization";
 
 export interface FolderTreeNode {
   folder: Folder;
@@ -112,11 +116,22 @@ export const FolderTreeItemNode: React.FC<{
               <span className="w-6 h-6 shrink-0" />
             )}
 
-            {isActive ? (
-              <FolderOpen className="w-4.5 h-4.5 text-m3-primary shrink-0" />
-            ) : (
-              <FolderIcon className="w-4.5 h-4.5 text-m3-primary/60 shrink-0 group-hover:text-m3-primary transition-colors" />
-            )}
+            {(() => {
+              const IconComp = isActive
+                ? (node.folder.icon && node.folder.icon !== "default" ? getFolderIconComponent(node.folder.icon) : FolderOpen)
+                : getFolderIconComponent(node.folder.icon);
+              const colorStyle = getFolderColorStyle(node.folder.color);
+
+              return (
+                <IconComp
+                  className={`w-4.5 h-4.5 shrink-0 transition-colors ${
+                    isActive
+                      ? `${colorStyle.textClass}`
+                      : `${colorStyle.textClass} opacity-75 group-hover:opacity-100`
+                  }`}
+                />
+              );
+            })()}
             <span className="truncate tracking-tight">{node.folder.name}</span>
           </div>
 
