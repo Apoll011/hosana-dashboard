@@ -67,6 +67,8 @@ export const songSchema: RxJsonSchema<SongDocType> = {
 export interface FolderDocType {
   id: string;
   name: string;
+  color?: string;
+  icon?: string;
   songCount: number | null;
   folderCount: number | null;
   parentId: string | null;
@@ -76,7 +78,7 @@ export interface FolderDocType {
 }
 
 export const folderSchema: RxJsonSchema<FolderDocType> = {
-  version: 1,
+  version: 2,
   primaryKey: "id",
   type: "object",
   properties: {
@@ -85,6 +87,12 @@ export const folderSchema: RxJsonSchema<FolderDocType> = {
       maxLength: 100,
     },
     name: {
+      type: "string",
+    },
+    color: {
+      type: "string",
+    },
+    icon: {
       type: "string",
     },
     parentId: {

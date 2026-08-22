@@ -124,6 +124,16 @@ export const SongEditorPage: React.FC = () => {
     [song, queryClient, updateSong],
   );
 
+  useEffect(() => {
+    if (!hasUnsavedChanges || isUpdating || isSavingRef.current) return;
+
+    const timer = setInterval(() => {
+      handleSave(deferredContent);
+    }, 60000);
+
+    return () => clearInterval(timer);
+  }, [hasUnsavedChanges, deferredContent, handleSave, isUpdating]);
+
   if (isLoading) {
     return (
       <div className="flex-1 flex items-center justify-center p-12">

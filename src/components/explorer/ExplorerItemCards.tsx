@@ -1,6 +1,10 @@
 import React from "react";
 import { Folder, Song } from "@hosanna/shared";
 import { FileText, Folder as FolderIcon, MoreVertical } from "lucide-react";
+import {
+  getFolderColorStyle,
+  getFolderIconComponent,
+} from "../../utils/folderCustomization";
 
 export interface FolderGridCardProps {
   folder: Folder;
@@ -84,13 +88,19 @@ export const FolderGridCard: React.FC<FolderGridCardProps> = React.memo(
           <MoreVertical className={isCompact ? "w-3.5 h-3.5" : "w-4.5 h-4.5"} />
         </button>
 
-        <div
-          className={`${isCompact ? "w-10 h-10 rounded-xl mb-2" : "w-14 h-14 rounded-2xl mb-3"} bg-m3-primary/10 border border-m3-primary/20 flex items-center justify-center text-m3-primary group-hover:scale-110 transition-transform`}
-        >
-          <FolderIcon
-            className={`${isCompact ? "w-5 h-5" : "w-8 h-8"} opacity-80`}
-          />
-        </div>
+        {(() => {
+          const IconComponent = getFolderIconComponent(folder.icon);
+          const colorStyle = getFolderColorStyle(folder.color);
+          return (
+            <div
+              className={`${isCompact ? "w-10 h-10 rounded-xl mb-2" : "w-14 h-14 rounded-2xl mb-3"} ${colorStyle.bgClass} border ${colorStyle.borderClass} flex items-center justify-center ${colorStyle.textClass} group-hover:scale-110 transition-transform`}
+            >
+              <IconComponent
+                className={`${isCompact ? "w-5 h-5" : "w-8 h-8"} opacity-80`}
+              />
+            </div>
+          );
+        })()}
 
         <span
           className={`${isCompact ? "text-xs" : "text-sm"} font-black text-m3-text transition-colors truncate w-full px-1`}

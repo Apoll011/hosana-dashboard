@@ -133,8 +133,14 @@ export const MainLayout: React.FC = () => {
     [showArchived, archivedServicesQuery.data],
   );
 
-  const { foldersQuery, createFolder, renameFolder, moveFolder, deleteFolder } =
-    useFolders();
+  const {
+    foldersQuery,
+    createFolder,
+    renameFolder,
+    customizeFolder,
+    moveFolder,
+    deleteFolder,
+  } = useFolders();
 
   const songParams = useMemo(() => ({}), []);
   const { songsQuery, moveSong, deleteSong, updateBatchTags } =
@@ -784,6 +790,7 @@ export const MainLayout: React.FC = () => {
   const [isCifraImportOpen, setIsCifraImportOpen] = useState(false);
 
   const [renameTarget, setRenameTarget] = useState<Folder | null>(null);
+  const [customizeTarget, setCustomizeTarget] = useState<Folder | null>(null);
   const [moveFolderTarget, setMoveFolderTarget] = useState<Folder | null>(null);
   const [targetParentFolderId, setTargetParentFolderId] = useState<
     string | null
@@ -981,6 +988,17 @@ export const MainLayout: React.FC = () => {
       updatedAt: renameTarget.updatedAt!,
     });
     setRenameTarget(null);
+  };
+
+  const handleCustomizeFolderSubmit = async (color: string, icon: string) => {
+    if (!customizeTarget) return;
+    await customizeFolder({
+      id: customizeTarget.id,
+      color,
+      icon,
+      updatedAt: customizeTarget.updatedAt!,
+    });
+    setCustomizeTarget(null);
   };
 
   const handleMoveFolderSubmit = async () => {
@@ -1640,6 +1658,7 @@ export const MainLayout: React.FC = () => {
         onOpenBatchDelete={() => setIsBatchDeleteOpen(true)}
         onClearSelection={clearSelection}
         onSelectFolder={handleSelectFolder}
+        onCustomizeFolder={setCustomizeTarget}
         onRenameFolder={setRenameTarget}
         onMoveFolder={(f) => {
           setMoveFolderTarget(f);
@@ -1676,6 +1695,9 @@ export const MainLayout: React.FC = () => {
         renameTarget={renameTarget}
         setRenameTarget={setRenameTarget}
         onRenameFolderSubmit={handleRenameFolderSubmit}
+        customizeTarget={customizeTarget}
+        setCustomizeTarget={setCustomizeTarget}
+        onCustomizeFolderSubmit={handleCustomizeFolderSubmit}
         moveFolderTarget={moveFolderTarget}
         setMoveFolderTarget={setMoveFolderTarget}
         targetParentFolderId={targetParentFolderId}
