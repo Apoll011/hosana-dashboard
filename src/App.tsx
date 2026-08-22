@@ -1,13 +1,11 @@
 import { configureApiClient } from "@hosanna/shared";
 import { preloadEditor } from "@hosanna/shared/editor";
 import { QueryClientProvider } from "@tanstack/react-query";
-import { Analytics } from "@vercel/analytics/react";
-import { SpeedInsights } from "@vercel/speed-insights/react";
 import { useEffect } from "react";
 import { BrowserRouter } from "react-router-dom";
+import { NavigationProgressBar } from "./components/NavigationProgressBar";
 import { AuthProvider } from "./contexts/AuthContext";
 import { CacheHydrationProvider } from "./contexts/CacheHydrationProvider";
-import { NavigationProgressBar } from "./components/NavigationProgressBar";
 import { NavigationTransitionProvider } from "./contexts/NavigationTransitionContext";
 import { SyncProvider } from "./contexts/SyncContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
@@ -35,12 +33,10 @@ export default function App() {
           <SyncProvider>
             <CacheHydrationProvider>
               <BrowserRouter>
-                <Analytics />
                 <NavigationTransitionProvider>
                   <NavigationProgressBar />
                   <AppRoutes />
                 </NavigationTransitionProvider>
-                <SpeedInsights />
               </BrowserRouter>
             </CacheHydrationProvider>
           </SyncProvider>
