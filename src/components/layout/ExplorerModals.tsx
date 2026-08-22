@@ -26,6 +26,7 @@ import { MoveSongModal } from "../modals/MoveSongModal";
 import { BatchMoveModal } from "../modals/BatchMoveModal";
 import { BatchDeleteModal } from "../modals/BatchDeleteModal";
 import { BatchTagModal } from "../modals/BatchTagModal";
+import { CustomizeFolderModal } from "../modals/CustomizeFolderModal";
 
 interface ExplorerModalsProps {
   // CifraClub
@@ -68,6 +69,11 @@ interface ExplorerModalsProps {
   renameTarget: Folder | null;
   setRenameTarget: (f: Folder | null) => void;
   onRenameFolderSubmit: (name: string) => Promise<void>;
+
+  // Customize Folder
+  customizeTarget?: Folder | null;
+  setCustomizeTarget?: (f: Folder | null) => void;
+  onCustomizeFolderSubmit?: (color: string, icon: string) => Promise<void>;
 
   // Move Folder
   moveFolderTarget: Folder | null;
@@ -163,6 +169,9 @@ export const ExplorerModals: React.FC<ExplorerModalsProps> = ({
   renameTarget,
   setRenameTarget,
   onRenameFolderSubmit,
+  customizeTarget,
+  setCustomizeTarget,
+  onCustomizeFolderSubmit,
   moveFolderTarget,
   setMoveFolderTarget,
   targetParentFolderId,
@@ -274,6 +283,16 @@ export const ExplorerModals: React.FC<ExplorerModalsProps> = ({
           onCancel={() => setRenameTarget(null)}
         />
       </Modal>
+
+      {/* CUSTOMIZE FOLDER MODAL */}
+      {customizeTarget && setCustomizeTarget && onCustomizeFolderSubmit && (
+        <CustomizeFolderModal
+          isOpen={!!customizeTarget}
+          folder={customizeTarget}
+          onClose={() => setCustomizeTarget(null)}
+          onSave={onCustomizeFolderSubmit}
+        />
+      )}
 
       {/* MOVE FOLDER MODAL (TREE HIERARCHY) */}
       <Modal

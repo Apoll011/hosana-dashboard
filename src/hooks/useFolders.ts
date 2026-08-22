@@ -132,6 +132,37 @@ export function useFolders() {
     [showToast],
   );
 
+  const customizeFolder = useCallback(
+    async ({
+      id,
+      color,
+      icon,
+    }: {
+      id: string;
+      color?: string;
+      icon?: string;
+      updatedAt?: string;
+    }) => {
+      try {
+        const db = await getDatabase();
+        const doc = await db.folders.findOne(id).exec();
+        if (doc) {
+          await doc.patch({
+            ...(color !== undefined ? { color } : {}),
+            ...(icon !== undefined ? { icon } : {}),
+            updatedAt: new Date().toISOString(),
+          });
+        }
+        showToast("Pasta personalizada com sucesso", "success");
+      } catch (err: unknown) {
+        if (err && typeof err === "object" && "message" in err)
+          showToast(err.message || "Falha ao personalizar pasta", "error");
+        throw err;
+      }
+    },
+    [showToast],
+  );
+
   const moveFolder = useCallback(
     async ({
       id,
@@ -252,6 +283,7 @@ export function useFolders() {
     },
     createFolder,
     renameFolder,
+    customizeFolder,
     moveFolder,
     deleteFolder,
     isCreating,
