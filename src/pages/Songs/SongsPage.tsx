@@ -868,36 +868,6 @@ export const SongsPage: React.FC<SongsPageProps> = ({
           {/* Right: Clean Page Controls */}
           {totalPages > 1 && (
             <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
-              {/* Quick jump form */}
-              <form
-                onSubmit={handleJumpPage}
-                className="flex items-center gap-1.5 bg-m3-card border border-m3-border rounded-xl px-2.5 py-1 shadow-xs"
-              >
-                <span className="text-[10px] text-m3-secondary font-bold uppercase tracking-wider">
-                  Ir para:
-                </span>
-                <input
-                  type="number"
-                  min={1}
-                  max={totalPages}
-                  placeholder={String(page)}
-                  value={jumpPageInput}
-                  onChange={(e) => setJumpPageInput(e.target.value)}
-                  className="w-9 bg-transparent text-center font-bold text-m3-text focus:outline-none border-b border-m3-border focus:border-m3-primary text-xs"
-                />
-                <button
-                  type="submit"
-                  disabled={
-                    !jumpPageInput ||
-                    parseInt(jumpPageInput, 10) < 1 ||
-                    parseInt(jumpPageInput, 10) > totalPages
-                  }
-                  className="text-[10px] font-black uppercase text-m3-primary hover:underline disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
-                >
-                  OK
-                </button>
-              </form>
-
               {/* Navigation button group */}
               <div className="flex items-center gap-1 bg-m3-card border border-m3-border rounded-xl p-1 shadow-xs">
                 <button
@@ -919,8 +889,19 @@ export const SongsPage: React.FC<SongsPageProps> = ({
                   <ChevronLeft className="w-3.5 h-3.5" />
                 </button>
 
-                <span className="px-2 font-bold text-m3-text text-xs whitespace-nowrap">
-                  {page} / {totalPages}
+                <span className="px-2 font-bold text-m3-text flex items-center text-xs whitespace-nowrap">
+                  <form onSubmit={handleJumpPage} className="flex items-center">
+                    <input
+                      type="number"
+                      min={1}
+                      max={totalPages}
+                      placeholder={String(page)}
+                      value={jumpPageInput}
+                      onChange={(e) => setJumpPageInput(e.target.value)}
+                      className="w-5 bg-transparent text-center font-bold text-m3-text focus:outline-none border-b border-m3-border focus:border-m3-primary text-xs [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    />
+                  </form>{" "}
+                  / {totalPages}
                 </span>
 
                 <button

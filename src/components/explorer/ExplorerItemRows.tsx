@@ -1,6 +1,10 @@
 import React from "react";
 import { Button, Folder, Song } from "@hosanna/shared";
 import { FileText, Folder as FolderIcon, MoreVertical } from "lucide-react";
+import {
+  getFolderColorStyle,
+  getFolderIconComponent,
+} from "../../utils/folderCustomization";
 
 export interface FolderTableRowProps {
   folder: Folder;
@@ -69,12 +73,18 @@ export const FolderTableRow: React.FC<FolderTableRowProps> = React.memo(
         } ${showDisabledDuringDrag ? "opacity-40 cursor-not-allowed" : ""}`}
       >
         <td className={`${cellPadding} max-w-xs sm:max-w-md`}>
-          <div className="flex items-center gap-3 group-hover:translate-x-1 transition-transform min-w-0">
-            <FolderIcon
-              className={`${isCompact ? "w-4 h-4" : "w-5 h-5"} text-m3-primary opacity-80 shrink-0`}
-            />
-            <span className="truncate">{folder.name}</span>
-          </div>
+          {(() => {
+            const IconComponent = getFolderIconComponent(folder.icon);
+            const colorStyle = getFolderColorStyle(folder.color);
+            return (
+              <div className="flex items-center gap-3 group-hover:translate-x-1 transition-transform min-w-0">
+                <IconComponent
+                  className={`${isCompact ? "w-4 h-4" : "w-5 h-5"} ${colorStyle.textClass} opacity-90 shrink-0`}
+                />
+                <span className="truncate">{folder.name}</span>
+              </div>
+            );
+          })()}
         </td>
         <td className={`${cellPadding} text-m3-secondary opacity-70`}>Pasta</td>
         {isSearchingOrFiltering && getFolderPathString && (
