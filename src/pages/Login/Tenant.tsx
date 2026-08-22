@@ -147,7 +147,7 @@ export const RegisterOrganizationPage: React.FC = () => {
             Registro de organizações ainda não está ativo
           </h2>
           <p className="text-sm leading-6 text-slate-500 dark:text-slate-400">
-            Aguarde o Alpha Release no dia 1 de Setembro para criar sua
+            Aguarde o Beta Release no dia 1 de Setembro para criar sua
             organização e fazer login.
           </p>
         </div>
