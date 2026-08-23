@@ -4,7 +4,6 @@
  */
 
 import { ConversionResult, Folder, Song } from "@hosanna/shared";
-import { useQueryClient } from "@tanstack/react-query";
 import React, {
   useCallback,
   useEffect,
@@ -119,7 +118,6 @@ export const MainLayout: React.FC = () => {
   }, [triggerSyncCheck]);
 
   // Queries & Mutations
-  const queryClient = useQueryClient();
   const { servicesQuery, createService, deleteService } = useServices();
   const allServices = useMemo(
     () => servicesQuery.data || [],
@@ -1091,48 +1089,10 @@ export const MainLayout: React.FC = () => {
   };
 
   // Batch Operations,
-  // TODO: use RxDB
   const handleBatchMoveConfirm = useCallback(
     async (targetFolderId: string | null) => {
       const folderList = Array.from(selectedFolderIds);
       const songList = Array.from(selectedSongIds);
-
-      const prevFoldersData = queryClient.getQueryData(["folders"]);
-      const prevSongsData = queryClient.getQueryData(["songs", "all", {}]);
-
-      if (folderList.length > 0) {
-        queryClient.setQueryData(
-          ["folders"],
-          (old: { folders: Folder[] } | undefined) => {
-            if (!old) return old;
-            return {
-              ...old,
-              folders: old.folders.map((f: Folder) =>
-                folderList.includes(f.id)
-                  ? { ...f, parentId: targetFolderId }
-                  : f,
-              ),
-            };
-          },
-        );
-      }
-
-      if (songList.length > 0) {
-        queryClient.setQueryData(
-          ["songs", "all", {}],
-          (old: { songs: Song[] } | undefined) => {
-            if (!old || !old.songs) return old;
-            return {
-              ...old,
-              songs: old.songs.map((s: Song) =>
-                songList.includes(s.id)
-                  ? { ...s, folderId: targetFolderId }
-                  : s,
-              ),
-            };
-          },
-        );
-      }
 
       clearSelection();
 
@@ -1161,10 +1121,6 @@ export const MainLayout: React.FC = () => {
           "success",
         );
       } catch {
-        if (prevFoldersData)
-          queryClient.setQueryData(["folders"], prevFoldersData);
-        if (prevSongsData)
-          queryClient.setQueryData(["songs", "all", {}], prevSongsData);
         showToast(
           "Erro ao mover itens. As alterações foram revertidas.",
           "error",
@@ -1176,13 +1132,13 @@ export const MainLayout: React.FC = () => {
       selectedSongIds,
       allFolders,
       allSongs,
-      queryClient,
       moveFolder,
       moveSong,
       showToast,
       clearSelection,
     ],
   );
+
 
   const handleBatchDeleteConfirm = async (
     folderAction: "move_to_root" | "delete_songs",
