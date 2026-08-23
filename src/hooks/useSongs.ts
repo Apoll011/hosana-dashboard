@@ -395,14 +395,14 @@ export function useSong(id: string | null) {
         const db = await getDatabase();
         if (!isSubscribed) return;
 
-        rxSub = db.songs.findOne(id).$.subscribe((doc) => {
+        rxSub = db.songs.findOne(id as string).$.subscribe((doc) => {
           if (!isSubscribed) return;
           if (doc && !doc._deleted) {
             const data = doc.toJSON() as Song;
-            cachedSingleSongs.set(id, data);
+            cachedSingleSongs.set(id as string, data);
             setSong(data);
           } else {
-            cachedSingleSongs.delete(id);
+            cachedSingleSongs.delete(id as string);
             setSong(null);
           }
           setIsLoading(false);

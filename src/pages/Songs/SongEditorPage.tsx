@@ -16,7 +16,6 @@ import {
   Spinner,
 } from "@hosanna/shared";
 import { Editor, EditorSettingsPanel } from "@hosanna/shared/editor";
-import { useQueryClient } from "@tanstack/react-query";
 import {
   ArrowLeft,
   Columns,
@@ -48,7 +47,6 @@ export const SongEditorPage: React.FC = () => {
   const { navigate } = useAppNavigate();
   const { organization } = useAuth();
   const slugPrefix = organization?.slug ? `/${organization.slug}` : "";
-  const queryClient = useQueryClient();
 
   const { granted: canUpdateSong } = useCan("song.update");
 
@@ -98,16 +96,14 @@ export const SongEditorPage: React.FC = () => {
       isSavingRef.current = true;
 
       try {
-        const currentSong =
-          queryClient.getQueryData<Song>(["song", song?.id]) || song;
-        if (!currentSong) return;
+        if (!song) return;
 
         const parsed = parseChordPro(updatedContent);
         const meta = parsed.metadata;
 
         const updates: Partial<Song> = {
           content: updatedContent,
-          updatedAt: currentSong.updatedAt,
+          updatedAt: song.updatedAt,
         };
 
         if (meta.title) updates.title = meta.title;
@@ -115,13 +111,13 @@ export const SongEditorPage: React.FC = () => {
         if (meta.songNumber && Number(meta.songNumber))
           updates.song_number = Number(meta.songNumber);
 
-        await updateSong({ id: currentSong.id, data: updates });
+        await updateSong({ id: song.id, data: updates });
         setHasUnsavedChanges(false);
       } finally {
         isSavingRef.current = false;
       }
     },
-    [song, queryClient, updateSong],
+    [song, updateSong],
   );
 
   useEffect(() => {
