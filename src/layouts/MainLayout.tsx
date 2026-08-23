@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ConversionResult, Folder, Song, songsApi } from "@hosanna/shared";
+import { ConversionResult, Folder, Song } from "@hosanna/shared";
 import { useQueryClient } from "@tanstack/react-query";
 import React, {
   useCallback,
@@ -36,7 +36,7 @@ import { useAppNavigate } from "../hooks/useAppNavigate";
 import { useFolders } from "../hooks/useFolders";
 import { usePersonalSettings } from "../hooks/usePersonalSettings";
 import { useServices } from "../hooks/useServices";
-import { useAllSongs } from "../hooks/useSongs";
+import { useSongs } from "../hooks/useSongs";
 import { songImportRegistry } from "../import";
 import { ProviderImportResult } from "../utils/import";
 
@@ -143,8 +143,8 @@ export const MainLayout: React.FC = () => {
   } = useFolders();
 
   const songParams = useMemo(() => ({}), []);
-  const { songsQuery, moveSong, deleteSong, updateBatchTags } =
-    useAllSongs(songParams);
+  const { songsQuery, moveSong, deleteSong, updateBatchTags, createSong } =
+    useSongs(songParams);
 
   // Folder & Navigation State
   const [currentFolderId, setCurrentFolderId] = useState<string | null>(null);
@@ -1039,14 +1039,13 @@ export const MainLayout: React.FC = () => {
     folderId: string | null;
     tags: string[];
   }) => {
-    const song = await songsApi.createSong({
+    const song = await createSong({
       title: data.title,
       artist: data.artist,
       folderId: data.folderId,
       content: `{title: ${data.title}}\n{artist: ${data.artist}}\n\n[G] Exemplo de tom e cifra...`,
       tags: data.tags,
     });
-    await Promise.all([songsQuery.refetch(), foldersQuery.refetch()]);
     setIsCreateSongModalOpen(false);
     showToast("Cântico criado com sucesso!", "success");
     navigate(`${slugPrefix}/songs/${song.id}`);
@@ -1057,7 +1056,7 @@ export const MainLayout: React.FC = () => {
     artist: string,
     title: string,
   ) => {
-    const song = await songsApi.createSong({
+    const song = await createSong({
       title,
       artist,
       folderId: currentFolderId,
@@ -1091,7 +1090,8 @@ export const MainLayout: React.FC = () => {
     setDeleteSongTarget(null);
   };
 
-  // Batch Operations
+  // Batch Operations,
+  // TODO: use RxDB
   const handleBatchMoveConfirm = useCallback(
     async (targetFolderId: string | null) => {
       const folderList = Array.from(selectedFolderIds);
