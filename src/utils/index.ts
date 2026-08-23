@@ -134,24 +134,22 @@ export function parseCifraClubInput(
   return null;
 }
 
-export async function getCifra(
-  artist: string,
-  song: string,
-): Promise<CifraResult> {
+export async function getCifra(url: string): Promise<CifraResult> {
   try {
-    // This calls the Vercel API route we created in Step 1
-    const response = await fetch(`/api/cifra?artist=${artist}&song=${song}`);
+    const params = new URLSearchParams({ url });
+
+    const response = await fetch(`/api/song?${params.toString()}`);
 
     if (!response.ok) {
-      throw new Error("Failed to fetch from our API");
+      throw new Error(`API request failed (${response.status})`);
     }
 
     const data: CifraResult = await response.json();
     return data;
   } catch (error) {
     return {
-      cifraclub_url: `https://www.cifraclub.com.br/${artist}/${song}/`,
-      error: (error as { message: string }).message,
+      url,
+      error: error instanceof Error ? error.message : "Unknown error",
     };
   }
 }
