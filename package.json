@@ -15,7 +15,7 @@
   "dependencies": {
     "@atlaskit/pragmatic-drag-and-drop": "^3.0.0",
     "@atlaskit/pragmatic-drag-and-drop-hitbox": "^2.1.0",
-    "@hosanna/shared": "^2.3.4",
+    "@hosanna/shared": "^2.4.0",
     "@preact/preset-vite": "^2.10.6",
     "@tailwindcss/vite": "^4.1.14",
     "ace-builds": "^1.44.0",
