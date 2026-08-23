@@ -1,6 +1,5 @@
 import { configureApiClient } from "@hosanna/shared";
 import { preloadEditor } from "@hosanna/shared/editor";
-import { QueryClientProvider } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { BrowserRouter } from "react-router-dom";
 import { NavigationProgressBar } from "./components/NavigationProgressBar";
@@ -9,7 +8,6 @@ import { CacheHydrationProvider } from "./contexts/CacheHydrationProvider";
 import { NavigationTransitionProvider } from "./contexts/NavigationTransitionContext";
 import { SyncProvider } from "./contexts/SyncContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
-import { queryClient } from "./queryClient";
 import { AppRoutes } from "./routes/AppRoutes";
 
 export default function App() {
@@ -27,21 +25,19 @@ export default function App() {
     }
   }, []);
   return (
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <ThemeProvider>
-          <SyncProvider>
-            <CacheHydrationProvider>
-              <BrowserRouter>
-                <NavigationTransitionProvider>
-                  <NavigationProgressBar />
-                  <AppRoutes />
-                </NavigationTransitionProvider>
-              </BrowserRouter>
-            </CacheHydrationProvider>
-          </SyncProvider>
-        </ThemeProvider>
-      </AuthProvider>
-    </QueryClientProvider>
+    <AuthProvider>
+      <ThemeProvider>
+        <SyncProvider>
+          <CacheHydrationProvider>
+            <BrowserRouter>
+              <NavigationTransitionProvider>
+                <NavigationProgressBar />
+                <AppRoutes />
+              </NavigationTransitionProvider>
+            </BrowserRouter>
+          </CacheHydrationProvider>
+        </SyncProvider>
+      </ThemeProvider>
+    </AuthProvider>
   );
 }
