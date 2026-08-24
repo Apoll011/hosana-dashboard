@@ -136,12 +136,10 @@ export function parseCifraClubInput(
 
 export async function getCifra(url: string): Promise<CifraResult> {
   try {
+    const params = new URLSearchParams({ url });
+
     const client = getApiClient();
-    const res = await client.request<CifraResult>(`/cifra`, {
-      body: JSON.stringify({
-        url,
-      }),
-    });
+    const res = await client.request<CifraResult>(`/cifra?{params.toString()}`);
     return res;
   } catch (error) {
     return {
