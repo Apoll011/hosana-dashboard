@@ -9,3 +9,4 @@ coverage/
 .vercel
 .agents/
 skills-lock.json
+.wrangler
