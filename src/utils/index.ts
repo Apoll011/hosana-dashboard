@@ -139,7 +139,9 @@ export async function getCifra(url: string): Promise<CifraResult> {
     const params = new URLSearchParams({ url });
 
     const client = getApiClient();
-    const res = await client.request<CifraResult>(`/cifra?{params.toString()}`);
+    const res = await client.request<CifraResult>(
+      `/cifra?${params.toString()}`,
+    );
     return res;
   } catch (error) {
     return {
