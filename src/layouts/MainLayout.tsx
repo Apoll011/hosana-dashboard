@@ -31,6 +31,7 @@ import {
 import { ToastContainer } from "../components/Toast";
 import { useAuth } from "../contexts/AuthContext";
 import { useSync } from "../contexts/SyncContext";
+import { getDatabase, purgeExpiredTrash } from "../db";
 import { useAppNavigate } from "../hooks/useAppNavigate";
 import { useFolders } from "../hooks/useFolders";
 import { usePersonalSettings } from "../hooks/usePersonalSettings";
@@ -62,6 +63,7 @@ export const MainLayout: React.FC = () => {
 
   const isTeamsView = location.pathname.includes("/teams");
   const isSettingsView = location.pathname.includes("/settings");
+  const isTrashView = location.pathname.includes("/trash");
   const isExplorerView =
     location.pathname.includes("/folders") ||
     (!isSongsView &&
@@ -69,7 +71,8 @@ export const MainLayout: React.FC = () => {
       !isServicesView &&
       !isServiceEditorView &&
       !isTeamsView &&
-      !isSettingsView);
+      !isSettingsView &&
+      !isTrashView);
   const isEditorView = isSongEditorView || isServiceEditorView;
 
   const { settings } = usePersonalSettings();
@@ -111,8 +114,13 @@ export const MainLayout: React.FC = () => {
   }, [needRefresh, showToast, updateServiceWorker]);
 
   useEffect(() => {
+    const runTrashVerifier = () => {
+      void getDatabase().then(purgeExpiredTrash);
+    };
+    runTrashVerifier();
     const interval = setInterval(() => {
       void triggerSyncCheck();
+      runTrashVerifier();
     }, 60000);
     return () => clearInterval(interval);
   }, [triggerSyncCheck]);
@@ -1409,6 +1417,7 @@ export const MainLayout: React.FC = () => {
           isSongsView={isSongsView}
           isServicesView={isServicesView}
           isTeamsView={isTeamsView}
+          isTrashView={isTrashView}
           currentFolderId={currentFolderId}
           rootSongsCount={rootSongsCount}
           rootFoldersCount={rootFoldersCount}

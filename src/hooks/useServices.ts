@@ -6,7 +6,7 @@
 import { Service, ServiceElement } from "@hosanna/shared";
 import { useCallback, useEffect, useState } from "react";
 import { useSync } from "../contexts/SyncContext";
-import { getDatabase, ServiceDocType } from "../db";
+import { getDatabase, getPurgeAt, ServiceDocType } from "../db";
 
 let cachedServicesMap: Map<string, Service[]> = new Map();
 let cachedSingleServices: Map<string, Service> = new Map();
@@ -23,6 +23,7 @@ export function useServices(includeArchived: boolean = false) {
   const [isCreating, setIsCreating] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isRestoring, setIsRestoring] = useState(false);
 
   useEffect(() => {
     let isSubscribed = true;
@@ -34,7 +35,7 @@ export function useServices(includeArchived: boolean = false) {
         if (!isSubscribed) return;
 
         const selector: any = {
-          _deleted: { $ne: true },
+          deleted: { $ne: true },
         };
 
         if (!includeArchived) {
@@ -155,7 +156,8 @@ export function useServices(includeArchived: boolean = false) {
         const doc = await db.services.findOne(id).exec();
         if (doc) {
           await doc.patch({
-            _deleted: true,
+            deleted: true,
+            purgeAt: getPurgeAt(),
             updatedAt: new Date().toISOString(),
           });
         }
@@ -166,6 +168,31 @@ export function useServices(includeArchived: boolean = false) {
         throw err;
       } finally {
         setIsDeleting(false);
+      }
+    },
+    [showToast],
+  );
+
+  const restoreService = useCallback(
+    async (id: string) => {
+      setIsRestoring(true);
+      try {
+        const db = await getDatabase();
+        const doc = await db.services.findOne(id).exec();
+        if (doc) {
+          await doc.patch({
+            deleted: false,
+            purgeAt: null,
+            updatedAt: new Date().toISOString(),
+          });
+        }
+        showToast("Service restored", "success");
+      } catch (err: unknown) {
+        if (err && typeof err === "object" && "message" in err)
+          showToast(err.message || "Failed to restore service", "error");
+        throw err;
+      } finally {
+        setIsRestoring(false);
       }
     },
     [showToast],
@@ -213,10 +240,12 @@ export function useServices(includeArchived: boolean = false) {
     createService,
     updateService,
     deleteService,
+    restoreService,
     updateElements,
     isCreating,
     isUpdating,
     isDeleting,
+    isRestoring,
   };
 }
 
@@ -246,7 +275,7 @@ export function useService(id: string | null) {
 
         rxSub = db.services.findOne(id as string).$.subscribe((doc) => {
           if (!isSubscribed) return;
-          if (doc && !doc._deleted) {
+          if (doc && !doc.deleted) {
             const data = doc.toJSON() as Service;
             cachedSingleServices.set(id as string, data);
             setService(data);

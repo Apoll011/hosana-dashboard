@@ -13,10 +13,12 @@ export interface SongDocType {
   createdAt: string;
   updatedAt: string;
   _deleted?: boolean;
+  deleted?: boolean;
+  purgeAt?: string | null;
 }
 
 export const songSchema: RxJsonSchema<SongDocType> = {
-  version: 0,
+  version: 1,
   primaryKey: "id",
   type: "object",
   properties: {
@@ -59,6 +61,12 @@ export const songSchema: RxJsonSchema<SongDocType> = {
     _deleted: {
       type: "boolean",
     },
+    deleted: {
+      type: "boolean",
+    },
+    purgeAt: {
+      type: ["string", "null"],
+    },
   },
   required: ["id", "title", "updatedAt"],
   indexes: ["updatedAt"],
@@ -75,10 +83,12 @@ export interface FolderDocType {
   createdAt: string;
   updatedAt: string;
   _deleted?: boolean;
+  deleted?: boolean;
+  purgeAt?: string | null;
 }
 
 export const folderSchema: RxJsonSchema<FolderDocType> = {
-  version: 2,
+  version: 3,
   primaryKey: "id",
   type: "object",
   properties: {
@@ -115,6 +125,12 @@ export const folderSchema: RxJsonSchema<FolderDocType> = {
     _deleted: {
       type: "boolean",
     },
+    deleted: {
+      type: "boolean",
+    },
+    purgeAt: {
+      type: ["string", "null"],
+    },
   },
   required: ["id", "name", "updatedAt"],
   indexes: ["updatedAt"],
@@ -130,10 +146,12 @@ export interface ServiceDocType {
   createdAt: string;
   updatedAt: string;
   _deleted?: boolean;
+  deleted?: boolean;
+  purgeAt?: string | null;
 }
 
 export const serviceSchema: RxJsonSchema<ServiceDocType> = {
-  version: 0,
+  version: 1,
   primaryKey: "id",
   type: "object",
   properties: {
@@ -168,6 +186,12 @@ export const serviceSchema: RxJsonSchema<ServiceDocType> = {
     },
     _deleted: {
       type: "boolean",
+    },
+    deleted: {
+      type: "boolean",
+    },
+    purgeAt: {
+      type: ["string", "null"],
     },
   },
   required: ["id", "name", "updatedAt"],

@@ -6,7 +6,7 @@
 import { GetSongsParams, Song } from "@hosanna/shared";
 import { useCallback, useEffect, useState } from "react";
 import { useSync } from "../contexts/SyncContext";
-import { getDatabase, SongDocType } from "../db";
+import { getDatabase, getPurgeAt, SongDocType } from "../db";
 
 function useSongMutations() {
   const { showToast } = useSync();
@@ -14,6 +14,7 @@ function useSongMutations() {
   const [isUpdating, setIsUpdating] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isUpdatingBatchTags, setIsUpdatingBatchTags] = useState(false);
+  const [isRestoring, setIsRestoring] = useState(false);
 
   const createSong = useCallback(
     async (data: Partial<Song>) => {
@@ -115,9 +116,10 @@ function useSongMutations() {
         const db = await getDatabase();
         const doc = await db.songs.findOne(id).exec();
         if (doc) {
-          // Soft delete so RxDB replication pushes tombstone to server
+          // Move to trash; permanent removal happens at purgeAt via the trash verifier
           await doc.patch({
-            _deleted: true,
+            deleted: true,
+            purgeAt: getPurgeAt(),
             updatedAt: new Date().toISOString(),
           });
         }
@@ -128,6 +130,31 @@ function useSongMutations() {
         throw err;
       } finally {
         setIsDeleting(false);
+      }
+    },
+    [showToast],
+  );
+
+  const restoreSong = useCallback(
+    async (id: string) => {
+      setIsRestoring(true);
+      try {
+        const db = await getDatabase();
+        const doc = await db.songs.findOne(id).exec();
+        if (doc) {
+          await doc.patch({
+            deleted: false,
+            purgeAt: null,
+            updatedAt: new Date().toISOString(),
+          });
+        }
+        showToast("Cântico restaurado", "success");
+      } catch (err: unknown) {
+        if (err && typeof err === "object" && "message" in err)
+          showToast(err.message || "Falha ao restaurar cântico", "error");
+        throw err;
+      } finally {
+        setIsRestoring(false);
       }
     },
     [showToast],
@@ -226,12 +253,14 @@ function useSongMutations() {
     createSong,
     updateSong,
     deleteSong,
+    restoreSong,
     moveSong,
     updateBatchTags,
     isCreating,
     isUpdating,
     isDeleting,
     isUpdatingBatchTags,
+    isRestoring,
   };
 }
 
@@ -294,7 +323,7 @@ export function useSongs(params: GetSongsParams = {}) {
 
         let query = db.songs.find({
           selector: {
-            _deleted: {
+            deleted: {
               $ne: true,
             },
           },
@@ -303,7 +332,7 @@ export function useSongs(params: GetSongsParams = {}) {
         if (folder !== undefined) {
           query = db.songs.find({
             selector: {
-              _deleted: { $ne: true },
+              deleted: { $ne: true },
               folderId: folder,
             },
           });
@@ -397,7 +426,7 @@ export function useSong(id: string | null) {
 
         rxSub = db.songs.findOne(id as string).$.subscribe((doc) => {
           if (!isSubscribed) return;
-          if (doc && !doc._deleted) {
+          if (doc && !doc.deleted) {
             const data = doc.toJSON() as Song;
             cachedSingleSongs.set(id as string, data);
             setSong(data);

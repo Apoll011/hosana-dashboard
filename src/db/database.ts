@@ -13,6 +13,7 @@ import {
   SongDocType,
   songSchema,
 } from "./schemas";
+import { TRASH_RETENTION_MS } from "./trash";
 
 addRxPlugin(RxDBUpdatePlugin);
 addRxPlugin(RxDBQueryBuilderPlugin);
@@ -42,9 +43,22 @@ export async function getDatabase(): Promise<HosanaDatabase> {
         }),
       });
 
+      const migrateToTrash = <T extends { deleted?: boolean }>(
+        oldDoc: Partial<T>,
+      ) => ({
+        ...oldDoc,
+        deleted: oldDoc.deleted ?? false,
+        purgeAt: oldDoc.deleted
+          ? new Date(Date.now() + TRASH_RETENTION_MS).toISOString()
+          : null,
+      });
+
       await db.addCollections({
         songs: {
           schema: songSchema,
+          migrationStrategies: {
+            1: migrateToTrash<SongDocType>,
+          },
         },
         folders: {
           schema: folderSchema,
@@ -55,10 +69,14 @@ export async function getDatabase(): Promise<HosanaDatabase> {
               color: oldDoc.color || "default",
               icon: oldDoc.icon || "default",
             }),
+            3: migrateToTrash<FolderDocType>,
           },
         },
         services: {
           schema: serviceSchema,
+          migrationStrategies: {
+            1: migrateToTrash<ServiceDocType>,
+          },
         },
       });
 
