@@ -119,6 +119,9 @@ export const SettingsPage = lazyImport(() =>
 export const TeamsPage = lazyImport(() =>
   import("../pages/TeamsPage").then((m) => ({ default: m.TeamsPage })),
 );
+export const TrashPage = lazyImport(() =>
+  import("../pages/TrashPage").then((m) => ({ default: m.TrashPage })),
+);
 
 export const routePreloaders: Array<{
   pattern: RegExp;
@@ -130,6 +133,7 @@ export const routePreloaders: Array<{
   { pattern: /\/services(\/|\?|#|$)/, preload: () => ServicesPage.preload() },
   { pattern: /\/folders(\/|\?|#|$)/, preload: () => FoldersPage.preload() },
   { pattern: /\/teams(\/|\?|#|$)/, preload: () => TeamsPage.preload() },
+  { pattern: /\/trash(\/|\?|#|$)/, preload: () => TrashPage.preload() },
   { pattern: /\/settings(\/|\?|#|$)/, preload: () => SettingsPage.preload() },
   { pattern: /\/login(\/|\?|#|$)/, preload: () => LoginPage.preload() },
   {
