@@ -43,12 +43,12 @@ export async function getDatabase(): Promise<HosanaDatabase> {
         }),
       });
 
-      const migrateToTrash = <T extends { deleted?: boolean }>(
+      const migrateToTrash = <T extends { isDeleted?: boolean }>(
         oldDoc: Partial<T>,
       ) => ({
         ...oldDoc,
-        deleted: oldDoc.deleted ?? false,
-        purgeAt: oldDoc.deleted
+        isDeleted: oldDoc.isDeleted ?? false,
+        purgeAt: oldDoc.isDeleted
           ? new Date(Date.now() + TRASH_RETENTION_MS).toISOString()
           : null,
       });

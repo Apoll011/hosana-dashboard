@@ -118,7 +118,7 @@ function useSongMutations() {
         if (doc) {
           // Move to trash; permanent removal happens at purgeAt via the trash verifier
           await doc.patch({
-            deleted: true,
+            isDeleted: true,
             purgeAt: getPurgeAt(),
             updatedAt: new Date().toISOString(),
           });
@@ -143,7 +143,7 @@ function useSongMutations() {
         const doc = await db.songs.findOne(id).exec();
         if (doc) {
           await doc.patch({
-            deleted: false,
+            isDeleted: false,
             purgeAt: null,
             updatedAt: new Date().toISOString(),
           });
@@ -323,7 +323,7 @@ export function useSongs(params: GetSongsParams = {}) {
 
         let query = db.songs.find({
           selector: {
-            deleted: {
+            isDeleted: {
               $ne: true,
             },
           },
@@ -332,7 +332,7 @@ export function useSongs(params: GetSongsParams = {}) {
         if (folder !== undefined) {
           query = db.songs.find({
             selector: {
-              deleted: { $ne: true },
+              isDeleted: { $ne: true },
               folderId: folder,
             },
           });
@@ -426,7 +426,7 @@ export function useSong(id: string | null) {
 
         rxSub = db.songs.findOne(id as string).$.subscribe((doc) => {
           if (!isSubscribed) return;
-          if (doc && !doc.deleted) {
+          if (doc && !doc.isDeleted) {
             const data = doc.toJSON() as Song;
             cachedSingleSongs.set(id as string, data);
             setSong(data);

@@ -19,7 +19,7 @@ export async function purgeExpiredTrash(db: HosanaDatabase): Promise<void> {
     const expired = await collection
       .find({
         selector: {
-          deleted: true,
+          isDeleted: true,
           purgeAt: { $lte: nowIso, $ne: null },
         },
       })

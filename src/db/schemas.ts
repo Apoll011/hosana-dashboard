@@ -13,7 +13,7 @@ export interface SongDocType {
   createdAt: string;
   updatedAt: string;
   _deleted?: boolean;
-  deleted?: boolean;
+  isDeleted?: boolean;
   purgeAt?: string | null;
 }
 
@@ -61,7 +61,7 @@ export const songSchema: RxJsonSchema<SongDocType> = {
     _deleted: {
       type: "boolean",
     },
-    deleted: {
+    isDeleted: {
       type: "boolean",
     },
     purgeAt: {
@@ -83,7 +83,7 @@ export interface FolderDocType {
   createdAt: string;
   updatedAt: string;
   _deleted?: boolean;
-  deleted?: boolean;
+  isDeleted?: boolean;
   purgeAt?: string | null;
 }
 
@@ -125,7 +125,7 @@ export const folderSchema: RxJsonSchema<FolderDocType> = {
     _deleted: {
       type: "boolean",
     },
-    deleted: {
+    isDeleted: {
       type: "boolean",
     },
     purgeAt: {
@@ -146,7 +146,7 @@ export interface ServiceDocType {
   createdAt: string;
   updatedAt: string;
   _deleted?: boolean;
-  deleted?: boolean;
+  isDeleted?: boolean;
   purgeAt?: string | null;
 }
 
@@ -187,7 +187,7 @@ export const serviceSchema: RxJsonSchema<ServiceDocType> = {
     _deleted: {
       type: "boolean",
     },
-    deleted: {
+    isDeleted: {
       type: "boolean",
     },
     purgeAt: {

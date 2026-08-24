@@ -43,21 +43,23 @@ export function useTrash() {
       };
 
       subs.push(
-        db.folders.find({ selector: { deleted: true } }).$.subscribe((docs) => {
-          if (!isSubscribed) return;
-          latestFolders = docs.map((d) => ({
-            id: d.id,
-            type: "folder" as const,
-            name: d.name,
-            updatedAt: d.updatedAt,
-            purgeAt: d.purgeAt ?? null,
-          }));
-          emit();
-        }),
+        db.folders
+          .find({ selector: { isDeleted: true } })
+          .$.subscribe((docs) => {
+            if (!isSubscribed) return;
+            latestFolders = docs.map((d) => ({
+              id: d.id,
+              type: "folder" as const,
+              name: d.name,
+              updatedAt: d.updatedAt,
+              purgeAt: d.purgeAt ?? null,
+            }));
+            emit();
+          }),
       );
 
       subs.push(
-        db.songs.find({ selector: { deleted: true } }).$.subscribe((docs) => {
+        db.songs.find({ selector: { isDeleted: true } }).$.subscribe((docs) => {
           if (!isSubscribed) return;
           latestSongs = docs.map((d) => ({
             id: d.id,
@@ -72,7 +74,7 @@ export function useTrash() {
 
       subs.push(
         db.services
-          .find({ selector: { deleted: true } })
+          .find({ selector: { isDeleted: true } })
           .$.subscribe((docs) => {
             if (!isSubscribed) return;
             latestServices = docs.map((d) => ({
