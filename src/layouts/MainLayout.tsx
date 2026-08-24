@@ -1139,7 +1139,6 @@ export const MainLayout: React.FC = () => {
     ],
   );
 
-
   const handleBatchDeleteConfirm = async (
     folderAction: "move_to_root" | "delete_songs",
   ) => {
