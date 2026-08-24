@@ -6,7 +6,7 @@
 import { Folder } from "@hosanna/shared";
 import { useCallback, useEffect, useState } from "react";
 import { useSync } from "../contexts/SyncContext";
-import { FolderDocType, getDatabase } from "../db";
+import { FolderDocType, getDatabase, getPurgeAt } from "../db";
 
 let cachedFolders: Folder[] | null = null;
 let cachedRootSongsCount: number = 0;
@@ -22,6 +22,7 @@ export function useFolders() {
   const [isRenaming, setIsRenaming] = useState(false);
   const [isMoving, setIsMoving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isRestoring, setIsRestoring] = useState(false);
 
   useEffect(() => {
     let isSubscribed = true;
@@ -36,7 +37,7 @@ export function useFolders() {
         rxSubFolders = db.folders
           .find({
             selector: {
-              _deleted: {
+              isDeleted: {
                 $ne: true,
               },
             },
@@ -52,7 +53,7 @@ export function useFolders() {
         rxSubSongs = db.songs
           .find({
             selector: {
-              _deleted: { $ne: true },
+              isDeleted: { $ne: true },
               folderId: null,
             },
           })
@@ -207,11 +208,14 @@ export function useFolders() {
         const db = await getDatabase();
         const now = new Date().toISOString();
 
-        // 1. Soft-delete the folder
+        const purgeAt = getPurgeAt();
+
+        // 1. Move folder to trash
         const folderDoc = await db.folders.findOne(id).exec();
         if (folderDoc) {
           await folderDoc.patch({
-            _deleted: true,
+            isDeleted: true,
+            purgeAt,
             updatedAt: now,
           });
         }
@@ -221,7 +225,7 @@ export function useFolders() {
           .find({
             selector: {
               folderId: id,
-              _deleted: { $ne: true },
+              isDeleted: { $ne: true },
             },
           })
           .exec();
@@ -229,7 +233,8 @@ export function useFolders() {
         for (const songDoc of songsInFolder) {
           if (action === "delete_songs") {
             await songDoc.patch({
-              _deleted: true,
+              isDeleted: true,
+              purgeAt,
               updatedAt: now,
             });
           } else {
@@ -245,7 +250,7 @@ export function useFolders() {
           .find({
             selector: {
               parentId: id,
-              _deleted: { $ne: true },
+              isDeleted: { $ne: true },
             },
           })
           .exec();
@@ -269,6 +274,31 @@ export function useFolders() {
     [showToast],
   );
 
+  const restoreFolder = useCallback(
+    async (id: string) => {
+      setIsRestoring(true);
+      try {
+        const db = await getDatabase();
+        const doc = await db.folders.findOne(id).exec();
+        if (doc) {
+          await doc.patch({
+            isDeleted: false,
+            purgeAt: null,
+            updatedAt: new Date().toISOString(),
+          });
+        }
+        showToast("Folder restored", "success");
+      } catch (err: unknown) {
+        if (err && typeof err === "object" && "message" in err)
+          showToast(err.message || "Failed to restore folder", "error");
+        throw err;
+      } finally {
+        setIsRestoring(false);
+      }
+    },
+    [showToast],
+  );
+
   return {
     foldersQuery: {
       data: {
@@ -286,9 +316,11 @@ export function useFolders() {
     customizeFolder,
     moveFolder,
     deleteFolder,
+    restoreFolder,
     isCreating,
     isRenaming,
     isMoving,
     isDeleting,
+    isRestoring,
   };
 }

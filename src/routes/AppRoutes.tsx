@@ -40,6 +40,7 @@ import {
   SongEditorPage,
   SongsPage,
   TeamsPage,
+  TrashPage,
   TwoFactorPage,
   VerifyEmailPage,
   prefetchQueue,
@@ -157,6 +158,7 @@ export const AppRoutes: React.FC = () => {
                 <Route path="services" element={<ServicesPage hideHeader />} />
                 <Route path="services/:id" element={<ServiceDetailPage />} />
                 <Route path="teams" element={<TeamsPage />} />
+                <Route path="trash" element={<TrashPage />} />
                 <Route path="settings" element={<SettingsPage />} />
               </Route>
             </Route>
