@@ -4,7 +4,7 @@
  */
 
 import { Spinner } from "@hosanna/shared";
-import React, { Suspense, lazy, useEffect } from "react";
+import React, { Suspense, useEffect } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import {
   Navigate,

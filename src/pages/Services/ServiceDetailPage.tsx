@@ -22,10 +22,8 @@ import {
   Input,
   parseChordPro,
   ServiceElement,
-  songsApi,
   Spinner,
 } from "@hosanna/shared";
-import { useQueryClient } from "@tanstack/react-query";
 import {
   ArrowLeft,
   BookOpen,
@@ -556,7 +554,6 @@ export const ServiceDetailPage: React.FC = () => {
   const { updateElements, updateService } = useServices();
   const { songsQuery } = useSongs({ limit: 1000 });
   const { showToast } = useSync();
-  const queryClient = useQueryClient();
 
   const [elements, setElements] = useState<ServiceElement[]>([]);
   const elementsRef = useRef<ServiceElement[]>([]);
@@ -659,10 +656,7 @@ export const ServiceDetailPage: React.FC = () => {
     }));
     const previousElements = [...elementsRef.current];
     try {
-      const song = await queryClient.fetchQuery({
-        queryKey: ["song", songId],
-        queryFn: () => songsApi.getSongById(songId),
-      });
+      const song = songsQuery.data.songs.find((s) => s.id === songId);
 
       const parsed = parseChordPro(song?.content || "");
       const newElem: ServiceElement = {
@@ -861,7 +855,6 @@ export const ServiceDetailPage: React.FC = () => {
       }
     : undefined;
 
-  // IMPORTANT: Hooks cannot be called conditionally. This early return must stay here at the bottom.
   if (isLoading)
     return (
       <div className="flex-1 flex items-center justify-center p-12">

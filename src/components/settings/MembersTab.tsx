@@ -5,7 +5,6 @@
 
 import { Can, CanAny } from "@/src/lib/permissions/components";
 import { Button, Input, Modal } from "@hosanna/shared";
-import { useQuery } from "@tanstack/react-query";
 import {
   ChevronRight,
   Loader2,
@@ -16,7 +15,7 @@ import {
   UserPlus,
   XCircle,
 } from "lucide-react";
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { useSync } from "../../contexts/SyncContext";
 import { authClient } from "../../lib/authClient";
@@ -70,68 +69,84 @@ export const MembersTab: React.FC<{ active: boolean }> = ({ active }) => {
   const [isCancelling, setIsCancelling] = useState(false);
 
   // Fetch Better Auth Organization Members
-  const {
-    data: orgMembersData,
-    isLoading: isLoadingOrgMembers,
-    refetch: refetchOrgMembers,
-  } = useQuery({
-    queryKey: ["betterAuthOrgMembers", organization?.id],
-    queryFn: async () => {
-      try {
-        if (organization && organization.members) {
-          return organization.members.map(
-            (m: {
-              id: string;
-              userId?: string;
-              user?: {
-                id?: string;
-                name?: string;
-                email?: string;
-                image?: string;
-              };
+  const [orgMembersData, setOrgMembersData] = useState<OrgMember[] | null>(
+    null,
+  );
+  const [isLoadingOrgMembers, setIsLoadingOrgMembers] = useState(true);
+
+  const fetchOrgMembers = useCallback(async () => {
+    setIsLoadingOrgMembers(true);
+    try {
+      if (organization && organization.members) {
+        const mapped = organization.members.map(
+          (m: {
+            id: string;
+            userId?: string;
+            user?: {
+              id?: string;
               name?: string;
               email?: string;
-              role?: string;
-              createdAt?: string | Date;
               image?: string;
-            }) => ({
-              id: m.id,
-              userId: m.userId || m.user?.id || m.id,
-              name: m.user?.name || m.name || m.user?.email || "Membro",
-              email: m.user?.email || m.email || "",
-              role: m.role || "member",
-              createdAt: m.createdAt,
-              image: m.user?.image || m.image,
-            }),
-          );
-        }
-      } catch {
-        // Fallback to empty if endpoint fails
+            };
+            name?: string;
+            email?: string;
+            role?: string;
+            createdAt?: string | Date;
+            image?: string;
+          }) => ({
+            id: m.id,
+            userId: m.userId || m.user?.id || m.id,
+            name: m.user?.name || m.name || m.user?.email || "Membro",
+            email: m.user?.email || m.email || "",
+            role: m.role || "member",
+            createdAt: m.createdAt,
+            image: m.user?.image || m.image,
+          }),
+        );
+        setOrgMembersData(mapped);
+      } else {
+        setOrgMembersData(null);
       }
-      return null;
-    },
-    enabled: active && !!organization,
-  });
+    } catch {
+      setOrgMembersData(null);
+    } finally {
+      setIsLoadingOrgMembers(false);
+    }
+  }, [organization]);
+
+  useEffect(() => {
+    if (active && organization) {
+      void fetchOrgMembers();
+    }
+  }, [active, organization, fetchOrgMembers]);
+
+  const refetchOrgMembers = fetchOrgMembers;
 
   // Fetch Better Auth Organization Invitations
-  const {
-    data: invitationsData,
-    isLoading: isLoadingInvitations,
-    refetch: refetchInvitations,
-  } = useQuery({
-    queryKey: ["betterAuthOrgInvitations", organization?.id],
-    queryFn: async () => {
-      try {
-        const { data } = await authClient.organization.listInvitations({
-          query: { organizationId: organization?.id },
-        });
-        return (data as OrgInvitation[]) || [];
-      } catch {
-        return [];
-      }
-    },
-    enabled: active && !!organization,
-  });
+  const [invitationsData, setInvitationsData] = useState<OrgInvitation[]>([]);
+  const [isLoadingInvitations, setIsLoadingInvitations] = useState(true);
+
+  const fetchInvitations = useCallback(async () => {
+    setIsLoadingInvitations(true);
+    try {
+      const { data } = await authClient.organization.listInvitations({
+        query: { organizationId: organization?.id },
+      });
+      setInvitationsData((data as OrgInvitation[]) || []);
+    } catch {
+      setInvitationsData([]);
+    } finally {
+      setIsLoadingInvitations(false);
+    }
+  }, [organization?.id]);
+
+  useEffect(() => {
+    if (active && organization) {
+      void fetchInvitations();
+    }
+  }, [active, organization, fetchInvitations]);
+
+  const refetchInvitations = fetchInvitations;
 
   if (!active) return null;
 

@@ -24,9 +24,9 @@ export const AboutTab: React.FC<{ active: boolean }> = ({ active }) => {
   const productionDependencies = [
     // --- Dependências Existentes ---
     {
-      name: "@tanstack/react-query",
-      license: "MIT",
-      type: "Estado & Data Fetching",
+      name: "RxDB",
+      license: "Apache-2.0",
+      type: "Offline-First Database",
     },
     { name: "Better Auth", license: "MIT", type: "Autenticação & RBAC" },
     { name: "@tailwindcss/vite", license: "MIT", type: "Estilização" },

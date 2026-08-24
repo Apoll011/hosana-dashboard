@@ -244,14 +244,14 @@ export function useService(id: string | null) {
         const db = await getDatabase();
         if (!isSubscribed) return;
 
-        rxSub = db.services.findOne(id).$.subscribe((doc) => {
+        rxSub = db.services.findOne(id as string).$.subscribe((doc) => {
           if (!isSubscribed) return;
           if (doc && !doc._deleted) {
             const data = doc.toJSON() as Service;
-            cachedSingleServices.set(id, data);
+            cachedSingleServices.set(id as string, data);
             setService(data);
           } else {
-            cachedSingleServices.delete(id);
+            cachedSingleServices.delete(id as string);
             setService(null);
           }
           setIsLoading(false);

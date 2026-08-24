@@ -1,18 +1,18 @@
 import React, { lazy } from "react";
 
-export type LazyImportFn<T = any> = () => Promise<{
+export type LazyImportFn<T> = () => Promise<{
   default: React.ComponentType<T>;
 }>;
 
-export interface LazyPreloadableComponent<
-  T = any,
-> extends React.LazyExoticComponent<React.ComponentType<T>> {
+export interface LazyPreloadableComponent<T> extends React.LazyExoticComponent<
+  React.ComponentType<T>
+> {
   preload: () => Promise<{ default: React.ComponentType<T> }>;
 }
 
 export const prefetchQueue: Array<() => Promise<unknown>> = [];
 
-export const lazyImport = <T = any>(
+export const lazyImport = <T>(
   componentImport: LazyImportFn<T>,
 ): LazyPreloadableComponent<T> => {
   prefetchQueue.push(componentImport);
