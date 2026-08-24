@@ -1,28 +1,8 @@
-interface SongResult {
-  source: "cifraclub" | "ultimate-guitar";
-  source_url: string;
-  name?: string;
-  artist?: string;
-  youtube_url?: string;
-  cifra?: string;
-  error?: string;
-}
-
-interface JsonLdSong {
-  "@type"?: string | string[];
-  name?: string;
-  byArtist?:
-    | {
-        name?: string;
-      }
-    | string;
-}
-
 const USER_AGENT =
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 " +
   "(KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36";
 
-function decodeHtml(value: string): string {
+function decodeHtml(value) {
   return value
     .replace(/&amp;/g, "&")
     .replace(/&quot;/g, '"')
@@ -31,7 +11,7 @@ function decodeHtml(value: string): string {
     .replace(/&gt;/g, ">");
 }
 
-function stripHtml(value: string): string {
+function stripHtml(value) {
   return decodeHtml(
     value
       .replace(/<br\s*\/?>/gi, "\n")
@@ -41,7 +21,7 @@ function stripHtml(value: string): string {
   );
 }
 
-function extractMeta(html: string, property: string): string | undefined {
+function extractMeta(html, property) {
   const escaped = property.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
   const patterns = [
@@ -74,7 +54,7 @@ function extractMeta(html: string, property: string): string | undefined {
   return undefined;
 }
 
-function extractJsonLd(html: string): JsonLdSong | undefined {
+function extractJsonLd(html) {
   const scripts = html.match(
     /<script[^>]+type=["']application\/ld\+json["'][^>]*>[\s\S]*?<\/script>/gi,
   );
@@ -115,7 +95,7 @@ function extractJsonLd(html: string): JsonLdSong | undefined {
   return undefined;
 }
 
-function extractYouTubeUrl(html: string): string | undefined {
+function extractYouTubeUrl(html) {
   const patterns = [
     /https?:\/\/(?:www\.)?youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})/,
     /https?:\/\/youtu\.be\/([a-zA-Z0-9_-]{11})/,
@@ -133,7 +113,7 @@ function extractYouTubeUrl(html: string): string | undefined {
   return undefined;
 }
 
-function detectSource(url: URL): SongResult["source"] | undefined {
+function detectSource(url) {
   const hostname = url.hostname.toLowerCase();
 
   if (
@@ -153,11 +133,11 @@ function detectSource(url: URL): SongResult["source"] | undefined {
   return undefined;
 }
 
-function extractTitleArtist(html: string, source: SongResult["source"]) {
+function extractTitleArtist(html, source) {
   const jsonLd = extractJsonLd(html);
 
-  let name: string | undefined;
-  let artist: string | undefined;
+  let name;
+  let artist;
 
   if (jsonLd?.name) {
     name = jsonLd.name;
@@ -218,10 +198,7 @@ function extractTitleArtist(html: string, source: SongResult["source"]) {
   };
 }
 
-function extractCifraClub(html: string): string | undefined {
-  // Cifra Club's actual chord content can change markup,
-  // so keep several fallbacks.
-
+function extractCifraClub(html) {
   const pre = html.match(/<pre[^>]*>([\s\S]*?)<\/pre>/i);
 
   if (pre?.[1]) {
@@ -235,10 +212,7 @@ function extractCifraClub(html: string): string | undefined {
   return cifra?.[1] ? stripHtml(cifra[1]) : undefined;
 }
 
-function extractUltimateGuitar(html: string): string | undefined {
-  // UG embeds a large amount of page data in JSON.
-  // Search for common tab content fields first.
-
+function extractUltimateGuitar(html) {
   const patterns = [
     /"content"\s*:\s*"((?:\\.|[^"\\])*)"/g,
     /"tab_view"\s*:\s*"((?:\\.|[^"\\])*)"/g,
@@ -263,7 +237,7 @@ function extractUltimateGuitar(html: string): string | undefined {
   return undefined;
 }
 
-export async function onRequestGet(context: { request: Request }) {
+export async function onRequestGet(context) {
   const requestUrl = new URL(context.request.url);
   const target = requestUrl.searchParams.get("url");
 
@@ -271,7 +245,7 @@ export async function onRequestGet(context: { request: Request }) {
     return Response.json({ error: "Missing url parameter" }, { status: 400 });
   }
 
-  let url: URL;
+  let url;
 
   try {
     url = new URL(target);
@@ -291,7 +265,7 @@ export async function onRequestGet(context: { request: Request }) {
     );
   }
 
-  const result: SongResult = {
+  const result = {
     source,
     source_url: url.toString(),
   };
