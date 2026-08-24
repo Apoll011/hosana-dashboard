@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from "react";
-import { Archive, ArrowUpDown, Filter, LayoutGrid, List } from "lucide-react";
 import { Service } from "@hosanna/shared";
+import { Archive, ArrowUpDown, Filter, LayoutGrid, List } from "lucide-react";
+import React from "react";
 
 interface ExplorerToolbarProps {
   isExplorerView: boolean;
@@ -55,7 +55,7 @@ export const ExplorerToolbar: React.FC<ExplorerToolbarProps> = ({
         {isExplorerView && (
           <button
             onClick={onOpenFilterPanel}
-            className={`flex items-center gap-2 px-4 py-2 rounded-2xl border text-xs font-black uppercase tracking-widest transition-all cursor-pointer relative ${
+            className={`flex items-center gap-2 px-4 py-1.5 rounded-2xl border text-xs font-black uppercase tracking-widest transition-all cursor-pointer relative ${
               activeFiltersCount > 0
                 ? "bg-m3-primary/10 border-m3-primary text-m3-primary shadow-lg shadow-m3-primary/10"
                 : "bg-m3-card border-m3-border text-m3-secondary hover:bg-m3-hover hover:text-m3-text hover:border-m3-primary/30"
@@ -77,7 +77,7 @@ export const ExplorerToolbar: React.FC<ExplorerToolbarProps> = ({
           <button
             type="button"
             onClick={() => setShowArchived((v) => !v)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-2xl border text-xs font-black uppercase tracking-widest transition-all cursor-pointer shrink-0 ${
+            className={`flex items-center gap-2 px-4 py-1.5 rounded-2xl border text-xs font-black uppercase tracking-widest transition-all cursor-pointer shrink-0 ${
               showArchived
                 ? "bg-amber-500/10 border-amber-500 text-amber-600 dark:text-amber-400 shadow-lg shadow-amber-500/10"
                 : "bg-m3-card border-m3-border text-m3-secondary hover:bg-m3-hover hover:text-m3-text hover:border-amber-500/30"
@@ -132,13 +132,13 @@ export const ExplorerToolbar: React.FC<ExplorerToolbarProps> = ({
       <div className="flex items-center gap-2.5">
         {/* View Mode Toggle (hidden in Songs view) */}
         {!isSongsView && (
-          <div className="flex items-center p-1 bg-m3-bg rounded-2xl border border-m3-border select-none shrink-0 shadow-inner">
+          <div className="flex items-center bg-m3-bg rounded-2xl border border-m3-border select-none shrink-0 shadow-inner">
             <button
               onClick={() => onViewModeChange("grid")}
               title="Vista em Grelha"
-              className={`p-2 rounded-xl transition-all cursor-pointer ${
+              className={`p-2 rounded-2xl transition-all cursor-pointer ${
                 viewMode === "grid"
-                  ? "bg-m3-card text-m3-primary shadow-lg shadow-black/10"
+                  ? "bg-m3-card text-m3-primary"
                   : "text-m3-secondary hover:text-m3-text"
               }`}
             >
@@ -147,9 +147,9 @@ export const ExplorerToolbar: React.FC<ExplorerToolbarProps> = ({
             <button
               onClick={() => onViewModeChange("list")}
               title="Vista em Lista"
-              className={`p-2 rounded-xl transition-all cursor-pointer ${
+              className={`p-2 rounded-2xl transition-all cursor-pointer ${
                 viewMode === "list"
-                  ? "bg-m3-card text-m3-primary shadow-lg shadow-black/10"
+                  ? "bg-m3-card text-m3-primary"
                   : "text-m3-secondary hover:text-m3-text"
               }`}
             >

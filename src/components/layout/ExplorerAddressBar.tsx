@@ -34,6 +34,7 @@ interface ExplorerAddressBarProps {
   isServiceEditorView: boolean;
   isSettingsView: boolean;
   isTeamsView: boolean;
+  isTrashView: boolean;
   isSidebarOpen: boolean;
   setIsSidebarOpen: (v: boolean) => void;
   currentFolder: Folder | undefined;
@@ -139,7 +140,7 @@ export const ExplorerAddressBar: React.FC<ExplorerAddressBarProps> = ({
               onSelectFolder(null);
               navigate(`${slugPrefix}/folders`);
             }}
-            className={`flex items-center gap-2 font-black uppercase tracking-widest transition-all cursor-pointer shrink-0 ${
+            className={`flex items-center gap-2 font-black tracking-widest transition-all cursor-pointer shrink-0 ${
               currentFolderId === null && isExplorerView
                 ? "text-m3-primary"
                 : "text-m3-secondary hover:text-m3-text"
@@ -162,7 +163,7 @@ export const ExplorerAddressBar: React.FC<ExplorerAddressBarProps> = ({
                 <React.Fragment key={folder.id}>
                   <ChevronRight className="w-3.5 h-3.5 text-m3-secondary/40 shrink-0" />
                   {isLast ? (
-                    <div className="flex items-center gap-2 font-black text-m3-primary shrink-0 uppercase tracking-wide">
+                    <div className="flex items-center gap-2 font-black text-m3-primary shrink-0 tracking-wide">
                       <FolderOpen className="w-4 h-4" />
                       <span>{folder.name}</span>
                     </div>
@@ -182,7 +183,7 @@ export const ExplorerAddressBar: React.FC<ExplorerAddressBarProps> = ({
           {isSongsView && (
             <>
               <ChevronRight className="w-3.5 h-3.5 text-m3-secondary/40 shrink-0" />
-              <div className="flex items-center gap-2 font-black text-m3-primary shrink-0 uppercase tracking-wide">
+              <div className="flex items-center gap-2 font-black text-m3-primary shrink-0 tracking-wide">
                 <Music className="w-4 h-4" />
                 <span>Biblioteca</span>
               </div>
@@ -210,7 +211,7 @@ export const ExplorerAddressBar: React.FC<ExplorerAddressBarProps> = ({
               {currentSong && (
                 <>
                   <ChevronRight className="w-3.5 h-3.5 text-m3-secondary/40 shrink-0" />
-                  <div className="flex items-center gap-2 font-black text-m3-primary shrink-0 uppercase tracking-wide">
+                  <div className="flex items-center gap-2 font-black text-m3-primary shrink-0 tracking-wide">
                     <FileText className="w-4 h-4" />
                     <span>{currentSongFileName}</span>
                   </div>
@@ -222,7 +223,7 @@ export const ExplorerAddressBar: React.FC<ExplorerAddressBarProps> = ({
           {isServicesView && (
             <>
               <ChevronRight className="w-3.5 h-3.5 text-m3-secondary/40 shrink-0" />
-              <div className="flex items-center gap-2 font-black text-m3-primary shrink-0 uppercase tracking-wide">
+              <div className="flex items-center gap-2 font-black text-m3-primary shrink-0 tracking-wide">
                 <Calendar className="w-4 h-4" />
                 <span>Cultos</span>
               </div>
@@ -242,7 +243,7 @@ export const ExplorerAddressBar: React.FC<ExplorerAddressBarProps> = ({
               {currentService && (
                 <>
                   <ChevronRight className="w-3.5 h-3.5 text-m3-secondary/40 shrink-0" />
-                  <div className="flex items-center gap-2 font-black text-m3-primary shrink-0 uppercase tracking-wide">
+                  <div className="flex items-center gap-2 font-black text-m3-primary shrink-0 tracking-wide">
                     <Calendar className="w-4 h-4" />
                     <span>{currentService.name}.service</span>
                   </div>
@@ -273,7 +274,7 @@ export const ExplorerAddressBar: React.FC<ExplorerAddressBarProps> = ({
           {isSettingsView && (
             <>
               <ChevronRight className="w-3.5 h-3.5 text-m3-secondary/40 shrink-0" />
-              <div className="flex items-center gap-2 font-black text-m3-primary shrink-0 uppercase tracking-wide">
+              <div className="flex items-center gap-2 font-black text-m3-primary shrink-0 tracking-wide">
                 <Settings className="w-4 h-4" />
                 <span>Definições</span>
               </div>
@@ -283,9 +284,19 @@ export const ExplorerAddressBar: React.FC<ExplorerAddressBarProps> = ({
           {isTeamsView && (
             <>
               <ChevronRight className="w-3.5 h-3.5 text-m3-secondary/40 shrink-0" />
-              <div className="flex items-center gap-2 font-black text-m3-primary shrink-0 uppercase tracking-wide">
+              <div className="flex items-center gap-2 font-black text-m3-primary shrink-0 tracking-wide">
                 <Users className="w-4 h-4" />
                 <span>Equipas</span>
+              </div>
+            </>
+          )}
+
+          {isTrashView && (
+            <>
+              <ChevronRight className="w-3.5 h-3.5 text-m3-secondary/40 shrink-0" />
+              <div className="flex items-center gap-2 font-black text-m3-primary shrink-0 tracking-wide">
+                <Users className="w-4 h-4" />
+                <span>Lixeira</span>
               </div>
             </>
           )}

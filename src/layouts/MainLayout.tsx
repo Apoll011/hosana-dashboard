@@ -1457,10 +1457,12 @@ export const MainLayout: React.FC = () => {
               isSongsView ||
               isServicesView ||
               isSettingsView ||
-              isEditorView) && (
+              isEditorView ||
+              isTrashView) && (
               <ExplorerAddressBar
                 isExplorerView={isExplorerView}
                 isSongsView={isSongsView}
+                isTrashView={isTrashView}
                 isSongEditorView={isSongEditorView}
                 isServicesView={isServicesView}
                 isServiceEditorView={isServiceEditorView}
