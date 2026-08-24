@@ -37,7 +37,7 @@ export function useFolders() {
         rxSubFolders = db.folders
           .find({
             selector: {
-              deleted: {
+              isDeleted: {
                 $ne: true,
               },
             },
@@ -53,7 +53,7 @@ export function useFolders() {
         rxSubSongs = db.songs
           .find({
             selector: {
-              deleted: { $ne: true },
+              isDeleted: { $ne: true },
               folderId: null,
             },
           })
@@ -214,7 +214,7 @@ export function useFolders() {
         const folderDoc = await db.folders.findOne(id).exec();
         if (folderDoc) {
           await folderDoc.patch({
-            deleted: true,
+            isDeleted: true,
             purgeAt,
             updatedAt: now,
           });
@@ -225,7 +225,7 @@ export function useFolders() {
           .find({
             selector: {
               folderId: id,
-              deleted: { $ne: true },
+              isDeleted: { $ne: true },
             },
           })
           .exec();
@@ -233,7 +233,7 @@ export function useFolders() {
         for (const songDoc of songsInFolder) {
           if (action === "delete_songs") {
             await songDoc.patch({
-              deleted: true,
+              isDeleted: true,
               purgeAt,
               updatedAt: now,
             });
@@ -250,7 +250,7 @@ export function useFolders() {
           .find({
             selector: {
               parentId: id,
-              deleted: { $ne: true },
+              isDeleted: { $ne: true },
             },
           })
           .exec();
@@ -282,7 +282,7 @@ export function useFolders() {
         const doc = await db.folders.findOne(id).exec();
         if (doc) {
           await doc.patch({
-            deleted: false,
+            isDeleted: false,
             purgeAt: null,
             updatedAt: new Date().toISOString(),
           });

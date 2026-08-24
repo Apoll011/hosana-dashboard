@@ -35,7 +35,7 @@ export function useServices(includeArchived: boolean = false) {
         if (!isSubscribed) return;
 
         const selector: any = {
-          deleted: { $ne: true },
+          isDeleted: { $ne: true },
         };
 
         if (!includeArchived) {
@@ -156,7 +156,7 @@ export function useServices(includeArchived: boolean = false) {
         const doc = await db.services.findOne(id).exec();
         if (doc) {
           await doc.patch({
-            deleted: true,
+            isDeleted: true,
             purgeAt: getPurgeAt(),
             updatedAt: new Date().toISOString(),
           });
@@ -181,7 +181,7 @@ export function useServices(includeArchived: boolean = false) {
         const doc = await db.services.findOne(id).exec();
         if (doc) {
           await doc.patch({
-            deleted: false,
+            isDeleted: false,
             purgeAt: null,
             updatedAt: new Date().toISOString(),
           });
@@ -275,7 +275,7 @@ export function useService(id: string | null) {
 
         rxSub = db.services.findOne(id as string).$.subscribe((doc) => {
           if (!isSubscribed) return;
-          if (doc && !doc.deleted) {
+          if (doc && !doc.isDeleted) {
             const data = doc.toJSON() as Service;
             cachedSingleServices.set(id as string, data);
             setService(data);
