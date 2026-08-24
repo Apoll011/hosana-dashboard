@@ -69,7 +69,9 @@ export const MembersTab: React.FC<{ active: boolean }> = ({ active }) => {
   const [isCancelling, setIsCancelling] = useState(false);
 
   // Fetch Better Auth Organization Members
-  const [orgMembersData, setOrgMembersData] = useState<OrgMember[] | null>(null);
+  const [orgMembersData, setOrgMembersData] = useState<OrgMember[] | null>(
+    null,
+  );
   const [isLoadingOrgMembers, setIsLoadingOrgMembers] = useState(true);
 
   const fetchOrgMembers = useCallback(async () => {
@@ -145,7 +147,6 @@ export const MembersTab: React.FC<{ active: boolean }> = ({ active }) => {
   }, [active, organization, fetchInvitations]);
 
   const refetchInvitations = fetchInvitations;
-
 
   if (!active) return null;
 

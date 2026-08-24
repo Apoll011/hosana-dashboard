@@ -48,7 +48,6 @@ const ActiveSessionsSection: React.FC = () => {
 
   const refetch = fetchSessions;
 
-
   const handleRevoke = async (token: string) => {
     try {
       await authClient.revokeSession({ token });
