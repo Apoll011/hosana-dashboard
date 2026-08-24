@@ -4,7 +4,7 @@
  */
 
 import React, { useEffect, useRef } from "react";
-import { clearAllEntries } from "../cache/queryCache";
+import { getDatabase } from "../db";
 import { useAuth } from "./AuthContext";
 import { useSync } from "./SyncContext";
 
@@ -28,8 +28,19 @@ export const CacheHydrationProvider: React.FC<Props> = ({ children }) => {
   useEffect(() => {
     if (prevAuthRef.current !== undefined) {
       if (prevAuthRef.current && !isAuthenticated) {
-        // User logged out
-        void clearAllEntries();
+        // User logged out — clear all RxDB collections
+        void (async () => {
+          try {
+            const db = await getDatabase();
+            await Promise.all([
+              db.songs.remove(),
+              db.folders.remove(),
+              db.services.remove(),
+            ]);
+          } catch {
+            // ignore — DB may not be initialized yet
+          }
+        })();
         hasSyncedRef.current = false;
       }
     }

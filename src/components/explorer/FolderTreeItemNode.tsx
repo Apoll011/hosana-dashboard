@@ -118,7 +118,9 @@ export const FolderTreeItemNode: React.FC<{
 
             {(() => {
               const IconComp = isActive
-                ? (node.folder.icon && node.folder.icon !== "default" ? getFolderIconComponent(node.folder.icon) : FolderOpen)
+                ? node.folder.icon && node.folder.icon !== "default"
+                  ? getFolderIconComponent(node.folder.icon)
+                  : FolderOpen
                 : getFolderIconComponent(node.folder.icon);
               const colorStyle = getFolderColorStyle(node.folder.color);
 

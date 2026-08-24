@@ -15,7 +15,7 @@ export type SyncStatus =
   "synced" | "syncing" | "error" | "offline" | "local_only";
 
 export interface CifraResult {
-  cifraclub_url: string;
+  url: string;
   name?: string;
   artist?: string;
   youtube_url?: string;

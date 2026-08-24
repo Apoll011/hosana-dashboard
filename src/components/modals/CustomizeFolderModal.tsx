@@ -82,10 +82,6 @@ export const CustomizeFolderModal: React.FC<CustomizeFolderModalProps> = ({
     setSelectedIcon("default");
   };
 
-  const isModified =
-    selectedColor !== (folder.color || "default") ||
-    selectedIcon !== (folder.icon || "default");
-
   const PreviewIcon = getFolderIconComponent(selectedIcon);
   const previewColorStyle = getFolderColorStyle(selectedColor);
   const currentIconObj = FOLDER_ICONS.find((i) => i.id === selectedIcon);

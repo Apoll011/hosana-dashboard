@@ -4,7 +4,7 @@
  */
 
 import { Button, Input } from "@hosanna/shared";
-import { useQuery } from "@tanstack/react-query";
+import { Session } from "better-auth";
 import {
   Camera,
   CheckCircle2,
@@ -18,7 +18,7 @@ import {
   Save,
   Trash2,
 } from "lucide-react";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { useSync } from "../../contexts/SyncContext";
 import { authClient } from "../../lib/authClient";
@@ -28,21 +28,26 @@ import { TwoFactorSection } from "./TwoFactor";
 const ActiveSessionsSection: React.FC = () => {
   const { showToast } = useSync();
 
-  const {
-    data: sessions,
-    refetch,
-    isLoading,
-  } = useQuery({
-    queryKey: ["activeSessions"],
-    queryFn: async () => {
-      try {
-        const { data } = await authClient.listSessions();
-        return data || [];
-      } catch {
-        return [];
-      }
-    },
-  });
+  const [sessions, setSessions] = useState<Session[] | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const fetchSessions = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const { data } = await authClient.listSessions();
+      setSessions(data || []);
+    } catch {
+      setSessions([]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void fetchSessions();
+  }, [fetchSessions]);
+
+  const refetch = fetchSessions;
 
   const handleRevoke = async (token: string) => {
     try {

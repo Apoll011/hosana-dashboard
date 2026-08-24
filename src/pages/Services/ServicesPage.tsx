@@ -6,10 +6,8 @@ import {
   EmptyState,
   Modal,
   Service,
-  servicesApi,
   Spinner,
 } from "@hosanna/shared";
-import { useQueryClient } from "@tanstack/react-query";
 import {
   Archive,
   ArchiveRestore,
@@ -51,7 +49,6 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
   searchQuery: externalSearchQuery,
 }) => {
   const { navigate } = useAppNavigate();
-  const queryClient = useQueryClient();
   const { organization } = useAuth();
   const slugPrefix = organization?.slug ? `/${organization.slug}` : "";
   const context = (useOutletContext<Record<string, unknown>>() || {}) as Record<
@@ -326,7 +323,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
     try {
       let fullElements = service.elements;
       if (!fullElements) {
-        const fullService = await servicesApi.getServiceById(service.id);
+        const fullService = servicesQuery.data.find((s) => s.id === service.id);
         fullElements = fullService?.elements || [];
       }
       await createService({
@@ -365,7 +362,6 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
         updatedAt: service.updatedAt,
       },
     });
-    await queryClient.invalidateQueries({ queryKey: ["services"] });
     setArchiveTarget(null);
     setContextMenu(null);
   };
@@ -390,7 +386,6 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
         });
       }
     }
-    await queryClient.invalidateQueries({ queryKey: ["services"] });
     setSelectedServiceIds(new Set());
     setIsBatchArchiveOpen(false);
   };

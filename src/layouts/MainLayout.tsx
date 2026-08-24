@@ -3,8 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ConversionResult, Folder, Song, songsApi } from "@hosanna/shared";
-import { useQueryClient } from "@tanstack/react-query";
+import { ConversionResult, Folder, Song } from "@hosanna/shared";
 import React, {
   useCallback,
   useEffect,
@@ -36,7 +35,7 @@ import { useAppNavigate } from "../hooks/useAppNavigate";
 import { useFolders } from "../hooks/useFolders";
 import { usePersonalSettings } from "../hooks/usePersonalSettings";
 import { useServices } from "../hooks/useServices";
-import { useAllSongs } from "../hooks/useSongs";
+import { useSongs } from "../hooks/useSongs";
 import { songImportRegistry } from "../import";
 import { ProviderImportResult } from "../utils/import";
 
@@ -119,7 +118,6 @@ export const MainLayout: React.FC = () => {
   }, [triggerSyncCheck]);
 
   // Queries & Mutations
-  const queryClient = useQueryClient();
   const { servicesQuery, createService, deleteService } = useServices();
   const allServices = useMemo(
     () => servicesQuery.data || [],
@@ -143,8 +141,8 @@ export const MainLayout: React.FC = () => {
   } = useFolders();
 
   const songParams = useMemo(() => ({}), []);
-  const { songsQuery, moveSong, deleteSong, updateBatchTags } =
-    useAllSongs(songParams);
+  const { songsQuery, moveSong, deleteSong, updateBatchTags, createSong } =
+    useSongs(songParams);
 
   // Folder & Navigation State
   const [currentFolderId, setCurrentFolderId] = useState<string | null>(null);
@@ -1039,14 +1037,13 @@ export const MainLayout: React.FC = () => {
     folderId: string | null;
     tags: string[];
   }) => {
-    const song = await songsApi.createSong({
+    const song = await createSong({
       title: data.title,
       artist: data.artist,
       folderId: data.folderId,
       content: `{title: ${data.title}}\n{artist: ${data.artist}}\n\n[G] Exemplo de tom e cifra...`,
       tags: data.tags,
     });
-    await Promise.all([songsQuery.refetch(), foldersQuery.refetch()]);
     setIsCreateSongModalOpen(false);
     showToast("Cântico criado com sucesso!", "success");
     navigate(`${slugPrefix}/songs/${song.id}`);
@@ -1057,7 +1054,7 @@ export const MainLayout: React.FC = () => {
     artist: string,
     title: string,
   ) => {
-    const song = await songsApi.createSong({
+    const song = await createSong({
       title,
       artist,
       folderId: currentFolderId,
@@ -1091,48 +1088,11 @@ export const MainLayout: React.FC = () => {
     setDeleteSongTarget(null);
   };
 
-  // Batch Operations
+  // Batch Operations,
   const handleBatchMoveConfirm = useCallback(
     async (targetFolderId: string | null) => {
       const folderList = Array.from(selectedFolderIds);
       const songList = Array.from(selectedSongIds);
-
-      const prevFoldersData = queryClient.getQueryData(["folders"]);
-      const prevSongsData = queryClient.getQueryData(["songs", "all", {}]);
-
-      if (folderList.length > 0) {
-        queryClient.setQueryData(
-          ["folders"],
-          (old: { folders: Folder[] } | undefined) => {
-            if (!old) return old;
-            return {
-              ...old,
-              folders: old.folders.map((f: Folder) =>
-                folderList.includes(f.id)
-                  ? { ...f, parentId: targetFolderId }
-                  : f,
-              ),
-            };
-          },
-        );
-      }
-
-      if (songList.length > 0) {
-        queryClient.setQueryData(
-          ["songs", "all", {}],
-          (old: { songs: Song[] } | undefined) => {
-            if (!old || !old.songs) return old;
-            return {
-              ...old,
-              songs: old.songs.map((s: Song) =>
-                songList.includes(s.id)
-                  ? { ...s, folderId: targetFolderId }
-                  : s,
-              ),
-            };
-          },
-        );
-      }
 
       clearSelection();
 
@@ -1161,10 +1121,6 @@ export const MainLayout: React.FC = () => {
           "success",
         );
       } catch {
-        if (prevFoldersData)
-          queryClient.setQueryData(["folders"], prevFoldersData);
-        if (prevSongsData)
-          queryClient.setQueryData(["songs", "all", {}], prevSongsData);
         showToast(
           "Erro ao mover itens. As alterações foram revertidas.",
           "error",
@@ -1176,7 +1132,6 @@ export const MainLayout: React.FC = () => {
       selectedSongIds,
       allFolders,
       allSongs,
-      queryClient,
       moveFolder,
       moveSong,
       showToast,
