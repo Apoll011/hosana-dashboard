@@ -13,6 +13,7 @@ import {
   LogOut,
   Music,
   Settings,
+  Trash2,
   Users,
 } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
@@ -31,6 +32,7 @@ interface AppSidebarProps {
   isSongsView: boolean;
   isServicesView: boolean;
   isTeamsView: boolean;
+  isTrashView: boolean;
   currentFolderId: string | null;
   rootSongsCount: number;
   rootFoldersCount: number;
@@ -68,6 +70,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
   isSongsView,
   isServicesView,
   isTeamsView,
+  isTrashView,
   currentFolderId,
   rootSongsCount,
   rootFoldersCount,
@@ -336,6 +339,32 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
           </>
         )}
         {(isSidebarCollapsed || !showFolderTree) && <div className="flex-1" />}
+
+        <button
+          onClick={() => {
+            navigate(`${slugPrefix}/trash`);
+            if (window.innerWidth < 768) setIsSidebarOpen(false);
+          }}
+          title={isSidebarCollapsed ? "Lixo" : undefined}
+          className={`w-full flex items-center ${
+            isSidebarCollapsed ? "justify-center" : "justify-between"
+          } px-4 py-3 text-[13px] font-bold rounded-2xl transition-all cursor-pointer group ${
+            isTrashView
+              ? "bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 shadow-sm"
+              : "text-m3-secondary hover:bg-m3-hover hover:text-m3-text"
+          }`}
+        >
+          <div
+            className={`flex items-center ${isSidebarCollapsed ? "" : "gap-3"}`}
+          >
+            <Trash2
+              className={`w-4.5 h-4.5 ${
+                isTrashView ? "text-rose-500" : "text-m3-secondary"
+              }`}
+            />
+            {!isSidebarCollapsed && <span>Lixo</span>}
+          </div>
+        </button>
 
         {user && (
           <div

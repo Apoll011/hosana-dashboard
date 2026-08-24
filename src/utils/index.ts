@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Song } from "@hosanna/shared";
+import { getApiClient, Song } from "@hosanna/shared";
 import { CifraResult, FolderNode } from "../types";
 
 // ---------------------------------------------------------------------------
@@ -138,14 +138,11 @@ export async function getCifra(url: string): Promise<CifraResult> {
   try {
     const params = new URLSearchParams({ url });
 
-    const response = await fetch(`/api/song?${params.toString()}`);
-
-    if (!response.ok) {
-      throw new Error(`API request failed (${response.status})`);
-    }
-
-    const data: CifraResult = await response.json();
-    return data;
+    const client = getApiClient();
+    const res = await client.request<CifraResult>(
+      `/cifra?${params.toString()}`,
+    );
+    return res;
   } catch (error) {
     return {
       url,
