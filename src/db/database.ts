@@ -50,7 +50,7 @@ export async function getDatabase(): Promise<HosanaDatabase> {
           schema: folderSchema,
           migrationStrategies: {
             1: () => null,
-            2: (oldDoc: any) => ({
+            2: (oldDoc: Partial<FolderDocType>) => ({
               ...oldDoc,
               color: oldDoc.color || "default",
               icon: oldDoc.icon || "default",

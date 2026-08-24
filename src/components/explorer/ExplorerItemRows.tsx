@@ -1,6 +1,6 @@
-import React from "react";
 import { Button, Folder, Song } from "@hosanna/shared";
-import { FileText, Folder as FolderIcon, MoreVertical } from "lucide-react";
+import { FileText, MoreVertical } from "lucide-react";
+import React from "react";
 import {
   getFolderColorStyle,
   getFolderIconComponent,

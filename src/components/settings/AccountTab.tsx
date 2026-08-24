@@ -4,6 +4,7 @@
  */
 
 import { Button, Input } from "@hosanna/shared";
+import { Session } from "better-auth";
 import {
   Camera,
   CheckCircle2,
@@ -27,7 +28,7 @@ import { TwoFactorSection } from "./TwoFactor";
 const ActiveSessionsSection: React.FC = () => {
   const { showToast } = useSync();
 
-  const [sessions, setSessions] = useState<any[] | null>(null);
+  const [sessions, setSessions] = useState<Session[] | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchSessions = useCallback(async () => {
