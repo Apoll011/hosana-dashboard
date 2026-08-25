@@ -20,13 +20,21 @@ import { pt } from "./locales/pt";
 import {
   LANGUAGE_LOCALE,
   Language,
-  MessageDict,
   PersonalLanguage,
+  TranslationKeyOf,
+  TranslationPluralKeyOf,
 } from "./types";
 
-const MESSAGES: Record<Language, MessageDict> = { pt, en, es };
+const MESSAGES: Record<Language, typeof pt> = { pt, en, es };
 
 type Interpolation = Record<string, string | number>;
+
+/** Every dot-path that resolves to a translatable string leaf. */
+export type TranslationKey = TranslationKeyOf<typeof pt>;
+/** Every dot-path that resolves to a plural (`{ one, other }`) node. */
+export type TranslationPluralKey = TranslationPluralKeyOf<typeof pt>;
+/** The typed `t` function signature. */
+export type TranslateFn = (key: TranslationKey, vars?: Interpolation) => string;
 
 export interface I18nContextValue {
   /** Resolved UI language in effect right now. */
@@ -37,22 +45,23 @@ export interface I18nContextValue {
   locale: string;
   setPersonalLanguage: (lang: PersonalLanguage) => void;
   /** Translate a dot-path key with `{var}` interpolation. */
-  t: (key: string, vars?: Interpolation) => string;
+  t: TranslateFn;
   /** Translate a pluralized key (`key.one` / `key.other`) based on `count`. */
-  tc: (key: string, count: number, vars?: Interpolation) => string;
+  tc: (
+    key: TranslationPluralKey,
+    count: number,
+    vars?: Interpolation,
+  ) => string;
 }
 
 const I18nContext = createContext<I18nContextValue | null>(null);
 
-function lookup(
-  dict: MessageDict,
-  key: string,
-): string | MessageDict | undefined {
+function lookup(dict: unknown, key: string): unknown {
   const parts = key.split(".");
-  let node: string | MessageDict | undefined = dict;
+  let node: unknown = dict;
   for (const part of parts) {
-    if (node && typeof node === "object" && part in node) {
-      node = (node as MessageDict)[part];
+    if (node && typeof node === "object" && part in (node as object)) {
+      node = (node as Record<string, unknown>)[part];
     } else {
       return undefined;
     }
@@ -68,7 +77,7 @@ function interpolate(template: string, vars?: Interpolation): string {
 }
 
 function resolveString(
-  dict: MessageDict,
+  dict: unknown,
   key: string,
   vars?: Interpolation,
 ): string | undefined {
@@ -95,7 +104,7 @@ export const I18nProvider: React.FC<{ children: React.ReactNode }> = ({
   }, [personalLanguage, orgLocale]);
 
   const t = useCallback(
-    (key: string, vars?: Interpolation): string => {
+    (key: TranslationKey, vars?: Interpolation): string => {
       const direct = resolveString(MESSAGES[language], key, vars);
       if (direct !== undefined) return direct;
 
@@ -110,9 +119,13 @@ export const I18nProvider: React.FC<{ children: React.ReactNode }> = ({
   );
 
   const tc = useCallback(
-    (key: string, count: number, vars?: Interpolation): string => {
+    (
+      key: TranslationPluralKey,
+      count: number,
+      vars?: Interpolation,
+    ): string => {
       const form = count === 1 ? "one" : "other";
-      return t(`${key}.${form}`, { ...vars, count });
+      return t(`${key}.${form}` as TranslationKey, { ...vars, count });
     },
     [t],
   );
