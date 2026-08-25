@@ -17,7 +17,7 @@ export const ThemeProvider: React.FC<{
   children: React.ReactNode;
 }> = ({ children }) => {
   const [theme, setTheme] = useState<Theme>(() => {
-    return (localStorage.getItem("chordpro_theme") as Theme) ?? "system";
+    return (localStorage.getItem("chordpro_theme") as Theme) ?? "light";
   });
 
   const [systemDark, setSystemDark] = useState(
