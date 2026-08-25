@@ -56,7 +56,6 @@ import { AnnouncementModal } from "./modals/Anouncement";
 import { ScriptureModal } from "./modals/Bible";
 import { CustomModal } from "./modals/Custom";
 import { MessageModal } from "./modals/Message";
-import { ReadingModal } from "./modals/Reading";
 import { WelcomeModal } from "./modals/Welcome";
 
 function arrayMove<T>(array: T[], fromIndex: number, toIndex: number): T[] {
@@ -97,13 +96,6 @@ const getElementBadge = (type: string) => {
         bg: "#FEF3C7",
         color: "#D97706",
         icon: MessageSquare,
-      };
-    case "reading":
-      return {
-        label: "Leitura",
-        bg: "#F3E8FF",
-        color: "#7E22CE",
-        icon: FileText,
       };
     case "announcement":
       return {
@@ -538,13 +530,7 @@ const ServiceRow: React.FC<ServiceRowProps> = ({
 };
 
 type ModalType =
-  | "welcome"
-  | "scripture"
-  | "message"
-  | "reading"
-  | "announcement"
-  | "custom"
-  | null;
+  "welcome" | "scripture" | "message" | "announcement" | "custom" | null;
 
 export const ServiceDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -744,7 +730,6 @@ export const ServiceDetailPage: React.FC = () => {
       "welcome",
       "scripture",
       "message",
-      "reading",
       "announcement",
       "custom",
     ];
@@ -988,13 +973,6 @@ export const ServiceDetailPage: React.FC = () => {
                   </button>
                   <button
                     type="button"
-                    onClick={() => openAddModal("reading")}
-                    className="px-2.5 py-1 text-[11px] font-bold rounded-lg bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-300 hover:bg-red-100 dark:hover:bg-red-900/50 transition-colors"
-                  >
-                    + Leitura
-                  </button>
-                  <button
-                    type="button"
                     onClick={() => openAddModal("message")}
                     className="px-2.5 py-1 text-[11px] font-bold rounded-lg bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/50 transition-colors"
                   >
@@ -1152,15 +1130,6 @@ export const ServiceDetailPage: React.FC = () => {
           setEditingElement(null);
         }}
         onSave={(data) => handleModalSave("message", data)}
-        initial={editInitial}
-      />
-      <ReadingModal
-        isOpen={activeModal === "reading"}
-        onClose={() => {
-          setActiveModal(null);
-          setEditingElement(null);
-        }}
-        onSave={(data) => handleModalSave("reading", data)}
         initial={editInitial}
       />
       <AnnouncementModal
