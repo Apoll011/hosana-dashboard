@@ -34,7 +34,7 @@ export function useServices(includeArchived: boolean = false) {
         const db = await getDatabase();
         if (!isSubscribed) return;
 
-        const selector: any = {
+        const selector: Record<string, object> = {
           isDeleted: { $ne: true },
         };
 

@@ -24,7 +24,7 @@ import { AppearanceTab } from "../components/settings/AppearanceTab";
 import { GeneralTab } from "../components/settings/GeneralTab";
 import { MembersTab } from "../components/settings/MembersTab";
 import { WorkspaceTab } from "../components/settings/WorkspaceTab";
-import { useActiveRole, useCan } from "../lib/permissions/client";
+import { useCan } from "../lib/permissions/client";
 
 import { CloudOff } from "lucide-react";
 import { useOnline } from "../hooks/useOnline";
@@ -72,7 +72,6 @@ export const SettingsPage: React.FC = () => {
     }
   };
 
-  const { role } = useActiveRole();
   const { granted: canUpdate } = useCan("organization.update");
 
   const tabs = [

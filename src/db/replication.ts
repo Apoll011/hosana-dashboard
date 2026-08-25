@@ -36,11 +36,11 @@ const VOLATILE_FIELDS = ["updatedAt", "_rev", "_meta", "_attachments"] as const;
 
 function omitVolatile<T extends Record<string, any>>(doc: T): Partial<T> {
   const clone: Partial<T> = { ...doc };
-  for (const field of VOLATILE_FIELDS) delete (clone as any)[field];
+  for (const field of VOLATILE_FIELDS) delete clone[field];
   return clone;
 }
 
-function deepEqual(a: unknown, b: unknown): boolean {
+function deepEqual(a: object, b: object): boolean {
   if (a === b) return true;
   if (
     typeof a !== "object" ||
@@ -50,8 +50,8 @@ function deepEqual(a: unknown, b: unknown): boolean {
   ) {
     return false;
   }
-  const aKeys = Object.keys(a as object);
-  const bKeys = Object.keys(b as object);
+  const aKeys = Object.keys(a);
+  const bKeys = Object.keys(b);
   if (aKeys.length !== bKeys.length) return false;
   return aKeys.every((k) => deepEqual((a as any)[k], (b as any)[k]));
 }
@@ -125,7 +125,7 @@ async function pushWithConflictRetry<T extends SyncableDoc>(
         // drifted. Retry with the server's doc as the fresh assumed master state.
         retryRows.push({
           newDocumentState: row.newDocumentState,
-          assumedMasterState: serverDoc as any,
+          assumedMasterState: serverDoc,
         });
       } else {
         realConflicts.push(serverDoc);
