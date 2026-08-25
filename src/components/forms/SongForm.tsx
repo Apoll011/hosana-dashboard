@@ -5,6 +5,7 @@
 
 import { Button, Folder, Input } from "@hosanna/shared";
 import { useState } from "react";
+import { useI18n } from "../../i18n";
 
 interface SongFormData {
   title: string;
@@ -16,14 +17,15 @@ interface SongFormData {
 // Extracted pure validation function
 const validateSongForm = (
   values: SongFormData,
+  t: (key: string) => string,
 ): Record<string, string> | undefined => {
   const errors: Record<string, string> = {};
 
   if (!values.title.trim()) {
-    errors.title = "O título do cântico é obrigatório";
+    errors.title = t("forms.songTitleRequired");
   }
   if (!values.artist.trim()) {
-    errors.artist = "O nome do artista é obrigatório";
+    errors.artist = t("forms.artistRequired");
   }
 
   return Object.keys(errors).length > 0 ? errors : undefined;
@@ -54,9 +56,10 @@ export const SongForm: React.FC<SongFormProps> = ({
   onCancel,
   isLoading = false,
 }) => {
+  const { t } = useI18n();
   const [formData, setFormData] = useState<SongFormData>({
     title: initialValues?.title || "",
-    artist: initialValues?.artist || "Unknown Artist",
+    artist: initialValues?.artist || t("forms.unknownArtist"),
     folderId: initialValues?.folderId || "",
     tags: initialValues?.tags ? initialValues.tags.join(", ") : "",
   });
@@ -79,7 +82,7 @@ export const SongForm: React.FC<SongFormProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const validationErrors = validateSongForm(formData);
+    const validationErrors = validateSongForm(formData, t);
 
     if (validationErrors) {
       setErrors(validationErrors);
@@ -105,8 +108,8 @@ export const SongForm: React.FC<SongFormProps> = ({
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
       <Input
         name="title"
-        label="Título do Cântico"
-        placeholder="Ex: Caminho no Deserto"
+        label={t("forms.songTitle")}
+        placeholder={t("forms.songTitlePlaceholder")}
         error={errors.title}
         value={formData.title}
         onChange={handleChange}
@@ -115,8 +118,8 @@ export const SongForm: React.FC<SongFormProps> = ({
 
       <Input
         name="artist"
-        label="Artista / Autor"
-        placeholder="Ex: Sinach"
+        label={t("forms.artistLabel")}
+        placeholder={t("forms.artistPlaceholder")}
         error={errors.artist}
         value={formData.artist}
         onChange={handleChange}
@@ -125,7 +128,7 @@ export const SongForm: React.FC<SongFormProps> = ({
 
       <div className="flex flex-col gap-1.5">
         <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-          Categoria de Pasta
+          {t("forms.folderCategory")}
         </label>
         <select
           name="folderId"
@@ -134,7 +137,7 @@ export const SongForm: React.FC<SongFormProps> = ({
           disabled={isLoading}
           className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#0284c7] disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          <option value="">Nível Raiz (Sem pasta)</option>
+          <option value="">{t("forms.rootLevel")}</option>
           {folders.map((f) => (
             <option key={f.id} value={f.id}>
               {f.name}
@@ -145,8 +148,8 @@ export const SongForm: React.FC<SongFormProps> = ({
 
       <Input
         name="tags"
-        label="Etiquetas (separadas por vírgulas)"
-        placeholder="Ex: Hino, Louvor, Graça"
+        label={t("forms.tagsLabel")}
+        placeholder={t("forms.tagsPlaceholder")}
         error={errors.tags}
         value={formData.tags}
         onChange={handleChange}
@@ -160,10 +163,10 @@ export const SongForm: React.FC<SongFormProps> = ({
           onClick={onCancel}
           disabled={isLoading}
         >
-          Cancelar
+          {t("common.cancel")}
         </Button>
         <Button type="submit" variant="primary" isLoading={isLoading}>
-          Guardar Cântico
+          {t("forms.saveSong")}
         </Button>
       </div>
     </form>

@@ -6,6 +6,7 @@
 import { Badge, Button, Input, Modal } from "@hosanna/shared";
 import { Check, Plus, Tag as TagIcon, X } from "lucide-react";
 import React, { useEffect, useState } from "react";
+import { useI18n } from "../../i18n";
 
 interface BatchTagModalProps {
   isOpen: boolean;
@@ -41,6 +42,7 @@ export const BatchTagModal: React.FC<BatchTagModalProps> = ({
   selectedSongIds,
   onConfirm,
 }) => {
+  const { t } = useI18n();
   const [tags, setTags] = useState<string[]>([]);
   const [customTag, setCustomTag] = useState("");
   const [mode, setMode] = useState<"append" | "replace" | "remove">("append");
@@ -99,14 +101,13 @@ export const BatchTagModal: React.FC<BatchTagModalProps> = ({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={`Etiquetar ${count} Cântico(s) em Lote`}
+      title={t("modals.batchTagTitle", { count })}
     >
       <div className="flex flex-col gap-5 text-slate-700 dark:text-slate-300">
         <p className="text-xs text-slate-500 dark:text-slate-400">
-          Selecione categorias predefinidas ou introduza etiquetas
-          personalizadas para atribuir a{" "}
+          {t("modals.selectCategories")}{" "}
           <strong className="text-slate-900 dark:text-slate-100">
-            {count} cântico(s) selecionado(s)
+            {t("modals.selectedSongs", { count })}
           </strong>
           .
         </p>
@@ -114,7 +115,7 @@ export const BatchTagModal: React.FC<BatchTagModalProps> = ({
         {/* Mode Selector */}
         <div className="flex flex-col gap-2">
           <label className="text-xs font-bold text-slate-900 dark:text-slate-100 uppercase tracking-wider text-[10px]">
-            Modo de Aplicação
+            {t("modals.applyMode")}
           </label>
           <div className="grid grid-cols-3 gap-2 p-1 bg-slate-100 dark:bg-slate-800/60 rounded-xl">
             <button
@@ -126,7 +127,7 @@ export const BatchTagModal: React.FC<BatchTagModalProps> = ({
                   : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100"
               }`}
             >
-              Adicionar
+              {t("modals.add")}
             </button>
             <button
               type="button"
@@ -137,7 +138,7 @@ export const BatchTagModal: React.FC<BatchTagModalProps> = ({
                   : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100"
               }`}
             >
-              Substituir
+              {t("modals.replace")}
             </button>
             <button
               type="button"
@@ -148,23 +149,20 @@ export const BatchTagModal: React.FC<BatchTagModalProps> = ({
                   : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100"
               }`}
             >
-              Remover
+              {t("modals.remove")}
             </button>
           </div>
           <span className="text-[11px] text-slate-500 dark:text-slate-400 italic">
-            {mode === "append" &&
-              "• Acrescenta estas etiquetas mantendo as existentes nos cânticos."}
-            {mode === "replace" &&
-              "• Substitui todas as etiquetas existentes pelas etiquetas selecionadas abaixo."}
-            {mode === "remove" &&
-              "• Remove estas etiquetas específicas de todos os cânticos selecionados."}
+            {mode === "append" && t("modals.appendDesc")}
+            {mode === "replace" && t("modals.replaceDesc")}
+            {mode === "remove" && t("modals.removeDesc")}
           </span>
         </div>
 
         {/* Preset Categories */}
         <div className="flex flex-col gap-2">
           <label className="text-[10px] font-bold text-slate-900 dark:text-slate-100 uppercase tracking-wider flex items-center gap-1.5">
-            Categorias & Temas Sugeridos
+            {t("modals.suggestedCategories")}
           </label>
           <div className="flex flex-wrap gap-1.5 max-h-36 overflow-y-auto p-1.5 border border-slate-200 dark:border-slate-800 rounded-xl bg-slate-50/50 dark:bg-slate-900/30">
             {PRESET_CATEGORIES.map((cat) => {
@@ -191,12 +189,12 @@ export const BatchTagModal: React.FC<BatchTagModalProps> = ({
         {/* Custom Tag Input */}
         <div className="flex flex-col gap-2">
           <label className="text-[10px] font-bold text-slate-900 dark:text-slate-100 uppercase tracking-wider">
-            Nova Tag Personalizada
+            {t("modals.newCustomTag")}
           </label>
           <div className="flex gap-2">
             <div className="flex-1">
               <Input
-                placeholder="Ex: Jovens, Ministração, Solo..."
+                placeholder={t("modals.customTagPlaceholder")}
                 value={customTag}
                 onChange={(e) => setCustomTag(e.target.value)}
                 onKeyDown={handleKeyDown}
@@ -210,7 +208,7 @@ export const BatchTagModal: React.FC<BatchTagModalProps> = ({
               onClick={handleAddCustomTag}
               disabled={!customTag.trim()}
             >
-              Adicionar
+              {t("modals.add")}
             </Button>
           </div>
         </div>
@@ -219,8 +217,13 @@ export const BatchTagModal: React.FC<BatchTagModalProps> = ({
         {tags.length > 0 && (
           <div className="flex flex-col gap-1.5 p-3 bg-sky-50/70 dark:bg-sky-950/40 border border-sky-200 dark:border-sky-800/60 rounded-xl">
             <span className="text-[10px] font-bold uppercase tracking-wider text-[#0284c7]">
-              Etiquetas a {mode === "remove" ? "remover" : "aplicar"} (
-              {tags.length})
+              {t("modals.tagsToApply", {
+                action:
+                  mode === "remove"
+                    ? t("modals.removeLower")
+                    : t("modals.applyLower"),
+                count: tags.length,
+              })}
             </span>
             <div className="flex flex-wrap gap-1.5 mt-1">
               {tags.map((tag) => (
@@ -245,7 +248,7 @@ export const BatchTagModal: React.FC<BatchTagModalProps> = ({
 
         <div className="flex items-center justify-end gap-3 mt-2 pt-4 border-t border-slate-100 dark:border-slate-800">
           <Button variant="ghost" onClick={onClose} disabled={isLoading}>
-            Cancelar
+            {t("common.cancel")}
           </Button>
           <Button
             variant="primary"
@@ -254,7 +257,7 @@ export const BatchTagModal: React.FC<BatchTagModalProps> = ({
             disabled={tags.length === 0 && mode !== "replace"}
             icon={<TagIcon className="w-4 h-4" />}
           >
-            Aplicar em {count} Cântico(s)
+            {t("modals.applyToCount", { count })}
           </Button>
         </div>
       </div>

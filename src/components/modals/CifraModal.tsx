@@ -7,6 +7,7 @@ import {
   convertToChordProDetailed,
 } from "@hosanna/shared";
 import React, { useState } from "react";
+import { useI18n } from "../../i18n";
 
 type Provider = "cifraclub" | "ultimateguitar";
 
@@ -71,6 +72,7 @@ export const CifraClubImportModal: React.FC<{
   handleClose: () => void;
   handleSave: (result: ConversionResult, artist: string, title: string) => void;
 }> = ({ isOpen, handleClose, handleSave }) => {
+  const { t } = useI18n();
   const [urlInput, setUrlInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -92,17 +94,13 @@ export const CifraClubImportModal: React.FC<{
 
     const trimmedUrl = urlInput.trim();
     if (!trimmedUrl) {
-      setError(
-        "Por favor, introduza um link do Cifra Club ou Ultimate Guitar.",
-      );
+      setError(t("modals.pleaseEnterLink"));
       return;
     }
 
     const provider = detectProvider(trimmedUrl);
     if (!provider) {
-      setError(
-        "Por favor, introduza um link válido do Cifra Club ou Ultimate Guitar.",
-      );
+      setError(t("modals.pleaseEnterValidLink"));
       return;
     }
 
@@ -114,15 +112,17 @@ export const CifraClubImportModal: React.FC<{
 
       if (result.error || !result.cifra) {
         setError(
-          `Erro ao obter a cifra: ${result.error || "Cifra não encontrada."}`,
+          t("modals.errorGetCifra", {
+            error: result.error || t("modals.cifraNotFound"),
+          }),
         );
         return;
       }
 
       const fallback = parseUrlFallback(trimmedUrl);
       const artist =
-        result.artist?.trim() || fallback.artist || "Artista Desconhecido";
-      const title = result.name?.trim() || fallback.title || "Sem Título";
+        result.artist?.trim() || fallback.artist || t("forms.unknownArtist");
+      const title = result.name?.trim() || fallback.title || t("forms.untitled");
 
       const conversion = convertToChordProDetailed(result.cifra, {
         strictChordDetection: false,
@@ -134,7 +134,7 @@ export const CifraClubImportModal: React.FC<{
       if (err instanceof Error) {
         setError(err.message);
       } else {
-        setError("Ocorreu um erro inesperado ao importar a cifra.");
+        setError(t("modals.unexpectedError"));
       }
     } finally {
       setIsLoading(false);
@@ -145,12 +145,11 @@ export const CifraClubImportModal: React.FC<{
     <Modal
       isOpen={isOpen}
       onClose={resetAndClose}
-      title="Importar Cifra (Cifra Club ou Ultimate Guitar)"
+      title={t("modals.importCifraTitle")}
     >
       <form onSubmit={handleImport} className="space-y-5 py-2">
         <p className="text-xs text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800/60 p-2.5 rounded-xl border border-slate-200 dark:border-slate-700">
-          Cole o link direto da página da cifra no Cifra Club ou Ultimate
-          Guitar.
+          {t("modals.pasteLink")}
         </p>
 
         {/* Error Alert */}
@@ -162,7 +161,7 @@ export const CifraClubImportModal: React.FC<{
 
         <div className="space-y-1.5">
           <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
-            Link da Música / Cifra
+            {t("modals.songLink")}
           </label>
           <input
             type="url"
@@ -183,7 +182,7 @@ export const CifraClubImportModal: React.FC<{
             onClick={resetAndClose}
             disabled={isLoading}
           >
-            Cancelar
+            {t("common.cancel")}
           </Button>
 
           <Button
@@ -192,7 +191,7 @@ export const CifraClubImportModal: React.FC<{
             size="sm"
             disabled={isLoading || !urlInput.trim()}
           >
-            {isLoading ? "A Importar..." : "Importar Cifra"}
+            {isLoading ? t("modals.importing") : t("modals.importCifra")}
           </Button>
         </div>
       </form>

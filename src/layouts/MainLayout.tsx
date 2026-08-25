@@ -289,9 +289,11 @@ export const MainLayout: React.FC = () => {
   const getFolderPathString = useCallback(
     (folderId: string | null | undefined): string => {
       const trail = getFolderAncestors(folderId, allFolders);
-      return trail.length > 0 ? trail.map((f) => f.name).join(" / ") : "Raiz";
+      return trail.length > 0
+        ? trail.map((f) => f.name).join(" / ")
+        : t("common.root");
     },
-    [allFolders],
+    [allFolders, t],
   );
 
   const availableTags = useMemo(() => {
@@ -962,10 +964,7 @@ export const MainLayout: React.FC = () => {
       deleteAcao === "delete_songs" &&
       confirmFolderName.trim() !== deleteTarget.name.trim()
     ) {
-      showToast(
-        "O nome da pasta inserido não é igual ao nome da pasta.",
-        "error",
-      );
+      showToast(t("layout.folderNameMismatch"), "error");
       return;
     }
     await deleteFolder({ id: deleteTarget.id, action: deleteAcao });
@@ -992,7 +991,7 @@ export const MainLayout: React.FC = () => {
       tags: data.tags,
     });
     setIsCreateSongModalOpen(false);
-    showToast("Cântico criado com sucesso!", "success");
+    showToast(t("layout.songCreated"), "success");
     navigate(`${slugPrefix}/songs/${song.id}`);
   };
 
@@ -1010,7 +1009,7 @@ export const MainLayout: React.FC = () => {
     });
     await Promise.all([songsQuery.refetch(), foldersQuery.refetch()]);
     setIsCreateSongModalOpen(false);
-    showToast("Cântico importado com sucesso!", "success");
+    showToast(t("layout.songImported"), "success");
     navigate(`${slugPrefix}/songs/${song.id}`);
   };
 
@@ -1064,14 +1063,13 @@ export const MainLayout: React.FC = () => {
         }
 
         showToast(
-          `${folderList.length + songList.length} item(ns) movido(s) com sucesso!`,
+          t("layout.movedItems", {
+            count: folderList.length + songList.length,
+          }),
           "success",
         );
       } catch {
-        showToast(
-          "Erro ao mover itens. As alterações foram revertidas.",
-          "error",
-        );
+        showToast(t("layout.moveError"), "error");
       }
     },
     [
@@ -1083,6 +1081,7 @@ export const MainLayout: React.FC = () => {
       moveSong,
       showToast,
       clearSelection,
+      t,
     ],
   );
 
@@ -1100,7 +1099,7 @@ export const MainLayout: React.FC = () => {
     }
 
     showToast(
-      `${folderList.length + songList.length} item(ns) apagado(s) com sucesso!`,
+      t("layout.deletedItems", { count: folderList.length + songList.length }),
       "success",
     );
     clearSelection();
@@ -1121,23 +1120,33 @@ export const MainLayout: React.FC = () => {
     if (result.created > 0) {
       const targetFolderName = currentFolder
         ? currentFolder.name
-        : "Diretório Raiz";
+        : t("layout.rootDirectory");
       showToast(
-        `${result.created} ficheiro(s) ${result.fileTypeName} carregado(s) com sucesso para "${targetFolderName}"!`,
+        t("layout.uploadSuccess", {
+          count: result.created,
+          type: result.fileTypeName,
+          folder: targetFolderName,
+        }),
         "success",
       );
     }
 
     if (result.failed > 0) {
       showToast(
-        `Erro ao carregar ${result.failed} ficheiro(s) ${result.fileTypeName}`,
+        t("layout.uploadError", {
+          count: result.failed,
+          type: result.fileTypeName,
+        }),
         "error",
       );
     }
 
     if (result.ignored > 0) {
       showToast(
-        `Ignorado ${result.ignored} ficheiro(s) ${result.fileTypeName}`,
+        t("layout.uploadIgnored", {
+          count: result.ignored,
+          type: result.fileTypeName,
+        }),
         "warning",
       );
     }
@@ -1272,7 +1281,7 @@ export const MainLayout: React.FC = () => {
             "left:0",
           ].join(";");
           if (i === 0) {
-            card.textContent = `${totalDragging} itens`;
+            card.textContent = t("layout.dragItems", { count: totalDragging });
           }
           ghost.appendChild(card);
         }
@@ -1288,7 +1297,7 @@ export const MainLayout: React.FC = () => {
       e.dataTransfer.effectAllowed = "move";
       e.dataTransfer.setData("application/x-app-internal-drag", "true");
     },
-    [selectedFolderIds, selectedSongIds],
+    [selectedFolderIds, selectedSongIds, t],
   );
 
   const handleItemDragEnd = useCallback(() => {
@@ -1526,7 +1535,7 @@ export const MainLayout: React.FC = () => {
 
       <BatchActionFloatingBar
         selectedCount={totalSelectedCount}
-        itemLabel="itens"
+        itemLabel={t("layout.items")}
         onDelete={() => setIsBatchDeleteOpen(true)}
         onCancel={clearSelection}
       />

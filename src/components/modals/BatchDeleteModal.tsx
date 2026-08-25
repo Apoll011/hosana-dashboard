@@ -6,6 +6,7 @@
 import { Button, Folder, Input, Modal } from "@hosanna/shared";
 import { AlertTriangle, Trash2 } from "lucide-react";
 import React, { useEffect, useState } from "react";
+import { useI18n } from "../../i18n";
 
 interface BatchDeleteModalProps {
   isOpen: boolean;
@@ -22,6 +23,7 @@ export const BatchDeleteModal: React.FC<BatchDeleteModalProps> = ({
   selectedSongsCount,
   onConfirm,
 }) => {
+  const { t } = useI18n();
   const [folderAction, setFolderAction] = useState<
     "move_to_root" | "delete_songs"
   >("move_to_root");
@@ -42,7 +44,9 @@ export const BatchDeleteModal: React.FC<BatchDeleteModalProps> = ({
     hasFolders && folderAction === "delete_songs";
   // Expected text: name of first folder if 1 folder, or 'APAGAR' if multiple
   const expectedConfirmText =
-    selectedFolders.length === 1 ? selectedFolders[0].name.trim() : "APAGAR";
+    selectedFolders.length === 1
+      ? selectedFolders[0].name.trim()
+      : t("modals.confirmKeyword");
 
   const isConfirmDisabled =
     requiresTypedConfirmation && confirmText.trim() !== expectedConfirmText;
@@ -61,18 +65,19 @@ export const BatchDeleteModal: React.FC<BatchDeleteModalProps> = ({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={`Apagar ${totalItems} Item(ns) Selecionado(s)`}
+      title={t("modals.batchDeleteTitle", { count: totalItems })}
     >
       <div className="flex flex-col gap-4">
         <div className="p-3.5 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 rounded-xl flex items-start gap-3">
           <AlertTriangle className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
           <p className="text-xs text-amber-900 dark:text-amber-200">
-            Está prestes a apagar{" "}
+            {t("modals.aboutToDelete")}{" "}
             <strong>
               {selectedFolders.length > 0 &&
-                `${selectedFolders.length} pasta(s)`}
-              {selectedFolders.length > 0 && selectedSongsCount > 0 && " e "}
-              {selectedSongsCount > 0 && `${selectedSongsCount} cântico(s)`}
+                t("modals.folderCount", { count: selectedFolders.length })}
+              {selectedFolders.length > 0 && selectedSongsCount > 0 && t("modals.and")}
+              {selectedSongsCount > 0 &&
+                t("modals.songCount", { count: selectedSongsCount })}
             </strong>
             .
           </p>
@@ -81,7 +86,7 @@ export const BatchDeleteModal: React.FC<BatchDeleteModalProps> = ({
         {hasFolders && (
           <div className="flex flex-col gap-2.5 mt-1">
             <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-              O que fazer com os cânticos dentro das pastas selecionadas?
+              {t("modals.whatToDo")}
             </span>
 
             <label className="flex items-start gap-3 p-3 border border-slate-200 dark:border-slate-800 rounded-xl cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50">
@@ -98,11 +103,10 @@ export const BatchDeleteModal: React.FC<BatchDeleteModalProps> = ({
               />
               <div className="flex flex-col">
                 <span className="text-xs font-bold text-slate-900 dark:text-slate-100">
-                  Preservar cânticos (Mover para o Nível Raiz)
+                  {t("modals.preserveSongs")}
                 </span>
                 <span className="text-[11px] text-slate-500 dark:text-slate-400">
-                  Apaga apenas as pastas e move os seus cânticos para a raiz sem
-                  perder dados.
+                  {t("modals.preserveSongsDesc")}
                 </span>
               </div>
             </label>
@@ -118,11 +122,10 @@ export const BatchDeleteModal: React.FC<BatchDeleteModalProps> = ({
               />
               <div className="flex flex-col">
                 <span className="text-xs font-bold text-rose-700 dark:text-rose-300">
-                  Apagar permanentemente as pastas e todos os seus cânticos
+                  {t("modals.deletePermanently")}
                 </span>
                 <span className="text-[11px] text-rose-600/80 dark:text-rose-400">
-                  Ação destrutiva. Apaga as pastas e todos os cânticos nelas
-                  contidos.
+                  {t("modals.deletePermanentlyDesc")}
                 </span>
               </div>
             </label>
@@ -133,17 +136,19 @@ export const BatchDeleteModal: React.FC<BatchDeleteModalProps> = ({
           <div className="p-4 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 rounded-2xl flex flex-col gap-3 text-xs">
             <div className="flex items-center gap-2 font-bold text-rose-700 dark:text-rose-300">
               <AlertTriangle className="w-4 h-4 text-rose-500 shrink-0" />
-              <span>Confirmação de Segurança</span>
+              <span>{t("modals.safetyConfirmation")}</span>
             </div>
             <p className="text-rose-900 dark:text-rose-200 text-[11px] leading-relaxed">
-              Para confirmar a eliminação de{" "}
+              {t("modals.confirmDeleteIntro")}{" "}
               <strong className="font-extrabold underline">
                 {expectedConfirmText}
               </strong>
-              , escreva exatamente o nome abaixo:
+              {t("modals.writeNameBelow")}
             </p>
             <Input
-              placeholder={`Escreva "${expectedConfirmText}" para confirmar`}
+              placeholder={t("modals.writeToConfirm", {
+                name: expectedConfirmText,
+              })}
               value={confirmText}
               onChange={(e) => setConfirmText(e.target.value)}
               className="bg-white dark:bg-slate-900 border-rose-300 dark:border-rose-800 text-xs"
@@ -153,7 +158,7 @@ export const BatchDeleteModal: React.FC<BatchDeleteModalProps> = ({
 
         <div className="flex items-center justify-end gap-3 mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
           <Button variant="ghost" onClick={onClose} disabled={isLoading}>
-            Cancelar
+            {t("common.cancel")}
           </Button>
           <Button
             variant="danger"
@@ -162,7 +167,7 @@ export const BatchDeleteModal: React.FC<BatchDeleteModalProps> = ({
             onClick={handleConfirm}
             icon={<Trash2 className="w-4 h-4" />}
           >
-            Apagar {totalItems} Item(ns)
+            {t("modals.deleteItems", { count: totalItems })}
           </Button>
         </div>
       </div>

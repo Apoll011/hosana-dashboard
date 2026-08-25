@@ -14,6 +14,7 @@ import {
   X,
 } from "lucide-react";
 import React, { useEffect, useMemo, useState } from "react";
+import { useI18n } from "../../i18n";
 import {
   FOLDER_COLORS,
   FOLDER_ICONS,
@@ -34,6 +35,7 @@ export const CustomizeFolderModal: React.FC<CustomizeFolderModalProps> = ({
   onClose,
   onSave,
 }) => {
+  const { t } = useI18n();
   const [selectedColor, setSelectedColor] = useState<string>("default");
   const [selectedIcon, setSelectedIcon] = useState<string>("default");
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -87,7 +89,11 @@ export const CustomizeFolderModal: React.FC<CustomizeFolderModalProps> = ({
   const currentIconObj = FOLDER_ICONS.find((i) => i.id === selectedIcon);
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Personalizar Pasta">
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={t("modals.customizeFolder")}
+    >
       <div className="flex flex-col gap-5 max-h-[calc(85vh-6rem)]">
         {/* Hero Preview Card */}
         <div className="relative overflow-hidden flex items-center gap-4 p-3.5 sm:p-4 rounded-2xl bg-linear-to-br from-slate-50 to-slate-100/70 dark:from-slate-800/70 dark:to-slate-900/80 border border-slate-200/80 dark:border-slate-700/60 shadow-inner">
@@ -114,7 +120,7 @@ export const CustomizeFolderModal: React.FC<CustomizeFolderModalProps> = ({
               </span>
 
               <span className="inline-flex items-center text-[11px] font-medium px-2 py-0.5 rounded-full bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 shadow-2xs">
-                {currentIconObj?.name || "Ícone Padrão"}
+                {currentIconObj?.name || t("modals.defaultIcon")}
               </span>
             </div>
           </div>
@@ -124,7 +130,7 @@ export const CustomizeFolderModal: React.FC<CustomizeFolderModalProps> = ({
             <button
               type="button"
               onClick={handleReset}
-              title="Restaurar predefinições"
+              title={t("modals.restoreDefaults")}
               className="p-2 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-white/80 dark:hover:bg-slate-800/80 transition-colors shrink-0"
             >
               <RotateCcw className="w-4 h-4" />
@@ -137,7 +143,7 @@ export const CustomizeFolderModal: React.FC<CustomizeFolderModalProps> = ({
           <div className="flex items-center justify-between">
             <label className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
               <Palette className="w-3.5 h-3.5 text-sky-500" />
-              <span>Cor do Destaque</span>
+              <span>{t("modals.highlightColor")}</span>
             </label>
             <span className="text-xs text-slate-400 dark:text-slate-500 font-medium">
               {previewColorStyle.name}
@@ -181,7 +187,7 @@ export const CustomizeFolderModal: React.FC<CustomizeFolderModalProps> = ({
           <div className="flex items-center justify-between gap-2">
             <label className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5 shrink-0">
               <Sparkles className="w-3.5 h-3.5 text-sky-500" />
-              <span>Ícone ({filteredIcons.length})</span>
+              <span>{t("modals.iconCount", { count: filteredIcons.length })}</span>
             </label>
 
             {/* Quick Search */}
@@ -189,7 +195,7 @@ export const CustomizeFolderModal: React.FC<CustomizeFolderModalProps> = ({
               <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
               <input
                 type="text"
-                placeholder="Pesquisar..."
+                placeholder={t("modals.searchIcons")}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full pl-8 pr-7 py-1 text-xs rounded-lg bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-hidden focus:ring-1 focus:ring-sky-500 focus:border-sky-500 transition-all"
@@ -212,7 +218,7 @@ export const CustomizeFolderModal: React.FC<CustomizeFolderModalProps> = ({
               <div className="h-full flex flex-col items-center justify-center py-8 text-center text-slate-400">
                 <Search className="w-6 h-6 mb-1 opacity-50" />
                 <p className="text-xs">
-                  Nenhum ícone encontrado para &quot;{searchQuery}&quot;
+                  {t("modals.noIconFound", { query: searchQuery })}
                 </p>
               </div>
             ) : (
@@ -253,7 +259,7 @@ export const CustomizeFolderModal: React.FC<CustomizeFolderModalProps> = ({
             onClick={onClose}
             disabled={isSaving}
           >
-            Cancelar
+            {t("common.cancel")}
           </Button>
           <Button
             type="button"
@@ -264,10 +270,11 @@ export const CustomizeFolderModal: React.FC<CustomizeFolderModalProps> = ({
           >
             {isSaving ? (
               <span className="flex items-center gap-1.5">
-                <Loader2 className="w-4 h-4 animate-spin" />A guardar...
+                <Loader2 className="w-4 h-4 animate-spin" />
+                {t("modals.saving")}
               </span>
             ) : (
-              "Guardar"
+              t("common.save")
             )}
           </Button>
         </div>
