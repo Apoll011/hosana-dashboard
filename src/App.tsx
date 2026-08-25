@@ -8,6 +8,7 @@ import { CacheHydrationProvider } from "./contexts/CacheHydrationProvider";
 import { NavigationTransitionProvider } from "./contexts/NavigationTransitionContext";
 import { SyncProvider } from "./contexts/SyncContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import { I18nProvider } from "./i18n";
 import { AppRoutes } from "./routes/AppRoutes";
 
 export default function App() {
@@ -26,18 +27,20 @@ export default function App() {
   }, []);
   return (
     <AuthProvider>
-      <ThemeProvider>
-        <SyncProvider>
-          <CacheHydrationProvider>
-            <BrowserRouter>
-              <NavigationTransitionProvider>
-                <NavigationProgressBar />
-                <AppRoutes />
-              </NavigationTransitionProvider>
-            </BrowserRouter>
-          </CacheHydrationProvider>
-        </SyncProvider>
-      </ThemeProvider>
+      <I18nProvider>
+        <ThemeProvider>
+          <SyncProvider>
+            <CacheHydrationProvider>
+              <BrowserRouter>
+                <NavigationTransitionProvider>
+                  <NavigationProgressBar />
+                  <AppRoutes />
+                </NavigationTransitionProvider>
+              </BrowserRouter>
+            </CacheHydrationProvider>
+          </SyncProvider>
+        </ThemeProvider>
+      </I18nProvider>
     </AuthProvider>
   );
 }
