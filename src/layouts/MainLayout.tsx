@@ -1383,36 +1383,34 @@ export const MainLayout: React.FC = () => {
             className="bg-m3-card border md:border-none border-m3-border rounded-4xl md:rounded-none shadow-2xl md:shadow-none shadow-black/10 overflow-hidden flex flex-col flex-1 h-full transition-all duration-300"
             role="main"
           >
-            {view !== "teams" && (
-              <ExplorerAddressBar
-                view={view}
-                isSidebarOpen={isSidebarOpen}
-                setIsSidebarOpen={setIsSidebarOpen}
-                currentFolder={currentFolder}
-                currentFolderId={currentFolderId}
-                slugPrefix={slugPrefix}
-                folderBreadcrumbs={folderBreadcrumbs}
-                songBreadcrumbs={songBreadcrumbs}
-                currentSong={currentSong}
-                currentSongFileName={currentSongFileName}
-                currentService={currentService}
-                searchQuery={searchQuery}
-                onSearchChange={handleSearchChange}
-                onSelectFolder={handleSelectFolder}
-                onNavigateBack={() => {
-                  if (view === "explorer") {
-                    handleSelectFolder(currentFolder?.parentId || null);
-                  } else {
-                    navigate(-1);
-                  }
-                }}
-                navigate={navigate}
-                onOpenCreateSong={() => setIsCreateSongModalOpen(true)}
-                onOpenCifraImport={() => setIsCifraImportOpen(true)}
-                onOpenCreateService={() => setIsCreateServiceModalOpen(true)}
-                onOpenCreateFolder={() => setIsCreateModalOpen(true)}
-              />
-            )}
+            <ExplorerAddressBar
+              view={view}
+              isSidebarOpen={isSidebarOpen}
+              setIsSidebarOpen={setIsSidebarOpen}
+              currentFolder={currentFolder}
+              currentFolderId={currentFolderId}
+              slugPrefix={slugPrefix}
+              folderBreadcrumbs={folderBreadcrumbs}
+              songBreadcrumbs={songBreadcrumbs}
+              currentSong={currentSong}
+              currentSongFileName={currentSongFileName}
+              currentService={currentService}
+              searchQuery={searchQuery}
+              onSearchChange={handleSearchChange}
+              onSelectFolder={handleSelectFolder}
+              onNavigateBack={() => {
+                if (view === "explorer") {
+                  handleSelectFolder(currentFolder?.parentId || null);
+                } else {
+                  navigate(-1);
+                }
+              }}
+              navigate={navigate}
+              onOpenCreateSong={() => setIsCreateSongModalOpen(true)}
+              onOpenCifraImport={() => setIsCifraImportOpen(true)}
+              onOpenCreateService={() => setIsCreateServiceModalOpen(true)}
+              onOpenCreateFolder={() => setIsCreateModalOpen(true)}
+            />
 
             <ExplorerToolbar
               view={view}
