@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import React, { useMemo } from "react";
 import { Song } from "@hosanna/shared";
+import { ViewName } from "../layouts/view";
 import {
   CommandAction,
   FolderItem,
@@ -42,9 +43,7 @@ export interface HosannaCommandPaletteProps {
   currentFolderId?: string | null;
   currentSong?: Song | null;
   currentService?: ServiceItem | null;
-  isExplorerView?: boolean;
-  isSongEditorView?: boolean;
-  isServiceEditorView?: boolean;
+  view?: ViewName;
   isSidebarCollapsed?: boolean;
   setIsSidebarCollapsed: (v: boolean) => void;
   setCurrentFolderId: (id: string | null) => void;
@@ -96,9 +95,7 @@ export function HosannaCommandPalette(props: HosannaCommandPaletteProps) {
     logout,
     currentSong,
     currentService,
-    isExplorerView,
-    isSongEditorView,
-    isServiceEditorView,
+    view,
     isSidebarCollapsed,
     setIsSidebarCollapsed,
     setCurrentFolderId,
@@ -240,7 +237,7 @@ export function HosannaCommandPalette(props: HosannaCommandPaletteProps) {
       },
     ];
 
-    if (isExplorerView) {
+    if (view === "explorer") {
       actions.push(
         {
           id: "view-grid",
@@ -269,7 +266,7 @@ export function HosannaCommandPalette(props: HosannaCommandPaletteProps) {
       );
     }
 
-    if (isSongEditorView && currentSong) {
+    if (view === "song-editor" && currentSong) {
       actions.push(
         {
           id: "song-print-current",
@@ -302,7 +299,7 @@ export function HosannaCommandPalette(props: HosannaCommandPaletteProps) {
       );
     }
 
-    if (isServiceEditorView && currentService) {
+    if (view === "service-editor" && currentService) {
       actions.push({
         id: "service-delete-current",
         name: `Eliminar Culto: "${currentService.name}"`,
@@ -319,14 +316,26 @@ export function HosannaCommandPalette(props: HosannaCommandPaletteProps) {
     return actions;
   }, [
     slugPrefix,
-    isExplorerView,
-    isSongEditorView,
-    isServiceEditorView,
+    view,
     currentSong,
     currentService,
     isSidebarCollapsed,
     navigate,
     logout,
+    setCurrentFolderId,
+    setIsCreateSongModalOpen,
+    setIsCifraImportOpen,
+    setIsCreateServiceModalOpen,
+    setIsCreateModalOpen,
+    setIsFilterPanelOpen,
+    setIsSidebarCollapsed,
+    handleViewModeChange,
+    handlePrintSong,
+    setMoveSongTarget,
+    setTargetSongFolderId,
+    setDeleteSongTarget,
+    deleteService,
+    fileInputRef,
   ]);
 
   return (
