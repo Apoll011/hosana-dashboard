@@ -5,6 +5,7 @@
 
 import { Button, Input } from "@hosanna/shared";
 import React, { useState } from "react";
+import { useI18n } from "../../i18n";
 
 // --- SERVICE FORM ---
 
@@ -17,14 +18,15 @@ interface ServiceFormData {
 // Extracted pure validation function
 const validateServiceForm = (
   values: ServiceFormData,
+  t: (key: string) => string,
 ): Record<string, string> | undefined => {
   const errors: Record<string, string> = {};
 
   if (!values.name.trim()) {
-    errors.name = "O título do culto é obrigatório";
+    errors.name = t("forms.serviceTitleRequired");
   }
   if (!values.date.trim()) {
-    errors.date = "A data do culto é obrigatória";
+    errors.date = t("forms.serviceDateRequired");
   }
 
   return Object.keys(errors).length > 0 ? errors : undefined;
@@ -51,6 +53,7 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
   onCancel,
   isLoading = false,
 }) => {
+  const { t } = useI18n();
   const [formData, setFormData] = useState<ServiceFormData>({
     name: initialValues?.name || "",
     date: initialValues?.date
@@ -77,7 +80,7 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const validationErrors = validateServiceForm(formData);
+    const validationErrors = validateServiceForm(formData, t);
 
     if (validationErrors) {
       setErrors(validationErrors);
@@ -95,8 +98,8 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
       <Input
         name="name"
-        label="Título do Culto"
-        placeholder="Ex: Culto de Domingo de Manhã"
+        label={t("forms.serviceTitle")}
+        placeholder={t("forms.serviceTitlePlaceholder")}
         error={errors.name}
         autoFocus
         value={formData.name}
@@ -106,7 +109,7 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
 
       <Input
         name="date"
-        label="Data Agendada"
+        label={t("forms.scheduledDate")}
         type="date"
         error={errors.date}
         value={formData.date}
@@ -116,12 +119,12 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
 
       <div className="flex flex-col gap-1.5">
         <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-          Notas Gerais de Planeamento
+          {t("forms.planningNotes")}
         </label>
         <textarea
           name="notes"
           rows={3}
-          placeholder="Ex: Tema: Graça e Esperança. Ensaio da banda às 8:15."
+          placeholder={t("forms.planningNotesPlaceholder")}
           value={formData.notes}
           onChange={handleChange}
           disabled={isLoading}
@@ -136,10 +139,10 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
           onClick={onCancel}
           disabled={isLoading}
         >
-          Cancelar
+          {t("common.cancel")}
         </Button>
         <Button type="submit" variant="primary" isLoading={isLoading}>
-          Guardar Plano de Culto
+          {t("forms.saveService")}
         </Button>
       </div>
     </form>

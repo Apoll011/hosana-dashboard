@@ -10,6 +10,7 @@ import {
 } from "../components/explorer";
 import { useAuth } from "../contexts/AuthContext";
 import { useAppNavigate } from "../hooks/useAppNavigate";
+import { useI18n } from "../i18n";
 import { Can, CanAll } from "../lib/permissions/components";
 
 interface FolderExplorerContext {
@@ -108,6 +109,7 @@ const DEFAULT_CONTEXT: FolderExplorerContext = {
 
 export const FoldersPage: React.FC = () => {
   const { navigate } = useAppNavigate();
+  const { t } = useI18n();
   const context = useOutletContext<FolderExplorerContext>() ?? DEFAULT_CONTEXT;
   const { organization } = useAuth();
   const slugPrefix = organization?.slug ? `/${organization.slug}` : "";
@@ -173,11 +175,14 @@ export const FoldersPage: React.FC = () => {
               <Upload className="w-8 h-8" />
             </div>
             <h3 className="text-lg font-extrabold text-[#0284c7]">
-              Solte os ficheiros aqui
+              {t("foldersPage.dropHere")}
             </h3>
             <p className="text-xs font-semibold text-slate-600 dark:text-slate-300 mt-1">
-              Os ficheiros serão importados para &quot;
-              {currentFolder ? currentFolder.name : "Diretório Raiz"}&quot;
+              {t("foldersPage.dropHereDesc", {
+                folder: currentFolder
+                  ? currentFolder.name
+                  : t("layout.rootDirectory"),
+              })}
             </p>
           </div>
         </Can>
@@ -185,7 +190,7 @@ export const FoldersPage: React.FC = () => {
 
       {foldersQuery.isLoading || songsQuery.isLoading ? (
         <div className="h-full flex items-center justify-center p-12">
-          <Spinner label="A carregar explorador de ficheiros..." />
+          <Spinner label={t("foldersPage.loading")} />
         </div>
       ) : totalItemsCount === 0 ? (
         <div className="h-full flex flex-col items-center justify-center p-12 text-center my-8 select-none">
@@ -194,15 +199,20 @@ export const FoldersPage: React.FC = () => {
           </div>
           <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">
             {searchQuery
-              ? "Nenhum ficheiro ou pasta correspondente"
-              : "Esta Pasta está Vazia"}
+              ? t("foldersPage.noResults")
+              : t("foldersPage.emptyTitle")}
           </h3>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-sm">
             {searchQuery
-              ? `Nenhum item em "${currentFolder ? currentFolder.name : "Raiz"}" corresponde a "${searchQuery}".`
+              ? t("foldersPage.noResultsDesc", {
+                  folder: currentFolder ? currentFolder.name : t("common.root"),
+                  query: searchQuery,
+                })
               : currentFolderId === null
-                ? "Ainda não existem pastas nem cânticos na raiz."
-                : `Ainda não foram adicionados cânticos à pasta "${currentFolder?.name}".`}
+                ? t("foldersPage.emptyRootDesc")
+                : t("foldersPage.emptyFolderDesc", {
+                    folder: currentFolder?.name,
+                  })}
           </p>
 
           {!searchQuery && (
@@ -214,12 +224,12 @@ export const FoldersPage: React.FC = () => {
                   icon={<Plus className="w-4 h-4" />}
                   onClick={() => setIsCreateSongModalOpen(true)}
                 >
-                  Novo Cântico
+                  {t("addressBar.newSong")}
                 </Button>
               </Can>
               <CanAll permissions={["song.create", "song.import"]}>
                 <span className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
-                  Ou
+                  {t("common.or")}
                 </span>
               </CanAll>
               <Can permission="song.import">
@@ -228,9 +238,7 @@ export const FoldersPage: React.FC = () => {
                   className="text-xs font-medium text-[#0284c7] hover:underline flex items-center gap-1.5 cursor-pointer bg-sky-50/80 dark:bg-sky-950/40 px-4 py-2 rounded-xl border border-sky-200 dark:border-sky-900/50 hover:bg-sky-100 dark:hover:bg-sky-900/50 transition-colors"
                 >
                   <Upload className="w-3.5 h-3.5" />
-                  <span>
-                    Arraste e solte ficheiros aqui ou clique para carregar
-                  </span>
+                  <span>{t("foldersPage.dragOrClick")}</span>
                 </button>
               </Can>
             </div>
@@ -289,23 +297,23 @@ export const FoldersPage: React.FC = () => {
             <thead>
               <tr className="bg-m3-sidebar/40 border-b border-m3-border text-[10px] font-black text-m3-secondary uppercase tracking-[0.2em]">
                 <th className={isCompact ? "py-2.5 px-4" : "py-4 px-6"}>
-                  Nome
+                  {t("common.name")}
                 </th>
                 <th className={isCompact ? "py-2.5 px-4" : "py-4 px-6"}>
-                  Tipo
+                  {t("common.type")}
                 </th>
                 {isSearchingOrFiltering && (
                   <th className={isCompact ? "py-2.5 px-4" : "py-4 px-6"}>
-                    Localização
+                    {t("common.location")}
                   </th>
                 )}
                 <th className={isCompact ? "py-2.5 px-4" : "py-4 px-6"}>
-                  Detalhes
+                  {t("common.details")}
                 </th>
                 <th
                   className={`${isCompact ? "py-2.5 px-4" : "py-4 px-6"} text-right`}
                 >
-                  Ação
+                  {t("common.action")}
                 </th>
               </tr>
             </thead>

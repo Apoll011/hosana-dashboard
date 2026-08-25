@@ -11,6 +11,7 @@ import {
   HardDrive,
 } from "lucide-react";
 import React, { useEffect, useMemo, useState } from "react";
+import { useI18n } from "../../i18n";
 
 interface FolderTreeNode {
   folder: Folder;
@@ -139,6 +140,7 @@ export const MoveSongModal: React.FC<MoveSongModalProps> = ({
   onConfirm,
   isLoading = false,
 }) => {
+  const { t } = useI18n();
   const [selectedFolderId, setSelectedFolderId] = useState<string | null>(
     initialFolderId || null,
   );
@@ -176,13 +178,15 @@ export const MoveSongModal: React.FC<MoveSongModalProps> = ({
       isOpen={isOpen}
       onClose={onClose}
       title={
-        songTitle ? `Mover Cântico "${songTitle}"` : "Mover Cântico para Pasta"
+        songTitle
+          ? t("modals.moveSongTitle", { title: songTitle })
+          : t("modals.moveSongToFolder")
       }
     >
       <div className="flex flex-col gap-4">
         {songTitle && (
           <p className="text-xs text-slate-500 dark:text-slate-400">
-            Escolha a pasta de destino para{" "}
+            {t("modals.chooseDestination")}{" "}
             <strong className="text-slate-900 dark:text-slate-100">
               {songTitle}
             </strong>
@@ -202,7 +206,7 @@ export const MoveSongModal: React.FC<MoveSongModalProps> = ({
             />
             <div className="flex items-center gap-2 text-xs font-bold text-slate-900 dark:text-slate-100">
               <HardDrive className="w-4 h-4 text-[#0284c7]" />
-              <span>Nível Raiz (Sem pasta)</span>
+              <span>{t("modals.rootLevel")}</span>
             </div>
           </label>
 
@@ -222,14 +226,14 @@ export const MoveSongModal: React.FC<MoveSongModalProps> = ({
 
         <div className="flex items-center justify-end gap-3 mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
           <Button variant="ghost" onClick={onClose}>
-            Cancelar
+            {t("common.cancel")}
           </Button>
           <Button
             variant="primary"
             isLoading={isLoading}
             onClick={handleConfirm}
           >
-            Mover Cântico
+            {t("modals.moveSong")}
           </Button>
         </div>
       </div>
