@@ -204,7 +204,9 @@ export const BatchMoveModal: React.FC<BatchMoveModalProps> = ({
           <strong className="text-slate-900 dark:text-slate-100">
             {selectedFoldersCount > 0 &&
               t("modals.folderCount", { count: selectedFoldersCount })}
-            {selectedFoldersCount > 0 && selectedSongsCount > 0 && t("modals.and")}
+            {selectedFoldersCount > 0 &&
+              selectedSongsCount > 0 &&
+              t("modals.and")}
             {selectedSongsCount > 0 &&
               t("modals.songCount", { count: selectedSongsCount })}
           </strong>

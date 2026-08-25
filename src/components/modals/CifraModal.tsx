@@ -122,7 +122,8 @@ export const CifraClubImportModal: React.FC<{
       const fallback = parseUrlFallback(trimmedUrl);
       const artist =
         result.artist?.trim() || fallback.artist || t("forms.unknownArtist");
-      const title = result.name?.trim() || fallback.title || t("forms.untitled");
+      const title =
+        result.name?.trim() || fallback.title || t("forms.untitled");
 
       const conversion = convertToChordProDetailed(result.cifra, {
         strictChordDetection: false,

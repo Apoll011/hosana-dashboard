@@ -187,7 +187,9 @@ export const CustomizeFolderModal: React.FC<CustomizeFolderModalProps> = ({
           <div className="flex items-center justify-between gap-2">
             <label className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5 shrink-0">
               <Sparkles className="w-3.5 h-3.5 text-sky-500" />
-              <span>{t("modals.iconCount", { count: filteredIcons.length })}</span>
+              <span>
+                {t("modals.iconCount", { count: filteredIcons.length })}
+              </span>
             </label>
 
             {/* Quick Search */}
