@@ -237,7 +237,7 @@ export const ExplorerAddressBar: React.FC<ExplorerAddressBarProps> = ({
                     <span>{currentService.name}.service</span>
                   </div>
                   <div
-                    className="ml-auto mr-2 inline-flex items-center gap-1.5 rounded-full
+                    className="ml-auto mr-2 inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full
                           px-3 py-1.5 text-xs font-semibold
                           bg-m3-primary-light text-m3-primary
                           border border-m3-primary"
@@ -296,7 +296,7 @@ export const ExplorerAddressBar: React.FC<ExplorerAddressBarProps> = ({
       <div className="flex items-center gap-3 w-full md:w-auto overflow-visible hide-scrollbar pb-1 md:pb-0 justify-end">
         {/* Search Input */}
         {(view === "explorer" || view === "songs" || view === "services") && (
-          <div className="relative w-full sm:w-64">
+          <div className="relative w-full sm:w-64 min-w-0">
             <Input
               placeholder={
                 view === "services"
