@@ -272,8 +272,7 @@ export const es: typeof pt = {
     emptyTitle: "Esta Carpeta está Vacía",
     noResultsDesc: 'Nada en "{folder}" coincide con "{query}".',
     emptyRootDesc: "Aún no hay carpetas ni canciones en la raíz.",
-    emptyFolderDesc:
-      'Aún no se han añadido canciones a la carpeta "{folder}".',
+    emptyFolderDesc: 'Aún no se han añadido canciones a la carpeta "{folder}".',
     dragOrClick: "Arrastra y suelta archivos aquí o haz clic para cargar",
   },
 
@@ -330,10 +329,8 @@ export const es: typeof pt = {
     archiveService: "Archivar Culto",
     activateService: "Activar Culto",
     deleteService: "Eliminar Culto",
-    deleteServiceMessage:
-      '¿Seguro que deseas eliminar el culto "{name}"?',
-    archiveServiceMessage:
-      '¿Seguro que deseas {action} el culto "{name}"?',
+    deleteServiceMessage: '¿Seguro que deseas eliminar el culto "{name}"?',
+    archiveServiceMessage: '¿Seguro que deseas {action} el culto "{name}"?',
     deleteAllTitle: "Eliminar {count} Cultos",
     deleteAllMessage:
       "¿Seguro que deseas eliminar permanentemente {count} cultos seleccionados?",
@@ -448,11 +445,13 @@ export const es: typeof pt = {
     moveItems: "Mover {count} Elemento(s)",
     batchDeleteTitle: "Eliminar {count} Elemento(s) Seleccionado(s)",
     aboutToDelete: "Estás a punto de eliminar",
-    whatToDo: "¿Qué hacer con las canciones dentro de las carpetas seleccionadas?",
+    whatToDo:
+      "¿Qué hacer con las canciones dentro de las carpetas seleccionadas?",
     preserveSongs: "Conservar canciones (Mover al Nivel Raíz)",
     preserveSongsDesc:
       "Elimina solo las carpetas y mueve sus canciones a la raíz sin perder datos.",
-    deletePermanently: "Eliminar permanentemente las carpetas y todas sus canciones",
+    deletePermanently:
+      "Eliminar permanentemente las carpetas y todas sus canciones",
     deletePermanentlyDesc:
       "Acción destructiva. Elimina las carpetas y todas las canciones contenidas en ellas.",
     safetyConfirmation: "Confirmación de Seguridad",
@@ -468,7 +467,8 @@ export const es: typeof pt = {
     add: "Añadir",
     replace: "Reemplazar",
     remove: "Quitar",
-    appendDesc: "• Añade estas etiquetas manteniendo las existentes en las canciones.",
+    appendDesc:
+      "• Añade estas etiquetas manteniendo las existentes en las canciones.",
     replaceDesc:
       "• Reemplaza todas las etiquetas existentes por las etiquetas seleccionadas abajo.",
     removeDesc:
@@ -489,9 +489,11 @@ export const es: typeof pt = {
     noIconFound: 'No se encontró ningún icono para "{query}"',
     saving: "Guardando...",
     importCifraTitle: "Importar Acordes (Cifra Club o Ultimate Guitar)",
-    pasteLink: "Pega el enlace directo de la página de acordes en Cifra Club o Ultimate Guitar.",
+    pasteLink:
+      "Pega el enlace directo de la página de acordes en Cifra Club o Ultimate Guitar.",
     songLink: "Enlace de la Canción / Acordes",
-    pleaseEnterLink: "Por favor, introduce un enlace de Cifra Club o Ultimate Guitar.",
+    pleaseEnterLink:
+      "Por favor, introduce un enlace de Cifra Club o Ultimate Guitar.",
     pleaseEnterValidLink:
       "Por favor, introduce un enlace válido de Cifra Club o Ultimate Guitar.",
     errorGetCifra: "Error al obtener los acordes: {error}",

@@ -254,7 +254,8 @@ export const pt = {
     moveError: "Erro ao mover itens. As alterações foram revertidas.",
     songCreated: "Cântico criado com sucesso!",
     songImported: "Cântico importado com sucesso!",
-    folderNameMismatch: "O nome da pasta inserido não é igual ao nome da pasta.",
+    folderNameMismatch:
+      "O nome da pasta inserido não é igual ao nome da pasta.",
     uploadSuccess:
       '{count} ficheiro(s) {type} carregado(s) com sucesso para "{folder}"!',
     uploadError: "Erro ao carregar {count} ficheiro(s) {type}",
@@ -269,8 +270,7 @@ export const pt = {
     emptyTitle: "Esta Pasta está Vazia",
     noResultsDesc: 'Nenhum item em "{folder}" corresponde a "{query}".',
     emptyRootDesc: "Ainda não existem pastas nem cânticos na raiz.",
-    emptyFolderDesc:
-      'Ainda não foram adicionados cânticos à pasta "{folder}".',
+    emptyFolderDesc: 'Ainda não foram adicionados cânticos à pasta "{folder}".',
     dragOrClick: "Arraste e solte ficheiros aqui ou clique para carregar",
   },
 
@@ -358,7 +358,8 @@ export const pt = {
     noResults: "Nenhum cântico encontrado",
     noResultsDesc:
       "A sua pesquisa não retornou resultados. Experimente termos mais genéricos.",
-    emptyDesc: "A sua biblioteca está vazia. Comece a sua jornada musical agora!",
+    emptyDesc:
+      "A sua biblioteca está vazia. Comece a sua jornada musical agora!",
     titlePath: "Título & Caminho",
     artist: "Artista",
     folder: "Pasta",
@@ -449,7 +450,8 @@ export const pt = {
     preserveSongs: "Preservar cânticos (Mover para o Nível Raiz)",
     preserveSongsDesc:
       "Apaga apenas as pastas e move os seus cânticos para a raiz sem perder dados.",
-    deletePermanently: "Apagar permanentemente as pastas e todos os seus cânticos",
+    deletePermanently:
+      "Apagar permanentemente as pastas e todos os seus cânticos",
     deletePermanentlyDesc:
       "Ação destrutiva. Apaga as pastas e todos os cânticos nelas contidos.",
     safetyConfirmation: "Confirmação de Segurança",
@@ -465,7 +467,8 @@ export const pt = {
     add: "Adicionar",
     replace: "Substituir",
     remove: "Remover",
-    appendDesc: "• Acrescenta estas etiquetas mantendo as existentes nos cânticos.",
+    appendDesc:
+      "• Acrescenta estas etiquetas mantendo as existentes nos cânticos.",
     replaceDesc:
       "• Substitui todas as etiquetas existentes pelas etiquetas selecionadas abaixo.",
     removeDesc:
@@ -489,7 +492,8 @@ export const pt = {
     pasteLink:
       "Cole o link direto da página da cifra no Cifra Club ou Ultimate Guitar.",
     songLink: "Link da Música / Cifra",
-    pleaseEnterLink: "Por favor, introduza um link do Cifra Club ou Ultimate Guitar.",
+    pleaseEnterLink:
+      "Por favor, introduza um link do Cifra Club ou Ultimate Guitar.",
     pleaseEnterValidLink:
       "Por favor, introduza um link válido do Cifra Club ou Ultimate Guitar.",
     errorGetCifra: "Erro ao obter a cifra: {error}",
