@@ -75,7 +75,9 @@ export const BatchDeleteModal: React.FC<BatchDeleteModalProps> = ({
             <strong>
               {selectedFolders.length > 0 &&
                 t("modals.folderCount", { count: selectedFolders.length })}
-              {selectedFolders.length > 0 && selectedSongsCount > 0 && t("modals.and")}
+              {selectedFolders.length > 0 &&
+                selectedSongsCount > 0 &&
+                t("modals.and")}
               {selectedSongsCount > 0 &&
                 t("modals.songCount", { count: selectedSongsCount })}
             </strong>
