@@ -108,10 +108,10 @@ export const pt: MessageDict = {
     viewGrid: "Alternar Vista para Grelha",
     viewList: "Alternar Vista para Lista",
     openFilters: "Abrir Painel de Filtros Avançados",
-    printSong: "Imprimir Cântico: \"{title}\"",
-    moveSong: "Mover Cântico: \"{title}\"",
-    deleteSong: "Eliminar Cântico: \"{title}\"",
-    deleteService: "Eliminar Culto: \"{name}\"",
+    printSong: 'Imprimir Cântico: "{title}"',
+    moveSong: 'Mover Cântico: "{title}"',
+    deleteSong: 'Eliminar Cântico: "{title}"',
+    deleteService: 'Eliminar Culto: "{name}"',
   },
 
   palette: {
@@ -121,7 +121,7 @@ export const pt: MessageDict = {
     recents: "Recentes",
     defaultSection: "Ações",
     noResults: "Nenhum resultado encontrado",
-    noResultsDesc: "Não encontramos nada para \"{query}\".",
+    noResultsDesc: 'Não encontramos nada para "{query}".',
     navigate: "Navegar",
     select: "Selecionar",
     title: "Command Palette",

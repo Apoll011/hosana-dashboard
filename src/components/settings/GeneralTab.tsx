@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
+import { useI18n } from "../../i18n";
 import { authClient } from "../../lib/authClient";
 
 export interface GeneralTabProps {
@@ -93,12 +94,15 @@ function parseMMSSToSeconds(value: string, fallbackSeconds = 300): number {
   return fallbackSeconds;
 }
 
-function formatHumanDuration(seconds: number): string {
+function formatHumanDuration(
+  seconds: number,
+  t: (key: string, vars?: Record<string, string | number>) => string,
+): string {
   const mins = Math.floor(seconds / 60);
   const secs = seconds % 60;
-  if (mins === 0) return `${secs} seg`;
-  if (secs === 0) return `${mins} min`;
-  return `${mins} min e ${secs} seg`;
+  if (mins === 0) return t("settings.general.seg", { count: secs });
+  if (secs === 0) return t("settings.general.min", { count: mins });
+  return t("settings.general.minAndSeg", { min: mins, sec: secs });
 }
 
 const SONG_PRESETS = [
@@ -131,6 +135,7 @@ export const GeneralTab: React.FC<GeneralTabProps> = ({
   showToast,
 }) => {
   const { organization, refetch: refetchAuth } = useAuth();
+  const { t } = useI18n();
   const { granted: canManageOrg, loading: canLoading } = useCan(
     "organization.update",
   );
@@ -175,7 +180,7 @@ export const GeneralTab: React.FC<GeneralTabProps> = ({
   if (canLoading || !organization) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center p-12 text-slate-500">
-        <Spinner size="lg" label="A carregar preferências da organização..." />
+        <Spinner size="lg" label={t("settings.general.loading")} />
       </div>
     );
   }
@@ -246,14 +251,13 @@ export const GeneralTab: React.FC<GeneralTabProps> = ({
       }));
 
       await refetchAuth();
-      showToast?.(
-        "Definições da organização guardadas com sucesso!",
-        "success",
-      );
+      showToast?.(t("settings.toast.orgSaved"), "success");
     } catch (err) {
       showToast?.(
-        "Erro ao guardar definições: " +
-          ((err as { message?: string })?.message || "Erro de comunicação"),
+        t("settings.toast.orgSaveError", {
+          error:
+            (err as { message?: string })?.message || "Erro de comunicação",
+        }),
         "error",
       );
     } finally {
@@ -284,17 +288,16 @@ export const GeneralTab: React.FC<GeneralTabProps> = ({
           <div>
             <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
               <Settings2 className="w-5 h-5 text-m3-primary" />
-              Preferências Regionais & Calendário
+              {t("settings.general.title")}
             </h3>
             <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-              Defina o idioma principal, fuso horário para alertas e convenção
-              semanal.
+              {t("settings.general.desc")}
             </p>
           </div>
           {!canManageOrg && (
             <span className="text-xs bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 px-3 py-1.5 rounded-full flex items-center gap-1.5 font-semibold">
               <Lock className="w-3.5 h-3.5" />
-              Apenas Leitura
+              {t("settings.general.readOnly")}
             </span>
           )}
         </div>
@@ -305,7 +308,7 @@ export const GeneralTab: React.FC<GeneralTabProps> = ({
             <div className="flex flex-col gap-2">
               <label className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5 uppercase tracking-wide">
                 <Globe className="w-4 h-4 text-slate-400" />
-                Idioma da Organização
+                {t("settings.general.orgLanguage")}
               </label>
               <select
                 disabled={!canManageOrg || isSaving}
@@ -326,7 +329,7 @@ export const GeneralTab: React.FC<GeneralTabProps> = ({
             <div className="flex flex-col gap-2">
               <label className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5 uppercase tracking-wide">
                 <Clock className="w-4 h-4 text-slate-400" />
-                Fuso Horário
+                {t("settings.general.timezone")}
               </label>
               <select
                 disabled={!canManageOrg || isSaving}
@@ -362,16 +365,20 @@ export const GeneralTab: React.FC<GeneralTabProps> = ({
             <div className="flex flex-col gap-2 md:col-span-2">
               <label className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5 uppercase tracking-wide">
                 <Calendar className="w-4 h-4 text-slate-400" />
-                Primeiro Dia da Semana
+                {t("settings.general.weekStartsOn")}
               </label>
               <div className="grid grid-cols-2 gap-3 max-w-md">
                 {[
                   {
                     value: 1,
-                    label: "Segunda-feira",
-                    desc: "Padrão ISO / Planeamento",
+                    label: t("settings.general.monday"),
+                    desc: t("settings.general.mondayDesc"),
                   },
-                  { value: 0, label: "Domingo", desc: "Tradicional" },
+                  {
+                    value: 0,
+                    label: t("settings.general.sunday"),
+                    desc: t("settings.general.sundayDesc"),
+                  },
                 ].map((day) => {
                   const isChecked = orgFormData.weekStartsOn === day.value;
                   return (
@@ -419,11 +426,10 @@ export const GeneralTab: React.FC<GeneralTabProps> = ({
           <div>
             <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
               <Timer className="w-5 h-5 text-indigo-500" />
-              Durações Padrão dos Momentos (MM:SS)
+              {t("settings.general.durationsTitle")}
             </h3>
             <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-              Introduza os tempos médios em minutos e segundos para estimar a
-              duração dos cultos.
+              {t("settings.general.durationsDesc")}
             </p>
           </div>
         </div>
@@ -435,10 +441,10 @@ export const GeneralTab: React.FC<GeneralTabProps> = ({
               <div className="flex items-center justify-between">
                 <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide flex items-center gap-1.5">
                   <Music className="w-4 h-4 text-indigo-500" />
-                  Cântico / Música
+                  {t("settings.general.songLabel")}
                 </label>
                 <span className="text-xs font-mono font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/50 px-2 py-0.5 rounded border border-indigo-200/50 dark:border-indigo-800/50">
-                  {formatHumanDuration(songSecondsPreview)}
+                  {formatHumanDuration(songSecondsPreview, t)}
                 </span>
               </div>
 
@@ -460,7 +466,7 @@ export const GeneralTab: React.FC<GeneralTabProps> = ({
               {canManageOrg && (
                 <div className="flex items-center gap-1.5 pt-1">
                   <span className="text-[11px] text-slate-400 font-medium">
-                    Sugestões:
+                    {t("settings.general.suggestions")}
                   </span>
                   <div className="flex flex-wrap gap-1">
                     {SONG_PRESETS.map((preset) => (
@@ -488,10 +494,10 @@ export const GeneralTab: React.FC<GeneralTabProps> = ({
               <div className="flex items-center justify-between">
                 <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide flex items-center gap-1.5">
                   <Mic2 className="w-4 h-4 text-rose-500" />
-                  Pregação / Sermão
+                  {t("settings.general.sermonLabel")}
                 </label>
                 <span className="text-xs font-mono font-bold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/50 px-2 py-0.5 rounded border border-rose-200/50 dark:border-rose-800/50">
-                  {formatHumanDuration(sermonSecondsPreview)}
+                  {formatHumanDuration(sermonSecondsPreview, t)}
                 </span>
               </div>
 
@@ -513,7 +519,7 @@ export const GeneralTab: React.FC<GeneralTabProps> = ({
               {canManageOrg && (
                 <div className="flex items-center gap-1.5 pt-1">
                   <span className="text-[11px] text-slate-400 font-medium">
-                    Sugestões:
+                    {t("settings.general.suggestions")}
                   </span>
                   <div className="flex flex-wrap gap-1">
                     {SERMON_PRESETS.map((preset) => (
@@ -543,29 +549,26 @@ export const GeneralTab: React.FC<GeneralTabProps> = ({
           <div className="space-y-3">
             <h4 className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide flex items-center gap-1.5 mb-3">
               <Shield className="w-4 h-4 text-slate-400" />
-              Comportamento do Alinhamento e Culto
+              {t("settings.general.behaviorTitle")}
             </h4>
 
             {[
               {
                 id: "showServiceDuration" as const,
-                label: "Apresentar Duração Total Estimada",
-                description:
-                  "Soma os minutos das músicas e momentos de palavra para calcular o tempo total do culto.",
+                label: t("settings.general.showDuration"),
+                description: t("settings.general.showDurationDesc"),
                 checked: orgFormData.showServiceDuration,
               },
               {
                 id: "showNotes" as const,
-                label: "Ativar Notas e Indicações Técnicas",
-                description:
-                  "Permite que os líderes e a equipa adicionem notas de dinâmica, tom e observações em cada item.",
+                label: t("settings.general.showNotes"),
+                description: t("settings.general.showNotesDesc"),
                 checked: orgFormData.showNotes,
               },
               {
                 id: "autoSave" as const,
-                label: "Guardar Rascunhos Automaticamente (Autosave)",
-                description:
-                  "Guarda alterações contínuas enquanto prepara e reorganiza o alinhamento musical.",
+                label: t("settings.general.autoSave"),
+                description: t("settings.general.autoSaveDesc"),
                 checked: orgFormData.autoSave,
               },
             ].map((toggle) => (
@@ -614,7 +617,7 @@ export const GeneralTab: React.FC<GeneralTabProps> = ({
               className="text-xs text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 flex items-center gap-1 font-medium transition-colors"
             >
               <RotateCcw className="w-3.5 h-3.5" />
-              Repor Valores
+              {t("settings.general.reset")}
             </button>
 
             <Button
@@ -629,7 +632,9 @@ export const GeneralTab: React.FC<GeneralTabProps> = ({
                 )
               }
             >
-              {isSaving ? "A guardar preferências..." : "Guardar Preferências"}
+              {isSaving
+                ? t("settings.general.saving")
+                : t("settings.general.save")}
             </Button>
           </div>
         )}

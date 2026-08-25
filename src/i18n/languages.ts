@@ -15,7 +15,12 @@ export interface LanguageMeta {
 }
 
 export const LANGUAGES: LanguageMeta[] = [
-  { code: "pt", nativeLabel: "Português", englishLabel: "Portuguese", flag: "🇵🇹" },
+  {
+    code: "pt",
+    nativeLabel: "Português",
+    englishLabel: "Portuguese",
+    flag: "🇵🇹",
+  },
   { code: "en", nativeLabel: "English", englishLabel: "English", flag: "🇬🇧" },
   { code: "es", nativeLabel: "Español", englishLabel: "Spanish", flag: "🇪🇸" },
 ];

@@ -17,6 +17,7 @@ import {
   Users,
 } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
+import { useI18n } from "../../i18n";
 import { ViewName } from "../../layouts/view";
 import { getInitials } from "../../utils";
 import { FolderTreeItemNode, FolderTreeNode } from "../explorer";
@@ -81,6 +82,8 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
   navigate,
   logout,
 }) => {
+  const { t } = useI18n();
+  const shortName = organization?.metadata?.shortName || "";
   const isDriveRoot = view === "explorer" && currentFolderId === null;
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
@@ -153,7 +156,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
             <button
               onClick={() => setIsSidebarCollapsed(true)}
               className="hidden md:flex p-1.5 rounded-xl hover:bg-m3-hover text-m3-secondary hover:text-m3-text border border-transparent hover:border-m3-border/60 transition-all cursor-pointer shrink-0"
-              title="Recolher menu"
+              title={t("sidebar.collapse")}
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
@@ -164,7 +167,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
           <button
             onClick={() => setIsSidebarCollapsed(false)}
             className="hidden md:flex w-full py-2 items-center justify-center rounded-xl bg-m3-card/50 hover:bg-m3-hover border border-m3-border/40 text-m3-secondary hover:text-m3-text transition-all cursor-pointer mb-3 shadow-xs"
-            title="Expandir menu"
+            title={t("sidebar.expand")}
           >
             <ChevronRight className="w-4 h-4" />
           </button>
@@ -172,7 +175,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
 
         {!isSidebarCollapsed && (
           <div className="px-3 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-m3-secondary opacity-60">
-            Menu Principal
+            {t("sidebar.mainMenu")}
           </div>
         )}
 
@@ -184,7 +187,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
           }}
           title={
             isSidebarCollapsed
-              ? `Drive da ${organization?.metadata?.shortName || ""}`
+              ? t("sidebar.drive", { name: shortName })
               : undefined
           }
           className={`w-full flex items-center ${
@@ -204,7 +207,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
               }`}
             />
             {!isSidebarCollapsed && (
-              <span>Drive da {organization?.metadata?.shortName || ""}</span>
+              <span>{t("sidebar.drive", { name: shortName })}</span>
             )}
           </div>
           {!isSidebarCollapsed && (
@@ -219,7 +222,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
             navigate(`${slugPrefix}/songs`);
             if (window.innerWidth < 768) setIsSidebarOpen(false);
           }}
-          title={isSidebarCollapsed ? "Biblioteca" : undefined}
+          title={isSidebarCollapsed ? t("common.library") : undefined}
           className={`w-full flex items-center ${
             isSidebarCollapsed ? "justify-center" : "justify-between"
           } px-4 py-3 text-[13px] font-bold rounded-2xl transition-all cursor-pointer group ${
@@ -236,7 +239,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
                 view === "songs" ? "text-m3-primary" : "text-m3-secondary"
               }`}
             />
-            {!isSidebarCollapsed && <span>Biblioteca</span>}
+            {!isSidebarCollapsed && <span>{t("common.library")}</span>}
           </div>
           {!isSidebarCollapsed && (
             <Badge variant={view === "songs" ? "sky" : "slate"}>
@@ -250,7 +253,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
             navigate(`${slugPrefix}/services`);
             if (window.innerWidth < 768) setIsSidebarOpen(false);
           }}
-          title={isSidebarCollapsed ? "Cultos" : undefined}
+          title={isSidebarCollapsed ? t("common.services") : undefined}
           className={`w-full flex items-center ${
             isSidebarCollapsed ? "justify-center" : "justify-between"
           } px-4 py-3 text-[13px] font-bold rounded-2xl transition-all cursor-pointer group ${
@@ -267,7 +270,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
                 view === "services" ? "text-emerald-500" : "text-m3-secondary"
               }`}
             />
-            {!isSidebarCollapsed && <span>Cultos</span>}
+            {!isSidebarCollapsed && <span>{t("common.services")}</span>}
           </div>
           {!isSidebarCollapsed && (
             <Badge variant={view === "services" ? "sky" : "slate"}>
@@ -282,7 +285,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
               navigate(`${slugPrefix}/teams`);
               if (window.innerWidth < 768) setIsSidebarOpen(false);
             }}
-            title={isSidebarCollapsed ? "Equipas" : undefined}
+            title={isSidebarCollapsed ? t("common.teams") : undefined}
             className={`w-full flex items-center ${
               isSidebarCollapsed ? "justify-center" : "justify-between"
             } px-4 py-3 text-[13px] font-bold rounded-2xl transition-all cursor-pointer group ${
@@ -299,7 +302,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
                   view === "teams" ? "text-amber-500" : "text-m3-secondary"
                 }`}
               />
-              {!isSidebarCollapsed && <span>Equipas</span>}
+              {!isSidebarCollapsed && <span>{t("common.teams")}</span>}
             </div>
           </button>
         )}
@@ -307,7 +310,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
         {!isSidebarCollapsed && showFolderTree && (
           <>
             <div className="mt-6 px-3 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-m3-secondary opacity-60">
-              Pastas ({allFolders.length})
+              {t("sidebar.foldersCount", { count: allFolders.length })}
             </div>
 
             <div className="flex-1 overflow-y-auto flex flex-col gap-1 pr-1 custom-scrollbar">
@@ -335,7 +338,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
             navigate(`${slugPrefix}/trash`);
             if (window.innerWidth < 768) setIsSidebarOpen(false);
           }}
-          title={isSidebarCollapsed ? "Lixo" : undefined}
+          title={isSidebarCollapsed ? t("sidebar.trash") : undefined}
           className={`w-full flex items-center ${
             isSidebarCollapsed ? "justify-center" : "justify-between"
           } px-4 py-3 text-[13px] font-bold rounded-2xl transition-all cursor-pointer group ${
@@ -352,7 +355,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
                 view === "trash" ? "text-rose-500" : "text-m3-secondary"
               }`}
             />
-            {!isSidebarCollapsed && <span>Lixo</span>}
+            {!isSidebarCollapsed && <span>{t("sidebar.trash")}</span>}
           </div>
         </button>
 
@@ -410,7 +413,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
                   className="w-full flex items-center gap-3 px-3 py-2 text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors cursor-pointer text-left"
                 >
                   <Settings className="w-4 h-4 text-sky-600" />
-                  Definições
+                  {t("sidebar.openSettings")}
                 </button>
                 <div className="my-1 border-t border-slate-100 dark:border-slate-800" />
                 <button
@@ -421,7 +424,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
                   className="w-full flex items-center gap-3 px-3 py-2 text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-xl transition-colors cursor-pointer text-left"
                 >
                   <LogOut className="w-4 h-4 text-rose-500" />
-                  Sair
+                  {t("sidebar.logout")}
                 </button>
               </div>
             )}

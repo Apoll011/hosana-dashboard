@@ -33,6 +33,7 @@ import { ToastContainer } from "../components/Toast";
 import { useAuth } from "../contexts/AuthContext";
 import { useSync } from "../contexts/SyncContext";
 import { getDatabase, purgeExpiredTrash } from "../db";
+import { useI18n } from "../i18n";
 import { useAppNavigate } from "../hooks/useAppNavigate";
 import { useFolders } from "../hooks/useFolders";
 import { usePersonalSettings } from "../hooks/usePersonalSettings";
@@ -45,6 +46,7 @@ import { deriveView } from "./view";
 export const MainLayout: React.FC = () => {
   const { navigate } = useAppNavigate();
   const location = useLocation();
+  const { t } = useI18n();
   const { user, logout, organization } = useAuth();
 
   const slugPrefix = organization?.slug ? `/${organization.slug}` : "";
@@ -78,18 +80,18 @@ export const MainLayout: React.FC = () => {
     if (needRefresh) {
       showToast({
         type: "info",
-        title: "Nova versão disponível",
-        description: "Uma nova versão do Hosanna Studio está disponível.",
+        title: t("layout.newVersionTitle"),
+        description: t("layout.newVersionDesc"),
         duration: 0,
         action: {
-          label: "Recarregar",
+          label: t("layout.reload"),
           onClick: () => {
             void updateServiceWorker(true);
           },
         },
       });
     }
-  }, [needRefresh, showToast, updateServiceWorker]);
+  }, [needRefresh, showToast, updateServiceWorker, t]);
 
   useEffect(() => {
     const runTrashVerifier = () => {
@@ -1496,14 +1498,22 @@ export const MainLayout: React.FC = () => {
                 <div className="flex items-center gap-4">
                   <span className="flex items-center gap-1.5">
                     <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-xs" />
-                    {currentFolder ? `/${currentFolder.name}` : "/ (Raiz)"}
+                    {currentFolder
+                      ? `/${currentFolder.name}`
+                      : t("layout.rootLocation")}
                   </span>
                 </div>
                 <div className="flex items-center gap-6">
-                  <span>{filteredSubfolders.length} Pastas</span>
-                  <span>{filteredFiles.length} Ficheiros</span>
+                  <span>
+                    {t("layout.statusFolders", {
+                      count: filteredSubfolders.length,
+                    })}
+                  </span>
+                  <span>
+                    {t("layout.statusFiles", { count: filteredFiles.length })}
+                  </span>
                   <span className="text-m3-primary font-bold">
-                    {totalItemsCount} Total
+                    {t("layout.statusTotal", { count: totalItemsCount })}
                   </span>
                 </div>
               </div>

@@ -7,6 +7,7 @@ import { usePersonalSettings } from "@/src/hooks/usePersonalSettings";
 import {
   Check,
   FolderTree,
+  Globe,
   Layout,
   MonitorSmartphone,
   Moon,
@@ -18,6 +19,9 @@ import {
 } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useTheme } from "../../contexts/ThemeContext";
+import { useI18n } from "../../i18n";
+import { LANGUAGES } from "../../i18n/languages";
+import { PersonalLanguage } from "../../i18n/types";
 
 export interface AppearanceTabProps {
   active: boolean;
@@ -32,7 +36,6 @@ interface ThemeOption {
   title: string;
   description: string;
   icon: React.ElementType;
-  badge: string;
   previewBg: string;
 }
 
@@ -42,6 +45,7 @@ export const AppearanceTab: React.FC<AppearanceTabProps> = ({
 }) => {
   const { theme, setTheme } = useTheme();
   const { settings, updateSetting } = usePersonalSettings();
+  const { t, personalLanguage, setPersonalLanguage } = useI18n();
 
   const [studioSettings, setStudioSettings] = useState({
     showChordsDefault: true,
@@ -64,28 +68,25 @@ export const AppearanceTab: React.FC<AppearanceTabProps> = ({
   const themes: ThemeOption[] = [
     {
       id: "light",
-      title: "Modo Claro",
-      description: "Ambientes iluminados e impressão.",
+      title: t("settings.appearance.light"),
+      description: t("settings.appearance.lightDesc"),
       icon: Sun,
-      badge: "Diurno",
       previewBg:
         "from-amber-500/10 to-orange-500/5 text-amber-600 dark:text-amber-400",
     },
     {
       id: "system",
-      title: "Automático",
-      description: "Sincroniza com o tema do dispositivo.",
+      title: t("settings.appearance.auto"),
+      description: t("settings.appearance.autoDesc"),
       icon: MonitorSmartphone,
-      badge: "Adaptativo",
       previewBg:
         "from-slate-500/10 to-slate-600/5 text-slate-700 dark:text-slate-300",
     },
     {
       id: "dark",
-      title: "Modo Escuro",
-      description: "Confortável para a noite e púlpito.",
+      title: t("settings.appearance.dark"),
+      description: t("settings.appearance.darkDesc"),
       icon: Moon,
-      badge: "Noturno",
       previewBg:
         "from-indigo-500/10 to-sky-500/5 text-sky-600 dark:text-sky-400",
     },
@@ -93,18 +94,21 @@ export const AppearanceTab: React.FC<AppearanceTabProps> = ({
 
   const handleThemeChange = (newTheme: "light" | "dark" | "system") => {
     setTheme(newTheme);
-    showToast?.(
-      `Tema alterado para ${newTheme === "system" ? "Automático" : newTheme === "light" ? "Modo Claro" : "Modo Escuro"}.`,
-      "info",
-    );
+    const label =
+      newTheme === "system"
+        ? t("settings.appearance.auto")
+        : newTheme === "light"
+          ? t("settings.appearance.light")
+          : t("settings.appearance.dark");
+    showToast?.(t("settings.toast.themeChanged", { theme: label }), "info");
   };
 
   const handleFolderTreeToggle = (checked: boolean) => {
     updateSetting("showFolderTree", checked);
     showToast?.(
       checked
-        ? "Árvore de pastas visível na barra lateral."
-        : "Árvore de pastas oculta.",
+        ? t("settings.toast.folderTreeVisible")
+        : t("settings.toast.folderTreeHidden"),
       "success",
     );
   };
@@ -118,9 +122,21 @@ export const AppearanceTab: React.FC<AppearanceTabProps> = ({
     }
     showToast?.(
       checked
-        ? "Acordes ativos por predefinição nos cânticos."
-        : "Apenas letra visível por predefinição.",
+        ? t("settings.toast.chordsVisible")
+        : t("settings.toast.chordsHidden"),
       "success",
+    );
+  };
+
+  const handleLanguageChange = (lang: PersonalLanguage) => {
+    setPersonalLanguage(lang);
+    const label =
+      lang === "auto"
+        ? t("settings.appearance.languageAuto")
+        : (LANGUAGES.find((l) => l.code === lang)?.nativeLabel ?? lang);
+    showToast?.(
+      t("settings.toast.languageChanged", { language: label }),
+      "info",
     );
   };
 
@@ -134,16 +150,15 @@ export const AppearanceTab: React.FC<AppearanceTabProps> = ({
           <div>
             <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
               <MonitorSmartphone className="w-5 h-5 text-m3-primary" />
-              Tema & Aparência da Aplicação
+              {t("settings.appearance.themeTitle")}
             </h2>
             <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-              Personalize o esquema de cores e a luminosidade da interface no
-              seu ecrã.
+              {t("settings.appearance.themeDesc")}
             </p>
           </div>
           <span className="text-xs bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 px-3 py-1.5 rounded-full flex items-center gap-1.5 font-semibold">
             <User className="w-3.5 h-3.5" />
-            Preferência Pessoal
+            {t("settings.appearance.personalPreference")}
           </span>
         </div>
 
@@ -194,18 +209,96 @@ export const AppearanceTab: React.FC<AppearanceTabProps> = ({
       </div>
 
       {/* ========================================== */}
-      {/* 2. NAVEGAÇÃO & PAINÉIS LATERAIS            */}
+      {/* 2. IDIOMA                                  */}
+      {/* ========================================== */}
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xs overflow-hidden">
+        <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 flex items-center justify-between">
+          <div>
+            <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+              <Globe className="w-5 h-5 text-m3-primary" />
+              {t("settings.appearance.languageTitle")}
+            </h3>
+            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+              {t("settings.appearance.languageDesc")}
+            </p>
+          </div>
+          <span className="text-xs bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 px-3 py-1.5 rounded-full flex items-center gap-1.5 font-semibold">
+            <User className="w-3.5 h-3.5" />
+            {t("settings.appearance.personalPreference")}
+          </span>
+        </div>
+
+        <div className="p-6">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <button
+              type="button"
+              onClick={() => handleLanguageChange("auto")}
+              aria-pressed={personalLanguage === "auto"}
+              className={`group relative rounded-2xl border p-4 text-left transition-all duration-200 cursor-pointer ${
+                personalLanguage === "auto"
+                  ? "border-m3-primary bg-m3-primary/5 ring-2 ring-m3-primary/20"
+                  : "border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-slate-50/30 dark:bg-slate-900/40"
+              }`}
+            >
+              {personalLanguage === "auto" && (
+                <div className="absolute top-3 right-3 h-5 w-5 rounded-full bg-m3-primary flex items-center justify-center">
+                  <Check className="h-3.5 w-3.5 text-white stroke-[2.5]" />
+                </div>
+              )}
+              <div className="text-2xl mb-2">🌐</div>
+              <span className="block font-bold text-sm text-slate-900 dark:text-slate-100">
+                {t("settings.appearance.languageAuto")}
+              </span>
+              <span className="block mt-1 text-xs text-slate-500 dark:text-slate-400">
+                {t("settings.appearance.languageAutoDesc")}
+              </span>
+            </button>
+
+            {LANGUAGES.map((lang) => {
+              const selected = personalLanguage === lang.code;
+              return (
+                <button
+                  key={lang.code}
+                  type="button"
+                  onClick={() => handleLanguageChange(lang.code)}
+                  aria-pressed={selected}
+                  className={`group relative rounded-2xl border p-4 text-left transition-all duration-200 cursor-pointer ${
+                    selected
+                      ? "border-m3-primary bg-m3-primary/5 ring-2 ring-m3-primary/20"
+                      : "border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-slate-50/30 dark:bg-slate-900/40"
+                  }`}
+                >
+                  {selected && (
+                    <div className="absolute top-3 right-3 h-5 w-5 rounded-full bg-m3-primary flex items-center justify-center">
+                      <Check className="h-3.5 w-3.5 text-white stroke-[2.5]" />
+                    </div>
+                  )}
+                  <div className="text-2xl mb-2">{lang.flag}</div>
+                  <span className="block font-bold text-sm text-slate-900 dark:text-slate-100">
+                    {lang.nativeLabel}
+                  </span>
+                  <span className="block mt-1 text-xs text-slate-500 dark:text-slate-400">
+                    {lang.englishLabel}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* ========================================== */}
+      {/* 3. NAVEGAÇÃO & PAINÉIS LATERAIS            */}
       {/* ========================================== */}
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xs overflow-hidden">
         <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-900/50">
           <div>
             <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
               <Sliders className="w-5 h-5 text-indigo-500" />
-              Navegação & Estrutura
+              {t("settings.appearance.navigationTitle")}
             </h3>
             <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-              Ajuste como os repertórios e pastas são dispostos na sua área de
-              trabalho.
+              {t("settings.appearance.navigationDesc")}
             </p>
           </div>
         </div>
@@ -223,11 +316,10 @@ export const AppearanceTab: React.FC<AppearanceTabProps> = ({
             <div className="flex flex-col">
               <span className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
                 <FolderTree className="w-4 h-4 text-slate-400" />
-                Mostrar Árvore Hierárquica de Pastas
+                {t("settings.appearance.showFolderTree")}
               </span>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                Apresenta a estrutura completa de pastas e subpastas de músicas
-                na barra lateral esquerda.
+                {t("settings.appearance.showFolderTreeDesc")}
               </p>
             </div>
           </label>
@@ -235,23 +327,22 @@ export const AppearanceTab: React.FC<AppearanceTabProps> = ({
       </div>
 
       {/* ========================================== */}
-      {/* 3. DEFINIÇÕES DO STUDIO & ACORDES          */}
+      {/* 4. DEFINIÇÕES DO STUDIO & ACORDES          */}
       {/* ========================================== */}
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xs overflow-hidden">
         <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-900/50">
           <div>
             <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
               <Layout className="w-5 h-5 text-emerald-500" />
-              Preferências do Studio Musical
+              {t("settings.appearance.studioTitle")}
             </h3>
             <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-              Opções padrão de visualização de cifras e letra para este
-              navegador.
+              {t("settings.appearance.studioDesc")}
             </p>
           </div>
           <span className="text-xs bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 px-3 py-1.5 rounded-full flex items-center gap-1.5 font-semibold">
             <Smartphone className="w-3.5 h-3.5" />
-            Neste Dispositivo
+            {t("settings.appearance.onDevice")}
           </span>
         </div>
 
@@ -268,12 +359,10 @@ export const AppearanceTab: React.FC<AppearanceTabProps> = ({
             <div className="flex flex-col">
               <span className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
                 <Music2 className="w-4 h-4 text-slate-400" />
-                Exibir Acordes por Predefinição
+                {t("settings.appearance.showChords")}
               </span>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
-                Ativa automaticamente a linha de acordes (ChordPro) ao abrir o
-                visualizador de cânticos, ensaio e modo de projeção para
-                músicos.
+                {t("settings.appearance.showChordsDesc")}
               </p>
             </div>
           </label>

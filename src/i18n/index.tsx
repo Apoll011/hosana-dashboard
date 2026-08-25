@@ -17,7 +17,12 @@ import { resolveLanguage } from "./resolve";
 import { en } from "./locales/en";
 import { es } from "./locales/es";
 import { pt } from "./locales/pt";
-import { LANGUAGE_LOCALE, Language, MessageDict, PersonalLanguage } from "./types";
+import {
+  LANGUAGE_LOCALE,
+  Language,
+  MessageDict,
+  PersonalLanguage,
+} from "./types";
 
 const MESSAGES: Record<Language, MessageDict> = { pt, en, es };
 
@@ -55,10 +60,7 @@ function lookup(
   return node;
 }
 
-function interpolate(
-  template: string,
-  vars?: Interpolation,
-): string {
+function interpolate(template: string, vars?: Interpolation): string {
   if (!vars) return template;
   return template.replace(/\{(\w+)\}/g, (match, name: string) =>
     vars[name] !== undefined ? String(vars[name]) : match,
@@ -86,7 +88,9 @@ export const I18nProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const language = useMemo<Language>(() => {
     const browser =
-      typeof navigator !== "undefined" ? navigator.languages ?? navigator.language : undefined;
+      typeof navigator !== "undefined"
+        ? (navigator.languages ?? navigator.language)
+        : undefined;
     return resolveLanguage(personalLanguage, orgLocale, browser);
   }, [personalLanguage, orgLocale]);
 

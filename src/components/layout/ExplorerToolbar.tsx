@@ -6,6 +6,7 @@
 import { Service } from "@hosanna/shared";
 import { Archive, ArrowUpDown, Filter, LayoutGrid, List } from "lucide-react";
 import React from "react";
+import { useI18n } from "../../i18n";
 import { ViewName } from "../../layouts/view";
 
 interface ExplorerToolbarProps {
@@ -42,6 +43,7 @@ export const ExplorerToolbar: React.FC<ExplorerToolbarProps> = ({
   onDensityChange,
   onOpenFilterPanel,
 }) => {
+  const { t } = useI18n();
   if (view !== "explorer" && view !== "services" && view !== "songs")
     return null;
 
@@ -58,10 +60,10 @@ export const ExplorerToolbar: React.FC<ExplorerToolbarProps> = ({
                 ? "bg-m3-primary/10 border-m3-primary text-m3-primary shadow-lg shadow-m3-primary/10"
                 : "bg-m3-card border-m3-border text-m3-secondary hover:bg-m3-hover hover:text-m3-text hover:border-m3-primary/30"
             }`}
-            title="Abrir Filtros Avançados"
+            title={t("toolbar.openFilters")}
           >
             <Filter className="w-4 h-4" />
-            <span>Filtros</span>
+            <span>{t("toolbar.filters")}</span>
             {activeFiltersCount > 0 && (
               <span className="w-4.5 h-4.5 rounded-full bg-m3-primary text-white text-[10px] font-black flex items-center justify-center shadow-sm">
                 {activeFiltersCount}
@@ -80,10 +82,14 @@ export const ExplorerToolbar: React.FC<ExplorerToolbarProps> = ({
                 ? "bg-amber-500/10 border-amber-500 text-amber-600 dark:text-amber-400 shadow-lg shadow-amber-500/10"
                 : "bg-m3-card border-m3-border text-m3-secondary hover:bg-m3-hover hover:text-m3-text hover:border-amber-500/30"
             }`}
-            title={showArchived ? "Ocultar arquivados" : "Mostrar arquivados"}
+            title={
+              showArchived
+                ? t("toolbar.hideArchived")
+                : t("toolbar.showArchived")
+            }
           >
             <Archive className="w-4 h-4" />
-            <span>Arquivados</span>
+            <span>{t("toolbar.archived")}</span>
             {showArchived && archivedServices.length > 0 && (
               <span className="w-4.5 h-4.5 rounded-full bg-amber-500 text-white text-[10px] font-black flex items-center justify-center">
                 {archivedServices.length}
@@ -106,22 +112,24 @@ export const ExplorerToolbar: React.FC<ExplorerToolbarProps> = ({
             }}
             className="bg-transparent font-bold text-m3-text focus:outline-none cursor-pointer text-[11px] uppercase tracking-wider"
             title={
-              view === "services" ? "Organizar cultos" : "Organizar ficheiros"
+              view === "services"
+                ? t("toolbar.sortServices")
+                : t("toolbar.sortFiles")
             }
           >
             {view === "services" ? (
               <>
-                <option value="updatedAt-desc">Data: Recente</option>
-                <option value="updatedAt-asc">Data: Antiga</option>
-                <option value="title-asc">Nome (A-Z)</option>
-                <option value="title-desc">Nome (Z-A)</option>
+                <option value="updatedAt-desc">{t("toolbar.dateDesc")}</option>
+                <option value="updatedAt-asc">{t("toolbar.dateAsc")}</option>
+                <option value="title-asc">{t("toolbar.nameAsc")}</option>
+                <option value="title-desc">{t("toolbar.nameDesc")}</option>
               </>
             ) : (
               <>
-                <option value="title-asc">Nome (A-Z)</option>
-                <option value="title-desc">Nome (Z-A)</option>
-                <option value="artist-asc">Artista (A-Z)</option>
-                <option value="updatedAt-desc">Data Recente</option>
+                <option value="title-asc">{t("toolbar.nameAsc")}</option>
+                <option value="title-desc">{t("toolbar.nameDesc")}</option>
+                <option value="artist-asc">{t("toolbar.artistAsc")}</option>
+                <option value="updatedAt-desc">{t("toolbar.dateDesc")}</option>
               </>
             )}
           </select>
@@ -134,13 +142,13 @@ export const ExplorerToolbar: React.FC<ExplorerToolbarProps> = ({
         {view !== "songs" && (
           <div
             role="group"
-            aria-label="Modo de visualização"
+            aria-label={t("toolbar.viewMode")}
             className="inline-flex items-center bg-slate-100 p-px dark:bg-slate-800/80 rounded-xl border border-slate-200/80 dark:border-slate-700/80 select-none shrink-0 shadow-inner"
           >
             <button
               type="button"
               onClick={() => onViewModeChange("grid")}
-              title="Vista em Grelha"
+              title={t("toolbar.gridView")}
               aria-pressed={viewMode === "grid"}
               className={`relative flex items-center justify-center p-1.5 rounded-xl text-xs font-medium transition-all duration-200 cursor-pointer focus:outline-hidden focus-visible:ring-2 focus-visible:ring-m3-primary ${
                 viewMode === "grid"
@@ -154,7 +162,7 @@ export const ExplorerToolbar: React.FC<ExplorerToolbarProps> = ({
             <button
               type="button"
               onClick={() => onViewModeChange("list")}
-              title="Vista em Lista"
+              title={t("toolbar.listView")}
               aria-pressed={viewMode === "list"}
               className={`relative flex items-center justify-center p-1.5 rounded-xl text-xs font-medium transition-all duration-200 cursor-pointer focus:outline-hidden focus-visible:ring-2 focus-visible:ring-m3-primary ${
                 viewMode === "list"
@@ -175,10 +183,10 @@ export const ExplorerToolbar: React.FC<ExplorerToolbarProps> = ({
               onDensityChange(e.target.value as "comfortable" | "compact")
             }
             className="bg-transparent font-bold text-m3-text focus:outline-none cursor-pointer text-[11px] uppercase tracking-wider"
-            title="Densidade de visualização"
+            title={t("toolbar.density")}
           >
-            <option value="comfortable">Confortável</option>
-            <option value="compact">Compacto</option>
+            <option value="comfortable">{t("toolbar.comfortable")}</option>
+            <option value="compact">{t("toolbar.compact")}</option>
           </select>
         </div>
       </div>
