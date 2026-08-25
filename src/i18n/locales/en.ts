@@ -108,10 +108,10 @@ export const en: MessageDict = {
     viewGrid: "Switch to Grid View",
     viewList: "Switch to List View",
     openFilters: "Open Advanced Filter Panel",
-    printSong: "Print Song: \"{title}\"",
-    moveSong: "Move Song: \"{title}\"",
-    deleteSong: "Delete Song: \"{title}\"",
-    deleteService: "Delete Service: \"{name}\"",
+    printSong: 'Print Song: "{title}"',
+    moveSong: 'Move Song: "{title}"',
+    deleteSong: 'Delete Song: "{title}"',
+    deleteService: 'Delete Service: "{name}"',
   },
 
   palette: {
@@ -121,7 +121,7 @@ export const en: MessageDict = {
     recents: "Recents",
     defaultSection: "Actions",
     noResults: "No results found",
-    noResultsDesc: "We couldn't find anything for \"{query}\".",
+    noResultsDesc: 'We couldn\'t find anything for "{query}".',
     navigate: "Navigate",
     select: "Select",
     title: "Command Palette",
@@ -165,8 +165,7 @@ export const en: MessageDict = {
       showFolderTreeDesc:
         "Displays the full folder and subfolder structure of songs in the left sidebar.",
       studioTitle: "Music Studio Preferences",
-      studioDesc:
-        "Default chord and lyric display options for this browser.",
+      studioDesc: "Default chord and lyric display options for this browser.",
       onDevice: "On This Device",
       showChords: "Show Chords by Default",
       showChordsDesc:

@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import React, { useMemo } from "react";
 import { Song } from "@hosanna/shared";
+import { useI18n } from "../i18n";
 import { ViewName } from "../layouts/view";
 import {
   CommandAction,
@@ -113,15 +114,17 @@ export function HosannaCommandPalette(props: HosannaCommandPaletteProps) {
     fileInputRef,
   } = props;
 
+  const { t } = useI18n();
+
   const staticActions = useMemo<CommandAction[]>(() => {
     const actions: CommandAction[] = [
       // --- NAVEGAÇÃO ---
       {
         id: "nav-drive",
-        name: "Ir para Drive (Início)",
+        name: t("commandPalette.navDrive"),
         shortcut: ["g", "d"],
         keywords: "drive inicio home pastas root folders",
-        section: "Navegação",
+        section: t("commandPalette.sections.navigation"),
         icon: <HardDrive className="w-4 h-4 text-sky-500" />,
         perform: () => {
           setCurrentFolderId(null);
@@ -130,28 +133,28 @@ export function HosannaCommandPalette(props: HosannaCommandPaletteProps) {
       },
       {
         id: "nav-songs",
-        name: "Ir para Biblioteca de Cânticos",
+        name: t("commandPalette.navSongs"),
         shortcut: ["g", "s"],
         keywords: "biblioteca canticos musicas songs library",
-        section: "Navegação",
+        section: t("commandPalette.sections.navigation"),
         icon: <Music className="w-4 h-4 text-sky-500" />,
         perform: () => navigate(`${slugPrefix}/songs`),
       },
       {
         id: "nav-services",
-        name: "Ir para Cultos / Planos",
+        name: t("commandPalette.navServices"),
         shortcut: ["g", "c"],
         keywords: "cultos planos servicos services worship",
-        section: "Navegação",
+        section: t("commandPalette.sections.navigation"),
         icon: <Church className="w-4 h-4 text-emerald-500" />,
         perform: () => navigate(`${slugPrefix}/services`),
       },
       {
         id: "nav-settings",
-        name: "Ir para Definições do Sistema",
+        name: t("commandPalette.navSettings"),
         shortcut: ["g", "t"],
         keywords: "definicoes configuracoes settings preferences",
-        section: "Navegação",
+        section: t("commandPalette.sections.navigation"),
         icon: <Settings className="w-4 h-4 text-slate-500" />,
         perform: () => navigate(`${slugPrefix}/settings`),
       },
@@ -159,46 +162,46 @@ export function HosannaCommandPalette(props: HosannaCommandPaletteProps) {
       // --- AÇÕES RÁPIDAS ---
       {
         id: "action-create-song",
-        name: "Criar Novo Cântico",
+        name: t("commandPalette.createSong"),
         shortcut: ["c", "s"],
         keywords: "novo cantico musica adicionar song create add",
-        section: "Ações Rápidas",
+        section: t("commandPalette.sections.quickActions"),
         icon: <Plus className="w-4 h-4 text-sky-500" />,
         perform: () => setIsCreateSongModalOpen(true),
       },
       {
         id: "action-import-cifra",
-        name: "Importar Cântico do CifraClub",
+        name: t("commandPalette.importCifra"),
         shortcut: ["c", "i"],
         keywords: "importar cifraclub cifra web url fetch",
-        section: "Ações Rápidas",
+        section: t("commandPalette.sections.quickActions"),
         icon: <Download className="w-4 h-4 text-sky-500" />,
         perform: () => setIsCifraImportOpen(true),
       },
       {
         id: "action-create-service",
-        name: "Criar Novo Plano de Culto",
+        name: t("commandPalette.createService"),
         shortcut: ["c", "c"],
         keywords: "novo culto plano servico create service worship date",
-        section: "Ações Rápidas",
+        section: t("commandPalette.sections.quickActions"),
         icon: <Calendar className="w-4 h-4 text-emerald-500" />,
         perform: () => setIsCreateServiceModalOpen(true),
       },
       {
         id: "action-create-folder",
-        name: "Criar Nova Pasta",
+        name: t("commandPalette.createFolder"),
         shortcut: ["c", "f"],
         keywords: "nova pasta diretorio novapasta create folder directory",
-        section: "Ações Rápidas",
+        section: t("commandPalette.sections.quickActions"),
         icon: <FolderPlus className="w-4 h-4 text-amber-500" />,
         perform: () => setIsCreateModalOpen(true),
       },
       {
         id: "action-upload-files",
-        name: "Importar Ficheiros",
+        name: t("commandPalette.uploadFiles"),
         shortcut: ["u"],
         keywords: "upload carregar ficheiros chordpro sbpbackup import txt pro",
-        section: "Ações Rápidas",
+        section: t("commandPalette.sections.quickActions"),
         icon: <Upload className="w-4 h-4 text-purple-500" />,
         perform: () => fileInputRef.current?.click(),
       },
@@ -206,10 +209,10 @@ export function HosannaCommandPalette(props: HosannaCommandPaletteProps) {
       // --- TEMA E PREFERÊNCIAS ---
       {
         id: "toggle-theme",
-        name: "Alternar Tema Claro / Escuro",
+        name: t("commandPalette.toggleTheme"),
         shortcut: ["t", "t"],
         keywords: "tema dark light modo escuro claro theme",
-        section: "Definições & Conta",
+        section: t("commandPalette.sections.account"),
         icon: <Moon className="w-4 h-4 text-amber-500" />,
         perform: () => {
           const isDark = document.documentElement.classList.toggle("dark");
@@ -219,19 +222,19 @@ export function HosannaCommandPalette(props: HosannaCommandPaletteProps) {
       {
         id: "toggle-sidebar",
         name: isSidebarCollapsed
-          ? "Expandir Barra Lateral"
-          : "Recolher Barra Lateral",
+          ? t("commandPalette.toggleSidebarExpand")
+          : t("commandPalette.toggleSidebarCollapse"),
         shortcut: ["b", "s"],
         keywords: "sidebar menu barras lateral recolher expandir toggle",
-        section: "Definições & Conta",
+        section: t("commandPalette.sections.account"),
         icon: <ChevronRight className="w-4 h-4 text-slate-500" />,
         perform: () => setIsSidebarCollapsed(!isSidebarCollapsed),
       },
       {
         id: "user-logout",
-        name: "Sair / Terminar Sessão",
+        name: t("commandPalette.logout"),
         keywords: "sair logout encerrar sessao exit",
-        section: "Definições & Conta",
+        section: t("commandPalette.sections.account"),
         icon: <LogOut className="w-4 h-4 text-rose-500" />,
         perform: () => logout(),
       },
@@ -241,25 +244,25 @@ export function HosannaCommandPalette(props: HosannaCommandPaletteProps) {
       actions.push(
         {
           id: "view-grid",
-          name: "Alternar Vista para Grelha",
+          name: t("commandPalette.viewGrid"),
           keywords: "vista grelha grid view layout",
-          section: "Visualização",
+          section: t("commandPalette.sections.visualization"),
           icon: <LayoutGrid className="w-4 h-4 text-slate-500" />,
           perform: () => handleViewModeChange("grid"),
         },
         {
           id: "view-list",
-          name: "Alternar Vista para Lista",
+          name: t("commandPalette.viewList"),
           keywords: "vista lista list view table layout",
-          section: "Visualização",
+          section: t("commandPalette.sections.visualization"),
           icon: <List className="w-4 h-4 text-slate-500" />,
           perform: () => handleViewModeChange("list"),
         },
         {
           id: "open-filters",
-          name: "Abrir Painel de Filtros Avançados",
+          name: t("commandPalette.openFilters"),
           keywords: "filtros filter pesquisar tom tag artista",
-          section: "Visualização",
+          section: t("commandPalette.sections.visualization"),
           icon: <Filter className="w-4 h-4 text-slate-500" />,
           perform: () => setIsFilterPanelOpen(true),
         },
@@ -270,17 +273,17 @@ export function HosannaCommandPalette(props: HosannaCommandPaletteProps) {
       actions.push(
         {
           id: "song-print-current",
-          name: `Imprimir Cântico: "${currentSong.title}"`,
+          name: t("commandPalette.printSong", { title: currentSong.title }),
           keywords: "imprimir print pdf cantico atual",
-          section: "Cântico Atual",
+          section: t("commandPalette.sections.currentSong"),
           icon: <Printer className="w-4 h-4 text-indigo-500" />,
           perform: () => handlePrintSong(currentSong.id),
         },
         {
           id: "song-move-current",
-          name: `Mover Cântico: "${currentSong.title}"`,
+          name: t("commandPalette.moveSong", { title: currentSong.title }),
           keywords: "mover pasta move folder destination",
-          section: "Cântico Atual",
+          section: t("commandPalette.sections.currentSong"),
           icon: <Move className="w-4 h-4 text-sky-500" />,
           perform: () => {
             setMoveSongTarget(currentSong);
@@ -290,9 +293,9 @@ export function HosannaCommandPalette(props: HosannaCommandPaletteProps) {
         },
         {
           id: "song-delete-current",
-          name: `Eliminar Cântico: "${currentSong.title}"`,
+          name: t("commandPalette.deleteSong", { title: currentSong.title }),
           keywords: "eliminar apagar remover delete remove",
-          section: "Cântico Atual",
+          section: t("commandPalette.sections.currentSong"),
           icon: <Trash2 className="w-4 h-4 text-rose-500" />,
           perform: () => setDeleteSongTarget(currentSong),
         },
@@ -302,9 +305,9 @@ export function HosannaCommandPalette(props: HosannaCommandPaletteProps) {
     if (view === "service-editor" && currentService) {
       actions.push({
         id: "service-delete-current",
-        name: `Eliminar Culto: "${currentService.name}"`,
+        name: t("commandPalette.deleteService", { name: currentService.name }),
         keywords: "eliminar apagar culto delete service",
-        section: "Culto Atual",
+        section: t("commandPalette.sections.currentService"),
         icon: <Trash2 className="w-4 h-4 text-rose-500" />,
         perform: async () => {
           await deleteService(currentService.id);
@@ -336,6 +339,7 @@ export function HosannaCommandPalette(props: HosannaCommandPaletteProps) {
     setDeleteSongTarget,
     deleteService,
     fileInputRef,
+    t,
   ]);
 
   return (
