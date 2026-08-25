@@ -843,7 +843,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
         onConfirm={handleDeleteConfirm}
         title={t("servicesPage.deleteService")}
         message={t("servicesPage.deleteServiceMessage", {
-          name: deleteTarget!.name,
+          name: deleteTarget?.name || "",
         })}
         confirmText={t("servicesPage.deleteService")}
       />
@@ -863,7 +863,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
           action: archiveTarget?.archived
             ? t("servicesPage.activate")
             : t("servicesPage.archive"),
-          name: archiveTarget!.name,
+          name: archiveTarget?.name || "",
         })}
         confirmText={
           archiveTarget?.archived
