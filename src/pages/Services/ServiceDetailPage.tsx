@@ -41,11 +41,14 @@ import {
   Music,
   PanelLeftClose,
   PanelLeftOpen,
+  PanelRight,
+  PanelRightClose,
   Plus,
   Save,
   Search,
   Settings2,
   Trash2,
+  X,
 } from "lucide-react";
 import React, { useDeferredValue, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
@@ -250,6 +253,8 @@ const LibrarySongItem: React.FC<LibrarySongItemProps> = ({
 interface ServiceRowProps {
   element: ServiceElement;
   index: number;
+  isPreviewed: boolean;
+  onTogglePreview: (el: ServiceElement) => void;
   onRemove: (id: string) => void;
   onEdit: (el: ServiceElement) => void;
   onNoteChange: (id: string, note: string) => void;
@@ -258,6 +263,8 @@ interface ServiceRowProps {
 const ServiceRow: React.FC<ServiceRowProps> = ({
   element,
   index,
+  isPreviewed,
+  onTogglePreview,
   onRemove,
   onEdit,
   onNoteChange,
@@ -336,12 +343,17 @@ const ServiceRow: React.FC<ServiceRowProps> = ({
   const badge = getElementBadge(element.type);
   const Icon = badge.icon;
 
+  const handleExpandToggle = () => {
+    if (isSong) onTogglePreview(element);
+    else setIsExpanded(!isExpanded);
+  };
+
   return (
     <div
       ref={rowRef}
       className={`bg-white dark:bg-m3-card rounded-2xl border transition-all duration-150 relative ${
         isDragging ? "opacity-40 scale-[0.98]" : "opacity-100"
-      } ${
+      } ${isPreviewed ? "ring-2 ring-m3-primary/30 shadow-md" : ""} ${
         closestEdge === "top"
           ? "border-t-m3-primary border-t-2 shadow-sm"
           : closestEdge === "bottom"
@@ -372,7 +384,7 @@ const ServiceRow: React.FC<ServiceRowProps> = ({
 
         <div
           className="min-w-0 flex-1 cursor-pointer select-none"
-          onClick={() => setIsExpanded(!isExpanded)}
+          onClick={handleExpandToggle}
         >
           <div className="flex items-center gap-2">
             <p className="text-sm font-semibold truncate text-m3-text">
@@ -412,10 +424,25 @@ const ServiceRow: React.FC<ServiceRowProps> = ({
 
           <button
             type="button"
-            onClick={() => setIsExpanded(!isExpanded)}
-            className="p-1.5 text-m3-secondary hover:text-m3-primary hover:bg-m3-primary/10 rounded-lg transition-colors"
+            onClick={handleExpandToggle}
+            className={`p-1.5 rounded-lg transition-colors ${isSong && isPreviewed ? "bg-m3-primary/10 text-m3-primary" : "text-m3-secondary hover:text-m3-primary hover:bg-m3-primary/10"}`}
+            title={
+              isSong
+                ? isPreviewed
+                  ? "Fechar Prévia"
+                  : "Abrir Prévia"
+                : isExpanded
+                  ? "Recolher"
+                  : "Expandir"
+            }
           >
-            {isExpanded ? (
+            {isSong ? (
+              isPreviewed ? (
+                <PanelRightClose className="w-4 h-4" />
+              ) : (
+                <PanelRight className="w-4 h-4" />
+              )
+            ) : isExpanded ? (
               <ChevronUp className="w-4 h-4" />
             ) : (
               <ChevronDown className="w-4 h-4" />
@@ -514,11 +541,7 @@ const ServiceRow: React.FC<ServiceRowProps> = ({
             </div>
           )}
 
-          {isSong ? (
-            <div className="mt-2 h-125 border border-m3-border dark:border-m3-border/50 rounded-xl overflow-hidden shadow-inner bg-m3-card">
-              <SongPreview element={element} />
-            </div>
-          ) : (
+          {!isSong && (
             <div className="mt-2 text-sm text-m3-text whitespace-pre-wrap bg-white dark:bg-m3-card p-4 rounded-xl border border-m3-border dark:border-m3-border/50">
               {element.content || "Sem conteúdo."}
             </div>
@@ -539,7 +562,7 @@ export const ServiceDetailPage: React.FC = () => {
   const { data: service, isLoading, isError } = useService(id || null);
   const { updateElements, updateService } = useServices();
   const { songsQuery } = useSongs({ limit: 1000 });
-  const { showToast } = useSync();
+  const { showToast, syncStatus } = useSync();
 
   const [elements, setElements] = useState<ServiceElement[]>([]);
   const elementsRef = useRef<ServiceElement[]>([]);
@@ -551,6 +574,9 @@ export const ServiceDetailPage: React.FC = () => {
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   const [showLibrary, setShowLibrary] = useState(true);
+  const [previewElement, setPreviewElement] = useState<ServiceElement | null>(
+    null,
+  );
   const [isDropTargetActive, setIsDropTargetActive] = useState(false);
   const dropContainerRef = useRef<HTMLDivElement>(null);
 
@@ -576,6 +602,13 @@ export const ServiceDetailPage: React.FC = () => {
     elementsRef.current = elements;
   }, [elements]);
 
+  // Close the preview if the song it references is removed from the plan
+  useEffect(() => {
+    if (previewElement && !elements.some((e) => e.id === previewElement.id)) {
+      setPreviewElement(null);
+    }
+  }, [elements, previewElement]);
+
   // Derived state (Must be defined before usage in hooks and renders)
   const allAvailableSongs = songsQuery.data?.songs || [];
   const songCountById = elements.reduce<Record<string, number>>((acc, el) => {
@@ -594,6 +627,24 @@ export const ServiceDetailPage: React.FC = () => {
       s.title.toLowerCase().includes(librarySearch.toLowerCase()) ||
       (s.artist || "").toLowerCase().includes(librarySearch.toLowerCase()),
   );
+
+  const syncStatusMeta = {
+    synced: { dot: "bg-emerald-500", label: "Sincronizado" },
+    syncing: { dot: "bg-sky-500 animate-pulse", label: "A sincronizar" },
+    error: { dot: "bg-rose-500", label: "Erro de sincronização" },
+    offline: { dot: "bg-amber-500", label: "Offline" },
+    local_only: { dot: "bg-slate-400", label: "Apenas local" },
+  } as const;
+  const syncMeta = syncStatusMeta[syncStatus] ?? syncStatusMeta.local_only;
+
+  const handleOpenLibrary = () => {
+    setShowLibrary(true);
+    requestAnimationFrame(() => searchInputRef.current?.focus());
+  };
+
+  const handleTogglePreview = (el: ServiceElement) => {
+    setPreviewElement((prev) => (prev?.id === el.id ? null : el));
+  };
 
   const syncElements = async (
     newElements: ServiceElement[],
@@ -884,42 +935,92 @@ export const ServiceDetailPage: React.FC = () => {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => setShowLibrary(!showLibrary)}
-            icon={
-              showLibrary ? (
-                <PanelLeftClose className="w-4 h-4" />
-              ) : (
-                <PanelLeftOpen className="w-4 h-4" />
-              )
-            }
+          <div
+            className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-m3-card border border-m3-border/60 shadow-sm"
+            title={syncMeta.label}
           >
-            <span className="hidden sm:inline">
-              {showLibrary ? "Esconder Biblioteca" : "Ver Biblioteca"}
+            <span
+              className={`w-2 h-2 rounded-full shrink-0 ${syncMeta.dot}`}
+              aria-hidden="true"
+            />
+            <span className="text-[11px] font-semibold text-m3-secondary hidden sm:inline">
+              {syncMeta.label}
             </span>
-          </Button>
+            <span className="w-px h-3.5 bg-m3-border/70 hidden sm:inline-block" />
+            <span className="text-[11px] font-semibold text-m3-secondary">
+              {elements.length}{" "}
+              {elements.length === 1 ? "elemento" : "elementos"}
+            </span>
+          </div>
         </div>
       </div>
 
       {/* ── Split Layout ────────────────────────────────────────────── */}
       <div className="flex-1 flex overflow-hidden relative">
+        {!showLibrary && (
+          <button
+            type="button"
+            onClick={handleOpenLibrary}
+            className="absolute left-0 top-1/2 -translate-y-1/2 z-20 w-9 h-16 flex items-center justify-center bg-m3-card border border-l-0 border-m3-border rounded-r-2xl shadow-md text-m3-primary hover:bg-m3-primary/10 hover:border-m3-primary/40 transition-colors group"
+            title="Ver Biblioteca"
+            aria-label="Ver Biblioteca"
+          >
+            <PanelLeftOpen className="w-4 h-4" />
+          </button>
+        )}
         {/* Library Sidebar */}
         <div
           className={`transition-all duration-300 flex flex-col border-r border-m3-border bg-m3-sidebar/30 ${showLibrary ? "w-full md:w-80 lg:w-96 translate-x-0" : "w-0 -translate-x-full border-none opacity-0 overflow-hidden"}`}
         >
           <div className="p-4 border-b border-m3-border bg-m3-card shrink-0">
-            <h2 className="text-sm font-bold text-m3-text mb-3">
-              Biblioteca de Cânticos
-            </h2>
-            <Input
-              ref={searchInputRef}
-              placeholder="Pesquisar cânticos..."
-              value={librarySearch}
-              onChange={(e) => setLibrarySearch(e.target.value)}
-              icon={<Search className="w-4 h-4 text-m3-secondary" />}
-            />
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-sm font-bold text-m3-text flex items-center gap-2">
+                <BookOpen className="w-4 h-4 text-m3-primary" />
+                Biblioteca de Cânticos
+              </h2>
+              <button
+                type="button"
+                onClick={() => setShowLibrary(false)}
+                className="p-1.5 rounded-lg text-m3-secondary hover:text-m3-primary hover:bg-m3-primary/10 transition-colors"
+                title="Esconder Biblioteca"
+                aria-label="Esconder Biblioteca"
+              >
+                <PanelLeftClose className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="relative">
+              <Input
+                ref={searchInputRef}
+                placeholder="Pesquisar cânticos..."
+                value={librarySearch}
+                onChange={(e) => setLibrarySearch(e.target.value)}
+                icon={<Search className="w-4 h-4 text-m3-secondary" />}
+                className="pr-9"
+              />
+              {librarySearch && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setLibrarySearch("");
+                    searchInputRef.current?.focus();
+                  }}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-md text-m3-secondary hover:text-m3-text hover:bg-m3-hover transition-colors"
+                  title="Limpar pesquisa"
+                  aria-label="Limpar pesquisa"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
+            <div className="flex items-center justify-between mt-2.5">
+              <span className="text-[10px] font-semibold text-m3-secondary uppercase tracking-wider">
+                {filteredLibrarySongs.length}{" "}
+                {filteredLibrarySongs.length === 1 ? "cântico" : "cânticos"}
+              </span>
+              <span className="text-[10px] text-m3-secondary/70 hidden md:inline">
+                Arraste para a lista
+              </span>
+            </div>
           </div>
           <div className="flex-1 overflow-y-auto min-h-0 custom-scrollbar p-3 space-y-2">
             {filteredLibrarySongs.length === 0 ? (
@@ -1075,6 +1176,8 @@ export const ServiceDetailPage: React.FC = () => {
                         key={el.id}
                         element={el}
                         index={i}
+                        isPreviewed={previewElement?.id === el.id}
+                        onTogglePreview={handleTogglePreview}
                         onRemove={handleRemoveElement}
                         onEdit={openEditModal}
                         onNoteChange={handleNoteChange}
@@ -1086,8 +1189,9 @@ export const ServiceDetailPage: React.FC = () => {
                 <div className="flex gap-3 mt-auto pt-4 shrink-0">
                   <button
                     type="button"
-                    onClick={() => searchInputRef.current?.focus()}
+                    onClick={handleOpenLibrary}
                     className="flex-1 py-3 rounded-2xl border border-dashed border-m3-primary/30 text-xs font-semibold flex items-center justify-center gap-2 cursor-pointer transition-colors hover:bg-m3-primary/5 text-m3-primary bg-m3-card shadow-sm"
+                    title="Abrir a biblioteca e pesquisar"
                   >
                     <Plus className="w-4 h-4" /> Adicionar Cântico
                   </button>
@@ -1103,6 +1207,34 @@ export const ServiceDetailPage: React.FC = () => {
             </div>
           </div>
         </div>
+
+        {previewElement && (
+          <div className="absolute inset-y-0 right-0 z-30 w-full sm:w-96 lg:w-[28rem] flex flex-col bg-m3-sidebar/30 border-l border-m3-border shadow-2xl md:static md:shadow-none transition-all duration-300">
+            <div className="p-4 border-b border-m3-border bg-m3-card shrink-0">
+              <div className="flex items-center justify-between gap-2">
+                <h2 className="text-sm font-bold text-m3-text flex items-center gap-2 min-w-0">
+                  <Music className="w-4 h-4 text-m3-primary shrink-0" />
+                  <span className="truncate">{previewElement.title}</span>
+                </h2>
+                <button
+                  type="button"
+                  onClick={() => setPreviewElement(null)}
+                  className="p-1.5 rounded-lg text-m3-secondary hover:text-m3-primary hover:bg-m3-primary/10 transition-colors shrink-0"
+                  title="Fechar Prévia"
+                  aria-label="Fechar Prévia"
+                >
+                  <PanelRightClose className="w-4 h-4" />
+                </button>
+              </div>
+              <p className="text-xs text-m3-secondary truncate mt-0.5">
+                {previewElement.content || "—"}
+              </p>
+            </div>
+            <div className="flex-1 overflow-hidden min-h-0">
+              <SongPreview element={previewElement} />
+            </div>
+          </div>
+        )}
       </div>
 
       <WelcomeModal
