@@ -1216,7 +1216,7 @@ export const ServiceDetailPage: React.FC = () => {
         </div>
 
         <div
-          className={`transition-all duration-300 flex flex-col border-l border-m3-border bg-m3-sidebar/30 ${previewElement ? "w-full md:w-96 lg:w-[28rem] translate-x-0" : "w-0 translate-x-full border-none opacity-0 overflow-hidden"}`}
+          className={`transition-all duration-300 flex flex-col border-l border-m3-border bg-m3-sidebar/30 ${previewElement ? "w-full md:w-96 lg:w-md translate-x-0" : "w-0 translate-x-full border-none opacity-0 overflow-hidden"}`}
         >
           {previewContent && (
             <>
