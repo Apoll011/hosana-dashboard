@@ -17,6 +17,7 @@ import {
   Users,
 } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
+import { ViewName } from "../../layouts/view";
 import { getInitials } from "../../utils";
 import { FolderTreeItemNode, FolderTreeNode } from "../explorer";
 import { getRoleLabel } from "../settings/settingsUtils";
@@ -28,11 +29,7 @@ interface AppSidebarProps {
   setIsSidebarCollapsed: (v: boolean) => void;
   organization?: Organization | null;
   slugPrefix: string;
-  isExplorerView: boolean;
-  isSongsView: boolean;
-  isServicesView: boolean;
-  isTeamsView: boolean;
-  isTrashView: boolean;
+  view: ViewName;
   currentFolderId: string | null;
   rootSongsCount: number;
   rootFoldersCount: number;
@@ -66,11 +63,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
   setIsSidebarCollapsed,
   organization,
   slugPrefix,
-  isExplorerView,
-  isSongsView,
-  isServicesView,
-  isTeamsView,
-  isTrashView,
+  view,
   currentFolderId,
   rootSongsCount,
   rootFoldersCount,
@@ -88,6 +81,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
   navigate,
   logout,
 }) => {
+  const isDriveRoot = view === "explorer" && currentFolderId === null;
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
 
@@ -196,7 +190,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
           className={`w-full flex items-center ${
             isSidebarCollapsed ? "justify-center" : "justify-between"
           } px-4 py-3 text-[13px] font-bold rounded-2xl transition-all cursor-pointer group ${
-            isExplorerView && currentFolderId === null
+            isDriveRoot
               ? "bg-m3-primary/10 text-m3-primary border border-m3-primary/20 shadow-sm"
               : "text-m3-secondary hover:bg-m3-hover hover:text-m3-text"
           }`}
@@ -206,9 +200,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
           >
             <HardDrive
               className={`w-4.5 h-4.5 ${
-                isExplorerView && currentFolderId === null
-                  ? "text-m3-primary"
-                  : "text-m3-secondary"
+                isDriveRoot ? "text-m3-primary" : "text-m3-secondary"
               }`}
             />
             {!isSidebarCollapsed && (
@@ -216,11 +208,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
             )}
           </div>
           {!isSidebarCollapsed && (
-            <Badge
-              variant={
-                isExplorerView && currentFolderId === null ? "sky" : "slate"
-              }
-            >
+            <Badge variant={isDriveRoot ? "sky" : "slate"}>
               {rootSongsCount + rootFoldersCount}
             </Badge>
           )}
@@ -235,7 +223,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
           className={`w-full flex items-center ${
             isSidebarCollapsed ? "justify-center" : "justify-between"
           } px-4 py-3 text-[13px] font-bold rounded-2xl transition-all cursor-pointer group ${
-            isSongsView
+            view === "songs"
               ? "bg-m3-primary/10 text-m3-primary border border-m3-primary/20 shadow-sm"
               : "text-m3-secondary hover:bg-m3-hover hover:text-m3-text"
           }`}
@@ -245,13 +233,15 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
           >
             <Music
               className={`w-4.5 h-4.5 ${
-                isSongsView ? "text-m3-primary" : "text-m3-secondary"
+                view === "songs" ? "text-m3-primary" : "text-m3-secondary"
               }`}
             />
             {!isSidebarCollapsed && <span>Biblioteca</span>}
           </div>
           {!isSidebarCollapsed && (
-            <Badge variant={isSongsView ? "sky" : "slate"}>{totalSongs}</Badge>
+            <Badge variant={view === "songs" ? "sky" : "slate"}>
+              {totalSongs}
+            </Badge>
           )}
         </button>
 
@@ -264,7 +254,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
           className={`w-full flex items-center ${
             isSidebarCollapsed ? "justify-center" : "justify-between"
           } px-4 py-3 text-[13px] font-bold rounded-2xl transition-all cursor-pointer group ${
-            isServicesView
+            view === "services"
               ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 shadow-sm"
               : "text-m3-secondary hover:bg-m3-hover hover:text-m3-text"
           }`}
@@ -274,13 +264,13 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
           >
             <Church
               className={`w-4.5 h-4.5 ${
-                isServicesView ? "text-emerald-500" : "text-m3-secondary"
+                view === "services" ? "text-emerald-500" : "text-m3-secondary"
               }`}
             />
             {!isSidebarCollapsed && <span>Cultos</span>}
           </div>
           {!isSidebarCollapsed && (
-            <Badge variant={isServicesView ? "sky" : "slate"}>
+            <Badge variant={view === "services" ? "sky" : "slate"}>
               {totalServices}
             </Badge>
           )}
@@ -296,7 +286,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
             className={`w-full flex items-center ${
               isSidebarCollapsed ? "justify-center" : "justify-between"
             } px-4 py-3 text-[13px] font-bold rounded-2xl transition-all cursor-pointer group ${
-              isTeamsView
+              view === "teams"
                 ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 shadow-sm"
                 : "text-m3-secondary hover:bg-m3-hover hover:text-m3-text"
             }`}
@@ -306,7 +296,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
             >
               <Users
                 className={`w-4.5 h-4.5 ${
-                  isTeamsView ? "text-amber-500" : "text-m3-secondary"
+                  view === "teams" ? "text-amber-500" : "text-m3-secondary"
                 }`}
               />
               {!isSidebarCollapsed && <span>Equipas</span>}
@@ -349,7 +339,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
           className={`w-full flex items-center ${
             isSidebarCollapsed ? "justify-center" : "justify-between"
           } px-4 py-3 text-[13px] font-bold rounded-2xl transition-all cursor-pointer group ${
-            isTrashView
+            view === "trash"
               ? "bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 shadow-sm"
               : "text-m3-secondary hover:bg-m3-hover hover:text-m3-text"
           }`}
@@ -359,7 +349,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
           >
             <Trash2
               className={`w-4.5 h-4.5 ${
-                isTrashView ? "text-rose-500" : "text-m3-secondary"
+                view === "trash" ? "text-rose-500" : "text-m3-secondary"
               }`}
             />
             {!isSidebarCollapsed && <span>Lixo</span>}

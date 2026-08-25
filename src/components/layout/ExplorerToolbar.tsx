@@ -6,11 +6,10 @@
 import { Service } from "@hosanna/shared";
 import { Archive, ArrowUpDown, Filter, LayoutGrid, List } from "lucide-react";
 import React from "react";
+import { ViewName } from "../../layouts/view";
 
 interface ExplorerToolbarProps {
-  isExplorerView: boolean;
-  isServicesView: boolean;
-  isSongsView: boolean;
+  view: ViewName;
   activeFiltersCount: number;
   showArchived: boolean;
   setShowArchived: React.Dispatch<React.SetStateAction<boolean>>;
@@ -29,9 +28,7 @@ interface ExplorerToolbarProps {
 }
 
 export const ExplorerToolbar: React.FC<ExplorerToolbarProps> = ({
-  isExplorerView,
-  isServicesView,
-  isSongsView,
+  view,
   activeFiltersCount,
   showArchived,
   setShowArchived,
@@ -45,14 +42,15 @@ export const ExplorerToolbar: React.FC<ExplorerToolbarProps> = ({
   onDensityChange,
   onOpenFilterPanel,
 }) => {
-  if (!isExplorerView && !isServicesView && !isSongsView) return null;
+  if (view !== "explorer" && view !== "services" && view !== "songs")
+    return null;
 
   return (
     <div className="px-4 py-2.5 bg-m3-sidebar/20 border-b border-m3-border/40 flex items-center justify-between gap-3 flex-wrap">
       {/* Left Side: Filter button, Archive button (services), Sort dropdown */}
       <div className="flex items-center gap-2.5 flex-wrap">
         {/* Filter Pop-Up Panel Trigger Button */}
-        {isExplorerView && (
+        {view === "explorer" && (
           <button
             onClick={onOpenFilterPanel}
             className={`flex items-center gap-2 px-4 py-1.5 rounded-2xl border text-xs font-black uppercase tracking-widest transition-all cursor-pointer relative ${
@@ -73,7 +71,7 @@ export const ExplorerToolbar: React.FC<ExplorerToolbarProps> = ({
         )}
 
         {/* Archive Toggle Button (Services View) */}
-        {isServicesView && (
+        {view === "services" && (
           <button
             type="button"
             onClick={() => setShowArchived((v) => !v)}
@@ -107,9 +105,11 @@ export const ExplorerToolbar: React.FC<ExplorerToolbarProps> = ({
               onSortChange(sb, so);
             }}
             className="bg-transparent font-bold text-m3-text focus:outline-none cursor-pointer text-[11px] uppercase tracking-wider"
-            title={isServicesView ? "Organizar cultos" : "Organizar ficheiros"}
+            title={
+              view === "services" ? "Organizar cultos" : "Organizar ficheiros"
+            }
           >
-            {isServicesView ? (
+            {view === "services" ? (
               <>
                 <option value="updatedAt-desc">Data: Recente</option>
                 <option value="updatedAt-asc">Data: Antiga</option>
@@ -131,7 +131,7 @@ export const ExplorerToolbar: React.FC<ExplorerToolbarProps> = ({
       {/* Right Side: View Mode Toggle & Density Selector */}
       <div className="flex items-center gap-2.5">
         {/* View Mode Toggle (hidden in Songs view) */}
-        {!isSongsView && (
+        {view !== "songs" && (
           <div
             role="group"
             aria-label="Modo de visualização"

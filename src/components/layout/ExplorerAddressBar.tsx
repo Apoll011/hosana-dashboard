@@ -21,20 +21,14 @@ import {
   X,
 } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
+import { ViewName } from "../../layouts/view";
 import { authClient } from "../../lib/authClient";
 import { Can, CanAny } from "../../lib/permissions/components";
 import { InboxButton, InboxFetchClient } from "../Inbox";
 import { SyncStatusBadge } from "../SyncStatusBadge";
 
 interface ExplorerAddressBarProps {
-  isExplorerView: boolean;
-  isSongsView: boolean;
-  isSongEditorView: boolean;
-  isServicesView: boolean;
-  isServiceEditorView: boolean;
-  isSettingsView: boolean;
-  isTeamsView: boolean;
-  isTrashView: boolean;
+  view: ViewName;
   isSidebarOpen: boolean;
   setIsSidebarOpen: (v: boolean) => void;
   currentFolder: Folder | undefined;
@@ -57,14 +51,7 @@ interface ExplorerAddressBarProps {
 }
 
 export const ExplorerAddressBar: React.FC<ExplorerAddressBarProps> = ({
-  isExplorerView,
-  isSongsView,
-  isSongEditorView,
-  isServicesView,
-  isServiceEditorView,
-  isSettingsView,
-  isTeamsView,
-  isTrashView,
+  view,
   isSidebarOpen,
   setIsSidebarOpen,
   currentFolder,
@@ -85,6 +72,7 @@ export const ExplorerAddressBar: React.FC<ExplorerAddressBarProps> = ({
   onOpenCreateService,
   onOpenCreateFolder,
 }) => {
+  const isDriveRoot = view === "explorer" && currentFolderId === null;
   const [isPlusMenuOpen, setIsPlusMenuOpen] = useState(false);
   const plusMenuRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -115,9 +103,9 @@ export const ExplorerAddressBar: React.FC<ExplorerAddressBarProps> = ({
         {/* Up / Back Button */}
         <button
           onClick={onNavigateBack}
-          disabled={isExplorerView && currentFolderId === null}
+          disabled={isDriveRoot}
           title={
-            isExplorerView
+            view === "explorer"
               ? currentFolderId === null
                 ? "No Nível Raiz"
                 : currentFolder?.parentId
@@ -126,7 +114,7 @@ export const ExplorerAddressBar: React.FC<ExplorerAddressBarProps> = ({
               : "Voltar"
           }
           className={`p-2.5 rounded-2xl border transition-all ${
-            isExplorerView && currentFolderId === null
+            isDriveRoot
               ? "text-m3-secondary/30 bg-m3-bg border-m3-border/30 cursor-not-allowed opacity-50"
               : "text-m3-primary border-m3-primary/30 hover:bg-m3-primary hover:text-white bg-m3-card cursor-pointer shadow-sm hover:shadow-m3-primary/20"
           }`}
@@ -142,22 +130,20 @@ export const ExplorerAddressBar: React.FC<ExplorerAddressBarProps> = ({
               navigate(`${slugPrefix}/folders`);
             }}
             className={`flex items-center gap-2 font-black tracking-widest transition-all cursor-pointer shrink-0 ${
-              currentFolderId === null && isExplorerView
+              isDriveRoot
                 ? "text-m3-primary"
                 : "text-m3-secondary hover:text-m3-text"
             }`}
           >
             <HardDrive
               className={`w-4 h-4 ${
-                currentFolderId === null && isExplorerView
-                  ? "text-m3-primary"
-                  : "text-m3-secondary"
+                isDriveRoot ? "text-m3-primary" : "text-m3-secondary"
               }`}
             />
             <span>Início</span>
           </button>
 
-          {isExplorerView &&
+          {view === "explorer" &&
             folderBreadcrumbs.map((folder, index) => {
               const isLast = index === folderBreadcrumbs.length - 1;
               return (
@@ -181,7 +167,7 @@ export const ExplorerAddressBar: React.FC<ExplorerAddressBarProps> = ({
               );
             })}
 
-          {isSongsView && (
+          {view === "songs" && (
             <>
               <ChevronRight className="w-3.5 h-3.5 text-m3-secondary/40 shrink-0" />
               <div className="flex items-center gap-2 font-black text-m3-primary shrink-0 tracking-wide">
@@ -191,7 +177,7 @@ export const ExplorerAddressBar: React.FC<ExplorerAddressBarProps> = ({
             </>
           )}
 
-          {isSongEditorView && (
+          {view === "song-editor" && (
             <>
               {songBreadcrumbs.map((folder) => (
                 <React.Fragment key={folder.id}>
@@ -221,7 +207,7 @@ export const ExplorerAddressBar: React.FC<ExplorerAddressBarProps> = ({
             </>
           )}
 
-          {isServicesView && (
+          {view === "services" && (
             <>
               <ChevronRight className="w-3.5 h-3.5 text-m3-secondary/40 shrink-0" />
               <div className="flex items-center gap-2 font-black text-m3-primary shrink-0 tracking-wide">
@@ -231,7 +217,7 @@ export const ExplorerAddressBar: React.FC<ExplorerAddressBarProps> = ({
             </>
           )}
 
-          {isServiceEditorView && (
+          {view === "service-editor" && (
             <>
               <ChevronRight className="w-3.5 h-3.5 text-m3-secondary/40 shrink-0" />
               <button
@@ -272,7 +258,7 @@ export const ExplorerAddressBar: React.FC<ExplorerAddressBarProps> = ({
             </>
           )}
 
-          {isSettingsView && (
+          {view === "settings" && (
             <>
               <ChevronRight className="w-3.5 h-3.5 text-m3-secondary/40 shrink-0" />
               <div className="flex items-center gap-2 font-black text-m3-primary shrink-0 tracking-wide">
@@ -282,7 +268,7 @@ export const ExplorerAddressBar: React.FC<ExplorerAddressBarProps> = ({
             </>
           )}
 
-          {isTeamsView && (
+          {view === "teams" && (
             <>
               <ChevronRight className="w-3.5 h-3.5 text-m3-secondary/40 shrink-0" />
               <div className="flex items-center gap-2 font-black text-m3-primary shrink-0 tracking-wide">
@@ -292,7 +278,7 @@ export const ExplorerAddressBar: React.FC<ExplorerAddressBarProps> = ({
             </>
           )}
 
-          {isTrashView && (
+          {view === "trash" && (
             <>
               <ChevronRight className="w-3.5 h-3.5 text-m3-secondary/40 shrink-0" />
               <div className="flex items-center gap-2 font-black text-m3-primary shrink-0 tracking-wide">
@@ -307,17 +293,15 @@ export const ExplorerAddressBar: React.FC<ExplorerAddressBarProps> = ({
       {/* Search, Notifications & Plus Action */}
       <div className="flex items-center gap-3 w-full md:w-auto overflow-visible hide-scrollbar pb-1 md:pb-0 justify-end">
         {/* Search Input */}
-        {(isExplorerView || isSongsView || isServicesView) && (
+        {(view === "explorer" || view === "songs" || view === "services") && (
           <div className="relative w-full sm:w-64">
             <Input
               placeholder={
-                isServicesView
+                view === "services"
                   ? "Pesquisar cultos..."
-                  : isSongsView
+                  : view === "songs"
                     ? "Pesquisar biblioteca..."
-                    : currentFolder
-                      ? "Pesquisar pastas..."
-                      : "Pesquisar pastas..."
+                    : "Pesquisar pastas..."
               }
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
