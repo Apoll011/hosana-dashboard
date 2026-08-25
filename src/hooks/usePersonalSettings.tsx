@@ -4,16 +4,17 @@
  */
 
 import { useCallback, useSyncExternalStore } from "react";
+import { PersonalLanguage } from "../i18n/types";
 
 export interface PersonalSettings {
   showFolderTree: boolean;
-  // Add future settings here, e.g.:
-  // theme: "light" | "dark" | "system";
-  // compactView: boolean;
+  /** UI language preference. `"auto"` follows org → browser → default. */
+  language: PersonalLanguage;
 }
 
 const DEFAULT_SETTINGS: PersonalSettings = {
   showFolderTree: true,
+  language: "auto",
 };
 
 const STORAGE_KEY = "personal-settings";
