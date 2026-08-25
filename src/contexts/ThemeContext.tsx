@@ -1,6 +1,10 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
+import {
+  usePersonalSettings,
+  type PersonalTheme,
+} from "../hooks/usePersonalSettings";
 
-export type Theme = "light" | "dark" | "system";
+export type Theme = PersonalTheme;
 
 interface ThemeContextType {
   theme: Theme;
@@ -14,9 +18,8 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 export const ThemeProvider: React.FC<{
   children: React.ReactNode;
 }> = ({ children }) => {
-  const [theme, setTheme] = useState<Theme>(() => {
-    return (localStorage.getItem("chordpro_theme") as Theme) ?? "light";
-  });
+  const { settings, updateSetting } = usePersonalSettings();
+  const theme = settings.theme;
 
   const [systemDark, setSystemDark] = useState(
     () => window.matchMedia("(prefers-color-scheme: dark)").matches,
@@ -35,12 +38,13 @@ export const ThemeProvider: React.FC<{
     return () => media.removeEventListener("change", listener);
   }, []);
 
+  const setTheme = (next: Theme) => updateSetting("theme", next);
+
   const darkMode = theme === "system" ? systemDark : theme === "dark";
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", darkMode);
-    localStorage.setItem("chordpro_theme", theme);
-  }, [theme, darkMode]);
+  }, [darkMode]);
 
   const toggleDarkMode = () => {
     if (theme === "system") {
