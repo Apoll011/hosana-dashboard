@@ -33,9 +33,9 @@ import {
 } from "../../components/explorer";
 import { ServiceForm } from "../../components/forms/ServiceForm";
 import { useAuth } from "../../contexts/AuthContext";
-import { useI18n } from "../../i18n";
 import { useMarqueeSelection } from "../../hooks/useMarqueeSelection";
 import { useServices } from "../../hooks/useServices";
+import { useI18n } from "../../i18n";
 
 interface ServicesPageProps {
   hideHeader?: boolean;
@@ -843,7 +843,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
         onConfirm={handleDeleteConfirm}
         title={t("servicesPage.deleteService")}
         message={t("servicesPage.deleteServiceMessage", {
-          name: deleteTarget?.name,
+          name: deleteTarget!.name,
         })}
         confirmText={t("servicesPage.deleteService")}
       />
@@ -863,7 +863,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
           action: archiveTarget?.archived
             ? t("servicesPage.activate")
             : t("servicesPage.archive"),
-          name: archiveTarget?.name,
+          name: archiveTarget!.name,
         })}
         confirmText={
           archiveTarget?.archived
