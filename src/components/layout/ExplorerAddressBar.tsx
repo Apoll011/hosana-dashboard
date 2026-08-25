@@ -64,6 +64,7 @@ export const ExplorerAddressBar: React.FC<ExplorerAddressBarProps> = ({
   isServiceEditorView,
   isSettingsView,
   isTeamsView,
+  isTrashView,
   isSidebarOpen,
   setIsSidebarOpen,
   currentFolder,
