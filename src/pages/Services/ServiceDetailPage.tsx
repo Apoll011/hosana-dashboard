@@ -646,6 +646,13 @@ export const ServiceDetailPage: React.FC = () => {
     setPreviewElement((prev) => (prev?.id === el.id ? null : el));
   };
 
+  // Keep the last previewed song mounted during the close animation
+  const previewContentRef = useRef<ServiceElement | null>(null);
+  useEffect(() => {
+    if (previewElement) previewContentRef.current = previewElement;
+  }, [previewElement]);
+  const previewContent = previewElement ?? previewContentRef.current;
+
   const syncElements = async (
     newElements: ServiceElement[],
     fallbackElements: ServiceElement[] = elementsRef.current,
@@ -1042,11 +1049,11 @@ export const ServiceDetailPage: React.FC = () => {
         </div>
 
         <div
-          className={`flex-1 flex flex-col min-w-0 overflow-hidden bg-m3-background relative transition-all ${!showLibrary ? "p-4 lg:p-6" : ""}`}
+          className={`flex-1 flex flex-col min-w-0 overflow-hidden bg-m3-background relative transition-all ${!showLibrary && !previewElement ? "p-4 lg:p-6" : ""}`}
         >
           <div className="max-w-5xl w-full mx-auto flex flex-col h-full">
             <div
-              className={`flex-1 flex flex-col bg-m3-card overflow-hidden min-h-0 transition-all ${!showLibrary ? "rounded-3xl border border-m3-border shadow-sm" : ""}`}
+              className={`flex-1 flex flex-col bg-m3-card overflow-hidden min-h-0 transition-all ${!showLibrary && !previewElement ? "rounded-3xl border border-m3-border shadow-sm" : ""}`}
             >
               <div className="flex flex-wrap items-center justify-between px-5 py-3 border-b border-m3-border shrink-0 bg-m3-sidebar/30 gap-3">
                 <div className="flex items-center gap-3">
@@ -1208,33 +1215,37 @@ export const ServiceDetailPage: React.FC = () => {
           </div>
         </div>
 
-        {previewElement && (
-          <div className="absolute inset-y-0 right-0 z-30 w-full sm:w-96 lg:w-[28rem] flex flex-col bg-m3-sidebar/30 border-l border-m3-border shadow-2xl md:static md:shadow-none transition-all duration-300">
-            <div className="p-4 border-b border-m3-border bg-m3-card shrink-0">
-              <div className="flex items-center justify-between gap-2">
-                <h2 className="text-sm font-bold text-m3-text flex items-center gap-2 min-w-0">
-                  <Music className="w-4 h-4 text-m3-primary shrink-0" />
-                  <span className="truncate">{previewElement.title}</span>
-                </h2>
-                <button
-                  type="button"
-                  onClick={() => setPreviewElement(null)}
-                  className="p-1.5 rounded-lg text-m3-secondary hover:text-m3-primary hover:bg-m3-primary/10 transition-colors shrink-0"
-                  title="Fechar Prévia"
-                  aria-label="Fechar Prévia"
-                >
-                  <PanelRightClose className="w-4 h-4" />
-                </button>
+        <div
+          className={`transition-all duration-300 flex flex-col border-l border-m3-border bg-m3-sidebar/30 ${previewElement ? "w-full md:w-96 lg:w-[28rem] translate-x-0" : "w-0 translate-x-full border-none opacity-0 overflow-hidden"}`}
+        >
+          {previewContent && (
+            <>
+              <div className="p-4 border-b border-m3-border bg-m3-card shrink-0">
+                <div className="flex items-center justify-between gap-2">
+                  <h2 className="text-sm font-bold text-m3-text flex items-center gap-2 min-w-0">
+                    <Music className="w-4 h-4 text-m3-primary shrink-0" />
+                    <span className="truncate">{previewContent.title}</span>
+                  </h2>
+                  <button
+                    type="button"
+                    onClick={() => setPreviewElement(null)}
+                    className="p-1.5 rounded-lg text-m3-secondary hover:text-m3-primary hover:bg-m3-primary/10 transition-colors shrink-0"
+                    title="Fechar Prévia"
+                    aria-label="Fechar Prévia"
+                  >
+                    <PanelRightClose className="w-4 h-4" />
+                  </button>
+                </div>
+                <p className="text-xs text-m3-secondary truncate mt-0.5">
+                  {previewContent.content || "—"}
+                </p>
               </div>
-              <p className="text-xs text-m3-secondary truncate mt-0.5">
-                {previewElement.content || "—"}
-              </p>
-            </div>
-            <div className="flex-1 overflow-hidden min-h-0">
-              <SongPreview element={previewElement} />
-            </div>
-          </div>
-        )}
+              <div className="flex-1 overflow-hidden min-h-0">
+                <SongPreview element={previewContent} />
+              </div>
+            </>
+          )}
+        </div>
       </div>
 
       <WelcomeModal
