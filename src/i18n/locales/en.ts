@@ -255,8 +255,10 @@ export const en: typeof pt = {
     moveError: "Error moving items. Changes were reverted.",
     songCreated: "Song created successfully!",
     songImported: "Song imported successfully!",
-    folderNameMismatch: "The folder name entered does not match the folder name.",
-    uploadSuccess: '{count} {type} file(s) uploaded successfully to "{folder}"!',
+    folderNameMismatch:
+      "The folder name entered does not match the folder name.",
+    uploadSuccess:
+      '{count} {type} file(s) uploaded successfully to "{folder}"!',
     uploadError: "Error uploading {count} {type} file(s)",
     uploadIgnored: "Ignored {count} {type} file(s)",
   },
@@ -355,8 +357,7 @@ export const en: typeof pt = {
     loading: "Loading library...",
     loadError: "Error loading songs: {error}",
     noResults: "No songs found",
-    noResultsDesc:
-      "Your search returned no results. Try more generic terms.",
+    noResultsDesc: "Your search returned no results. Try more generic terms.",
     emptyDesc: "Your library is empty. Start your musical journey now!",
     titlePath: "Title & Path",
     artist: "Artist",
@@ -464,9 +465,9 @@ export const en: typeof pt = {
     add: "Add",
     replace: "Replace",
     remove: "Remove",
-    appendDesc: "• Adds these tags while keeping the existing ones on the songs.",
-    replaceDesc:
-      "• Replaces all existing tags with the tags selected below.",
+    appendDesc:
+      "• Adds these tags while keeping the existing ones on the songs.",
+    replaceDesc: "• Replaces all existing tags with the tags selected below.",
     removeDesc: "• Removes these specific tags from all selected songs.",
     suggestedCategories: "Suggested Categories & Themes",
     newCustomTag: "New Custom Tag",
@@ -484,7 +485,8 @@ export const en: typeof pt = {
     noIconFound: 'No icon found for "{query}"',
     saving: "Saving...",
     importCifraTitle: "Import Chords (Cifra Club or Ultimate Guitar)",
-    pasteLink: "Paste the direct link to the chord page on Cifra Club or Ultimate Guitar.",
+    pasteLink:
+      "Paste the direct link to the chord page on Cifra Club or Ultimate Guitar.",
     songLink: "Song / Chord Link",
     pleaseEnterLink: "Please enter a Cifra Club or Ultimate Guitar link.",
     pleaseEnterValidLink:
