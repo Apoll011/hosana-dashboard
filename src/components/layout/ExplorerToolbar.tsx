@@ -132,32 +132,40 @@ export const ExplorerToolbar: React.FC<ExplorerToolbarProps> = ({
       <div className="flex items-center gap-2.5">
         {/* View Mode Toggle (hidden in Songs view) */}
         {!isSongsView && (
-          <div className="flex items-center bg-m3-bg rounded-2xl border border-m3-border select-none shrink-0 shadow-inner">
+          <div
+            role="group"
+            aria-label="Modo de visualização"
+            className="inline-flex items-center bg-slate-100 p-px dark:bg-slate-800/80 rounded-xl border border-slate-200/80 dark:border-slate-700/80 select-none shrink-0 shadow-inner"
+          >
             <button
+              type="button"
               onClick={() => onViewModeChange("grid")}
               title="Vista em Grelha"
-              className={`p-2 rounded-2xl transition-all cursor-pointer ${
+              aria-pressed={viewMode === "grid"}
+              className={`relative flex items-center justify-center p-1.5 rounded-xl text-xs font-medium transition-all duration-200 cursor-pointer focus:outline-hidden focus-visible:ring-2 focus-visible:ring-m3-primary ${
                 viewMode === "grid"
-                  ? "bg-m3-card text-m3-primary"
-                  : "text-m3-secondary hover:text-m3-text"
+                  ? "bg-white dark:bg-slate-900 text-m3-primary shadow-xs ring-1 ring-black/5 dark:ring-white/10 font-bold scale-[1.02]"
+                  : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-black/5 dark:hover:bg-white/5"
               }`}
             >
-              <LayoutGrid className="w-4 h-4" />
+              <LayoutGrid className="w-4 h-4 stroke-[2.2]" />
             </button>
+
             <button
+              type="button"
               onClick={() => onViewModeChange("list")}
               title="Vista em Lista"
-              className={`p-2 rounded-2xl transition-all cursor-pointer ${
+              aria-pressed={viewMode === "list"}
+              className={`relative flex items-center justify-center p-1.5 rounded-xl text-xs font-medium transition-all duration-200 cursor-pointer focus:outline-hidden focus-visible:ring-2 focus-visible:ring-m3-primary ${
                 viewMode === "list"
-                  ? "bg-m3-card text-m3-primary"
-                  : "text-m3-secondary hover:text-m3-text"
+                  ? "bg-white dark:bg-slate-900 text-m3-primary shadow-xs ring-1 ring-black/5 dark:ring-white/10 font-bold scale-[1.02]"
+                  : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-black/5 dark:hover:bg-white/5"
               }`}
             >
-              <List className="w-4 h-4" />
+              <List className="w-4 h-4 stroke-[2.2]" />
             </button>
           </div>
         )}
-
         {/* Density Selector (Confortável / Compacto) */}
         <div className="flex items-center gap-2 bg-m3-bg border border-m3-border rounded-2xl px-3 py-1.5 text-xs transition-all hover:border-m3-primary/30">
           <LayoutGrid className="w-4 h-4 text-m3-primary shrink-0" />
