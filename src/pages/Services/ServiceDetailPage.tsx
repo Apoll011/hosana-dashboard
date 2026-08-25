@@ -955,9 +955,13 @@ export const ServiceDetailPage: React.FC = () => {
           </div>
         </div>
 
-        <div className="flex-1 flex flex-col min-w-0 overflow-hidden bg-m3-background relative p-4 lg:p-6">
+        <div
+          className={`flex-1 flex flex-col min-w-0 overflow-hidden bg-m3-background relative transition-all ${!showLibrary ? "p-4 lg:p-6" : ""}`}
+        >
           <div className="max-w-5xl w-full mx-auto flex flex-col h-full">
-            <div className="flex-1 flex flex-col bg-m3-card rounded-3xl border border-m3-border shadow-sm overflow-hidden min-h-0">
+            <div
+              className={`flex-1 flex flex-col bg-m3-card overflow-hidden min-h-0 transition-all ${!showLibrary ? "rounded-3xl border border-m3-border shadow-sm" : ""}`}
+            >
               <div className="flex flex-wrap items-center justify-between px-5 py-3 border-b border-m3-border shrink-0 bg-m3-sidebar/30 gap-3">
                 <div className="flex items-center gap-3">
                   <h2 className="text-base font-bold text-m3-text">
