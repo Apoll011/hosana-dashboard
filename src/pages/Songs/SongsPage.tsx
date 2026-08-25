@@ -53,6 +53,7 @@ import { useAuth } from "../../contexts/AuthContext";
 import { useSync } from "../../contexts/SyncContext";
 import { useFolders } from "../../hooks/useFolders";
 import { useAllSongs } from "../../hooks/useSongs";
+import { usePersonalSettings } from "../../hooks/usePersonalSettings";
 import { useI18n } from "../../i18n";
 
 interface SongsPageProps {
@@ -81,6 +82,7 @@ export const SongsPage: React.FC<SongsPageProps> = ({
 }) => {
   const { navigate } = useAppNavigate();
   const { t, tc, locale } = useI18n();
+  const { settings, updateSetting } = usePersonalSettings();
   const { organization } = useAuth();
   const { showToast } = useSync();
   const slugPrefix = organization?.slug ? `/${organization.slug}` : "";
@@ -92,31 +94,15 @@ export const SongsPage: React.FC<SongsPageProps> = ({
   const actualHideHeader =
     hideHeader ?? (context.hideHeader as boolean | undefined);
 
-  // Density from context with localStorage fallback
+  // Density from context with the unified personal-settings fallback
   const contextDensity = context.density as
     "comfortable" | "compact" | undefined;
 
-  const [localDensity, setLocalDensity] = useState<"comfortable" | "compact">(
-    () => {
-      try {
-        return (
-          (localStorage.getItem("explorer_density") as
-            "comfortable" | "compact") || "comfortable"
-        );
-      } catch {
-        return "comfortable";
-      }
-    },
-  );
-
-  const density = contextDensity ?? localDensity;
+  const density = contextDensity ?? settings.explorerDensity;
   const isCompact = density === "compact";
 
   const handleDensityChange = (d: "comfortable" | "compact") => {
-    setLocalDensity(d);
-    try {
-      localStorage.setItem("explorer_density", d);
-    } catch {}
+    updateSetting("explorerDensity", d);
   };
 
   // Search & Filter props resolution
@@ -492,7 +478,10 @@ export const SongsPage: React.FC<SongsPageProps> = ({
           });
         }
       }
-      showToast(t("songsPage.movedToast", { count: songList.length }), "success");
+      showToast(
+        t("songsPage.movedToast", { count: songList.length }),
+        "success",
+      );
       setSelectedSongIds(new Set());
       setIsBatchMoveOpen(false);
     },
@@ -1042,7 +1031,9 @@ export const SongsPage: React.FC<SongsPageProps> = ({
                 >
                   <Trash2 className="w-4 h-4 text-rose-500" />
                   <span>
-                    {t("songsPage.deleteCount", { count: selectedSongIds.size })}
+                    {t("songsPage.deleteCount", {
+                      count: selectedSongIds.size,
+                    })}
                   </span>
                 </button>
               </Can>

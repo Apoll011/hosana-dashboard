@@ -55,17 +55,15 @@ export const MainLayout: React.FC = () => {
     [location.pathname, slugPrefix],
   );
 
-  const { settings } = usePersonalSettings();
+  const { settings, updateSetting } = usePersonalSettings();
 
   // Sidebar & Responsive State
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(
-    () => localStorage.getItem("sidebarCollapsed") === "true",
+  const isSidebarCollapsed = settings.sidebarCollapsed;
+  const setIsSidebarCollapsed = useCallback(
+    (v: boolean) => updateSetting("sidebarCollapsed", v),
+    [updateSetting],
   );
-
-  useEffect(() => {
-    localStorage.setItem("sidebarCollapsed", String(isSidebarCollapsed));
-  }, [isSidebarCollapsed]);
 
   // Service Worker & Sync
   const { showToast, triggerSyncCheck } = useSync();
@@ -151,36 +149,24 @@ export const MainLayout: React.FC = () => {
   );
 
   // View Mode & Density
-  const [viewMode, setViewMode] = useState<"grid" | "list">(
-    () => (localStorage.getItem("viewMode") as "grid" | "list") || "grid",
-  );
+  const viewMode = settings.viewMode;
   const handleViewModeChange = useCallback(
     (mode: "grid" | "list") => {
-      setViewMode(mode);
-      localStorage.setItem("viewMode", mode);
+      updateSetting("viewMode", mode);
       if (view === "settings") {
         navigate(`${slugPrefix}/folders`);
       }
     },
-    [view, navigate, slugPrefix],
+    [view, navigate, slugPrefix, updateSetting],
   );
 
-  const [density, setDensity] = useState<"comfortable" | "compact">(() => {
-    try {
-      return (
-        (localStorage.getItem("explorer_density") as
-          "comfortable" | "compact") || "comfortable"
-      );
-    } catch {
-      return "comfortable";
-    }
-  });
-  const handleDensityChange = useCallback((d: "comfortable" | "compact") => {
-    setDensity(d);
-    try {
-      localStorage.setItem("explorer_density", d);
-    } catch {}
-  }, []);
+  const density = settings.explorerDensity;
+  const handleDensityChange = useCallback(
+    (d: "comfortable" | "compact") => {
+      updateSetting("explorerDensity", d);
+    },
+    [updateSetting],
+  );
 
   // Search & Filter State
   const [searchQuery, setSearchQuery] = useState("");

@@ -17,7 +17,7 @@ import {
   Sun,
   User,
 } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { useTheme } from "../../contexts/ThemeContext";
 import { useI18n } from "../../i18n";
 import { LANGUAGES } from "../../i18n/languages";
@@ -46,22 +46,6 @@ export const AppearanceTab: React.FC<AppearanceTabProps> = ({
   const { theme, setTheme } = useTheme();
   const { settings, updateSetting } = usePersonalSettings();
   const { t, personalLanguage, setPersonalLanguage } = useI18n();
-
-  const [studioSettings, setStudioSettings] = useState({
-    showChordsDefault: true,
-  });
-
-  // Carregar preferências locais do Studio
-  useEffect(() => {
-    try {
-      const storedChords = localStorage.getItem("@hosanna:showChordsDefault");
-      if (storedChords !== null) {
-        setStudioSettings({ showChordsDefault: storedChords === "true" });
-      }
-    } catch {
-      // Fallback gracioso se localStorage estiver bloqueado
-    }
-  }, []);
 
   if (!active) return null;
 
@@ -114,12 +98,7 @@ export const AppearanceTab: React.FC<AppearanceTabProps> = ({
   };
 
   const handleStudioSettingsChange = (checked: boolean) => {
-    setStudioSettings({ showChordsDefault: checked });
-    try {
-      localStorage.setItem("@hosanna:showChordsDefault", checked.toString());
-    } catch {
-      // Silently ignore storage errors
-    }
+    updateSetting("showChordsDefault", checked);
     showToast?.(
       checked
         ? t("settings.toast.chordsVisible")
@@ -351,7 +330,7 @@ export const AppearanceTab: React.FC<AppearanceTabProps> = ({
             <div className="flex items-center h-5 mt-0.5">
               <input
                 type="checkbox"
-                checked={studioSettings.showChordsDefault}
+                checked={settings.showChordsDefault}
                 onChange={(e) => handleStudioSettingsChange(e.target.checked)}
                 className="w-4.5 h-4.5 text-emerald-600 border-slate-300 rounded focus:ring-emerald-500 cursor-pointer"
               />
