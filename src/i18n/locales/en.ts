@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { MessageDict } from "../types";
+import type { pt } from "./pt";
 
-export const en: MessageDict = {
+export const en: typeof pt = {
   common: {
     library: "Library",
     services: "Services",
