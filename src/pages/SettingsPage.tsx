@@ -6,9 +6,9 @@
 import { Button, Modal, backupApi } from "@hosanna/shared";
 import {
   AlertTriangle,
+  AppWindow,
   Building2,
   Info,
-  Palette,
   RotateCcw,
   Server,
   User,
@@ -23,13 +23,13 @@ import { AppearanceTab } from "../components/settings/AppearanceTab";
 import { GeneralTab } from "../components/settings/GeneralTab";
 import { MembersTab } from "../components/settings/MembersTab";
 import { WorkspaceTab } from "../components/settings/WorkspaceTab";
-import { useActiveRole } from "../lib/permissions/client";
+import { useActiveRole, useCan } from "../lib/permissions/client";
 
 import { CloudOff } from "lucide-react";
 import { useOnline } from "../hooks/useOnline";
 
 type TabType =
-  "general" | "workspace" | "account" | "members" | "appearance" | "about";
+  "general" | "workspace" | "account" | "members" | "app" | "about";
 
 export const SettingsPage: React.FC = () => {
   const { showToast } = useSync();
@@ -74,7 +74,7 @@ export const SettingsPage: React.FC = () => {
   };
 
   const { role } = useActiveRole();
-  const isServerAdminRole = role === "admin" || role === "owner";
+  const { granted: canUpdate } = useCan("organization.update");
 
   const tabs = [
     {
@@ -82,27 +82,43 @@ export const SettingsPage: React.FC = () => {
       label: "Conta & Segurança",
       icon: User,
       requiresNetwork: true,
+      show: true,
     },
     {
       id: "workspace",
       label: "Organização",
       icon: Building2,
       requiresNetwork: true,
+      show: true,
     },
-    { id: "members", label: "Membros", icon: Users, requiresNetwork: true },
+    {
+      id: "members",
+      label: "Membros",
+      icon: Users,
+      requiresNetwork: true,
+      show: true,
+    },
     {
       id: "general",
-      label: isServerAdminRole ? "Servidor & Geral" : "Geral",
+      label: "Servidor",
       icon: Server,
       requiresNetwork: true,
+      show: canUpdate,
     },
     {
-      id: "appearance",
-      label: "Aparência",
-      icon: Palette,
+      id: "app",
+      label: "Applicação",
+      icon: AppWindow,
       requiresNetwork: false,
+      show: true,
     },
-    { id: "about", label: "Sobre", icon: Info, requiresNetwork: false },
+    {
+      id: "about",
+      label: "Sobre",
+      icon: Info,
+      requiresNetwork: false,
+      show: true,
+    },
   ];
 
   return (
@@ -127,6 +143,8 @@ export const SettingsPage: React.FC = () => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
             const isTabDisabled = !isOnline && tab.requiresNetwork;
+
+            if (!tab.show) return;
 
             return (
               <button
@@ -172,7 +190,7 @@ export const SettingsPage: React.FC = () => {
             <MembersTab active={activeTab === "members"} />
             <GeneralTab active={activeTab === "general"} />
           </div>
-          <AppearanceTab active={activeTab === "appearance"} />
+          <AppearanceTab active={activeTab === "app"} />
           <AboutTab active={activeTab === "about"} />
         </div>
       </div>
