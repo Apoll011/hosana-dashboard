@@ -55,6 +55,7 @@ import { useParams } from "react-router-dom";
 import { useSync } from "../../contexts/SyncContext";
 import { useService, useServices } from "../../hooks/useServices";
 import { useSong, useSongs } from "../../hooks/useSongs";
+import { TranslateFn, useI18n } from "../../i18n";
 import { AnnouncementModal } from "./modals/Anouncement";
 import { ScriptureModal } from "./modals/Bible";
 import { CustomModal } from "./modals/Custom";
@@ -75,41 +76,46 @@ const formatDuration = (seconds: number) => {
   return `${String(mm).padStart(2, "0")}:${String(ss).padStart(2, "0")}`;
 };
 
-const getElementBadge = (type: string) => {
+const getElementBadge = (type: string, t: TranslateFn) => {
   switch (type.toLowerCase()) {
     case "song":
-      return { label: "Cântico", bg: "#e0f2fe", color: "#0284c7", icon: Music };
+      return {
+        label: t("serviceDetailPage.badgeSong"),
+        bg: "#e0f2fe",
+        color: "#0284c7",
+        icon: Music,
+      };
     case "welcome":
       return {
-        label: "Boas-vindas",
+        label: t("serviceDetailPage.addWelcome"),
         bg: "#EBF5FF",
         color: "#1D4ED8",
         icon: FileText,
       };
     case "scripture":
       return {
-        label: "Escritura",
+        label: t("serviceDetailPage.addScripture"),
         bg: "#FDF4FF",
         color: "#C026D3",
         icon: BookOpen,
       };
     case "message":
       return {
-        label: "Mensagem",
+        label: t("serviceDetailPage.addMessage"),
         bg: "#FEF3C7",
         color: "#D97706",
         icon: MessageSquare,
       };
     case "announcement":
       return {
-        label: "Avisos",
+        label: t("serviceDetailPage.addAnnouncement"),
         bg: "#ECFDF5",
         color: "#059669",
         icon: Megaphone,
       };
     default:
       return {
-        label: type || "Elemento",
+        label: type || t("serviceDetailPage.addCustom"),
         bg: "#F1F5F9",
         color: "#475569",
         icon: FileText,
@@ -118,6 +124,7 @@ const getElementBadge = (type: string) => {
 };
 
 const SongPreview: React.FC<{ element: ServiceElement }> = ({ element }) => {
+  const { t } = useI18n();
   const { data: song, isLoading } = useSong(element.songId || null);
   const { settings, updateSetting, resetSettings } = usePreviewSettings();
   const [showSettings, setShowSettings] = useState(false);
@@ -132,7 +139,7 @@ const SongPreview: React.FC<{ element: ServiceElement }> = ({ element }) => {
   if (!song)
     return (
       <div className="flex items-center justify-center h-full text-sm text-rose-500 font-medium">
-        Cântico não encontrado ou removido.
+        {t("serviceDetailPage.songNotFound")}
       </div>
     );
 
@@ -140,12 +147,13 @@ const SongPreview: React.FC<{ element: ServiceElement }> = ({ element }) => {
     <div className="flex flex-col h-full relative">
       <div className="h-10 bg-m3-sidebar/50 border-b border-m3-border dark:border-m3-dark-border flex items-center justify-between px-3 shrink-0">
         <span className="text-[10px] font-semibold text-m3-secondary uppercase tracking-wider flex items-center gap-1.5">
-          <LayoutTemplate className="w-3 h-3" /> Prévia Visual
+          <LayoutTemplate className="w-3 h-3" />{" "}
+          {t("serviceDetailPage.previewTitle")}
         </span>
         <button
           onClick={() => setShowSettings(!showSettings)}
-          className={`p-1 rounded transition-colors ${showSettings ? "bg-m3-primary/10 text-m3-primary" : "text-m3-secondary hover:bg-m3-hover hover:text-m3-text"}`}
-          title="Ajustes de Leitura"
+          className={`p-1 rounded transition-colors cursor-pointer ${showSettings ? "bg-m3-primary/10 text-m3-primary" : "text-m3-secondary hover:bg-m3-hover hover:text-m3-text"}`}
+          title={t("serviceDetailPage.readingSettings")}
         >
           <Settings2 className="w-3.5 h-3.5" />
         </button>
@@ -194,6 +202,7 @@ const LibrarySongItem: React.FC<LibrarySongItemProps> = ({
   isPending,
   onAdd,
 }) => {
+  const { t } = useI18n();
   const itemRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
 
@@ -230,14 +239,14 @@ const LibrarySongItem: React.FC<LibrarySongItemProps> = ({
       <div className="flex items-center gap-2 shrink-0">
         {countInService > 0 && (
           <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400">
-            Na Lista ×{countInService}
+            {t("serviceDetailPage.inService", { count: countInService })}
           </span>
         )}
         <button
           type="button"
           onClick={() => onAdd(song.id)}
           disabled={isPending}
-          className="p-1.5 rounded-lg bg-m3-primary/10 text-m3-primary hover:bg-m3-primary/20 disabled:opacity-50 transition-colors"
+          className="p-1.5 rounded-lg bg-m3-primary/10 text-m3-primary hover:bg-m3-primary/20 disabled:opacity-50 transition-colors cursor-pointer"
         >
           {isPending ? (
             <Loader2 className="w-4 h-4 animate-spin" />
@@ -269,6 +278,7 @@ const ServiceRow: React.FC<ServiceRowProps> = ({
   onEdit,
   onNoteChange,
 }) => {
+  const { t } = useI18n();
   const rowRef = useRef<HTMLDivElement>(null);
   const dragHandleRef = useRef<HTMLButtonElement>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -340,7 +350,7 @@ const ServiceRow: React.FC<ServiceRowProps> = ({
   useEffect(() => setLocalNote(element.notes || ""), [element.notes]);
 
   const isSong = element.type === "song";
-  const badge = getElementBadge(element.type);
+  const badge = getElementBadge(element.type, t);
   const Icon = badge.icon;
 
   const handleExpandToggle = () => {
@@ -366,7 +376,7 @@ const ServiceRow: React.FC<ServiceRowProps> = ({
           ref={dragHandleRef}
           type="button"
           className="text-slate-300 hover:text-slate-500 cursor-grab active:cursor-grabbing shrink-0 p-1 rounded hover:bg-m3-hover touch-none"
-          title="Arrastar para reordenar"
+          title={t("serviceDetailPage.dragToReorder")}
         >
           <GripVertical className="w-4 h-4" />
         </button>
@@ -388,7 +398,7 @@ const ServiceRow: React.FC<ServiceRowProps> = ({
         >
           <div className="flex items-center gap-2">
             <p className="text-sm font-semibold truncate text-m3-text">
-              {element.title || "Elemento Sem Título"}
+              {element.title || t("serviceDetailPage.untitledElement")}
             </p>
             <span
               className="text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0"
@@ -425,15 +435,15 @@ const ServiceRow: React.FC<ServiceRowProps> = ({
           <button
             type="button"
             onClick={handleExpandToggle}
-            className={`p-1.5 rounded-lg transition-colors ${isSong && isPreviewed ? "bg-m3-primary/10 text-m3-primary" : "text-m3-secondary hover:text-m3-primary hover:bg-m3-primary/10"}`}
+            className={`p-1.5 rounded-lg transition-colors cursor-pointer ${isSong && isPreviewed ? "bg-m3-primary/10 text-m3-primary" : "text-m3-secondary hover:text-m3-primary hover:bg-m3-primary/10"}`}
             title={
               isSong
                 ? isPreviewed
-                  ? "Fechar Prévia"
-                  : "Abrir Prévia"
+                  ? t("serviceDetailPage.closePreview")
+                  : t("serviceDetailPage.openPreview")
                 : isExpanded
-                  ? "Recolher"
-                  : "Expandir"
+                  ? t("serviceDetailPage.collapse")
+                  : t("serviceDetailPage.expand")
             }
           >
             {isSong ? (
@@ -453,7 +463,7 @@ const ServiceRow: React.FC<ServiceRowProps> = ({
             <button
               type="button"
               onClick={() => setMenuOpen(!menuOpen)}
-              className="p-1.5 text-m3-secondary hover:text-m3-primary hover:bg-m3-primary/10 rounded-lg transition-colors"
+              className="p-1.5 text-m3-secondary hover:text-m3-primary hover:bg-m3-primary/10 rounded-lg transition-colors cursor-pointer"
             >
               <MoreHorizontal className="w-4 h-4" />
             </button>
@@ -463,7 +473,7 @@ const ServiceRow: React.FC<ServiceRowProps> = ({
                   className="fixed inset-0 z-10"
                   onClick={() => setMenuOpen(false)}
                 />
-                <div className="absolute right-0 top-8 z-20 w-40 bg-white dark:bg-m3-dark-card rounded-xl shadow-lg border border-m3-border dark:border-m3-dark-border py-1">
+                <div className="absolute right-0 top-8 z-20 w-40 bg-white dark:bg-m3-card rounded-xl shadow-lg border border-m3-border dark:border-m3-border/40 py-1">
                   {!isSong && (
                     <button
                       type="button"
@@ -473,7 +483,8 @@ const ServiceRow: React.FC<ServiceRowProps> = ({
                       }}
                       className="w-full flex items-center gap-2 px-3 py-2 text-xs font-medium text-m3-text hover:bg-m3-hover cursor-pointer"
                     >
-                      <Edit3 className="w-3.5 h-3.5" /> Editar
+                      <Edit3 className="w-3.5 h-3.5" />{" "}
+                      {t("serviceDetailPage.editElement")}
                     </button>
                   )}
                   <button
@@ -486,7 +497,9 @@ const ServiceRow: React.FC<ServiceRowProps> = ({
                     className="w-full flex items-center gap-2 px-3 py-2 text-xs font-medium text-m3-text hover:bg-m3-hover cursor-pointer"
                   >
                     <FileText className="w-3.5 h-3.5" />{" "}
-                    {element.notes ? "Editar Notas" : "Adicionar Notas"}
+                    {element.notes
+                      ? t("serviceDetailPage.editNotes")
+                      : t("serviceDetailPage.addNotes")}
                   </button>
                   <button
                     type="button"
@@ -496,7 +509,8 @@ const ServiceRow: React.FC<ServiceRowProps> = ({
                     }}
                     className="w-full flex items-center gap-2 px-3 py-2 text-xs font-medium text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 cursor-pointer"
                   >
-                    <Trash2 className="w-3.5 h-3.5" /> Remover
+                    <Trash2 className="w-3.5 h-3.5" />{" "}
+                    {t("serviceDetailPage.removeElement")}
                   </button>
                 </div>
               </>
@@ -510,7 +524,8 @@ const ServiceRow: React.FC<ServiceRowProps> = ({
           {(isEditingNote || element.notes) && (
             <div className="flex flex-col gap-2">
               <label className="text-xs font-bold text-m3-secondary uppercase tracking-wider flex items-center gap-1">
-                <FileText className="w-3 h-3" /> Notas do Elemento
+                <FileText className="w-3 h-3" />{" "}
+                {t("serviceDetailPage.elementNotes")}
               </label>
               {isEditingNote ? (
                 <div className="flex items-center gap-2">
@@ -518,7 +533,7 @@ const ServiceRow: React.FC<ServiceRowProps> = ({
                     type="text"
                     value={localNote}
                     onChange={(e) => setLocalNote(e.target.value)}
-                    placeholder="Ex: Introdução ao piano..."
+                    placeholder={t("serviceDetailPage.elementNotesPlaceholder")}
                     className="flex-1 text-xs rounded-lg border border-m3-border px-3 py-2 bg-white dark:bg-m3-card focus:outline-none focus:border-m3-primary text-m3-text"
                     autoFocus
                   />
@@ -543,7 +558,7 @@ const ServiceRow: React.FC<ServiceRowProps> = ({
 
           {!isSong && (
             <div className="mt-2 text-sm text-m3-text whitespace-pre-wrap bg-white dark:bg-m3-card p-4 rounded-xl border border-m3-border dark:border-m3-border/50">
-              {element.content || "Sem conteúdo."}
+              {element.content || t("serviceDetailPage.noContent")}
             </div>
           )}
         </div>
@@ -558,6 +573,7 @@ type ModalType =
 export const ServiceDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { navigate } = useAppNavigate();
+  const { t } = useI18n();
 
   const { data: service, isLoading, isError } = useService(id || null);
   const { updateElements, updateService } = useServices();
@@ -609,7 +625,7 @@ export const ServiceDetailPage: React.FC = () => {
     }
   }, [elements, previewElement]);
 
-  // Derived state (Must be defined before usage in hooks and renders)
+  // Derived state
   const allAvailableSongs = songsQuery.data?.songs || [];
   const songCountById = elements.reduce<Record<string, number>>((acc, el) => {
     if (el.type === "song" && el.songId)
@@ -629,11 +645,14 @@ export const ServiceDetailPage: React.FC = () => {
   );
 
   const syncStatusMeta = {
-    synced: { dot: "bg-emerald-500", label: "Sincronizado" },
-    syncing: { dot: "bg-sky-500 animate-pulse", label: "A sincronizar" },
-    error: { dot: "bg-rose-500", label: "Erro de sincronização" },
-    offline: { dot: "bg-amber-500", label: "Offline" },
-    local_only: { dot: "bg-slate-400", label: "Apenas local" },
+    synced: { dot: "bg-emerald-500", label: t("misc.syncStatus.synced") },
+    syncing: {
+      dot: "bg-sky-500 animate-pulse",
+      label: t("misc.syncStatus.syncing"),
+    },
+    error: { dot: "bg-rose-500", label: t("misc.syncStatus.error") },
+    offline: { dot: "bg-amber-500", label: t("misc.syncStatus.offline") },
+    local_only: { dot: "bg-slate-400", label: t("misc.syncStatus.local_only") },
   } as const;
   const syncMeta = syncStatusMeta[syncStatus] ?? syncStatusMeta.local_only;
 
@@ -684,10 +703,20 @@ export const ServiceDetailPage: React.FC = () => {
 
   const handleSaveGeneralNotes = async () => {
     if (!service) return;
-    await updateService({
-      id: service.id,
-      data: { notes: generalNotes, updatedAt: service.updatedAt },
-    });
+    try {
+      await updateService({
+        id: service.id,
+        data: { notes: generalNotes, updatedAt: service.updatedAt },
+      });
+      showToast(t("serviceDetailPage.serviceSavedSuccess"), "success");
+    } catch (error: any) {
+      showToast(
+        t("serviceDetailPage.serviceSaveError", {
+          error: error?.message || "Sync error",
+        }),
+        "error",
+      );
+    }
   };
 
   const handleAddSongToService = async (
@@ -700,15 +729,15 @@ export const ServiceDetailPage: React.FC = () => {
     }));
     const previousElements = [...elementsRef.current];
     try {
-      const song = songsQuery.data.songs.find((s) => s.id === songId);
+      const song = allAvailableSongs.find((s) => s.id === songId);
 
       const parsed = parseChordPro(song?.content || "");
       const newElem: ServiceElement = {
         id: crypto.randomUUID(),
         type: "song",
-        title: song?.title || "Cântico Desconhecido",
+        title: song?.title || t("serviceDetailPage.unknownSong"),
         songId,
-        content: song?.artist || "Sem Compositor",
+        content: song?.artist || t("serviceDetailPage.noComposer"),
         position: previousElements.length,
         duration: Number(parsed.metadata.duration || "0"),
       };
@@ -725,7 +754,7 @@ export const ServiceDetailPage: React.FC = () => {
       }
       await syncElements(nextElements, previousElements);
     } catch {
-      showToast("Falha ao carregar cântico", "error");
+      showToast(t("serviceDetailPage.failedToLoadSong"), "error");
     } finally {
       setPendingSongIds((prev) => {
         const next = { ...prev };
@@ -901,21 +930,21 @@ export const ServiceDetailPage: React.FC = () => {
   if (isLoading)
     return (
       <div className="flex-1 flex items-center justify-center p-12">
-        <Spinner size="lg" label="A carregar plano de culto..." />
+        <Spinner size="lg" label={t("serviceDetailPage.loadingPlan")} />
       </div>
     );
   if (isError || !service)
     return (
       <div className="flex-1 flex flex-col items-center justify-center gap-4 p-12 text-center">
         <h2 className="text-lg font-bold text-m3-text">
-          Plano de Culto Não Encontrado
+          {t("serviceDetailPage.serviceNotFound")}
         </h2>
         <Button
           variant="primary"
           icon={<ArrowLeft className="w-4 h-4" />}
           onClick={() => navigate(-1)}
         >
-          Voltar
+          {t("common.back")}
         </Button>
       </div>
     );
@@ -930,7 +959,7 @@ export const ServiceDetailPage: React.FC = () => {
             size="sm"
             onClick={() => navigate(-1)}
             className="p-1 -ml-2"
-            title="Voltar"
+            title={t("common.back")}
           >
             <ArrowLeft className="w-4 h-4 text-m3-secondary" />
           </Button>
@@ -938,7 +967,9 @@ export const ServiceDetailPage: React.FC = () => {
             <h1 className="text-sm font-bold text-m3-text flex items-center gap-2">
               {service.name}
             </h1>
-            <p className="text-[10px] text-m3-secondary">Plano de Culto</p>
+            <p className="text-[10px] text-m3-secondary">
+              {t("serviceDetailPage.servicePlan")}
+            </p>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -956,7 +987,9 @@ export const ServiceDetailPage: React.FC = () => {
             <span className="w-px h-3.5 bg-m3-border/70 hidden sm:inline-block" />
             <span className="text-[11px] font-semibold text-m3-secondary">
               {elements.length}{" "}
-              {elements.length === 1 ? "elemento" : "elementos"}
+              {elements.length === 1
+                ? t("serviceDetailPage.elementSingular")
+                : t("serviceDetailPage.elementPlural")}
             </span>
           </div>
         </div>
@@ -968,9 +1001,9 @@ export const ServiceDetailPage: React.FC = () => {
           <button
             type="button"
             onClick={handleOpenLibrary}
-            className="absolute left-0 top-1/2 -translate-y-1/2 z-20 w-9 h-16 flex items-center justify-center bg-m3-card border border-l-0 border-m3-border rounded-r-2xl shadow-md text-m3-primary hover:bg-m3-primary/10 hover:border-m3-primary/40 transition-colors group"
-            title="Ver Biblioteca"
-            aria-label="Ver Biblioteca"
+            className="absolute left-0 top-1/2 -translate-y-1/2 z-20 w-9 h-16 flex items-center justify-center bg-m3-card border border-l-0 border-m3-border rounded-r-2xl shadow-md text-m3-primary hover:bg-m3-primary/10 hover:border-m3-primary/40 transition-colors group cursor-pointer"
+            title={t("serviceDetailPage.viewLibrary")}
+            aria-label={t("serviceDetailPage.viewLibrary")}
           >
             <PanelLeftOpen className="w-4 h-4" />
           </button>
@@ -983,14 +1016,14 @@ export const ServiceDetailPage: React.FC = () => {
             <div className="flex items-center justify-between mb-3">
               <h2 className="text-sm font-bold text-m3-text flex items-center gap-2">
                 <BookOpen className="w-4 h-4 text-m3-primary" />
-                Biblioteca de Cânticos
+                {t("serviceDetailPage.songsLibrary")}
               </h2>
               <button
                 type="button"
                 onClick={() => setShowLibrary(false)}
-                className="p-1.5 rounded-lg text-m3-secondary hover:text-m3-primary hover:bg-m3-primary/10 transition-colors"
-                title="Esconder Biblioteca"
-                aria-label="Esconder Biblioteca"
+                className="p-1.5 rounded-lg text-m3-secondary hover:text-m3-primary hover:bg-m3-primary/10 transition-colors cursor-pointer"
+                title={t("serviceDetailPage.hideLibrary")}
+                aria-label={t("serviceDetailPage.hideLibrary")}
               >
                 <PanelLeftClose className="w-4 h-4" />
               </button>
@@ -998,7 +1031,7 @@ export const ServiceDetailPage: React.FC = () => {
             <div className="relative">
               <Input
                 ref={searchInputRef}
-                placeholder="Pesquisar cânticos..."
+                placeholder={t("serviceDetailPage.searchSongsPlaceholder")}
                 value={librarySearch}
                 onChange={(e) => setLibrarySearch(e.target.value)}
                 icon={<Search className="w-4 h-4 text-m3-secondary" />}
@@ -1011,9 +1044,9 @@ export const ServiceDetailPage: React.FC = () => {
                     setLibrarySearch("");
                     searchInputRef.current?.focus();
                   }}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-md text-m3-secondary hover:text-m3-text hover:bg-m3-hover transition-colors"
-                  title="Limpar pesquisa"
-                  aria-label="Limpar pesquisa"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-md text-m3-secondary hover:text-m3-text hover:bg-m3-hover transition-colors cursor-pointer"
+                  title={t("serviceDetailPage.clearSearch")}
+                  aria-label={t("serviceDetailPage.clearSearch")}
                 >
                   <X className="w-3.5 h-3.5" />
                 </button>
@@ -1022,17 +1055,19 @@ export const ServiceDetailPage: React.FC = () => {
             <div className="flex items-center justify-between mt-2.5">
               <span className="text-[10px] font-semibold text-m3-secondary uppercase tracking-wider">
                 {filteredLibrarySongs.length}{" "}
-                {filteredLibrarySongs.length === 1 ? "cântico" : "cânticos"}
+                {filteredLibrarySongs.length === 1
+                  ? t("serviceDetailPage.songSingular")
+                  : t("serviceDetailPage.songPlural")}
               </span>
               <span className="text-[10px] text-m3-secondary/70 hidden md:inline">
-                Arraste para a lista
+                {t("serviceDetailPage.dragToList")}
               </span>
             </div>
           </div>
           <div className="flex-1 overflow-y-auto min-h-0 custom-scrollbar p-3 space-y-2">
             {filteredLibrarySongs.length === 0 ? (
               <div className="p-6 text-center text-xs text-m3-secondary">
-                Nenhum cântico encontrado.
+                {t("serviceDetailPage.noSongsFound")}
               </div>
             ) : (
               filteredLibrarySongs.map((s) => (
@@ -1066,40 +1101,41 @@ export const ServiceDetailPage: React.FC = () => {
               <div className="flex flex-wrap items-center justify-between px-5 py-3 border-b border-m3-border shrink-0 bg-m3-sidebar/30 gap-3">
                 <div className="flex items-center gap-3">
                   <h2 className="text-base font-bold text-m3-text">
-                    Ordem do Culto
+                    {t("serviceDetailPage.serviceOrder")}
                   </h2>
                   <span className="text-xs font-semibold text-m3-secondary bg-m3-background px-2.5 py-1 rounded-full border border-m3-border/50 shadow-sm">
-                    Duração Total: {formatDuration(totalDurationSeconds)}
+                    {t("serviceDetailPage.totalDuration")}:{" "}
+                    {formatDuration(totalDurationSeconds)}
                   </span>
                 </div>
                 <div className="flex flex-wrap items-center gap-1.5">
                   <button
                     type="button"
                     onClick={() => openAddModal("welcome")}
-                    className="px-2.5 py-1 text-[11px] font-bold rounded-lg bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors"
+                    className="px-2.5 py-1 text-[11px] font-bold rounded-lg bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors cursor-pointer"
                   >
-                    + Boas-vindas
+                    + {t("serviceDetailPage.addWelcome")}
                   </button>
                   <button
                     type="button"
                     onClick={() => openAddModal("scripture")}
-                    className="px-2.5 py-1 text-[11px] font-bold rounded-lg bg-fuchsia-50 text-fuchsia-700 dark:bg-fuchsia-900/30 dark:text-fuchsia-300 hover:bg-fuchsia-100 dark:hover:bg-fuchsia-900/50 transition-colors"
+                    className="px-2.5 py-1 text-[11px] font-bold rounded-lg bg-fuchsia-50 text-fuchsia-700 dark:bg-fuchsia-900/30 dark:text-fuchsia-300 hover:bg-fuchsia-100 dark:hover:bg-fuchsia-900/50 transition-colors cursor-pointer"
                   >
-                    + Escritura
+                    + {t("serviceDetailPage.addScripture")}
                   </button>
                   <button
                     type="button"
                     onClick={() => openAddModal("message")}
-                    className="px-2.5 py-1 text-[11px] font-bold rounded-lg bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/50 transition-colors"
+                    className="px-2.5 py-1 text-[11px] font-bold rounded-lg bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/50 transition-colors cursor-pointer"
                   >
-                    + Mensagem
+                    + {t("serviceDetailPage.addMessage")}
                   </button>
                   <button
                     type="button"
                     onClick={() => openAddModal("announcement")}
-                    className="px-2.5 py-1 text-[11px] font-bold rounded-lg bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 transition-colors"
+                    className="px-2.5 py-1 text-[11px] font-bold rounded-lg bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 transition-colors cursor-pointer"
                   >
-                    + Avisos
+                    + {t("serviceDetailPage.addAnnouncement")}
                   </button>
                 </div>
               </div>
@@ -1111,7 +1147,9 @@ export const ServiceDetailPage: React.FC = () => {
                       rows={1}
                       value={generalNotes}
                       onChange={(e) => setGeneralNotes(e.target.value)}
-                      placeholder="Ex: Horário do ensaio: 8:30..."
+                      placeholder={t(
+                        "serviceDetailPage.generalNotesPlaceholder",
+                      )}
                       className="flex-1 text-xs rounded-lg border border-m3-border p-2 bg-white dark:bg-m3-card focus:outline-none focus:ring-1 focus:ring-m3-primary text-m3-text resize-y min-h-9"
                       autoFocus
                     />
@@ -1124,7 +1162,7 @@ export const ServiceDetailPage: React.FC = () => {
                       }}
                       className="h-9 text-xs shrink-0"
                     >
-                      Cancelar
+                      {t("common.cancel")}
                     </Button>
                     <Button
                       size="sm"
@@ -1135,7 +1173,7 @@ export const ServiceDetailPage: React.FC = () => {
                       }}
                       className="h-9 text-xs shrink-0"
                     >
-                      <Save className="w-3.5 h-3.5 mr-1" /> Guardar
+                      <Save className="w-3.5 h-3.5 mr-1" /> {t("common.save")}
                     </Button>
                   </div>
                 ) : (
@@ -1151,15 +1189,14 @@ export const ServiceDetailPage: React.FC = () => {
                         </span>
                       ) : (
                         <span className="italic text-m3-secondary/70">
-                          Sem notas gerais do culto. Clique para adicionar
-                          informações úteis.
+                          {t("serviceDetailPage.noGeneralNotes")}
                         </span>
                       )}
                     </div>
                     <button
                       type="button"
-                      className="text-m3-secondary hover:text-m3-primary opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-lg hover:bg-m3-primary/10 shrink-0"
-                      title="Editar Notas Gerais"
+                      className="text-m3-secondary hover:text-m3-primary opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-lg hover:bg-m3-primary/10 shrink-0 cursor-pointer"
+                      title={t("serviceDetailPage.editGeneralNotes")}
                     >
                       <Edit3 className="w-3.5 h-3.5" />
                     </button>
@@ -1177,11 +1214,10 @@ export const ServiceDetailPage: React.FC = () => {
                       <Music className="w-6 h-6" />
                     </div>
                     <h4 className="text-sm font-bold text-m3-text">
-                      O plano ainda está vazio
+                      {t("serviceDetailPage.emptyOutlineTitle")}
                     </h4>
                     <p className="text-xs text-m3-secondary mt-1 max-w-50">
-                      Arraste cânticos da biblioteca ou adicione elementos
-                      acima.
+                      {t("serviceDetailPage.emptyOutlineDesc")}
                     </p>
                   </div>
                 ) : (
@@ -1206,16 +1242,18 @@ export const ServiceDetailPage: React.FC = () => {
                     type="button"
                     onClick={handleOpenLibrary}
                     className="flex-1 py-3 rounded-2xl border border-dashed border-m3-primary/30 text-xs font-semibold flex items-center justify-center gap-2 cursor-pointer transition-colors hover:bg-m3-primary/5 text-m3-primary bg-m3-card shadow-sm"
-                    title="Abrir a biblioteca e pesquisar"
+                    title={t("serviceDetailPage.openLibraryToSearch")}
                   >
-                    <Plus className="w-4 h-4" /> Adicionar Cântico
+                    <Plus className="w-4 h-4" />{" "}
+                    {t("serviceDetailPage.addSong")}
                   </button>
                   <button
                     type="button"
                     onClick={() => openAddModal("custom")}
                     className="flex-1 py-3 rounded-2xl border border-dashed border-m3-border text-xs font-semibold flex items-center justify-center gap-2 cursor-pointer transition-colors hover:bg-m3-sidebar text-m3-secondary bg-m3-card shadow-sm"
                   >
-                    <Plus className="w-4 h-4" /> Adicionar Personalizado
+                    <Plus className="w-4 h-4" />{" "}
+                    {t("serviceDetailPage.addCustom")}
                   </button>
                 </div>
               </div>
@@ -1237,9 +1275,9 @@ export const ServiceDetailPage: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setPreviewElement(null)}
-                    className="p-1.5 rounded-lg text-m3-secondary hover:text-m3-primary hover:bg-m3-primary/10 transition-colors shrink-0"
-                    title="Fechar Prévia"
-                    aria-label="Fechar Prévia"
+                    className="p-1.5 rounded-lg text-m3-secondary hover:text-m3-primary hover:bg-m3-primary/10 transition-colors shrink-0 cursor-pointer"
+                    title={t("serviceDetailPage.closePreview")}
+                    aria-label={t("serviceDetailPage.closePreview")}
                   >
                     <PanelRightClose className="w-4 h-4" />
                   </button>
