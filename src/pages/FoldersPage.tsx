@@ -211,7 +211,7 @@ export const FoldersPage: React.FC = () => {
               : currentFolderId === null
                 ? t("foldersPage.emptyRootDesc")
                 : t("foldersPage.emptyFolderDesc", {
-                    folder: currentFolder?.name,
+                    folder: currentFolder?.name || "",
                   })}
           </p>
 
