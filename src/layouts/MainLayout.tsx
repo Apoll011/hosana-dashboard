@@ -104,7 +104,8 @@ export const MainLayout: React.FC = () => {
   }, [triggerSyncCheck]);
 
   // Queries & Mutations
-  const { servicesQuery, createService, deleteService } = useServices();
+  //TODO: Maybe find a better way to handle the archived services
+  const { servicesQuery, createService, deleteService } = useServices(true);
   const allServices = useMemo(
     () => servicesQuery.data || [],
     [servicesQuery.data],
