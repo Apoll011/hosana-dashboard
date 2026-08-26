@@ -48,16 +48,19 @@ import {
 
 function canPrefetch(): boolean {
   if (typeof navigator === "undefined") return false;
-  const connection = (navigator as any).connection;
+  const connection =
+    navigator.connection ||
+    navigator.mozConnection ||
+    navigator.webkitConnection;
   if (!connection) return true;
   if (connection.saveData) return false;
-  return !["slow-2g", "2g"].includes(connection.effectiveType);
+  return !["slow-2g", "2g"].includes(connection.effectiveType || "");
 }
 
 function runWhenIdle(cb: () => void, timeout = 2000) {
   if (typeof window === "undefined") return;
   if ("requestIdleCallback" in window) {
-    (window as any).requestIdleCallback(cb, { timeout });
+    window.requestIdleCallback(cb, { timeout });
   } else {
     setTimeout(cb, 1);
   }
