@@ -1,6 +1,7 @@
 import { Folder, Song } from "@hosanna/shared";
 import { FileText, MoreVertical } from "lucide-react";
 import React from "react";
+import { useI18n } from "../../i18n";
 import {
   getFolderColorStyle,
   getFolderIconComponent,
@@ -44,6 +45,7 @@ export const FolderGridCard: React.FC<FolderGridCardProps> = React.memo(
     onDragLeave,
     onDrop,
   }) => {
+    const { t } = useI18n();
     const showDisabledDuringDrag = isInternalDragActive && isDropDisabled;
     const isCompact = density === "compact";
 
@@ -82,8 +84,8 @@ export const FolderGridCard: React.FC<FolderGridCardProps> = React.memo(
               ? "opacity-100"
               : "opacity-0 group-hover:opacity-100 focus:opacity-100"
           }`}
-          title="Mais opções"
-          aria-label="Mais opções"
+          title={t("explorer.moreOptions")}
+          aria-label={t("explorer.moreOptions")}
         >
           <MoreVertical className={isCompact ? "w-3.5 h-3.5" : "w-4.5 h-4.5"} />
         </button>
@@ -109,7 +111,9 @@ export const FolderGridCard: React.FC<FolderGridCardProps> = React.memo(
         </span>
 
         <span className="text-[10px] text-m3-secondary font-bold uppercase tracking-wider mt-0.5 opacity-70">
-          {(folder.songCount || 0) + (folder.folderCount || 0)} Items
+          {t("explorer.itemsCount", {
+            count: (folder.songCount || 0) + (folder.folderCount || 0),
+          })}
         </span>
 
         {isSearchingOrFiltering && getFolderPathString && (
@@ -149,6 +153,7 @@ export const SongGridCard: React.FC<SongGridCardProps> = React.memo(
     onDragStart,
     onDragEnd,
   }) => {
+    const { t } = useI18n();
     const isCompact = density === "compact";
     return (
       <div
@@ -180,8 +185,8 @@ export const SongGridCard: React.FC<SongGridCardProps> = React.memo(
               ? "opacity-100"
               : "opacity-0 group-hover:opacity-100 focus:opacity-100"
           }`}
-          title="Mais opções"
-          aria-label="Mais opções"
+          title={t("explorer.moreOptions")}
+          aria-label={t("explorer.moreOptions")}
         >
           <MoreVertical className={isCompact ? "w-3.5 h-3.5" : "w-4.5 h-4.5"} />
         </button>
@@ -190,7 +195,7 @@ export const SongGridCard: React.FC<SongGridCardProps> = React.memo(
           <span
             className={`absolute ${isCompact ? "top-2 left-2 text-[9px] px-1.5 py-0.5" : "top-5 left-5 text-[10px] px-2 py-1"} font-bold bg-neutral-100 dark:bg-slate-800 text-neutral-600 dark:text-neutral-400 rounded-lg border border-neutral-200 dark:border-slate-700`}
           >
-            Nº {song.song_number}
+            {t("explorer.songNumber", { number: song.song_number })}
           </span>
         )}
 
@@ -209,7 +214,7 @@ export const SongGridCard: React.FC<SongGridCardProps> = React.memo(
         </span>
 
         <span className="text-[10px] text-m3-secondary font-bold truncate w-full px-1 mt-0.5 opacity-70">
-          {song.artist || "Cifra"}
+          {song.artist || t("explorer.cifra")}
         </span>
 
         {isSearchingOrFiltering && getFolderPathString && (

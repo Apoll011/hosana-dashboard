@@ -18,6 +18,7 @@ import {
 import React, { useRef, useState } from "react";
 
 import { useAppNavigate } from "@/src/hooks/useAppNavigate";
+import { useI18n } from "../../i18n";
 import { authClient } from "../../lib/authClient";
 import { PasswordStrengthMeter } from "./components/PasswordStrengthMeter";
 import { TurnstileWidget } from "./components/TurnstileWidget";
@@ -25,6 +26,7 @@ import LoginLayout from "./Layout";
 
 export const RegisterOrganizationPage: React.FC = () => {
   const { navigate } = useAppNavigate();
+  const { t } = useI18n();
   const alpha_release = false;
   const captchaEnabled = false;
 
@@ -138,17 +140,16 @@ export const RegisterOrganizationPage: React.FC = () => {
     return (
       <LoginLayout
         optionalLink="/login"
-        optionalMsg="Faça Login"
+        optionalMsg={t("auth.login.title")}
         errorMsg={""}
         titleMb={2}
       >
         <div className="py-14 px-6 flex flex-col items-center justify-center text-center animate-in zoom-in-95 duration-500">
           <h2 className="text-2xl font-black tracking-tight text-slate-900 dark:text-white mb-3">
-            Registro de organizações ainda não está ativo
+            {t("auth.tenant.title")}
           </h2>
           <p className="text-sm leading-6 text-slate-500 dark:text-slate-400">
-            Aguarde o Beta Release no dia 1 de Setembro para criar sua
-            organização e fazer login.
+            {t("auth.tenant.noOrgs")}
           </p>
         </div>
       </LoginLayout>
@@ -158,7 +159,7 @@ export const RegisterOrganizationPage: React.FC = () => {
   return (
     <LoginLayout
       optionalLink="/login"
-      optionalMsg="Já tem uma organização? Faça Login"
+      optionalMsg={t("auth.register.hasAccount") + " " + t("auth.register.loginLink")}
       errorMsg={errorMsg}
       titleMb={2}
     >
@@ -171,17 +172,17 @@ export const RegisterOrganizationPage: React.FC = () => {
             </div>
           </div>
           <h2 className="text-2xl font-black text-slate-900 dark:text-white mb-2">
-            Tudo Pronto!
+            {t("auth.resetPassword.successTitle")}
           </h2>
           <p className="text-slate-500 dark:text-slate-400 font-medium">
-            A redirecionar para o login...
+            {t("auth.resetPassword.successDesc")}
           </p>
         </div>
       ) : (
         <>
           <div className="text-center mb-4">
             <h2 className="font-display font-black text-2xl sm:text-3xl tracking-tight text-slate-900 dark:text-white">
-              Criar Organização
+              {t("onboarding.createOrgTab")}
             </h2>
           </div>
 
@@ -189,9 +190,9 @@ export const RegisterOrganizationPage: React.FC = () => {
           <div className="mb-6">
             <div className="flex items-center justify-between mb-2">
               {[
-                { num: 1, label: "Igreja" },
-                { num: 2, label: "Admin" },
-                { num: 3, label: "Segurança" },
+                { num: 1, label: t("settings.workspace.title") },
+                { num: 2, label: t("settings.roles.admin") },
+                { num: 3, label: t("settings.tabs.account") },
               ].map((s) => (
                 <div
                   key={s.num}
@@ -236,16 +237,16 @@ export const RegisterOrganizationPage: React.FC = () => {
               <div className="space-y-4 animate-in slide-in-from-right-4 fade-in duration-300">
                 <div className="mb-2">
                   <h3 className="text-lg font-bold text-slate-800 dark:text-slate-200">
-                    Dados da Igreja
+                    {t("onboarding.orgNameLabel")}
                   </h3>
                   <p className="text-xs text-slate-500 dark:text-slate-400">
-                    Como se chama a sua comunidade?
+                    {t("onboarding.step1Desc")}
                   </p>
                 </div>
                 <Input
                   type="text"
-                  label="Nome da Igreja"
-                  placeholder="Ex: Hosanna Community Church"
+                  label={t("onboarding.orgNameLabel")}
+                  placeholder={t("onboarding.orgNamePlaceholder")}
                   value={orgName}
                   onChange={(e) => setOrgName(e.target.value)}
                   icon={<Building2 className="w-4 h-4 opacity-40" />}
@@ -254,8 +255,8 @@ export const RegisterOrganizationPage: React.FC = () => {
                 />
                 <Input
                   type="text"
-                  label="URL Personalizado"
-                  placeholder="Ex: hosanna-community"
+                  label={t("onboarding.slugLabel")}
+                  placeholder={t("onboarding.slugPlaceholder")}
                   value={orgSlug}
                   onChange={(e) =>
                     setOrgSlug(
@@ -273,16 +274,16 @@ export const RegisterOrganizationPage: React.FC = () => {
               <div className="space-y-4 animate-in slide-in-from-right-4 fade-in duration-300">
                 <div className="mb-2">
                   <h3 className="text-lg font-bold text-slate-800 dark:text-slate-200">
-                    Perfil de Administrador
+                    {t("settings.roles.admin")}
                   </h3>
                   <p className="text-xs text-slate-500 dark:text-slate-400">
-                    Quem vai gerir a plataforma?
+                    {t("auth.register.subtitle")}
                   </p>
                 </div>
                 <Input
                   type="text"
-                  label="O seu Nome"
-                  placeholder="Ex: João Silva"
+                  label={t("auth.register.nameLabel")}
+                  placeholder={t("auth.register.namePlaceholder")}
                   value={adminName}
                   onChange={(e) => setAdminName(e.target.value)}
                   icon={<User className="w-4 h-4 opacity-40" />}
@@ -291,8 +292,8 @@ export const RegisterOrganizationPage: React.FC = () => {
                 />
                 <Input
                   type="email"
-                  label="Email Profissional"
-                  placeholder="joao@exemplo.com"
+                  label={t("auth.register.emailLabel")}
+                  placeholder={t("auth.register.emailPlaceholder")}
                   value={adminEmail}
                   onChange={(e) => setAdminEmail(e.target.value)}
                   icon={<Mail className="w-4 h-4 opacity-40" />}
@@ -306,17 +307,17 @@ export const RegisterOrganizationPage: React.FC = () => {
               <div className="space-y-4 animate-in slide-in-from-right-4 fade-in duration-300">
                 <div className="mb-2">
                   <h3 className="text-lg font-bold text-slate-800 dark:text-slate-200">
-                    Segurança
+                    {t("settings.account.profile.password")}
                   </h3>
                   <p className="text-xs text-slate-500 dark:text-slate-400">
-                    Proteja a sua conta com uma senha forte.
+                    {t("auth.resetPassword.subtitle")}
                   </p>
                 </div>
 
                 <div className="space-y-1">
                   <Input
                     type="password"
-                    label="Palavra-passe"
+                    label={t("auth.register.passwordLabel")}
                     placeholder="••••••••••"
                     value={adminPassword}
                     onChange={(e) => setAdminPassword(e.target.value)}
@@ -332,7 +333,7 @@ export const RegisterOrganizationPage: React.FC = () => {
                 <div className="space-y-1">
                   <Input
                     type="password"
-                    label="Confirmar Palavra-passe"
+                    label={t("auth.register.confirmPasswordLabel")}
                     placeholder="••••••••••"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
@@ -345,7 +346,7 @@ export const RegisterOrganizationPage: React.FC = () => {
                   />
                   {passwordMismatch && (
                     <p className="text-xs font-semibold text-rose-500 dark:text-rose-400 pl-1 animate-in fade-in">
-                      As palavras-passe não coincidem
+                      {t("auth.register.passwordMismatch")}
                     </p>
                   )}
                 </div>
@@ -369,21 +370,7 @@ export const RegisterOrganizationPage: React.FC = () => {
                     htmlFor="terms"
                     className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed cursor-pointer select-none"
                   >
-                    Concordo com os{" "}
-                    <a
-                      href="#"
-                      className="font-bold text-m3-primary dark:text-m3-primary-light hover:underline"
-                    >
-                      Termos de Serviço
-                    </a>{" "}
-                    e a{" "}
-                    <a
-                      href="#"
-                      className="font-bold text-m3-primary dark:text-m3-primary-light hover:underline"
-                    >
-                      Política de Privacidade
-                    </a>
-                    .
+                    Concordo com os Termos de Serviço e a Política de Privacidade.
                   </label>
                 </div>
               </div>
@@ -397,7 +384,7 @@ export const RegisterOrganizationPage: React.FC = () => {
                 type="button"
                 onClick={handleBack}
                 variant="outline"
-                className="h-12 px-5 rounded-xl border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all font-semibold"
+                className="h-12 px-5 rounded-xl border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all font-semibold cursor-pointer"
                 disabled={isLoading}
               >
                 <ArrowLeft className="w-4 h-4" />
@@ -410,9 +397,9 @@ export const RegisterOrganizationPage: React.FC = () => {
                 onClick={handleNext}
                 variant="primary"
                 disabled={step === 1 ? !isStep1Valid : !isStep2Valid}
-                className="flex-1 h-12 bg-m3-primary hover:bg-m3-primary-dark border-0 font-bold text-sm text-white rounded-xl transition-all shadow-lg shadow-m3-primary/20 hover:shadow-m3-primary/40 flex items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 h-12 bg-m3-primary hover:bg-m3-primary-dark border-0 font-bold text-sm text-white rounded-xl transition-all shadow-lg shadow-m3-primary/20 hover:shadow-m3-primary/40 flex items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
               >
-                <span>Continuar</span>
+                <span>{t("settings.twoFactor.continue")}</span>
                 <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
               </Button>
             ) : (
@@ -422,13 +409,13 @@ export const RegisterOrganizationPage: React.FC = () => {
                 variant="primary"
                 isLoading={isLoading}
                 disabled={!isStep3Valid || isLoading}
-                className="flex-1 h-12 bg-emerald-600 hover:bg-emerald-700 border-0 font-bold text-sm text-white rounded-xl transition-all shadow-lg shadow-emerald-600/20 hover:shadow-emerald-600/40 flex items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 h-12 bg-emerald-600 hover:bg-emerald-700 border-0 font-bold text-sm text-white rounded-xl transition-all shadow-lg shadow-emerald-600/20 hover:shadow-emerald-600/40 flex items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
               >
                 {isLoading ? (
-                  <span>A criar...</span>
+                  <span>{t("settings.workspace.saving")}</span>
                 ) : (
                   <>
-                    <span>Criar Organização</span>
+                    <span>{t("onboarding.createOrgBtn")}</span>
                     <ShieldCheck className="w-4 h-4" />
                   </>
                 )}

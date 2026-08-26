@@ -7,15 +7,17 @@ import { Spinner } from "@hosanna/shared";
 import React from "react";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import { useI18n } from "../i18n";
 
 export const ProtectedRoute: React.FC = () => {
   const { isAuthenticated, isLoading, organization } = useAuth();
   const location = useLocation();
+  const { t } = useI18n();
 
   if (isLoading) {
     return (
       <div className="h-screen w-screen flex items-center justify-center bg-m3-bg">
-        <Spinner size="lg" label="A autenticar sessão no Servidor Hosanna..." />
+        <Spinner size="lg" label={t("common.loading")} />
       </div>
     );
   }

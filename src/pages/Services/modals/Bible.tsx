@@ -1,6 +1,7 @@
 import { Button, Modal } from "@hosanna/shared";
 import { BookOpen, Check, ChevronDown, Loader2, Search } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
+import { useI18n } from "../../../i18n";
 import {
   DurationField,
   durationInputToSeconds,
@@ -305,7 +306,6 @@ function extractVerseText(
     if (startVerse !== undefined && vn < startVerse) continue;
     if (endVerse !== undefined && vn > endVerse) continue;
 
-    // Strip generic HTML tags and multi-spaces that sometimes slip through APIs
     const cleanText = (item.text || "")
       .replace(/<[^>]+>/g, " ")
       .replace(/&nbsp;/gi, " ")
@@ -317,15 +317,10 @@ function extractVerseText(
   return lines.join("\n");
 }
 
-/**
- * Smartly parse passage strings. Supports:
- * - "Salmos 23", "Gn 1:1", "1 João 3:16-18", "Mateus 5.1-10", "Salmos 23, 1-6"
- */
 function parsePassageInput(input: string): ParsedPassage | null {
   const trimmed = input.trim();
   if (!trimmed) return null;
 
-  // Regex matches `[Book] [Chapter] [Separator:VerseStart] [Separator-VerseEnd]`
   const match = trimmed.match(
     /^(.+?)\s+(\d+)(?:[:.,]\s*(\d+)(?:\s*[-–,]\s*(\d+))?)?$/,
   );
@@ -334,7 +329,6 @@ function parsePassageInput(input: string): ParsedPassage | null {
   const rawBookStr = match[1];
   const chapter = parseInt(match[2], 10);
   const startVerse = match[3] ? parseInt(match[3], 10) : undefined;
-  // Fallback to startVerse if no end specified (meaning they searched exactly one verse)
   const endVerse = match[4] ? parseInt(match[4], 10) : startVerse;
 
   const normalized = normalizeBookName(rawBookStr);
@@ -374,7 +368,10 @@ export const ScriptureModal: React.FC<ScriptureModalProps> = ({
   onSave,
   initial,
 }) => {
-  const [title, setTitle] = useState(initial?.title || "Leitura Bíblica");
+  const { t } = useI18n();
+  const defaultTitle = t("serviceModals.bible.modalTitle");
+
+  const [title, setTitle] = useState(initial?.title || defaultTitle);
   const [passageInput, setPassageInput] = useState(initial?.passage || "");
   const [notes, setNotes] = useState(initial?.notes || "");
   const [duration, setDuration] = useState(
@@ -412,11 +409,11 @@ export const ScriptureModal: React.FC<ScriptureModalProps> = ({
         if (res.ok) {
           const data = await res.json();
           const sorted = sortTranslations(data);
-          cachedTranslations = sorted; // Save memory cache
+          cachedTranslations = sorted;
           if (!cancelled) setTranslations(sorted);
         }
       } catch {
-        // Silently fail – relies on the solid FALLBACK_TRANSLATIONS list.
+        // Silently fail – fallback to FALLBACK_TRANSLATIONS
       } finally {
         if (!cancelled) setTranslationsLoading(false);
       }
@@ -430,7 +427,7 @@ export const ScriptureModal: React.FC<ScriptureModalProps> = ({
   // Reset state on open
   useEffect(() => {
     if (isOpen) {
-      setTitle(initial?.title || "Leitura Bíblica");
+      setTitle(initial?.title || defaultTitle);
       setPassageInput(initial?.passage || "");
       setNotes(initial?.notes || "");
       setDuration(secondsToDurationInput(initial?.duration));
@@ -439,14 +436,12 @@ export const ScriptureModal: React.FC<ScriptureModalProps> = ({
       setFetchError(null);
       setAccepted(false);
     }
-  }, [isOpen, initial]);
+  }, [isOpen, initial, defaultTitle]);
 
   const handleSearch = useCallback(async () => {
     const parsed = parsePassageInput(passageInput);
     if (!parsed) {
-      setFetchError(
-        "Livro ou formato inválido. Tente: Livro Capítulo:Versículo (ex: Salmos 23:1-6, 1 João 3:16)",
-      );
+      setFetchError(t("serviceModals.bible.invalidFormatError"));
       return;
     }
 
@@ -459,19 +454,17 @@ export const ScriptureModal: React.FC<ScriptureModalProps> = ({
       const url = `https://bolls.life/get-text/${selectedTranslation}/${parsed.bookId}/${parsed.chapter}/`;
       const res = await fetchWithTimeout(url);
 
-      if (!res.ok) throw new Error("Passagem não encontrada.");
+      if (!res.ok) throw new Error(t("serviceModals.bible.notFoundError"));
 
       const data = await res.json();
       if (!Array.isArray(data) || data.length === 0) {
-        throw new Error("Capítulo não encontrado nesta tradução.");
+        throw new Error(t("serviceModals.bible.chapterNotFoundError"));
       }
 
       const text = extractVerseText(data, parsed.startVerse, parsed.endVerse);
 
       if (!text.trim()) {
-        throw new Error(
-          "Nenhum versículo encontrado no intervalo especificado.",
-        );
+        throw new Error(t("serviceModals.bible.noVersesError"));
       }
 
       const prettyBookName = PRETTY_BOOK_NAMES[parsed.bookId];
@@ -492,17 +485,16 @@ export const ScriptureModal: React.FC<ScriptureModalProps> = ({
     } catch (err: unknown) {
       const errorObj = err as { name?: string; message?: string };
       if (errorObj?.name === "AbortError") {
-        setFetchError("A busca demorou muito tempo. Tente novamente.");
+        setFetchError(t("serviceModals.bible.timeoutError"));
       } else {
         setFetchError(
-          errorObj?.message ||
-            "Erro ao buscar a passagem. Verifique a sua ligação à internet.",
+          errorObj?.message || t("serviceModals.bible.genericError"),
         );
       }
     } finally {
       setIsFetching(false);
     }
-  }, [passageInput, selectedTranslation]);
+  }, [passageInput, selectedTranslation, t]);
 
   const handleAcceptPassage = () => {
     setAccepted(true);
@@ -523,7 +515,7 @@ export const ScriptureModal: React.FC<ScriptureModalProps> = ({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Leitura Bíblica"
+      title={t("serviceModals.bible.modalTitle")}
       maxWidth="lg"
     >
       <div className="space-y-4 py-2">
@@ -540,11 +532,10 @@ export const ScriptureModal: React.FC<ScriptureModalProps> = ({
           </div>
           <div>
             <p className="text-xs font-bold" style={{ color: "#C026D3" }}>
-              Escritura
+              {t("serviceModals.bible.badgeTitle")}
             </p>
             <p className="text-[11px] text-slate-500">
-              Pesquise uma passagem bíblica, escolha a tradução e adicione ao
-              culto.
+              {t("serviceModals.bible.badgeDesc")}
             </p>
           </div>
         </div>
@@ -552,13 +543,13 @@ export const ScriptureModal: React.FC<ScriptureModalProps> = ({
         {/* Title */}
         <div className="space-y-1.5">
           <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
-            Título
+            {t("serviceModals.bible.titleLabel")}
           </label>
           <input
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="Ex: Leitura Bíblica"
+            placeholder={t("serviceModals.bible.titlePlaceholder")}
             className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-fuchsia-500"
           />
         </div>
@@ -566,7 +557,7 @@ export const ScriptureModal: React.FC<ScriptureModalProps> = ({
         {/* Translation Selector */}
         <div className="space-y-1.5">
           <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
-            Tradução
+            {t("serviceModals.bible.translationLabel")}
           </label>
           <div className="relative">
             <select
@@ -589,8 +580,8 @@ export const ScriptureModal: React.FC<ScriptureModalProps> = ({
           </div>
           {translationsLoading && (
             <p className="text-[11px] text-slate-400 flex items-center gap-1">
-              <Loader2 className="w-3 h-3 animate-spin" />A carregar
-              traduções...
+              <Loader2 className="w-3 h-3 animate-spin" />
+              {t("serviceModals.bible.loadingTranslations")}
             </p>
           )}
         </div>
@@ -598,7 +589,7 @@ export const ScriptureModal: React.FC<ScriptureModalProps> = ({
         {/* Passage Input + Search */}
         <div className="space-y-1.5">
           <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
-            Passagem Bíblica
+            {t("serviceModals.bible.passageLabel")}
           </label>
           <div className="flex gap-2">
             <input
@@ -616,7 +607,7 @@ export const ScriptureModal: React.FC<ScriptureModalProps> = ({
                   handleSearch();
                 }
               }}
-              placeholder="Ex: Salmos 23:1-6, João 3:16, 1 João 1:9"
+              placeholder={t("serviceModals.bible.passagePlaceholder")}
               className="flex-1 px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-fuchsia-500"
             />
             <Button
@@ -631,11 +622,13 @@ export const ScriptureModal: React.FC<ScriptureModalProps> = ({
               ) : (
                 <Search className="w-3.5 h-3.5" />
               )}
-              Buscar
+              {isFetching
+                ? t("serviceModals.bible.searchingBtn")
+                : t("serviceModals.bible.searchBtn")}
             </Button>
           </div>
           <p className="text-[10px] text-slate-400">
-            Formatos aceites: Salmos 23, João 3:16, Gênesis 1:1-5, I João 3:16
+            {t("serviceModals.bible.acceptedFormats")}
           </p>
         </div>
 
@@ -661,12 +654,12 @@ export const ScriptureModal: React.FC<ScriptureModalProps> = ({
                   onClick={handleAcceptPassage}
                 >
                   <Check className="w-3.5 h-3.5" />
-                  Usar esta Passagem
+                  {t("serviceModals.bible.usePassageBtn")}
                 </Button>
               ) : (
                 <span className="inline-flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400">
                   <Check className="w-3 h-3" />
-                  Aceite
+                  {t("serviceModals.bible.acceptedBadge")}
                 </span>
               )}
             </div>
@@ -686,14 +679,16 @@ export const ScriptureModal: React.FC<ScriptureModalProps> = ({
         {/* Notes */}
         <div className="space-y-1.5">
           <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
-            Notas
-            <span className="font-normal text-slate-400 ml-1">(opcional)</span>
+            {t("serviceModals.bible.notesLabel")}
+            <span className="font-normal text-slate-400 ml-1">
+              ({t("common.details")})
+            </span>
           </label>
           <textarea
             rows={2}
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            placeholder="Ex: Lida pelo diácono Carlos, congregação de pé..."
+            placeholder={t("serviceModals.bible.notesPlaceholder")}
             className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-fuchsia-500"
           />
         </div>
@@ -707,7 +702,7 @@ export const ScriptureModal: React.FC<ScriptureModalProps> = ({
         {/* Actions */}
         <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-200 dark:border-slate-800">
           <Button type="button" variant="ghost" size="sm" onClick={onClose}>
-            Cancelar
+            {t("common.cancel")}
           </Button>
           <Button
             type="button"
@@ -715,7 +710,7 @@ export const ScriptureModal: React.FC<ScriptureModalProps> = ({
             size="sm"
             onClick={handleSave}
           >
-            Guardar
+            {t("common.save")}
           </Button>
         </div>
       </div>

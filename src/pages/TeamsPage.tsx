@@ -19,6 +19,7 @@ import {
 import React, { useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { useSync } from "../contexts/SyncContext";
+import { useI18n } from "../i18n";
 
 export interface TeamMember {
   id: string;
@@ -48,6 +49,7 @@ export interface Team {
 export const TeamsPage: React.FC = () => {
   const { user } = useAuth();
   const { showToast } = useSync();
+  const { t } = useI18n();
 
   const [teams, setTeams] = useState<Team[]>([
     {
@@ -174,7 +176,7 @@ export const TeamsPage: React.FC = () => {
         {
           id: `tm-${Date.now()}`,
           userId: user?.id || "user-1",
-          name: user?.name || "Eu",
+          name: user?.name || t("common.you"),
           email: user?.email || "admin@example.com",
           role: "leader",
           joinedAt: new Date(),
@@ -185,7 +187,7 @@ export const TeamsPage: React.FC = () => {
     setNewTeamName("");
     setNewTeamDesc("");
     setIsCreateModalOpen(false);
-    showToast("Equipa criada com sucesso!", "success");
+    showToast(t("teamsPage.teamCreated"), "success");
   };
 
   const handleDeleteTeam = (teamId: string) => {
@@ -193,7 +195,7 @@ export const TeamsPage: React.FC = () => {
     if (selectedTeam?.id === teamId) {
       setSelectedTeam(null);
     }
-    showToast("Equipa removida.", "success");
+    showToast(t("teamsPage.teamRemoved"), "success");
   };
 
   const handleAddMember = (e: React.FormEvent) => {
@@ -240,7 +242,7 @@ export const TeamsPage: React.FC = () => {
     setNewMemberName("");
     setNewMemberEmail("");
     setIsAddMemberModalOpen(false);
-    showToast("Membro adicionado à equipa!", "success");
+    showToast(t("teamsPage.memberAdded"), "success");
   };
 
   const handleRemoveMember = (teamId: string, memberId: string) => {
@@ -257,7 +259,7 @@ export const TeamsPage: React.FC = () => {
       ),
     );
 
-    showToast("Membro removido da equipa.", "success");
+    showToast(t("teamsPage.memberRemoved"), "success");
   };
 
   const handleAssignLeader = (teamId: string, member: TeamMember) => {
@@ -285,7 +287,7 @@ export const TeamsPage: React.FC = () => {
       );
     }
 
-    showToast(`${member.name} é agora o Líder da equipa!`, "success");
+    showToast(t("teamsPage.leaderAssigned", { name: member.name }), "success");
   };
 
   const handleTogglePermission = (
@@ -315,7 +317,7 @@ export const TeamsPage: React.FC = () => {
       ),
     );
 
-    showToast("Permissões da equipa atualizadas.", "success");
+    showToast(t("teamsPage.permissionsUpdated"), "success");
   };
 
   // If viewing single team detail page (TEAM-05)
@@ -333,13 +335,15 @@ export const TeamsPage: React.FC = () => {
             className="inline-flex items-center text-sm font-bold text-slate-500 hover:text-slate-900 dark:hover:text-slate-100 transition-colors cursor-pointer"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Voltar às Equipas
+            {t("teamsPage.backToTeams")}
           </button>
 
           <div className="flex items-center gap-2">
             <span className="text-xs bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400 font-bold px-3 py-1 rounded-full flex items-center gap-1">
               <Shield className="w-3.5 h-3.5" />
-              {isLeaderOfTeam ? "Gestor da Equipa" : "Membro"}
+              {isLeaderOfTeam
+                ? t("teamsPage.teamManagerBadge")
+                : t("teamsPage.memberBadge")}
             </span>
           </div>
         </div>
@@ -354,17 +358,23 @@ export const TeamsPage: React.FC = () => {
               {selectedTeam.name}
             </h1>
             <p className="text-sky-100 text-sm max-w-xl">
-              {selectedTeam.description || "Sem descrição definida."}
+              {selectedTeam.description || t("teamsPage.noDesc")}
             </p>
 
             <div className="flex flex-wrap gap-4 mt-6 text-xs font-bold text-sky-100">
               <div className="flex items-center gap-1.5 bg-black/20 px-3 py-1.5 rounded-xl">
                 <Crown className="w-4 h-4 text-amber-300" />
-                <span>Líder: {selectedTeam.leaderName || "Não atribuído"}</span>
+                <span>
+                  {t("teamsPage.leaderLabel", {
+                    name: selectedTeam.leaderName || t("teamsPage.notAssigned"),
+                  })}
+                </span>
               </div>
               <div className="flex items-center gap-1.5 bg-black/20 px-3 py-1.5 rounded-xl">
                 <Users className="w-4 h-4 text-sky-200" />
-                <span>{members.length} Membros</span>
+                <span>
+                  {t("teamsPage.membersCount", { count: members.length })}
+                </span>
               </div>
             </div>
           </div>
@@ -376,7 +386,7 @@ export const TeamsPage: React.FC = () => {
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-black text-slate-900 dark:text-slate-100 flex items-center gap-2">
                 <Users className="w-5 h-5 text-m3-primary" />
-                Membros da Equipa
+                {t("teamsPage.teamMembersTitle")}
               </h2>
 
               {isLeaderOfTeam && (
@@ -386,7 +396,7 @@ export const TeamsPage: React.FC = () => {
                   onClick={() => setIsAddMemberModalOpen(true)}
                   icon={<UserPlus className="w-4 h-4" />}
                 >
-                  Adicionar Membro
+                  {t("teamsPage.addMember")}
                 </Button>
               )}
             </div>
@@ -409,7 +419,7 @@ export const TeamsPage: React.FC = () => {
                         {member.role === "leader" && (
                           <span className="text-[10px] font-black uppercase tracking-wider bg-amber-100 text-amber-700 dark:bg-amber-950/60 dark:text-amber-400 px-2 py-0.5 rounded-md flex items-center gap-1">
                             <Crown className="w-3 h-3" />
-                            Líder
+                            {t("settings.roles.teamLeader")}
                           </span>
                         )}
                       </div>
@@ -424,12 +434,12 @@ export const TeamsPage: React.FC = () => {
                           onClick={() =>
                             handleAssignLeader(selectedTeam.id, member)
                           }
-                          title="Tornar Líder de Equipa"
+                          title={t("teamsPage.setLeaderTitle")}
                           className="px-2.5 py-1 text-xs font-bold text-amber-600 hover:bg-amber-50 rounded-lg transition-colors border border-amber-200 flex items-center gap-1 cursor-pointer"
                         >
                           <Crown className="w-3.5 h-3.5" />
                           <span className="hidden sm:inline">
-                            Definir Líder
+                            {t("teamsPage.setLeader")}
                           </span>
                         </button>
                       )}
@@ -439,7 +449,7 @@ export const TeamsPage: React.FC = () => {
                           onClick={() =>
                             handleRemoveMember(selectedTeam.id, member.id)
                           }
-                          title="Remover da equipa"
+                          title={t("teamsPage.removeFromTeamTitle")}
                           className="p-1.5 text-slate-400 hover:text-red-500 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors cursor-pointer"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -456,13 +466,12 @@ export const TeamsPage: React.FC = () => {
           <div className="space-y-4">
             <h2 className="text-lg font-black text-slate-900 dark:text-slate-100 flex items-center gap-2">
               <Shield className="w-5 h-5 text-m3-primary" />
-              Permissões da Equipa
+              {t("teamsPage.teamPermissionsTitle")}
             </h2>
 
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 space-y-4 shadow-xs">
               <p className="text-xs text-slate-500 leading-relaxed">
-                As permissões da equipa estão limitadas pelas políticas gerais
-                da organização.
+                {t("teamsPage.teamPermissionsDesc")}
               </p>
 
               <div className="space-y-3">
@@ -471,10 +480,10 @@ export const TeamsPage: React.FC = () => {
                     <Music className="w-4 h-4 text-sky-500" />
                     <div>
                       <p className="text-xs font-bold text-slate-900 dark:text-slate-100">
-                        Gerir Músicas
+                        {t("teamsPage.manageSongs")}
                       </p>
                       <p className="text-[10px] text-slate-500">
-                        Criar e editar repertório
+                        {t("teamsPage.manageSongsDesc")}
                       </p>
                     </div>
                   </div>
@@ -492,10 +501,10 @@ export const TeamsPage: React.FC = () => {
                     <Calendar className="w-4 h-4 text-emerald-500" />
                     <div>
                       <p className="text-xs font-bold text-slate-900 dark:text-slate-100">
-                        Gerir Cultos
+                        {t("teamsPage.manageServices")}
                       </p>
                       <p className="text-[10px] text-slate-500">
-                        Agendar e alinhar escalas
+                        {t("teamsPage.manageServicesDesc")}
                       </p>
                     </div>
                   </div>
@@ -515,10 +524,10 @@ export const TeamsPage: React.FC = () => {
                     <UserPlus className="w-4 h-4 text-amber-500" />
                     <div>
                       <p className="text-xs font-bold text-slate-900 dark:text-slate-100">
-                        Convidar Membros
+                        {t("teamsPage.inviteMembers")}
                       </p>
                       <p className="text-[10px] text-slate-500">
-                        Adicionar novos membros
+                        {t("teamsPage.inviteMembersDesc")}
                       </p>
                     </div>
                   </div>
@@ -540,20 +549,20 @@ export const TeamsPage: React.FC = () => {
           <Modal
             isOpen={isAddMemberModalOpen}
             onClose={() => setIsAddMemberModalOpen(false)}
-            title="Adicionar Membro à Equipa"
+            title={t("teamsPage.addMemberModalTitle")}
           >
             <form onSubmit={handleAddMember} className="space-y-4 pt-2">
               <Input
-                label="Nome"
-                placeholder="e.g. Maria Santos"
+                label={t("teamsPage.memberNameLabel")}
+                placeholder={t("teamsPage.memberNamePlaceholder")}
                 value={newMemberName}
                 onChange={(e) => setNewMemberName(e.target.value)}
                 required
               />
               <Input
                 type="email"
-                label="E-mail"
-                placeholder="e.g. maria@example.com"
+                label={t("teamsPage.memberEmailLabel")}
+                placeholder={t("teamsPage.memberEmailPlaceholder")}
                 value={newMemberEmail}
                 onChange={(e) => setNewMemberEmail(e.target.value)}
                 required
@@ -561,7 +570,7 @@ export const TeamsPage: React.FC = () => {
 
               <div>
                 <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                  Função na Equipa
+                  {t("teamsPage.teamRoleLabel")}
                 </label>
                 <select
                   value={newMemberRole}
@@ -570,9 +579,11 @@ export const TeamsPage: React.FC = () => {
                   }
                   className="w-full h-11 px-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-sm font-semibold"
                 >
-                  <option value="member">Membro</option>
+                  <option value="member">{t("settings.roles.member")}</option>
                   {isOrgAdminOrOwner && (
-                    <option value="leader">Líder de Equipa</option>
+                    <option value="leader">
+                      {t("settings.roles.teamLeader")}
+                    </option>
                   )}
                 </select>
               </div>
@@ -583,10 +594,10 @@ export const TeamsPage: React.FC = () => {
                   type="button"
                   onClick={() => setIsAddMemberModalOpen(false)}
                 >
-                  Cancelar
+                  {t("common.cancel")}
                 </Button>
                 <Button variant="primary" type="submit">
-                  Adicionar
+                  {t("teamsPage.addMemberBtn")}
                 </Button>
               </div>
             </form>
@@ -603,10 +614,10 @@ export const TeamsPage: React.FC = () => {
         <div>
           <h1 className="text-2xl font-black text-slate-900 dark:text-slate-100 flex items-center gap-2">
             <Users className="w-7 h-7 text-m3-primary" />
-            Equipas da Organização
+            {t("teamsPage.title")}
           </h1>
           <p className="text-slate-500 text-xs sm:text-sm mt-0.5">
-            Gerencie equipas, atribua líderes e configure permissões de acesso.
+            {t("teamsPage.desc")}
           </p>
         </div>
 
@@ -616,7 +627,7 @@ export const TeamsPage: React.FC = () => {
             onClick={() => setIsCreateModalOpen(true)}
             icon={<Plus className="w-4 h-4" />}
           >
-            Nova Equipa
+            {t("teamsPage.newTeam")}
           </Button>
         )}
       </div>
@@ -627,7 +638,7 @@ export const TeamsPage: React.FC = () => {
           <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3.5" />
           <input
             type="text"
-            placeholder="Pesquisar equipas..."
+            placeholder={t("teamsPage.searchPlaceholder")}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-9 pr-4 py-2 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 rounded-xl text-xs font-semibold focus:outline-none focus:border-m3-primary"
@@ -635,7 +646,7 @@ export const TeamsPage: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-4 text-xs font-bold text-slate-500">
-          <span>Total: {teams.length} Equipas</span>
+          <span>{t("teamsPage.totalTeams", { count: teams.length })}</span>
         </div>
       </div>
 
@@ -663,7 +674,7 @@ export const TeamsPage: React.FC = () => {
               </h3>
 
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2 leading-relaxed">
-                {team.description || "Sem descrição."}
+                {team.description || t("teamsPage.noDesc")}
               </p>
             </div>
 
@@ -671,13 +682,13 @@ export const TeamsPage: React.FC = () => {
               <div className="flex items-center gap-1.5 text-slate-600 dark:text-slate-400 font-semibold">
                 <Crown className="w-3.5 h-3.5 text-amber-500" />
                 <span className="truncate max-w-30">
-                  {team.leaderName || "Sem líder"}
+                  {team.leaderName || t("teamsPage.noLeader")}
                 </span>
               </div>
 
               <div className="flex items-center gap-2">
                 <span className="font-bold text-m3-primary bg-sky-50 dark:bg-sky-950/40 px-2 py-0.5 rounded-md">
-                  {team.membersCount} membros
+                  {t("teamsPage.membersCount", { count: team.membersCount })}
                 </span>
 
                 {isOrgAdminOrOwner && (
@@ -686,8 +697,8 @@ export const TeamsPage: React.FC = () => {
                       e.stopPropagation();
                       handleDeleteTeam(team.id);
                     }}
-                    title="Remover equipa"
-                    className="p-1 text-slate-400 hover:text-red-500 rounded transition-colors"
+                    title={t("teamsPage.removeTeamTitle")}
+                    className="p-1 text-slate-400 hover:text-red-500 rounded transition-colors cursor-pointer"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
@@ -703,12 +714,12 @@ export const TeamsPage: React.FC = () => {
         <Modal
           isOpen={isCreateModalOpen}
           onClose={() => setIsCreateModalOpen(false)}
-          title="Criar Nova Equipa"
+          title={t("teamsPage.createModalTitle")}
         >
           <form onSubmit={handleCreateTeam} className="space-y-4 pt-2">
             <Input
-              label="Nome da Equipa"
-              placeholder="e.g. Equipa de Louvor Principal"
+              label={t("teamsPage.teamNameLabel")}
+              placeholder={t("teamsPage.teamNamePlaceholder")}
               value={newTeamName}
               onChange={(e) => setNewTeamName(e.target.value)}
               required
@@ -716,10 +727,10 @@ export const TeamsPage: React.FC = () => {
 
             <div>
               <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                Descrição
+                {t("teamsPage.descLabel")}
               </label>
               <textarea
-                placeholder="Descrição das responsabilidades da equipa..."
+                placeholder={t("teamsPage.descPlaceholder")}
                 value={newTeamDesc}
                 onChange={(e) => setNewTeamDesc(e.target.value)}
                 className="w-full h-20 p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-medium focus:outline-none focus:border-m3-primary resize-none"
@@ -732,14 +743,14 @@ export const TeamsPage: React.FC = () => {
                 type="button"
                 onClick={() => setIsCreateModalOpen(false)}
               >
-                Cancelar
+                {t("common.cancel")}
               </Button>
               <Button
                 variant="primary"
                 type="submit"
                 disabled={!newTeamName.trim()}
               >
-                Criar Equipa
+                {t("teamsPage.createBtn")}
               </Button>
             </div>
           </form>

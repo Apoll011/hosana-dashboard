@@ -22,6 +22,7 @@ import {
   Upload,
   X,
 } from "lucide-react";
+import { useI18n } from "../../i18n";
 import { Can, CanAll } from "../../lib/permissions/components";
 
 export interface ContextMenuState {
@@ -94,6 +95,8 @@ export const ExplorerContextMenu: React.FC<ExplorerContextMenuProps> = ({
   onPrintSong,
   onPrintFolder,
 }) => {
+  const { t } = useI18n();
+
   if (!contextMenu) return null;
 
   return (
@@ -105,9 +108,13 @@ export const ExplorerContextMenu: React.FC<ExplorerContextMenuProps> = ({
       {contextMenu.type === "canvas" ? (
         <>
           <div className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400 border-b border-slate-100 dark:border-slate-800/80 mb-0.5 truncate flex items-center justify-between">
-            <span>{currentFolder ? currentFolder.name : "Diretório Raiz"}</span>
+            <span>
+              {currentFolder
+                ? currentFolder.name
+                : t("explorer.contextMenu.rootDirectory")}
+            </span>
             <span className="text-[9px] text-slate-400 font-normal">
-              Opções
+              {t("explorer.contextMenu.options")}
             </span>
           </div>
 
@@ -120,7 +127,7 @@ export const ExplorerContextMenu: React.FC<ExplorerContextMenuProps> = ({
               className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left cursor-pointer"
             >
               <FolderPlus className="w-4 h-4 text-amber-500" />
-              <span>Nova Pasta</span>
+              <span>{t("explorer.contextMenu.newFolder")}</span>
             </button>
           </Can>
 
@@ -133,7 +140,7 @@ export const ExplorerContextMenu: React.FC<ExplorerContextMenuProps> = ({
               className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left cursor-pointer"
             >
               <Plus className="w-4 h-4 text-sky-600" />
-              <span>Novo Cântico</span>
+              <span>{t("explorer.contextMenu.newSong")}</span>
             </button>
           </Can>
 
@@ -146,7 +153,7 @@ export const ExplorerContextMenu: React.FC<ExplorerContextMenuProps> = ({
               className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left cursor-pointer"
             >
               <Upload className="w-4 h-4 text-sky-600" />
-              <span>Carregar Ficheiros</span>
+              <span>{t("explorer.contextMenu.uploadFiles")}</span>
             </button>
           </Can>
 
@@ -160,7 +167,7 @@ export const ExplorerContextMenu: React.FC<ExplorerContextMenuProps> = ({
             className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left cursor-pointer"
           >
             <CheckSquare className="w-4 h-4 text-slate-500" />
-            <span>Selecionar Tudo</span>
+            <span>{t("explorer.contextMenu.selectAll")}</span>
           </button>
 
           <button
@@ -171,13 +178,13 @@ export const ExplorerContextMenu: React.FC<ExplorerContextMenuProps> = ({
             className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left cursor-pointer"
           >
             <RotateCw className="w-4 h-4 text-slate-500" />
-            <span>Atualizar Vista</span>
+            <span>{t("explorer.contextMenu.refreshView")}</span>
           </button>
         </>
       ) : totalSelectedCount > 1 ? (
         <>
           <div className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-sky-600 border-b border-slate-100 dark:border-slate-800/80 mb-0.5 truncate flex items-center justify-between">
-            <span>Seleção Múltipla</span>
+            <span>{t("explorer.contextMenu.multiSelect")}</span>
             <Badge variant="sky">{totalSelectedCount}</Badge>
           </div>
 
@@ -192,7 +199,11 @@ export const ExplorerContextMenu: React.FC<ExplorerContextMenuProps> = ({
                   className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left cursor-pointer"
                 >
                   <Tag className="w-4 h-4 text-sky-600" />
-                  <span>Etiquetar {selectedSongIds.size} cântico(s)</span>
+                  <span>
+                    {t("explorer.contextMenu.tagSongsCount", {
+                      count: selectedSongIds.size,
+                    })}
+                  </span>
                 </button>
               </Can>
               <Can permission="export.pdf">
@@ -204,7 +215,11 @@ export const ExplorerContextMenu: React.FC<ExplorerContextMenuProps> = ({
                   className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left cursor-pointer"
                 >
                   <Printer className="w-4 h-4 text-sky-600" />
-                  <span>Imprimir {selectedSongIds.size} cântico(s)</span>
+                  <span>
+                    {t("explorer.contextMenu.printSongsCount", {
+                      count: selectedSongIds.size,
+                    })}
+                  </span>
                 </button>
               </Can>
             </>
@@ -220,7 +235,11 @@ export const ExplorerContextMenu: React.FC<ExplorerContextMenuProps> = ({
                 className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left cursor-pointer"
               >
                 <Printer className="w-4 h-4 text-sky-600" />
-                <span>Imprimir {selectedFolderIds.size} Pastas</span>
+                <span>
+                  {t("explorer.contextMenu.printFoldersCount", {
+                    count: selectedFolderIds.size,
+                  })}
+                </span>
               </button>
             </Can>
           )}
@@ -234,7 +253,11 @@ export const ExplorerContextMenu: React.FC<ExplorerContextMenuProps> = ({
               className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left cursor-pointer"
             >
               <Move className="w-4 h-4 text-emerald-500" />
-              <span>Mover {totalSelectedCount} itens</span>
+              <span>
+                {t("explorer.contextMenu.moveItemsCount", {
+                  count: totalSelectedCount,
+                })}
+              </span>
             </button>
           </CanAll>
 
@@ -247,7 +270,11 @@ export const ExplorerContextMenu: React.FC<ExplorerContextMenuProps> = ({
               className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 font-semibold transition-colors text-left cursor-pointer"
             >
               <Trash2 className="w-4 h-4 text-rose-500" />
-              <span>Apagar {totalSelectedCount} itens</span>
+              <span>
+                {t("explorer.contextMenu.deleteItemsCount", {
+                  count: totalSelectedCount,
+                })}
+              </span>
             </button>
           </CanAll>
 
@@ -261,7 +288,7 @@ export const ExplorerContextMenu: React.FC<ExplorerContextMenuProps> = ({
             className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left cursor-pointer"
           >
             <X className="w-4 h-4 text-slate-400" />
-            <span>Desmarcar seleção</span>
+            <span>{t("explorer.contextMenu.deselect")}</span>
           </button>
         </>
       ) : (
@@ -282,7 +309,7 @@ export const ExplorerContextMenu: React.FC<ExplorerContextMenuProps> = ({
                 className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left cursor-pointer"
               >
                 <FolderOpen className="w-4 h-4 text-amber-500" />
-                <span>Abrir Pasta</span>
+                <span>{t("explorer.contextMenu.openFolder")}</span>
               </button>
 
               <Can permission="folder.update">
@@ -294,7 +321,7 @@ export const ExplorerContextMenu: React.FC<ExplorerContextMenuProps> = ({
                   className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left cursor-pointer"
                 >
                   <Palette className="w-4 h-4 text-purple-500" />
-                  <span>Personalizar Pasta</span>
+                  <span>{t("explorer.contextMenu.customizeFolder")}</span>
                 </button>
 
                 <button
@@ -305,7 +332,7 @@ export const ExplorerContextMenu: React.FC<ExplorerContextMenuProps> = ({
                   className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left cursor-pointer"
                 >
                   <Edit2 className="w-4 h-4 text-sky-600" />
-                  <span>Mudar Nome da Pasta</span>
+                  <span>{t("explorer.contextMenu.renameFolder")}</span>
                 </button>
 
                 <button
@@ -316,7 +343,7 @@ export const ExplorerContextMenu: React.FC<ExplorerContextMenuProps> = ({
                   className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left cursor-pointer"
                 >
                   <Move className="w-4 h-4 text-emerald-500" />
-                  <span>Mover Pasta</span>
+                  <span>{t("explorer.contextMenu.moveFolder")}</span>
                 </button>
               </Can>
 
@@ -329,7 +356,7 @@ export const ExplorerContextMenu: React.FC<ExplorerContextMenuProps> = ({
                   className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left cursor-pointer"
                 >
                   <Printer className="w-4 h-4 text-emerald-500" />
-                  <span>Imprimir Pasta</span>
+                  <span>{t("explorer.contextMenu.printFolder")}</span>
                 </button>
               </Can>
 
@@ -344,7 +371,7 @@ export const ExplorerContextMenu: React.FC<ExplorerContextMenuProps> = ({
                   className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 font-semibold transition-colors text-left cursor-pointer"
                 >
                   <Trash2 className="w-4 h-4 text-rose-500" />
-                  <span>Apagar Pasta</span>
+                  <span>{t("explorer.contextMenu.deleteFolder")}</span>
                 </button>
               </Can>
             </>
@@ -360,7 +387,7 @@ export const ExplorerContextMenu: React.FC<ExplorerContextMenuProps> = ({
                 className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left cursor-pointer"
               >
                 <ExternalLink className="w-4 h-4 text-sky-600" />
-                <span>Abrir / Editar Cântico</span>
+                <span>{t("explorer.contextMenu.openEditSong")}</span>
               </button>
               <Can permission="song.update">
                 <button
@@ -371,7 +398,7 @@ export const ExplorerContextMenu: React.FC<ExplorerContextMenuProps> = ({
                   className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left cursor-pointer"
                 >
                   <ArrowRightLeft className="w-4 h-4 text-emerald-500" />
-                  <span>Mover Cântico</span>
+                  <span>{t("explorer.contextMenu.moveSong")}</span>
                 </button>
 
                 <button
@@ -382,7 +409,7 @@ export const ExplorerContextMenu: React.FC<ExplorerContextMenuProps> = ({
                   className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left cursor-pointer"
                 >
                   <Tag className="w-4 h-4 text-sky-600" />
-                  <span>Etiquetar Cântico</span>
+                  <span>{t("explorer.contextMenu.tagSong")}</span>
                 </button>
               </Can>
               <Can permission="export.pdf">
@@ -394,7 +421,7 @@ export const ExplorerContextMenu: React.FC<ExplorerContextMenuProps> = ({
                   className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left cursor-pointer"
                 >
                   <Printer className="w-4 h-4 text-emerald-500" />
-                  <span>Imprimir Cântico</span>
+                  <span>{t("explorer.contextMenu.printSong")}</span>
                 </button>
               </Can>
 
@@ -409,7 +436,7 @@ export const ExplorerContextMenu: React.FC<ExplorerContextMenuProps> = ({
                   className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 font-semibold transition-colors text-left cursor-pointer"
                 >
                   <Trash2 className="w-4 h-4 text-rose-500" />
-                  <span>Apagar Cântico</span>
+                  <span>{t("explorer.contextMenu.deleteSong")}</span>
                 </button>
               </Can>
             </>

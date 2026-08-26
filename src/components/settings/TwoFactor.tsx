@@ -1,14 +1,16 @@
 import { useAuth } from "@/src/contexts/AuthContext";
 import { useSync } from "@/src/contexts/SyncContext";
+import { useI18n } from "@/src/i18n";
 import { authClient } from "@/src/lib/authClient";
 import { Button, Input, Modal } from "@hosanna/shared";
-import { AlertTriangle, CheckCircle2, Shield } from "lucide-react"; // Assumindo que usas lucide-react
+import { AlertTriangle, CheckCircle2, Shield } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import React, { useState } from "react";
 
 export const TwoFactorSection: React.FC = () => {
   const { user, refetch: refetchAuth } = useAuth();
   const { showToast } = useSync();
+  const { t } = useI18n();
   const is2FAEnabled =
     (user as { twoFactorEnabled?: boolean })?.twoFactorEnabled || false;
 
@@ -18,7 +20,6 @@ export const TwoFactorSection: React.FC = () => {
   const [backupCodes, setBackupCodes] = useState<string[]>([]);
   const [verificationCode, setVerificationCode] = useState("");
 
-  // O fluxo agora tem passos distintos: password -> setup (QR) -> backup -> disable
   const [step, setStep] = useState<"password" | "setup" | "backup" | "disable">(
     "password",
   );
@@ -26,22 +27,33 @@ export const TwoFactorSection: React.FC = () => {
 
   const handleEnable2FA = async () => {
     if (!password) {
-      showToast("Por favor insira a palavra-passe.", "error");
+      showToast(t("settings.twoFactor.passwordRequired"), "error");
       return;
     }
     setIsLoading(true);
     try {
       const { data, error } = await authClient.twoFactor.enable({ password });
       if (error) {
-        showToast(error.message || "Erro ao ativar 2FA", "error");
-      } else if (data) {
-        setTotpURI(data.totpURI);
-        setBackupCodes(data.backupCodes || []);
-        // Avançar para o ecrã do código QR
+        showToast(
+          t("settings.twoFactor.enableError", {
+            error: error.message || "Erro",
+          }),
+          "error",
+        );
+      } else if (data && "totpURI" in data) {
+        setTotpURI((data as { totpURI: string }).totpURI);
+        setBackupCodes(
+          (data as { backupCodes?: string[] }).backupCodes || [],
+        );
         setStep("setup");
       }
     } catch (err: unknown) {
-      showToast((err as Error).message || "Erro ao ativar 2FA", "error");
+      showToast(
+        t("settings.twoFactor.enableError", {
+          error: (err as Error).message || "Erro",
+        }),
+        "error",
+      );
     } finally {
       setIsLoading(false);
     }
@@ -49,7 +61,7 @@ export const TwoFactorSection: React.FC = () => {
 
   const handleVerify2FA = async () => {
     if (!verificationCode) {
-      showToast("Por favor insira o código de verificação.", "error");
+      showToast(t("settings.twoFactor.codeRequired"), "error");
       return;
     }
     setIsLoading(true);
@@ -59,42 +71,59 @@ export const TwoFactorSection: React.FC = () => {
         trustDevice: true,
       });
       if (error) {
-        showToast(error.message || "Código inválido", "error");
+        showToast(
+          error.message || t("settings.twoFactor.codeInvalid"),
+          "error",
+        );
       } else {
-        showToast("Código verificado com sucesso!", "success");
-        // Em vez de fechar, avança para mostrar os códigos de recuperação
+        showToast(t("settings.twoFactor.codeVerified"), "success");
         setStep("backup");
       }
     } catch (err: unknown) {
-      showToast((err as Error).message || "Erro ao verificar código", "error");
+      showToast(
+        t("settings.twoFactor.verifyError", {
+          error: (err as Error).message || "Erro",
+        }),
+        "error",
+      );
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleFinishSetup = async () => {
-    showToast("Autenticação em 2 Etapas configurada com sucesso!", "success");
+    showToast(t("settings.twoFactor.setupSuccess"), "success");
     await refetchAuth();
     closeModal();
   };
 
   const handleDisable2FA = async () => {
     if (!password) {
-      showToast("Por favor insira a palavra-passe.", "error");
+      showToast(t("settings.twoFactor.passwordRequired"), "error");
       return;
     }
     setIsLoading(true);
     try {
       const { error } = await authClient.twoFactor.disable({ password });
       if (error) {
-        showToast(error.message || "Erro ao desativar 2FA", "error");
+        showToast(
+          t("settings.twoFactor.disableError", {
+            error: error.message || "Erro",
+          }),
+          "error",
+        );
       } else {
-        showToast("Autenticação em 2 Etapas desativada.", "success");
+        showToast(t("settings.twoFactor.disableSuccess"), "success");
         await refetchAuth();
         closeModal();
       }
     } catch (err: unknown) {
-      showToast((err as Error).message || "Erro ao desativar 2FA", "error");
+      showToast(
+        t("settings.twoFactor.disableError", {
+          error: (err as Error).message || "Erro",
+        }),
+        "error",
+      );
     } finally {
       setIsLoading(false);
     }
@@ -115,11 +144,10 @@ export const TwoFactorSection: React.FC = () => {
         <div>
           <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
             <Shield className="w-4 h-4 text-m3-primary" />
-            Autenticação em 2 Etapas (2FA)
+            {t("settings.twoFactor.title")}
           </h3>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-            Adicione uma camada extra de segurança à sua conta com um código
-            temporário.
+            {t("settings.twoFactor.desc")}
           </p>
         </div>
         <button
@@ -133,32 +161,37 @@ export const TwoFactorSection: React.FC = () => {
               : "bg-m3-primary text-white hover:bg-m3-primary-dark shadow-xs"
           }`}
         >
-          {is2FAEnabled ? "Desativar 2FA" : "Ativar 2FA"}
+          {is2FAEnabled
+            ? t("settings.twoFactor.disableBtn")
+            : t("settings.twoFactor.enableBtn")}
         </button>
       </div>
 
       <Modal
         isOpen={isModalOpen}
         onClose={closeModal}
-        title={is2FAEnabled ? "Desativar 2FA" : "Configurar 2FA"}
+        title={
+          is2FAEnabled
+            ? t("settings.twoFactor.disableModalTitle")
+            : t("settings.twoFactor.setupModalTitle")
+        }
       >
         <div className="space-y-4 py-2">
           {/* PASSO 1: CONFIRMAR PALAVRA-PASSE */}
           {step === "password" && (
             <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
               <p className="text-xs text-slate-600 dark:text-slate-400 mb-4">
-                Para ativar a verificação em duas etapas, confirme a sua
-                palavra-passe atual:
+                {t("settings.twoFactor.passwordStepDesc")}
               </p>
               <Input
                 type="password"
-                label="Palavra-passe"
+                label={t("settings.twoFactor.passwordLabel")}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
               <div className="flex justify-end gap-2 pt-4">
                 <Button variant="outline" size="sm" onClick={closeModal}>
-                  Cancelar
+                  {t("common.cancel")}
                 </Button>
                 <Button
                   variant="primary"
@@ -166,7 +199,7 @@ export const TwoFactorSection: React.FC = () => {
                   isLoading={isLoading}
                   onClick={handleEnable2FA}
                 >
-                  Continuar
+                  {t("settings.twoFactor.continue")}
                 </Button>
               </div>
             </div>
@@ -176,13 +209,11 @@ export const TwoFactorSection: React.FC = () => {
           {step === "setup" && (
             <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
               <p className="text-xs text-slate-600 dark:text-slate-400 mb-4">
-                1. Digitalize o código QR com a sua aplicação de autenticação
-                (como Google Authenticator, Authy ou Microsoft Authenticator).
+                {t("settings.twoFactor.setupStep1")}
               </p>
 
               {totpURI && (
                 <div className="flex justify-center mb-6">
-                  {/* O fundo branco garante que o QR code seja lido corretamente mesmo em Dark Mode */}
                   <div className="bg-white p-3 rounded-xl shadow-sm border border-slate-200">
                     <QRCodeSVG value={totpURI} size={160} />
                   </div>
@@ -190,13 +221,13 @@ export const TwoFactorSection: React.FC = () => {
               )}
 
               <p className="text-xs text-slate-600 dark:text-slate-400 mb-2">
-                2. Introduza o código de 6 dígitos gerado pela aplicação:
+                {t("settings.twoFactor.setupStep2")}
               </p>
 
               <Input
                 type="text"
-                label="Código de Verificação"
-                placeholder="123456"
+                label={t("settings.twoFactor.verificationCodeLabel")}
+                placeholder={t("settings.twoFactor.verificationCodePlaceholder")}
                 value={verificationCode}
                 onChange={(e) => setVerificationCode(e.target.value)}
                 maxLength={6}
@@ -204,7 +235,7 @@ export const TwoFactorSection: React.FC = () => {
 
               <div className="flex justify-end gap-2 pt-4">
                 <Button variant="outline" size="sm" onClick={closeModal}>
-                  Cancelar
+                  {t("common.cancel")}
                 </Button>
                 <Button
                   variant="primary"
@@ -212,7 +243,7 @@ export const TwoFactorSection: React.FC = () => {
                   isLoading={isLoading}
                   onClick={handleVerify2FA}
                 >
-                  Verificar
+                  {t("settings.twoFactor.verify")}
                 </Button>
               </div>
             </div>
@@ -224,16 +255,14 @@ export const TwoFactorSection: React.FC = () => {
               <div className="flex items-center gap-2 mb-3 text-green-600 dark:text-green-400">
                 <CheckCircle2 className="w-5 h-5" />
                 <span className="text-sm font-bold">
-                  Aplicação associada com sucesso!
+                  {t("settings.twoFactor.backupSuccessTitle")}
                 </span>
               </div>
 
               <div className="bg-amber-50 dark:bg-amber-950/30 p-3 rounded-xl border border-amber-200 dark:border-amber-900/50 mb-4 flex gap-3">
                 <AlertTriangle className="w-5 h-5 text-amber-600 dark:text-amber-500 shrink-0" />
                 <p className="text-xs text-amber-800 dark:text-amber-400">
-                  Guarde estes códigos de recuperação num local seguro (como num
-                  gestor de palavras-passe). Eles são a única forma de aceder à
-                  sua conta caso perca acesso ao seu telemóvel.
+                  {t("settings.twoFactor.backupWarning")}
                 </p>
               </div>
 
@@ -254,7 +283,7 @@ export const TwoFactorSection: React.FC = () => {
 
               <div className="flex justify-end gap-2 pt-6">
                 <Button variant="primary" size="sm" onClick={handleFinishSetup}>
-                  Guardei os códigos de forma segura
+                  {t("settings.twoFactor.backupSavedBtn")}
                 </Button>
               </div>
             </div>
@@ -264,18 +293,17 @@ export const TwoFactorSection: React.FC = () => {
           {step === "disable" && (
             <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
               <p className="text-xs text-slate-600 dark:text-slate-400 mb-4">
-                Para desativar a verificação em duas etapas, confirme a sua
-                palavra-passe:
+                {t("settings.twoFactor.disableStepDesc")}
               </p>
               <Input
                 type="password"
-                label="Palavra-passe"
+                label={t("settings.twoFactor.passwordLabel")}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
               <div className="flex justify-end gap-2 pt-4">
                 <Button variant="outline" size="sm" onClick={closeModal}>
-                  Cancelar
+                  {t("common.cancel")}
                 </Button>
                 <Button
                   variant="primary"
@@ -284,7 +312,7 @@ export const TwoFactorSection: React.FC = () => {
                   onClick={handleDisable2FA}
                   className="bg-red-600 hover:bg-red-700 text-white border-0"
                 >
-                  Desativar 2FA
+                  {t("settings.twoFactor.disableBtn")}
                 </Button>
               </div>
             </div>

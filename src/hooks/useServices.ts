@@ -7,12 +7,14 @@ import { Service, ServiceElement } from "@hosanna/shared";
 import { useCallback, useEffect, useState } from "react";
 import { useSync } from "../contexts/SyncContext";
 import { getDatabase, getPurgeAt, ServiceDocType } from "../db";
+import { useI18n } from "../i18n";
 
 let cachedServicesMap: Map<string, Service[]> = new Map();
 let cachedSingleServices: Map<string, Service> = new Map();
 
 export function useServices(includeArchived: boolean = false) {
   const { showToast } = useSync();
+  const { t } = useI18n();
   const cacheKey = includeArchived ? "archived_included" : "active_only";
   const [services, setServices] = useState<Service[]>(
     () => cachedServicesMap.get(cacheKey) ?? [],
@@ -78,7 +80,7 @@ export function useServices(includeArchived: boolean = false) {
         const now = new Date().toISOString();
         const newService: ServiceDocType = {
           id: data.id || crypto.randomUUID(),
-          name: data.name || "Sem nome",
+          name: data.name || t("forms.untitled"),
           date: data.date || now,
           notes: data.notes ?? null,
           elements: data.elements || [],
@@ -90,17 +92,22 @@ export function useServices(includeArchived: boolean = false) {
 
         const doc = await db.services.insert(newService);
         const result = doc.toJSON() as Service;
-        showToast(`Service "${result.name}" created`, "success");
+        showToast(t("hooks.services.created"), "success");
         return result;
       } catch (err: unknown) {
         if (err && typeof err === "object" && "message" in err)
-          showToast(err.message || "Failed to create service", "error");
+          showToast(
+            t("hooks.services.saveError", {
+              error: (err as Error).message || "",
+            }),
+            "error",
+          );
         throw err;
       } finally {
         setIsCreating(false);
       }
     },
-    [showToast],
+    [showToast, t],
   );
 
   const updateService = useCallback(
@@ -118,12 +125,12 @@ export function useServices(includeArchived: boolean = false) {
             _deleted: false,
           });
           const updated = doc.toJSON() as Service;
-          showToast(`Service updated`, "success");
+          showToast(t("hooks.services.updated"), "success");
           return updated;
         } else {
           const newDoc = await db.services.upsert({
             id,
-            name: data.name || "Sem nome",
+            name: data.name || t("forms.untitled"),
             date: data.date || now,
             notes: data.notes ?? null,
             elements: data.elements || [],
@@ -134,18 +141,23 @@ export function useServices(includeArchived: boolean = false) {
             ...data,
           });
           const result = newDoc.toJSON() as Service;
-          showToast(`Service updated`, "success");
+          showToast(t("hooks.services.updated"), "success");
           return result;
         }
       } catch (err: unknown) {
         if (err && typeof err === "object" && "message" in err)
-          showToast(err.message || "Failed to update service", "error");
+          showToast(
+            t("hooks.services.saveError", {
+              error: (err as Error).message || "",
+            }),
+            "error",
+          );
         throw err;
       } finally {
         setIsUpdating(false);
       }
     },
-    [showToast],
+    [showToast, t],
   );
 
   const deleteService = useCallback(
@@ -161,16 +173,21 @@ export function useServices(includeArchived: boolean = false) {
             updatedAt: new Date().toISOString(),
           });
         }
-        showToast("Service deleted", "info");
+        showToast(t("hooks.services.deleted"), "info");
       } catch (err: unknown) {
         if (err && typeof err === "object" && "message" in err)
-          showToast(err.message || "Failed to delete service", "error");
+          showToast(
+            t("hooks.services.deleteError", {
+              error: (err as Error).message || "",
+            }),
+            "error",
+          );
         throw err;
       } finally {
         setIsDeleting(false);
       }
     },
-    [showToast],
+    [showToast, t],
   );
 
   const restoreService = useCallback(
@@ -186,16 +203,21 @@ export function useServices(includeArchived: boolean = false) {
             updatedAt: new Date().toISOString(),
           });
         }
-        showToast("Service restored", "success");
+        showToast(t("hooks.services.activated"), "success");
       } catch (err: unknown) {
         if (err && typeof err === "object" && "message" in err)
-          showToast(err.message || "Failed to restore service", "error");
+          showToast(
+            t("hooks.services.saveError", {
+              error: (err as Error).message || "",
+            }),
+            "error",
+          );
         throw err;
       } finally {
         setIsRestoring(false);
       }
     },
-    [showToast],
+    [showToast, t],
   );
 
   const updateElements = useCallback(
@@ -219,13 +241,18 @@ export function useServices(includeArchived: boolean = false) {
         }
       } catch (err: unknown) {
         if (err && typeof err === "object" && "message" in err)
-          showToast(err.message || "Failed to update elements", "error");
+          showToast(
+            t("hooks.services.saveError", {
+              error: (err as Error).message || "",
+            }),
+            "error",
+          );
         throw err;
       } finally {
         setIsUpdating(false);
       }
     },
-    [showToast],
+    [showToast, t],
   );
 
   return {

@@ -1,6 +1,7 @@
 import { AlertCircle, Cloud, CloudOff, RefreshCw } from "lucide-react";
 import React from "react";
 import { useSync } from "../contexts/SyncContext";
+import { useI18n } from "../i18n";
 
 interface SyncStatusBadgeProps {
   className?: string;
@@ -12,37 +13,44 @@ export const SyncStatusBadge: React.FC<SyncStatusBadgeProps> = ({
   showText = false,
 }) => {
   const { syncStatus, triggerSyncCheck, lastSyncedAt } = useSync();
+  const { t } = useI18n();
 
   const getStatusConfig = () => {
     switch (syncStatus) {
       case "syncing":
         return {
           icon: <RefreshCw className="w-4 h-4 animate-spin text-sky-500" />,
-          label: "A sincronizar...",
-          tooltip: "A sincronizar dados locais com o servidor...",
+          label: t("misc.syncStatus.syncing"),
+          tooltip: t("misc.syncStatus.syncingTooltip"),
           bgClass: "bg-sky-500/10 text-sky-500 border-sky-500/20",
         };
       case "offline":
         return {
           icon: <CloudOff className="w-4 h-4 text-amber-500" />,
-          label: "Offline",
-          tooltip:
-            "Modo offline. As alterações serão sincronizadas quando reconectar.",
+          label: t("misc.syncStatus.offline"),
+          tooltip: t("misc.syncStatus.offlineTooltip"),
           bgClass: "bg-amber-500/10 text-amber-500 border-amber-500/20",
         };
       case "error":
         return {
           icon: <AlertCircle className="w-4 h-4 text-rose-500" />,
-          label: "Erro ao sincronizar",
-          tooltip: "Erro na sincronização. Clique para tentar novamente.",
+          label: t("misc.syncStatus.error"),
+          tooltip: t("misc.syncStatus.errorTooltip"),
           bgClass: "bg-rose-500/10 text-rose-500 border-rose-500/20",
         };
       case "synced":
       default:
         return {
           icon: <Cloud className="w-4 h-4 text-emerald-500" />,
-          label: "Sincronizado",
-          tooltip: `Sincronizado${lastSyncedAt ? ` (${lastSyncedAt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })})` : ""}. Clique para forçar sincronização.`,
+          label: t("misc.syncStatus.synced"),
+          tooltip: lastSyncedAt
+            ? t("misc.syncStatus.syncedTooltip", {
+                time: lastSyncedAt.toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                }),
+              })
+            : t("misc.syncStatus.syncedTooltipNoTime"),
           bgClass:
             "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20",
         };

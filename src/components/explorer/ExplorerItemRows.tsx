@@ -1,6 +1,7 @@
 import { Button, Folder, Song } from "@hosanna/shared";
 import { FileText, MoreVertical } from "lucide-react";
 import React from "react";
+import { useI18n } from "../../i18n";
 import {
   getFolderColorStyle,
   getFolderIconComponent,
@@ -44,6 +45,7 @@ export const FolderTableRow: React.FC<FolderTableRowProps> = React.memo(
     onDragLeave,
     onDrop,
   }) => {
+    const { t } = useI18n();
     const showDisabledDuringDrag = isInternalDragActive && isDropDisabled;
     const isCompact = density === "compact";
     const cellPadding = isCompact ? "py-2.5 px-4" : "py-4 px-6";
@@ -86,14 +88,16 @@ export const FolderTableRow: React.FC<FolderTableRowProps> = React.memo(
             );
           })()}
         </td>
-        <td className={`${cellPadding} text-m3-secondary opacity-70`}>Pasta</td>
+        <td className={`${cellPadding} text-m3-secondary opacity-70`}>
+          {t("explorer.folder")}
+        </td>
         {isSearchingOrFiltering && getFolderPathString && (
           <td className={`${cellPadding} text-m3-primary/80`}>
             {getFolderPathString(folder.parentId)}
           </td>
         )}
         <td className={`${cellPadding} text-m3-secondary`}>
-          {folder.songCount || 0} Musicas
+          {t("explorer.songsCount", { count: folder.songCount || 0 })}
         </td>
         <td className={`${cellPadding} text-right`}>
           <div className="flex items-center justify-end gap-1">
@@ -105,7 +109,7 @@ export const FolderTableRow: React.FC<FolderTableRowProps> = React.memo(
                 onDoubleClick(e);
               }}
             >
-              Abrir
+              {t("explorer.open")}
             </Button>
             <button
               type="button"
@@ -114,8 +118,8 @@ export const FolderTableRow: React.FC<FolderTableRowProps> = React.memo(
                 onContextMenu(e);
               }}
               className="p-1.5 rounded-xl text-m3-secondary hover:text-m3-text hover:bg-m3-hover dark:hover:bg-slate-800 transition-colors cursor-pointer"
-              title="Mais opções"
-              aria-label="Mais opções"
+              title={t("explorer.moreOptions")}
+              aria-label={t("explorer.moreOptions")}
             >
               <MoreVertical className="w-4 h-4" />
             </button>
@@ -153,6 +157,7 @@ export const SongTableRow: React.FC<SongTableRowProps> = React.memo(
     onDragStart,
     onDragEnd,
   }) => {
+    const { t } = useI18n();
     const isCompact = density === "compact";
     const cellPadding = isCompact ? "py-2.5 px-4" : "py-4 px-6";
 
@@ -183,7 +188,9 @@ export const SongTableRow: React.FC<SongTableRowProps> = React.memo(
             <span className="truncate">{song.title}</span>
           </div>
         </td>
-        <td className={`${cellPadding} text-m3-secondary opacity-70`}>Cifra</td>
+        <td className={`${cellPadding} text-m3-secondary opacity-70`}>
+          {t("explorer.cifra")}
+        </td>
         {isSearchingOrFiltering && getFolderPathString && (
           <td className={`${cellPadding} text-m3-secondary font-medium`}>
             {getFolderPathString(song.folderId)}
@@ -202,7 +209,7 @@ export const SongTableRow: React.FC<SongTableRowProps> = React.memo(
                 onDoubleClick(e);
               }}
             >
-              Editar
+              {t("explorer.edit")}
             </Button>
             <button
               type="button"
@@ -211,8 +218,8 @@ export const SongTableRow: React.FC<SongTableRowProps> = React.memo(
                 onContextMenu(e);
               }}
               className="p-1.5 rounded-xl text-m3-secondary hover:text-m3-text hover:bg-m3-hover dark:hover:bg-slate-800 transition-colors cursor-pointer"
-              title="Mais opções"
-              aria-label="Mais opções"
+              title={t("explorer.moreOptions")}
+              aria-label={t("explorer.moreOptions")}
             >
               <MoreVertical className="w-4 h-4" />
             </button>

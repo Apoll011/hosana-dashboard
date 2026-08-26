@@ -329,14 +329,14 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
         fullElements = fullService?.elements || [];
       }
       await createService({
-        name: `${service.name} (Cópia)`,
+        name: `${service.name}${t("common.copySuffix")}`,
         date: service.date,
         notes: service.notes || "",
         elements: fullElements || [],
       });
     } catch {
       await createService({
-        name: `${service.name} (Cópia)`,
+        name: `${service.name}${t("common.copySuffix")}`,
         date: service.date,
         notes: service.notes || "",
         elements: [],

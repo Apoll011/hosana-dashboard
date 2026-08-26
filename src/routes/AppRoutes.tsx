@@ -15,16 +15,20 @@ import {
   useParams,
 } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import { useI18n } from "../i18n";
 import { MainLayout } from "../layouts/MainLayout";
 import { usePreloadPermissions } from "../lib/permissions/client";
 import { OnboardingPage } from "../pages/OnboardingPage";
 import { ProtectedRoute } from "./ProtectedRoute";
 
-const PageLoader = () => (
-  <div className="h-screen w-screen flex items-center justify-center bg-m3-bg">
-    <Spinner size="lg" label="A carregar..." />
-  </div>
-);
+const PageLoader = () => {
+  const { t } = useI18n();
+  return (
+    <div className="h-screen w-screen flex items-center justify-center bg-m3-bg">
+      <Spinner size="lg" label={t("common.loading")} />
+    </div>
+  );
+};
 
 import {
   AcceptInvitationPage,
@@ -84,21 +88,25 @@ const ErrorFallback = ({
   resetErrorBoundary,
 }: {
   resetErrorBoundary: () => void;
-}) => (
-  <div className="flex flex-col items-center justify-center min-h-screen text-center p-4">
-    <h2 className="text-xl font-bold mb-2">Ups! Ligação perdida.</h2>
-    <p className="text-gray-500 mb-4">
-      Não foi possível carregar esta página. Por favor, verifique a sua ligação
-      à internet.
-    </p>
-    <button
-      onClick={resetErrorBoundary}
-      className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-    >
-      Tentar Novamente
-    </button>
-  </div>
-);
+}) => {
+  const { t } = useI18n();
+  return (
+    <div className="flex flex-col items-center justify-center min-h-screen text-center p-4">
+      <h2 className="text-xl font-bold mb-2">
+        {t("routes.errorBoundary.title")}
+      </h2>
+      <p className="text-gray-500 mb-4">
+        {t("routes.errorBoundary.desc")}
+      </p>
+      <button
+        onClick={resetErrorBoundary}
+        className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors cursor-pointer"
+      >
+        {t("routes.errorBoundary.reloadBtn")}
+      </button>
+    </div>
+  );
+};
 
 const OrganizationGuard = () => {
   const { slug } = useParams<{ slug: string }>();
