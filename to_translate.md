@@ -14,4 +14,4 @@ All files and components in the application are now fully migrated to the i18n s
 - **Routing & Guards:** AppRoutes (ErrorFallback, PageLoader), ProtectedRoute.
 - **Hooks & Data:** useSongs, useServices, useRxDbSearch.
 
-*Note: BatchTagModal's PRESET_CATEGORIES and CustomizeFolderModal's color names remain data values (as they are persisted in stored items/database).*
+_Note: BatchTagModal's PRESET_CATEGORIES and CustomizeFolderModal's color names remain data values (as they are persisted in stored items/database)._

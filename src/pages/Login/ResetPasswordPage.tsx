@@ -33,7 +33,10 @@ export const ResetPasswordPage: React.FC = () => {
 
   if (!token) {
     return (
-      <LoginLayout optionalLink="/login" optionalMsg={"← " + t("auth.forgotPassword.backToLogin")}>
+      <LoginLayout
+        optionalLink="/login"
+        optionalMsg={"← " + t("auth.forgotPassword.backToLogin")}
+      >
         <div className="py-8 flex flex-col items-center text-center gap-4">
           <div className="w-20 h-20 bg-rose-100 dark:bg-rose-900/40 rounded-full flex items-center justify-center">
             <XCircle className="w-10 h-10 text-rose-500 dark:text-rose-400" />
@@ -102,7 +105,10 @@ export const ResetPasswordPage: React.FC = () => {
   // ── Success ─────────────────────────────────────────────────────────────
   if (state === "success") {
     return (
-      <LoginLayout optionalLink="/login" optionalMsg={t("auth.resetPassword.goToLoginBtn") + " →"}>
+      <LoginLayout
+        optionalLink="/login"
+        optionalMsg={t("auth.resetPassword.goToLoginBtn") + " →"}
+      >
         <div className="py-8 flex flex-col items-center text-center gap-4 animate-in zoom-in-95 duration-500">
           <div className="relative w-20 h-20">
             <div className="absolute inset-0 bg-emerald-100 dark:bg-emerald-900/40 rounded-full animate-ping opacity-60" />
@@ -126,7 +132,10 @@ export const ResetPasswordPage: React.FC = () => {
   // ── Expired ─────────────────────────────────────────────────────────────
   if (state === "expired") {
     return (
-      <LoginLayout optionalLink="/login" optionalMsg={"← " + t("auth.forgotPassword.backToLogin")}>
+      <LoginLayout
+        optionalLink="/login"
+        optionalMsg={"← " + t("auth.forgotPassword.backToLogin")}
+      >
         <div className="py-8 flex flex-col items-center text-center gap-4 animate-in zoom-in-95 duration-500">
           <div className="w-20 h-20 bg-amber-100 dark:bg-amber-900/40 rounded-full flex items-center justify-center">
             <Clock className="w-10 h-10 text-amber-500 dark:text-amber-400" />

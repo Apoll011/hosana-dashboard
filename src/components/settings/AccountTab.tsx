@@ -255,10 +255,7 @@ export const AccountTab: React.FC<{ active: boolean }> = ({ active }) => {
 
   const handleSavePassword = async () => {
     if (!draftOldPassword) {
-      showToast(
-        t("settings.account.profile.currentPasswordRequired"),
-        "error",
-      );
+      showToast(t("settings.account.profile.currentPasswordRequired"), "error");
       return;
     }
     if (draftNewPassword.length < 6) {

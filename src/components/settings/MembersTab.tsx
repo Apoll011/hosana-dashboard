@@ -176,8 +176,7 @@ export const MembersTab: React.FC<{ active: boolean }> = ({ active }) => {
     const diffMs = new Date(date).getTime() - Date.now();
     const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
     if (diffDays === 0) return t("settings.members.today");
-    if (diffDays > 0)
-      return t("settings.members.inDays", { count: diffDays });
+    if (diffDays > 0) return t("settings.members.inDays", { count: diffDays });
     return t("settings.members.daysAgo", { count: Math.abs(diffDays) });
   };
 

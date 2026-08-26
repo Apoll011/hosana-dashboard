@@ -260,10 +260,7 @@ function useSongMutations() {
           }
         }
 
-        showToast(
-          t("songsPage.movedToast", { count }),
-          "success",
-        );
+        showToast(t("songsPage.movedToast", { count }), "success");
         return { count };
       } catch (err: unknown) {
         if (err && typeof err === "object" && "message" in err)

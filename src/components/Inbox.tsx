@@ -272,7 +272,9 @@ export const InboxPanel: React.FC<InboxPanelProps> = ({
               className="p-1.5 text-xs text-m3-primary hover:bg-m3-primary/10 rounded-lg transition-colors flex items-center gap-1 font-semibold cursor-pointer"
             >
               <CheckCheck className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">{t("misc.inbox.readAll")}</span>
+              <span className="hidden sm:inline">
+                {t("misc.inbox.readAll")}
+              </span>
             </button>
           )}
           {onClose && (
@@ -320,9 +322,7 @@ export const InboxPanel: React.FC<InboxPanelProps> = ({
           </div>
         ) : filteredNotifications.length === 0 ? (
           <div className="p-8 text-center text-slate-400 dark:text-slate-600">
-            <p className="text-xs font-semibold">
-              {t("misc.inbox.empty")}
-            </p>
+            <p className="text-xs font-semibold">{t("misc.inbox.empty")}</p>
           </div>
         ) : (
           <>
