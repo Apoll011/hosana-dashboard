@@ -75,7 +75,10 @@ export const ForgotPasswordPage: React.FC = () => {
 
   if (sent) {
     return (
-      <LoginLayout optionalLink="/login" optionalMsg={"← " + t("auth.forgotPassword.backToLogin")}>
+      <LoginLayout
+        optionalLink="/login"
+        optionalMsg={"← " + t("auth.forgotPassword.backToLogin")}
+      >
         <div className="py-8 flex flex-col items-center text-center gap-4 animate-in zoom-in-95 duration-500">
           <div className="w-20 h-20 bg-emerald-100 dark:bg-emerald-900/40 rounded-full flex items-center justify-center">
             <CheckCircle2 className="w-10 h-10 text-emerald-500 dark:text-emerald-400" />

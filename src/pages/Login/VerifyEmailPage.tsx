@@ -70,7 +70,10 @@ export const VerifyEmailPage: React.FC = () => {
   // ── Pending (no token) ──────────────────────────────────────────────────
   if (state === "pending") {
     return (
-      <LoginLayout optionalLink="/login" optionalMsg={"← " + t("auth.forgotPassword.backToLogin")}>
+      <LoginLayout
+        optionalLink="/login"
+        optionalMsg={"← " + t("auth.forgotPassword.backToLogin")}
+      >
         <div className="py-6 flex flex-col items-center text-center gap-4">
           <div className="w-16 h-16 bg-sky-100 dark:bg-sky-900/40 rounded-2xl flex items-center justify-center">
             <MailCheck className="w-8 h-8 text-sky-600 dark:text-sky-400" />
@@ -91,7 +94,8 @@ export const VerifyEmailPage: React.FC = () => {
             </p>
             {resendSuccess ? (
               <p className="text-sm font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-2 justify-center">
-                <CheckCircle2 className="w-4 h-4" /> {t("auth.forgotPassword.emailSentTitle")}
+                <CheckCircle2 className="w-4 h-4" />{" "}
+                {t("auth.forgotPassword.emailSentTitle")}
               </p>
             ) : (
               <form onSubmit={handleResend} className="flex gap-2">
@@ -126,7 +130,10 @@ export const VerifyEmailPage: React.FC = () => {
   // ── Verifying ───────────────────────────────────────────────────────────
   if (state === "verifying") {
     return (
-      <LoginLayout optionalLink="/login" optionalMsg={"← " + t("auth.forgotPassword.backToLogin")}>
+      <LoginLayout
+        optionalLink="/login"
+        optionalMsg={"← " + t("auth.forgotPassword.backToLogin")}
+      >
         <div className="py-12 flex flex-col items-center gap-4">
           <Loader2 className="w-10 h-10 text-m3-primary animate-spin" />
           <p className="text-sm font-semibold text-slate-600 dark:text-slate-300">
@@ -140,7 +147,10 @@ export const VerifyEmailPage: React.FC = () => {
   // ── Success ─────────────────────────────────────────────────────────────
   if (state === "success") {
     return (
-      <LoginLayout optionalLink="/login" optionalMsg={t("auth.resetPassword.goToLoginBtn") + " →"}>
+      <LoginLayout
+        optionalLink="/login"
+        optionalMsg={t("auth.resetPassword.goToLoginBtn") + " →"}
+      >
         <div className="py-8 flex flex-col items-center text-center gap-4 animate-in zoom-in-95 duration-500">
           <div className="relative w-20 h-20">
             <div className="absolute inset-0 bg-emerald-100 dark:bg-emerald-900/40 rounded-full animate-ping opacity-60" />
@@ -170,7 +180,10 @@ export const VerifyEmailPage: React.FC = () => {
   // ── Expired ─────────────────────────────────────────────────────────────
   if (state === "expired") {
     return (
-      <LoginLayout optionalLink="/login" optionalMsg={"← " + t("auth.forgotPassword.backToLogin")}>
+      <LoginLayout
+        optionalLink="/login"
+        optionalMsg={"← " + t("auth.forgotPassword.backToLogin")}
+      >
         <div className="py-8 flex flex-col items-center text-center gap-4 animate-in zoom-in-95 duration-500">
           <div className="w-20 h-20 bg-amber-100 dark:bg-amber-900/40 rounded-full flex items-center justify-center">
             <Clock className="w-10 h-10 text-amber-500 dark:text-amber-400" />
@@ -221,7 +234,10 @@ export const VerifyEmailPage: React.FC = () => {
 
   // ── Error ───────────────────────────────────────────────────────────────
   return (
-    <LoginLayout optionalLink="/login" optionalMsg={"← " + t("auth.forgotPassword.backToLogin")}>
+    <LoginLayout
+      optionalLink="/login"
+      optionalMsg={"← " + t("auth.forgotPassword.backToLogin")}
+    >
       <div className="py-8 flex flex-col items-center text-center gap-4 animate-in zoom-in-95 duration-500">
         <div className="w-20 h-20 bg-rose-100 dark:bg-rose-900/40 rounded-full flex items-center justify-center">
           <XCircle className="w-10 h-10 text-rose-500 dark:text-rose-400" />

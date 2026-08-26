@@ -95,9 +95,7 @@ const ErrorFallback = ({
       <h2 className="text-xl font-bold mb-2">
         {t("routes.errorBoundary.title")}
       </h2>
-      <p className="text-gray-500 mb-4">
-        {t("routes.errorBoundary.desc")}
-      </p>
+      <p className="text-gray-500 mb-4">{t("routes.errorBoundary.desc")}</p>
       <button
         onClick={resetErrorBoundary}
         className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors cursor-pointer"

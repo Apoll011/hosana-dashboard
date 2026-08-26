@@ -159,7 +159,9 @@ export const RegisterOrganizationPage: React.FC = () => {
   return (
     <LoginLayout
       optionalLink="/login"
-      optionalMsg={t("auth.register.hasAccount") + " " + t("auth.register.loginLink")}
+      optionalMsg={
+        t("auth.register.hasAccount") + " " + t("auth.register.loginLink")
+      }
       errorMsg={errorMsg}
       titleMb={2}
     >
@@ -370,7 +372,8 @@ export const RegisterOrganizationPage: React.FC = () => {
                     htmlFor="terms"
                     className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed cursor-pointer select-none"
                   >
-                    Concordo com os Termos de Serviço e a Política de Privacidade.
+                    Concordo com os Termos de Serviço e a Política de
+                    Privacidade.
                   </label>
                 </div>
               </div>

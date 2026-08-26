@@ -6,7 +6,10 @@
 import { Crown, Music, Shield, User, UserCheck, Users } from "lucide-react";
 import type { TranslationKey } from "../../i18n";
 
-type TranslateFn = (key: TranslationKey, vars?: Record<string, string | number>) => string;
+type TranslateFn = (
+  key: TranslationKey,
+  vars?: Record<string, string | number>,
+) => string;
 
 export const getRoleLabel = (role: string, t?: TranslateFn) => {
   switch (role?.toLowerCase()) {

@@ -281,7 +281,10 @@ export const OnboardingPage: React.FC = () => {
               {/* Section: Pending Invitations */}
               {isFetchingInvitations ? (
                 <div className="flex items-center justify-center p-4">
-                  <Spinner size="sm" label={t("settings.members.loadingInvites")} />
+                  <Spinner
+                    size="sm"
+                    label={t("settings.members.loadingInvites")}
+                  />
                 </div>
               ) : invitations.length > 0 ? (
                 <div className="space-y-3">

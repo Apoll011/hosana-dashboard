@@ -37,7 +37,11 @@ export const RegisterPage: React.FC = () => {
     setErrorMsg("");
 
     if (!name.trim() || !email.trim() || !password.trim()) {
-      setErrorMsg(t("settings.account.profile.invalidImage") ? "Por favor preencha todos os campos." : "");
+      setErrorMsg(
+        t("settings.account.profile.invalidImage")
+          ? "Por favor preencha todos os campos."
+          : "",
+      );
       return;
     }
     if (password !== confirmPassword) {
@@ -103,7 +107,9 @@ export const RegisterPage: React.FC = () => {
   return (
     <LoginLayout
       optionalLink="/login"
-      optionalMsg={t("auth.register.hasAccount") + " " + t("auth.register.loginLink")}
+      optionalMsg={
+        t("auth.register.hasAccount") + " " + t("auth.register.loginLink")
+      }
       errorMsg={errorMsg}
       compactBranding
     >

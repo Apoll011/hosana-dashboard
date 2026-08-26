@@ -42,9 +42,7 @@ export const TwoFactorSection: React.FC = () => {
         );
       } else if (data && "totpURI" in data) {
         setTotpURI((data as { totpURI: string }).totpURI);
-        setBackupCodes(
-          (data as { backupCodes?: string[] }).backupCodes || [],
-        );
+        setBackupCodes((data as { backupCodes?: string[] }).backupCodes || []);
         setStep("setup");
       }
     } catch (err: unknown) {
@@ -227,7 +225,9 @@ export const TwoFactorSection: React.FC = () => {
               <Input
                 type="text"
                 label={t("settings.twoFactor.verificationCodeLabel")}
-                placeholder={t("settings.twoFactor.verificationCodePlaceholder")}
+                placeholder={t(
+                  "settings.twoFactor.verificationCodePlaceholder",
+                )}
                 value={verificationCode}
                 onChange={(e) => setVerificationCode(e.target.value)}
                 maxLength={6}
