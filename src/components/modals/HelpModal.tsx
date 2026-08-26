@@ -1,5 +1,6 @@
 import { Keyboard, Lightbulb, X } from "lucide-react";
 import React, { useEffect } from "react";
+import { useI18n } from "../../i18n";
 
 interface HelpModalProps {
   isOpen: boolean;
@@ -74,6 +75,8 @@ const renderShortcut = (shortcut: string) => {
 };
 
 export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
+  const { t } = useI18n();
+
   // Fechar no ESCape
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -98,11 +101,11 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
           <h2 className="text-sm font-black uppercase tracking-widest text-primary dark:text-sky-400 flex items-center gap-2">
             <Lightbulb className="w-4 h-4" />
-            Guia Rápido do Editor
+            {t("misc.help.title")}
           </h2>
           <button
             onClick={onClose}
-            className="p-2 rounded-full hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
+            className="p-2 rounded-full hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -113,7 +116,9 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
           {/* Coluna 1: Snippets */}
           <div>
             <div className="flex items-center gap-2 mb-2 text-primary dark:text-sky-400">
-              <h3 className="text-lg font-bold">Snippets Inteligentes</h3>
+              <h3 className="text-lg font-bold">
+                {t("misc.help.smartSnippets")}
+              </h3>
             </div>
             <p className="text-xs text-slate-500 dark:text-slate-400 mb-5 leading-relaxed">
               Escreva uma das siglas abaixo numa linha vazia e prima{" "}
@@ -140,11 +145,9 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
               <Lightbulb className="w-5 h-5 text-primary dark:text-sky-400 shrink-0 mt-0.5" />
               <p className="text-[11px] sm:text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
                 <strong className="text-primary dark:text-sky-400">
-                  Dica de preenchimento:
-                </strong>{" "}
-                Ao inserir um snippet, o texto temporário fica selecionado.
-                Basta escrever por cima. Prima <Key>TAB</Key> novamente para
-                saltar para o campo seguinte!
+                  {t("misc.help.tipTitle")}{" "}
+                </strong>
+                {t("misc.help.tipDesc")}
               </p>
             </div>
           </div>
@@ -153,11 +156,12 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
           <div>
             <div className="flex items-center gap-2 mb-2 text-primary dark:text-sky-400">
               <Keyboard className="w-5 h-5" />
-              <h3 className="text-lg font-bold">Atalhos de Teclado</h3>
+              <h3 className="text-lg font-bold">
+                {t("misc.help.shortcutsTitle")}
+              </h3>
             </div>
             <p className="text-xs text-slate-500 dark:text-slate-400 mb-5 leading-relaxed">
-              Acelere a edição e navegação sem precisar de tirar as mãos do
-              teclado.
+              {t("misc.help.shortcutsDesc")}
             </p>
 
             <div className="space-y-1.5">

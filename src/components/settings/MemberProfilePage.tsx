@@ -16,6 +16,7 @@ import {
   Trash2,
 } from "lucide-react";
 import React, { useState } from "react";
+import { useI18n } from "../../i18n";
 import { authClient } from "../../lib/authClient";
 import { getRoleBadge, getRoleLabel } from "./settingsUtils";
 
@@ -58,6 +59,7 @@ export const MemberProfilePage: React.FC<MemberProfilePageProps> = ({
   isApproving: _isApproving,
   showToast,
 }) => {
+  const { t, locale } = useI18n();
   const isSelf = currentUser?.id === member.id;
   const [isEditingRole, setIsEditingRole] = useState(false);
   const [selectedRole, setSelectedRole] = useState(member.role || "member");
@@ -69,7 +71,7 @@ export const MemberProfilePage: React.FC<MemberProfilePageProps> = ({
     if (onRoleChange) {
       await onRoleChange(member, selectedRole);
     } else {
-      showToast("Função de utilizador atualizada com sucesso!", "success");
+      showToast(t("settings.members.roleUpdated"), "success");
     }
     setIsEditingRole(false);
   };
@@ -80,11 +82,13 @@ export const MemberProfilePage: React.FC<MemberProfilePageProps> = ({
       await authClient.organization.leave({
         organizationId: organizationId || "",
       });
-      showToast("Saiu da organização com sucesso.", "success");
+      showToast(t("settings.memberProfile.leaveSuccess"), "success");
       onBack();
     } catch (err: unknown) {
       showToast(
-        (err as Error).message || "Falha ao sair da organização.",
+        t("settings.memberProfile.leaveError", {
+          error: (err as Error).message || "",
+        }),
         "error",
       );
     } finally {
@@ -106,7 +110,7 @@ export const MemberProfilePage: React.FC<MemberProfilePageProps> = ({
   const formatDate = (date?: string | Date) => {
     if (!date) return null;
     try {
-      return new Intl.DateTimeFormat("pt-PT", {
+      return new Intl.DateTimeFormat(locale, {
         day: "2-digit",
         month: "long",
         year: "numeric",
@@ -129,7 +133,7 @@ export const MemberProfilePage: React.FC<MemberProfilePageProps> = ({
         className="flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 transition-colors cursor-pointer"
       >
         <ArrowLeft className="w-4 h-4" />
-        Voltar à lista de membros
+        {t("settings.memberProfile.backToList")}
       </button>
 
       {/* Profile Hero */}
@@ -153,7 +157,7 @@ export const MemberProfilePage: React.FC<MemberProfilePageProps> = ({
             </div>
             {isSelf && (
               <span className="mb-2 text-[10px] font-black uppercase tracking-wider text-m3-primary bg-sky-50 dark:bg-sky-950 px-2 py-1 rounded-md border border-sky-200 dark:border-sky-800">
-                Você
+                {t("common.you")}
               </span>
             )}
           </div>
@@ -168,12 +172,14 @@ export const MemberProfilePage: React.FC<MemberProfilePageProps> = ({
                   {member.email}
                 </span>
                 <span className="text-slate-300 dark:text-slate-700">·</span>
-                {getRoleBadge(member.role)}
+                {getRoleBadge(member.role, t)}
               </div>
               {joinedDate && (
                 <div className="flex items-center gap-1.5 mt-2 text-[11px] text-slate-400">
                   <CalendarDays className="w-3.5 h-3.5" />
-                  Membro desde {joinedDate}
+                  {t("settings.memberProfile.memberSince", {
+                    date: joinedDate,
+                  })}
                 </div>
               )}
             </div>
@@ -187,7 +193,7 @@ export const MemberProfilePage: React.FC<MemberProfilePageProps> = ({
                   onClick={() => setShowLeaveConfirm(true)}
                   icon={<LogOut className="w-3.5 h-3.5 text-red-500" />}
                 >
-                  Sair da Organização
+                  {t("settings.memberProfile.leaveOrg")}
                 </Button>
               )}
 
@@ -200,7 +206,7 @@ export const MemberProfilePage: React.FC<MemberProfilePageProps> = ({
                     onClick={() => setShowRemoveConfirm(true)}
                     icon={<Trash2 className="w-3.5 h-3.5 text-red-500" />}
                   >
-                    Remover Membro
+                    {t("settings.memberProfile.removeMember")}
                   </Button>
                 </Can>
               )}
@@ -215,7 +221,7 @@ export const MemberProfilePage: React.FC<MemberProfilePageProps> = ({
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
               <Shield className="w-4 h-4 text-m3-primary" />
-              Gestão de Permissões RBAC
+              {t("settings.memberProfile.rbacTitle")}
             </h3>
 
             {!isEditingRole && (
@@ -224,7 +230,7 @@ export const MemberProfilePage: React.FC<MemberProfilePageProps> = ({
                 className="text-xs font-bold text-m3-primary hover:underline flex items-center gap-1 cursor-pointer"
               >
                 <PenLine className="w-3.5 h-3.5" />
-                Alterar Função
+                {t("settings.memberProfile.changeRole")}
               </button>
             )}
           </div>
@@ -236,26 +242,25 @@ export const MemberProfilePage: React.FC<MemberProfilePageProps> = ({
                 onChange={(e) => setSelectedRole(e.target.value)}
                 className="w-full h-11 px-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-semibold"
               >
-                {/* Only an owner can promote someone else to owner */}
                 <Can permission="organization.update">
-                  <option value="owner">Proprietário (Owner)</option>
+                  <option value="owner">{t("settings.roles.owner")}</option>
                 </Can>
-                <option value="admin">Administrador (Admin)</option>
+                <option value="admin">{t("settings.roles.admin")}</option>
                 <option value="teamLeader">
-                  Líder de Equipa (Team Leader)
+                  {t("settings.roles.teamLeader")}
                 </option>
-                <option value="editor">Editor</option>
-                <option value="musician">Músico</option>
-                <option value="guest">Convidado</option>
+                <option value="editor">{t("settings.roles.editor")}</option>
+                <option value="musician">{t("settings.roles.musician")}</option>
+                <option value="guest">{t("settings.roles.guest")}</option>
               </select>
 
               {isPromotingToOwner && (
                 <div className="flex items-start gap-2 p-3 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800">
                   <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
                   <p className="text-[11px] text-amber-800 dark:text-amber-300 leading-relaxed">
-                    Está prestes a tornar {member.name} proprietário da
-                    organização. Esta ação é sensível e deve ser confirmada com
-                    cuidado.
+                    {t("settings.memberProfile.promoteOwnerWarning", {
+                      name: member.name || "",
+                    })}
                   </p>
                 </div>
               )}
@@ -269,7 +274,7 @@ export const MemberProfilePage: React.FC<MemberProfilePageProps> = ({
                     setIsEditingRole(false);
                   }}
                 >
-                  Cancelar
+                  {t("common.cancel")}
                 </Button>
                 <Button
                   variant="primary"
@@ -277,15 +282,15 @@ export const MemberProfilePage: React.FC<MemberProfilePageProps> = ({
                   onClick={handleSaveRole}
                   icon={<Save className="w-4 h-4" />}
                 >
-                  Guardar Função
+                  {t("settings.memberProfile.saveRole")}
                 </Button>
               </div>
             </div>
           ) : (
             <p className="text-xs text-slate-500">
-              Função Atual:{" "}
+              {t("settings.memberProfile.currentRole")}{" "}
               <strong className="text-slate-800 dark:text-slate-200">
-                {getRoleLabel(member.role)}
+                {getRoleLabel(member.role, t)}
               </strong>
             </p>
           )}
@@ -297,19 +302,20 @@ export const MemberProfilePage: React.FC<MemberProfilePageProps> = ({
         <Modal
           isOpen={showRemoveConfirm}
           onClose={() => setShowRemoveConfirm(false)}
-          title="Remover Membro"
+          title={t("settings.memberProfile.removeConfirmTitle")}
         >
           <div className="space-y-4 pt-2">
             <p className="text-xs text-slate-600 dark:text-slate-400">
-              Tem a certeza que quer remover <strong>{member.name}</strong> da
-              organização? Esta pessoa perderá o acesso imediatamente.
+              {t("settings.memberProfile.removeConfirmText", {
+                name: member.name || "",
+              })}
             </p>
             <div className="flex justify-end gap-2">
               <Button
                 variant="outline"
                 onClick={() => setShowRemoveConfirm(false)}
               >
-                Voltar
+                {t("common.back")}
               </Button>
               <Button
                 variant="primary"
@@ -319,7 +325,7 @@ export const MemberProfilePage: React.FC<MemberProfilePageProps> = ({
                 }}
                 icon={<Trash2 className="w-4 h-4" />}
               >
-                Remover Membro
+                {t("settings.memberProfile.removeMember")}
               </Button>
             </div>
           </div>
@@ -331,20 +337,18 @@ export const MemberProfilePage: React.FC<MemberProfilePageProps> = ({
         <Modal
           isOpen={showLeaveConfirm}
           onClose={() => setShowLeaveConfirm(false)}
-          title="Sair da Organização"
+          title={t("settings.memberProfile.leaveConfirmTitle")}
         >
           <div className="space-y-4 pt-2">
             <p className="text-xs text-slate-600 dark:text-slate-400">
-              Tem a certeza que quer sair desta organização? Vai perder o acesso
-              imediatamente e terá de ser convidado novamente para voltar a
-              entrar.
+              {t("settings.memberProfile.leaveConfirmText")}
             </p>
             <div className="flex justify-end gap-2">
               <Button
                 variant="outline"
                 onClick={() => setShowLeaveConfirm(false)}
               >
-                Voltar
+                {t("common.back")}
               </Button>
               <Button
                 variant="primary"
@@ -352,7 +356,9 @@ export const MemberProfilePage: React.FC<MemberProfilePageProps> = ({
                 disabled={isLeaving}
                 icon={<LogOut className="w-4 h-4" />}
               >
-                {isLeaving ? "A Sair..." : "Sair da Organização"}
+                {isLeaving
+                  ? t("settings.memberProfile.leaving")
+                  : t("settings.memberProfile.leaveOrg")}
               </Button>
             </div>
           </div>

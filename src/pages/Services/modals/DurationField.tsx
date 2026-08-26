@@ -1,4 +1,6 @@
 import { Clock3 } from "lucide-react";
+import React from "react";
+import { useI18n } from "../../../i18n";
 
 export function secondsToDurationInput(seconds?: number): string {
   const safe = Number.isFinite(seconds)
@@ -37,12 +39,13 @@ export const DurationField: React.FC<DurationFieldProps> = ({
   onChange,
   accentRingClass,
 }) => {
+  const { t } = useI18n();
   const seconds = durationInputToSeconds(value);
 
   return (
     <div className="space-y-1.5">
       <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
-        Duração (MM:SS)
+        {t("serviceModals.duration.label")}
       </label>
       <div className="relative">
         <Clock3 className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
@@ -51,7 +54,7 @@ export const DurationField: React.FC<DurationFieldProps> = ({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           onBlur={() => onChange(secondsToDurationInput(seconds))}
-          placeholder="05:00"
+          placeholder={t("serviceModals.duration.placeholder")}
           className={`w-full pl-9 pr-20 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 ${accentRingClass}`}
         />
         <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-semibold text-slate-500">

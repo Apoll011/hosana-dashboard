@@ -13,6 +13,7 @@ import {
   Song,
 } from "@hosanna/shared";
 import { AlertTriangle, HardDrive } from "lucide-react";
+import { useI18n } from "../../i18n";
 import { FolderForm } from "../forms/FolderForm";
 import { SongForm } from "../forms/SongForm";
 import { ServiceForm } from "../forms/ServiceForm";
@@ -216,6 +217,8 @@ export const ExplorerModals: React.FC<ExplorerModalsProps> = ({
   setSearchFields,
   onClearFilters,
 }) => {
+  const { t } = useI18n();
+
   return (
     <>
       <CifraClubImportModal
@@ -230,8 +233,10 @@ export const ExplorerModals: React.FC<ExplorerModalsProps> = ({
         onClose={() => setIsCreateSongModalOpen(false)}
         title={
           currentFolder
-            ? `Criar Novo Cântico em "${currentFolder.name}"`
-            : "Criar Novo Cântico na Raiz"
+            ? t("explorer.modals.createSongInFolder", {
+                folder: currentFolder.name,
+              })
+            : t("explorer.modals.createSongInRoot")
         }
       >
         <SongForm
@@ -246,7 +251,7 @@ export const ExplorerModals: React.FC<ExplorerModalsProps> = ({
       <Modal
         isOpen={isCreateServiceModalOpen}
         onClose={() => setIsCreateServiceModalOpen(false)}
-        title="Criar Plano de Culto"
+        title={t("explorer.modals.createServiceTitle")}
       >
         <ServiceForm
           onSubmit={onCreateServiceSubmit}
@@ -260,8 +265,10 @@ export const ExplorerModals: React.FC<ExplorerModalsProps> = ({
         onClose={() => setIsCreateModalOpen(false)}
         title={
           currentFolder
-            ? `Criar Pasta dentro de "${currentFolder.name}"`
-            : "Criar Nova Pasta na Raiz"
+            ? t("explorer.modals.createFolderInFolder", {
+                folder: currentFolder.name,
+              })
+            : t("explorer.modals.createFolderInRoot")
         }
       >
         <FolderForm
@@ -274,11 +281,13 @@ export const ExplorerModals: React.FC<ExplorerModalsProps> = ({
       <Modal
         isOpen={!!renameTarget}
         onClose={() => setRenameTarget(null)}
-        title={`Mudar Nome da Pasta "${renameTarget?.name}"`}
+        title={t("explorer.modals.renameFolderTitle", {
+          folder: renameTarget?.name || "",
+        })}
       >
         <FolderForm
           initialName={renameTarget?.name || ""}
-          title="Atualizar Nome da Pasta"
+          title={t("explorer.modals.updateFolderName")}
           onSubmit={onRenameFolderSubmit}
           onCancel={() => setRenameTarget(null)}
         />
@@ -298,11 +307,13 @@ export const ExplorerModals: React.FC<ExplorerModalsProps> = ({
       <Modal
         isOpen={!!moveFolderTarget}
         onClose={() => setMoveFolderTarget(null)}
-        title={`Mover Pasta "${moveFolderTarget?.name}"`}
+        title={t("explorer.modals.moveFolderTitle", {
+          folder: moveFolderTarget?.name || "",
+        })}
       >
         <div className="flex flex-col gap-4">
           <p className="text-xs text-slate-500 dark:text-slate-400">
-            Selecione uma nova pasta de destino para{" "}
+            {t("explorer.modals.selectDestFolder")}{" "}
             <strong className="text-slate-900 dark:text-slate-100">
               {moveFolderTarget?.name}
             </strong>
@@ -321,7 +332,7 @@ export const ExplorerModals: React.FC<ExplorerModalsProps> = ({
               />
               <div className="flex items-center gap-2 text-xs font-bold text-slate-900 dark:text-slate-100">
                 <HardDrive className="w-4 h-4 text-[#0284c7]" />
-                <span>Diretório Raiz (Top Level)</span>
+                <span>{t("explorer.modals.rootTopLevel")}</span>
               </div>
             </label>
 
@@ -347,10 +358,10 @@ export const ExplorerModals: React.FC<ExplorerModalsProps> = ({
 
           <div className="flex items-center justify-end gap-3 mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
             <Button variant="ghost" onClick={() => setMoveFolderTarget(null)}>
-              Cancelar
+              {t("common.cancel")}
             </Button>
             <Button variant="primary" onClick={onMoveFolderSubmit}>
-              Mover Pasta
+              {t("explorer.modals.moveFolderBtn")}
             </Button>
           </div>
         </div>
@@ -364,16 +375,16 @@ export const ExplorerModals: React.FC<ExplorerModalsProps> = ({
           setConfirmFolderName("");
           setDeleteAcao("move_to_root");
         }}
-        title={`Apagar Pasta "${deleteTarget?.name}"`}
+        title={t("explorer.modals.deleteFolderTitle", {
+          folder: deleteTarget?.name || "",
+        })}
       >
         {(deleteTarget?.folderCount || 0) + (deleteTarget?.songCount || 0) >
         0 ? (
           <div className="flex flex-col gap-4">
             <div className="p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-xl flex items-start gap-2.5 text-xs text-amber-800 dark:text-amber-300">
               <AlertTriangle className="w-4 h-4 shrink-0 text-amber-500 mt-0.5" />
-              <span>
-                Selecione como tratar os conteúdos dentro desta pasta:
-              </span>
+              <span>{t("explorer.modals.selectDeleteFolderOption")}</span>
             </div>
 
             <div className="flex flex-col gap-2.5">
@@ -391,11 +402,10 @@ export const ExplorerModals: React.FC<ExplorerModalsProps> = ({
                 />
                 <div className="flex flex-col">
                   <span className="text-xs font-bold text-slate-900 dark:text-slate-100">
-                    Mover Conteúdos para a Raiz (Recomendado)
+                    {t("explorer.modals.moveContentsToRoot")}
                   </span>
                   <span className="text-[11px] text-slate-500">
-                    Mantém as cifras dos cânticos na biblioteca sem categoria de
-                    pasta.
+                    {t("explorer.modals.moveContentsToRootDesc")}
                   </span>
                 </div>
               </label>
@@ -411,11 +421,10 @@ export const ExplorerModals: React.FC<ExplorerModalsProps> = ({
                 />
                 <div className="flex flex-col">
                   <span className="text-xs font-bold text-rose-600 dark:text-rose-400">
-                    Apagar pasta e todos os conteúdos nela contidos
+                    {t("explorer.modals.deleteFolderAndContents")}
                   </span>
                   <span className="text-[11px] text-slate-500">
-                    Apaga permanentemente a pasta E todos os ficheiros de
-                    cânticos e pastas e os conteúdos das mesmas, dentro dela.
+                    {t("explorer.modals.deleteFolderAndContentsDesc")}
                   </span>
                 </div>
               </label>
@@ -425,19 +434,19 @@ export const ExplorerModals: React.FC<ExplorerModalsProps> = ({
               <div className="p-4 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 rounded-2xl flex flex-col gap-3 text-xs">
                 <div className="flex items-center gap-2 font-bold text-rose-700 dark:text-rose-300">
                   <AlertTriangle className="w-4 h-4 text-rose-500 shrink-0" />
-                  <span>Confirmação Adicional de Segurança</span>
+                  <span>{t("explorer.modals.additionalSecurity")}</span>
                 </div>
                 <p className="text-rose-900 dark:text-rose-200 text-[11px] leading-relaxed">
-                  Esta ação é irreversível. Para confirmar a eliminação
-                  permanente da pasta e de todos os seus cânticos, escreva o
-                  nome da pasta{" "}
+                  {t("explorer.modals.deleteFolderIrreversible")}{" "}
                   <strong className="font-extrabold underline">
                     {deleteTarget?.name}
                   </strong>{" "}
                   abaixo:
                 </p>
                 <Input
-                  placeholder={`Escreva "${deleteTarget?.name}" para confirmar`}
+                  placeholder={t("explorer.modals.writeToConfirm", {
+                    name: deleteTarget?.name || "",
+                  })}
                   value={confirmFolderName}
                   onChange={(e) => setConfirmFolderName(e.target.value)}
                   className="bg-white dark:bg-slate-900 border-rose-300 dark:border-rose-800 text-xs"
@@ -454,7 +463,7 @@ export const ExplorerModals: React.FC<ExplorerModalsProps> = ({
                   setDeleteAcao("move_to_root");
                 }}
               >
-                Cancelar
+                {t("common.cancel")}
               </Button>
               <Button
                 variant="danger"
@@ -464,7 +473,7 @@ export const ExplorerModals: React.FC<ExplorerModalsProps> = ({
                 }
                 onClick={onDeleteFolderSubmit}
               >
-                Confirmar Eliminação
+                {t("explorer.modals.confirmDelete")}
               </Button>
             </div>
           </div>
@@ -474,10 +483,10 @@ export const ExplorerModals: React.FC<ExplorerModalsProps> = ({
               <label className="flex items-center gap-3 p-3 border border-slate-200 dark:border-slate-800 rounded-xl cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50">
                 <div className="flex flex-col">
                   <span className="text-xs font-bold text-slate-900 dark:text-slate-100">
-                    Apagar pasta
+                    {t("explorer.modals.emptyFolderDelete")}
                   </span>
                   <span className="text-[11px] text-slate-500">
-                    A pasta está vazia e será eliminada
+                    {t("explorer.modals.emptyFolderDeleteDesc")}
                   </span>
                 </div>
               </label>
@@ -491,7 +500,7 @@ export const ExplorerModals: React.FC<ExplorerModalsProps> = ({
                     setDeleteAcao("move_to_root");
                   }}
                 >
-                  Cancelar
+                  {t("common.cancel")}
                 </Button>
                 <Button
                   variant="danger"
@@ -501,7 +510,7 @@ export const ExplorerModals: React.FC<ExplorerModalsProps> = ({
                   }
                   onClick={onDeleteFolderSubmit}
                 >
-                  Confirmar Eliminação
+                  {t("explorer.modals.confirmDelete")}
                 </Button>
               </div>
             </div>
@@ -523,24 +532,26 @@ export const ExplorerModals: React.FC<ExplorerModalsProps> = ({
       <Modal
         isOpen={!!deleteSongTarget}
         onClose={() => setDeleteSongTarget(null)}
-        title={`Apagar Cântico "${deleteSongTarget?.title}"`}
+        title={t("explorer.modals.deleteSongTitle", {
+          title: deleteSongTarget?.title || "",
+        })}
       >
         <div className="flex flex-col gap-4">
           <div className="p-3 bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900 rounded-xl flex items-start gap-2.5 text-xs text-rose-800 dark:text-rose-300">
             <AlertTriangle className="w-4 h-4 shrink-0 text-rose-500 mt-0.5" />
             <span>
-              Tem a certeza que deseja apagar permanentemente{" "}
-              <strong>&quot;{deleteSongTarget?.title}&quot;</strong>? Isto
-              também irá removê-lo de quaisquer cultos agendados.
+              {t("explorer.modals.deleteSongWarning", {
+                title: deleteSongTarget?.title || "",
+              })}
             </span>
           </div>
 
           <div className="flex items-center justify-end gap-3 mt-2 pt-4 border-t border-slate-100 dark:border-slate-800">
             <Button variant="ghost" onClick={() => setDeleteSongTarget(null)}>
-              Cancelar
+              {t("common.cancel")}
             </Button>
             <Button variant="danger" onClick={onDeleteSongSubmit}>
-              Apagar Cântico
+              {t("explorer.modals.deleteSongBtn")}
             </Button>
           </div>
         </div>
@@ -578,22 +589,24 @@ export const ExplorerModals: React.FC<ExplorerModalsProps> = ({
       <Modal
         isOpen={isFilterPanelOpen}
         onClose={() => setIsFilterPanelOpen(false)}
-        title="Filtros Avançados de Pesquisa"
+        title={t("explorer.modals.filterTitle")}
       >
         <div className="space-y-5 py-2">
           <p className="text-xs text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800/60 p-2.5 rounded-xl border border-slate-200 dark:border-slate-700">
-            Âmbito de pesquisa:{" "}
+            {t("explorer.modals.searchScope")}{" "}
             <span className="font-bold text-[#0284c7]">
               {currentFolder
-                ? `Pasta "${currentFolder.name}" e Subpastas`
-                : "Todo o Explorador (Diretório Raiz)"}
+                ? t("explorer.modals.scopeFolder", {
+                    folder: currentFolder.name,
+                  })
+                : t("explorer.modals.scopeRoot")}
             </span>
           </p>
 
           {/* Tag / Category Filter */}
           <div className="space-y-2">
             <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
-              Categoria / Etiqueta
+              {t("explorer.modals.categoryTag")}
             </label>
             <div className="flex flex-wrap gap-1.5 max-h-28 overflow-y-auto p-1.5 border border-slate-200 dark:border-slate-800 rounded-xl bg-slate-50/50 dark:bg-slate-900/50">
               <button
@@ -605,7 +618,7 @@ export const ExplorerModals: React.FC<ExplorerModalsProps> = ({
                     : "bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700"
                 }`}
               >
-                Todas as Categorias
+                {t("explorer.modals.allCategories")}
               </button>
               {availableTags.map((tag) => (
                 <button
@@ -627,7 +640,7 @@ export const ExplorerModals: React.FC<ExplorerModalsProps> = ({
           {/* Search Fields Toggles */}
           <div className="space-y-2">
             <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
-              Campos de Pesquisa de Texto
+              {t("explorer.modals.searchFields")}
             </label>
             <div className="grid grid-cols-2 gap-2 text-xs p-3 border border-slate-200 dark:border-slate-800 rounded-xl bg-slate-50/50 dark:bg-slate-900/50">
               <label className="flex items-center gap-2 cursor-pointer font-medium text-slate-700 dark:text-slate-300">
@@ -642,7 +655,7 @@ export const ExplorerModals: React.FC<ExplorerModalsProps> = ({
                   }
                   className="w-4 h-4 text-[#0284c7] rounded focus:ring-[#0284c7]"
                 />
-                <span>Título / Nome</span>
+                <span>{t("explorer.modals.fieldTitle")}</span>
               </label>
               <label className="flex items-center gap-2 cursor-pointer font-medium text-slate-700 dark:text-slate-300">
                 <input
@@ -656,7 +669,7 @@ export const ExplorerModals: React.FC<ExplorerModalsProps> = ({
                   }
                   className="w-4 h-4 text-[#0284c7] rounded focus:ring-[#0284c7]"
                 />
-                <span>Artista / Autor</span>
+                <span>{t("explorer.modals.fieldArtist")}</span>
               </label>
               <label className="flex items-center gap-2 cursor-pointer font-medium text-slate-700 dark:text-slate-300">
                 <input
@@ -670,7 +683,7 @@ export const ExplorerModals: React.FC<ExplorerModalsProps> = ({
                   }
                   className="w-4 h-4 text-[#0284c7] rounded focus:ring-[#0284c7]"
                 />
-                <span>Letra / Conteúdo</span>
+                <span>{t("explorer.modals.fieldContent")}</span>
               </label>
               <label className="flex items-center gap-2 cursor-pointer font-medium text-slate-700 dark:text-slate-300">
                 <input
@@ -684,7 +697,7 @@ export const ExplorerModals: React.FC<ExplorerModalsProps> = ({
                   }
                   className="w-4 h-4 text-[#0284c7] rounded focus:ring-[#0284c7]"
                 />
-                <span>Etiquetas / Tags</span>
+                <span>{t("explorer.modals.fieldTags")}</span>
               </label>
             </div>
           </div>
@@ -697,7 +710,7 @@ export const ExplorerModals: React.FC<ExplorerModalsProps> = ({
               size="sm"
               onClick={onClearFilters}
             >
-              Limpar Filtros
+              {t("explorer.modals.clearFilters")}
             </Button>
 
             <Button
@@ -706,7 +719,7 @@ export const ExplorerModals: React.FC<ExplorerModalsProps> = ({
               size="sm"
               onClick={() => setIsFilterPanelOpen(false)}
             >
-              Aplicar Filtros
+              {t("explorer.modals.applyFilters")}
             </Button>
           </div>
         </div>

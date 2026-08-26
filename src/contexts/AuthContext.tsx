@@ -197,7 +197,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
     try {
       const { data: sessionData, error: sessionError } =
-        await authClient.getSession();
+        await authClient.getSession({ fetchOptions: {} });
       const sessionUser = sessionData?.user;
 
       if (!sessionUser || sessionError) {
@@ -213,12 +213,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       let userRole: string | undefined = undefined;
 
       const { data: initialOrg } =
-        await authClient.organization.getFullOrganization();
+        await authClient.organization.getFullOrganization({ fetchOptions: {} });
 
       if (initialOrg) {
         activeOrg = normalizeOrganization(initialOrg);
       } else {
-        const { data: orgs } = await authClient.organization.list();
+        const { data: orgs } = await authClient.organization.list({
+          fetchOptions: {},
+        });
         if (orgs && orgs.length > 0) {
           const storedSlug = localStorage.getItem("active_org_slug");
           const targetOrg = orgs.find((o) => o.slug === storedSlug) || orgs[0];
@@ -228,7 +230,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           });
 
           const { data: newlyActiveOrg } =
-            await authClient.organization.getFullOrganization();
+            await authClient.organization.getFullOrganization({
+              fetchOptions: {},
+            });
           activeOrg = normalizeOrganization(newlyActiveOrg);
         }
       }
@@ -249,7 +253,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           userRole = currentUserMember.role;
         } else {
           const { data: roleData } =
-            await authClient.organization.getActiveMemberRole();
+            await authClient.organization.getActiveMemberRole({
+              fetchOptions: {},
+            });
           userRole = roleData?.role || undefined;
         }
       } else {
@@ -323,7 +329,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const logout = useCallback(async () => {
     setIsLoading(true);
-    await authClient.signOut();
+    await authClient.signOut({ fetchOptions: {} });
     handleClearSession();
   }, [handleClearSession]);
 

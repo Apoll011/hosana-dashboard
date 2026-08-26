@@ -13,11 +13,13 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import React, { useState } from "react";
+import { useI18n } from "../../i18n";
 import { authClient } from "../../lib/authClient";
 import LoginLayout from "./Layout";
 
 export const ForgotPasswordPage: React.FC = () => {
   const { navigate } = useAppNavigate();
+  const { t } = useI18n();
   const [email, setEmail] = useState("");
   const [mode, setMode] = useState<"link" | "code">("link");
   const [isLoading, setIsLoading] = useState(false);
@@ -27,14 +29,13 @@ export const ForgotPasswordPage: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email.trim()) {
-      setErrorMsg("Insira o seu endereço de e-mail.");
+      setErrorMsg(t("settings.account.profile.emailInvalid"));
       return;
     }
     setErrorMsg("");
     setIsLoading(true);
 
     if (mode === "code") {
-      // Send OTP code for password recovery / email verification
       const { error } = await authClient.sendVerificationEmail({
         email: email.trim(),
         callbackURL: `${window.location.origin}/reset-password`,
@@ -46,7 +47,6 @@ export const ForgotPasswordPage: React.FC = () => {
         return;
       }
 
-      // Navigate directly to reset-password with email in state
       navigate("/reset-password", {
         state: { email: email.trim(), mode: "code" },
       });
@@ -75,22 +75,20 @@ export const ForgotPasswordPage: React.FC = () => {
 
   if (sent) {
     return (
-      <LoginLayout optionalLink="/login" optionalMsg="← Voltar ao login">
+      <LoginLayout
+        optionalLink="/login"
+        optionalMsg={"← " + t("auth.forgotPassword.backToLogin")}
+      >
         <div className="py-8 flex flex-col items-center text-center gap-4 animate-in zoom-in-95 duration-500">
           <div className="w-20 h-20 bg-emerald-100 dark:bg-emerald-900/40 rounded-full flex items-center justify-center">
             <CheckCircle2 className="w-10 h-10 text-emerald-500 dark:text-emerald-400" />
           </div>
           <div>
             <h2 className="text-xl font-black text-slate-900 dark:text-white">
-              E-mail Enviado!
+              {t("auth.forgotPassword.emailSentTitle")}
             </h2>
             <p className="text-sm text-slate-500 dark:text-slate-400 mt-2 max-w-xs mx-auto leading-relaxed">
-              Se existe uma conta associada a{" "}
-              <span className="font-bold text-slate-700 dark:text-slate-200">
-                {email}
-              </span>
-              , receberá um e-mail com as instruções para redefinir a
-              palavra-passe.
+              {t("auth.forgotPassword.emailSentDesc")}
             </p>
           </div>
         </div>
@@ -101,7 +99,7 @@ export const ForgotPasswordPage: React.FC = () => {
   return (
     <LoginLayout
       optionalLink="/login"
-      optionalMsg="← Voltar ao login"
+      optionalMsg={"← " + t("auth.forgotPassword.backToLogin")}
       errorMsg={errorMsg}
     >
       <div className="flex flex-col items-center mb-4">
@@ -109,10 +107,10 @@ export const ForgotPasswordPage: React.FC = () => {
           <KeyRound className="w-7 h-7 text-m3-primary dark:text-m3-primary-light" />
         </div>
         <h2 className="font-display font-black text-xl text-slate-900 dark:text-white">
-          Esqueceu a palavra-passe?
+          {t("auth.forgotPassword.title")}
         </h2>
         <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 text-center max-w-xs">
-          Escolha como prefere recuperar o acesso à sua conta
+          {t("auth.forgotPassword.subtitle")}
         </p>
       </div>
 
@@ -121,33 +119,33 @@ export const ForgotPasswordPage: React.FC = () => {
         <button
           type="button"
           onClick={() => setMode("link")}
-          className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-2 rounded-lg text-xs font-bold transition-all ${
+          className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
             mode === "link"
               ? "bg-white dark:bg-slate-900 text-m3-primary dark:text-m3-primary-light shadow-sm"
               : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
           }`}
         >
           <Mail className="w-3.5 h-3.5" />
-          <span>Link Mágico</span>
+          <span>Link</span>
         </button>
         <button
           type="button"
           onClick={() => setMode("code")}
-          className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-2 rounded-lg text-xs font-bold transition-all ${
+          className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
             mode === "code"
               ? "bg-white dark:bg-slate-900 text-m3-primary dark:text-m3-primary-light shadow-sm"
               : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
           }`}
         >
           <ShieldCheck className="w-3.5 h-3.5" />
-          <span>Código OTP</span>
+          <span>OTP</span>
         </button>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <Input
           type="email"
-          label="E-mail"
+          label={t("auth.forgotPassword.emailLabel")}
           placeholder="admin@hosanna.org"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
@@ -159,13 +157,9 @@ export const ForgotPasswordPage: React.FC = () => {
           type="submit"
           variant="primary"
           isLoading={isLoading}
-          className="w-full h-14 bg-m3-primary hover:bg-m3-primary-dark border-0 font-black uppercase tracking-widest text-[10px] text-white rounded-[20px] transition-all shadow-xl shadow-m3-primary/20 hover:shadow-m3-primary/40 flex items-center justify-center gap-2 group"
+          className="w-full h-14 bg-m3-primary hover:bg-m3-primary-dark border-0 font-black uppercase tracking-widest text-[10px] text-white rounded-[20px] transition-all shadow-xl shadow-m3-primary/20 hover:shadow-m3-primary/40 flex items-center justify-center gap-2 group cursor-pointer"
         >
-          <span>
-            {mode === "code"
-              ? "Enviar Código de Recuperação"
-              : "Enviar Link de Recuperação"}
-          </span>
+          <span>{t("auth.forgotPassword.sendLinkBtn")}</span>
           <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
         </Button>
       </form>

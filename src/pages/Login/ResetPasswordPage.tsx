@@ -9,6 +9,7 @@ import { Button, Input } from "@hosanna/shared";
 import { ArrowRight, CheckCircle2, Clock, Lock, XCircle } from "lucide-react";
 import React, { useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import { useI18n } from "../../i18n";
 import { authClient } from "../../lib/authClient";
 import LoginLayout from "./Layout";
 import { PasswordStrengthMeter } from "./components/PasswordStrengthMeter";
@@ -19,6 +20,7 @@ export const ResetPasswordPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const token = searchParams.get("token");
   const { navigate } = useAppNavigate();
+  const { t } = useI18n();
 
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -31,24 +33,27 @@ export const ResetPasswordPage: React.FC = () => {
 
   if (!token) {
     return (
-      <LoginLayout optionalLink="/login" optionalMsg="← Voltar ao login">
+      <LoginLayout
+        optionalLink="/login"
+        optionalMsg={"← " + t("auth.forgotPassword.backToLogin")}
+      >
         <div className="py-8 flex flex-col items-center text-center gap-4">
           <div className="w-20 h-20 bg-rose-100 dark:bg-rose-900/40 rounded-full flex items-center justify-center">
             <XCircle className="w-10 h-10 text-rose-500 dark:text-rose-400" />
           </div>
           <div>
             <h2 className="text-xl font-black text-slate-900 dark:text-white">
-              Link Inválido
+              {t("auth.acceptInvitation.invalidTitle")}
             </h2>
             <p className="text-sm text-slate-500 dark:text-slate-400 mt-2 max-w-xs mx-auto">
-              Este link de recuperação é inválido. Solicite um novo abaixo.
+              {t("auth.verifyEmail.errorDesc")}
             </p>
           </div>
           <AppLink
             to="/forgot-password"
             className="inline-flex items-center gap-2 h-10 px-5 rounded-xl bg-m3-primary text-white text-xs font-bold hover:bg-m3-primary-dark transition-all"
           >
-            Solicitar novo link
+            {t("auth.forgotPassword.sendLinkBtn")}
           </AppLink>
         </div>
       </LoginLayout>
@@ -60,11 +65,11 @@ export const ResetPasswordPage: React.FC = () => {
     setErrorMsg("");
 
     if (password.length < 6) {
-      setErrorMsg("A palavra-passe deve ter pelo menos 6 caracteres.");
+      setErrorMsg(t("settings.account.profile.passwordMinLength"));
       return;
     }
     if (password !== confirmPassword) {
-      setErrorMsg("As palavras-passe não coincidem.");
+      setErrorMsg(t("auth.register.passwordMismatch"));
       return;
     }
 
@@ -90,7 +95,7 @@ export const ResetPasswordPage: React.FC = () => {
     setTimeout(
       () =>
         navigate("/login", {
-          state: { message: "Palavra-passe redefinida com sucesso!" },
+          state: { message: t("auth.resetPassword.successDesc") },
           replace: true,
         }),
       2500,
@@ -100,7 +105,10 @@ export const ResetPasswordPage: React.FC = () => {
   // ── Success ─────────────────────────────────────────────────────────────
   if (state === "success") {
     return (
-      <LoginLayout optionalLink="/login" optionalMsg="Iniciar Sessão →">
+      <LoginLayout
+        optionalLink="/login"
+        optionalMsg={t("auth.resetPassword.goToLoginBtn") + " →"}
+      >
         <div className="py-8 flex flex-col items-center text-center gap-4 animate-in zoom-in-95 duration-500">
           <div className="relative w-20 h-20">
             <div className="absolute inset-0 bg-emerald-100 dark:bg-emerald-900/40 rounded-full animate-ping opacity-60" />
@@ -110,10 +118,10 @@ export const ResetPasswordPage: React.FC = () => {
           </div>
           <div>
             <h2 className="text-2xl font-black text-slate-900 dark:text-white">
-              Palavra-passe Redefinida!
+              {t("auth.resetPassword.successTitle")}
             </h2>
             <p className="text-sm text-slate-500 dark:text-slate-400 mt-2">
-              A redirecionar para o login...
+              {t("auth.resetPassword.successDesc")}
             </p>
           </div>
         </div>
@@ -124,24 +132,27 @@ export const ResetPasswordPage: React.FC = () => {
   // ── Expired ─────────────────────────────────────────────────────────────
   if (state === "expired") {
     return (
-      <LoginLayout optionalLink="/login" optionalMsg="← Voltar ao login">
+      <LoginLayout
+        optionalLink="/login"
+        optionalMsg={"← " + t("auth.forgotPassword.backToLogin")}
+      >
         <div className="py-8 flex flex-col items-center text-center gap-4 animate-in zoom-in-95 duration-500">
           <div className="w-20 h-20 bg-amber-100 dark:bg-amber-900/40 rounded-full flex items-center justify-center">
             <Clock className="w-10 h-10 text-amber-500 dark:text-amber-400" />
           </div>
           <div>
             <h2 className="text-xl font-black text-slate-900 dark:text-white">
-              Link Expirado
+              {t("auth.acceptInvitation.invalidTitle")}
             </h2>
             <p className="text-sm text-slate-500 dark:text-slate-400 mt-2 max-w-xs mx-auto">
-              O link de recuperação expirou. Solicite um novo.
+              {t("auth.acceptInvitation.invalidDesc")}
             </p>
           </div>
           <AppLink
             to="/forgot-password"
             className="inline-flex items-center gap-2 h-10 px-5 rounded-xl bg-m3-primary text-white text-xs font-bold hover:bg-m3-primary-dark transition-all"
           >
-            Solicitar novo link
+            {t("auth.forgotPassword.sendLinkBtn")}
           </AppLink>
         </div>
       </LoginLayout>
@@ -152,7 +163,7 @@ export const ResetPasswordPage: React.FC = () => {
   return (
     <LoginLayout
       optionalLink="/login"
-      optionalMsg="← Voltar ao login"
+      optionalMsg={"← " + t("auth.forgotPassword.backToLogin")}
       errorMsg={errorMsg}
     >
       <div className="flex flex-col items-center mb-5">
@@ -160,10 +171,10 @@ export const ResetPasswordPage: React.FC = () => {
           <Lock className="w-7 h-7 text-m3-primary dark:text-m3-primary-light" />
         </div>
         <h2 className="font-display font-black text-xl text-slate-900 dark:text-white">
-          Nova Palavra-passe
+          {t("auth.resetPassword.title")}
         </h2>
         <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 text-center max-w-xs">
-          Escolha uma palavra-passe forte para proteger a sua conta.
+          {t("auth.resetPassword.subtitle")}
         </p>
       </div>
 
@@ -171,7 +182,7 @@ export const ResetPasswordPage: React.FC = () => {
         <div className="space-y-1">
           <Input
             type="password"
-            label="Nova Palavra-passe"
+            label={t("auth.resetPassword.newPasswordLabel")}
             placeholder="••••••••"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -184,7 +195,7 @@ export const ResetPasswordPage: React.FC = () => {
         <div className="space-y-1">
           <Input
             type="password"
-            label="Confirmar Palavra-passe"
+            label={t("auth.resetPassword.confirmPasswordLabel")}
             placeholder="••••••••"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
@@ -197,7 +208,7 @@ export const ResetPasswordPage: React.FC = () => {
           />
           {passwordMismatch && (
             <p className="text-xs font-semibold text-rose-500 dark:text-rose-400 pl-1 animate-in fade-in">
-              As palavras-passe não coincidem
+              {t("auth.register.passwordMismatch")}
             </p>
           )}
         </div>
@@ -206,9 +217,9 @@ export const ResetPasswordPage: React.FC = () => {
           type="submit"
           variant="primary"
           isLoading={isLoading}
-          className="w-full h-14 bg-m3-primary hover:bg-m3-primary-dark border-0 font-black uppercase tracking-widest text-[10px] text-white mt-2 rounded-[20px] transition-all shadow-xl shadow-m3-primary/20 hover:shadow-m3-primary/40 flex items-center justify-center gap-2 group"
+          className="w-full h-14 bg-m3-primary hover:bg-m3-primary-dark border-0 font-black uppercase tracking-widest text-[10px] text-white mt-2 rounded-[20px] transition-all shadow-xl shadow-m3-primary/20 hover:shadow-m3-primary/40 flex items-center justify-center gap-2 group cursor-pointer"
         >
-          <span>Redefinir Palavra-passe</span>
+          <span>{t("auth.resetPassword.resetBtn")}</span>
           <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
         </Button>
       </form>

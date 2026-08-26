@@ -4,7 +4,8 @@
 
 import { Button, Modal } from "@hosanna/shared";
 import { FileText } from "lucide-react";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useI18n } from "../../../i18n";
 import {
   DurationField,
   durationInputToSeconds,
@@ -34,9 +35,10 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({
   onSave,
   initial,
 }) => {
-  const [title, setTitle] = useState(
-    initial?.title || "Boas-vindas & Oração Inicial",
-  );
+  const { t } = useI18n();
+  const defaultTitle = t("serviceModals.welcome.defaultTitle");
+
+  const [title, setTitle] = useState(initial?.title || defaultTitle);
   const [content, setContent] = useState(initial?.content || "");
   const [notes, setNotes] = useState(initial?.notes || "");
   const [duration, setDuration] = useState(
@@ -45,15 +47,19 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({
 
   useEffect(() => {
     if (isOpen) {
-      setTitle(initial?.title || "Boas-vindas & Oração Inicial");
+      setTitle(initial?.title || defaultTitle);
       setContent(initial?.content || "");
       setNotes(initial?.notes || "");
       setDuration(secondsToDurationInput(initial?.duration));
     }
-  }, [isOpen, initial]);
+  }, [isOpen, initial, defaultTitle]);
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Boas-vindas & Oração">
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={t("serviceModals.welcome.modalTitle")}
+    >
       <div className="space-y-4 py-2">
         <div
           className="flex items-center gap-3 p-3 rounded-xl"
@@ -67,51 +73,55 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({
           </div>
           <div>
             <p className="text-xs font-bold" style={{ color: "#1D4ED8" }}>
-              Boas-vindas
+              {t("serviceModals.welcome.badgeTitle")}
             </p>
             <p className="text-[11px] text-slate-500">
-              Momento de acolhimento e oração inicial do culto.
+              {t("serviceModals.welcome.badgeDesc")}
             </p>
           </div>
         </div>
 
         <div className="space-y-1.5">
           <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
-            Título
+            {t("serviceModals.welcome.titleLabel")}
           </label>
           <input
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="Ex: Boas-vindas & Oração Inicial"
+            placeholder={t("serviceModals.welcome.titlePlaceholder")}
             className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
 
         <div className="space-y-1.5">
           <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
-            Detalhes / Conteúdo
-            <span className="font-normal text-slate-400 ml-1">(opcional)</span>
+            {t("serviceModals.welcome.contentLabel")}
+            <span className="font-normal text-slate-400 ml-1">
+              ({t("common.details")})
+            </span>
           </label>
           <textarea
             rows={3}
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            placeholder="Ex: Saudação pelo pastor, oração de abertura..."
+            placeholder={t("serviceModals.welcome.contentPlaceholder")}
             className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
 
         <div className="space-y-1.5">
           <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
-            Notas
-            <span className="font-normal text-slate-400 ml-1">(opcional)</span>
+            {t("serviceModals.welcome.notesLabel")}
+            <span className="font-normal text-slate-400 ml-1">
+              ({t("common.details")})
+            </span>
           </label>
           <textarea
             rows={2}
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            placeholder="Ex: O pastor João faz a saudação..."
+            placeholder={t("serviceModals.welcome.notesPlaceholder")}
             className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
@@ -124,7 +134,7 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({
 
         <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-200 dark:border-slate-800">
           <Button type="button" variant="ghost" size="sm" onClick={onClose}>
-            Cancelar
+            {t("common.cancel")}
           </Button>
           <Button
             type="button"
@@ -140,7 +150,7 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({
               });
             }}
           >
-            Guardar
+            {t("common.save")}
           </Button>
         </div>
       </div>

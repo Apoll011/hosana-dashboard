@@ -14,6 +14,7 @@ import {
   X,
 } from "lucide-react";
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import { useI18n } from "../i18n";
 
 export type InboxNotification = {
   id: string;
@@ -210,6 +211,7 @@ export const InboxPanel: React.FC<InboxPanelProps> = ({
   renderItem,
   onClose,
 }) => {
+  const { t } = useI18n();
   const [filter, setFilter] = useState<"all" | "unread">("all");
   const [selectedNotif, setSelectedNotif] = useState<InboxNotification | null>(
     null,
@@ -254,10 +256,10 @@ export const InboxPanel: React.FC<InboxPanelProps> = ({
           </div>
           <div>
             <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
-              Notificações
+              {t("misc.inbox.title")}
             </h3>
             <p className="text-[11px] text-slate-500 dark:text-slate-400">
-              {inbox.unreadCount} não lida{inbox.unreadCount !== 1 ? "s" : ""}
+              {t("misc.inbox.unreadCount", { count: inbox.unreadCount })}
             </p>
           </div>
         </div>
@@ -266,17 +268,19 @@ export const InboxPanel: React.FC<InboxPanelProps> = ({
           {inbox.unreadCount > 0 && (
             <button
               onClick={inbox.markAllRead}
-              title="Marcar todas como lidas"
-              className="p-1.5 text-xs text-m3-primary hover:bg-m3-primary/10 rounded-lg transition-colors flex items-center gap-1 font-semibold"
+              title={t("misc.inbox.markAllRead")}
+              className="p-1.5 text-xs text-m3-primary hover:bg-m3-primary/10 rounded-lg transition-colors flex items-center gap-1 font-semibold cursor-pointer"
             >
               <CheckCheck className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Ler todas</span>
+              <span className="hidden sm:inline">
+                {t("misc.inbox.readAll")}
+              </span>
             </button>
           )}
           {onClose && (
             <button
               onClick={onClose}
-              className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+              className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
             >
               <X className="w-4 h-4" />
             </button>
@@ -288,23 +292,23 @@ export const InboxPanel: React.FC<InboxPanelProps> = ({
       <div className="flex border-b border-slate-100 dark:border-slate-800 text-xs px-2 pt-2 bg-slate-50/30 dark:bg-slate-900/30">
         <button
           onClick={() => setFilter("all")}
-          className={`px-3 py-1.5 font-bold rounded-t-lg transition-colors border-b-2 ${
+          className={`px-3 py-1.5 font-bold rounded-t-lg transition-colors border-b-2 cursor-pointer ${
             filter === "all"
               ? "border-m3-primary text-m3-primary bg-white dark:bg-slate-900"
               : "border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
           }`}
         >
-          Todas ({inbox.notifications.length})
+          {t("misc.inbox.all", { count: inbox.notifications.length })}
         </button>
         <button
           onClick={() => setFilter("unread")}
-          className={`px-3 py-1.5 font-bold rounded-t-lg transition-colors border-b-2 ${
+          className={`px-3 py-1.5 font-bold rounded-t-lg transition-colors border-b-2 cursor-pointer ${
             filter === "unread"
               ? "border-m3-primary text-m3-primary bg-white dark:bg-slate-900"
               : "border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
           }`}
         >
-          Não Lidas ({inbox.unreadCount})
+          {t("misc.inbox.unread", { count: inbox.unreadCount })}
         </button>
       </div>
 
@@ -313,14 +317,12 @@ export const InboxPanel: React.FC<InboxPanelProps> = ({
         {inbox.isLoading && inbox.notifications.length === 0 ? (
           <div className="p-8 text-center text-slate-400 dark:text-slate-600">
             <p className="text-xs font-semibold animate-pulse">
-              A carregar notificações...
+              {t("misc.inbox.loading")}
             </p>
           </div>
         ) : filteredNotifications.length === 0 ? (
           <div className="p-8 text-center text-slate-400 dark:text-slate-600">
-            <p className="text-xs font-semibold">
-              Nenhuma notificação encontrada
-            </p>
+            <p className="text-xs font-semibold">{t("misc.inbox.empty")}</p>
           </div>
         ) : (
           <>
@@ -372,9 +374,9 @@ export const InboxPanel: React.FC<InboxPanelProps> = ({
               <div className="p-2 text-center">
                 <button
                   onClick={inbox.loadMore}
-                  className="text-xs font-semibold text-m3-primary hover:underline"
+                  className="text-xs font-semibold text-m3-primary hover:underline cursor-pointer"
                 >
-                  Carregar mais
+                  {t("misc.inbox.loadMore")}
                 </button>
               </div>
             )}
@@ -392,9 +394,9 @@ export const InboxPanel: React.FC<InboxPanelProps> = ({
             </span>
             <button
               onClick={() => setSelectedNotif(null)}
-              className="text-xs text-slate-400 hover:text-slate-600"
+              className="text-xs text-slate-400 hover:text-slate-600 cursor-pointer"
             >
-              Fechar
+              {t("common.close")}
             </button>
           </div>
           <h4 className="text-xs font-bold text-slate-900 dark:text-slate-100 mb-1">
@@ -430,6 +432,7 @@ export const InboxButton: React.FC<InboxButtonProps> = ({
   organizationId,
   className = "",
 }) => {
+  const { t } = useI18n();
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -453,7 +456,7 @@ export const InboxButton: React.FC<InboxButtonProps> = ({
       <button
         onClick={() => setIsOpen((prev) => !prev)}
         className="relative p-2 text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all cursor-pointer focus:outline-none"
-        title="Inbox de Notificações"
+        title={t("misc.inbox.buttonTitle")}
       >
         <Bell className="w-5 h-5" />
         {inbox.unreadCount > 0 && (

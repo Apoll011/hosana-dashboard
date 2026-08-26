@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
+import { useI18n } from "../../i18n";
 import { authClient } from "../../lib/authClient";
 import { compressImage } from "./settingsUtils";
 
@@ -78,6 +79,7 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
   setRestoreStats,
 }) => {
   const { organization, refetch: refetchAuth } = useAuth();
+  const { t } = useI18n();
   const orgMetadata = (organization?.metadata as OrgMetadataStructure) || {};
 
   // --- Refs & Async States ---
@@ -158,7 +160,7 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
     if (!file) return;
 
     if (!file.type.startsWith("image/")) {
-      showToast("Por favor selecione um ficheiro de imagem válido.", "error");
+      showToast(t("settings.account.profile.invalidImage"), "error");
       return;
     }
 
@@ -166,9 +168,9 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
       setIsCompressing(true);
       const compressedBase64 = await compressImage(file, 800, 0.85);
       setDraftLogo(compressedBase64);
-      showToast("Imagem processada com sucesso.", "info");
+      showToast(t("settings.workspace.imageProcessed"), "info");
     } catch {
-      showToast("Erro ao processar a imagem. Tente novamente.", "error");
+      showToast(t("settings.workspace.imageProcessError"), "error");
     } finally {
       setIsCompressing(false);
       e.target.value = "";
@@ -183,7 +185,7 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
     e?.preventDefault();
 
     if (!draftName.trim()) {
-      showToast("O nome da organização não pode estar vazio.", "error");
+      showToast(t("settings.workspace.nameRequired"), "error");
       return;
     }
 
@@ -228,10 +230,7 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
       });
 
       await refetchAuth();
-      showToast(
-        "Organização e identidade visual atualizadas com sucesso!",
-        "success",
-      );
+      showToast(t("settings.workspace.saved"), "success");
     } catch (err) {
       // Rollback on failure
       setCurrentName(prev.name);
@@ -248,8 +247,9 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
       setIsEditing(true);
 
       showToast(
-        "Erro ao atualizar organização: " +
-          ((err as { message?: string })?.message || "Erro de rede"),
+        t("settings.workspace.saveError", {
+          error: (err as { message?: string })?.message || "Erro de rede",
+        }),
         "error",
       );
     } finally {
@@ -270,9 +270,9 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
     setIsDownloading(true);
     try {
       await backupApi.downloadBackup();
-      showToast("Cópia de segurança descarregada com sucesso!", "success");
+      showToast(t("settings.workspace.exportSuccess"), "success");
     } catch {
-      showToast("Falha ao exportar cópia de segurança.", "error");
+      showToast(t("settings.workspace.exportError"), "error");
     } finally {
       setIsDownloading(false);
     }
@@ -293,7 +293,7 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
           folders: json.folders?.length || 0,
         });
       } catch {
-        showToast("Ficheiro JSON de cópia de segurança inválido.", "error");
+        showToast(t("settings.workspace.invalidJson"), "error");
       }
     };
     reader.readAsText(file);
@@ -320,18 +320,17 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
             <div>
               <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
                 <Building2 className="w-5 h-5 text-m3-primary" />
-                Perfil da Organização
+                {t("settings.workspace.title")}
               </h2>
               <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-                Gira a identidade institucional, logótipo e cores do seu
-                ministério.
+                {t("settings.workspace.desc")}
               </p>
             </div>
 
             {!canLoading && !canManageOrg && (
               <span className="text-xs bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 px-3 py-1.5 rounded-full flex items-center gap-1.5 font-semibold">
                 <Lock className="w-3.5 h-3.5" />
-                Apenas Leitura
+                {t("settings.general.readOnly")}
               </span>
             )}
           </div>
@@ -353,7 +352,7 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
                     <div className="flex flex-col items-center justify-center text-slate-400 p-2 text-center">
                       <ImagePlus className="w-10 h-10 mb-1 opacity-70" />
                       <span className="text-[10px] font-medium uppercase tracking-wider">
-                        Sem Logótipo
+                        {t("settings.workspace.noLogo")}
                       </span>
                     </div>
                   )}
@@ -367,7 +366,9 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
                         <>
                           <Camera className="w-6 h-6 text-white mb-1.5" />
                           <span className="text-[11px] font-semibold text-white uppercase tracking-wider">
-                            {displayLogo ? "Alterar" : "Adicionar"}
+                            {displayLogo
+                              ? t("settings.workspace.change")
+                              : t("settings.workspace.add")}
                           </span>
                         </>
                       )}
@@ -389,14 +390,14 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
                       <button
                         type="button"
                         onClick={handleRemoveLogo}
-                        className="text-xs text-rose-500 hover:text-rose-600 dark:hover:text-rose-400 flex items-center gap-1 font-medium transition-colors"
+                        className="text-xs text-rose-500 hover:text-rose-600 dark:hover:text-rose-400 flex items-center gap-1 font-medium transition-colors cursor-pointer"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
-                        Remover logótipo
+                        {t("settings.workspace.removeLogo")}
                       </button>
                     )}
                     <p className="text-[11px] text-slate-400 text-center max-w-32">
-                      JPG, PNG ou WebP. Máx 800x800px.
+                      {t("settings.workspace.logoSpecs")}
                     </p>
                   </div>
                 )}
@@ -408,32 +409,36 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="md:col-span-2">
                       <Input
-                        label="Nome da Igreja / Organização"
+                        label={t("settings.workspace.orgNameLabel")}
                         value={draftName}
                         onChange={(e) => setDraftName(e.target.value)}
-                        placeholder="e.g. Igreja Hosanna Lisboa"
+                        placeholder={t("settings.workspace.orgNamePlaceholder")}
                         required
                         disabled={isSavingOrganization}
                       />
                     </div>
                     <div>
                       <Input
-                        label="Sigla / Abreviatura"
+                        label={t("settings.workspace.shortNameLabel")}
                         value={draftShortName}
                         onChange={(e) => setDraftShortName(e.target.value)}
-                        placeholder="e.g. IHL"
+                        placeholder={t(
+                          "settings.workspace.shortNamePlaceholder",
+                        )}
                         disabled={isSavingOrganization}
                       />
                     </div>
                     <div className="md:col-span-3">
                       <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide mb-1.5">
-                        Descrição ou Visão
+                        {t("settings.workspace.descriptionLabel")}
                       </label>
                       <textarea
                         rows={3}
                         value={draftDescription}
                         onChange={(e) => setDraftDescription(e.target.value)}
-                        placeholder="Breve descrição dos propósitos da igreja ou equipa..."
+                        placeholder={t(
+                          "settings.workspace.descriptionPlaceholder",
+                        )}
                         disabled={isSavingOrganization}
                         className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3.5 py-2.5 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-hidden focus:ring-2 focus:ring-m3-primary/30 focus:border-m3-primary transition-all resize-none disabled:opacity-50"
                       />
@@ -443,7 +448,7 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
                   <div className="space-y-3">
                     <div className="flex flex-wrap items-center gap-2.5">
                       <h3 className="text-2xl font-black tracking-tight text-slate-900 dark:text-white">
-                        {currentName || "Minha Organização"}
+                        {currentName || t("settings.workspace.defaultOrgName")}
                       </h3>
                       {currentShortName && (
                         <span className="text-xs font-bold text-m3-primary bg-m3-primary/10 border border-m3-primary/20 px-2.5 py-0.5 rounded-md">
@@ -455,7 +460,7 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
                     <p className="text-sm text-slate-600 dark:text-slate-300 max-w-xl leading-relaxed">
                       {currentDescription || (
                         <span className="italic text-slate-400 dark:text-slate-500">
-                          Nenhuma descrição configurada.
+                          {t("settings.workspace.noDescription")}
                         </span>
                       )}
                     </p>
@@ -492,11 +497,10 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
               <div>
                 <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2 uppercase tracking-wide">
                   <Palette className="w-4 h-4 text-rose-500" />
-                  Identidade Visual & Cores
+                  {t("settings.workspace.visualIdentityTitle")}
                 </h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                  Personalize a cor de destaque e visibilidade de marca em
-                  apresentações e partilhas.
+                  {t("settings.workspace.visualIdentityDesc")}
                 </p>
               </div>
 
@@ -505,7 +509,7 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
                   {/* Cor de Destaque */}
                   <div className="space-y-3">
                     <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide block">
-                      Cor de Destaque (Accent)
+                      {t("settings.workspace.accentColorLabel")}
                     </label>
 
                     <div className="flex items-center gap-3">
@@ -544,7 +548,7 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
                     {/* Predefinições Rápidas */}
                     <div className="pt-1">
                       <span className="text-[11px] text-slate-400 font-medium block mb-1.5">
-                        Cores Rápidas:
+                        {t("settings.workspace.quickColors")}
                       </span>
                       <div className="flex flex-wrap gap-1.5">
                         {PRESET_COLORS.map((preset) => (
@@ -559,7 +563,7 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
                               })
                             }
                             title={preset.name}
-                            className={`w-6 h-6 rounded-full transition-transform hover:scale-110 flex items-center justify-center ${
+                            className={`w-6 h-6 rounded-full transition-transform hover:scale-110 flex items-center justify-center cursor-pointer ${
                               draftAppearance.accentColor.toLowerCase() ===
                               preset.hex.toLowerCase()
                                 ? "ring-2 ring-offset-2 ring-slate-900 dark:ring-white dark:ring-offset-slate-900"
@@ -596,16 +600,15 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
                             showBranding: e.target.checked,
                           })
                         }
-                        className="w-4 h-4 mt-0.5 rounded text-m3-primary border-slate-300 focus:ring-m3-primary"
+                        className="w-4 h-4 mt-0.5 rounded text-m3-primary border-slate-300 focus:ring-m3-primary cursor-pointer"
                       />
                       <div className="text-xs">
                         <span className="font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
                           <ImageIcon className="w-3.5 h-3.5 text-slate-400" />
-                          Exibir Logótipo em Ecrãs Públicos
+                          {t("settings.workspace.showBrandingLabel")}
                         </span>
                         <p className="text-slate-500 dark:text-slate-400 mt-0.5">
-                          Apresenta o cabeçalho e marca da igreja em projeções e
-                          relatórios partilhados.
+                          {t("settings.workspace.showBrandingDesc")}
                         </p>
                       </div>
                     </label>
@@ -613,7 +616,7 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
                     {/* Preview Box */}
                     <div className="p-3 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 flex items-center justify-between text-xs">
                       <span className="text-slate-500 font-medium flex items-center gap-1.5">
-                        Pré-visualização:
+                        {t("settings.workspace.preview")}
                       </span>
                       <div className="flex items-center gap-2">
                         <span
@@ -622,11 +625,13 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
                             backgroundColor: draftAppearance.accentColor,
                           }}
                         >
-                          Botão Ativo
+                          {t("settings.workspace.activeButton")}
                         </span>
                         {draftAppearance.showBranding && (
                           <span className="text-[11px] font-semibold text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 px-2 py-0.5 rounded">
-                            {draftShortName || draftName || "Igreja"}
+                            {draftShortName ||
+                              draftName ||
+                              t("settings.workspace.churchFallback")}
                           </span>
                         )}
                       </div>
@@ -645,7 +650,7 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
                     </div>
                     <div>
                       <span className="text-xs text-slate-400 uppercase font-semibold tracking-wider block">
-                        Cor de Destaque
+                        {t("settings.workspace.accentColorTitle")}
                       </span>
                       <span className="font-mono font-bold text-sm text-slate-800 dark:text-slate-200">
                         {displayAccentColor.toUpperCase()}
@@ -665,12 +670,12 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
                     </div>
                     <div>
                       <span className="text-xs text-slate-400 uppercase font-semibold tracking-wider block">
-                        Exibição de Marca
+                        {t("settings.workspace.brandingTitle")}
                       </span>
                       <span className="font-semibold text-sm text-slate-800 dark:text-slate-200">
                         {displayShowBranding
-                          ? "Ativa em ecrãs públicos"
-                          : "Oculta"}
+                          ? t("settings.workspace.brandingActive")
+                          : t("settings.workspace.brandingHidden")}
                       </span>
                     </div>
                   </div>
@@ -691,7 +696,7 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
                     disabled={isSavingOrganization}
                     icon={<RotateCcw className="w-4 h-4" />}
                   >
-                    Cancelar
+                    {t("common.cancel")}
                   </Button>
                   <Button
                     type="submit"
@@ -706,8 +711,8 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
                     }
                   >
                     {isSavingOrganization
-                      ? "A guardar alterações..."
-                      : "Guardar Alterações"}
+                      ? t("settings.workspace.saving")
+                      : t("settings.workspace.saveChanges")}
                   </Button>
                 </>
               ) : (
@@ -717,7 +722,7 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
                   onClick={() => setIsEditing(true)}
                   icon={<PenLine className="w-4 h-4" />}
                 >
-                  Editar Perfil & Identidade
+                  {t("settings.workspace.editProfile")}
                 </Button>
               )}
             </div>
@@ -733,11 +738,10 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
           <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
             <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
               <ShieldAlert className="w-5 h-5 text-sky-500" />
-              Cópia de Segurança & Dados
+              {t("settings.workspace.backupTitle")}
             </h3>
             <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-              Exporte ou restaure todos os repertórios, cultos e definições num
-              ficheiro JSON seguro.
+              {t("settings.workspace.backupDesc")}
             </p>
           </div>
 
@@ -752,11 +756,10 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
                     </div>
                     <div>
                       <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100">
-                        Exportar Dados
+                        {t("settings.workspace.exportData")}
                       </h4>
                       <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                        Transfira um backup completo em JSON contendo músicas,
-                        alinhamentos e pastas.
+                        {t("settings.workspace.exportDesc")}
                       </p>
                     </div>
                   </div>
@@ -775,8 +778,8 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
                     }
                   >
                     {isDownloading
-                      ? "A processar backup..."
-                      : "Descarregar Cópia (.json)"}
+                      ? t("settings.workspace.exportProcessing")
+                      : t("settings.workspace.exportDownloadBtn")}
                   </Button>
                 </div>
               </Can>
@@ -790,11 +793,11 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
                     </div>
                     <div>
                       <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100">
-                        Restaurar Dados
+                        {t("settings.workspace.restoreData")}
                       </h4>
                       <p className="text-xs text-amber-600 dark:text-amber-400 mt-0.5 flex items-center gap-1">
                         <Info className="w-3.5 h-3.5 shrink-0" />
-                        Pode atualizar ou substituir dados existentes.
+                        {t("settings.workspace.restoreWarning")}
                       </p>
                     </div>
                   </div>
@@ -813,7 +816,7 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
                     onClick={() => restoreInputRef.current?.click()}
                     icon={<Upload className="w-4 h-4 text-emerald-500" />}
                   >
-                    Carregar Ficheiro JSON
+                    {t("settings.workspace.restoreUploadBtn")}
                   </Button>
                 </div>
               </Can>
