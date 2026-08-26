@@ -12,13 +12,8 @@ import {
   Trash2,
 } from "lucide-react";
 import React from "react";
+import { useI18n } from "../i18n";
 import { useTrash } from "../hooks/useTrash";
-
-const TYPE_LABELS: Record<string, string> = {
-  folder: "Pasta",
-  song: "Cântico",
-  service: "Culto",
-};
 
 const TYPE_ICONS: Record<string, React.ReactNode> = {
   folder: <FolderIcon className="w-4 h-4 text-amber-500" />,
@@ -26,9 +21,9 @@ const TYPE_ICONS: Record<string, React.ReactNode> = {
   service: <Calendar className="w-4 h-4 text-emerald-500" />,
 };
 
-function formatDate(iso: string | null): string {
+function formatDate(iso: string | null, locale: string): string {
   if (!iso) return "—";
-  return new Date(iso).toLocaleDateString("pt-PT", {
+  return new Date(iso).toLocaleDateString(locale, {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
@@ -37,11 +32,19 @@ function formatDate(iso: string | null): string {
 
 export const TrashPage: React.FC = () => {
   const { items, isLoading, restoreItem, isRestoring } = useTrash();
+  const { t, locale } = useI18n();
+
+  const typeLabel = (type: string): string =>
+    type === "folder"
+      ? t("common.folder")
+      : type === "song"
+        ? t("common.song")
+        : t("common.service");
 
   if (isLoading) {
     return (
       <div className="h-full flex items-center justify-center p-12">
-        <Spinner label="A carregar lixo..." />
+        <Spinner label={t("trashPage.loading")} />
       </div>
     );
   }
@@ -51,8 +54,8 @@ export const TrashPage: React.FC = () => {
       <div className="flex-1 flex flex-col w-full mx-auto p-4 sm:p-8 max-w-7xl">
         <EmptyState
           icon={<Trash2 className="w-12 h-12 text-m3-primary opacity-40" />}
-          title="O lixo está vazio"
-          description="Os itens apagados aparecem aqui durante 30 dias antes de serem removidos definitivamente."
+          title={t("trashPage.emptyTitle")}
+          description={t("trashPage.emptyDesc")}
         />
       </div>
     );
@@ -64,11 +67,11 @@ export const TrashPage: React.FC = () => {
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="bg-m3-sidebar/40 border-b border-m3-border text-[10px] font-black text-m3-secondary uppercase tracking-[0.2em]">
-              <th className="py-4 px-6">Nome</th>
-              <th className="py-4 px-6">Tipo</th>
-              <th className="py-4 px-6">Apagado em</th>
-              <th className="py-4 px-6">Remoção definitiva</th>
-              <th className="py-4 px-6 text-right">Ação</th>
+              <th className="py-4 px-6">{t("common.name")}</th>
+              <th className="py-4 px-6">{t("common.type")}</th>
+              <th className="py-4 px-6">{t("trashPage.deletedAt")}</th>
+              <th className="py-4 px-6">{t("trashPage.permanentDeletion")}</th>
+              <th className="py-4 px-6 text-right">{t("common.action")}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-m3-border/30 text-[13px] font-bold">
@@ -82,13 +85,13 @@ export const TrashPage: React.FC = () => {
                   <span className="truncate">{item.name}</span>
                 </td>
                 <td className="py-3 px-6">
-                  <Badge variant="slate">{TYPE_LABELS[item.type]}</Badge>
+                  <Badge variant="slate">{typeLabel(item.type)}</Badge>
                 </td>
                 <td className="py-3 px-6 text-m3-secondary font-medium">
-                  {formatDate(item.updatedAt)}
+                  {formatDate(item.updatedAt, locale)}
                 </td>
                 <td className="py-3 px-6 text-rose-500 font-medium">
-                  {formatDate(item.purgeAt)}
+                  {formatDate(item.purgeAt, locale)}
                 </td>
                 <td className="py-3 px-6 text-right">
                   <Button
@@ -98,7 +101,7 @@ export const TrashPage: React.FC = () => {
                     icon={<RotateCcw className="w-3.5 h-3.5" />}
                     onClick={() => restoreItem(item)}
                   >
-                    Restaurar
+                    {t("trashPage.restore")}
                   </Button>
                 </td>
               </tr>

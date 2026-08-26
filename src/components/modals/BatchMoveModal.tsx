@@ -11,6 +11,7 @@ import {
   HardDrive,
 } from "lucide-react";
 import React, { useEffect, useMemo, useState } from "react";
+import { useI18n } from "../../i18n";
 
 interface FolderTreeNode {
   folder: Folder;
@@ -56,6 +57,7 @@ const MoveFolderTreeItem: React.FC<{
   expandedFolderIds,
   toggleExpand,
 }) => {
+  const { t } = useI18n();
   const isSelected = selectedFolderId === node.folder.id;
   const isDisabled = disabledFolderIds.has(node.folder.id);
   const hasChildren = node.children.length > 0;
@@ -107,7 +109,7 @@ const MoveFolderTreeItem: React.FC<{
           {node.folder.name}
           {isDisabled && (
             <span className="text-[10px] font-normal text-slate-400 ml-1.5">
-              (Inválido)
+              {t("modals.invalid")}
             </span>
           )}
         </span>
@@ -151,6 +153,7 @@ export const BatchMoveModal: React.FC<BatchMoveModalProps> = ({
   folders,
   onConfirm,
 }) => {
+  const { t } = useI18n();
   const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null);
   const [expandedFolderIds, setExpandedFolderIds] = useState<Set<string>>(
     new Set(),
@@ -193,15 +196,19 @@ export const BatchMoveModal: React.FC<BatchMoveModalProps> = ({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={`Mover ${totalItems} Item(ns) Selecionado(s)`}
+      title={t("modals.batchMoveTitle", { count: totalItems })}
     >
       <div className="flex flex-col gap-4">
         <p className="text-xs text-slate-500 dark:text-slate-400">
-          Escolha a pasta de destino para mover{" "}
+          {t("modals.chooseDestFolder")}{" "}
           <strong className="text-slate-900 dark:text-slate-100">
-            {selectedFoldersCount > 0 && `${selectedFoldersCount} pasta(s)`}
-            {selectedFoldersCount > 0 && selectedSongsCount > 0 && " e "}
-            {selectedSongsCount > 0 && `${selectedSongsCount} cântico(s)`}
+            {selectedFoldersCount > 0 &&
+              t("modals.folderCount", { count: selectedFoldersCount })}
+            {selectedFoldersCount > 0 &&
+              selectedSongsCount > 0 &&
+              t("modals.and")}
+            {selectedSongsCount > 0 &&
+              t("modals.songCount", { count: selectedSongsCount })}
           </strong>
           :
         </p>
@@ -218,7 +225,7 @@ export const BatchMoveModal: React.FC<BatchMoveModalProps> = ({
             />
             <div className="flex items-center gap-2 text-xs font-bold text-slate-900 dark:text-slate-100">
               <HardDrive className="w-4 h-4 text-[#0284c7]" />
-              <span>Nível Raiz (Sem pasta)</span>
+              <span>{t("modals.rootLevel")}</span>
             </div>
           </label>
 
@@ -239,14 +246,14 @@ export const BatchMoveModal: React.FC<BatchMoveModalProps> = ({
 
         <div className="flex items-center justify-end gap-3 mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
           <Button variant="ghost" onClick={onClose} disabled={isLoading}>
-            Cancelar
+            {t("common.cancel")}
           </Button>
           <Button
             variant="primary"
             isLoading={isLoading}
             onClick={handleConfirm}
           >
-            Mover {totalItems} Item(ns)
+            {t("modals.moveItems", { count: totalItems })}
           </Button>
         </div>
       </div>

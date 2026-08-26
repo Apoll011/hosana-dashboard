@@ -35,6 +35,7 @@ import { ServiceForm } from "../../components/forms/ServiceForm";
 import { useAuth } from "../../contexts/AuthContext";
 import { useMarqueeSelection } from "../../hooks/useMarqueeSelection";
 import { useServices } from "../../hooks/useServices";
+import { useI18n } from "../../i18n";
 
 interface ServicesPageProps {
   hideHeader?: boolean;
@@ -49,6 +50,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
   searchQuery: externalSearchQuery,
 }) => {
   const { navigate } = useAppNavigate();
+  const { t } = useI18n();
   const { organization } = useAuth();
   const slugPrefix = organization?.slug ? `/${organization.slug}` : "";
   const context = (useOutletContext<Record<string, unknown>>() || {}) as Record<
@@ -87,7 +89,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
 
   const { value: emptyStateAction } = usePermissionValue(
     "service.create",
-    "Criar Primeiro Culto",
+    t("servicesPage.createFirstService"),
     undefined,
   );
 
@@ -407,7 +409,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
   if (servicesQuery.isLoading) {
     return (
       <div className="flex-1 flex items-center justify-center p-12">
-        <Spinner label="A carregar agenda..." />
+        <Spinner label={t("servicesPage.loading")} />
       </div>
     );
   }
@@ -419,8 +421,8 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
       >
         <EmptyState
           icon={<Calendar className="w-12 h-12 text-m3-primary opacity-40" />}
-          title="Nenhum culto agendado"
-          description="A sua agenda está livre. Que tal planejar o próximo momento de louvor?"
+          title={t("servicesPage.noServicesTitle")}
+          description={t("servicesPage.noServicesDesc")}
           actionLabel={emptyStateAction}
           onAction={() => setIsCreateModalOpen(true)}
         />
@@ -428,7 +430,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
         <Modal
           isOpen={isCreateModalOpen}
           onClose={() => setIsCreateModalOpen(false)}
-          title="Criar Plano de Culto"
+          title={t("servicesPage.createServiceTitle")}
         >
           <ServiceForm
             onSubmit={handleCreateServiceSubmit}
@@ -457,7 +459,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
         >
           {filteredServices.length === 0 && !showArchived ? (
             <div className="col-span-full text-center py-20 text-m3-secondary font-black uppercase tracking-widest opacity-60">
-              Nenhum plano corresponde à sua pesquisa.
+              {t("servicesPage.noMatch")}
             </div>
           ) : (
             filteredServices.map((service) => (
@@ -490,7 +492,9 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
                 <div className="h-px flex-1 bg-amber-500/20" />
                 <span className="text-[10px] font-black uppercase tracking-widest text-amber-600 dark:text-amber-400 flex items-center gap-2">
                   <Archive className="w-3.5 h-3.5" />
-                  Cultos Arquivados ({filteredArchivedServices.length})
+                  {t("servicesPage.archivedTitle", {
+                    count: filteredArchivedServices.length,
+                  })}
                   {archivedServicesQuery.isLoading && <Spinner size="sm" />}
                 </span>
                 <div className="h-px flex-1 bg-amber-500/20" />
@@ -498,7 +502,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
               {filteredArchivedServices.length === 0 &&
               !archivedServicesQuery.isLoading ? (
                 <div className="col-span-full text-center py-8 text-m3-secondary text-xs opacity-60">
-                  Nenhum culto arquivado.
+                  {t("servicesPage.noArchived")}
                 </div>
               ) : (
                 filteredArchivedServices.map((service) => (
@@ -537,26 +541,26 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
                     density === "compact" ? "py-2.5 px-4" : "py-4 px-6"
                   }
                 >
-                  Nome do Culto
+                  {t("servicesPage.serviceName")}
                 </th>
                 <th
                   className={
                     density === "compact" ? "py-2.5 px-4" : "py-4 px-6"
                   }
                 >
-                  Tipo
+                  {t("common.type")}
                 </th>
                 <th
                   className={
                     density === "compact" ? "py-2.5 px-4" : "py-4 px-6"
                   }
                 >
-                  Data Agendada
+                  {t("servicesPage.scheduledDate")}
                 </th>
                 <th
                   className={`${density === "compact" ? "py-2.5 px-4" : "py-4 px-6"} text-right`}
                 >
-                  Ações
+                  {t("servicesPage.actions")}
                 </th>
               </tr>
             </thead>
@@ -569,7 +573,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
                     colSpan={4}
                     className="text-center py-12 text-m3-secondary opacity-60"
                   >
-                    Nenhum plano corresponde à sua pesquisa.
+                    {t("servicesPage.noMatch")}
                   </td>
                 </tr>
               ) : (
@@ -606,7 +610,9 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
                     >
                       <span className="text-[10px] font-black uppercase tracking-widest text-amber-600 dark:text-amber-400 flex items-center gap-2">
                         <Archive className="w-3.5 h-3.5" />
-                        Cultos Arquivados ({filteredArchivedServices.length})
+                        {t("servicesPage.archivedTitle", {
+                          count: filteredArchivedServices.length,
+                        })}
                         {archivedServicesQuery.isLoading && (
                           <Spinner size="sm" />
                         )}
@@ -620,7 +626,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
                         colSpan={4}
                         className="text-center py-6 text-m3-secondary text-xs opacity-60"
                       >
-                        Nenhum culto arquivado.
+                        {t("servicesPage.noArchived")}
                       </td>
                     </tr>
                   ) : (
@@ -661,7 +667,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
       {/* ── Multi-select action bar ── */}
       <BatchActionFloatingBar
         selectedCount={selectedServiceIds.size}
-        itemLabel="cultos"
+        itemLabel={t("common.services")}
         onArchive={() => setIsBatchArchiveOpen(true)}
         onDelete={() => setIsBatchDeleteOpen(true)}
         onCancel={() => {
@@ -681,7 +687,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
             /* Multi-select context menu */
             <>
               <div className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-sky-500 border-b border-slate-100 dark:border-slate-800/80 mb-0.5 flex items-center justify-between">
-                <span>Seleção Múltipla</span>
+                <span>{t("servicesPage.multiSelect")}</span>
                 <Badge variant="sky">{selectedServiceIds.size}</Badge>
               </div>
               <button
@@ -692,7 +698,11 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
                 className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left cursor-pointer"
               >
                 <Archive className="w-4 h-4 text-amber-500" />
-                <span>Arquivar {selectedServiceIds.size} cultos</span>
+                <span>
+                  {t("servicesPage.archiveCount", {
+                    count: selectedServiceIds.size,
+                  })}
+                </span>
               </button>
               <button
                 onClick={() => {
@@ -702,7 +712,11 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
                 className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 font-semibold transition-colors text-left cursor-pointer"
               >
                 <Trash2 className="w-4 h-4 text-rose-500" />
-                <span>Apagar {selectedServiceIds.size} cultos</span>
+                <span>
+                  {t("servicesPage.deleteCount", {
+                    count: selectedServiceIds.size,
+                  })}
+                </span>
               </button>
               <div className="my-1 border-t border-slate-100 dark:border-slate-800/80" />
               <button
@@ -713,7 +727,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
                 className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left cursor-pointer"
               >
                 <X className="w-4 h-4 text-slate-400" />
-                <span>Desmarcar seleção</span>
+                <span>{t("servicesPage.deselect")}</span>
               </button>
             </>
           ) : contextMenu.service ? (
@@ -731,7 +745,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
                 className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left cursor-pointer"
               >
                 <Calendar className="w-4 h-4 text-sky-500" />
-                <span>Abrir Culto</span>
+                <span>{t("servicesPage.openService")}</span>
               </button>
 
               <button
@@ -742,7 +756,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
                 className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left cursor-pointer"
               >
                 <Edit2 className="w-4 h-4 text-blue-500" />
-                <span>Editar Nome e Data</span>
+                <span>{t("servicesPage.editNameDate")}</span>
               </button>
 
               <button
@@ -753,7 +767,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
                 className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left cursor-pointer"
               >
                 <Copy className="w-4 h-4 text-emerald-500" />
-                <span>Duplicar Culto</span>
+                <span>{t("servicesPage.duplicate")}</span>
               </button>
 
               <button
@@ -768,7 +782,9 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
                   <Archive className="w-4 h-4 text-orange-500" />
                 )}
                 <span>
-                  {contextMenu.service.archived ? "Ativar" : "Arquivar"} Culto
+                  {contextMenu.service.archived
+                    ? t("servicesPage.activateService")
+                    : t("servicesPage.archiveService")}
                 </span>
               </button>
 
@@ -782,7 +798,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
                 className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 font-semibold transition-colors text-left cursor-pointer"
               >
                 <Trash2 className="w-4 h-4 text-rose-500" />
-                <span>Apagar Culto</span>
+                <span>{t("servicesPage.deleteService")}</span>
               </button>
             </>
           ) : null}
@@ -793,7 +809,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
       <Modal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
-        title="Criar Plano de Culto"
+        title={t("servicesPage.createServiceTitle")}
       >
         <ServiceForm
           onSubmit={handleCreateServiceSubmit}
@@ -805,7 +821,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
       <Modal
         isOpen={!!editTarget}
         onClose={() => setEditTarget(null)}
-        title="Editar Plano de Culto"
+        title={t("servicesPage.editServiceTitle")}
       >
         {editTarget && (
           <ServiceForm
@@ -825,9 +841,11 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
         isOpen={!!deleteTarget}
         onClose={() => setDeleteTarget(null)}
         onConfirm={handleDeleteConfirm}
-        title="Apagar Culto"
-        message={`Tem a certeza de que deseja apagar o culto "${deleteTarget?.name}"?`}
-        confirmText="Apagar Culto"
+        title={t("servicesPage.deleteService")}
+        message={t("servicesPage.deleteServiceMessage", {
+          name: deleteTarget?.name || "",
+        })}
+        confirmText={t("servicesPage.deleteService")}
       />
 
       {/* ── ARCHIVE SERVICE DIALOG ── */}
@@ -836,9 +854,22 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
         isOpen={!!archiveTarget}
         onClose={() => setArchiveTarget(null)}
         onConfirm={() => archiveTarget && handleArchiveToggle(archiveTarget)}
-        title={`${archiveTarget?.archived ? "Ativar" : "Arquivar"} Culto`}
-        message={`Tem a certeza de que deseja ${archiveTarget?.archived ? "ativar" : "arquivar"} o culto "${archiveTarget?.name}"?`}
-        confirmText={`${archiveTarget?.archived ? "Ativar" : "Arquivar"} Culto`}
+        title={
+          archiveTarget?.archived
+            ? t("servicesPage.activateService")
+            : t("servicesPage.archiveService")
+        }
+        message={t("servicesPage.archiveServiceMessage", {
+          action: archiveTarget?.archived
+            ? t("servicesPage.activate")
+            : t("servicesPage.archive"),
+          name: archiveTarget?.name || "",
+        })}
+        confirmText={
+          archiveTarget?.archived
+            ? t("servicesPage.activateService")
+            : t("servicesPage.archiveService")
+        }
       />
 
       {/* ── BATCH DELETE DIALOG ── */}
@@ -846,9 +877,13 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
         isOpen={isBatchDeleteOpen}
         onClose={() => setIsBatchDeleteOpen(false)}
         onConfirm={handleBatchDelete}
-        title={`Apagar ${selectedServiceIds.size} Cultos`}
-        message={`Tem a certeza de que deseja apagar permanentemente ${selectedServiceIds.size} cultos selecionados?`}
-        confirmText="Apagar Todos"
+        title={t("servicesPage.deleteAllTitle", {
+          count: selectedServiceIds.size,
+        })}
+        message={t("servicesPage.deleteAllMessage", {
+          count: selectedServiceIds.size,
+        })}
+        confirmText={t("servicesPage.deleteAll")}
       />
 
       {/* ── BATCH ARCHIVE DIALOG ── */}
@@ -857,9 +892,13 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
         isOpen={isBatchArchiveOpen}
         onClose={() => setIsBatchArchiveOpen(false)}
         onConfirm={handleBatchArchive}
-        title={`Arquivar ${selectedServiceIds.size} Cultos`}
-        message={`Tem a certeza de que deseja arquivar ${selectedServiceIds.size} cultos selecionados?`}
-        confirmText="Arquivar Todos"
+        title={t("servicesPage.archiveAllTitle", {
+          count: selectedServiceIds.size,
+        })}
+        message={t("servicesPage.archiveAllMessage", {
+          count: selectedServiceIds.size,
+        })}
+        confirmText={t("servicesPage.archiveAll")}
       />
 
       {/* ── Marquee rubberband selection box ── */}
