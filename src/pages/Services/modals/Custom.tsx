@@ -4,7 +4,8 @@
 
 import { Button, Modal } from "@hosanna/shared";
 import { Plus } from "lucide-react";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useI18n } from "../../../i18n";
 import {
   DurationField,
   durationInputToSeconds,
@@ -34,6 +35,7 @@ export const CustomModal: React.FC<CustomModalProps> = ({
   onSave,
   initial,
 }) => {
+  const { t } = useI18n();
   const [title, setTitle] = useState(initial?.title || "");
   const [content, setContent] = useState(initial?.content || "");
   const [notes, setNotes] = useState(initial?.notes || "");
@@ -51,7 +53,11 @@ export const CustomModal: React.FC<CustomModalProps> = ({
   }, [isOpen, initial]);
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Elemento Personalizado">
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={t("serviceModals.custom.modalTitle")}
+    >
       <div className="space-y-4 py-2">
         <div
           className="flex items-center gap-3 p-3 rounded-xl"
@@ -65,51 +71,55 @@ export const CustomModal: React.FC<CustomModalProps> = ({
           </div>
           <div>
             <p className="text-xs font-bold" style={{ color: "#475569" }}>
-              Personalizado
+              {t("serviceModals.custom.badgeTitle")}
             </p>
             <p className="text-[11px] text-slate-500">
-              Crie qualquer elemento de culto que precisar.
+              {t("serviceModals.custom.badgeDesc")}
             </p>
           </div>
         </div>
 
         <div className="space-y-1.5">
           <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
-            Título
+            {t("serviceModals.custom.titleLabel")}
           </label>
           <input
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="Ex: Oração de Intercessão, Santa Ceia..."
+            placeholder={t("serviceModals.custom.titlePlaceholder")}
             className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-500"
           />
         </div>
 
         <div className="space-y-1.5">
           <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
-            Detalhes / Conteúdo
-            <span className="font-normal text-slate-400 ml-1">(opcional)</span>
+            {t("serviceModals.custom.contentLabel")}
+            <span className="font-normal text-slate-400 ml-1">
+              ({t("common.details")})
+            </span>
           </label>
           <textarea
             rows={3}
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            placeholder="Descreva o conteúdo deste momento..."
+            placeholder={t("serviceModals.custom.contentPlaceholder")}
             className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-500"
           />
         </div>
 
         <div className="space-y-1.5">
           <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
-            Notas
-            <span className="font-normal text-slate-400 ml-1">(opcional)</span>
+            {t("serviceModals.custom.notesLabel")}
+            <span className="font-normal text-slate-400 ml-1">
+              ({t("common.details")})
+            </span>
           </label>
           <textarea
             rows={2}
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            placeholder="Notas adicionais..."
+            placeholder={t("serviceModals.custom.notesPlaceholder")}
             className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-500"
           />
         </div>
@@ -122,7 +132,7 @@ export const CustomModal: React.FC<CustomModalProps> = ({
 
         <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-200 dark:border-slate-800">
           <Button type="button" variant="ghost" size="sm" onClick={onClose}>
-            Cancelar
+            {t("common.cancel")}
           </Button>
           <Button
             type="button"
@@ -138,7 +148,7 @@ export const CustomModal: React.FC<CustomModalProps> = ({
               });
             }}
           >
-            Guardar
+            {t("common.save")}
           </Button>
         </div>
       </div>

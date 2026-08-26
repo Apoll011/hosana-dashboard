@@ -123,11 +123,13 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
       })),
     [servicesQuery.data],
   );
+
   // Active (non-archived) services
   const activeServices = useMemo(
     () => allServices.filter((s) => !s.archived),
     [allServices],
   );
+
   const archivedServices = useMemo(
     () =>
       showArchived
@@ -148,7 +150,6 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
           valA = (a.name || "").toLowerCase();
           valB = (b.name || "").toLowerCase();
         } else {
-          // date
           valA = a.date || a.updatedAt || "";
           valB = b.date || b.updatedAt || "";
         }
@@ -186,14 +187,29 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
     return sortServices(list);
   }, [archivedServices, actualSearchQuery, sortServices]);
 
-  // ─── Close context menu on outside click ─────────────────────────────────
+  // Combined visible list for keyboard selection and operations
+  const allVisibleServices = useMemo(
+    () =>
+      showArchived
+        ? [...filteredServices, ...filteredArchivedServices]
+        : filteredServices,
+    [showArchived, filteredServices, filteredArchivedServices],
+  );
+
+  // ─── Context menu auto-close listeners ────────────────────────────────────
   useEffect(() => {
-    const handleClickOutside = () => setContextMenu(null);
-    window.addEventListener("click", handleClickOutside);
-    return () => window.removeEventListener("click", handleClickOutside);
+    const handleClose = () => setContextMenu(null);
+    window.addEventListener("click", handleClose);
+    window.addEventListener("scroll", handleClose, true);
+    window.addEventListener("resize", handleClose);
+    return () => {
+      window.removeEventListener("click", handleClose);
+      window.removeEventListener("scroll", handleClose, true);
+      window.removeEventListener("resize", handleClose);
+    };
   }, []);
 
-  // ─── Keyboard shortcuts (selection mode) ────────────────────────
+  // ─── Keyboard shortcuts (selection mode) ──────────────────────────────────
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement;
@@ -212,7 +228,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
 
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "a") {
         e.preventDefault();
-        setSelectedServiceIds(new Set(filteredServices.map((s) => s.id)));
+        setSelectedServiceIds(new Set(allVisibleServices.map((s) => s.id)));
         return;
       }
 
@@ -220,7 +236,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
         if (selectedServiceIds.size === 0) return;
         e.preventDefault();
         if (selectedServiceIds.size === 1) {
-          const service = filteredServices.find((s) =>
+          const service = allVisibleServices.find((s) =>
             selectedServiceIds.has(s.id),
           );
           if (service) setDeleteTarget(service);
@@ -231,7 +247,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [filteredServices, selectedServiceIds]);
+  }, [allVisibleServices, selectedServiceIds]);
 
   // ─── Marquee selection hook ──────────────────────────────────────────────
   const { selectionBox, handleMouseDown: handleWorkspaceMouseDown } =
@@ -287,6 +303,27 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
     [navigate, slugPrefix, lastClickedId, selectedServiceIds],
   );
 
+  // ─── Context menu opener ──────────────────────────────────────────────────
+  const openContextMenu = useCallback(
+    (e: React.MouseEvent, service: Service) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      if (!selectedServiceIds.has(service.id)) {
+        setSelectedServiceIds(new Set([service.id]));
+        setLastClickedId(service.id);
+      }
+
+      const x = Math.max(12, Math.min(e.clientX, window.innerWidth - 240));
+      const y = Math.max(12, Math.min(e.clientY, window.innerHeight - 320));
+      const isMulti =
+        selectedServiceIds.size > 1 && selectedServiceIds.has(service.id);
+
+      setContextMenu({ x, y, service, isMulti });
+    },
+    [selectedServiceIds],
+  );
+
   // ─── Service actions ──────────────────────────────────────────────────────
   const handleCreateServiceSubmit = async (data: {
     name: string;
@@ -325,18 +362,20 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
     try {
       let fullElements = service.elements;
       if (!fullElements) {
-        const fullService = servicesQuery.data.find((s) => s.id === service.id);
+        const fullService = (servicesQuery.data || []).find(
+          (s: Service) => s.id === service.id,
+        );
         fullElements = fullService?.elements || [];
       }
       await createService({
-        name: `${service.name} (Cópia)`,
+        name: `${service.name}${t("common.copySuffix")}`,
         date: service.date,
         notes: service.notes || "",
         elements: fullElements || [],
       });
     } catch {
       await createService({
-        name: `${service.name} (Cópia)`,
+        name: `${service.name}${t("common.copySuffix")}`,
         date: service.date,
         notes: service.notes || "",
         elements: [],
@@ -347,12 +386,12 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
   const handleDeleteConfirm = async () => {
     if (!deleteTarget) return;
     await deleteService(deleteTarget.id);
-    setDeleteTarget(null);
     setSelectedServiceIds((prev) => {
       const next = new Set(prev);
       next.delete(deleteTarget.id);
       return next;
     });
+    setDeleteTarget(null);
   };
 
   const handleArchiveToggle = async (service: Service) => {
@@ -369,43 +408,30 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
   };
 
   const handleBatchDelete = async () => {
-    for (const id of Array.from(selectedServiceIds)) {
-      await deleteService(id);
-    }
+    const ids = Array.from(selectedServiceIds);
+    await Promise.allSettled(ids.map((id) => deleteService(id)));
     setSelectedServiceIds(new Set());
     setIsBatchDeleteOpen(false);
   };
 
   const handleBatchArchive = async () => {
-    for (const id of Array.from(selectedServiceIds)) {
-      const service =
-        filteredServices.find((s) => s.id === id) ||
-        filteredArchivedServices.find((s) => s.id === id);
+    const ids = Array.from(selectedServiceIds);
+    const updates = ids.map((id) => {
+      const service = allVisibleServices.find((s) => s.id === id);
       if (service) {
-        await updateService({
+        return updateService({
           id,
           data: { archived: !service.archived, updatedAt: service.updatedAt },
         });
       }
-    }
+      return Promise.resolve();
+    });
+    await Promise.allSettled(updates);
     setSelectedServiceIds(new Set());
     setIsBatchArchiveOpen(false);
   };
 
-  // ─── Context menu opener ──────────────────────────────────────────────────
-  const openContextMenu = useCallback(
-    (e: React.MouseEvent, service: Service) => {
-      e.stopPropagation();
-      const x = Math.min(e.clientX, window.innerWidth - 240);
-      const y = Math.min(e.clientY, window.innerHeight - 320);
-      const isMulti =
-        selectedServiceIds.size > 1 && selectedServiceIds.has(service.id);
-      setContextMenu({ x, y, service, isMulti });
-    },
-    [selectedServiceIds],
-  );
-
-  // ─── Loading / empty states ───────────────────────────────────────────────
+  // ─── Loading State ────────────────────────────────────────────────────────
   if (servicesQuery.isLoading) {
     return (
       <div className="flex-1 flex items-center justify-center p-12">
@@ -414,10 +440,17 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
     );
   }
 
-  if (allServices.length === 0) {
+  // ─── Truly Empty State (Only when no active services AND archive view is off/empty) ───
+  const hasNoItemsToShow =
+    activeServices.length === 0 &&
+    (!showArchived ||
+      (archivedServices.length === 0 && !archivedServicesQuery.isLoading));
+
+  if (hasNoItemsToShow && !actualSearchQuery) {
     return (
       <div
         className={`flex-1 flex flex-col w-full mx-auto animate-in fade-in duration-500 overflow-y-auto h-full ${actualHideHeader ? "p-6" : "p-4 sm:p-8 max-w-7xl"}`}
+        onContextMenu={(e) => e.preventDefault()}
       >
         <EmptyState
           icon={<Calendar className="w-12 h-12 text-m3-primary opacity-40" />}
@@ -426,7 +459,6 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
           actionLabel={emptyStateAction}
           onAction={() => setIsCreateModalOpen(true)}
         />
-        {/* CREATE SERVICE MODAL */}
         <Modal
           isOpen={isCreateModalOpen}
           onClose={() => setIsCreateModalOpen(false)}
@@ -441,11 +473,12 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
     );
   }
 
-  // ─── Main render ─────────────────────────────────────────────────────────
+  // ─── Main Render ──────────────────────────────────────────────────────────
   return (
     <div
       className={`flex-1 flex flex-col w-full mx-auto space-y-6 animate-in fade-in duration-300 overflow-y-auto h-full relative select-none ${actualHideHeader ? "p-6" : "p-4 sm:p-8 max-w-7xl"}`}
       onMouseDown={handleWorkspaceMouseDown}
+      onContextMenu={(e) => e.preventDefault()}
       ref={containerRef}
     >
       {/* ── Services Content (Grid / List Views) ── */}
@@ -474,13 +507,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
                 onDoubleClick={() =>
                   navigate(`${slugPrefix}/services/${service.id}`)
                 }
-                onContextMenu={(e) => {
-                  if (!selectedServiceIds.has(service.id)) {
-                    setSelectedServiceIds(new Set([service.id]));
-                    setLastClickedId(service.id);
-                  }
-                  openContextMenu(e, service);
-                }}
+                onContextMenu={(e) => openContextMenu(e, service)}
               />
             ))
           )}
@@ -518,13 +545,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
                     onDoubleClick={() =>
                       navigate(`${slugPrefix}/services/${service.id}`)
                     }
-                    onContextMenu={(e) => {
-                      if (!selectedServiceIds.has(service.id)) {
-                        setSelectedServiceIds(new Set([service.id]));
-                        setLastClickedId(service.id);
-                      }
-                      openContextMenu(e, service);
-                    }}
+                    onContextMenu={(e) => openContextMenu(e, service)}
                   />
                 ))
               )}
@@ -589,13 +610,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
                     onDoubleClick={() =>
                       navigate(`${slugPrefix}/services/${service.id}`)
                     }
-                    onContextMenu={(e) => {
-                      if (!selectedServiceIds.has(service.id)) {
-                        setSelectedServiceIds(new Set([service.id]));
-                        setLastClickedId(service.id);
-                      }
-                      openContextMenu(e, service);
-                    }}
+                    onContextMenu={(e) => openContextMenu(e, service)}
                   />
                 ))
               )}
@@ -647,13 +662,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
                         onDoubleClick={() =>
                           navigate(`${slugPrefix}/services/${service.id}`)
                         }
-                        onContextMenu={(e) => {
-                          if (!selectedServiceIds.has(service.id)) {
-                            setSelectedServiceIds(new Set([service.id]));
-                            setLastClickedId(service.id);
-                          }
-                          openContextMenu(e, service);
-                        }}
+                        onContextMenu={(e) => openContextMenu(e, service)}
                       />
                     ))
                   )}
@@ -682,9 +691,9 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
           style={{ top: contextMenu.y, left: contextMenu.x }}
           className="fixed z-50 w-56 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl p-1.5 flex flex-col gap-0.5 text-xs select-none animate-in fade-in zoom-in-95 duration-100"
           onClick={(e) => e.stopPropagation()}
+          onContextMenu={(e) => e.preventDefault()}
         >
           {contextMenu.isMulti ? (
-            /* Multi-select context menu */
             <>
               <div className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-sky-500 border-b border-slate-100 dark:border-slate-800/80 mb-0.5 flex items-center justify-between">
                 <span>{t("servicesPage.multiSelect")}</span>
@@ -731,7 +740,6 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
               </button>
             </>
           ) : contextMenu.service ? (
-            /* Single service context menu */
             <>
               <div className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400 border-b border-slate-100 dark:border-slate-800/80 mb-0.5 truncate">
                 {contextMenu.service.name}

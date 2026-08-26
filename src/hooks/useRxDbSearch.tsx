@@ -1,5 +1,5 @@
 import { Calendar, Folder as FolderIcon, Music } from "lucide-react";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   CommandAction,
   FolderItem,
@@ -7,6 +7,7 @@ import {
   SongItem,
 } from "../command-palette.types";
 import { useCommandPalette } from "../contexts/CommandPaletteContext";
+import { useI18n } from "../i18n";
 
 interface UseRxDbSearchProps {
   slugPrefix: string;
@@ -33,6 +34,7 @@ export function useRxDbSearch({
     unregisterDynamicActions,
     closePalette,
   } = useCommandPalette();
+  const { t, tc, locale } = useI18n();
   const [isDebouncing, setIsDebouncing] = useState(false);
 
   useEffect(() => {
@@ -65,9 +67,9 @@ export function useRxDbSearch({
           results.push({
             id: `folder-${f.id}`,
             name: f.name,
-            subtitle: `Caminho: ${getFolderPathString(f.parentId)} (${f.songCount || 0} cânticos)`,
+            subtitle: `${getFolderPathString(f.parentId)} (${tc("songsPage.subtitle", f.songCount || 0)})`,
             keywords: `${f.name} pasta folder diretorio`,
-            section: "Pastas",
+            section: t("common.folders"),
             icon: <FolderIcon className="w-4 h-4 text-amber-500" />,
             perform: () => {
               navigate(`${slugPrefix}/folders?id=${f.id}`);
@@ -81,10 +83,10 @@ export function useRxDbSearch({
           results.push({
             id: `song-${s.id}`,
             name: s.title,
-            subtitle: s.artist || "Artista Desconhecido",
-            badge: s.key ? `Tom: ${s.key}` : undefined,
+            subtitle: s.artist || t("forms.unknownArtist"),
+            badge: s.key ? `Key: ${s.key}` : undefined,
             keywords: `${s.title} ${s.artist || ""} ${(s.tags || []).join(" ")} musica cantico`,
-            section: "Cânticos",
+            section: t("common.songs"),
             icon: <Music className="w-4 h-4 text-sky-500" />,
             perform: () => {
               navigate(`${slugPrefix}/songs/${s.id}`);
@@ -98,9 +100,9 @@ export function useRxDbSearch({
           results.push({
             id: `service-${srv.id}`,
             name: srv.name,
-            subtitle: `Data: ${new Date(srv.date).toLocaleDateString("pt-PT")}`,
+            subtitle: new Date(srv.date).toLocaleDateString(locale),
             keywords: `${srv.name} culto reuniao plano`,
-            section: "Cultos",
+            section: t("common.services"),
             icon: <Calendar className="w-4 h-4 text-emerald-500" />,
             perform: () => {
               navigate(`${slugPrefix}/services/${srv.id}`);
@@ -132,6 +134,8 @@ export function useRxDbSearch({
     registerDynamicActions,
     unregisterDynamicActions,
     closePalette,
+    t,
+    locale,
   ]);
 
   return {

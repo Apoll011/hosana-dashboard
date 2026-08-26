@@ -21,12 +21,14 @@ import {
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { useSync } from "../../contexts/SyncContext";
+import { useI18n } from "../../i18n";
 import { authClient } from "../../lib/authClient";
 import { compressImage, getRoleBadge } from "./settingsUtils";
 import { TwoFactorSection } from "./TwoFactor";
 
 const ActiveSessionsSection: React.FC = () => {
   const { showToast } = useSync();
+  const { t } = useI18n();
 
   const [sessions, setSessions] = useState<Session[] | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -34,7 +36,7 @@ const ActiveSessionsSection: React.FC = () => {
   const fetchSessions = useCallback(async () => {
     setIsLoading(true);
     try {
-      const { data } = await authClient.listSessions();
+      const { data } = await authClient.listSessions({ query: {} });
       setSessions(data || []);
     } catch {
       setSessions([]);
@@ -52,10 +54,10 @@ const ActiveSessionsSection: React.FC = () => {
   const handleRevoke = async (token: string) => {
     try {
       await authClient.revokeSession({ token });
-      showToast("Sessão revogada com sucesso.", "success");
+      showToast(t("settings.account.activeSessions.revokeSuccess"), "success");
       refetch();
     } catch {
-      showToast("Erro ao revogar sessão.", "error");
+      showToast(t("settings.account.activeSessions.revokeError"), "error");
     }
   };
 
@@ -65,16 +67,16 @@ const ActiveSessionsSection: React.FC = () => {
         <div>
           <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
             <MonitorSmartphone className="w-4 h-4 text-slate-400" />
-            Sessões Ativas
+            {t("settings.account.activeSessions.title")}
           </h3>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-            Dispositivos e navegadores atualmente autenticados na sua conta.
+            {t("settings.account.activeSessions.desc")}
           </p>
         </div>
         <button
           onClick={() => refetch()}
           className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-          title="Atualizar sessões"
+          title={t("settings.account.activeSessions.refreshTitle")}
         >
           <RefreshCw className="w-4 h-4" />
         </button>
@@ -82,8 +84,8 @@ const ActiveSessionsSection: React.FC = () => {
 
       {isLoading ? (
         <div className="py-6 text-center text-xs text-slate-400 flex items-center justify-center gap-2">
-          <Loader2 className="w-4 h-4 animate-spin text-m3-primary" />A carregar
-          sessões...
+          <Loader2 className="w-4 h-4 animate-spin text-m3-primary" />
+          {t("settings.account.activeSessions.loading")}
         </div>
       ) : sessions && sessions.length > 0 ? (
         <div className="space-y-3">
@@ -111,11 +113,16 @@ const ActiveSessionsSection: React.FC = () => {
                   </div>
                   <div>
                     <p className="text-xs font-bold text-slate-900 dark:text-slate-100">
-                      {sess.userAgent || "Sessão do Navegador"}
+                      {sess.userAgent ||
+                        t("settings.account.activeSessions.browserSession")}
                     </p>
                     <p className="text-[10px] text-slate-400 font-mono mt-0.5">
-                      IP: {sess.ipAddress || "Atual"} · Criada a{" "}
-                      {new Date(sess.createdAt).toLocaleDateString()}
+                      {t("settings.account.activeSessions.ip", {
+                        ip:
+                          sess.ipAddress ||
+                          t("settings.account.activeSessions.currentIp"),
+                        date: new Date(sess.createdAt).toLocaleDateString(),
+                      })}
                     </p>
                   </div>
                 </div>
@@ -124,7 +131,7 @@ const ActiveSessionsSection: React.FC = () => {
                   onClick={() => handleRevoke(sess.token)}
                   className="px-2.5 py-1 text-xs font-bold text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-lg transition-colors border border-red-200 dark:border-red-900/50 cursor-pointer"
                 >
-                  Encerrar
+                  {t("settings.account.activeSessions.terminate")}
                 </button>
               </div>
             ),
@@ -132,7 +139,7 @@ const ActiveSessionsSection: React.FC = () => {
         </div>
       ) : (
         <p className="text-xs text-slate-500 py-4 text-center">
-          Apenas a sessão atual está ativa.
+          {t("settings.account.activeSessions.currentSessionOnly")}
         </p>
       )}
     </div>
@@ -142,6 +149,7 @@ const ActiveSessionsSection: React.FC = () => {
 export const AccountTab: React.FC<{ active: boolean }> = ({ active }) => {
   const { user, refetch: refetchAuth } = useAuth();
   const { showToast } = useSync();
+  const { t } = useI18n();
   const avatarInputRef = useRef<HTMLInputElement>(null);
 
   const [displayUser, setDisplayUser] = useState(user);
@@ -167,7 +175,7 @@ export const AccountTab: React.FC<{ active: boolean }> = ({ active }) => {
     const file = e.target.files?.[0];
     if (!file) return;
     if (!file.type.startsWith("image/")) {
-      showToast("Por favor selecione um ficheiro de imagem válido.", "error");
+      showToast(t("settings.account.profile.invalidImage"), "error");
       return;
     }
 
@@ -181,11 +189,12 @@ export const AccountTab: React.FC<{ active: boolean }> = ({ active }) => {
 
       await authClient.updateUser({ image: compressedBase64 });
       await refetchAuth();
-      showToast("Avatar atualizado com sucesso!", "success");
+      showToast(t("settings.account.profile.avatarUpdated"), "success");
     } catch (err: unknown) {
       showToast(
-        "Erro ao atualizar o avatar: " +
-          ((err as Error).message || "Erro de rede"),
+        t("settings.account.profile.avatarUpdateError", {
+          error: (err as Error).message || "Erro de rede",
+        }),
         "error",
       );
     } finally {
@@ -199,15 +208,15 @@ export const AccountTab: React.FC<{ active: boolean }> = ({ active }) => {
       setDisplayUser((prev) => (prev ? { ...prev, image: undefined } : prev));
       await authClient.updateUser({ image: "" });
       await refetchAuth();
-      showToast("Avatar removido com sucesso!", "success");
+      showToast(t("settings.account.profile.avatarRemoved"), "success");
     } catch {
-      showToast("Erro ao remover o avatar.", "error");
+      showToast(t("settings.account.profile.avatarRemoveError"), "error");
     }
   };
 
   const handleSaveName = async () => {
     if (!draftName.trim()) {
-      showToast("O nome não pode estar vazio.", "error");
+      showToast(t("settings.account.profile.nameEmpty"), "error");
       return;
     }
 
@@ -217,15 +226,15 @@ export const AccountTab: React.FC<{ active: boolean }> = ({ active }) => {
 
       await authClient.updateUser({ name: draftName });
       await refetchAuth();
-      showToast("Nome guardado com sucesso!", "success");
+      showToast(t("settings.account.profile.nameSaved"), "success");
     } catch {
-      showToast("Erro ao guardar o novo nome.", "error");
+      showToast(t("settings.account.profile.nameSaveError"), "error");
     }
   };
 
   const handleSaveEmail = async () => {
     if (!draftEmail.trim() || !draftEmail.includes("@")) {
-      showToast("Por favor introduza um e-mail válido.", "error");
+      showToast(t("settings.account.profile.emailInvalid"), "error");
       return;
     }
 
@@ -233,11 +242,12 @@ export const AccountTab: React.FC<{ active: boolean }> = ({ active }) => {
       setIsEditingEmail(false);
       await authClient.changeEmail({ newEmail: draftEmail });
       await refetchAuth();
-      showToast("Pedido de alteração de e-mail enviado!", "success");
+      showToast(t("settings.account.profile.emailChangeSent"), "success");
     } catch (err: unknown) {
       showToast(
-        "Erro ao alterar o e-mail: " +
-          ((err as Error).message || "Tente novamente"),
+        t("settings.account.profile.emailChangeError", {
+          error: (err as Error).message || "Tente novamente",
+        }),
         "error",
       );
     }
@@ -245,18 +255,15 @@ export const AccountTab: React.FC<{ active: boolean }> = ({ active }) => {
 
   const handleSavePassword = async () => {
     if (!draftOldPassword) {
-      showToast("Por favor introduza a sua palavra-passe atual.", "error");
+      showToast(t("settings.account.profile.currentPasswordRequired"), "error");
       return;
     }
     if (draftNewPassword.length < 6) {
-      showToast(
-        "A nova palavra-passe deve ter pelo menos 6 caracteres.",
-        "error",
-      );
+      showToast(t("settings.account.profile.passwordMinLength"), "error");
       return;
     }
     if (draftNewPassword !== draftConfirmPassword) {
-      showToast("As palavras-passe não coincidem.", "error");
+      showToast(t("settings.account.profile.passwordMismatch"), "error");
       return;
     }
 
@@ -267,15 +274,16 @@ export const AccountTab: React.FC<{ active: boolean }> = ({ active }) => {
         revokeOtherSessions: true,
       });
 
-      showToast("Palavra-passe alterada com sucesso!", "success");
+      showToast(t("settings.account.profile.passwordChanged"), "success");
       setIsEditingPassword(false);
       setDraftOldPassword("");
       setDraftNewPassword("");
       setDraftConfirmPassword("");
     } catch (err: unknown) {
       showToast(
-        "Erro ao alterar palavra-passe: " +
-          ((err as Error).message || "Verifique a palavra-passe atual"),
+        t("settings.account.profile.passwordChangeError", {
+          error: (err as Error).message || "Verifique a palavra-passe atual",
+        }),
         "error",
       );
     }
@@ -327,7 +335,7 @@ export const AccountTab: React.FC<{ active: boolean }> = ({ active }) => {
                 onClick={() => avatarInputRef.current?.click()}
                 disabled={isCompressingAvatar}
                 className="absolute bottom-0 right-0 p-1.5 bg-m3-primary text-white rounded-full shadow-md hover:bg-m3-primary/90 transition-colors cursor-pointer"
-                title="Alterar imagem de perfil"
+                title={t("settings.account.profile.changeAvatarTitle")}
               >
                 <Camera className="w-3.5 h-3.5" />
               </button>
@@ -335,9 +343,10 @@ export const AccountTab: React.FC<{ active: boolean }> = ({ active }) => {
 
             <div>
               <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                {displayUser?.name || "Utilizador"}
+                {displayUser?.name || t("settings.account.user")}
                 {getRoleBadge(
                   (displayUser as { role?: string })?.role || "member",
+                  t,
                 )}
               </h2>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
@@ -353,7 +362,7 @@ export const AccountTab: React.FC<{ active: boolean }> = ({ active }) => {
               className="text-xs font-semibold text-red-600 hover:text-red-700 dark:text-red-400 flex items-center gap-1 self-start sm:self-center cursor-pointer"
             >
               <Trash2 className="w-3.5 h-3.5" />
-              Remover Foto
+              {t("settings.account.profile.removeAvatar")}
             </button>
           )}
         </div>
@@ -363,7 +372,7 @@ export const AccountTab: React.FC<{ active: boolean }> = ({ active }) => {
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs">
         <div className="flex items-center justify-between mb-2">
           <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-            Nome de Exibição
+            {t("settings.account.profile.displayName")}
           </label>
           {!isEditingName && (
             <button
@@ -374,7 +383,7 @@ export const AccountTab: React.FC<{ active: boolean }> = ({ active }) => {
               className="text-xs font-bold text-m3-primary hover:underline flex items-center gap-1 cursor-pointer"
             >
               <PenLine className="w-3.5 h-3.5" />
-              Editar
+              {t("settings.account.profile.edit")}
             </button>
           )}
         </div>
@@ -384,7 +393,7 @@ export const AccountTab: React.FC<{ active: boolean }> = ({ active }) => {
             <Input
               value={draftName}
               onChange={(e) => setDraftName(e.target.value)}
-              placeholder="Seu nome completo"
+              placeholder={t("settings.account.profile.namePlaceholder")}
             />
             <div className="flex justify-end gap-2">
               <Button
@@ -392,7 +401,7 @@ export const AccountTab: React.FC<{ active: boolean }> = ({ active }) => {
                 size="sm"
                 onClick={() => setIsEditingName(false)}
               >
-                Cancelar
+                {t("common.cancel")}
               </Button>
               <Button
                 variant="primary"
@@ -400,7 +409,7 @@ export const AccountTab: React.FC<{ active: boolean }> = ({ active }) => {
                 onClick={handleSaveName}
                 icon={<Save className="w-4 h-4" />}
               >
-                Guardar
+                {t("common.save")}
               </Button>
             </div>
           </div>
@@ -415,7 +424,7 @@ export const AccountTab: React.FC<{ active: boolean }> = ({ active }) => {
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs">
         <div className="flex items-center justify-between mb-2">
           <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-            Endereço de E-mail
+            {t("settings.account.profile.emailAddress")}
           </label>
           {!isEditingEmail && (
             <button
@@ -426,7 +435,7 @@ export const AccountTab: React.FC<{ active: boolean }> = ({ active }) => {
               className="text-xs font-bold text-m3-primary hover:underline flex items-center gap-1 cursor-pointer"
             >
               <PenLine className="w-3.5 h-3.5" />
-              Alterar E-mail
+              {t("settings.account.profile.changeEmail")}
             </button>
           )}
         </div>
@@ -437,7 +446,7 @@ export const AccountTab: React.FC<{ active: boolean }> = ({ active }) => {
               type="email"
               value={draftEmail}
               onChange={(e) => setDraftEmail(e.target.value)}
-              placeholder="novo.email@exemplo.com"
+              placeholder={t("settings.account.profile.emailPlaceholder")}
             />
             <div className="flex justify-end gap-2">
               <Button
@@ -445,7 +454,7 @@ export const AccountTab: React.FC<{ active: boolean }> = ({ active }) => {
                 size="sm"
                 onClick={() => setIsEditingEmail(false)}
               >
-                Cancelar
+                {t("common.cancel")}
               </Button>
               <Button
                 variant="primary"
@@ -453,7 +462,7 @@ export const AccountTab: React.FC<{ active: boolean }> = ({ active }) => {
                 onClick={handleSaveEmail}
                 icon={<Save className="w-4 h-4" />}
               >
-                Guardar E-mail
+                {t("settings.account.profile.saveEmail")}
               </Button>
             </div>
           </div>
@@ -469,7 +478,7 @@ export const AccountTab: React.FC<{ active: boolean }> = ({ active }) => {
         <div className="flex items-center justify-between mb-2">
           <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
             <Lock className="w-3.5 h-3.5 text-m3-primary" />
-            Palavra-passe
+            {t("settings.account.profile.password")}
           </label>
           {!isEditingPassword && (
             <button
@@ -477,7 +486,7 @@ export const AccountTab: React.FC<{ active: boolean }> = ({ active }) => {
               className="text-xs font-bold text-m3-primary hover:underline flex items-center gap-1 cursor-pointer"
             >
               <KeyRound className="w-3.5 h-3.5" />
-              Alterar
+              {t("settings.account.profile.changePassword")}
             </button>
           )}
         </div>
@@ -486,19 +495,19 @@ export const AccountTab: React.FC<{ active: boolean }> = ({ active }) => {
           <div className="space-y-4 pt-2">
             <Input
               type="password"
-              label="Palavra-passe Atual"
+              label={t("settings.account.profile.currentPassword")}
               value={draftOldPassword}
               onChange={(e) => setDraftOldPassword(e.target.value)}
             />
             <Input
               type="password"
-              label="Nova Palavra-passe"
+              label={t("settings.account.profile.newPassword")}
               value={draftNewPassword}
               onChange={(e) => setDraftNewPassword(e.target.value)}
             />
             <Input
               type="password"
-              label="Confirmar Nova Palavra-passe"
+              label={t("settings.account.profile.confirmNewPassword")}
               value={draftConfirmPassword}
               onChange={(e) => setDraftConfirmPassword(e.target.value)}
             />
@@ -514,7 +523,7 @@ export const AccountTab: React.FC<{ active: boolean }> = ({ active }) => {
                   setDraftConfirmPassword("");
                 }}
               >
-                Cancelar
+                {t("common.cancel")}
               </Button>
               <Button
                 variant="primary"
@@ -522,7 +531,7 @@ export const AccountTab: React.FC<{ active: boolean }> = ({ active }) => {
                 onClick={handleSavePassword}
                 icon={<Save className="w-4 h-4" />}
               >
-                Atualizar Palavra-passe
+                {t("settings.account.profile.updatePassword")}
               </Button>
             </div>
           </div>
@@ -543,12 +552,12 @@ export const AccountTab: React.FC<{ active: boolean }> = ({ active }) => {
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs">
         <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2 mb-4">
           <Info className="w-4 h-4 text-slate-400" />
-          Informações da Conta
+          {t("settings.account.profile.accountInfo")}
         </h3>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="p-3 bg-slate-50 dark:bg-slate-950/50 rounded-xl border border-slate-100 dark:border-slate-800/60">
             <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 block mb-1">
-              ID do Utilizador
+              {t("settings.account.profile.userId")}
             </span>
             <p className="text-xs font-mono text-slate-700 dark:text-slate-300 truncate">
               {displayUser?.id || "—"}
@@ -556,17 +565,20 @@ export const AccountTab: React.FC<{ active: boolean }> = ({ active }) => {
           </div>
           <div className="p-3 bg-slate-50 dark:bg-slate-950/50 rounded-xl border border-slate-100 dark:border-slate-800/60">
             <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 block mb-1">
-              Função
+              {t("settings.account.profile.role")}
             </span>
-            {getRoleBadge((displayUser as { role?: string })?.role || "member")}
+            {getRoleBadge(
+              (displayUser as { role?: string })?.role || "member",
+              t,
+            )}
           </div>
           <div className="p-3 bg-slate-50 dark:bg-slate-950/50 rounded-xl border border-slate-100 dark:border-slate-800/60">
             <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 block mb-1">
-              Estado da Conta
+              {t("settings.account.profile.accountStatus")}
             </span>
             <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 dark:text-emerald-400">
               <CheckCircle2 className="w-3.5 h-3.5" />
-              Ativo
+              {t("settings.account.profile.active")}
             </span>
           </div>
         </div>

@@ -256,7 +256,8 @@ export const GeneralTab: React.FC<GeneralTabProps> = ({
       showToast?.(
         t("settings.toast.orgSaveError", {
           error:
-            (err as { message?: string })?.message || "Erro de comunicação",
+            (err as { message?: string })?.message ||
+            t("settings.general.commError"),
         }),
         "error",
       );
@@ -318,10 +319,18 @@ export const GeneralTab: React.FC<GeneralTabProps> = ({
                 }
                 className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-sm px-3.5 py-2.5 focus:outline-hidden focus:ring-2 focus:ring-m3-primary/40 focus:border-m3-primary disabled:opacity-60 disabled:bg-slate-50 dark:disabled:bg-slate-800/50 transition-colors cursor-pointer"
               >
-                <option value="pt-PT">Português (Portugal)</option>
-                <option value="pt-BR">Português (Brasil)</option>
-                <option value="en-US">English (US)</option>
-                <option value="es-ES">Español</option>
+                <option value="pt-PT">
+                  {t("settings.general.locales.ptPT")}
+                </option>
+                <option value="pt-BR">
+                  {t("settings.general.locales.ptBR")}
+                </option>
+                <option value="en-US">
+                  {t("settings.general.locales.enUS")}
+                </option>
+                <option value="es-ES">
+                  {t("settings.general.locales.esES")}
+                </option>
               </select>
             </div>
 
@@ -339,24 +348,34 @@ export const GeneralTab: React.FC<GeneralTabProps> = ({
                 }
                 className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-sm px-3.5 py-2.5 focus:outline-hidden focus:ring-2 focus:ring-m3-primary/40 focus:border-m3-primary disabled:opacity-60 disabled:bg-slate-50 dark:disabled:bg-slate-800/50 transition-colors cursor-pointer"
               >
-                <optgroup label="Portugal & Ilhas">
+                <optgroup label={t("settings.general.timezones.portugalGroup")}>
                   <option value="Europe/Lisbon">
-                    Lisboa, Porto, Funchal (WET / GMT+0)
+                    {t("settings.general.timezones.lisbon")}
                   </option>
-                  <option value="Atlantic/Azores">Açores (GMT-1)</option>
+                  <option value="Atlantic/Azores">
+                    {t("settings.general.timezones.azores")}
+                  </option>
                 </optgroup>
-                <optgroup label="Brasil">
+                <optgroup label={t("settings.general.timezones.brazilGroup")}>
                   <option value="America/Sao_Paulo">
-                    Brasília, São Paulo, Rio (GMT-3)
+                    {t("settings.general.timezones.saoPaulo")}
                   </option>
-                  <option value="America/Manaus">Manaus (GMT-4)</option>
+                  <option value="America/Manaus">
+                    {t("settings.general.timezones.manaus")}
+                  </option>
                 </optgroup>
-                <optgroup label="Outras Regiões">
-                  <option value="Europe/London">Londres (GMT+0)</option>
-                  <option value="America/New_York">
-                    Nova Iorque (EST / GMT-5)
+                <optgroup
+                  label={t("settings.general.timezones.otherRegionsGroup")}
+                >
+                  <option value="Europe/London">
+                    {t("settings.general.timezones.london")}
                   </option>
-                  <option value="UTC">UTC (Tempo Universal)</option>
+                  <option value="America/New_York">
+                    {t("settings.general.timezones.newYork")}
+                  </option>
+                  <option value="UTC">
+                    {t("settings.general.timezones.utc")}
+                  </option>
                 </optgroup>
               </select>
             </div>

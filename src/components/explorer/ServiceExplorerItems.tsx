@@ -1,16 +1,7 @@
 import React from "react";
 import { Badge, Button, Service } from "@hosanna/shared";
 import { Archive, Calendar, Church, MoreVertical } from "lucide-react";
-
-const formatDate = (dateStr: string, options?: Intl.DateTimeFormatOptions) =>
-  new Date(dateStr).toLocaleDateString(
-    "pt-PT",
-    options ?? {
-      weekday: "long",
-      day: "numeric",
-      month: "long",
-    },
-  );
+import { useI18n } from "../../i18n";
 
 export interface ServiceGridCardProps {
   service: Service;
@@ -32,7 +23,22 @@ export const ServiceGridCard: React.FC<ServiceGridCardProps> = React.memo(
     onDoubleClick,
     onContextMenu,
   }) => {
+    const { t, locale } = useI18n();
     const isCompact = density === "compact";
+
+    const formatDate = (
+      dateStr: string,
+      options?: Intl.DateTimeFormatOptions,
+    ) =>
+      new Date(dateStr).toLocaleDateString(
+        locale,
+        options ?? {
+          weekday: "long",
+          day: "numeric",
+          month: "long",
+        },
+      );
+
     return (
       <div
         data-item-id={service.id}
@@ -55,8 +61,8 @@ export const ServiceGridCard: React.FC<ServiceGridCardProps> = React.memo(
             onContextMenu(e);
           }}
           className={`absolute ${isCompact ? "top-2 right-2 p-1" : "top-3 right-3 p-1.5"} rounded-xl text-m3-secondary hover:text-m3-text hover:bg-slate-200/60 dark:hover:bg-slate-700/60 transition-all z-10 cursor-pointer opacity-0 group-hover:opacity-100`}
-          title="Mais opções"
-          aria-label="Mais opções"
+          title={t("explorer.moreOptions")}
+          aria-label={t("explorer.moreOptions")}
         >
           <MoreVertical className={isCompact ? "w-3.5 h-3.5" : "w-4.5 h-4.5"} />
         </button>
@@ -118,8 +124,22 @@ export const ServiceTableRow: React.FC<ServiceTableRowProps> = React.memo(
     onDoubleClick,
     onContextMenu,
   }) => {
+    const { t, locale } = useI18n();
     const isCompact = density === "compact";
     const cellPadding = isCompact ? "py-2.5 px-4" : "py-4 px-6";
+
+    const formatDate = (
+      dateStr: string,
+      options?: Intl.DateTimeFormatOptions,
+    ) =>
+      new Date(dateStr).toLocaleDateString(
+        locale,
+        options ?? {
+          weekday: "long",
+          day: "numeric",
+          month: "long",
+        },
+      );
 
     return (
       <tr
@@ -148,11 +168,13 @@ export const ServiceTableRow: React.FC<ServiceTableRowProps> = React.memo(
               />
             )}
             <span>{service.name}</span>
-            {isArchived && <Badge variant="slate">Arquivado</Badge>}
+            {isArchived && (
+              <Badge variant="slate">{t("explorer.archived")}</Badge>
+            )}
           </div>
         </td>
         <td className={`${cellPadding} text-m3-secondary opacity-70`}>
-          Culto (.service)
+          {t("explorer.service")}
         </td>
         <td className={`${cellPadding} text-m3-secondary`}>
           {formatDate(service.date, {
@@ -172,7 +194,7 @@ export const ServiceTableRow: React.FC<ServiceTableRowProps> = React.memo(
                 onDoubleClick();
               }}
             >
-              Abrir
+              {t("explorer.open")}
             </Button>
             <button
               type="button"
@@ -181,8 +203,8 @@ export const ServiceTableRow: React.FC<ServiceTableRowProps> = React.memo(
                 onContextMenu(e);
               }}
               className="p-1.5 rounded-xl text-m3-secondary hover:text-m3-text hover:bg-m3-hover transition-colors cursor-pointer"
-              title="Mais opções"
-              aria-label="Mais opções"
+              title={t("explorer.moreOptions")}
+              aria-label={t("explorer.moreOptions")}
             >
               <MoreVertical className="w-4 h-4" />
             </button>

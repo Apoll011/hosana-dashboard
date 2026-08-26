@@ -34,7 +34,7 @@ const CONFLICT_RETRY_LIMIT = 3;
 // content conflict — strip these before comparing docs.
 const VOLATILE_FIELDS = ["updatedAt", "_rev", "_meta", "_attachments"] as const;
 
-function omitVolatile<T extends Record<string, any>>(doc: T): Partial<T> {
+function omitVolatile<T extends Record<string, unknown>>(doc: T): Partial<T> {
   const clone: Partial<T> = { ...doc };
   for (const field of VOLATILE_FIELDS) delete clone[field];
   return clone;
@@ -53,7 +53,12 @@ function deepEqual(a: object, b: object): boolean {
   const aKeys = Object.keys(a);
   const bKeys = Object.keys(b);
   if (aKeys.length !== bKeys.length) return false;
-  return aKeys.every((k) => deepEqual((a as any)[k], (b as any)[k]));
+  return aKeys.every((k) =>
+    deepEqual(
+      (a as Record<string, object>)[k],
+      (b as Record<string, object>)[k],
+    ),
+  );
 }
 
 /**

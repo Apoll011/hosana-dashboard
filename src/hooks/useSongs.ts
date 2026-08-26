@@ -7,9 +7,11 @@ import { GetSongsParams, Song } from "@hosanna/shared";
 import { useCallback, useEffect, useState } from "react";
 import { useSync } from "../contexts/SyncContext";
 import { getDatabase, getPurgeAt, SongDocType } from "../db";
+import { useI18n } from "../i18n";
 
 function useSongMutations() {
   const { showToast } = useSync();
+  const { t } = useI18n();
   const [isCreating, setIsCreating] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -25,11 +27,11 @@ function useSongMutations() {
         const id = data.id || crypto.randomUUID();
         const newSong: SongDocType = {
           id,
-          title: data.title || "Sem título",
+          title: data.title || t("forms.untitled"),
           artist: data.artist || "",
           content: data.content || "",
           folderId: data.folderId ?? null,
-          path: data.path || `${data.title || "Sem título"}.pro`,
+          path: data.path || `${data.title || t("forms.untitled")}.pro`,
           tags: Array.isArray(data.tags) ? data.tags : [],
           song_number: data.song_number ?? null,
           createdAt: data.createdAt || now,
@@ -39,17 +41,22 @@ function useSongMutations() {
 
         const doc = await db.songs.insert(newSong);
         const result = doc.toJSON() as Song;
-        showToast(`Cântico "${result.title}" criado com sucesso!`, "success");
+        showToast(t("hooks.songs.created"), "success");
         return result;
       } catch (err: unknown) {
         if (err && typeof err === "object" && "message" in err)
-          showToast(err.message || "Falha ao criar cântico", "error");
+          showToast(
+            t("hooks.songs.saveError", {
+              error: (err as Error).message || "",
+            }),
+            "error",
+          );
         throw err;
       } finally {
         setIsCreating(false);
       }
     },
-    [showToast],
+    [showToast, t],
   );
 
   const updateSong = useCallback(
@@ -76,17 +83,17 @@ function useSongMutations() {
             _deleted: false,
           });
           const updated = doc.toJSON() as Song;
-          showToast(`Cântico "${updated.title}" guardado`, "success");
+          showToast(t("hooks.songs.updated"), "success");
           return updated;
         } else {
           // If not existing locally yet, upsert
           const newDoc = await db.songs.upsert({
             id,
-            title: data.title || "Sem título",
+            title: data.title || t("forms.untitled"),
             artist: data.artist || "",
             content: data.content || "",
             folderId: data.folderId ?? null,
-            path: data.path || `${data.title || "Sem título"}.pro`,
+            path: data.path || `${data.title || t("forms.untitled")}.pro`,
             tags: data.tags || [],
             song_number: data.song_number ?? null,
             createdAt: data.createdAt || now,
@@ -95,18 +102,23 @@ function useSongMutations() {
             ...data,
           });
           const result = newDoc.toJSON() as Song;
-          showToast(`Cântico "${result.title}" guardado`, "success");
+          showToast(t("hooks.songs.updated"), "success");
           return result;
         }
       } catch (err: unknown) {
         if (err && typeof err === "object" && "message" in err)
-          showToast(err.message || "Falha ao guardar cântico", "error");
+          showToast(
+            t("hooks.songs.saveError", {
+              error: (err as Error).message || "",
+            }),
+            "error",
+          );
         throw err;
       } finally {
         setIsUpdating(false);
       }
     },
-    [showToast],
+    [showToast, t],
   );
 
   const deleteSong = useCallback(
@@ -123,16 +135,21 @@ function useSongMutations() {
             updatedAt: new Date().toISOString(),
           });
         }
-        showToast("Cântico apagado", "info");
+        showToast(t("hooks.songs.deleted"), "info");
       } catch (err: unknown) {
         if (err && typeof err === "object" && "message" in err)
-          showToast(err.message || "Falha ao apagar cântico", "error");
+          showToast(
+            t("hooks.songs.deleteError", {
+              error: (err as Error).message || "",
+            }),
+            "error",
+          );
         throw err;
       } finally {
         setIsDeleting(false);
       }
     },
-    [showToast],
+    [showToast, t],
   );
 
   const restoreSong = useCallback(
@@ -148,16 +165,21 @@ function useSongMutations() {
             updatedAt: new Date().toISOString(),
           });
         }
-        showToast("Cântico restaurado", "success");
+        showToast(t("trashPage.restore"), "success");
       } catch (err: unknown) {
         if (err && typeof err === "object" && "message" in err)
-          showToast(err.message || "Falha ao restaurar cântico", "error");
+          showToast(
+            t("hooks.songs.saveError", {
+              error: (err as Error).message || "",
+            }),
+            "error",
+          );
         throw err;
       } finally {
         setIsRestoring(false);
       }
     },
-    [showToast],
+    [showToast, t],
   );
 
   const moveSong = useCallback(
@@ -185,18 +207,23 @@ function useSongMutations() {
             patchObj.path = newPath;
           }
           await doc.patch(patchObj);
-          showToast("Cântico movido", "success");
+          showToast(t("hooks.songs.moved"), "success");
           return doc.toJSON() as Song;
         }
       } catch (err: unknown) {
         if (err && typeof err === "object" && "message" in err)
-          showToast(err.message || "Falha ao mover cântico", "error");
+          showToast(
+            t("hooks.songs.saveError", {
+              error: (err as Error).message || "",
+            }),
+            "error",
+          );
         throw err;
       } finally {
         setIsUpdating(false);
       }
     },
-    [showToast],
+    [showToast, t],
   );
 
   const updateBatchTags = useCallback(
@@ -233,12 +260,14 @@ function useSongMutations() {
           }
         }
 
-        showToast(`Etiquetas atualizadas em ${count} cântico(s)!`, "success");
+        showToast(t("songsPage.movedToast", { count }), "success");
         return { count };
       } catch (err: unknown) {
         if (err && typeof err === "object" && "message" in err)
           showToast(
-            err.message || "Falha ao atualizar etiquetas em lote",
+            t("hooks.songs.saveError", {
+              error: (err as Error).message || "",
+            }),
             "error",
           );
         throw err;
@@ -246,7 +275,7 @@ function useSongMutations() {
         setIsUpdatingBatchTags(false);
       }
     },
-    [showToast],
+    [showToast, t],
   );
 
   return {

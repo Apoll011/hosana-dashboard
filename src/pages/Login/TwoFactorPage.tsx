@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import React, { useRef, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
+import { useI18n } from "../../i18n";
 import { authClient } from "../../lib/authClient";
 import LoginLayout from "./Layout";
 
@@ -23,6 +24,7 @@ type TwoFactorMethod = "totp" | "otp" | "backup";
 export const TwoFactorPage: React.FC = () => {
   const { navigate } = useAppNavigate();
   const { refetch } = useAuth();
+  const { t } = useI18n();
 
   const [method, setMethod] = useState<TwoFactorMethod>("totp");
   const [code, setCode] = useState("");
@@ -37,7 +39,7 @@ export const TwoFactorPage: React.FC = () => {
     setErrorMsg("");
     setOtpSentMsg("");
     setIsSendingOtp(true);
-    const { error } = await authClient.twoFactor.sendOtp();
+    const { error } = await authClient.twoFactor.sendOtp({});
     setIsSendingOtp(false);
     if (error) {
       setErrorMsg(error.message || "Erro ao enviar código OTP por e-mail.");
@@ -63,7 +65,7 @@ export const TwoFactorPage: React.FC = () => {
 
     if (method === "backup") {
       if (!backupCode.trim()) {
-        setErrorMsg("Insira o código de recuperação.");
+        setErrorMsg(t("settings.twoFactor.codeRequired"));
         return;
       }
       setIsLoading(true);
@@ -73,12 +75,12 @@ export const TwoFactorPage: React.FC = () => {
       });
       setIsLoading(false);
       if (error) {
-        setErrorMsg(error.message || "Código de recuperação inválido.");
+        setErrorMsg(error.message || t("settings.twoFactor.codeInvalid"));
         return;
       }
     } else if (method === "otp") {
       if (!code.trim() || code.trim().length < 6) {
-        setErrorMsg("Insira o código de 6 dígitos enviado por e-mail.");
+        setErrorMsg(t("settings.twoFactor.codeRequired"));
         return;
       }
       setIsLoading(true);
@@ -88,12 +90,12 @@ export const TwoFactorPage: React.FC = () => {
       });
       setIsLoading(false);
       if (error) {
-        setErrorMsg(error.message || "Código OTP inválido ou expirado.");
+        setErrorMsg(error.message || t("settings.twoFactor.codeInvalid"));
         return;
       }
     } else {
       if (!code.trim() || code.trim().length < 6) {
-        setErrorMsg("Insira o código de 6 dígitos da aplicação.");
+        setErrorMsg(t("settings.twoFactor.codeRequired"));
         return;
       }
       setIsLoading(true);
@@ -103,7 +105,7 @@ export const TwoFactorPage: React.FC = () => {
       });
       setIsLoading(false);
       if (error) {
-        setErrorMsg(error.message || "Código autenticador inválido.");
+        setErrorMsg(error.message || t("settings.twoFactor.codeInvalid"));
         return;
       }
     }
@@ -121,7 +123,7 @@ export const TwoFactorPage: React.FC = () => {
     <LoginLayout
       errorMsg={errorMsg}
       optionalLink="/login"
-      optionalMsg="← Voltar ao login"
+      optionalMsg={"← " + t("auth.forgotPassword.backToLogin")}
     >
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="flex flex-col items-center mb-1 text-center">
@@ -129,12 +131,12 @@ export const TwoFactorPage: React.FC = () => {
             <Shield className="w-6 h-6" />
           </div>
           <h2 className="font-display font-bold text-lg text-slate-900 dark:text-white">
-            Verificação em 2 Etapas
+            {t("auth.twoFactor.title")}
           </h2>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-xs leading-relaxed">
-            {method === "totp" && "Introduza o código da sua app autenticadora"}
+            {method === "totp" && t("auth.twoFactor.subtitle")}
             {method === "otp" && "Introduza o código enviado para o seu e-mail"}
-            {method === "backup" && "Introduza um código de recuperação"}
+            {method === "backup" && t("auth.twoFactor.useBackupCode")}
           </p>
         </div>
 
@@ -143,7 +145,7 @@ export const TwoFactorPage: React.FC = () => {
           <button
             type="button"
             onClick={() => handleSwitchMethod("totp")}
-            className={`flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg text-xs font-semibold transition-all ${
+            className={`flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
               method === "totp"
                 ? "bg-white dark:bg-slate-900 text-m3-primary dark:text-m3-primary-light shadow-sm"
                 : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
@@ -155,7 +157,7 @@ export const TwoFactorPage: React.FC = () => {
           <button
             type="button"
             onClick={() => handleSwitchMethod("otp")}
-            className={`flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg text-xs font-semibold transition-all ${
+            className={`flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
               method === "otp"
                 ? "bg-white dark:bg-slate-900 text-m3-primary dark:text-m3-primary-light shadow-sm"
                 : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
@@ -167,14 +169,14 @@ export const TwoFactorPage: React.FC = () => {
           <button
             type="button"
             onClick={() => handleSwitchMethod("backup")}
-            className={`flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg text-xs font-semibold transition-all ${
+            className={`flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
               method === "backup"
                 ? "bg-white dark:bg-slate-900 text-m3-primary dark:text-m3-primary-light shadow-sm"
                 : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
             }`}
           >
             <KeyRound className="w-3.5 h-3.5" />
-            <span>Reserva</span>
+            <span>{t("auth.twoFactor.backupCodeLabel")}</span>
           </button>
         </div>
 
@@ -188,11 +190,11 @@ export const TwoFactorPage: React.FC = () => {
         {method === "backup" ? (
           <div className="space-y-2">
             <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
-              Código de Recuperação
+              {t("auth.twoFactor.backupCodeLabel")}
             </label>
             <input
               type="text"
-              placeholder="Ex: a1b2c3d4e5"
+              placeholder={t("auth.twoFactor.backupCodePlaceholder")}
               value={backupCode}
               onChange={(e) => setBackupCode(e.target.value.trim())}
               className="w-full h-12 px-4 text-center font-mono tracking-widest text-base uppercase rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:border-m3-primary focus:bg-white dark:focus:bg-slate-900 focus:outline-none transition-all"
@@ -208,7 +210,7 @@ export const TwoFactorPage: React.FC = () => {
               type="button"
               onClick={handleSendOtp}
               disabled={isSendingOtp}
-              className="inline-flex items-center gap-1.5 text-xs font-bold text-m3-primary hover:underline dark:text-m3-primary-light disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 text-xs font-bold text-m3-primary hover:underline dark:text-m3-primary-light disabled:opacity-50 cursor-pointer"
             >
               <RefreshCw
                 className={`w-3.5 h-3.5 ${isSendingOtp ? "animate-spin" : ""}`}
@@ -224,9 +226,9 @@ export const TwoFactorPage: React.FC = () => {
               type="checkbox"
               checked={trustDevice}
               onChange={(e) => setTrustDevice(e.target.checked)}
-              className="w-4 h-4 rounded border-slate-300 dark:border-slate-700 text-m3-primary focus:ring-m3-primary dark:bg-slate-800"
+              className="w-4 h-4 rounded border-slate-300 dark:border-slate-700 text-m3-primary focus:ring-m3-primary dark:bg-slate-800 cursor-pointer"
             />
-            <span>Confiar neste dispositivo</span>
+            <span>{t("auth.login.rememberMe")}</span>
           </label>
         </div>
 
@@ -234,9 +236,9 @@ export const TwoFactorPage: React.FC = () => {
           type="submit"
           variant="primary"
           isLoading={isLoading}
-          className="w-full h-14 bg-m3-primary hover:bg-m3-primary-dark border-0 font-black uppercase tracking-widest text-[10px] text-white rounded-[20px] transition-all shadow-xl shadow-m3-primary/20 hover:shadow-m3-primary/40 flex items-center justify-center gap-2"
+          className="w-full h-14 bg-m3-primary hover:bg-m3-primary-dark border-0 font-black uppercase tracking-widest text-[10px] text-white rounded-[20px] transition-all shadow-xl shadow-m3-primary/20 hover:shadow-m3-primary/40 flex items-center justify-center gap-2 cursor-pointer"
         >
-          <span>Verificar</span>
+          <span>{t("auth.twoFactor.verifyBtn")}</span>
           <ArrowRight className="w-4 h-4" />
         </Button>
       </form>

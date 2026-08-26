@@ -11,9 +11,9 @@ import React, {
   useRef,
   useState,
 } from "react";
+import { getDatabase, ReplicationManager, setupReplication } from "../db";
 import { SyncStatus } from "../types";
 import { useAuth } from "./AuthContext";
-import { getDatabase, setupReplication, ReplicationManager } from "../db";
 
 export interface ToastAction {
   label: string;

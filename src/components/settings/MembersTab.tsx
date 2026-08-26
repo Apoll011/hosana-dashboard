@@ -18,6 +18,7 @@ import {
 import React, { useCallback, useEffect, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { useSync } from "../../contexts/SyncContext";
+import { useI18n } from "../../i18n";
 import { authClient } from "../../lib/authClient";
 import { MemberProfilePage } from "./MemberProfilePage";
 import { getRoleBadge } from "./settingsUtils";
@@ -49,6 +50,7 @@ type SubTab = "members" | "invites";
 export const MembersTab: React.FC<{ active: boolean }> = ({ active }) => {
   const { user, organization } = useAuth();
   const { showToast } = useSync();
+  const { t } = useI18n();
 
   const [activeSubTab, setActiveSubTab] = useState<SubTab>("members");
   const [searchQuery, setSearchQuery] = useState("");
@@ -96,7 +98,11 @@ export const MembersTab: React.FC<{ active: boolean }> = ({ active }) => {
           }) => ({
             id: m.id,
             userId: m.userId || m.user?.id || m.id,
-            name: m.user?.name || m.name || m.user?.email || "Membro",
+            name:
+              m.user?.name ||
+              m.name ||
+              m.user?.email ||
+              t("settings.members.memberRole"),
             email: m.user?.email || m.email || "",
             role: m.role || "member",
             createdAt: m.createdAt,
@@ -112,7 +118,7 @@ export const MembersTab: React.FC<{ active: boolean }> = ({ active }) => {
     } finally {
       setIsLoadingOrgMembers(false);
     }
-  }, [organization]);
+  }, [organization, t]);
 
   useEffect(() => {
     if (active && organization) {
@@ -169,9 +175,9 @@ export const MembersTab: React.FC<{ active: boolean }> = ({ active }) => {
     if (!date) return "";
     const diffMs = new Date(date).getTime() - Date.now();
     const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
-    if (diffDays === 0) return "hoje";
-    if (diffDays > 0) return `em ${diffDays} dia${diffDays === 1 ? "" : "s"}`;
-    return `há ${Math.abs(diffDays)} dia${Math.abs(diffDays) === 1 ? "" : "s"}`;
+    if (diffDays === 0) return t("settings.members.today");
+    if (diffDays > 0) return t("settings.members.inDays", { count: diffDays });
+    return t("settings.members.daysAgo", { count: Math.abs(diffDays) });
   };
 
   const handleRemoveMember = async (member: OrgMember) => {
@@ -179,13 +185,14 @@ export const MembersTab: React.FC<{ active: boolean }> = ({ active }) => {
       await authClient.organization.removeMember({
         memberIdOrEmail: member.id || member.email,
       });
-      showToast("Membro removido da organização com sucesso!", "success");
+      showToast(t("settings.members.memberRemoved"), "success");
       refetchOrgMembers();
       setSelectedMember(null);
     } catch (err: unknown) {
       showToast(
-        "Erro ao remover membro: " +
-          ((err as Error).message || "Tente novamente"),
+        t("settings.members.memberRemoveError", {
+          error: (err as Error).message || "Tente novamente",
+        }),
         "error",
       );
     }
@@ -197,12 +204,13 @@ export const MembersTab: React.FC<{ active: boolean }> = ({ active }) => {
         memberId: member.id,
         role: newRole as "owner" | "admin" | "member",
       });
-      showToast("Função do membro atualizada com sucesso!", "success");
+      showToast(t("settings.members.roleUpdated"), "success");
       refetchOrgMembers();
     } catch (err: unknown) {
       showToast(
-        "Erro ao atualizar função: " +
-          ((err as Error).message || "Tente novamente"),
+        t("settings.members.roleUpdateError", {
+          error: (err as Error).message || "Tente novamente",
+        }),
         "error",
       );
     }
@@ -218,14 +226,21 @@ export const MembersTab: React.FC<{ active: boolean }> = ({ active }) => {
         resend: true,
       });
       if (error) {
-        showToast(`Erro ao reenviar convite para ${invite.email}`, "error");
+        showToast(
+          t("settings.members.resendError", { email: invite.email }),
+          "error",
+        );
       } else {
-        showToast(`Convite reenviado para ${invite.email}!`, "success");
+        showToast(
+          t("settings.members.resendSuccess", { email: invite.email }),
+          "success",
+        );
         refetchInvitations();
       }
     } catch (err: unknown) {
       showToast(
-        (err as Error).message || "Falha ao reenviar convite.",
+        (err as Error).message ||
+          t("settings.members.resendError", { email: invite.email }),
         "error",
       );
     } finally {
@@ -240,11 +255,16 @@ export const MembersTab: React.FC<{ active: boolean }> = ({ active }) => {
       await authClient.organization.cancelInvitation({
         invitationId: inviteToCancel.id,
       });
-      showToast(`Convite para ${inviteToCancel.email} cancelado.`, "success");
+      showToast(
+        t("settings.members.inviteCancelled", { email: inviteToCancel.email }),
+        "success",
+      );
       refetchInvitations();
     } catch (err: unknown) {
       showToast(
-        (err as Error).message || "Falha ao cancelar convite.",
+        t("settings.members.cancelError", {
+          error: (err as Error).message || "",
+        }),
         "error",
       );
     } finally {
@@ -277,17 +297,19 @@ export const MembersTab: React.FC<{ active: boolean }> = ({ active }) => {
 
     setIsInviting(true);
     try {
-      // Try Better Auth Organization Invite
       const { error } = await authClient.organization.inviteMember({
         email: inviteEmail.trim(),
         role: inviteRole as "owner" | "admin" | "member",
       });
 
       if (error) {
-        showToast(`Erro convidando ${inviteEmail}!`, "error");
+        showToast(
+          t("settings.members.inviteError", { email: inviteEmail }),
+          "error",
+        );
       } else {
         showToast(
-          `Convite enviado com sucesso para ${inviteEmail}!`,
+          t("settings.members.inviteSuccess", { email: inviteEmail }),
           "success",
         );
         refetchInvitations();
@@ -297,7 +319,11 @@ export const MembersTab: React.FC<{ active: boolean }> = ({ active }) => {
       setInviteEmail("");
       setIsInviteModalOpen(false);
     } catch (err: unknown) {
-      showToast((err as Error).message || "Falha ao enviar convite.", "error");
+      showToast(
+        (err as Error).message ||
+          t("settings.members.inviteError", { email: inviteEmail }),
+        "error",
+      );
     } finally {
       setIsInviting(false);
     }
@@ -327,7 +353,7 @@ export const MembersTab: React.FC<{ active: boolean }> = ({ active }) => {
                 : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
             }`}
           >
-            Membros Ativos ({members.length})
+            {t("settings.members.activeMembers", { count: members.length })}
           </button>
 
           {/* Only show pending-invites tab to those who can manage invites */}
@@ -341,7 +367,9 @@ export const MembersTab: React.FC<{ active: boolean }> = ({ active }) => {
                   : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
               }`}
             >
-              Convites Pendentes ({pendingInvites.length})
+              {t("settings.members.pendingInvites", {
+                count: pendingInvites.length,
+              })}
             </button>
           </CanAny>
         </div>
@@ -350,7 +378,7 @@ export const MembersTab: React.FC<{ active: boolean }> = ({ active }) => {
           <button
             onClick={refetchAll}
             className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-            title="Atualizar"
+            title={t("common.refresh")}
           >
             <RefreshCw className="w-4 h-4" />
           </button>
@@ -362,7 +390,7 @@ export const MembersTab: React.FC<{ active: boolean }> = ({ active }) => {
               onClick={() => setIsInviteModalOpen(true)}
               icon={<UserPlus className="w-4 h-4" />}
             >
-              Convidar Membro
+              {t("settings.members.inviteMember")}
             </Button>
           </Can>
         </div>
@@ -375,8 +403,8 @@ export const MembersTab: React.FC<{ active: boolean }> = ({ active }) => {
           type="text"
           placeholder={
             activeSubTab === "members"
-              ? "Pesquisar por nome ou e-mail..."
-              : "Pesquisar por e-mail..."
+              ? t("settings.members.searchPlaceholder")
+              : t("settings.members.searchInvitesPlaceholder")
           }
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
@@ -389,12 +417,12 @@ export const MembersTab: React.FC<{ active: boolean }> = ({ active }) => {
         <>
           {isLoadingOrgMembers ? (
             <div className="py-12 text-center text-xs text-slate-400 flex items-center justify-center gap-2">
-              <Loader2 className="w-4 h-4 animate-spin text-m3-primary" />A
-              carregar membros da organização...
+              <Loader2 className="w-4 h-4 animate-spin text-m3-primary" />
+              {t("settings.members.loadingMembers")}
             </div>
           ) : filteredMembers.length === 0 ? (
             <div className="py-12 text-center text-xs text-slate-400">
-              Nenhum membro encontrado.
+              {t("settings.members.noMembers")}
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -425,7 +453,7 @@ export const MembersTab: React.FC<{ active: boolean }> = ({ active }) => {
                       <p className="text-xs text-slate-500 truncate">
                         {member.email}
                       </p>
-                      <div className="mt-1">{getRoleBadge(member.role)}</div>
+                      <div className="mt-1">{getRoleBadge(member.role, t)}</div>
                     </div>
                   </div>
 
@@ -442,12 +470,12 @@ export const MembersTab: React.FC<{ active: boolean }> = ({ active }) => {
         <>
           {isLoadingInvitations ? (
             <div className="py-12 text-center text-xs text-slate-400 flex items-center justify-center gap-2">
-              <Loader2 className="w-4 h-4 animate-spin text-m3-primary" />A
-              carregar convites...
+              <Loader2 className="w-4 h-4 animate-spin text-m3-primary" />
+              {t("settings.members.loadingInvites")}
             </div>
           ) : filteredInvites.length === 0 ? (
             <div className="py-12 text-center text-xs text-slate-400">
-              Nenhum convite pendente.
+              {t("settings.members.noInvites")}
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -467,14 +495,16 @@ export const MembersTab: React.FC<{ active: boolean }> = ({ active }) => {
                           {invite.email}
                         </p>
                         <div className="mt-1 flex items-center gap-2 flex-wrap">
-                          {getRoleBadge(invite.role)}
+                          {getRoleBadge(invite.role, t)}
                           {expired ? (
                             <span className="text-[10px] font-black uppercase tracking-wider text-red-600 bg-red-50 dark:bg-red-950 px-2 py-0.5 rounded-md border border-red-200 dark:border-red-800">
-                              Expirado
+                              {t("settings.members.expired")}
                             </span>
                           ) : (
                             <span className="text-[10px] text-slate-400">
-                              Expira {formatRelativeDays(invite.expiresAt)}
+                              {t("settings.members.expires", {
+                                date: formatRelativeDays(invite.expiresAt),
+                              })}
                             </span>
                           )}
                         </div>
@@ -487,7 +517,7 @@ export const MembersTab: React.FC<{ active: boolean }> = ({ active }) => {
                           type="button"
                           onClick={() => handleResendInvite(invite)}
                           disabled={resendingId === invite.id}
-                          title="Reenviar convite"
+                          title={t("settings.members.resendInviteTitle")}
                           className="p-2 text-slate-400 hover:text-m3-primary rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors disabled:opacity-50 cursor-pointer"
                         >
                           {resendingId === invite.id ? (
@@ -501,7 +531,7 @@ export const MembersTab: React.FC<{ active: boolean }> = ({ active }) => {
                         <button
                           type="button"
                           onClick={() => setInviteToCancel(invite)}
-                          title="Cancelar convite"
+                          title={t("settings.members.cancelInviteTitle")}
                           className="p-2 text-slate-400 hover:text-red-500 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
                         >
                           <XCircle className="w-4 h-4" />
@@ -521,19 +551,19 @@ export const MembersTab: React.FC<{ active: boolean }> = ({ active }) => {
         <Modal
           isOpen={isInviteModalOpen}
           onClose={() => setIsInviteModalOpen(false)}
-          title="Convidar Membro para a Organização"
+          title={t("settings.members.inviteModalTitle")}
         >
           <form onSubmit={handleInvite} className="space-y-4 pt-2">
             <Input
-              label="Nome Completo (Opcional)"
-              placeholder="e.g. Pedro Martins"
+              label={t("settings.members.nameLabel")}
+              placeholder={t("settings.members.namePlaceholder")}
               value={inviteName}
               onChange={(e) => setInviteName(e.target.value)}
             />
             <Input
               type="email"
-              label="E-mail *"
-              placeholder="e.g. pedro@exemplo.com"
+              label={t("settings.members.emailLabel")}
+              placeholder={t("settings.members.emailPlaceholder")}
               value={inviteEmail}
               onChange={(e) => setInviteEmail(e.target.value)}
               required
@@ -541,22 +571,23 @@ export const MembersTab: React.FC<{ active: boolean }> = ({ active }) => {
 
             <div>
               <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                Função RBAC na Organização
+                {t("settings.members.roleLabel")}
               </label>
               <select
                 value={inviteRole}
                 onChange={(e) => setInviteRole(e.target.value)}
                 className="w-full h-11 px-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-semibold"
               >
-                {/* Only an owner can invite someone in directly as owner */}
                 <Can permission="organization.update">
-                  <option value="owner">Proprietário</option>
+                  <option value="owner">{t("settings.roles.owner")}</option>
                 </Can>
-                <option value="admin">Administrador</option>
-                <option value="teamLeader">Lider de Equipa</option>
-                <option value="editor">Editor</option>
-                <option value="musician">Músico</option>
-                <option value="guest">Convidado</option>
+                <option value="admin">{t("settings.roles.admin")}</option>
+                <option value="teamLeader">
+                  {t("settings.roles.teamLeader")}
+                </option>
+                <option value="editor">{t("settings.roles.editor")}</option>
+                <option value="musician">{t("settings.roles.musician")}</option>
+                <option value="guest">{t("settings.roles.guest")}</option>
               </select>
             </div>
 
@@ -566,10 +597,12 @@ export const MembersTab: React.FC<{ active: boolean }> = ({ active }) => {
                 type="button"
                 onClick={() => setIsInviteModalOpen(false)}
               >
-                Cancelar
+                {t("common.cancel")}
               </Button>
               <Button variant="primary" type="submit" disabled={isInviting}>
-                {isInviting ? "A Enviar..." : "Enviar Convite"}
+                {isInviting
+                  ? t("settings.members.sending")
+                  : t("settings.members.sendInvite")}
               </Button>
             </div>
           </form>
@@ -581,17 +614,17 @@ export const MembersTab: React.FC<{ active: boolean }> = ({ active }) => {
         <Modal
           isOpen={!!inviteToCancel}
           onClose={() => setInviteToCancel(null)}
-          title="Cancelar Convite"
+          title={t("settings.members.cancelModalTitle")}
         >
           <div className="space-y-4 pt-2">
             <p className="text-xs text-slate-600 dark:text-slate-400">
-              Tem a certeza que quer cancelar o convite para{" "}
-              <strong>{inviteToCancel.email}</strong>? A pessoa deixará de
-              conseguir aceitar este convite.
+              {t("settings.members.cancelModalConfirm", {
+                email: inviteToCancel.email,
+              })}
             </p>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setInviteToCancel(null)}>
-                Voltar
+                {t("common.back")}
               </Button>
               <Button
                 variant="primary"
@@ -599,7 +632,9 @@ export const MembersTab: React.FC<{ active: boolean }> = ({ active }) => {
                 disabled={isCancelling}
                 icon={<XCircle className="w-4 h-4" />}
               >
-                {isCancelling ? "A Cancelar..." : "Cancelar Convite"}
+                {isCancelling
+                  ? t("settings.members.cancelling")
+                  : t("settings.members.confirmCancel")}
               </Button>
             </div>
           </div>

@@ -10,6 +10,7 @@ import { ArrowRight, Lock, Mail } from "lucide-react";
 import React, { useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
+import { useI18n } from "../../i18n";
 import { authClient } from "../../lib/authClient";
 import LoginLayout from "./Layout";
 import { TurnstileWidget } from "./components/TurnstileWidget";
@@ -20,6 +21,7 @@ export const LoginPage: React.FC = () => {
   const redirectMessage =
     (location.state as { message?: string })?.message || "";
   const { refetch } = useAuth();
+  const { t } = useI18n();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -34,11 +36,11 @@ export const LoginPage: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email.trim() || !password.trim()) {
-      setErrorMsg("Por favor, insira o seu e-mail e a sua palavra-passe");
+      setErrorMsg(t("auth.login.errorInvalidCredentials"));
       return;
     }
     if (captchaEnabled && !captchaToken) {
-      setErrorMsg("Por favor complete o CAPTCHA");
+      setErrorMsg("Please complete CAPTCHA");
       return;
     }
     setErrorMsg("");
@@ -68,7 +70,7 @@ export const LoginPage: React.FC = () => {
         navigate("/two-factor");
         return;
       }
-      setErrorMsg(error.message || "Autenticação falhou");
+      setErrorMsg(error.message || t("auth.login.errorInvalidCredentials"));
       return;
     }
 
@@ -77,9 +79,7 @@ export const LoginPage: React.FC = () => {
       return;
     }
 
-    // Refresh session state immediately so ProtectedRoute recognizes authentication and active organization
     await refetch();
-    // Fetch latest organization slug or fallback to onboarding/root
     const activeSlug = localStorage.getItem("active_org_slug");
     if (activeSlug) {
       navigate(`/${activeSlug}/folders`, { replace: true });
@@ -93,14 +93,14 @@ export const LoginPage: React.FC = () => {
       errorMsg={errorMsg}
       redirectMessage={redirectMessage}
       optionalLink="/register"
-      optionalMsg="Criar ou aderir a uma organização"
+      optionalMsg={t("auth.login.registerLink")}
     >
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-3">
           <Input
             type="email"
-            label="E-mail"
-            placeholder="admin@hosanna.org"
+            label={t("auth.login.emailLabel")}
+            placeholder={t("auth.login.emailPlaceholder")}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             icon={<Mail className="w-4 h-4 opacity-40" />}
@@ -108,8 +108,8 @@ export const LoginPage: React.FC = () => {
           />
           <Input
             type="password"
-            label="Palavra-passe"
-            placeholder="••••••••"
+            label={t("auth.login.passwordLabel")}
+            placeholder={t("auth.login.passwordPlaceholder")}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             icon={<Lock className="w-4 h-4 opacity-40" />}
@@ -120,10 +120,10 @@ export const LoginPage: React.FC = () => {
               type="checkbox"
               checked={rememberMe}
               onChange={(e) => setRememberMe(e.target.checked)}
-              className="w-4 h-4 rounded border-slate-300 dark:border-slate-700 text-m3-primary focus:ring-m3-primary dark:bg-slate-800"
+              className="w-4 h-4 rounded border-slate-300 dark:border-slate-700 text-m3-primary focus:ring-m3-primary dark:bg-slate-800 cursor-pointer"
             />
             <span className="text-sm text-slate-600 dark:text-slate-300">
-              Lembrar-me
+              {t("auth.login.rememberMe")}
             </span>
           </label>
         </div>
@@ -133,7 +133,7 @@ export const LoginPage: React.FC = () => {
             to="/forgot-password"
             className="text-xs font-semibold text-m3-primary dark:text-m3-primary-light hover:underline"
           >
-            Esqueceu a palavra-passe?
+            {t("auth.login.forgotPasswordLink")}
           </AppLink>
         </div>
 
@@ -144,10 +144,10 @@ export const LoginPage: React.FC = () => {
         <Button
           type="submit"
           variant="primary"
-          className="w-full h-14 bg-m3-primary hover:bg-m3-primary-dark border-0 font-black uppercase tracking-widest text-[10px] text-white mt-2 rounded-[20px] transition-all shadow-xl shadow-m3-primary/20 hover:shadow-m3-primary/40 flex items-center justify-center gap-2 group"
+          className="w-full h-14 bg-m3-primary hover:bg-m3-primary-dark border-0 font-black uppercase tracking-widest text-[10px] text-white mt-2 rounded-[20px] transition-all shadow-xl shadow-m3-primary/20 hover:shadow-m3-primary/40 flex items-center justify-center gap-2 group cursor-pointer"
           isLoading={isLoading}
         >
-          <span>Iniciar Sessão</span>
+          <span>{t("auth.login.loginBtn")}</span>
           <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
         </Button>
       </form>
