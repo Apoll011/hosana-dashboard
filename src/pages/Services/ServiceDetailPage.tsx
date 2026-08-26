@@ -709,10 +709,11 @@ export const ServiceDetailPage: React.FC = () => {
         data: { notes: generalNotes, updatedAt: service.updatedAt },
       });
       showToast(t("serviceDetailPage.serviceSavedSuccess"), "success");
-    } catch (error: any) {
+    } catch (error) {
       showToast(
         t("serviceDetailPage.serviceSaveError", {
-          error: error?.message || "Sync error",
+          error:
+            (error as { message?: string | null })?.message || "Sync error",
         }),
         "error",
       );
