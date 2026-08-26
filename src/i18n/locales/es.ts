@@ -20,6 +20,7 @@ export const es: typeof pt = {
     save: "Guardar",
     cancel: "Cancelar",
     close: "Cerrar",
+    archive: "Archivar",
     delete: "Eliminar",
     edit: "Editar",
     search: "Buscar",
@@ -312,7 +313,8 @@ export const es: typeof pt = {
         newPassword: "Nueva Contraseña",
         confirmNewPassword: "Confirmar Nueva Contraseña",
         currentPasswordRequired: "Por favor, introduzca su contraseña actual.",
-        passwordMinLength: "La nueva contraseña debe tener al menos 6 caracteres.",
+        passwordMinLength:
+          "La nueva contraseña debe tener al menos 6 caracteres.",
         passwordMismatch: "Las contraseñas no coinciden.",
         passwordChanged: "¡Contraseña cambiada con éxito!",
         passwordChangeError: "Error al cambiar la contraseña: {error}",
@@ -331,18 +333,23 @@ export const es: typeof pt = {
       disableBtn: "Desactivar 2FA",
       setupModalTitle: "Configurar 2FA",
       disableModalTitle: "Desactivar 2FA",
-      passwordStepDesc: "Para activar la verificación en dos pasos, confirme su contraseña actual:",
+      passwordStepDesc:
+        "Para activar la verificación en dos pasos, confirme su contraseña actual:",
       passwordLabel: "Contraseña",
       continue: "Continuar",
-      setupStep1: "1. Escanee el código QR con su aplicación de autenticación (como Google Authenticator, Authy o Microsoft Authenticator).",
-      setupStep2: "2. Introduzca el código de 6 dígitos generado por la aplicación:",
+      setupStep1:
+        "1. Escanee el código QR con su aplicación de autenticación (como Google Authenticator, Authy o Microsoft Authenticator).",
+      setupStep2:
+        "2. Introduzca el código de 6 dígitos generado por la aplicación:",
       verificationCodeLabel: "Código de Verificación",
       verificationCodePlaceholder: "123456",
       verify: "Verificar",
       backupSuccessTitle: "¡Aplicación vinculada con éxito!",
-      backupWarning: "Guarde estos códigos de recuperación en un lugar seguro (como un gestor de contraseñas). Son la única forma de acceder a su cuenta si pierde su teléfono.",
+      backupWarning:
+        "Guarde estos códigos de recuperación en un lugar seguro (como un gestor de contraseñas). Son la única forma de acceder a su cuenta si pierde su teléfono.",
       backupSavedBtn: "He guardado los códigos de forma segura",
-      disableStepDesc: "Para desactivar la verificación en dos pasos, confirme su contraseña:",
+      disableStepDesc:
+        "Para desactivar la verificación en dos pasos, confirme su contraseña:",
       passwordRequired: "Por favor, introduzca su contraseña.",
       codeRequired: "Por favor, introduzca el código de verificación.",
       enableError: "Error al activar 2FA: {error}",
@@ -390,7 +397,8 @@ export const es: typeof pt = {
       inviteSuccess: "¡Invitación enviada con éxito a {email}!",
       inviteError: "¡Error al invitar a {email}!",
       cancelModalTitle: "Cancelar Invitación",
-      cancelModalConfirm: "¿Está seguro de que desea cancelar la invitación para {email}? La persona ya no podrá aceptar esta invitación.",
+      cancelModalConfirm:
+        "¿Está seguro de que desea cancelar la invitación para {email}? La persona ya no podrá aceptar esta invitación.",
       cancelling: "Cancelando...",
       confirmCancel: "Cancelar Invitación",
     },
@@ -401,13 +409,16 @@ export const es: typeof pt = {
       removeMember: "Eliminar Miembro",
       rbacTitle: "Gestión de Permisos RBAC",
       changeRole: "Cambiar Rol",
-      promoteOwnerWarning: "Está a punto de nombrar a {name} propietario de la organización. Esta acción es delicada y debe confirmarse con cuidado.",
+      promoteOwnerWarning:
+        "Está a punto de nombrar a {name} propietario de la organización. Esta acción es delicada y debe confirmarse con cuidado.",
       saveRole: "Guardar Rol",
       currentRole: "Rol Actual:",
       removeConfirmTitle: "Eliminar Miembro",
-      removeConfirmText: "¿Está seguro de que desea eliminar a {name} de la organización? Esta persona perderá el acceso de inmediato.",
+      removeConfirmText:
+        "¿Está seguro de que desea eliminar a {name} de la organización? Esta persona perderá el acceso de inmediato.",
       leaveConfirmTitle: "Salir de la Organización",
-      leaveConfirmText: "¿Está seguro de que desea salir de esta organización? Perderá el acceso de inmediato y deberá ser invitado de nuevo para volver a entrar.",
+      leaveConfirmText:
+        "¿Está seguro de que desea salir de esta organización? Perderá el acceso de inmediato y deberá ser invitado de nuevo para volver a entrar.",
       leaving: "Saliendo...",
       leaveSuccess: "Ha salido de la organización con éxito.",
       leaveError: "Fallo al salir de la organización: {error}",
@@ -425,15 +436,18 @@ export const es: typeof pt = {
       shortNameLabel: "Sigla / Abreviatura",
       shortNamePlaceholder: "e.g. IHM",
       descriptionLabel: "Descripción o Visión",
-      descriptionPlaceholder: "Breve descripción de los propósitos de la iglesia o equipo...",
+      descriptionPlaceholder:
+        "Breve descripción de los propósitos de la iglesia o equipo...",
       defaultOrgName: "Mi Organización",
       noDescription: "Ninguna descripción configurada.",
       visualIdentityTitle: "Identidad Visual y Colores",
-      visualIdentityDesc: "Personalice el color de acento y la visibilidad de marca en presentaciones y compartidos.",
+      visualIdentityDesc:
+        "Personalice el color de acento y la visibilidad de marca en presentaciones y compartidos.",
       accentColorLabel: "Color de Acento",
       quickColors: "Colores Rápidos:",
       showBrandingLabel: "Mostrar Logotipo en Pantallas Públicas",
-      showBrandingDesc: "Muestra el encabezado y la marca de la iglesia en proyecciones e informes compartidos.",
+      showBrandingDesc:
+        "Muestra el encabezado y la marca de la iglesia en proyecciones e informes compartidos.",
       preview: "Vista previa:",
       activeButton: "Botón Activo",
       churchFallback: "Iglesia",
@@ -450,9 +464,11 @@ export const es: typeof pt = {
       saved: "¡Organización e identidad visual actualizadas con éxito!",
       saveError: "Error al actualizar la organización: {error}",
       backupTitle: "Copia de Seguridad y Datos",
-      backupDesc: "Exporte o restaure todos los repertorios, cultos y ajustes en un archivo JSON seguro.",
+      backupDesc:
+        "Exporte o restaure todos los repertorios, cultos y ajustes en un archivo JSON seguro.",
       exportData: "Exportar Datos",
-      exportDesc: "Descargue una copia de seguridad completa en JSON con canciones, planes y carpetas.",
+      exportDesc:
+        "Descargue una copia de seguridad completa en JSON con canciones, planes y carpetas.",
       exportProcessing: "Procesando copia...",
       exportDownloadBtn: "Descargar Copia (.json)",
       exportSuccess: "¡Copia de seguridad descargada con éxito!",
@@ -465,9 +481,11 @@ export const es: typeof pt = {
     about: {
       title: "Acerca de Hosanna Studio",
       controlPanel: "Panel de Control",
-      copyright: "© {year} Embrace & Tiago Inês. Código bajo licencia Apache 2.0.",
+      copyright:
+        "© {year} Embrace & Tiago Inês. Código bajo licencia Apache 2.0.",
       studioVersion: "Versión de Studio",
-      openSourceBanner: "¡Este proyecto es <strong>open-source</strong>! Creemos en el software libre para equipar y apoyar comunidades.",
+      openSourceBanner:
+        "¡Este proyecto es <strong>open-source</strong>! Creemos en el software libre para equipar y apoyar comunidades.",
       viewRepo: "Ver Repositorio",
       supportedFormats: "Formatos de Importación Compatibles",
       thirdPartyLicenses: "Licencias de Bibliotecas de Terceros ({count})",
@@ -680,7 +698,8 @@ export const es: typeof pt = {
     moveItems: "Mover {count} Elemento(s)",
     batchDeleteTitle: "Eliminar {count} Elemento(s) Seleccionado(s)",
     aboutToDelete: "Está a punto de eliminar",
-    whatToDo: "¿Qué hacer con las canciones dentro de las carpetas seleccionadas?",
+    whatToDo:
+      "¿Qué hacer con las canciones dentro de las carpetas seleccionadas?",
     preserveSongs: "Preservar canciones (Mover al Nivel Raíz)",
     preserveSongsDesc:
       "Elimina solo las carpetas y mueve sus canciones a la raíz sin perder datos.",
@@ -789,19 +808,24 @@ export const es: typeof pt = {
       rootTopLevel: "Directorio Raíz (Nivel Superior)",
       moveFolderBtn: "Mover Carpeta",
       deleteFolderTitle: 'Eliminar Carpeta "{folder}"',
-      selectDeleteFolderOption: "Seleccione cómo manejar el contenido dentro de esta carpeta:",
+      selectDeleteFolderOption:
+        "Seleccione cómo manejar el contenido dentro de esta carpeta:",
       moveContentsToRoot: "Mover Contenidos a la Raíz (Recomendado)",
-      moveContentsToRootDesc: "Mantiene las cifras de canciones en la biblioteca sin categoría de carpeta.",
+      moveContentsToRootDesc:
+        "Mantiene las cifras de canciones en la biblioteca sin categoría de carpeta.",
       deleteFolderAndContents: "Eliminar carpeta y todo el contenido dentro",
-      deleteFolderAndContentsDesc: "Elimina permanentemente la carpeta Y todos los archivos de canciones y subcarpetas y su contenido.",
+      deleteFolderAndContentsDesc:
+        "Elimina permanentemente la carpeta Y todos los archivos de canciones y subcarpetas y su contenido.",
       additionalSecurity: "Confirmación Adicional de Seguridad",
-      deleteFolderIrreversible: "Esta acción es irreversible. Para confirmar la eliminación permanente de la carpeta y todas sus canciones, escriba el nombre de la carpeta",
+      deleteFolderIrreversible:
+        "Esta acción es irreversible. Para confirmar la eliminación permanente de la carpeta y todas sus canciones, escriba el nombre de la carpeta",
       writeToConfirm: 'Escriba "{name}" para confirmar',
       confirmDelete: "Confirmar Eliminación",
       emptyFolderDelete: "Eliminar carpeta",
       emptyFolderDeleteDesc: "La carpeta está vacía y será eliminada",
       deleteSongTitle: 'Eliminar Canción "{title}"',
-      deleteSongWarning: '¿Está seguro de que desea eliminar permanentemente "{title}"? Esto también lo eliminará de cualquier culto programado.',
+      deleteSongWarning:
+        '¿Está seguro de que desea eliminar permanentemente "{title}"? Esto también lo eliminará de cualquier culto programado.',
       deleteSongBtn: "Eliminar Canción",
       filterTitle: "Filtros Avanzados de Búsqueda",
       searchScope: "Ámbito de búsqueda:",
@@ -852,21 +876,27 @@ export const es: typeof pt = {
       syncing: "Sincronizando...",
       syncingTooltip: "Sincronizando datos locales con el servidor...",
       offline: "Sin conexión",
-      offlineTooltip: "Modo sin conexión. Los cambios se sincronizarán al reconectar.",
+      offlineTooltip:
+        "Modo sin conexión. Los cambios se sincronizarán al reconectar.",
       error: "Error al sincronizar",
       errorTooltip: "Error en la sincronización. Haga clic para reintentar.",
       synced: "Sincronizado",
-      syncedTooltip: "Sincronizado ({time}). Haga clic para forzar sincronización.",
-      syncedTooltipNoTime: "Sincronizado. Haga clic para forzar sincronización.",
+      syncedTooltip:
+        "Sincronizado ({time}). Haga clic para forzar sincronización.",
+      syncedTooltipNoTime:
+        "Sincronizado. Haga clic para forzar sincronización.",
     },
     help: {
       title: "Guía Rápida del Editor",
       smartSnippets: "Snippets Inteligentes",
-      snippetsDesc: "Escriba una de las siglas abajo en una línea vacía y presione <key>TAB</key> para que el editor complete automáticamente.",
+      snippetsDesc:
+        "Escriba una de las siglas abajo en una línea vacía y presione <key>TAB</key> para que el editor complete automáticamente.",
       tipTitle: "Consejo de autocompletado:",
-      tipDesc: "Al insertar un snippet, el texto temporal queda seleccionado. Simplemente escriba encima. ¡Presione <key>TAB</key> nuevamente para saltar al siguiente campo!",
+      tipDesc:
+        "Al insertar un snippet, el texto temporal queda seleccionado. Simplemente escriba encima. ¡Presione <key>TAB</key> nuevamente para saltar al siguiente campo!",
       shortcutsTitle: "Atajos de Teclado",
-      shortcutsDesc: "Acelere la edición y navegación sin quitar las manos del teclado.",
+      shortcutsDesc:
+        "Acelere la edición y navegación sin quitar las manos del teclado.",
     },
   },
 
@@ -895,7 +925,8 @@ export const es: typeof pt = {
     memberRemoved: "Miembro eliminado del equipo.",
     leaderAssigned: "¡{name} es ahora el Líder del equipo!",
     teamPermissionsTitle: "Permisos del Equipo",
-    teamPermissionsDesc: "Los permisos del equipo están limitados por las políticas generales de la organización.",
+    teamPermissionsDesc:
+      "Los permisos del equipo están limitados por las políticas generales de la organización.",
     manageSongs: "Gestionar Canciones",
     manageSongsDesc: "Crear y editar repertorio",
     manageServices: "Gestionar Cultos",
@@ -940,7 +971,8 @@ export const es: typeof pt = {
     addCustom: "Personalizado",
     serviceOutline: "Orden del Culto ({count})",
     emptyOutlineTitle: "El Orden está Vacío",
-    emptyOutlineDesc: "Añada canciones y momentos litúrgicos para estructurar su culto.",
+    emptyOutlineDesc:
+      "Añada canciones y momentos litúrgicos para estructurar su culto.",
     noSongsFound: "No se encontraron canciones en la biblioteca.",
     searchSongsPlaceholder: "Buscar canciones...",
     songNotFound: "Canción no encontrada o eliminada.",
@@ -963,33 +995,39 @@ export const es: typeof pt = {
       titleLabel: "Título",
       titlePlaceholder: "Ej: Avisos de la Semana",
       listLabel: "Lista de Avisos",
-      listPlaceholder: "Ej:\n• Ensayo del coro: sábado a las 15h\n• Retiro de jóvenes: 15-17 de Septiembre\n• Culto especial: próximo domingo",
+      listPlaceholder:
+        "Ej:\n• Ensayo del coro: sábado a las 15h\n• Retiro de jóvenes: 15-17 de Septiembre\n• Culto especial: próximo domingo",
       notesLabel: "Notas",
       notesPlaceholder: "Ej: Responsable: Diácono Pedro",
     },
     bible: {
       modalTitle: "Lectura Bíblica",
       badgeTitle: "Escritura",
-      badgeDesc: "Busque un pasaje bíblico, elija la traducción y añádalo al culto.",
+      badgeDesc:
+        "Busque un pasaje bíblico, elija la traducción y añádalo al culto.",
       titleLabel: "Título",
       titlePlaceholder: "Ej: Lectura Bíblica",
       translationLabel: "Traducción",
       loadingTranslations: "Cargando traducciones...",
       passageLabel: "Pasaje Bíblico",
       passagePlaceholder: "Ej: Salmos 23:1-6, Juan 3:16, 1 Juan 1:9",
-      acceptedFormats: "Formatos aceptados: Salmos 23, Juan 3:16, Génesis 1:1-5, 1 Juan 3:16",
+      acceptedFormats:
+        "Formatos aceptados: Salmos 23, Juan 3:16, Génesis 1:1-5, 1 Juan 3:16",
       searchBtn: "Buscar",
       searchingBtn: "Buscando...",
       usePassageBtn: "Usar este Pasaje",
       acceptedBadge: "Aceptado",
       notesLabel: "Notas",
-      notesPlaceholder: "Ej: Leído por el diácono Carlos, congregación de pie...",
-      invalidFormatError: "Libro o formato no válido. Pruebe: Libro Capítulo:Versículo (ej: Salmos 23:1-6, 1 Juan 3:16)",
+      notesPlaceholder:
+        "Ej: Leído por el diácono Carlos, congregación de pie...",
+      invalidFormatError:
+        "Libro o formato no válido. Pruebe: Libro Capítulo:Versículo (ej: Salmos 23:1-6, 1 Juan 3:16)",
       notFoundError: "Pasaje no encontrado.",
       chapterNotFoundError: "Capítulo no encontrado en esta traducción.",
       noVersesError: "Ningún versículo encontrado en el rango especificado.",
       timeoutError: "La búsqueda tardó demasiado tiempo. Inténtelo de nuevo.",
-      genericError: "Error al buscar el pasaje. Compruebe su conexión a internet.",
+      genericError:
+        "Error al buscar el pasaje. Compruebe su conexión a internet.",
     },
     custom: {
       modalTitle: "Elemento Personalizado",
@@ -1009,7 +1047,8 @@ export const es: typeof pt = {
       titleLabel: "Título del Sermón",
       titlePlaceholder: "Ej: Caminando por Fe",
       summaryLabel: "Resumen / Puntos Principales",
-      summaryPlaceholder: "Ej: Introducción sobre la fe, 3 puntos sobre confiar en Dios...",
+      summaryPlaceholder:
+        "Ej: Introducción sobre la fe, 3 puntos sobre confiar en Dios...",
       notesLabel: "Notas",
       notesPlaceholder: "Ej: Predicador: Pastor Juan. Duración: ~30min.",
     },
@@ -1035,7 +1074,8 @@ export const es: typeof pt = {
     welcomeTitle: "¡Bienvenido a Hosanna Studio!",
     welcomeSubtitle: "Vamos a configurar su espacio de alabanza y adoración.",
     step1Title: "Crear o Unirse a una Organización",
-    step1Desc: "Una organización es el espacio compartido de su iglesia o ministerio.",
+    step1Desc:
+      "Una organización es el espacio compartido de su iglesia o ministerio.",
     createOrgTab: "Crear Nueva Organización",
     joinOrgTab: "Unirse con Invitación",
     orgNameLabel: "Nombre de la Organización",
@@ -1044,7 +1084,8 @@ export const es: typeof pt = {
     slugPlaceholder: "iglesia-hosanna-madrid",
     createOrgBtn: "Crear y Continuar",
     creatingOrgBtn: "Creando organización...",
-    joinInviteDesc: "Si recibió una invitación por correo, puede aceptarla directamente.",
+    joinInviteDesc:
+      "Si recibió una invitación por correo, puede aceptarla directamente.",
     checkInvitesBtn: "Verificar Invitaciones",
     step2Title: "Personalización Rápida",
     step2Desc: "Elija las preferencias iniciales para su equipo.",
@@ -1094,7 +1135,8 @@ export const es: typeof pt = {
       sendingBtn: "Enviando...",
       backToLogin: "Volver al inicio de sesión",
       emailSentTitle: "¡Enlace enviado!",
-      emailSentDesc: "Si existe una cuenta asociada a este correo, recibirá instrucciones pronto.",
+      emailSentDesc:
+        "Si existe una cuenta asociada a este correo, recibirá instrucciones pronto.",
     },
     resetPassword: {
       title: "Establecer Nueva Contraseña",
@@ -1138,7 +1180,8 @@ export const es: typeof pt = {
     },
     twoFactor: {
       title: "Verificación en 2 Pasos",
-      subtitle: "Introduzca el código de 6 dígitos generado por su aplicación de autenticación",
+      subtitle:
+        "Introduzca el código de 6 dígitos generado por su aplicación de autenticación",
       codeLabel: "Código de Verificación",
       verifyBtn: "Verificar",
       verifyingBtn: "Verificando...",

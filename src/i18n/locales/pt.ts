@@ -18,6 +18,7 @@ export const pt = {
     save: "Guardar",
     cancel: "Cancelar",
     close: "Fechar",
+    archive: "Arquivar",
     delete: "Apagar",
     edit: "Editar",
     search: "Pesquisar",
@@ -309,8 +310,10 @@ export const pt = {
         currentPassword: "Palavra-passe Atual",
         newPassword: "Nova Palavra-passe",
         confirmNewPassword: "Confirmar Nova Palavra-passe",
-        currentPasswordRequired: "Por favor introduza a sua palavra-passe atual.",
-        passwordMinLength: "A nova palavra-passe deve ter pelo menos 6 caracteres.",
+        currentPasswordRequired:
+          "Por favor introduza a sua palavra-passe atual.",
+        passwordMinLength:
+          "A nova palavra-passe deve ter pelo menos 6 caracteres.",
         passwordMismatch: "As palavras-passe não coincidem.",
         passwordChanged: "Palavra-passe alterada com sucesso!",
         passwordChangeError: "Erro ao alterar palavra-passe: {error}",
@@ -329,18 +332,22 @@ export const pt = {
       disableBtn: "Desativar 2FA",
       setupModalTitle: "Configurar 2FA",
       disableModalTitle: "Desativar 2FA",
-      passwordStepDesc: "Para ativar a verificação em duas etapas, confirme a sua palavra-passe atual:",
+      passwordStepDesc:
+        "Para ativar a verificação em duas etapas, confirme a sua palavra-passe atual:",
       passwordLabel: "Palavra-passe",
       continue: "Continuar",
-      setupStep1: "1. Digitalize o código QR com a sua aplicação de autenticação (como Google Authenticator, Authy ou Microsoft Authenticator).",
+      setupStep1:
+        "1. Digitalize o código QR com a sua aplicação de autenticação (como Google Authenticator, Authy ou Microsoft Authenticator).",
       setupStep2: "2. Introduza o código de 6 dígitos gerado pela aplicação:",
       verificationCodeLabel: "Código de Verificação",
       verificationCodePlaceholder: "123456",
       verify: "Verificar",
       backupSuccessTitle: "Aplicação associada com sucesso!",
-      backupWarning: "Guarde estes códigos de recuperação num local seguro (como num gestor de palavras-passe). Eles são a única forma de aceder à sua conta caso perca acesso ao seu telemóvel.",
+      backupWarning:
+        "Guarde estes códigos de recuperação num local seguro (como num gestor de palavras-passe). Eles são a única forma de aceder à sua conta caso perca acesso ao seu telemóvel.",
       backupSavedBtn: "Guardei os códigos de forma segura",
-      disableStepDesc: "Para desativar a verificação em duas etapas, confirme a sua palavra-passe:",
+      disableStepDesc:
+        "Para desativar a verificação em duas etapas, confirme a sua palavra-passe:",
       passwordRequired: "Por favor insira a palavra-passe.",
       codeRequired: "Por favor insira o código de verificação.",
       enableError: "Erro ao ativar 2FA: {error}",
@@ -388,7 +395,8 @@ export const pt = {
       inviteSuccess: "Convite enviado com sucesso para {email}!",
       inviteError: "Erro convidando {email}!",
       cancelModalTitle: "Cancelar Convite",
-      cancelModalConfirm: "Tem a certeza que quer cancelar o convite para {email}? A pessoa deixará de conseguir aceitar este convite.",
+      cancelModalConfirm:
+        "Tem a certeza que quer cancelar o convite para {email}? A pessoa deixará de conseguir aceitar este convite.",
       cancelling: "A Cancelar...",
       confirmCancel: "Cancelar Convite",
     },
@@ -399,13 +407,16 @@ export const pt = {
       removeMember: "Remover Membro",
       rbacTitle: "Gestão de Permissões RBAC",
       changeRole: "Alterar Função",
-      promoteOwnerWarning: "Está prestes a tornar {name} proprietário da organização. Esta ação é sensível e deve ser confirmada com cuidado.",
+      promoteOwnerWarning:
+        "Está prestes a tornar {name} proprietário da organização. Esta ação é sensível e deve ser confirmada com cuidado.",
       saveRole: "Guardar Função",
       currentRole: "Função Atual:",
       removeConfirmTitle: "Remover Membro",
-      removeConfirmText: "Tem a certeza que quer remover {name} da organização? Esta pessoa perderá o acesso imediatamente.",
+      removeConfirmText:
+        "Tem a certeza que quer remover {name} da organização? Esta pessoa perderá o acesso imediatamente.",
       leaveConfirmTitle: "Sair da Organização",
-      leaveConfirmText: "Tem a certeza que quer sair desta organização? Vai perder o acesso imediatamente e terá de ser convidado novamente para voltar a entrar.",
+      leaveConfirmText:
+        "Tem a certeza que quer sair desta organização? Vai perder o acesso imediatamente e terá de ser convidado novamente para voltar a entrar.",
       leaving: "A Sair...",
       leaveSuccess: "Saiu da organização com sucesso.",
       leaveError: "Falha ao sair da organização: {error}",
@@ -423,15 +434,18 @@ export const pt = {
       shortNameLabel: "Sigla / Abreviatura",
       shortNamePlaceholder: "e.g. IHL",
       descriptionLabel: "Descrição ou Visão",
-      descriptionPlaceholder: "Breve descrição dos propósitos da igreja ou equipa...",
+      descriptionPlaceholder:
+        "Breve descrição dos propósitos da igreja ou equipa...",
       defaultOrgName: "Minha Organização",
       noDescription: "Nenhuma descrição configurada.",
       visualIdentityTitle: "Identidade Visual & Cores",
-      visualIdentityDesc: "Personalize a cor de destaque e visibilidade de marca em apresentações e partilhas.",
+      visualIdentityDesc:
+        "Personalize a cor de destaque e visibilidade de marca em apresentações e partilhas.",
       accentColorLabel: "Cor de Destaque (Accent)",
       quickColors: "Cores Rápidas:",
       showBrandingLabel: "Exibir Logótipo em Ecrãs Públicos",
-      showBrandingDesc: "Apresenta o cabeçalho e marca da igreja em projeções e relatórios partilhados.",
+      showBrandingDesc:
+        "Apresenta o cabeçalho e marca da igreja em projeções e relatórios partilhados.",
       preview: "Pré-visualização:",
       activeButton: "Botão Ativo",
       churchFallback: "Igreja",
@@ -448,9 +462,11 @@ export const pt = {
       saved: "Organização e identidade visual atualizadas com sucesso!",
       saveError: "Erro ao atualizar organização: {error}",
       backupTitle: "Cópia de Segurança & Dados",
-      backupDesc: "Exporte ou restaure todos os repertórios, cultos e definições num ficheiro JSON seguro.",
+      backupDesc:
+        "Exporte ou restaure todos os repertórios, cultos e definições num ficheiro JSON seguro.",
       exportData: "Exportar Dados",
-      exportDesc: "Transfira um backup completo em JSON contendo músicas, alinhamentos e pastas.",
+      exportDesc:
+        "Transfira um backup completo em JSON contendo músicas, alinhamentos e pastas.",
       exportProcessing: "A processar backup...",
       exportDownloadBtn: "Descarregar Cópia (.json)",
       exportSuccess: "Cópia de segurança descarregada com sucesso!",
@@ -463,9 +479,11 @@ export const pt = {
     about: {
       title: "Sobre o Hosanna Studio",
       controlPanel: "Painel de Controlo",
-      copyright: "© {year} Embrace & Tiago Inês. Código sob licença Apache 2.0.",
+      copyright:
+        "© {year} Embrace & Tiago Inês. Código sob licença Apache 2.0.",
       studioVersion: "Versão do Studio",
-      openSourceBanner: "Este projeto é <strong>open-source</strong>! Acreditamos no software livre para equipar e apoiar comunidades.",
+      openSourceBanner:
+        "Este projeto é <strong>open-source</strong>! Acreditamos no software livre para equipar e apoiar comunidades.",
       viewRepo: "Ver Repositório",
       supportedFormats: "Formatos de Importação Suportados",
       thirdPartyLicenses: "Licenças de Bibliotecas de Terceiros ({count})",
@@ -789,19 +807,25 @@ export const pt = {
       rootTopLevel: "Diretório Raiz (Top Level)",
       moveFolderBtn: "Mover Pasta",
       deleteFolderTitle: 'Apagar Pasta "{folder}"',
-      selectDeleteFolderOption: "Selecione como tratar os conteúdos dentro desta pasta:",
+      selectDeleteFolderOption:
+        "Selecione como tratar os conteúdos dentro desta pasta:",
       moveContentsToRoot: "Mover Conteúdos para a Raiz (Recomendado)",
-      moveContentsToRootDesc: "Mantém as cifras dos cânticos na biblioteca sem categoria de pasta.",
-      deleteFolderAndContents: "Apagar pasta e todos os conteúdos nela contidos",
-      deleteFolderAndContentsDesc: "Apaga permanentemente a pasta E todos os ficheiros de cânticos e pastas e os conteúdos das mesmas, dentro dela.",
+      moveContentsToRootDesc:
+        "Mantém as cifras dos cânticos na biblioteca sem categoria de pasta.",
+      deleteFolderAndContents:
+        "Apagar pasta e todos os conteúdos nela contidos",
+      deleteFolderAndContentsDesc:
+        "Apaga permanentemente a pasta E todos os ficheiros de cânticos e pastas e os conteúdos das mesmas, dentro dela.",
       additionalSecurity: "Confirmação Adicional de Segurança",
-      deleteFolderIrreversible: "Esta ação é irreversível. Para confirmar a eliminação permanente da pasta e de todos os seus cânticos, escreva o nome da pasta",
+      deleteFolderIrreversible:
+        "Esta ação é irreversível. Para confirmar a eliminação permanente da pasta e de todos os seus cânticos, escreva o nome da pasta",
       writeToConfirm: 'Escreva "{name}" para confirmar',
       confirmDelete: "Confirmar Eliminação",
       emptyFolderDelete: "Apagar pasta",
       emptyFolderDeleteDesc: "A pasta está vazia e será eliminada",
       deleteSongTitle: 'Apagar Cântico "{title}"',
-      deleteSongWarning: 'Tem a certeza que deseja apagar permanentemente "{title}"? Isto também irá removê-lo de quaisquer cultos agendados.',
+      deleteSongWarning:
+        'Tem a certeza que deseja apagar permanentemente "{title}"? Isto também irá removê-lo de quaisquer cultos agendados.',
       deleteSongBtn: "Apagar Cântico",
       filterTitle: "Filtros Avançados de Pesquisa",
       searchScope: "Âmbito de pesquisa:",
@@ -852,7 +876,8 @@ export const pt = {
       syncing: "A sincronizar...",
       syncingTooltip: "A sincronizar dados locais com o servidor...",
       offline: "Offline",
-      offlineTooltip: "Modo offline. As alterações serão sincronizadas quando reconectar.",
+      offlineTooltip:
+        "Modo offline. As alterações serão sincronizadas quando reconectar.",
       error: "Erro ao sincronizar",
       errorTooltip: "Erro na sincronização. Clique para tentar novamente.",
       synced: "Sincronizado",
@@ -862,11 +887,14 @@ export const pt = {
     help: {
       title: "Guia Rápido do Editor",
       smartSnippets: "Snippets Inteligentes",
-      snippetsDesc: "Escreva uma das siglas abaixo numa linha vazia e prima <key>TAB</key> para o editor preencher automaticamente.",
+      snippetsDesc:
+        "Escreva uma das siglas abaixo numa linha vazia e prima <key>TAB</key> para o editor preencher automaticamente.",
       tipTitle: "Dica de preenchimento:",
-      tipDesc: "Ao inserir um snippet, o texto temporário fica selecionado. Basta escrever por cima. Prima <key>TAB</key> novamente para saltar para o campo seguinte!",
+      tipDesc:
+        "Ao inserir um snippet, o texto temporário fica selecionado. Basta escrever por cima. Prima <key>TAB</key> novamente para saltar para o campo seguinte!",
       shortcutsTitle: "Atalhos de Teclado",
-      shortcutsDesc: "Acelere a edição e navegação sem precisar de tirar as mãos do teclado.",
+      shortcutsDesc:
+        "Acelere a edição e navegação sem precisar de tirar as mãos do teclado.",
     },
   },
 
@@ -895,7 +923,8 @@ export const pt = {
     memberRemoved: "Membro removido da equipa.",
     leaderAssigned: "{name} é agora o Líder da equipa!",
     teamPermissionsTitle: "Permissões da Equipa",
-    teamPermissionsDesc: "As permissões da equipa estão limitadas pelas políticas gerais da organização.",
+    teamPermissionsDesc:
+      "As permissões da equipa estão limitadas pelas políticas gerais da organização.",
     manageSongs: "Gerir Músicas",
     manageSongsDesc: "Criar e editar repertório",
     manageServices: "Gerir Cultos",
@@ -940,7 +969,8 @@ export const pt = {
     addCustom: "Personalizado",
     serviceOutline: "Alinhamento do Culto ({count})",
     emptyOutlineTitle: "O Alinhamento está Vazio",
-    emptyOutlineDesc: "Adicione músicas e momentos litúrgicos para estruturar o seu culto.",
+    emptyOutlineDesc:
+      "Adicione músicas e momentos litúrgicos para estruturar o seu culto.",
     noSongsFound: "Nenhum cântico encontrado na biblioteca.",
     searchSongsPlaceholder: "Pesquisar músicas...",
     songNotFound: "Cântico não encontrado ou removido.",
@@ -963,33 +993,38 @@ export const pt = {
       titleLabel: "Título",
       titlePlaceholder: "Ex: Avisos da Semana",
       listLabel: "Lista de Avisos",
-      listPlaceholder: "Ex:\n• Ensaio do coral: sábado às 15h\n• Retiro da juventude: 15-17 de Setembro\n• Culto especial: próximo domingo",
+      listPlaceholder:
+        "Ex:\n• Ensaio do coral: sábado às 15h\n• Retiro da juventude: 15-17 de Setembro\n• Culto especial: próximo domingo",
       notesLabel: "Notas",
       notesPlaceholder: "Ex: Responsável: Diácono Pedro",
     },
     bible: {
       modalTitle: "Leitura Bíblica",
       badgeTitle: "Escritura",
-      badgeDesc: "Pesquise uma passagem bíblica, escolha a tradução e adicione ao culto.",
+      badgeDesc:
+        "Pesquise uma passagem bíblica, escolha a tradução e adicione ao culto.",
       titleLabel: "Título",
       titlePlaceholder: "Ex: Leitura Bíblica",
       translationLabel: "Tradução",
       loadingTranslations: "A carregar traduções...",
       passageLabel: "Passagem Bíblica",
       passagePlaceholder: "Ex: Salmos 23:1-6, João 3:16, 1 João 1:9",
-      acceptedFormats: "Formatos aceites: Salmos 23, João 3:16, Gênesis 1:1-5, I João 3:16",
+      acceptedFormats:
+        "Formatos aceites: Salmos 23, João 3:16, Gênesis 1:1-5, I João 3:16",
       searchBtn: "Buscar",
       searchingBtn: "A buscar...",
       usePassageBtn: "Usar esta Passagem",
       acceptedBadge: "Aceite",
       notesLabel: "Notas",
       notesPlaceholder: "Ex: Lida pelo diácono Carlos, congregação de pé...",
-      invalidFormatError: "Livro ou formato inválido. Tente: Livro Capítulo:Versículo (ex: Salmos 23:1-6, 1 João 3:16)",
+      invalidFormatError:
+        "Livro ou formato inválido. Tente: Livro Capítulo:Versículo (ex: Salmos 23:1-6, 1 João 3:16)",
       notFoundError: "Passagem não encontrada.",
       chapterNotFoundError: "Capítulo não encontrado nesta tradução.",
       noVersesError: "Nenhum versículo encontrado no intervalo especificado.",
       timeoutError: "A busca demorou muito tempo. Tente novamente.",
-      genericError: "Erro ao buscar a passagem. Verifique a sua ligação à internet.",
+      genericError:
+        "Erro ao buscar a passagem. Verifique a sua ligação à internet.",
     },
     custom: {
       modalTitle: "Elemento Personalizado",
@@ -1009,7 +1044,8 @@ export const pt = {
       titleLabel: "Título do Sermão",
       titlePlaceholder: "Ex: A Caminhar pela Fé",
       summaryLabel: "Resumo / Pontos Principais",
-      summaryPlaceholder: "Ex: Introdução sobre fé, 3 pontos sobre confiança em Deus...",
+      summaryPlaceholder:
+        "Ex: Introdução sobre fé, 3 pontos sobre confiança em Deus...",
       notesLabel: "Notas",
       notesPlaceholder: "Ex: Pregador: Pastor João. Duração: ~30min.",
     },
@@ -1035,7 +1071,8 @@ export const pt = {
     welcomeTitle: "Bem-vindo ao Hosanna Studio!",
     welcomeSubtitle: "Vamos configurar o seu espaço de louvor e adoração.",
     step1Title: "Criar ou Juntar-se a uma Organização",
-    step1Desc: "Uma organização é o espaço partilhado da sua igreja ou ministério.",
+    step1Desc:
+      "Uma organização é o espaço partilhado da sua igreja ou ministério.",
     createOrgTab: "Criar Nova Organização",
     joinOrgTab: "Juntar-se com Convite",
     orgNameLabel: "Nome da Organização",
@@ -1044,7 +1081,8 @@ export const pt = {
     slugPlaceholder: "igreja-hosanna-lisboa",
     createOrgBtn: "Criar e Continuar",
     creatingOrgBtn: "A criar organização...",
-    joinInviteDesc: "Se recebeu um convite por e-mail, pode aceitá-lo diretamente.",
+    joinInviteDesc:
+      "Se recebeu um convite por e-mail, pode aceitá-lo diretamente.",
     checkInvitesBtn: "Verificar Convites",
     step2Title: "Personalização Rápida",
     step2Desc: "Escolha as preferências iniciais para a sua equipa.",
@@ -1094,7 +1132,8 @@ export const pt = {
       sendingBtn: "A enviar...",
       backToLogin: "Voltar ao login",
       emailSentTitle: "Link enviado!",
-      emailSentDesc: "Se existir uma conta associada a este e-mail, receberá as instruções em breve.",
+      emailSentDesc:
+        "Se existir uma conta associada a este e-mail, receberá as instruções em breve.",
     },
     resetPassword: {
       title: "Definir Nova Palavra-passe",
@@ -1138,7 +1177,8 @@ export const pt = {
     },
     twoFactor: {
       title: "Verificação em 2 Etapas",
-      subtitle: "Introduza o código de 6 dígitos gerado pela sua aplicação de autenticação",
+      subtitle:
+        "Introduza o código de 6 dígitos gerado pela sua aplicação de autenticação",
       codeLabel: "Código de Verificação",
       verifyBtn: "Verificar",
       verifyingBtn: "A verificar...",
