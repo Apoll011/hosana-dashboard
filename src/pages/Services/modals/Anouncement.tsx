@@ -4,7 +4,8 @@
 
 import { Button, Modal } from "@hosanna/shared";
 import { Megaphone } from "lucide-react";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useI18n } from "../../../i18n";
 import {
   DurationField,
   durationInputToSeconds,
@@ -34,7 +35,10 @@ export const AnnouncementModal: React.FC<AnnouncementModalProps> = ({
   onSave,
   initial,
 }) => {
-  const [title, setTitle] = useState(initial?.title || "Avisos da Igreja");
+  const { t } = useI18n();
+  const defaultTitle = t("serviceModals.announcement.modalTitle");
+
+  const [title, setTitle] = useState(initial?.title || defaultTitle);
   const [content, setContent] = useState(initial?.content || "");
   const [notes, setNotes] = useState(initial?.notes || "");
   const [duration, setDuration] = useState(
@@ -43,15 +47,19 @@ export const AnnouncementModal: React.FC<AnnouncementModalProps> = ({
 
   useEffect(() => {
     if (isOpen) {
-      setTitle(initial?.title || "Avisos da Igreja");
+      setTitle(initial?.title || defaultTitle);
       setContent(initial?.content || "");
       setNotes(initial?.notes || "");
       setDuration(secondsToDurationInput(initial?.duration));
     }
-  }, [isOpen, initial]);
+  }, [isOpen, initial, defaultTitle]);
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Avisos da Igreja">
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={t("serviceModals.announcement.modalTitle")}
+    >
       <div className="space-y-4 py-2">
         <div
           className="flex items-center gap-3 p-3 rounded-xl"
@@ -65,53 +73,52 @@ export const AnnouncementModal: React.FC<AnnouncementModalProps> = ({
           </div>
           <div>
             <p className="text-xs font-bold" style={{ color: "#059669" }}>
-              Avisos
+              {t("serviceModals.announcement.badgeTitle")}
             </p>
             <p className="text-[11px] text-slate-500">
-              Comunicações e anúncios da comunidade.
+              {t("serviceModals.announcement.badgeDesc")}
             </p>
           </div>
         </div>
 
         <div className="space-y-1.5">
           <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
-            Título
+            {t("serviceModals.announcement.titleLabel")}
           </label>
           <input
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="Ex: Avisos da Semana"
+            placeholder={t("serviceModals.announcement.titlePlaceholder")}
             className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
           />
         </div>
 
         <div className="space-y-1.5">
           <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
-            Lista de Avisos
-            <span className="font-normal text-slate-400 ml-1">(opcional)</span>
+            {t("serviceModals.announcement.listLabel")}
+            <span className="font-normal text-slate-400 ml-1">
+              ({t("common.details")})
+            </span>
           </label>
           <textarea
             rows={4}
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            placeholder={
-              "Ex:\n• Ensaio do coral: sábado às 15h\n• Retiro da juventude: 15-17 de Setembro\n• Culto especial: próximo domingo"
-            }
+            placeholder={t("serviceModals.announcement.listPlaceholder")}
             className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
           />
         </div>
 
         <div className="space-y-1.5">
           <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
-            Notas
-            <span className="font-normal text-slate-400 ml-1">(opcional)</span>
+            {t("serviceModals.announcement.notesLabel")}
           </label>
           <textarea
             rows={2}
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            placeholder="Ex: Responsável: Diácono Pedro"
+            placeholder={t("serviceModals.announcement.notesPlaceholder")}
             className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
           />
         </div>
@@ -124,7 +131,7 @@ export const AnnouncementModal: React.FC<AnnouncementModalProps> = ({
 
         <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-200 dark:border-slate-800">
           <Button type="button" variant="ghost" size="sm" onClick={onClose}>
-            Cancelar
+            {t("common.cancel")}
           </Button>
           <Button
             type="button"
@@ -140,7 +147,7 @@ export const AnnouncementModal: React.FC<AnnouncementModalProps> = ({
               });
             }}
           >
-            Guardar
+            {t("common.save")}
           </Button>
         </div>
       </div>

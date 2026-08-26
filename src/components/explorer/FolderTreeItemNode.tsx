@@ -7,6 +7,7 @@ import {
   FolderOpen,
   MoreVertical,
 } from "lucide-react";
+import { useI18n } from "../../i18n";
 import {
   getFolderColorStyle,
   getFolderIconComponent,
@@ -105,6 +106,7 @@ export const FolderTreeItemNode: React.FC<{
     expandedFolderIds,
     toggleExpand,
   }) => {
+    const { t } = useI18n();
     const isActive = currentFolderId === node.folder.id;
     const hasChildren = node.children.length > 0;
     const isExpanded = expandedFolderIds.has(node.folder.id);
@@ -172,8 +174,8 @@ export const FolderTreeItemNode: React.FC<{
                 onContextMenu(e, "folder", node.folder);
               }}
               className="hidden group-hover:flex p-1 rounded-lg hover:bg-m3-primary/20 text-m3-secondary hover:text-m3-primary transition-all cursor-pointer"
-              title="Mais opções"
-              aria-label="Mais opções"
+              title={t("explorer.moreOptions")}
+              aria-label={t("explorer.moreOptions")}
             >
               <MoreVertical className="w-3.5 h-3.5" />
             </button>

@@ -23,6 +23,7 @@ import bg from "../assets/images/background.webp";
 import { useAuth } from "../contexts/AuthContext";
 import { useTheme } from "../contexts/ThemeContext";
 import { useAppNavigate } from "../hooks/useAppNavigate";
+import { useI18n } from "../i18n";
 import { authClient } from "../lib/authClient";
 
 interface UserInvitation {
@@ -40,6 +41,7 @@ export const OnboardingPage: React.FC = () => {
   const { user, logout, refetch } = useAuth();
   const { darkMode, toggleDarkMode } = useTheme();
   const { navigate } = useAppNavigate();
+  const { t } = useI18n();
   const [mode, setMode] = useState<"choose" | "create" | "join" | "pending">(
     "choose",
   );
@@ -58,9 +60,10 @@ export const OnboardingPage: React.FC = () => {
   const fetchUserInvitations = async () => {
     setIsFetchingInvitations(true);
     try {
-      const res = await authClient.organization.listUserInvitations();
+      const res = await authClient.organization.listUserInvitations({
+        query: {},
+      });
       if (res.data) {
-        // Filter pending invitations
         const pendingInvs = (res.data as unknown as UserInvitation[]).filter(
           (inv) => inv.status === "pending",
         );
@@ -190,7 +193,7 @@ export const OnboardingPage: React.FC = () => {
         type="button"
         onClick={toggleDarkMode}
         aria-label="Alternar tema"
-        className="fixed top-4 right-4 z-30 p-2.5 rounded-full bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border border-slate-200/80 dark:border-slate-800 text-slate-700 dark:text-slate-200 hover:scale-110 active:scale-95 shadow-lg transition-all duration-200"
+        className="fixed top-4 right-4 z-30 p-2.5 rounded-full bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border border-slate-200/80 dark:border-slate-800 text-slate-700 dark:text-slate-200 hover:scale-110 active:scale-95 shadow-lg transition-all duration-200 cursor-pointer"
       >
         {darkMode ? (
           <Sun className="w-5 h-5 text-amber-400" />
@@ -214,7 +217,7 @@ export const OnboardingPage: React.FC = () => {
           </h1>
           {mode === "choose" && (
             <p className="text-slate-500 dark:text-slate-400 text-sm mt-1 max-w-xs mx-auto">
-              Para começar, selecione uma organização ou crie a sua nova equipa.
+              {t("onboarding.step1Desc")}
             </p>
           )}
         </div>
@@ -268,24 +271,26 @@ export const OnboardingPage: React.FC = () => {
                 onClick={() => logout()}
               >
                 <LogOut className="w-4 h-4 mr-2" />
-                Sair da Conta
+                {t("sidebar.logout")}
               </Button>
             </div>
           )}
 
           {mode === "choose" && (
             <div className="space-y-6">
-              {/* Section: Pending Invitations (Displayed when user has invitations) */}
+              {/* Section: Pending Invitations */}
               {isFetchingInvitations ? (
                 <div className="flex items-center justify-center p-4">
-                  <Spinner size="sm" label="A procurar convites..." />
+                  <Spinner size="sm" label={t("settings.members.loadingInvites")} />
                 </div>
               ) : invitations.length > 0 ? (
                 <div className="space-y-3">
                   <div className="flex items-center gap-2 px-1">
                     <MailCheck className="w-4 h-4 text-m3-primary" />
                     <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-                      Convites Recebidos ({invitations.length})
+                      {t("settings.members.pendingInvites", {
+                        count: invitations.length,
+                      })}
                     </h3>
                   </div>
 
@@ -305,7 +310,7 @@ export const OnboardingPage: React.FC = () => {
                               </span>
                             </div>
                             <p className="text-xs text-slate-500 dark:text-slate-400">
-                              Função:{" "}
+                              {t("settings.account.profile.role")}:{" "}
                               <span className="font-medium text-slate-700 dark:text-slate-300 capitalize">
                                 {inv.role}
                               </span>
@@ -321,7 +326,7 @@ export const OnboardingPage: React.FC = () => {
                               className="h-9 px-3 rounded-xl border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/40 dark:hover:text-red-400 transition-colors text-xs font-semibold"
                             >
                               <X className="w-3.5 h-3.5 mr-1" />
-                              Recusar
+                              {t("auth.acceptInvitation.rejectBtn")}
                             </Button>
                             <Button
                               variant="primary"
@@ -332,7 +337,7 @@ export const OnboardingPage: React.FC = () => {
                               className="h-9 px-4 rounded-xl bg-m3-primary hover:bg-m3-primary-dark text-white text-xs font-bold shadow-md shadow-m3-primary/20"
                             >
                               <Check className="w-3.5 h-3.5 mr-1" />
-                              Aceitar
+                              {t("auth.acceptInvitation.acceptBtn")}
                             </Button>
                           </div>
                         </div>
@@ -352,17 +357,17 @@ export const OnboardingPage: React.FC = () => {
 
                 <button
                   onClick={() => setMode("create")}
-                  className="w-full flex items-center p-4 border border-slate-200/80 dark:border-slate-800 hover:border-m3-primary dark:hover:border-m3-primary rounded-2xl transition-all group text-left bg-white/50 dark:bg-slate-800/40 hover:shadow-lg hover:shadow-m3-primary/5"
+                  className="w-full flex items-center p-4 border border-slate-200/80 dark:border-slate-800 hover:border-m3-primary dark:hover:border-m3-primary rounded-2xl transition-all group text-left bg-white/50 dark:bg-slate-800/40 hover:shadow-lg hover:shadow-m3-primary/5 cursor-pointer"
                 >
                   <div className="w-11 h-11 bg-m3-primary/10 text-m3-primary rounded-xl flex items-center justify-center mr-4 group-hover:scale-110 transition-transform">
                     <PlusCircle className="w-5 h-5" />
                   </div>
                   <div className="flex-1">
                     <h3 className="font-bold text-slate-900 dark:text-white group-hover:text-m3-primary transition-colors text-sm">
-                      Criar Organização
+                      {t("onboarding.createOrgTab")}
                     </h3>
                     <p className="text-xs text-slate-500 dark:text-slate-400">
-                      Configurar uma nova igreja ou equipa do zero.
+                      {t("onboarding.step1Desc")}
                     </p>
                   </div>
                   <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-m3-primary group-hover:translate-x-1 transition-all" />
@@ -370,17 +375,17 @@ export const OnboardingPage: React.FC = () => {
 
                 <button
                   onClick={() => setMode("join")}
-                  className="w-full flex items-center p-4 border border-slate-200/80 dark:border-slate-800 hover:border-m3-primary dark:hover:border-m3-primary rounded-2xl transition-all group text-left bg-white/50 dark:bg-slate-800/40 hover:shadow-lg hover:shadow-m3-primary/5"
+                  className="w-full flex items-center p-4 border border-slate-200/80 dark:border-slate-800 hover:border-m3-primary dark:hover:border-m3-primary rounded-2xl transition-all group text-left bg-white/50 dark:bg-slate-800/40 hover:shadow-lg hover:shadow-m3-primary/5 cursor-pointer"
                 >
                   <div className="w-11 h-11 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-xl flex items-center justify-center mr-4 group-hover:scale-110 transition-transform group-hover:bg-m3-primary/10 group-hover:text-m3-primary">
                     <Users className="w-5 h-5" />
                   </div>
                   <div className="flex-1">
                     <h3 className="font-bold text-slate-900 dark:text-white group-hover:text-m3-primary transition-colors text-sm">
-                      Aderir a uma Organização
+                      {t("onboarding.joinOrgTab")}
                     </h3>
                     <p className="text-xs text-slate-500 dark:text-slate-400">
-                      Pesquisar pelo identificador (slug) da sua organização.
+                      {t("onboarding.joinInviteDesc")}
                     </p>
                   </div>
                   <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-m3-primary group-hover:translate-x-1 transition-all" />
@@ -390,10 +395,10 @@ export const OnboardingPage: React.FC = () => {
               <div className="pt-2 text-center">
                 <button
                   onClick={() => logout()}
-                  className="inline-flex items-center text-xs font-semibold text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors gap-1.5"
+                  className="inline-flex items-center text-xs font-semibold text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors gap-1.5 cursor-pointer"
                 >
                   <LogOut className="w-3.5 h-3.5" />
-                  <span>Terminar Sessão</span>
+                  <span>{t("sidebar.logout")}</span>
                 </button>
               </div>
             </div>
@@ -403,28 +408,28 @@ export const OnboardingPage: React.FC = () => {
             <form onSubmit={handleCreate} className="space-y-4">
               <div className="flex items-center justify-between mb-4 pb-2 border-b border-slate-200/60 dark:border-slate-800">
                 <h3 className="text-base font-bold text-slate-900 dark:text-white">
-                  Criar Organização
+                  {t("onboarding.createOrgTab")}
                 </h3>
                 <button
                   type="button"
                   onClick={() => setMode("choose")}
-                  className="text-xs font-semibold text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
+                  className="text-xs font-semibold text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors cursor-pointer"
                 >
-                  ← Voltar
+                  ← {t("common.back")}
                 </button>
               </div>
 
               <Input
-                label="Nome da Organização"
-                placeholder="Ex: Igreja Hosanna Lisboa"
+                label={t("onboarding.orgNameLabel")}
+                placeholder={t("onboarding.orgNamePlaceholder")}
                 value={orgName}
                 onChange={(e) => setOrgName(e.target.value)}
                 required
                 className="h-11 rounded-xl"
               />
               <Input
-                label="Identificador (Slug)"
-                placeholder="Ex: hosanna-lisboa"
+                label={t("onboarding.slugLabel")}
+                placeholder={t("onboarding.slugPlaceholder")}
                 value={orgSlug}
                 onChange={(e) =>
                   setOrgSlug(e.target.value.toLowerCase().replace(/\s+/g, "-"))
@@ -441,7 +446,7 @@ export const OnboardingPage: React.FC = () => {
                   disabled={isLoading || !orgName || !orgSlug}
                   isLoading={isLoading}
                 >
-                  Criar Organização
+                  {t("onboarding.createOrgBtn")}
                 </Button>
               </div>
             </form>
@@ -451,20 +456,20 @@ export const OnboardingPage: React.FC = () => {
             <form onSubmit={handleJoin} className="space-y-4">
               <div className="flex items-center justify-between mb-4 pb-2 border-b border-slate-200/60 dark:border-slate-800">
                 <h3 className="text-base font-bold text-slate-900 dark:text-white">
-                  Aderir a uma Organização
+                  {t("onboarding.joinOrgTab")}
                 </h3>
                 <button
                   type="button"
                   onClick={() => setMode("choose")}
-                  className="text-xs font-semibold text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
+                  className="text-xs font-semibold text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors cursor-pointer"
                 >
-                  ← Voltar
+                  ← {t("common.back")}
                 </button>
               </div>
 
               <Input
-                label="Identificador da Organização (Slug)"
-                placeholder="Ex: hosanna-lisboa"
+                label={t("onboarding.slugLabel")}
+                placeholder={t("onboarding.slugPlaceholder")}
                 value={searchSlug}
                 onChange={(e) => setSearchSlug(e.target.value)}
                 icon={<Search className="w-4 h-4 opacity-40" />}
@@ -480,7 +485,7 @@ export const OnboardingPage: React.FC = () => {
                   disabled={isLoading || !searchSlug}
                   isLoading={isLoading}
                 >
-                  Solicitar Acesso
+                  {t("onboarding.checkInvitesBtn")}
                 </Button>
               </div>
             </form>

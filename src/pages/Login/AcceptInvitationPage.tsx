@@ -9,6 +9,7 @@ import { Building2, Check, ShieldAlert, X } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
+import { useI18n } from "../../i18n";
 import { authClient } from "../../lib/authClient";
 import LoginLayout from "./Layout";
 
@@ -28,6 +29,7 @@ export const AcceptInvitationPage: React.FC = () => {
   const invitationId = searchParams.get("id");
   const { navigate } = useAppNavigate();
   const { refetch, user } = useAuth();
+  const { t } = useI18n();
 
   const [invitation, setInvitation] = useState<InvitationData | null>(null);
   const [isFetching, setIsFetching] = useState(true);
@@ -90,7 +92,7 @@ export const AcceptInvitationPage: React.FC = () => {
         return;
       }
 
-      setSuccessMsg("Convite aceite com sucesso! A redirecionar...");
+      setSuccessMsg(t("auth.acceptInvitation.successDesc"));
 
       await refetch();
       const orgData = data as {
@@ -133,7 +135,7 @@ export const AcceptInvitationPage: React.FC = () => {
         return;
       }
 
-      setSuccessMsg("Convite recusado.");
+      setSuccessMsg(t("settings.members.inviteCancelled", { email: "" }));
       setTimeout(() => {
         if (user) {
           navigate("/onboarding", { replace: true });
@@ -156,7 +158,7 @@ export const AcceptInvitationPage: React.FC = () => {
           <div className="flex flex-col items-center justify-center py-8 space-y-3">
             <Spinner size="md" />
             <p className="text-sm text-slate-500 dark:text-slate-400">
-              A verificar detalhes do convite...
+              {t("common.loading")}
             </p>
           </div>
         ) : invitation ? (
@@ -167,10 +169,10 @@ export const AcceptInvitationPage: React.FC = () => {
 
             <div>
               <h2 className="text-xl font-black text-slate-900 dark:text-white tracking-tight">
-                Convite para Organização
+                {t("auth.acceptInvitation.title")}
               </h2>
               <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-                Foi convidado(a) para se juntar à organização:
+                {t("auth.acceptInvitation.invitedTo")}:
               </p>
               <div className="mt-3 p-4 bg-slate-50 dark:bg-slate-800/80 rounded-2xl border border-slate-100 dark:border-slate-700/60">
                 <span className="text-lg font-bold text-slate-900 dark:text-white block">
@@ -179,7 +181,7 @@ export const AcceptInvitationPage: React.FC = () => {
                     "Organização Hosanna"}
                 </span>
                 <span className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 block capitalize">
-                  Função:{" "}
+                  {t("settings.account.profile.role")}:{" "}
                   <strong className="text-m3-primary">{invitation.role}</strong>
                 </span>
               </div>
@@ -187,8 +189,7 @@ export const AcceptInvitationPage: React.FC = () => {
 
             {invitation.status !== "pending" && (
               <div className="p-3 bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-300 text-xs rounded-xl border border-amber-200 dark:border-amber-800">
-                Este convite já se encontra com o estado:{" "}
-                <strong>{invitation.status}</strong>.
+                Estado: <strong>{invitation.status}</strong>.
               </div>
             )}
 
@@ -198,10 +199,10 @@ export const AcceptInvitationPage: React.FC = () => {
                 onClick={handleReject}
                 isLoading={actionLoading === "reject"}
                 disabled={actionLoading !== null}
-                className="h-12 rounded-xl border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/30 dark:hover:text-red-400 hover:border-red-200 transition-all font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2"
+                className="h-12 rounded-xl border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/30 dark:hover:text-red-400 hover:border-red-200 transition-all font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer"
               >
                 <X className="w-4 h-4" />
-                <span>Recusar</span>
+                <span>{t("auth.acceptInvitation.rejectBtn")}</span>
               </Button>
 
               <Button
@@ -211,10 +212,10 @@ export const AcceptInvitationPage: React.FC = () => {
                 disabled={
                   actionLoading !== null || invitation.status !== "pending"
                 }
-                className="h-12 rounded-xl bg-m3-primary hover:bg-m3-primary-dark text-white font-bold text-xs uppercase tracking-wider transition-all shadow-lg shadow-m3-primary/20 flex items-center justify-center gap-2"
+                className="h-12 rounded-xl bg-m3-primary hover:bg-m3-primary-dark text-white font-bold text-xs uppercase tracking-wider transition-all shadow-lg shadow-m3-primary/20 flex items-center justify-center gap-2 cursor-pointer"
               >
                 <Check className="w-4 h-4" />
-                <span>Aceitar</span>
+                <span>{t("auth.acceptInvitation.acceptBtn")}</span>
               </Button>
             </div>
           </div>
@@ -224,7 +225,7 @@ export const AcceptInvitationPage: React.FC = () => {
               <ShieldAlert className="w-7 h-7" />
             </div>
             <p className="text-sm text-slate-600 dark:text-slate-300">
-              Não foi possível encontrar ou validar o convite solicitado.
+              {t("auth.acceptInvitation.invalidDesc")}
             </p>
           </div>
         )}

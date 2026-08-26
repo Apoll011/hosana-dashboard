@@ -14,10 +14,12 @@ import {
 } from "lucide-react";
 import React, { useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
+import { useI18n } from "../../i18n";
 import { songImportRegistry } from "../../import";
 
 export const AboutTab: React.FC<{ active: boolean }> = ({ active }) => {
   const { organization } = useAuth();
+  const { t } = useI18n();
   const [showLicenses, setShowLicenses] = useState(false);
 
   if (!active) return null;
@@ -110,21 +112,22 @@ export const AboutTab: React.FC<{ active: boolean }> = ({ active }) => {
             </div>
             <div>
               <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">
-                Sobre o Hosanna Studio
+                {t("settings.about.title")}
               </h3>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                Painel de Controlo{" "}
+                {t("settings.about.controlPanel")}{" "}
                 {organization?.name ? `• ${organization.name}` : ""}
               </p>
               <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-2">
-                © {new Date().getFullYear()} Embrace & Tiago Inês. Código sob
-                licença Apache 2.0.
+                {t("settings.about.copyright", {
+                  year: new Date().getFullYear(),
+                })}
               </p>
             </div>
           </div>
           <div className="sm:text-right shrink-0 px-4 py-2 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-xl self-start sm:self-center">
             <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400 dark:text-slate-500 block">
-              Versão do Studio
+              {t("settings.about.studioVersion")}
             </span>
             <span className="text-sm font-mono font-bold text-slate-700 dark:text-slate-300">
               {APP_VERSION}
@@ -136,10 +139,12 @@ export const AboutTab: React.FC<{ active: boolean }> = ({ active }) => {
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-emerald-50/40 dark:bg-emerald-950/20 border border-emerald-200/60 dark:border-emerald-900/40 rounded-xl gap-3">
           <div className="flex items-center gap-2.5">
             <Heart className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 fill-emerald-500/20" />
-            <p className="text-xs text-emerald-800 dark:text-emerald-300 leading-relaxed">
-              Este projeto é <strong>open-source</strong>! Acreditamos no
-              software livre para equipar e apoiar comunidades.
-            </p>
+            <p
+              className="text-xs text-emerald-800 dark:text-emerald-300 leading-relaxed"
+              dangerouslySetInnerHTML={{
+                __html: t("settings.about.openSourceBanner"),
+              }}
+            />
           </div>
           <a
             href="https://github.com/Apoll011/Hosana-dashboard"
@@ -148,7 +153,7 @@ export const AboutTab: React.FC<{ active: boolean }> = ({ active }) => {
             className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-emerald-700 dark:text-emerald-300 bg-white dark:bg-slate-800 border border-emerald-200 dark:border-slate-700 rounded-lg hover:bg-emerald-50 dark:hover:bg-slate-700/55 transition-colors shrink-0"
           >
             <Github className="w-3.5 h-3.5" />
-            Ver Repositório
+            {t("settings.about.viewRepo")}
           </a>
         </div>
       </div>
@@ -157,7 +162,7 @@ export const AboutTab: React.FC<{ active: boolean }> = ({ active }) => {
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs space-y-4">
         <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 border-b border-slate-100 dark:border-slate-800 pb-3 flex items-center gap-2">
           <FileUp className="w-4 h-4 text-m3-primary" />
-          Formatos de Importação Suportados
+          {t("settings.about.supportedFormats")}
         </h3>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
@@ -191,8 +196,9 @@ export const AboutTab: React.FC<{ active: boolean }> = ({ active }) => {
           className="w-full flex items-center justify-between text-left cursor-pointer"
         >
           <span className="text-xs font-bold text-slate-900 dark:text-slate-100 uppercase tracking-wider">
-            Licenças de Bibliotecas de Terceiros (
-            {productionDependencies.length})
+            {t("settings.about.thirdPartyLicenses", {
+              count: productionDependencies.length,
+            })}
           </span>
           {showLicenses ? (
             <ChevronUp className="w-4 h-4 text-slate-400" />

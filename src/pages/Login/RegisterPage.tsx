@@ -7,6 +7,7 @@ import { Button, Input } from "@hosanna/shared";
 import { ArrowRight, CheckCircle2, Lock, Mail, User } from "lucide-react";
 import React, { useRef, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
+import { useI18n } from "../../i18n";
 import { authClient } from "../../lib/authClient";
 import LoginLayout from "./Layout";
 import { PasswordStrengthMeter } from "./components/PasswordStrengthMeter";
@@ -14,6 +15,7 @@ import { TurnstileWidget } from "./components/TurnstileWidget";
 
 export const RegisterPage: React.FC = () => {
   const { refetch } = useAuth();
+  const { t } = useI18n();
   const captchaEnabled = false;
 
   const [name, setName] = useState("");
@@ -35,19 +37,19 @@ export const RegisterPage: React.FC = () => {
     setErrorMsg("");
 
     if (!name.trim() || !email.trim() || !password.trim()) {
-      setErrorMsg("Por favor preencha todos os campos obrigatórios.");
+      setErrorMsg(t("settings.account.profile.invalidImage") ? "Por favor preencha todos os campos." : "");
       return;
     }
     if (password !== confirmPassword) {
-      setErrorMsg("As palavras-passe não coincidem.");
+      setErrorMsg(t("auth.register.passwordMismatch"));
       return;
     }
     if (password.length < 6) {
-      setErrorMsg("A palavra-passe deve ter pelo menos 6 caracteres.");
+      setErrorMsg(t("settings.account.profile.passwordMinLength"));
       return;
     }
     if (captchaEnabled && !captchaToken) {
-      setErrorMsg("Por favor complete o CAPTCHA.");
+      setErrorMsg("Please complete CAPTCHA.");
       return;
     }
 
@@ -79,7 +81,7 @@ export const RegisterPage: React.FC = () => {
 
   if (successState) {
     return (
-      <LoginLayout optionalLink="/login" optionalMsg="Iniciar Sessão">
+      <LoginLayout optionalLink="/login" optionalMsg={t("auth.login.title")}>
         <div className="py-8 flex flex-col items-center text-center animate-in zoom-in-95 duration-500">
           <div className="relative w-20 h-20 mb-5">
             <div className="absolute inset-0 bg-emerald-100 dark:bg-emerald-900/40 rounded-full animate-ping opacity-60" />
@@ -88,14 +90,10 @@ export const RegisterPage: React.FC = () => {
             </div>
           </div>
           <h2 className="text-2xl font-black text-slate-900 dark:text-white mb-2">
-            Conta Criada!
+            {t("auth.register.successTitle")}
           </h2>
           <p className="text-slate-500 dark:text-slate-400 text-sm font-medium max-w-xs">
-            Enviámos um e-mail de verificação para{" "}
-            <span className="font-bold text-slate-700 dark:text-slate-200">
-              {email}
-            </span>
-            . Verifique a sua caixa de entrada para ativar a conta.
+            {t("auth.register.successDesc")}
           </p>
         </div>
       </LoginLayout>
@@ -105,14 +103,14 @@ export const RegisterPage: React.FC = () => {
   return (
     <LoginLayout
       optionalLink="/login"
-      optionalMsg="Já tem uma conta? Iniciar Sessão"
+      optionalMsg={t("auth.register.hasAccount") + " " + t("auth.register.loginLink")}
       errorMsg={errorMsg}
       compactBranding
     >
       <form onSubmit={handleSubmit} className="space-y-3.5">
         <Input
-          label="Nome Completo"
-          placeholder="Ex: Maria Santos"
+          label={t("auth.register.nameLabel")}
+          placeholder={t("auth.register.namePlaceholder")}
           value={name}
           onChange={(e) => setName(e.target.value)}
           icon={<User className="w-4 h-4 opacity-40" />}
@@ -121,8 +119,8 @@ export const RegisterPage: React.FC = () => {
 
         <Input
           type="email"
-          label="E-mail"
-          placeholder="maria@iglesia.org"
+          label={t("auth.register.emailLabel")}
+          placeholder={t("auth.register.emailPlaceholder")}
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           icon={<Mail className="w-4 h-4 opacity-40" />}
@@ -132,8 +130,8 @@ export const RegisterPage: React.FC = () => {
         <div className="space-y-1">
           <Input
             type="password"
-            label="Palavra-passe"
-            placeholder="••••••••"
+            label={t("auth.register.passwordLabel")}
+            placeholder={t("auth.register.passwordPlaceholder")}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             icon={<Lock className="w-4 h-4 opacity-40" />}
@@ -145,7 +143,7 @@ export const RegisterPage: React.FC = () => {
         <div className="space-y-1">
           <Input
             type="password"
-            label="Confirmar Palavra-passe"
+            label={t("auth.register.confirmPasswordLabel")}
             placeholder="••••••••"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
@@ -158,7 +156,7 @@ export const RegisterPage: React.FC = () => {
           />
           {passwordMismatch && (
             <p className="text-xs font-semibold text-rose-500 dark:text-rose-400 pl-1 animate-in fade-in">
-              As palavras-passe não coincidem
+              {t("auth.register.passwordMismatch")}
             </p>
           )}
         </div>
@@ -170,10 +168,10 @@ export const RegisterPage: React.FC = () => {
         <Button
           type="submit"
           variant="primary"
-          className="w-full h-14 bg-m3-primary hover:bg-m3-primary-dark border-0 font-black uppercase tracking-widest text-[10px] text-white mt-2 rounded-[20px] transition-all shadow-xl shadow-m3-primary/20 hover:shadow-m3-primary/40 flex items-center justify-center gap-2 group"
+          className="w-full h-14 bg-m3-primary hover:bg-m3-primary-dark border-0 font-black uppercase tracking-widest text-[10px] text-white mt-2 rounded-[20px] transition-all shadow-xl shadow-m3-primary/20 hover:shadow-m3-primary/40 flex items-center justify-center gap-2 group cursor-pointer"
           isLoading={isLoading}
         >
-          <span>Criar Conta</span>
+          <span>{t("auth.register.registerBtn")}</span>
           <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
         </Button>
       </form>
