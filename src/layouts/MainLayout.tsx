@@ -17,6 +17,7 @@ import { FolderItem, ServiceItem, SongItem } from "../command-palette.types";
 import {
   BatchActionFloatingBar,
   buildFolderTree,
+  getFolderAncestors,
   getFolderDescendantIds,
 } from "../components/explorer";
 import { HosannaCommandPalette } from "../components/HosannaCommandPalette";
@@ -37,55 +38,32 @@ import { useFolders } from "../hooks/useFolders";
 import { usePersonalSettings } from "../hooks/usePersonalSettings";
 import { useServices } from "../hooks/useServices";
 import { useSongs } from "../hooks/useSongs";
+import { useI18n } from "../i18n";
 import { songImportRegistry } from "../import";
 import { ProviderImportResult } from "../utils/import";
+import { deriveView } from "./view";
 
 export const MainLayout: React.FC = () => {
   const { navigate } = useAppNavigate();
   const location = useLocation();
+  const { t } = useI18n();
   const { user, logout, organization } = useAuth();
 
   const slugPrefix = organization?.slug ? `/${organization.slug}` : "";
-  const isSongsView =
-    location.pathname === `${slugPrefix}/songs` ||
-    location.pathname === "/songs";
-  const isSongEditorView =
-    (location.pathname.startsWith(`${slugPrefix}/songs/`) ||
-      location.pathname.startsWith("/songs/")) &&
-    !isSongsView;
-  const isServicesView =
-    location.pathname === `${slugPrefix}/services` ||
-    location.pathname === "/services";
-  const isServiceEditorView =
-    (location.pathname.startsWith(`${slugPrefix}/services/`) ||
-      location.pathname.startsWith("/services/")) &&
-    !isServicesView;
+  const view = useMemo(
+    () => deriveView(location.pathname, slugPrefix),
+    [location.pathname, slugPrefix],
+  );
 
-  const isTeamsView = location.pathname.includes("/teams");
-  const isSettingsView = location.pathname.includes("/settings");
-  const isTrashView = location.pathname.includes("/trash");
-  const isExplorerView =
-    location.pathname.includes("/folders") ||
-    (!isSongsView &&
-      !isSongEditorView &&
-      !isServicesView &&
-      !isServiceEditorView &&
-      !isTeamsView &&
-      !isSettingsView &&
-      !isTrashView);
-  const isEditorView = isSongEditorView || isServiceEditorView;
-
-  const { settings } = usePersonalSettings();
+  const { settings, updateSetting } = usePersonalSettings();
 
   // Sidebar & Responsive State
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(
-    () => localStorage.getItem("sidebarCollapsed") === "true",
+  const isSidebarCollapsed = settings.sidebarCollapsed;
+  const setIsSidebarCollapsed = useCallback(
+    (v: boolean) => updateSetting("sidebarCollapsed", v),
+    [updateSetting],
   );
-
-  useEffect(() => {
-    localStorage.setItem("sidebarCollapsed", String(isSidebarCollapsed));
-  }, [isSidebarCollapsed]);
 
   // Service Worker & Sync
   const { showToast, triggerSyncCheck } = useSync();
@@ -100,18 +78,18 @@ export const MainLayout: React.FC = () => {
     if (needRefresh) {
       showToast({
         type: "info",
-        title: "Nova versão disponível",
-        description: "Uma nova versão do Hosanna Studio está disponível.",
+        title: t("layout.newVersionTitle"),
+        description: t("layout.newVersionDesc"),
         duration: 0,
         action: {
-          label: "Recarregar",
+          label: t("layout.reload"),
           onClick: () => {
             void updateServiceWorker(true);
           },
         },
       });
     }
-  }, [needRefresh, showToast, updateServiceWorker]);
+  }, [needRefresh, showToast, updateServiceWorker, t]);
 
   useEffect(() => {
     const runTrashVerifier = () => {
@@ -148,60 +126,47 @@ export const MainLayout: React.FC = () => {
     deleteFolder,
   } = useFolders();
 
-  const songParams = useMemo(() => ({}), []);
   const { songsQuery, moveSong, deleteSong, updateBatchTags, createSong } =
-    useSongs(songParams);
+    useSongs();
 
   // Folder & Navigation State
   const [currentFolderId, setCurrentFolderId] = useState<string | null>(null);
 
   const navigateBackToDrive = useCallback(() => {
-    if (!isExplorerView) {
+    if (view !== "explorer") {
       navigate(`${slugPrefix}/folders`);
     }
-  }, [isExplorerView, navigate, slugPrefix]);
+  }, [view, navigate, slugPrefix]);
 
   const handleSelectFolder = useCallback(
     (folderId: string | null) => {
       setCurrentFolderId(folderId);
-      if (!isExplorerView) {
+      if (view !== "explorer") {
         navigate(`${slugPrefix}/folders`);
       }
     },
-    [isExplorerView, navigate, slugPrefix],
+    [view, navigate, slugPrefix],
   );
 
   // View Mode & Density
-  const [viewMode, setViewMode] = useState<"grid" | "list">(
-    () => (localStorage.getItem("viewMode") as "grid" | "list") || "grid",
-  );
+  const viewMode = settings.viewMode;
   const handleViewModeChange = useCallback(
     (mode: "grid" | "list") => {
-      setViewMode(mode);
-      localStorage.setItem("viewMode", mode);
-      if (isSettingsView) {
+      updateSetting("viewMode", mode);
+      if (view === "settings") {
         navigate(`${slugPrefix}/folders`);
       }
     },
-    [isSettingsView, navigate, slugPrefix],
+    [view, navigate, slugPrefix, updateSetting],
   );
 
-  const [density, setDensity] = useState<"comfortable" | "compact">(() => {
-    try {
-      return (
-        (localStorage.getItem("explorer_density") as
-          "comfortable" | "compact") || "comfortable"
-      );
-    } catch {
-      return "comfortable";
-    }
-  });
-  const handleDensityChange = useCallback((d: "comfortable" | "compact") => {
-    setDensity(d);
-    try {
-      localStorage.setItem("explorer_density", d);
-    } catch {}
-  }, []);
+  const density = settings.explorerDensity;
+  const handleDensityChange = useCallback(
+    (d: "comfortable" | "compact") => {
+      updateSetting("explorerDensity", d);
+    },
+    [updateSetting],
+  );
 
   // Search & Filter State
   const [searchQuery, setSearchQuery] = useState("");
@@ -222,22 +187,22 @@ export const MainLayout: React.FC = () => {
   const handleSearchChange = useCallback(
     (val: string) => {
       setSearchQuery(val);
-      if (isSettingsView) {
+      if (view === "settings") {
         navigate(`${slugPrefix}/folders`);
       }
     },
-    [isSettingsView, navigate, slugPrefix],
+    [view, navigate, slugPrefix],
   );
 
   const handleSortChange = useCallback(
     (sb: "title" | "artist" | "updatedAt", so: "asc" | "desc") => {
       setSortBy(sb);
       setSortOrder(so);
-      if (isSettingsView) {
+      if (view === "settings") {
         navigate(`${slugPrefix}/folders`);
       }
     },
-    [isSettingsView, navigate, slugPrefix],
+    [view, navigate, slugPrefix],
   );
 
   // Search Context Persistence
@@ -309,22 +274,12 @@ export const MainLayout: React.FC = () => {
 
   const getFolderPathString = useCallback(
     (folderId: string | null | undefined): string => {
-      if (!folderId) return "Raiz";
-      const pathList: string[] = [];
-      let curr: Folder | undefined = allFolders.find((f) => f.id === folderId);
-      const visited = new Set<string>();
-
-      while (curr && !visited.has(curr.id)) {
-        visited.add(curr.id);
-        pathList.unshift(curr.name);
-        curr = curr.parentId
-          ? allFolders.find((f) => f.id === curr?.parentId)
-          : undefined;
-      }
-
-      return pathList.length > 0 ? pathList.join(" / ") : "Raiz";
+      const trail = getFolderAncestors(folderId, allFolders);
+      return trail.length > 0
+        ? trail.map((f) => f.name).join(" / ")
+        : t("common.root");
     },
-    [allFolders],
+    [allFolders, t],
   );
 
   const availableTags = useMemo(() => {
@@ -335,49 +290,22 @@ export const MainLayout: React.FC = () => {
     return Array.from(tagsSet).sort();
   }, [allSongs]);
 
-  const folderBreadcrumbs = useMemo(() => {
-    if (!currentFolderId) return [];
-    const trail: Folder[] = [];
-    let curr: Folder | undefined = allFolders.find(
-      (f) => f.id === currentFolderId,
-    );
-    const visited = new Set<string>();
+  const folderBreadcrumbs = useMemo(
+    () => getFolderAncestors(currentFolderId, allFolders),
+    [currentFolderId, allFolders],
+  );
 
-    while (curr && !visited.has(curr.id)) {
-      visited.add(curr.id);
-      trail.unshift(curr);
-      curr = curr.parentId
-        ? allFolders.find((f) => f.id === curr?.parentId)
-        : undefined;
-    }
-    return trail;
-  }, [currentFolderId, allFolders]);
-
-  const currentSongId = isSongEditorView
-    ? location.pathname.split("/").pop()
-    : null;
+  const currentSongId =
+    view === "song-editor" ? location.pathname.split("/").pop() : null;
   const currentSong = useMemo(
     () => allSongs.find((s) => s.id === currentSongId),
     [allSongs, currentSongId],
   );
 
-  const songBreadcrumbs = useMemo(() => {
-    if (!currentSong || !currentSong.folderId) return [];
-    const trail: Folder[] = [];
-    let curr: Folder | undefined = allFolders.find(
-      (f) => f.id === currentSong.folderId,
-    );
-    const visited = new Set<string>();
-
-    while (curr && !visited.has(curr.id)) {
-      visited.add(curr.id);
-      trail.unshift(curr);
-      curr = curr.parentId
-        ? allFolders.find((f) => f.id === curr?.parentId)
-        : undefined;
-    }
-    return trail;
-  }, [currentSong, allFolders]);
+  const songBreadcrumbs = useMemo(
+    () => getFolderAncestors(currentSong?.folderId, allFolders),
+    [currentSong, allFolders],
+  );
 
   const currentSongFileName = useMemo(() => {
     if (!currentSong) return "";
@@ -398,9 +326,8 @@ export const MainLayout: React.FC = () => {
     return `${title}${ext}`;
   }, [currentSong]);
 
-  const currentServiceId = isServiceEditorView
-    ? location.pathname.split("/").pop()
-    : null;
+  const currentServiceId =
+    view === "service-editor" ? location.pathname.split("/").pop() : null;
   const currentService = useMemo(
     () => allServices.find((s) => s.id === currentServiceId),
     [allServices, currentServiceId],
@@ -922,7 +849,7 @@ export const MainLayout: React.FC = () => {
       if (isTyping) return;
 
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "a") {
-        if (!isExplorerView) return;
+        if (view !== "explorer") return;
         e.preventDefault();
         selectAllInCurrentView();
         return;
@@ -972,7 +899,7 @@ export const MainLayout: React.FC = () => {
     selectedSongIds,
     allFolders,
     allSongs,
-    isExplorerView,
+    view,
     clearSelection,
     selectAllInCurrentView,
     handleSelectFolder,
@@ -1023,10 +950,7 @@ export const MainLayout: React.FC = () => {
       deleteAcao === "delete_songs" &&
       confirmFolderName.trim() !== deleteTarget.name.trim()
     ) {
-      showToast(
-        "O nome da pasta inserido não é igual ao nome da pasta.",
-        "error",
-      );
+      showToast(t("layout.folderNameMismatch"), "error");
       return;
     }
     await deleteFolder({ id: deleteTarget.id, action: deleteAcao });
@@ -1053,7 +977,7 @@ export const MainLayout: React.FC = () => {
       tags: data.tags,
     });
     setIsCreateSongModalOpen(false);
-    showToast("Cântico criado com sucesso!", "success");
+    showToast(t("layout.songCreated"), "success");
     navigate(`${slugPrefix}/songs/${song.id}`);
   };
 
@@ -1071,7 +995,7 @@ export const MainLayout: React.FC = () => {
     });
     await Promise.all([songsQuery.refetch(), foldersQuery.refetch()]);
     setIsCreateSongModalOpen(false);
-    showToast("Cântico importado com sucesso!", "success");
+    showToast(t("layout.songImported"), "success");
     navigate(`${slugPrefix}/songs/${song.id}`);
   };
 
@@ -1125,14 +1049,13 @@ export const MainLayout: React.FC = () => {
         }
 
         showToast(
-          `${folderList.length + songList.length} item(ns) movido(s) com sucesso!`,
+          t("layout.movedItems", {
+            count: folderList.length + songList.length,
+          }),
           "success",
         );
       } catch {
-        showToast(
-          "Erro ao mover itens. As alterações foram revertidas.",
-          "error",
-        );
+        showToast(t("layout.moveError"), "error");
       }
     },
     [
@@ -1144,6 +1067,7 @@ export const MainLayout: React.FC = () => {
       moveSong,
       showToast,
       clearSelection,
+      t,
     ],
   );
 
@@ -1161,7 +1085,7 @@ export const MainLayout: React.FC = () => {
     }
 
     showToast(
-      `${folderList.length + songList.length} item(ns) apagado(s) com sucesso!`,
+      t("layout.deletedItems", { count: folderList.length + songList.length }),
       "success",
     );
     clearSelection();
@@ -1182,23 +1106,33 @@ export const MainLayout: React.FC = () => {
     if (result.created > 0) {
       const targetFolderName = currentFolder
         ? currentFolder.name
-        : "Diretório Raiz";
+        : t("layout.rootDirectory");
       showToast(
-        `${result.created} ficheiro(s) ${result.fileTypeName} carregado(s) com sucesso para "${targetFolderName}"!`,
+        t("layout.uploadSuccess", {
+          count: result.created,
+          type: result.fileTypeName,
+          folder: targetFolderName,
+        }),
         "success",
       );
     }
 
     if (result.failed > 0) {
       showToast(
-        `Erro ao carregar ${result.failed} ficheiro(s) ${result.fileTypeName}`,
+        t("layout.uploadError", {
+          count: result.failed,
+          type: result.fileTypeName,
+        }),
         "error",
       );
     }
 
     if (result.ignored > 0) {
       showToast(
-        `Ignorado ${result.ignored} ficheiro(s) ${result.fileTypeName}`,
+        t("layout.uploadIgnored", {
+          count: result.ignored,
+          type: result.fileTypeName,
+        }),
         "warning",
       );
     }
@@ -1333,7 +1267,7 @@ export const MainLayout: React.FC = () => {
             "left:0",
           ].join(";");
           if (i === 0) {
-            card.textContent = `${totalDragging} itens`;
+            card.textContent = t("layout.dragItems", { count: totalDragging });
           }
           ghost.appendChild(card);
         }
@@ -1349,7 +1283,7 @@ export const MainLayout: React.FC = () => {
       e.dataTransfer.effectAllowed = "move";
       e.dataTransfer.setData("application/x-app-internal-drag", "true");
     },
-    [selectedFolderIds, selectedSongIds],
+    [selectedFolderIds, selectedSongIds, t],
   );
 
   const handleItemDragEnd = useCallback(() => {
@@ -1413,11 +1347,7 @@ export const MainLayout: React.FC = () => {
           setIsSidebarCollapsed={setIsSidebarCollapsed}
           organization={organization}
           slugPrefix={slugPrefix}
-          isExplorerView={isExplorerView}
-          isSongsView={isSongsView}
-          isServicesView={isServicesView}
-          isTeamsView={isTeamsView}
-          isTrashView={isTrashView}
+          view={view}
           currentFolderId={currentFolderId}
           rootSongsCount={rootSongsCount}
           rootFoldersCount={rootFoldersCount}
@@ -1453,51 +1383,37 @@ export const MainLayout: React.FC = () => {
             className="bg-m3-card border md:border-none border-m3-border rounded-4xl md:rounded-none shadow-2xl md:shadow-none shadow-black/10 overflow-hidden flex flex-col flex-1 h-full transition-all duration-300"
             role="main"
           >
-            {(isExplorerView ||
-              isSongsView ||
-              isServicesView ||
-              isSettingsView ||
-              isEditorView) && (
-              <ExplorerAddressBar
-                isExplorerView={isExplorerView}
-                isSongsView={isSongsView}
-                isSongEditorView={isSongEditorView}
-                isServicesView={isServicesView}
-                isServiceEditorView={isServiceEditorView}
-                isSettingsView={isSettingsView}
-                isTeamsView={isTeamsView}
-                isSidebarOpen={isSidebarOpen}
-                setIsSidebarOpen={setIsSidebarOpen}
-                currentFolder={currentFolder}
-                currentFolderId={currentFolderId}
-                slugPrefix={slugPrefix}
-                folderBreadcrumbs={folderBreadcrumbs}
-                songBreadcrumbs={songBreadcrumbs}
-                currentSong={currentSong}
-                currentSongFileName={currentSongFileName}
-                currentService={currentService}
-                searchQuery={searchQuery}
-                onSearchChange={handleSearchChange}
-                onSelectFolder={handleSelectFolder}
-                onNavigateBack={() => {
-                  if (isExplorerView) {
-                    handleSelectFolder(currentFolder?.parentId || null);
-                  } else {
-                    navigate(-1);
-                  }
-                }}
-                navigate={navigate}
-                onOpenCreateSong={() => setIsCreateSongModalOpen(true)}
-                onOpenCifraImport={() => setIsCifraImportOpen(true)}
-                onOpenCreateService={() => setIsCreateServiceModalOpen(true)}
-                onOpenCreateFolder={() => setIsCreateModalOpen(true)}
-              />
-            )}
+            <ExplorerAddressBar
+              view={view}
+              isSidebarOpen={isSidebarOpen}
+              setIsSidebarOpen={setIsSidebarOpen}
+              currentFolder={currentFolder}
+              currentFolderId={currentFolderId}
+              slugPrefix={slugPrefix}
+              folderBreadcrumbs={folderBreadcrumbs}
+              songBreadcrumbs={songBreadcrumbs}
+              currentSong={currentSong}
+              currentSongFileName={currentSongFileName}
+              currentService={currentService}
+              searchQuery={searchQuery}
+              onSearchChange={handleSearchChange}
+              onSelectFolder={handleSelectFolder}
+              onNavigateBack={() => {
+                if (view === "explorer") {
+                  handleSelectFolder(currentFolder?.parentId || null);
+                } else {
+                  navigate(-1);
+                }
+              }}
+              navigate={navigate}
+              onOpenCreateSong={() => setIsCreateSongModalOpen(true)}
+              onOpenCifraImport={() => setIsCifraImportOpen(true)}
+              onOpenCreateService={() => setIsCreateServiceModalOpen(true)}
+              onOpenCreateFolder={() => setIsCreateModalOpen(true)}
+            />
 
             <ExplorerToolbar
-              isExplorerView={isExplorerView}
-              isServicesView={isServicesView}
-              isSongsView={isSongsView}
+              view={view}
               activeFiltersCount={activeFiltersCount}
               showArchived={showArchived}
               setShowArchived={setShowArchived}
@@ -1570,19 +1486,27 @@ export const MainLayout: React.FC = () => {
             </div>
 
             {/* Status Bar */}
-            {isExplorerView && (
+            {view === "explorer" && (
               <div className="h-10 bg-m3-sidebar/40 border-t border-m3-border px-6 flex items-center justify-between text-[10px] text-m3-secondary font-black uppercase tracking-widest select-none">
                 <div className="flex items-center gap-4">
                   <span className="flex items-center gap-1.5">
                     <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-xs" />
-                    {currentFolder ? `/${currentFolder.name}` : "/ (Raiz)"}
+                    {currentFolder
+                      ? `/${currentFolder.name}`
+                      : t("layout.rootLocation")}
                   </span>
                 </div>
                 <div className="flex items-center gap-6">
-                  <span>{filteredSubfolders.length} Pastas</span>
-                  <span>{filteredFiles.length} Ficheiros</span>
+                  <span>
+                    {t("layout.statusFolders", {
+                      count: filteredSubfolders.length,
+                    })}
+                  </span>
+                  <span>
+                    {t("layout.statusFiles", { count: filteredFiles.length })}
+                  </span>
                   <span className="text-m3-primary font-bold">
-                    {totalItemsCount} Total
+                    {t("layout.statusTotal", { count: totalItemsCount })}
                   </span>
                 </div>
               </div>
@@ -1595,7 +1519,7 @@ export const MainLayout: React.FC = () => {
 
       <BatchActionFloatingBar
         selectedCount={totalSelectedCount}
-        itemLabel="itens"
+        itemLabel={t("layout.items")}
         onDelete={() => setIsBatchDeleteOpen(true)}
         onCancel={clearSelection}
       />
@@ -1805,9 +1729,7 @@ export const MainLayout: React.FC = () => {
       currentFolderId={currentFolderId}
       currentSong={currentSong}
       currentService={currentService}
-      isExplorerView={isExplorerView}
-      isSongEditorView={isSongEditorView}
-      isServiceEditorView={isServiceEditorView}
+      view={view}
       isSidebarCollapsed={isSidebarCollapsed}
       setIsSidebarCollapsed={setIsSidebarCollapsed}
       setCurrentFolderId={setCurrentFolderId}

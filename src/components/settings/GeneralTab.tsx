@@ -4,25 +4,24 @@
  */
 
 import { useCan } from "@/src/lib/permissions/client";
-import { Can } from "@/src/lib/permissions/components";
 import { Button, Input, Spinner } from "@hosanna/shared";
 import {
   Calendar,
   Clock,
   Globe,
-  Layout,
   Loader2,
   Lock,
   Mic2,
   Music,
+  RotateCcw,
   Save,
   Settings2,
   Shield,
-  Smartphone,
   Timer,
 } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
+import { useI18n } from "../../i18n";
 import { authClient } from "../../lib/authClient";
 
 export interface GeneralTabProps {
@@ -33,86 +32,189 @@ export interface GeneralTabProps {
   ) => void;
 }
 
+interface GeneralOrgSettings {
+  locale: string;
+  timezone: string;
+  weekStartsOn: number;
+  sermonDurationMMSS: string; // formato "MM:SS" para UI
+  songDurationMMSS: string; // formato "MM:SS" para UI
+  showNotes: boolean;
+  showServiceDuration: boolean;
+  autoSave: boolean;
+}
+
+interface OrgMetadataStructure {
+  settings?: {
+    general?: {
+      locale?: string;
+      timezone?: string;
+      weekStartsOn?: number;
+    };
+    services?: {
+      defaultDurations?: {
+        sermon?: number; // em segundos no backend
+        song?: number; // em segundos no backend
+      };
+      showNotes?: boolean;
+      showServiceDuration?: boolean;
+      autoSave?: boolean;
+    };
+    [key: string]: unknown;
+  };
+  [key: string]: unknown;
+}
+
+// Helpers para conversão e validação MM:SS <-> Segundos
+function secondsToMMSS(totalSeconds: number): string {
+  const safeSec = Math.max(0, Math.floor(totalSeconds || 0));
+  const mins = Math.floor(safeSec / 60);
+  const secs = safeSec % 60;
+  return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+}
+
+function parseMMSSToSeconds(value: string, fallbackSeconds = 300): number {
+  if (!value || typeof value !== "string") return fallbackSeconds;
+  const clean = value.trim();
+
+  // Caso seja inserido formato MM:SS ou M:SS
+  if (clean.includes(":")) {
+    const parts = clean.split(":");
+    const mins = parseInt(parts[0], 10) || 0;
+    const secs = parseInt(parts[1], 10) || 0;
+    const total = mins * 60 + secs;
+    return total > 0 ? total : fallbackSeconds;
+  }
+
+  // Se o utilizador digitar apenas um número inteiro (ex: "5"), assume como minutos
+  const numeric = parseInt(clean, 10);
+  if (!isNaN(numeric) && numeric > 0) {
+    return numeric * 60;
+  }
+
+  return fallbackSeconds;
+}
+
+function formatHumanDuration(
+  seconds: number,
+  t: (key: string, vars?: Record<string, string | number>) => string,
+): string {
+  const mins = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+  if (mins === 0) return t("settings.general.seg", { count: secs });
+  if (secs === 0) return t("settings.general.min", { count: mins });
+  return t("settings.general.minAndSeg", { min: mins, sec: secs });
+}
+
+const SONG_PRESETS = [
+  { label: "3:30", sec: 210 },
+  { label: "4:00", sec: 240 },
+  { label: "5:00", sec: 300 },
+  { label: "6:30", sec: 390 },
+];
+
+const SERMON_PRESETS = [
+  { label: "30:00", sec: 1800 },
+  { label: "40:00", sec: 2400 },
+  { label: "45:00", sec: 2700 },
+  { label: "60:00", sec: 3600 },
+];
+
+const DEFAULT_SETTINGS: GeneralOrgSettings = {
+  locale: "pt-PT",
+  timezone: "Europe/Lisbon",
+  weekStartsOn: 1, // 0 = Domingo, 1 = Segunda-feira
+  sermonDurationMMSS: "40:00",
+  songDurationMMSS: "05:00",
+  showNotes: true,
+  showServiceDuration: true,
+  autoSave: true,
+};
+
 export const GeneralTab: React.FC<GeneralTabProps> = ({
   active,
   showToast,
 }) => {
   const { organization, refetch: refetchAuth } = useAuth();
+  const { t } = useI18n();
   const { granted: canManageOrg, loading: canLoading } = useCan(
     "organization.update",
   );
 
   const [isSaving, setIsSaving] = useState(false);
+  const [orgFormData, setOrgFormData] =
+    useState<GeneralOrgSettings>(DEFAULT_SETTINGS);
+  const [initialData, setInitialData] =
+    useState<GeneralOrgSettings>(DEFAULT_SETTINGS);
 
-  // ==========================================
-  // ESTADO: Definições da Organização (Requer Permissão)
-  // ==========================================
-  const [orgFormData, setOrgFormData] = useState({
-    locale: "pt-PT",
-    timezone: "Europe/Lisbon",
-    weekStartsOn: 1, // 0 = Sunday, 1 = Monday
-    sermonDuration: 45,
-    songDuration: 5,
-    showNotes: true,
-    showServiceDuration: true,
-    autoSave: true,
-  });
-
-  // ==========================================
-  // ESTADO: Definições do Studio (Preferência Local, Sem Permissão)
-  // ==========================================
-  const [studioSettings, setStudioSettings] = useState({
-    showChordsDefault: true,
-  });
-
-  // Sincronizar dados da organização
+  // Sincronizar dados ao carregar organização
   useEffect(() => {
     if (organization) {
-      const metadata = organization.metadata || {};
+      const metadata = (organization.metadata as OrgMetadataStructure) || {};
       const settings = metadata.settings || {};
       const general = settings.general || {};
       const services = settings.services || {};
       const durations = services.defaultDurations || {};
 
-      setOrgFormData({
-        locale: general.locale ?? "pt-PT",
-        timezone: general.timezone ?? "Europe/Lisbon",
-        weekStartsOn: general.weekStartsOn ?? 1,
-        sermonDuration: (durations.sermon ?? 2000) / 60,
-        songDuration: (durations.song ?? 230) / 60,
-        showNotes: services.showNotes ?? true,
-        showServiceDuration: services.showServiceDuration ?? true,
-        autoSave: services.autoSave ?? true,
-      });
+      const songSec = durations.song ?? 300; // 5 min por defeito
+      const sermonSec = durations.sermon ?? 2400; // 40 min por defeito
+
+      const loaded: GeneralOrgSettings = {
+        locale: general.locale ?? DEFAULT_SETTINGS.locale,
+        timezone: general.timezone ?? DEFAULT_SETTINGS.timezone,
+        weekStartsOn: general.weekStartsOn ?? DEFAULT_SETTINGS.weekStartsOn,
+        sermonDurationMMSS: secondsToMMSS(sermonSec),
+        songDurationMMSS: secondsToMMSS(songSec),
+        showNotes: services.showNotes ?? DEFAULT_SETTINGS.showNotes,
+        showServiceDuration:
+          services.showServiceDuration ?? DEFAULT_SETTINGS.showServiceDuration,
+        autoSave: services.autoSave ?? DEFAULT_SETTINGS.autoSave,
+      };
+
+      setOrgFormData(loaded);
+      setInitialData(loaded);
     }
   }, [organization]);
-
-  // Carregar preferências locais do Studio
-  useEffect(() => {
-    const storedChords = localStorage.getItem("@hosanna:showChordsDefault");
-    if (storedChords !== null) {
-      setStudioSettings({ showChordsDefault: storedChords === "true" });
-    }
-  }, []);
 
   if (!active) return null;
 
   if (canLoading || !organization) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center p-12 text-slate-500">
-        <Spinner size="lg" label="A carregar definições..." />
+        <Spinner size="lg" label={t("settings.general.loading")} />
       </div>
     );
   }
 
-  // Guardar Definições da Organização
+  const handleNormalizeOnBlur = (
+    field: "songDurationMMSS" | "sermonDurationMMSS",
+  ) => {
+    const raw = orgFormData[field];
+    const fallback = field === "songDurationMMSS" ? 300 : 2400;
+    const parsedSeconds = parseMMSSToSeconds(raw, fallback);
+    setOrgFormData((prev) => ({
+      ...prev,
+      [field]: secondsToMMSS(parsedSeconds),
+    }));
+  };
+
+  const handleReset = () => {
+    setOrgFormData(initialData);
+  };
+
   const handleSubmitOrgSettings = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!canManageOrg) return;
 
     try {
       setIsSaving(true);
-      const currentMetadata = organization.metadata || {};
+      const currentMetadata =
+        (organization.metadata as OrgMetadataStructure) || {};
+
+      const songSeconds = parseMMSSToSeconds(orgFormData.songDurationMMSS, 300);
+      const sermonSeconds = parseMMSSToSeconds(
+        orgFormData.sermonDurationMMSS,
+        2400,
+      );
 
       await authClient.organization.update({
         data: {
@@ -129,8 +231,8 @@ export const GeneralTab: React.FC<GeneralTabProps> = ({
               services: {
                 ...currentMetadata.settings?.services,
                 defaultDurations: {
-                  sermon: orgFormData.sermonDuration * 60,
-                  song: orgFormData.songDuration * 60,
+                  song: songSeconds,
+                  sermon: sermonSeconds,
                 },
                 showNotes: orgFormData.showNotes,
                 showServiceDuration: orgFormData.showServiceDuration,
@@ -141,327 +243,402 @@ export const GeneralTab: React.FC<GeneralTabProps> = ({
         },
       });
 
+      // Normaliza o display
+      setOrgFormData((prev) => ({
+        ...prev,
+        songDurationMMSS: secondsToMMSS(songSeconds),
+        sermonDurationMMSS: secondsToMMSS(sermonSeconds),
+      }));
+
       await refetchAuth();
-      if (showToast)
-        showToast("Definições da organização atualizadas!", "success");
+      showToast?.(t("settings.toast.orgSaved"), "success");
     } catch (err) {
-      if (showToast)
-        showToast("Erro ao guardar definições da organização.", "error");
-      console.error(err);
+      showToast?.(
+        t("settings.toast.orgSaveError", {
+          error:
+            (err as { message?: string })?.message || "Erro de comunicação",
+        }),
+        "error",
+      );
     } finally {
       setIsSaving(false);
     }
   };
 
-  // Guardar Definições do Studio (Auto-save local)
-  const handleStudioSettingsChange = (checked: boolean) => {
-    setStudioSettings({ showChordsDefault: checked });
-    localStorage.setItem("@hosanna:showChordsDefault", checked.toString());
-    if (showToast)
-      showToast("Preferências de visualização atualizadas.", "success");
-  };
+  // Cálculo das durações para live-preview
+  const songSecondsPreview = parseMMSSToSeconds(
+    orgFormData.songDurationMMSS,
+    300,
+  );
+  const sermonSecondsPreview = parseMMSSToSeconds(
+    orgFormData.sermonDurationMMSS,
+    2400,
+  );
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto w-full animate-in fade-in slide-in-from-bottom-2 duration-300">
-      <Can permission="organization.update">
-        <form onSubmit={handleSubmitOrgSettings} className="space-y-6">
-          {/* General Settings Card */}
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm overflow-hidden">
-            <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-900/50">
-              <div>
-                <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                  <Settings2 className="w-5 h-5 text-m3-primary" />
-                  Preferências Gerais
-                </h3>
-                <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-                  Configure a localização, fusos horários e datas para a sua
-                  organização.
-                </p>
-              </div>
-              {!canManageOrg && (
-                <span className="text-xs bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 px-3 py-1.5 rounded-full flex items-center gap-1.5 font-semibold">
-                  <Lock className="w-3.5 h-3.5" />
-                  Apenas Leitura
-                </span>
-              )}
+    <form
+      onSubmit={handleSubmitOrgSettings}
+      className="space-y-6 max-w-4xl mx-auto w-full animate-in fade-in slide-in-from-bottom-2 duration-300"
+    >
+      {/* ========================================== */}
+      {/* 1. LOCALIZAÇÃO E DATAS                     */}
+      {/* ========================================== */}
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xs overflow-hidden">
+        <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-900/50">
+          <div>
+            <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+              <Settings2 className="w-5 h-5 text-m3-primary" />
+              {t("settings.general.title")}
+            </h3>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+              {t("settings.general.desc")}
+            </p>
+          </div>
+          {!canManageOrg && (
+            <span className="text-xs bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 px-3 py-1.5 rounded-full flex items-center gap-1.5 font-semibold">
+              <Lock className="w-3.5 h-3.5" />
+              {t("settings.general.readOnly")}
+            </span>
+          )}
+        </div>
+
+        <div className="p-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Idioma */}
+            <div className="flex flex-col gap-2">
+              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5 uppercase tracking-wide">
+                <Globe className="w-4 h-4 text-slate-400" />
+                {t("settings.general.orgLanguage")}
+              </label>
+              <select
+                disabled={!canManageOrg || isSaving}
+                value={orgFormData.locale}
+                onChange={(e) =>
+                  setOrgFormData({ ...orgFormData, locale: e.target.value })
+                }
+                className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-sm px-3.5 py-2.5 focus:outline-hidden focus:ring-2 focus:ring-m3-primary/40 focus:border-m3-primary disabled:opacity-60 disabled:bg-slate-50 dark:disabled:bg-slate-800/50 transition-colors cursor-pointer"
+              >
+                <option value="pt-PT">Português (Portugal)</option>
+                <option value="pt-BR">Português (Brasil)</option>
+                <option value="en-US">English (US)</option>
+                <option value="es-ES">Español</option>
+              </select>
             </div>
 
-            <div className="p-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="flex flex-col gap-2">
-                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5 uppercase tracking-wide">
-                    <Globe className="w-4 h-4 text-slate-400" />
-                    Idioma Padrão
-                  </label>
-                  <select
-                    disabled={!canManageOrg || isSaving}
-                    value={orgFormData.locale}
-                    onChange={(e) =>
-                      setOrgFormData({ ...orgFormData, locale: e.target.value })
-                    }
-                    className="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-sm px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-m3-primary/50 disabled:opacity-50 disabled:bg-slate-50 dark:disabled:bg-slate-800/50 transition-colors"
-                  >
-                    <option value="pt-PT">Português (Portugal)</option>
-                    <option value="pt-BR">Português (Brasil)</option>
-                    <option value="en-US">English (US)</option>
-                    <option value="es-ES">Español (España)</option>
-                  </select>
-                </div>
+            {/* Fuso Horário */}
+            <div className="flex flex-col gap-2">
+              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5 uppercase tracking-wide">
+                <Clock className="w-4 h-4 text-slate-400" />
+                {t("settings.general.timezone")}
+              </label>
+              <select
+                disabled={!canManageOrg || isSaving}
+                value={orgFormData.timezone}
+                onChange={(e) =>
+                  setOrgFormData({ ...orgFormData, timezone: e.target.value })
+                }
+                className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-sm px-3.5 py-2.5 focus:outline-hidden focus:ring-2 focus:ring-m3-primary/40 focus:border-m3-primary disabled:opacity-60 disabled:bg-slate-50 dark:disabled:bg-slate-800/50 transition-colors cursor-pointer"
+              >
+                <optgroup label="Portugal & Ilhas">
+                  <option value="Europe/Lisbon">
+                    Lisboa, Porto, Funchal (WET / GMT+0)
+                  </option>
+                  <option value="Atlantic/Azores">Açores (GMT-1)</option>
+                </optgroup>
+                <optgroup label="Brasil">
+                  <option value="America/Sao_Paulo">
+                    Brasília, São Paulo, Rio (GMT-3)
+                  </option>
+                  <option value="America/Manaus">Manaus (GMT-4)</option>
+                </optgroup>
+                <optgroup label="Outras Regiões">
+                  <option value="Europe/London">Londres (GMT+0)</option>
+                  <option value="America/New_York">
+                    Nova Iorque (EST / GMT-5)
+                  </option>
+                  <option value="UTC">UTC (Tempo Universal)</option>
+                </optgroup>
+              </select>
+            </div>
 
-                <div className="flex flex-col gap-2">
-                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5 uppercase tracking-wide">
-                    <Clock className="w-4 h-4 text-slate-400" />
-                    Fuso Horário
-                  </label>
-                  <select
-                    disabled={!canManageOrg || isSaving}
-                    value={orgFormData.timezone}
-                    onChange={(e) =>
-                      setOrgFormData({
-                        ...orgFormData,
-                        timezone: e.target.value,
-                      })
-                    }
-                    className="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-sm px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-m3-primary/50 disabled:opacity-50 disabled:bg-slate-50 dark:disabled:bg-slate-800/50 transition-colors"
-                  >
-                    <option value="Europe/Lisbon">
-                      Lisboa (Europe/Lisbon)
-                    </option>
-                    <option value="America/Sao_Paulo">
-                      São Paulo (America/Sao_Paulo)
-                    </option>
-                    <option value="Europe/London">
-                      Londres (Europe/London)
-                    </option>
-                    <option value="America/New_York">
-                      Nova Iorque (America/New_York)
-                    </option>
-                  </select>
-                </div>
-
-                <div className="flex flex-col gap-2 md:col-span-2">
-                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5 uppercase tracking-wide">
-                    <Calendar className="w-4 h-4 text-slate-400" />
-                    Início da Semana
-                  </label>
-                  <div className="flex gap-4">
-                    {[
-                      { value: 0, label: "Domingo" },
-                      { value: 1, label: "Segunda-feira" },
-                    ].map((day) => (
-                      <label
-                        key={day.value}
-                        className={`flex items-center gap-2 p-3 rounded-xl border cursor-pointer transition-all ${
-                          orgFormData.weekStartsOn === day.value
-                            ? "border-m3-primary bg-m3-primary/5 text-m3-primary"
-                            : "border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800/50"
-                        } ${!canManageOrg ? "opacity-60 cursor-not-allowed" : ""}`}
-                      >
+            {/* Primeiro Dia da Semana */}
+            <div className="flex flex-col gap-2 md:col-span-2">
+              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5 uppercase tracking-wide">
+                <Calendar className="w-4 h-4 text-slate-400" />
+                {t("settings.general.weekStartsOn")}
+              </label>
+              <div className="grid grid-cols-2 gap-3 max-w-md">
+                {[
+                  {
+                    value: 1,
+                    label: t("settings.general.monday"),
+                    desc: t("settings.general.mondayDesc"),
+                  },
+                  {
+                    value: 0,
+                    label: t("settings.general.sunday"),
+                    desc: t("settings.general.sundayDesc"),
+                  },
+                ].map((day) => {
+                  const isChecked = orgFormData.weekStartsOn === day.value;
+                  return (
+                    <label
+                      key={day.value}
+                      className={`flex flex-col p-3 rounded-xl border transition-all cursor-pointer ${
+                        isChecked
+                          ? "border-m3-primary bg-m3-primary/5 text-m3-primary ring-1 ring-m3-primary/30"
+                          : "border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800/50 text-slate-700 dark:text-slate-300"
+                      } ${!canManageOrg ? "opacity-60 cursor-not-allowed" : ""}`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-bold">{day.label}</span>
                         <input
                           type="radio"
                           name="weekStartsOn"
                           disabled={!canManageOrg || isSaving}
-                          checked={orgFormData.weekStartsOn === day.value}
+                          checked={isChecked}
                           onChange={() =>
                             setOrgFormData({
                               ...orgFormData,
                               weekStartsOn: day.value,
                             })
                           }
-                          className="w-4 h-4 text-m3-primary focus:ring-m3-primary"
+                          className="w-4 h-4 text-m3-primary focus:ring-m3-primary cursor-pointer"
                         />
-                        <span className="text-sm font-semibold">
-                          {day.label}
-                        </span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Services Settings Card */}
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm overflow-hidden">
-            <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
-              <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                <Timer className="w-5 h-5 text-indigo-500" />
-                Configuração de Cultos e Eventos
-              </h3>
-              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-                Defina tempos padrão e comportamentos para os alinhamentos
-                musicais e eventos.
-              </p>
-            </div>
-
-            <div className="p-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                <Input
-                  label="Duração Média de um Cântico (minutos)"
-                  type="number"
-                  min={1}
-                  disabled={!canManageOrg || isSaving}
-                  value={orgFormData.songDuration}
-                  onChange={(e) =>
-                    setOrgFormData({
-                      ...orgFormData,
-                      songDuration: Number(e.target.value),
-                    })
-                  }
-                  icon={<Music className="w-4 h-4 text-slate-400" />}
-                  placeholder="5"
-                />
-                <Input
-                  label="Duração Média do Sermão/Pregação (minutos)"
-                  type="number"
-                  min={5}
-                  disabled={!canManageOrg || isSaving}
-                  value={orgFormData.sermonDuration}
-                  onChange={(e) =>
-                    setOrgFormData({
-                      ...orgFormData,
-                      sermonDuration: Number(e.target.value),
-                    })
-                  }
-                  icon={<Mic2 className="w-4 h-4 text-slate-400" />}
-                  placeholder="45"
-                />
-              </div>
-
-              <div className="space-y-3">
-                <h4 className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide flex items-center gap-1.5 mb-3">
-                  <Shield className="w-4 h-4 text-slate-400" />
-                  Funcionalidades do Culto
-                </h4>
-
-                {[
-                  {
-                    id: "showServiceDuration",
-                    label: "Mostrar duração total do Culto",
-                    description:
-                      "Calcula e apresenta o tempo estimado total no topo dos alinhamentos.",
-                    checked: orgFormData.showServiceDuration,
-                  },
-                  {
-                    id: "showNotes",
-                    label: "Ativar notas da equipa",
-                    description:
-                      "Permitir que músicos e técnicos adicionem notas específicas nos itens do culto.",
-                    checked: orgFormData.showNotes,
-                  },
-                  {
-                    id: "autoSave",
-                    label: "Guardar automaticamente (Autosave)",
-                    description:
-                      "Guarda as edições nos cultos em rascunho de forma contínua para evitar perda de dados.",
-                    checked: orgFormData.autoSave,
-                  },
-                ].map((toggle) => (
-                  <label
-                    key={toggle.id}
-                    className={`flex items-start gap-3.5 p-4 border border-slate-200 dark:border-slate-800 rounded-xl transition-colors ${
-                      canManageOrg && !isSaving
-                        ? "cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50"
-                        : "opacity-75 cursor-not-allowed"
-                    }`}
-                  >
-                    <div className="flex items-center h-5 mt-0.5">
-                      <input
-                        type="checkbox"
-                        disabled={!canManageOrg || isSaving}
-                        checked={toggle.checked}
-                        onChange={(e) =>
-                          setOrgFormData({
-                            ...orgFormData,
-                            [toggle.id]: e.target.checked,
-                          })
-                        }
-                        className="w-4.5 h-4.5 text-m3-primary border-slate-300 rounded focus:ring-m3-primary"
-                      />
-                    </div>
-                    <div className="flex flex-col">
-                      <span className="text-sm font-bold text-slate-900 dark:text-slate-100">
-                        {toggle.label}
+                      </div>
+                      <span className="text-[11px] text-slate-400 mt-0.5">
+                        {day.desc}
                       </span>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                        {toggle.description}
-                      </p>
-                    </div>
-                  </label>
-                ))}
+                    </label>
+                  );
+                })}
               </div>
             </div>
           </div>
-
-          {/* Footer Action Org Settings */}
-          {canManageOrg && (
-            <div className="flex items-center justify-end pt-2">
-              <Button
-                type="submit"
-                variant="primary"
-                size="lg"
-                disabled={isSaving}
-                icon={
-                  isSaving ? (
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                  ) : (
-                    <Save className="w-5 h-5" />
-                  )
-                }
-                className="w-full sm:w-auto shadow-md"
-              >
-                {isSaving
-                  ? "A guardar organizações..."
-                  : "Guardar Definições da Organização"}
-              </Button>
-            </div>
-          )}
-        </form>
-      </Can>
-
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm overflow-hidden mt-8">
-        <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-900/50">
-          <div>
-            <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-              <Layout className="w-5 h-5 text-emerald-500" />
-              Definições do Studio
-            </h3>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-              Preferências de visualização exclusivas para a sua conta e
-              dispositivo atual.
-            </p>
-          </div>
-          <span className="text-xs bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 px-3 py-1.5 rounded-full flex items-center gap-1.5 font-semibold">
-            <Smartphone className="w-3.5 h-3.5" />
-            Preferência Local
-          </span>
-        </div>
-
-        <div className="p-6">
-          <label className="flex items-start gap-3.5 p-4 border border-slate-200 dark:border-slate-800 rounded-xl cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
-            <div className="flex items-center h-5 mt-0.5">
-              <input
-                type="checkbox"
-                checked={studioSettings.showChordsDefault}
-                onChange={(e) => handleStudioSettingsChange(e.target.checked)}
-                className="w-4.5 h-4.5 text-emerald-500 border-slate-300 rounded focus:ring-emerald-500"
-              />
-            </div>
-            <div className="flex flex-col">
-              <span className="text-sm font-bold text-slate-900 dark:text-slate-100">
-                Mostrar Acordes por Defeito ao Visualizar e Editar Cânticos
-              </span>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                Ativa a apresentação automática de acordes sobre a letra no
-                visualizador ChordPro e no editor. (Guarda automaticamente)
-              </p>
-            </div>
-          </label>
         </div>
       </div>
 
-      {/* Espaço extra no fundo da página */}
-      <div className="h-4" />
-    </div>
+      {/* ========================================== */}
+      {/* 2. MODELO DE DURAÇÕES MM:SS & CULTOS       */}
+      {/* ========================================== */}
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xs overflow-hidden">
+        <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 flex items-center justify-between">
+          <div>
+            <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+              <Timer className="w-5 h-5 text-indigo-500" />
+              {t("settings.general.durationsTitle")}
+            </h3>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+              {t("settings.general.durationsDesc")}
+            </p>
+          </div>
+        </div>
+
+        <div className="p-6 space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Duração Média de Cântico */}
+            <div className="space-y-2.5 p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/40 dark:bg-slate-850/40">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide flex items-center gap-1.5">
+                  <Music className="w-4 h-4 text-indigo-500" />
+                  {t("settings.general.songLabel")}
+                </label>
+                <span className="text-xs font-mono font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/50 px-2 py-0.5 rounded border border-indigo-200/50 dark:border-indigo-800/50">
+                  {formatHumanDuration(songSecondsPreview, t)}
+                </span>
+              </div>
+
+              <Input
+                value={orgFormData.songDurationMMSS}
+                disabled={!canManageOrg || isSaving}
+                placeholder="05:00"
+                onChange={(e) =>
+                  setOrgFormData({
+                    ...orgFormData,
+                    songDurationMMSS: e.target.value,
+                  })
+                }
+                onBlur={() => handleNormalizeOnBlur("songDurationMMSS")}
+                className="font-mono text-base tracking-widest text-center"
+              />
+
+              {/* Presets Cânticos */}
+              {canManageOrg && (
+                <div className="flex items-center gap-1.5 pt-1">
+                  <span className="text-[11px] text-slate-400 font-medium">
+                    {t("settings.general.suggestions")}
+                  </span>
+                  <div className="flex flex-wrap gap-1">
+                    {SONG_PRESETS.map((preset) => (
+                      <button
+                        key={preset.label}
+                        type="button"
+                        onClick={() =>
+                          setOrgFormData({
+                            ...orgFormData,
+                            songDurationMMSS: secondsToMMSS(preset.sec),
+                          })
+                        }
+                        className="px-2 py-0.5 text-xs font-mono rounded-md bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-indigo-400 dark:hover:border-indigo-500 text-slate-600 dark:text-slate-300 transition-colors"
+                      >
+                        {preset.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Duração Média do Sermão */}
+            <div className="space-y-2.5 p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/40 dark:bg-slate-850/40">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide flex items-center gap-1.5">
+                  <Mic2 className="w-4 h-4 text-rose-500" />
+                  {t("settings.general.sermonLabel")}
+                </label>
+                <span className="text-xs font-mono font-bold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/50 px-2 py-0.5 rounded border border-rose-200/50 dark:border-rose-800/50">
+                  {formatHumanDuration(sermonSecondsPreview, t)}
+                </span>
+              </div>
+
+              <Input
+                value={orgFormData.sermonDurationMMSS}
+                disabled={!canManageOrg || isSaving}
+                placeholder="40:00"
+                onChange={(e) =>
+                  setOrgFormData({
+                    ...orgFormData,
+                    sermonDurationMMSS: e.target.value,
+                  })
+                }
+                onBlur={() => handleNormalizeOnBlur("sermonDurationMMSS")}
+                className="font-mono text-base tracking-widest text-center"
+              />
+
+              {/* Presets Sermão */}
+              {canManageOrg && (
+                <div className="flex items-center gap-1.5 pt-1">
+                  <span className="text-[11px] text-slate-400 font-medium">
+                    {t("settings.general.suggestions")}
+                  </span>
+                  <div className="flex flex-wrap gap-1">
+                    {SERMON_PRESETS.map((preset) => (
+                      <button
+                        key={preset.label}
+                        type="button"
+                        onClick={() =>
+                          setOrgFormData({
+                            ...orgFormData,
+                            sermonDurationMMSS: secondsToMMSS(preset.sec),
+                          })
+                        }
+                        className="px-2 py-0.5 text-xs font-mono rounded-md bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-rose-400 dark:hover:border-rose-500 text-slate-600 dark:text-slate-300 transition-colors"
+                      >
+                        {preset.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <hr className="border-slate-100 dark:border-slate-800" />
+
+          {/* Opções dos Alinhamentos */}
+          <div className="space-y-3">
+            <h4 className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide flex items-center gap-1.5 mb-3">
+              <Shield className="w-4 h-4 text-slate-400" />
+              {t("settings.general.behaviorTitle")}
+            </h4>
+
+            {[
+              {
+                id: "showServiceDuration" as const,
+                label: t("settings.general.showDuration"),
+                description: t("settings.general.showDurationDesc"),
+                checked: orgFormData.showServiceDuration,
+              },
+              {
+                id: "showNotes" as const,
+                label: t("settings.general.showNotes"),
+                description: t("settings.general.showNotesDesc"),
+                checked: orgFormData.showNotes,
+              },
+              {
+                id: "autoSave" as const,
+                label: t("settings.general.autoSave"),
+                description: t("settings.general.autoSaveDesc"),
+                checked: orgFormData.autoSave,
+              },
+            ].map((toggle) => (
+              <label
+                key={toggle.id}
+                className={`flex items-start gap-4 p-4 border border-slate-200 dark:border-slate-800 rounded-xl transition-colors ${
+                  canManageOrg && !isSaving
+                    ? "cursor-pointer hover:bg-slate-50/80 dark:hover:bg-slate-800/40"
+                    : "opacity-75 cursor-not-allowed"
+                }`}
+              >
+                <div className="flex items-center h-5 mt-0.5">
+                  <input
+                    type="checkbox"
+                    disabled={!canManageOrg || isSaving}
+                    checked={toggle.checked}
+                    onChange={(e) =>
+                      setOrgFormData({
+                        ...orgFormData,
+                        [toggle.id]: e.target.checked,
+                      })
+                    }
+                    className="w-4.5 h-4.5 text-m3-primary border-slate-300 rounded focus:ring-m3-primary cursor-pointer"
+                  />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-sm font-bold text-slate-900 dark:text-slate-100">
+                    {toggle.label}
+                  </span>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                    {toggle.description}
+                  </p>
+                </div>
+              </label>
+            ))}
+          </div>
+        </div>
+
+        {/* Footer com Guardar / Reset */}
+        {canManageOrg && (
+          <div className="px-6 py-4 bg-slate-50/70 dark:bg-slate-900/70 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center">
+            <button
+              type="button"
+              onClick={handleReset}
+              disabled={isSaving}
+              className="text-xs text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 flex items-center gap-1 font-medium transition-colors"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+              {t("settings.general.reset")}
+            </button>
+
+            <Button
+              type="submit"
+              variant="primary"
+              disabled={isSaving}
+              icon={
+                isSaving ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Save className="w-4 h-4" />
+                )
+              }
+            >
+              {isSaving
+                ? t("settings.general.saving")
+                : t("settings.general.save")}
+            </Button>
+          </div>
+        )}
+      </div>
+    </form>
   );
 };

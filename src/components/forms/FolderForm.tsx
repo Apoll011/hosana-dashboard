@@ -5,6 +5,7 @@
 
 import { Button, Input } from "@hosanna/shared";
 import React, { useState } from "react";
+import { useI18n } from "../../i18n";
 
 interface FolderFormProps {
   initialName?: string;
@@ -15,14 +16,17 @@ interface FolderFormProps {
 }
 
 // Extracted validation logic to a pure function for better testability
-const validateFolderName = (name: string): string | undefined => {
+const validateFolderName = (
+  name: string,
+  t: (key: string) => string,
+): string | undefined => {
   const trimmedName = name.trim();
 
   if (!trimmedName) {
-    return "O nome da pasta é obrigatório";
+    return t("forms.folderNameRequired");
   }
   if (trimmedName.length < 2) {
-    return "O nome deve ter pelo menos 2 caracteres";
+    return t("forms.folderNameMin");
   }
 
   return undefined;
@@ -33,15 +37,16 @@ export const FolderForm: React.FC<FolderFormProps> = ({
   onSubmit,
   onCancel,
   isLoading = false,
-  title = "Criar Pasta",
+  title,
 }) => {
+  const { t } = useI18n();
   const [name, setName] = useState(initialName);
   const [error, setError] = useState<string | undefined>();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const validationError = validateFolderName(name);
+    const validationError = validateFolderName(name, t);
 
     if (validationError) {
       setError(validationError);
@@ -63,8 +68,8 @@ export const FolderForm: React.FC<FolderFormProps> = ({
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
       <Input
-        label="Nome da Pasta"
-        placeholder="Ex: Natal 2026"
+        label={t("forms.folderName")}
+        placeholder={t("forms.folderNamePlaceholder")}
         error={error}
         autoFocus
         value={name}
@@ -79,10 +84,10 @@ export const FolderForm: React.FC<FolderFormProps> = ({
           onClick={onCancel}
           disabled={isLoading}
         >
-          Cancelar
+          {t("common.cancel")}
         </Button>
         <Button type="submit" variant="primary" isLoading={isLoading}>
-          {title}
+          {title ?? t("forms.createFolder")}
         </Button>
       </div>
     </form>

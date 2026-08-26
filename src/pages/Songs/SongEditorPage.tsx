@@ -38,6 +38,7 @@ import React, {
 import { useParams } from "react-router-dom";
 import { HelpModal } from "../../components/modals/HelpModal";
 import { useAuth } from "../../contexts/AuthContext";
+import { useI18n } from "../../i18n";
 import { useSong, useSongs } from "../../hooks/useSongs";
 
 type LayoutMode = "editor" | "split" | "preview";
@@ -45,6 +46,7 @@ type LayoutMode = "editor" | "split" | "preview";
 export const SongEditorPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { navigate } = useAppNavigate();
+  const { t } = useI18n();
   const { organization } = useAuth();
   const slugPrefix = organization?.slug ? `/${organization.slug}` : "";
 
@@ -133,7 +135,7 @@ export const SongEditorPage: React.FC = () => {
   if (isLoading) {
     return (
       <div className="flex-1 flex items-center justify-center p-12">
-        <Spinner size="lg" label="A carregar a pauta..." />
+        <Spinner size="lg" label={t("songEditor.loading")} />
       </div>
     );
   }
@@ -142,12 +144,10 @@ export const SongEditorPage: React.FC = () => {
     return (
       <div className="flex-1 flex flex-col items-center justify-center p-12 text-center">
         <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">
-          Cântico Não Encontrado
+          {t("songEditor.notFoundTitle")}
         </h2>
         <p className="text-sm text-slate-500 mt-1 mb-6">
-          {error
-            ? (error as Error).message
-            : "O cântico solicitado não existe ou foi apagado."}
+          {error ? (error as Error).message : t("songEditor.notFoundDesc")}
         </p>
         <Button
           variant="primary"
@@ -160,7 +160,7 @@ export const SongEditorPage: React.FC = () => {
             }
           }}
         >
-          Voltar
+          {t("common.back")}
         </Button>
       </div>
     );
@@ -175,7 +175,7 @@ export const SongEditorPage: React.FC = () => {
             size="sm"
             onClick={() => navigate(-1)}
             className="p-1 -ml-2"
-            title="Voltar"
+            title={t("common.back")}
           >
             <ArrowLeft className="w-4 h-4 text-m3-secondary" />
           </Button>
@@ -183,12 +183,12 @@ export const SongEditorPage: React.FC = () => {
             <div className="flex items-center gap-2">
               <span className="text-[11px] font-bold text-m3-text flex items-center gap-1.5">
                 <File className="w-3.5 h-3.5 text-m3-primary" />
-                {song.title || "Sem Título"}
+                {song.title || t("songEditor.untitled")}
               </span>
               {hasUnsavedChanges && (
                 <span
                   className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"
-                  title="Alterações não guardadas"
+                  title={t("songEditor.unsaved")}
                 />
               )}
             </div>
@@ -200,21 +200,21 @@ export const SongEditorPage: React.FC = () => {
             <button
               onClick={() => setLayoutMode("editor")}
               className={`p-1.5 rounded-md transition-all ${layoutMode === "editor" ? "bg-m3-primary/10 text-m3-primary shadow-sm" : "text-m3-secondary hover:bg-m3-hover"}`}
-              title="Apenas Editor"
+              title={t("songEditor.editorOnly")}
             >
               <EditIcon className="w-4 h-4" />
             </button>
             <button
               onClick={() => setLayoutMode("split")}
               className={`p-1.5 rounded-md transition-all ${layoutMode === "split" ? "bg-m3-primary/10 text-m3-primary shadow-sm" : "text-m3-secondary hover:bg-m3-hover"}`}
-              title="Dividir Ecrã"
+              title={t("songEditor.split")}
             >
               <Columns className="w-4 h-4" />
             </button>
             <button
               onClick={() => setLayoutMode("preview")}
               className={`p-1.5 rounded-md transition-all ${layoutMode === "preview" ? "bg-m3-primary/10 text-m3-primary shadow-sm" : "text-m3-secondary hover:bg-m3-hover"}`}
-              title="Apenas Prévia"
+              title={t("songEditor.previewOnly")}
             >
               <PanelRight className="w-4 h-4" />
             </button>
@@ -224,7 +224,7 @@ export const SongEditorPage: React.FC = () => {
             <button
               onClick={() => setShowHelp(true)}
               className="p-2 text-m3-secondary hover:text-m3-primary hover:bg-m3-primary/10 rounded-lg transition-all"
-              title="Ajuda ChordPro"
+              title={t("songEditor.chordproHelp")}
             >
               <HelpCircle className="w-4 h-4" />
             </button>
@@ -238,7 +238,7 @@ export const SongEditorPage: React.FC = () => {
               onClick={() => handleSave(content)}
               className="rounded-xl font-bold text-xs h-8 ml-2"
             >
-              Guardar
+              {t("common.save")}
             </Button>
           </div>
         </Can>
@@ -253,12 +253,12 @@ export const SongEditorPage: React.FC = () => {
             <div className="h-9 bg-m3-sidebar/30 border-b border-m3-border flex items-center justify-between px-3 shrink-0">
               <span className="text-[10px] font-semibold text-m3-secondary uppercase tracking-wider flex items-center gap-1.5">
                 <EditIcon className="w-3 h-3" />
-                Código
+                {t("songEditor.code")}
               </span>
               <button
                 onClick={() => setShowEditorSettings(!showEditorSettings)}
                 className={`p-1 rounded transition-colors ${showEditorSettings ? "bg-m3-primary/10 text-m3-primary" : "text-m3-secondary hover:bg-m3-hover hover:text-m3-text"}`}
-                title="Definições do Editor"
+                title={t("songEditor.editorSettings")}
               >
                 <Settings className="w-3.5 h-3.5" />
               </button>
@@ -282,7 +282,7 @@ export const SongEditorPage: React.FC = () => {
                 mode="chordpro"
                 fallback={
                   <div className="h-full w-full flex items-center justify-center">
-                    <Spinner size="md" label="A carregar o editor..." />
+                    <Spinner size="md" label={t("songEditor.loadingEditor")} />
                   </div>
                 }
               />
@@ -298,12 +298,12 @@ export const SongEditorPage: React.FC = () => {
             <div className="h-9 bg-m3-sidebar/30 border-b border-m3-border flex items-center justify-between px-3 shrink-0">
               <span className="text-[10px] font-semibold text-m3-secondary uppercase tracking-wider flex items-center gap-1.5">
                 <LayoutTemplate className="w-3 h-3" />
-                Prévia Visual
+                {t("songEditor.preview")}
               </span>
               <button
                 onClick={() => setShowPreviewSettings(!showPreviewSettings)}
                 className={`p-1 rounded transition-colors ${showPreviewSettings ? "bg-m3-primary/10 text-m3-primary" : "text-m3-secondary hover:bg-m3-hover hover:text-m3-text"}`}
-                title="Ajustes de Leitura"
+                title={t("songEditor.readingSettings")}
               >
                 <Settings2 className="w-3.5 h-3.5" />
               </button>

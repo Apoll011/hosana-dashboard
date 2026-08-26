@@ -1,5 +1,6 @@
 import { CommandAction } from "@/src/command-palette.types";
 import { useCommandPalette } from "@/src/contexts/CommandPaletteContext";
+import { useI18n } from "@/src/i18n";
 import {
   ChevronRight,
   Command,
@@ -56,6 +57,8 @@ export function CommandPaletteModal({
     recentActionIds,
   } = useCommandPalette();
 
+  const { t } = useI18n();
+
   const [selectedIndex, setSelectedIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const listContainerRef = useRef<HTMLDivElement>(null);
@@ -88,7 +91,7 @@ export function CommandPaletteModal({
             recents.push({
               ...found,
               id: `recent-${found.id}`,
-              section: "Recentes",
+              section: t("palette.recents"),
               icon: <History className="w-4 h-4 text-(--m3-secondary)" />,
               perform: found.perform,
             });
@@ -110,13 +113,13 @@ export function CommandPaletteModal({
       const matchSec = action.section?.toLowerCase().includes(q);
       return matchName || matchKeywords || matchSub || matchSec;
     });
-  }, [staticActions, searchQuery, activeParentId, recentActionIds]);
+  }, [staticActions, searchQuery, activeParentId, recentActionIds, t]);
 
   // Group actions by Section
   const groupedActions = useMemo(() => {
     const groups: { section: string; actions: CommandAction[] }[] = [];
     filteredActions.forEach((action) => {
-      const sec = action.section || "Ações";
+      const sec = action.section || t("palette.defaultSection");
       let g = groups.find((item) => item.section === sec);
       if (!g) {
         g = { section: sec, actions: [] };
@@ -125,7 +128,7 @@ export function CommandPaletteModal({
       g.actions.push(action);
     });
     return groups;
-  }, [filteredActions]);
+  }, [filteredActions, t]);
 
   // Flat list of visible actions to map keyboard navigation indices
   const flatVisibleActions = useMemo(() => {
@@ -206,7 +209,7 @@ export function CommandPaletteModal({
 
           {activeParentId && (
             <div className="flex items-center gap-1.5 mr-2 px-2 py-0.5 rounded-lg bg-m3-primary-light/60 dark:bg-m3-primary-dark text-xs font-semibold text-m3-primary">
-              <span>Sub-menu</span>
+              <span>{t("palette.submenu")}</span>
               <ChevronRight className="w-3.5 h-3.5 opacity-60" />
             </div>
           )}
@@ -218,8 +221,8 @@ export function CommandPaletteModal({
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder={
               activeParentId
-                ? "Pesquisar no sub-menu..."
-                : "Digite um comando ou pesquise no Hosanna Studio..."
+                ? t("palette.searchSubmenu")
+                : t("palette.searchPlaceholder")
             }
             className="w-full bg-transparent text-m3-text placeholder-m3-input text-sm outline-none font-sans"
           />
@@ -244,14 +247,10 @@ export function CommandPaletteModal({
                 <SearchX className="w-6 h-6 text-m3-secondary" />
               </div>
               <p className="text-sm font-medium text-m3-text">
-                Nenhum resultado encontrado
+                {t("palette.noResults")}
               </p>
               <p className="text-xs text-m3-secondary mt-1 max-w-70">
-                Não encontramos nada para{" "}
-                <span className="font-semibold text-m3-primary">
-                  &quot;{searchQuery}&quot;
-                </span>
-                .
+                {t("palette.noResultsDesc", { query: searchQuery })}
               </p>
             </div>
           ) : (
@@ -345,17 +344,17 @@ export function CommandPaletteModal({
               <kbd className="px-1 py-0.5 rounded bg-m3-card border border-m3-border">
                 ↓
               </kbd>{" "}
-              Navegar
+              {t("palette.navigate")}
             </span>
             <span className="flex items-center gap-1">
               <kbd className="px-1 py-0.5 rounded bg-m3-card border border-m3-border">
                 ↵
               </kbd>{" "}
-              Selecionar
+              {t("palette.select")}
             </span>
           </div>
           <span className="flex items-center gap-1 font-medium text-m3-primary">
-            <Command className="w-3 h-3 text-m3-primary" /> Command Palette
+            <Command className="w-3 h-3 text-m3-primary" /> {t("palette.title")}
           </span>
         </div>
       </div>

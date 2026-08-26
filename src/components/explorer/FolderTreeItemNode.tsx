@@ -41,6 +41,30 @@ export function buildFolderTree(folders: Folder[]): FolderTreeNode[] {
   return getNodes(null, 0);
 }
 
+/**
+ * Return the ordered ancestor chain for a folder (root-most first).
+ * Empty when there is no folder id (i.e. the root itself).
+ */
+export function getFolderAncestors(
+  folderId: string | null | undefined,
+  folders: Folder[],
+): Folder[] {
+  if (!folderId) return [];
+  const trail: Folder[] = [];
+  const visited = new Set<string>();
+  let current = folders.find((f) => f.id === folderId);
+
+  while (current && !visited.has(current.id)) {
+    visited.add(current.id);
+    trail.unshift(current);
+    current = current.parentId
+      ? folders.find((f) => f.id === current?.parentId)
+      : undefined;
+  }
+
+  return trail;
+}
+
 export function getFolderDescendantIds(
   folderId: string,
   folders: Folder[],

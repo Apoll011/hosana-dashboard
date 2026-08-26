@@ -6,9 +6,9 @@
 import { Button, Modal, backupApi } from "@hosanna/shared";
 import {
   AlertTriangle,
+  AppWindow,
   Building2,
   Info,
-  Palette,
   RotateCcw,
   Server,
   User,
@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import React, { useState } from "react";
 import { useSync } from "../contexts/SyncContext";
+import { useI18n } from "../i18n";
 
 import { AboutTab } from "../components/settings/AboutTab";
 import { AccountTab } from "../components/settings/AccountTab";
@@ -23,16 +24,17 @@ import { AppearanceTab } from "../components/settings/AppearanceTab";
 import { GeneralTab } from "../components/settings/GeneralTab";
 import { MembersTab } from "../components/settings/MembersTab";
 import { WorkspaceTab } from "../components/settings/WorkspaceTab";
-import { useActiveRole } from "../lib/permissions/client";
+import { useCan } from "../lib/permissions/client";
 
 import { CloudOff } from "lucide-react";
 import { useOnline } from "../hooks/useOnline";
 
 type TabType =
-  "general" | "workspace" | "account" | "members" | "appearance" | "about";
+  "general" | "workspace" | "account" | "members" | "app" | "about";
 
 export const SettingsPage: React.FC = () => {
   const { showToast } = useSync();
+  const { t } = useI18n();
   const isOnline = useOnline();
 
   const [activeTab, setActiveTab] = useState<TabType>("account");
@@ -57,15 +59,12 @@ export const SettingsPage: React.FC = () => {
     setIsRestoring(true);
     try {
       await backupApi.restoreBackup(pendingRestoreData);
-      showToast(
-        "Base de dados restaurada com sucesso! A recarregar...",
-        "success",
-      );
+      showToast(t("settings.restore.success"), "success");
       setTimeout(() => {
         window.location.reload();
       }, 1200);
     } catch {
-      showToast("Falha ao restaurar base de dados.", "error");
+      showToast(t("settings.restore.error"), "error");
     } finally {
       setIsRestoring(false);
       setPendingRestoreData(null);
@@ -73,36 +72,51 @@ export const SettingsPage: React.FC = () => {
     }
   };
 
-  const { role } = useActiveRole();
-  const isServerAdminRole = role === "admin" || role === "owner";
+  const { granted: canUpdate } = useCan("organization.update");
 
   const tabs = [
     {
       id: "account",
-      label: "Conta & Segurança",
+      label: t("settings.tabs.account"),
       icon: User,
       requiresNetwork: true,
+      show: true,
     },
     {
       id: "workspace",
-      label: "Organização",
+      label: t("settings.tabs.workspace"),
       icon: Building2,
       requiresNetwork: true,
+      show: true,
     },
-    { id: "members", label: "Membros", icon: Users, requiresNetwork: true },
+    {
+      id: "members",
+      label: t("settings.tabs.members"),
+      icon: Users,
+      requiresNetwork: true,
+      show: true,
+    },
     {
       id: "general",
-      label: isServerAdminRole ? "Servidor & Geral" : "Geral",
+      label: t("settings.tabs.general"),
       icon: Server,
       requiresNetwork: true,
+      show: canUpdate,
     },
     {
-      id: "appearance",
-      label: "Aparência",
-      icon: Palette,
+      id: "app",
+      label: t("settings.tabs.app"),
+      icon: AppWindow,
       requiresNetwork: false,
+      show: true,
     },
-    { id: "about", label: "Sobre", icon: Info, requiresNetwork: false },
+    {
+      id: "about",
+      label: t("settings.tabs.about"),
+      icon: Info,
+      requiresNetwork: false,
+      show: true,
+    },
   ];
 
   return (
@@ -112,11 +126,10 @@ export const SettingsPage: React.FC = () => {
           <div className="flex items-center gap-3 p-3.5 bg-amber-500/10 border border-amber-500/30 rounded-2xl text-amber-700 dark:text-amber-300 text-xs">
             <CloudOff className="w-5 h-5 shrink-0 text-amber-500" />
             <div>
-              <span className="font-bold block">Modo Offline</span>
-              <span className="opacity-90">
-                As definições de conta, organização e membros requerem ligação à
-                internet e estão desativadas.
+              <span className="font-bold block">
+                {t("settings.offlineTitle")}
               </span>
+              <span className="opacity-90">{t("settings.offlineDesc")}</span>
             </div>
           </div>
         )}
@@ -127,6 +140,8 @@ export const SettingsPage: React.FC = () => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
             const isTabDisabled = !isOnline && tab.requiresNetwork;
+
+            if (!tab.show) return;
 
             return (
               <button
@@ -142,7 +157,7 @@ export const SettingsPage: React.FC = () => {
                 <span>{tab.label}</span>
                 {isTabDisabled && (
                   <span className="text-[10px] uppercase tracking-wider font-semibold px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-800 text-slate-500 dark:text-slate-400">
-                    Offline
+                    {t("common.offline")}
                   </span>
                 )}
               </button>
@@ -172,7 +187,7 @@ export const SettingsPage: React.FC = () => {
             <MembersTab active={activeTab === "members"} />
             <GeneralTab active={activeTab === "general"} />
           </div>
-          <AppearanceTab active={activeTab === "appearance"} />
+          <AppearanceTab active={activeTab === "app"} />
           <AboutTab active={activeTab === "about"} />
         </div>
       </div>
@@ -185,44 +200,48 @@ export const SettingsPage: React.FC = () => {
             setPendingRestoreData(null);
             setRestoreStats(null);
           }}
-          title="Confirmar Restauração da Base de Dados"
+          title={t("settings.restore.confirmTitle")}
         >
           <div className="flex flex-col gap-4">
             <div className="p-3.5 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 rounded-xl flex items-start gap-3 text-xs text-amber-800 dark:text-amber-300">
               <AlertTriangle className="w-5 h-5 shrink-0 text-amber-500 mt-0.5" />
               <div>
-                <strong className="font-bold">Atenção ao Restaurar:</strong>
-                <p className="mt-0.5">
-                  Esta ação irá substituir a totalidade dos dados existentes
-                  pelos dados contidos no ficheiro de cópia de segurança
-                  selecionado.
-                </p>
+                <strong className="font-bold">
+                  {t("settings.restore.attention")}
+                </strong>
+                <p className="mt-0.5">{t("settings.restore.attentionDesc")}</p>
               </div>
             </div>
 
             {restoreStats && (
               <div className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-4 space-y-2">
                 <span className="text-xs font-bold text-slate-900 dark:text-slate-100 block">
-                  Resumo do Conteúdo a Restaurar:
+                  {t("settings.restore.summary")}
                 </span>
                 <div className="grid grid-cols-3 gap-2 text-center text-xs">
                   <div className="p-2 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800">
                     <span className="block text-lg font-extrabold text-m3-primary">
                       {restoreStats.songs}
                     </span>
-                    <span className="text-[10px] text-slate-500">Cânticos</span>
+                    <span className="text-[10px] text-slate-500">
+                      {t("settings.restore.songs")}
+                    </span>
                   </div>
                   <div className="p-2 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800">
                     <span className="block text-lg font-extrabold text-amber-500">
                       {restoreStats.folders}
                     </span>
-                    <span className="text-[10px] text-slate-500">Pastas</span>
+                    <span className="text-[10px] text-slate-500">
+                      {t("settings.restore.folders")}
+                    </span>
                   </div>
                   <div className="p-2 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800">
                     <span className="block text-lg font-extrabold text-emerald-500">
                       {restoreStats.services}
                     </span>
-                    <span className="text-[10px] text-slate-500">Cultos</span>
+                    <span className="text-[10px] text-slate-500">
+                      {t("settings.restore.services")}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -237,7 +256,7 @@ export const SettingsPage: React.FC = () => {
                   setRestoreStats(null);
                 }}
               >
-                Cancelar
+                {t("common.cancel")}
               </Button>
               <Button
                 variant="danger"
@@ -246,7 +265,7 @@ export const SettingsPage: React.FC = () => {
                 icon={<RotateCcw className="w-4 h-4" />}
                 onClick={handleConfirmRestore}
               >
-                Restaurar Base de Dados Agora
+                {t("settings.restore.restoreNow")}
               </Button>
             </div>
           </div>
