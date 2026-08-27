@@ -4,6 +4,7 @@
  */
 
 import { posthog } from "@/src/lib/posthog";
+import { renderHtml } from "@tanstack/markdown/html";
 import {
   AlertCircle,
   ArrowLeft,
@@ -294,107 +295,6 @@ const STATUS_STYLES: Record<string, string> = {
   pending: "bg-amber-500/10 text-amber-600 dark:text-amber-400",
   on_hold: "bg-purple-500/10 text-purple-600 dark:text-purple-400",
   resolved: "bg-slate-200 dark:bg-slate-700 text-slate-500",
-};
-
-/* ─── Minimal markdown renderer (no external deps) ─────────────────
- * Covers what support replies typically use: **bold**, *italic*,
- * `code`, ```code blocks```, [links](url), - / 1. lists, and
- * paragraph/line breaks. Only applied to team/AI responses — the
- * customer's own typed text is rendered as plain text so things like
- * "5*3=15" don't get misread as emphasis.
- */
-const renderInline = (text: string, keyPrefix: string): React.ReactNode[] => {
-  const nodes: React.ReactNode[] = [];
-  const pattern =
-    /`([^`]+)`|\[([^\]]+)\]\(([^)\s]+)\)|\*\*([^*]+)\*\*|__([^_]+)__|\*([^*]+)\*|_([^_]+)_/g;
-  let lastIndex = 0;
-  let match: RegExpExecArray | null;
-  let i = 0;
-  while ((match = pattern.exec(text))) {
-    if (match.index > lastIndex) nodes.push(text.slice(lastIndex, match.index));
-    const key = `${keyPrefix}-${i++}`;
-    if (match[1] !== undefined) {
-      nodes.push(
-        <code
-          key={key}
-          className="px-1 py-0.5 rounded bg-black/10 dark:bg-white/10 font-mono text-[10px]"
-        >
-          {match[1]}
-        </code>,
-      );
-    } else if (match[2] !== undefined) {
-      nodes.push(
-        <a
-          key={key}
-          href={match[3]}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="underline underline-offset-2 hover:opacity-80"
-        >
-          {match[2]}
-        </a>,
-      );
-    } else if (match[4] !== undefined || match[5] !== undefined) {
-      nodes.push(<strong key={key}>{match[4] ?? match[5]}</strong>);
-    } else if (match[6] !== undefined || match[7] !== undefined) {
-      nodes.push(<em key={key}>{match[6] ?? match[7]}</em>);
-    }
-    lastIndex = pattern.lastIndex;
-  }
-  if (lastIndex < text.length) nodes.push(text.slice(lastIndex));
-  return nodes;
-};
-
-const MarkdownMessage: React.FC<{ content: string }> = ({ content }) => {
-  const blocks = content.trim().split(/\n{2,}/);
-  return (
-    <div className="space-y-1.5">
-      {blocks.map((block, bi) => {
-        if (block.startsWith("```") && block.endsWith("```")) {
-          const code = block.replace(/^```[a-z]*\n?/i, "").replace(/```$/, "");
-          return (
-            <pre
-              key={bi}
-              className="rounded-lg bg-black/10 dark:bg-white/10 p-2 overflow-x-auto text-[10px] font-mono whitespace-pre"
-            >
-              {code}
-            </pre>
-          );
-        }
-        const lines = block.split("\n");
-        const isList = lines.every((l) => /^\s*([-*]|\d+\.)\s+/.test(l));
-        if (isList) {
-          const ordered = /^\s*\d+\./.test(lines[0]);
-          const ListTag = ordered ? "ol" : "ul";
-          return (
-            <ListTag
-              key={bi}
-              className={`pl-4 space-y-0.5 ${ordered ? "list-decimal" : "list-disc"}`}
-            >
-              {lines.map((l, li) => (
-                <li key={li}>
-                  {renderInline(
-                    l.replace(/^\s*([-*]|\d+\.)\s+/, ""),
-                    `${bi}-${li}`,
-                  )}
-                </li>
-              ))}
-            </ListTag>
-          );
-        }
-        return (
-          <p key={bi} className="wrap-break-word">
-            {lines.map((l, li) => (
-              <React.Fragment key={li}>
-                {li > 0 && <br />}
-                {renderInline(l, `${bi}-${li}`)}
-              </React.Fragment>
-            ))}
-          </p>
-        );
-      })}
-    </div>
-  );
 };
 
 const stripMarkdown = (text: string): string =>
@@ -822,11 +722,15 @@ const SupportPanel: React.FC = () => {
                         </p>
                       )}
                       {isCustomer ? (
-                        <p className="whitespace-pre-wrap break-words">
+                        <p className="whitespace-pre-wrap wrap-break-word">
                           {m.content}
                         </p>
                       ) : (
-                        <MarkdownMessage content={m.content} />
+                        <div
+                          dangerouslySetInnerHTML={{
+                            __html: renderHtml(m.content),
+                          }}
+                        />
                       )}
                       <p
                         className={`text-[10px] mt-1 ${isCustomer ? "text-white/60" : "text-slate-400"}`}
