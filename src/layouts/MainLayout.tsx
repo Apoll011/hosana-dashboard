@@ -1433,7 +1433,7 @@ export const MainLayout: React.FC = () => {
             />
 
             {/* Main Content Area */}
-            <div className="flex-1 flex flex-col relative bg-white dark:bg-slate-900 overflow-hidden">
+            <div className="flex-1 flex flex-col relative bg-white dark:bg-m3-bg overflow-hidden">
               <Outlet
                 context={{
                   filteredSubfolders,
