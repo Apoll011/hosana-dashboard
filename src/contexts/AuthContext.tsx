@@ -167,33 +167,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     localStorage.removeItem(CACHED_ORG_KEY);
     clearPermissionCache();
 
-    // Clear all localStorage data
-    localStorage.clear();
-
-    // Clear all IndexedDB databases
-    if (typeof indexedDB !== "undefined" && indexedDB.databases) {
-      try {
-        const databases = await indexedDB.databases();
-        await Promise.all(
-          databases.map(
-            (db) =>
-              new Promise<void>((resolve) => {
-                if (!db.name) {
-                  resolve();
-                  return;
-                }
-                const req = indexedDB.deleteDatabase(db.name);
-                req.onsuccess = () => resolve();
-                req.onerror = () => resolve();
-                req.onblocked = () => resolve();
-              }),
-          ),
-        );
-      } catch {
-        // indexedDB.databases() may not be available in all browsers; ignore errors
-      }
-    }
-
     setIsLoading(false);
   }, []);
 
@@ -359,6 +332,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     setIsLoading(true);
     await authClient.signOut({ fetchOptions: {} });
     handleClearSession();
+    // Clear all localStorage data
+    localStorage.clear();
+
+    // Clear all IndexedDB databases
+    if (typeof indexedDB !== "undefined" && indexedDB.databases) {
+      try {
+        const databases = await indexedDB.databases();
+        await Promise.all(
+          databases.map(
+            (db) =>
+              new Promise<void>((resolve) => {
+                if (!db.name) {
+                  resolve();
+                  return;
+                }
+                const req = indexedDB.deleteDatabase(db.name);
+                req.onsuccess = () => resolve();
+                req.onerror = () => resolve();
+                req.onblocked = () => resolve();
+              }),
+          ),
+        );
+      } catch {
+        // indexedDB.databases() may not be available in all browsers; ignore errors
+      }
+    }
   }, [handleClearSession]);
 
   const contextValue = useMemo<AuthContextType>(
