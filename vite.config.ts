@@ -1,8 +1,25 @@
+import posthog from "@posthog/rollup-plugin";
 import preact from "@preact/preset-vite";
 import tailwindcss from "@tailwindcss/vite";
 import path from "path";
 import { defineConfig } from "vite";
 import { VitePWA } from "vite-plugin-pwa";
+
+// Upload source maps to PostHog error tracking only when the build has
+// credentials. Local and CI builds without the key skip the upload.
+const sourceMapUpload = process.env.POSTHOG_API_KEY
+  ? [
+      posthog({
+        personalApiKey: process.env.POSTHOG_API_KEY,
+        projectId: process.env.POSTHOG_PROJECT_ID,
+        host: process.env.POSTHOG_HOST,
+        sourcemaps: {
+          enabled: true,
+          deleteAfterUpload: true,
+        },
+      }),
+    ]
+  : [];
 
 export default defineConfig(() => {
   return {
@@ -59,6 +76,7 @@ export default defineConfig(() => {
           ],
         },
       }),
+      ...sourceMapUpload,
     ],
     resolve: {
       alias: {
@@ -71,6 +89,9 @@ export default defineConfig(() => {
     build: {
       outDir: "dist",
       emptyOutDir: true,
+      // Generate hidden source maps so PostHog can symbolicate minified
+      // stack traces without serving the maps to end users.
+      sourcemap: "hidden" as const,
     },
     define: {
       APP_VERSION: JSON.stringify(process.env.npm_package_version),

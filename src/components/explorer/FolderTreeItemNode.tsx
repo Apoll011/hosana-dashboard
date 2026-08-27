@@ -50,7 +50,7 @@ export function getFolderAncestors(
   folderId: string | null | undefined,
   folders: Folder[],
 ): Folder[] {
-  if (!folderId) return [];
+  if (!folderId || !folders) return [];
   const trail: Folder[] = [];
   const visited = new Set<string>();
   let current = folders.find((f) => f.id === folderId);
