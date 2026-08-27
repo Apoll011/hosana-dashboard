@@ -151,11 +151,14 @@ export const pt = {
     features: {
       earlyAccess: {
         title: "Funcionalidades em Acesso Antecipado",
-        subtitle: "Ative ou desative funcionalidades beta do PostHog.",
+        subtitle: "Ative ou desative funcionalidades beta.",
         unavailable: "O PostHog não está disponível neste ambiente.",
         empty: "Não há funcionalidades em acesso antecipado disponíveis.",
         enrolled: "Inscrito",
         docs: "Saber mais",
+        comingSoon: "Brevemente",
+        interested: "Interessado",
+        loadError: "Não foi possível carregar as funcionalidades.",
       },
       support: {
         title: "Suporte & Feedback",
@@ -172,10 +175,24 @@ export const pt = {
         chatEmpty: "Ainda sem mensagens. Envie uma abaixo.",
         placeholder: "Escreva uma mensagem… (Enter para enviar)",
         restore: "Restaurar conversas",
-        restoreDesc: "Introduza o seu e-mail para receber um link que restaura as suas conversas anteriores neste browser.",
+        restoreDesc:
+          "Introduza o seu e-mail para receber um link que restaura as suas conversas anteriores neste browser.",
         restoreSent: "Link de recuperação enviado — verifique o seu e-mail!",
         emailPlaceholder: "o.seu@email.com",
         sendLink: "Enviar link",
+        loadError: "Ocorreu um erro ao carregar isto.",
+        sendError: "Não foi possível enviar a mensagem — tente novamente.",
+        restoreRateLimited:
+          "Demasiados pedidos — tente novamente daqui a pouco.",
+        restoreError: "Não foi possível enviar o e-mail de recuperação.",
+        noMessagesYet: "Ainda sem mensagens",
+        messages: "mensagens",
+        loadMore: "Carregar mais",
+        ai: "Assistente de IA",
+        team: "Suporte",
+        readOnlyTicket:
+          "Esta não é a sua conversa mais recente, por isso as respostas não podem ser enviadas a partir daqui.",
+        startNewInstead: "Inicie uma nova mensagem",
       },
     },
     offlineTitle: "Modo Offline",
