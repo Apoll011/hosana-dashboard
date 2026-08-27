@@ -23,18 +23,34 @@
 }
 
 .dark {
-  --m3-primary: #38bdf8;
-  --m3-primary-light: #0c4a6e;
-  --m3-primary-dark: #082f49;
-  --m3-text: #e6e1e5;
-  --m3-secondary: #cac4d0;
-  --m3-bg: #0f172a;
-  --m3-sidebar: #1e293b;
-  --m3-border: #334155;
-  --m3-hover: #0f172a;
-  --m3-toolbar: #1e293b;
-  --m3-card: #1c1b1f;
-  --m3-input: #938f99;
+  /* --- Accent (brand blue, desaturated ~15% for dark mode) --- */
+  --m3-primary: #5babdb;
+  --m3-primary-light: #0f2d40;
+  --m3-primary-dark: #3d8ab8;
+
+  /* --- Surface elevation ladder (no pure black) --- */
+  /* surface-0: app base — darkest, very dark desaturated navy */
+  --m3-bg: #0b0d12;
+  /* surface-1: sidebar, top bar — one step lighter */
+  --m3-sidebar: #12151c;
+  --m3-toolbar: #12151c;
+  /* surface-2: cards, panels */
+  --m3-card: #181b23;
+  /* surface-3: hover state on interactive surfaces */
+  --m3-hover: #1f2330;
+
+  /* --- Borders — neutral cool-dark hairline ---
+     Used as-is: subtle panel edge (~16% white equiv)
+     Used with /50: very faint dividers             */
+  --m3-border: #2d3244;
+
+  /* --- Text hierarchy --- */
+  /* Primary body text (~93% opacity via text-m3-text) */
+  --m3-text: #eceef2;
+  /* Secondary / helper text (~65% opacity via text-m3-secondary) */
+  --m3-secondary: #9aa0b0;
+  /* Input placeholder / muted tier */
+  --m3-input: #636a7a;
 }
 
 @theme {
@@ -185,4 +201,129 @@ body {
   100% {
     transform: translateX(100%);
   }
+}
+
+/* ============================================================
+   Dark Mode — Tonal Badge Utilities
+   Usage: class="badge-orange" etc.
+   Pattern: muted tint bg + full-hue icon/text; no neon fill.
+   ============================================================ */
+
+/* Tonal orange (folder / category) */
+.dark .badge-orange {
+  background-color: rgba(234, 88, 12, 0.13);
+  color: #fb923c;
+}
+/* Tonal blue */
+.dark .badge-blue {
+  background-color: rgba(59, 130, 246, 0.13);
+  color: #60a5fa;
+}
+/* Tonal teal */
+.dark .badge-teal {
+  background-color: rgba(20, 184, 166, 0.13);
+  color: #2dd4bf;
+}
+/* Tonal rose / pink */
+.dark .badge-rose {
+  background-color: rgba(244, 63, 94, 0.13);
+  color: #fb7185;
+}
+/* Tonal purple (duration tags) */
+.dark .badge-purple {
+  background-color: rgba(139, 92, 246, 0.13);
+  color: #a78bfa;
+}
+/* Tonal red (duration / alert tags) */
+.dark .badge-red {
+  background-color: rgba(220, 38, 38, 0.13);
+  color: #f87171;
+}
+
+/* ============================================================
+   Dark Mode — Active tab pill: tonal instead of solid saturated fill.
+   Targets the settings tab button when active (bg-m3-primary text-white).
+   Override to a low-opacity tint + accent-colored text.
+   ============================================================ */
+.dark button.bg-m3-primary {
+  background-color: rgba(91, 171, 219, 0.15) !important;
+  color: var(--m3-primary) !important;
+  box-shadow: none !important;
+}
+/* Keep primary action buttons (non-tab) solid — scope by common patterns */
+.dark button.bg-m3-primary[data-action="primary"],
+.dark button.bg-m3-primary.rounded-full,
+.dark button.bg-m3-primary.rounded-2xl:not([role="tab"]) {
+  background-color: var(--m3-primary) !important;
+  color: #ffffff !important;
+}
+
+/* ============================================================
+   Dark Mode — "Owner" / role badge: tonal amber, not solid gold.
+   Tailwind: bg-amber-500 text-white → tonal amber
+   ============================================================ */
+.dark .bg-amber-500 {
+  background-color: rgba(245, 158, 11, 0.15) !important;
+}
+.dark .bg-amber-500 + *,
+.dark .bg-amber-500,
+.dark [class*="bg-amber-500"] {
+  color: #fbbf24 !important;
+}
+
+/* ============================================================
+   Dark Mode — Avatar camera-upload icon: tonal, not vivid cyan.
+   ============================================================ */
+.dark .bg-m3-primary.rounded-full.absolute {
+  background-color: rgba(91, 171, 219, 0.20) !important;
+  border: 1px solid rgba(91, 171, 219, 0.30);
+}
+
+/* ============================================================
+   Dark Mode — Keyboard focus-visible on interactive controls only.
+   Scoped to buttons/inputs/selects — does NOT apply to panels.
+   ============================================================ */
+.dark button:focus-visible,
+.dark input:focus-visible,
+.dark select:focus-visible,
+.dark textarea:focus-visible,
+.dark [role="radio"]:focus-visible,
+.dark [role="checkbox"]:focus-visible {
+  outline: 2px solid var(--m3-primary);
+  outline-offset: 2px;
+  box-shadow: none;
+}
+
+/* ============================================================
+   Dark Mode — Floating element shadows
+   Soft, neutral-cool, low-opacity. No colored glows.
+   ============================================================ */
+.dark .shadow-float {
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.4),
+    0 2px 4px -2px rgba(0, 0, 0, 0.3);
+}
+.dark .shadow-float-lg {
+  box-shadow:
+    0 10px 25px -5px rgba(0, 0, 0, 0.5),
+    0 4px 10px -6px rgba(0, 0, 0, 0.4);
+}
+
+/* ============================================================
+   Dark Mode — Settings page: align bg & cards with app tokens
+   ============================================================ */
+
+/* Page background: match app base (--m3-bg) instead of slate-950 */
+.dark .dark\:bg-slate-950 {
+  background-color: var(--m3-bg) !important;
+}
+
+/* Settings cards: match folder card surface (--m3-card) instead of slate-900 */
+.dark .dark\:bg-slate-900 {
+  background-color: var(--m3-card) !important;
+}
+
+/* Settings card borders: match the app neutral hairline token */
+.dark .dark\:border-slate-800 {
+  border-color: var(--m3-border) !important;
 }
