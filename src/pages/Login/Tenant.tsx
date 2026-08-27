@@ -28,7 +28,6 @@ export const RegisterOrganizationPage: React.FC = () => {
   const { navigate } = useAppNavigate();
   const { t } = useI18n();
   const alpha_release = false;
-  const captchaEnabled = false;
 
   // Step state
   const [step, setStep] = useState(1);
@@ -59,7 +58,7 @@ export const RegisterOrganizationPage: React.FC = () => {
     adminPassword.trim() !== "" &&
     adminPassword === confirmPassword &&
     agreedToTerms &&
-    (!captchaEnabled || !!captchaToken);
+    !!captchaToken;
 
   const handleNext = () => {
     setErrorMsg("");
@@ -85,12 +84,11 @@ export const RegisterOrganizationPage: React.FC = () => {
         name: adminName.trim(),
         email: adminEmail.trim(),
         password: adminPassword,
-        fetchOptions:
-          captchaEnabled && captchaToken
-            ? {
-                headers: { "x-captcha-token": captchaToken },
-              }
-            : undefined,
+        fetchOptions: captchaToken
+          ? {
+              headers: { "x-captcha-token": captchaToken },
+            }
+          : undefined,
       });
 
       if (signUpError)
@@ -353,12 +351,7 @@ export const RegisterOrganizationPage: React.FC = () => {
                   )}
                 </div>
 
-                {captchaEnabled && (
-                  <TurnstileWidget
-                    ref={captchaRef}
-                    onVerify={setCaptchaToken}
-                  />
-                )}
+                <TurnstileWidget ref={captchaRef} onVerify={setCaptchaToken} />
 
                 <div className="flex items-start gap-3 p-3 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-100 dark:border-slate-700/60">
                   <input

@@ -17,7 +17,6 @@ import { TurnstileWidget } from "./components/TurnstileWidget";
 export const RegisterPage: React.FC = () => {
   const { refetch } = useAuth();
   const { t } = useI18n();
-  const captchaEnabled = false;
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -53,7 +52,7 @@ export const RegisterPage: React.FC = () => {
       setErrorMsg(t("settings.account.profile.passwordMinLength"));
       return;
     }
-    if (captchaEnabled && !captchaToken) {
+    if (!captchaToken) {
       setErrorMsg("Please complete CAPTCHA.");
       return;
     }
@@ -63,12 +62,11 @@ export const RegisterPage: React.FC = () => {
       name: name.trim(),
       email: email.trim(),
       password,
-      fetchOptions:
-        captchaEnabled && captchaToken
-          ? {
-              headers: { "x-captcha-token": captchaToken },
-            }
-          : undefined,
+      fetchOptions: captchaToken
+        ? {
+            headers: { "x-captcha-token": captchaToken },
+          }
+        : undefined,
     });
     setIsLoading(false);
 
@@ -169,9 +167,7 @@ export const RegisterPage: React.FC = () => {
           )}
         </div>
 
-        {captchaEnabled && (
-          <TurnstileWidget ref={captchaRef} onVerify={setCaptchaToken} />
-        )}
+        <TurnstileWidget ref={captchaRef} onVerify={setCaptchaToken} />
 
         <Button
           type="submit"
