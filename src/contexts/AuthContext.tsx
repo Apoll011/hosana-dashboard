@@ -14,6 +14,7 @@ import React, {
 } from "react";
 import { authClient } from "../lib/authClient";
 import { clearPermissionCache } from "../lib/permissions/client";
+import { posthog } from "../lib/posthog";
 
 interface SessionUser {
   id: string;
@@ -272,6 +273,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       setOrganization(activeOrg);
       setUser(fullUser);
 
+      // Identify the user in PostHog on every session refresh
+      posthog.identify(fullUser.id, {
+        name: fullUser.name,
+        email: fullUser.email,
+        role: userRole,
+        organization_id: activeOrg?.id,
+        organization_name: activeOrg?.name,
+      });
+
       // Cache for offline usage
       try {
         localStorage.setItem(CACHED_USER_KEY, JSON.stringify(fullUser));
@@ -331,6 +341,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const logout = useCallback(async () => {
     setIsLoading(true);
     await authClient.signOut({ fetchOptions: {} });
+    posthog.reset();
     handleClearSession();
     // Clear all localStorage data
     localStorage.clear();

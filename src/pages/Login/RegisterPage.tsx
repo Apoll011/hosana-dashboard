@@ -9,6 +9,7 @@ import React, { useRef, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { useI18n } from "../../i18n";
 import { authClient } from "../../lib/authClient";
+import { posthog } from "../../lib/posthog";
 import LoginLayout from "./Layout";
 import { PasswordStrengthMeter } from "./components/PasswordStrengthMeter";
 import { TurnstileWidget } from "./components/TurnstileWidget";
@@ -16,7 +17,6 @@ import { TurnstileWidget } from "./components/TurnstileWidget";
 export const RegisterPage: React.FC = () => {
   const { refetch } = useAuth();
   const { t } = useI18n();
-  const captchaEnabled = false;
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -52,7 +52,7 @@ export const RegisterPage: React.FC = () => {
       setErrorMsg(t("settings.account.profile.passwordMinLength"));
       return;
     }
-    if (captchaEnabled && !captchaToken) {
+    if (!captchaToken) {
       setErrorMsg("Please complete CAPTCHA.");
       return;
     }
@@ -62,12 +62,11 @@ export const RegisterPage: React.FC = () => {
       name: name.trim(),
       email: email.trim(),
       password,
-      fetchOptions:
-        captchaEnabled && captchaToken
-          ? {
-              headers: { "x-captcha-token": captchaToken },
-            }
-          : undefined,
+      fetchOptions: captchaToken
+        ? {
+            headers: { "x-captcha-response": captchaToken },
+          }
+        : undefined,
     });
     setIsLoading(false);
 
@@ -79,6 +78,7 @@ export const RegisterPage: React.FC = () => {
       return;
     }
 
+    posthog.capture("user_registered");
     await refetch();
     setSuccessState(true);
   };
@@ -167,9 +167,7 @@ export const RegisterPage: React.FC = () => {
           )}
         </div>
 
-        {captchaEnabled && (
-          <TurnstileWidget ref={captchaRef} onVerify={setCaptchaToken} />
-        )}
+        <TurnstileWidget ref={captchaRef} onVerify={setCaptchaToken} />
 
         <Button
           type="submit"

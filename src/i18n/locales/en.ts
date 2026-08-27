@@ -1186,7 +1186,7 @@ export const en: typeof pt = {
       title: "Select Organization",
       subtitle: "Choose the organization you want to work in",
       createOrgBtn: "Create New Organization",
-      noOrgs: "You do not belong to any organization at the moment.",
+      beta: "Wait for the Beta Release on September 1st to create your organization and log in.",
     },
     acceptInvitation: {
       title: "Organization Invitation",

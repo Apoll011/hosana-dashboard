@@ -12,6 +12,7 @@ import { useLocation } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import { useI18n } from "../../i18n";
 import { authClient } from "../../lib/authClient";
+import { posthog } from "../../lib/posthog";
 import LoginLayout from "./Layout";
 import { TurnstileWidget } from "./components/TurnstileWidget";
 
@@ -31,15 +32,13 @@ export const LoginPage: React.FC = () => {
   const [rememberMe, setRememberMe] = useState(true);
   const captchaRef = useRef<{ reset: () => void }>(null);
 
-  const captchaEnabled = false;
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email.trim() || !password.trim()) {
       setErrorMsg(t("auth.login.errorInvalidCredentials"));
       return;
     }
-    if (captchaEnabled && !captchaToken) {
+    if (!captchaToken) {
       setErrorMsg("Please complete CAPTCHA");
       return;
     }
@@ -50,12 +49,11 @@ export const LoginPage: React.FC = () => {
       email: email.trim(),
       password,
       rememberMe,
-      fetchOptions:
-        captchaEnabled && captchaToken
-          ? {
-              headers: { "x-captcha-token": captchaToken },
-            }
-          : undefined,
+      fetchOptions: captchaToken
+        ? {
+            headers: { "x-captcha-response": captchaToken },
+          }
+        : undefined,
     });
 
     setIsLoading(false);
@@ -79,6 +77,7 @@ export const LoginPage: React.FC = () => {
       return;
     }
 
+    posthog.capture("user_logged_in", { remember_me: rememberMe });
     await refetch();
     const activeSlug = localStorage.getItem("active_org_slug");
     if (activeSlug) {
@@ -137,9 +136,7 @@ export const LoginPage: React.FC = () => {
           </AppLink>
         </div>
 
-        {captchaEnabled && (
-          <TurnstileWidget ref={captchaRef} onVerify={setCaptchaToken} />
-        )}
+        <TurnstileWidget ref={captchaRef} onVerify={setCaptchaToken} />
 
         <Button
           type="submit"

@@ -55,6 +55,7 @@ import { useFolders } from "../../hooks/useFolders";
 import { useAllSongs } from "../../hooks/useSongs";
 import { usePersonalSettings } from "../../hooks/usePersonalSettings";
 import { useI18n } from "../../i18n";
+import { posthog } from "../../lib/posthog";
 
 interface SongsPageProps {
   hideHeader?: boolean;
@@ -448,6 +449,10 @@ export const SongsPage: React.FC<SongsPageProps> = ({
         tags: data.tags,
         content: `{title: ${data.title}}\n{artist: ${data.artist}}\n{key: G}\n\n[G]Enter lyrics and chords...`,
       });
+      posthog.capture("song_created", {
+        has_tags: data.tags.length > 0,
+        has_folder: !!data.folderId,
+      });
       setIsCreateModalOpen(false);
       navigate(`${slugPrefix}/songs/${newSong.id}`);
     },
@@ -457,6 +462,7 @@ export const SongsPage: React.FC<SongsPageProps> = ({
   const handleDeleteConfirm = useCallback(async () => {
     if (!deleteTarget) return;
     await deleteSong(deleteTarget.id);
+    posthog.capture("song_deleted", { count: 1 });
     setSelectedSongIds((prev) => {
       const next = new Set(prev);
       next.delete(deleteTarget.id);
@@ -493,6 +499,7 @@ export const SongsPage: React.FC<SongsPageProps> = ({
     for (const sId of songList) {
       await deleteSong(sId);
     }
+    posthog.capture("song_deleted", { count: songList.length });
     showToast(
       t("songsPage.deletedToast", { count: songList.length }),
       "success",

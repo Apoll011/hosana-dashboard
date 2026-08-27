@@ -1193,10 +1193,10 @@ export const pt = {
       resendBtn: "Reenviar e-mail de verificação",
     },
     tenant: {
-      title: "Selecionar Organização",
-      subtitle: "Escolha a organização em que deseja trabalhar",
+      title: "Criar Organização",
+      subtitle: "Crie a organização em que deseja trabalhar",
       createOrgBtn: "Criar Nova Organização",
-      noOrgs: "Não pertence a nenhuma organização de momento.",
+      beta: "Aguarde o Beta Release no dia 1 de Setembro para criar sua organização e fazer login.",
     },
     acceptInvitation: {
       title: "Convite para Organização",
