@@ -104,7 +104,8 @@ export const MainLayout: React.FC = () => {
   }, [triggerSyncCheck]);
 
   // Queries & Mutations
-  const { servicesQuery, createService, deleteService } = useServices();
+  //TODO: Maybe find a better way to handle the archived services
+  const { servicesQuery, createService, deleteService } = useServices(true);
   const allServices = useMemo(
     () => servicesQuery.data || [],
     [servicesQuery.data],
@@ -1432,7 +1433,7 @@ export const MainLayout: React.FC = () => {
             />
 
             {/* Main Content Area */}
-            <div className="flex-1 flex flex-col relative bg-white dark:bg-slate-900 overflow-hidden">
+            <div className="flex-1 flex flex-col relative bg-white dark:bg-m3-bg overflow-hidden">
               <Outlet
                 context={{
                   filteredSubfolders,
