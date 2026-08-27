@@ -51,7 +51,7 @@ export const LoginPage: React.FC = () => {
       rememberMe,
       fetchOptions: captchaToken
         ? {
-            headers: { "x-captcha-token": captchaToken },
+            headers: { "x-captcha-response": captchaToken },
           }
         : undefined,
     });
@@ -136,13 +136,7 @@ export const LoginPage: React.FC = () => {
           </AppLink>
         </div>
 
-        <TurnstileWidget
-          ref={captchaRef}
-          onVerify={(token: string) => {
-            setCaptchaToken(token);
-            console.log("Token: ", token);
-          }}
-        />
+        <TurnstileWidget ref={captchaRef} onVerify={setCaptchaToken} />
 
         <Button
           type="submit"

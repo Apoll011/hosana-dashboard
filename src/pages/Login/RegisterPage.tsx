@@ -64,7 +64,7 @@ export const RegisterPage: React.FC = () => {
       password,
       fetchOptions: captchaToken
         ? {
-            headers: { "x-captcha-token": captchaToken },
+            headers: { "x-captcha-response": captchaToken },
           }
         : undefined,
     });
