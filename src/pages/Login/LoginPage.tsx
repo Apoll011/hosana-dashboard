@@ -136,7 +136,13 @@ export const LoginPage: React.FC = () => {
           </AppLink>
         </div>
 
-        <TurnstileWidget ref={captchaRef} onVerify={setCaptchaToken} />
+        <TurnstileWidget
+          ref={captchaRef}
+          onVerify={(token: string) => {
+            setCaptchaToken(token);
+            console.log("Token: ", token);
+          }}
+        />
 
         <Button
           type="submit"
