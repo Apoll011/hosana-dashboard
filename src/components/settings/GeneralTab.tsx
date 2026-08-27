@@ -456,7 +456,7 @@ export const GeneralTab: React.FC<GeneralTabProps> = ({
         <div className="p-6 space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Duração Média de Cântico */}
-            <div className="space-y-2.5 p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/40 dark:bg-slate-850/40">
+            <div className="space-y-2.5 p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/40 dark:bg-m3-bg">
               <div className="flex items-center justify-between">
                 <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide flex items-center gap-1.5">
                   <Music className="w-4 h-4 text-indigo-500" />
@@ -509,7 +509,7 @@ export const GeneralTab: React.FC<GeneralTabProps> = ({
             </div>
 
             {/* Duração Média do Sermão */}
-            <div className="space-y-2.5 p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/40 dark:bg-slate-850/40">
+            <div className="space-y-2.5 p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/40 dark:bg-m3-bg">
               <div className="flex items-center justify-between">
                 <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide flex items-center gap-1.5">
                   <Mic2 className="w-4 h-4 text-rose-500" />
