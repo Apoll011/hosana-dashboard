@@ -4,6 +4,7 @@
  */
 
 import { Button, Input } from "@hosanna/shared";
+import { useFeatureFlagEnabled } from "@posthog/react";
 import {
   ArrowLeft,
   ArrowRight,
@@ -27,7 +28,7 @@ import LoginLayout from "./Layout";
 export const RegisterOrganizationPage: React.FC = () => {
   const { navigate } = useAppNavigate();
   const { t } = useI18n();
-  const alpha_release = false;
+  const beta_release = useFeatureFlagEnabled("beta-release");
 
   // Step state
   const [step, setStep] = useState(1);
@@ -134,7 +135,7 @@ export const RegisterOrganizationPage: React.FC = () => {
     }
   };
 
-  if (!alpha_release) {
+  if (!beta_release) {
     return (
       <LoginLayout
         optionalLink="/login"
