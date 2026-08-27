@@ -28,7 +28,7 @@ export const AcceptInvitationPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const invitationId = searchParams.get("id");
   const { navigate } = useAppNavigate();
-  const { refetch, user } = useAuth();
+  const { refetch, user, isLoading: isAuthLoading } = useAuth();
   const { t } = useI18n();
 
   const [invitation, setInvitation] = useState<InvitationData | null>(null);
@@ -45,6 +45,19 @@ export const AcceptInvitationPage: React.FC = () => {
       setIsFetching(false);
       return;
     }
+
+    // Wait until auth state is settled before redirecting
+    if (isAuthLoading) {
+      return;
+    }
+
+    // If the user is not logged in, save the invitation token and redirect to register
+    if (!user) {
+      localStorage.setItem("pending_invitation_id", invitationId);
+      navigate("/register", { replace: true });
+      return;
+    }
+
 
     const fetchInvitation = async () => {
       setIsFetching(true);
@@ -74,7 +87,8 @@ export const AcceptInvitationPage: React.FC = () => {
     };
 
     fetchInvitation();
-  }, [invitationId]);
+  }, [invitationId, user, isAuthLoading, navigate]);
+
 
   const handleAccept = async () => {
     if (!invitationId) return;
@@ -91,6 +105,9 @@ export const AcceptInvitationPage: React.FC = () => {
         setActionLoading(null);
         return;
       }
+
+      // Clear pending invitation from storage
+      localStorage.removeItem("pending_invitation_id");
 
       setSuccessMsg(t("auth.acceptInvitation.successDesc"));
 
@@ -135,6 +152,9 @@ export const AcceptInvitationPage: React.FC = () => {
         return;
       }
 
+      // Clear pending invitation from storage
+      localStorage.removeItem("pending_invitation_id");
+
       setSuccessMsg(t("settings.members.inviteCancelled", { email: "" }));
       setTimeout(() => {
         if (user) {
@@ -150,6 +170,7 @@ export const AcceptInvitationPage: React.FC = () => {
       setActionLoading(null);
     }
   };
+
 
   return (
     <LoginLayout errorMsg={errorMsg} redirectMessage={successMsg}>

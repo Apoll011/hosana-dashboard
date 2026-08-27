@@ -25,6 +25,7 @@ import { useTheme } from "../contexts/ThemeContext";
 import { useAppNavigate } from "../hooks/useAppNavigate";
 import { useI18n } from "../i18n";
 import { authClient } from "../lib/authClient";
+import { LanguageSelector } from "./Login/components/LanguageSelector";
 
 interface UserInvitation {
   id: string;
@@ -77,8 +78,18 @@ export const OnboardingPage: React.FC = () => {
   };
 
   useEffect(() => {
+    // Check for a pending invitation token stored before sign-up/sign-in
+    const pendingInvitationId = localStorage.getItem("pending_invitation_id");
+    if (pendingInvitationId) {
+      navigate(`/accept-invitation?id=${pendingInvitationId}`, {
+        replace: true,
+      });
+      return;
+    }
+
     fetchUserInvitations();
   }, []);
+
 
   const handleAcceptInvitation = async (invitationId: string) => {
     setProcessingInvId(invitationId);
@@ -188,19 +199,22 @@ export const OnboardingPage: React.FC = () => {
         <div className="absolute inset-0 bg-black/40 dark:bg-black/70 backdrop-blur-[2px] transition-colors duration-500" />
       </div>
 
-      {/* Dark mode toggle button in corner */}
-      <button
-        type="button"
-        onClick={toggleDarkMode}
-        aria-label="Alternar tema"
-        className="fixed top-4 right-4 z-30 p-2.5 rounded-full bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border border-slate-200/80 dark:border-slate-800 text-slate-700 dark:text-slate-200 hover:scale-110 active:scale-95 shadow-lg transition-all duration-200 cursor-pointer"
-      >
-        {darkMode ? (
-          <Sun className="w-5 h-5 text-amber-400" />
-        ) : (
-          <Moon className="w-5 h-5 text-slate-700" />
-        )}
-      </button>
+      {/* Top-right controls: Language selector + Dark mode toggle */}
+      <div className="fixed top-4 right-4 z-30 flex items-center gap-2">
+        <LanguageSelector />
+        <button
+          type="button"
+          onClick={toggleDarkMode}
+          aria-label="Alternar tema"
+          className="p-2.5 rounded-full bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border border-slate-200/80 dark:border-slate-800 text-slate-700 dark:text-slate-200 hover:scale-110 active:scale-95 shadow-lg transition-all duration-200 cursor-pointer"
+        >
+          {darkMode ? (
+            <Sun className="w-5 h-5 text-amber-400" />
+          ) : (
+            <Moon className="w-5 h-5 text-slate-700" />
+          )}
+        </button>
+      </div>
 
       <div className="relative max-w-md sm:max-w-lg w-full bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-slate-200/80 dark:border-slate-800/80 rounded-3xl sm:rounded-4xl shadow-2xl shadow-black/30 p-5 sm:p-7 transition-all duration-300 z-20 my-auto max-h-[92vh] flex flex-col overflow-y-auto scrollbar-thin animate-in zoom-in-95">
         {/* Branding / Header */}
