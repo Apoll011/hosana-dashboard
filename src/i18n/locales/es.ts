@@ -147,7 +147,41 @@ export const es: typeof pt = {
       members: "Miembros",
       general: "Servidor",
       app: "Aplicación",
+      features: "Funcionalidades y soporte",
       about: "Acerca de",
+    },
+    features: {
+      earlyAccess: {
+        title: "Funciones de acceso anticipado",
+        subtitle: "Activa o desactiva las funciones beta de PostHog.",
+        unavailable: "PostHog no está disponible en este entorno.",
+        empty: "No hay funciones de acceso anticipado disponibles.",
+        enrolled: "Inscrito",
+        docs: "Más información",
+      },
+      support: {
+        title: "Soporte y comentarios",
+        subtitle:
+          "Habla con nosotros, informa de errores o solicita nuevas funciones.",
+        unavailable: "El soporte por chat no está disponible en este entorno.",
+        noTickets: "Aún no hay conversaciones. Inicia una a continuación.",
+        ticket: "Ticket",
+        newTicket: "Nueva conversación",
+        startNew: "Iniciar nueva conversación",
+        requestFeature: "Solicitar una función",
+        requestFeatureMsg: "¡Hola! Me gustaría solicitar una nueva función: ",
+        reportBug: "Informar de un error",
+        reportBugMsg: "¡Hola! Me gustaría informar de un error: ",
+        chatEmpty: "Aún no hay mensajes. Envía uno a continuación.",
+        placeholder: "Escribe un mensaje… (Enter para enviar)",
+        restore: "Restaurar conversaciones",
+        restoreDesc:
+          "Introduce tu correo electrónico para recibir un enlace que restaure tus conversaciones anteriores en este navegador.",
+        restoreSent:
+          "¡Enlace de recuperación enviado! Revisa tu correo electrónico.",
+        emailPlaceholder: "tu@email.com",
+        sendLink: "Enviar enlace",
+      },
     },
     offlineTitle: "Modo Sin Conexión",
     offlineDesc:

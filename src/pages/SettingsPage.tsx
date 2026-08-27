@@ -13,6 +13,7 @@ import {
   Server,
   User,
   Users,
+  Zap,
 } from "lucide-react";
 import React, { useState } from "react";
 import { useSync } from "../contexts/SyncContext";
@@ -21,6 +22,7 @@ import { useI18n } from "../i18n";
 import { AboutTab } from "../components/settings/AboutTab";
 import { AccountTab } from "../components/settings/AccountTab";
 import { AppearanceTab } from "../components/settings/AppearanceTab";
+import { FeaturesTab } from "../components/settings/FeaturesTab";
 import { GeneralTab } from "../components/settings/GeneralTab";
 import { MembersTab } from "../components/settings/MembersTab";
 import { WorkspaceTab } from "../components/settings/WorkspaceTab";
@@ -30,7 +32,7 @@ import { CloudOff } from "lucide-react";
 import { useOnline } from "../hooks/useOnline";
 
 type TabType =
-  "general" | "workspace" | "account" | "members" | "app" | "about";
+  "general" | "workspace" | "account" | "members" | "app" | "features" | "about";
 
 export const SettingsPage: React.FC = () => {
   const { showToast } = useSync();
@@ -107,6 +109,13 @@ export const SettingsPage: React.FC = () => {
       id: "app",
       label: t("settings.tabs.app"),
       icon: AppWindow,
+      requiresNetwork: false,
+      show: true,
+    },
+    {
+      id: "features",
+      label: t("settings.tabs.features"),
+      icon: Zap,
       requiresNetwork: false,
       show: true,
     },
@@ -188,6 +197,7 @@ export const SettingsPage: React.FC = () => {
             <GeneralTab active={activeTab === "general"} />
           </div>
           <AppearanceTab active={activeTab === "app"} />
+          <FeaturesTab active={activeTab === "features"} />
           <AboutTab active={activeTab === "about"} />
         </div>
       </div>
