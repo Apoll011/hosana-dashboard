@@ -36,6 +36,7 @@ import { useAuth } from "../../contexts/AuthContext";
 import { useMarqueeSelection } from "../../hooks/useMarqueeSelection";
 import { useServices } from "../../hooks/useServices";
 import { useI18n } from "../../i18n";
+import { posthog } from "../../lib/posthog";
 
 interface ServicesPageProps {
   hideHeader?: boolean;
@@ -336,6 +337,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
       notes: data.notes,
       elements: [],
     });
+    posthog.capture("service_created", { has_notes: !!data.notes });
     setIsCreateModalOpen(false);
     navigate(`${slugPrefix}/services/${newService.id}`);
   };
@@ -386,6 +388,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
   const handleDeleteConfirm = async () => {
     if (!deleteTarget) return;
     await deleteService(deleteTarget.id);
+    posthog.capture("service_deleted", { count: 1 });
     setSelectedServiceIds((prev) => {
       const next = new Set(prev);
       next.delete(deleteTarget.id);
@@ -403,6 +406,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
         updatedAt: service.updatedAt,
       },
     });
+    posthog.capture("service_archived", { archived: nextArchived });
     setArchiveTarget(null);
     setContextMenu(null);
   };
@@ -410,6 +414,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
   const handleBatchDelete = async () => {
     const ids = Array.from(selectedServiceIds);
     await Promise.allSettled(ids.map((id) => deleteService(id)));
+    posthog.capture("service_deleted", { count: ids.length });
     setSelectedServiceIds(new Set());
     setIsBatchDeleteOpen(false);
   };

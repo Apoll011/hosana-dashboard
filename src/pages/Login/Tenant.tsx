@@ -18,6 +18,7 @@ import {
 import React, { useRef, useState } from "react";
 
 import { useAppNavigate } from "@/src/hooks/useAppNavigate";
+import { posthog } from "@/src/lib/posthog";
 import { useI18n } from "../../i18n";
 import { authClient } from "../../lib/authClient";
 import { PasswordStrengthMeter } from "./components/PasswordStrengthMeter";
@@ -27,8 +28,13 @@ import LoginLayout from "./Layout";
 export const RegisterOrganizationPage: React.FC = () => {
   const { navigate } = useAppNavigate();
   const { t } = useI18n();
-  const alpha_release = false;
-  const captchaEnabled = false;
+  let beta_release;
+
+  if (posthog.isFeatureEnabled("beta-release")) {
+    beta_release = true;
+  } else {
+    beta_release = false;
+  }
 
   // Step state
   const [step, setStep] = useState(1);
@@ -59,7 +65,7 @@ export const RegisterOrganizationPage: React.FC = () => {
     adminPassword.trim() !== "" &&
     adminPassword === confirmPassword &&
     agreedToTerms &&
-    (!captchaEnabled || !!captchaToken);
+    !!captchaToken;
 
   const handleNext = () => {
     setErrorMsg("");
@@ -85,12 +91,11 @@ export const RegisterOrganizationPage: React.FC = () => {
         name: adminName.trim(),
         email: adminEmail.trim(),
         password: adminPassword,
-        fetchOptions:
-          captchaEnabled && captchaToken
-            ? {
-                headers: { "x-captcha-token": captchaToken },
-              }
-            : undefined,
+        fetchOptions: captchaToken
+          ? {
+              headers: { "x-captcha-response": captchaToken },
+            }
+          : undefined,
       });
 
       if (signUpError)
@@ -136,7 +141,7 @@ export const RegisterOrganizationPage: React.FC = () => {
     }
   };
 
-  if (!alpha_release) {
+  if (!beta_release) {
     return (
       <LoginLayout
         optionalLink="/login"
@@ -149,7 +154,7 @@ export const RegisterOrganizationPage: React.FC = () => {
             {t("auth.tenant.title")}
           </h2>
           <p className="text-sm leading-6 text-slate-500 dark:text-slate-400">
-            {t("auth.tenant.noOrgs")}
+            {t("auth.tenant.beta")}
           </p>
         </div>
       </LoginLayout>
@@ -353,12 +358,7 @@ export const RegisterOrganizationPage: React.FC = () => {
                   )}
                 </div>
 
-                {captchaEnabled && (
-                  <TurnstileWidget
-                    ref={captchaRef}
-                    onVerify={setCaptchaToken}
-                  />
-                )}
+                <TurnstileWidget ref={captchaRef} onVerify={setCaptchaToken} />
 
                 <div className="flex items-start gap-3 p-3 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-100 dark:border-slate-700/60">
                   <input

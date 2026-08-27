@@ -1199,7 +1199,7 @@ export const es: typeof pt = {
       title: "Seleccionar Organización",
       subtitle: "Elija la organización en la que desea trabajar",
       createOrgBtn: "Crear Nueva Organización",
-      noOrgs: "No pertenece a ninguna organización actualmente.",
+      beta: "Espere al lanzamiento de la Beta el 1 de septiembre para crear su organización e iniciar sesión.",
     },
     acceptInvitation: {
       title: "Invitación a la Organización",
