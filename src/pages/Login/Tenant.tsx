@@ -31,9 +31,9 @@ export const RegisterOrganizationPage: React.FC = () => {
   let beta_release;
 
   if (posthog.isFeatureEnabled("beta-release")) {
-    beta_release = false;
-  } else {
     beta_release = true;
+  } else {
+    beta_release = false;
   }
 
   // Step state
