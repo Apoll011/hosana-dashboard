@@ -5,25 +5,25 @@
 
 import { posthog } from "@/src/lib/posthog";
 import {
-    AlertCircle,
-    ArrowLeft,
-    Bot,
-    Bug,
-    ChevronRight,
-    ExternalLink,
-    FlaskConical,
-    HelpCircle,
-    Inbox,
-    Loader2,
-    Lock,
-    MailCheck,
-    MessageSquare,
-    Plus,
-    RefreshCw,
-    Send,
-    Sparkles,
-    ToggleLeft,
-    ToggleRight,
+  AlertCircle,
+  ArrowLeft,
+  Bot,
+  Bug,
+  ChevronRight,
+  ExternalLink,
+  FlaskConical,
+  HelpCircle,
+  Inbox,
+  Loader2,
+  Lock,
+  MailCheck,
+  MessageSquare,
+  Plus,
+  RefreshCw,
+  Send,
+  Sparkles,
+  ToggleLeft,
+  ToggleRight,
 } from "lucide-react";
 import { EarlyAccessFeature, Message, Ticket } from "posthog-js";
 import React, { useCallback, useEffect, useRef, useState } from "react";
@@ -89,13 +89,12 @@ const EarlyAccessPanel: React.FC = () => {
   const [activeFeatures, setActiveFeatures] = useState<EarlyAccessFeature[]>(
     [],
   );
-  const [conceptFeatures, setConceptFeatures] = useState<
-    EarlyAccessFeature[]
-  >([]);
-  const [enrolled, setEnrolled] = useState<Record<string, boolean>>({});
-  const [interested, setInterested] = useState<Record<string, boolean>>(
-    readLocalInterest,
+  const [conceptFeatures, setConceptFeatures] = useState<EarlyAccessFeature[]>(
+    [],
   );
+  const [enrolled, setEnrolled] = useState<Record<string, boolean>>({});
+  const [interested, setInterested] =
+    useState<Record<string, boolean>>(readLocalInterest);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -297,6 +296,120 @@ const STATUS_STYLES: Record<string, string> = {
   resolved: "bg-slate-200 dark:bg-slate-700 text-slate-500",
 };
 
+/* ─── Minimal markdown renderer (no external deps) ─────────────────
+ * Covers what support replies typically use: **bold**, *italic*,
+ * `code`, ```code blocks```, [links](url), - / 1. lists, and
+ * paragraph/line breaks. Only applied to team/AI responses — the
+ * customer's own typed text is rendered as plain text so things like
+ * "5*3=15" don't get misread as emphasis.
+ */
+const renderInline = (text: string, keyPrefix: string): React.ReactNode[] => {
+  const nodes: React.ReactNode[] = [];
+  const pattern =
+    /`([^`]+)`|\[([^\]]+)\]\(([^)\s]+)\)|\*\*([^*]+)\*\*|__([^_]+)__|\*([^*]+)\*|_([^_]+)_/g;
+  let lastIndex = 0;
+  let match: RegExpExecArray | null;
+  let i = 0;
+  while ((match = pattern.exec(text))) {
+    if (match.index > lastIndex) nodes.push(text.slice(lastIndex, match.index));
+    const key = `${keyPrefix}-${i++}`;
+    if (match[1] !== undefined) {
+      nodes.push(
+        <code
+          key={key}
+          className="px-1 py-0.5 rounded bg-black/10 dark:bg-white/10 font-mono text-[10px]"
+        >
+          {match[1]}
+        </code>,
+      );
+    } else if (match[2] !== undefined) {
+      nodes.push(
+        <a
+          key={key}
+          href={match[3]}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="underline underline-offset-2 hover:opacity-80"
+        >
+          {match[2]}
+        </a>,
+      );
+    } else if (match[4] !== undefined || match[5] !== undefined) {
+      nodes.push(<strong key={key}>{match[4] ?? match[5]}</strong>);
+    } else if (match[6] !== undefined || match[7] !== undefined) {
+      nodes.push(<em key={key}>{match[6] ?? match[7]}</em>);
+    }
+    lastIndex = pattern.lastIndex;
+  }
+  if (lastIndex < text.length) nodes.push(text.slice(lastIndex));
+  return nodes;
+};
+
+const MarkdownMessage: React.FC<{ content: string }> = ({ content }) => {
+  const blocks = content.trim().split(/\n{2,}/);
+  return (
+    <div className="space-y-1.5">
+      {blocks.map((block, bi) => {
+        if (block.startsWith("```") && block.endsWith("```")) {
+          const code = block.replace(/^```[a-z]*\n?/i, "").replace(/```$/, "");
+          return (
+            <pre
+              key={bi}
+              className="rounded-lg bg-black/10 dark:bg-white/10 p-2 overflow-x-auto text-[10px] font-mono whitespace-pre"
+            >
+              {code}
+            </pre>
+          );
+        }
+        const lines = block.split("\n");
+        const isList = lines.every((l) => /^\s*([-*]|\d+\.)\s+/.test(l));
+        if (isList) {
+          const ordered = /^\s*\d+\./.test(lines[0]);
+          const ListTag = ordered ? "ol" : "ul";
+          return (
+            <ListTag
+              key={bi}
+              className={`pl-4 space-y-0.5 ${ordered ? "list-decimal" : "list-disc"}`}
+            >
+              {lines.map((l, li) => (
+                <li key={li}>
+                  {renderInline(
+                    l.replace(/^\s*([-*]|\d+\.)\s+/, ""),
+                    `${bi}-${li}`,
+                  )}
+                </li>
+              ))}
+            </ListTag>
+          );
+        }
+        return (
+          <p key={bi} className="wrap-break-word">
+            {lines.map((l, li) => (
+              <React.Fragment key={li}>
+                {li > 0 && <br />}
+                {renderInline(l, `${bi}-${li}`)}
+              </React.Fragment>
+            ))}
+          </p>
+        );
+      })}
+    </div>
+  );
+};
+
+const stripMarkdown = (text: string): string =>
+  text
+    .replace(/```[\s\S]*?```/g, " ")
+    .replace(/`([^`]+)`/g, "$1")
+    .replace(/\*\*([^*]+)\*\*/g, "$1")
+    .replace(/__([^_]+)__/g, "$1")
+    .replace(/\*([^*]+)\*/g, "$1")
+    .replace(/_([^_]+)_/g, "$1")
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+    .replace(/^\s*#{1,6}\s+/gm, "")
+    .replace(/\n+/g, " ")
+    .trim();
+
 const SupportPanel: React.FC = () => {
   const { t } = useI18n();
 
@@ -471,8 +584,7 @@ const SupportPanel: React.FC = () => {
       setRestoreSent(true);
     } catch (err: any) {
       setError(
-        err?.message?.includes("Too many requests") ||
-          err?.status === 429
+        err?.message?.includes("Too many requests") || err?.status === 429
           ? t("settings.features.support.restoreRateLimited")
           : t("settings.features.support.restoreError"),
       );
@@ -601,8 +713,9 @@ const SupportPanel: React.FC = () => {
                     <MessageSquare className="w-4 h-4 text-slate-400 shrink-0" />
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-semibold text-slate-900 dark:text-slate-100 truncate">
-                        {tk.last_message ||
-                          t("settings.features.support.noMessagesYet")}
+                        {tk.last_message
+                          ? stripMarkdown(tk.last_message)
+                          : t("settings.features.support.noMessagesYet")}
                       </p>
                       <p className="text-[11px] text-slate-400 mt-0.5">
                         {new Date(
@@ -675,16 +788,18 @@ const SupportPanel: React.FC = () => {
       {/* Chat */}
       {view === "chat" && (
         <div className="flex flex-col px-5 pb-5">
-          <div className="min-h-50 max-h-64 overflow-y-auto space-y-3 py-2">
+          <div className="h-80 overflow-y-auto space-y-3 py-2">
             {loadingMsgs ? (
-              <div className="flex items-center gap-2 py-4 text-slate-400 text-xs">
+              <div className="flex items-center justify-center gap-2 h-full text-slate-400 text-xs">
                 <Loader2 className="w-4 h-4 animate-spin" />
                 {t("common.loading")}…
               </div>
             ) : messages.length === 0 ? (
-              <p className="text-xs text-slate-400 py-4 text-center">
-                {t("settings.features.support.chatEmpty")}
-              </p>
+              <div className="flex items-center justify-center h-full">
+                <p className="text-xs text-slate-400 text-center">
+                  {t("settings.features.support.chatEmpty")}
+                </p>
+              </div>
             ) : (
               messages.map((m) => {
                 const isCustomer = m.author_type === "customer";
@@ -706,7 +821,13 @@ const SupportPanel: React.FC = () => {
                               : t("settings.features.support.team"))}
                         </p>
                       )}
-                      <p>{m.content}</p>
+                      {isCustomer ? (
+                        <p className="whitespace-pre-wrap break-words">
+                          {m.content}
+                        </p>
+                      ) : (
+                        <MarkdownMessage content={m.content} />
+                      )}
                       <p
                         className={`text-[10px] mt-1 ${isCustomer ? "text-white/60" : "text-slate-400"}`}
                       >
