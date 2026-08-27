@@ -3,6 +3,8 @@ import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import { getDatabase } from "./db";
 import "./index.css";
+// Initialize PostHog as early as possible
+import "./lib/posthog";
 
 // Kick off RxDB initialization immediately at module load time.
 // Since RxDB uses Dexie (IndexedDB), the local data is already persisted

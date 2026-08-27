@@ -9,6 +9,7 @@ import React, { useRef, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { useI18n } from "../../i18n";
 import { authClient } from "../../lib/authClient";
+import { posthog } from "../../lib/posthog";
 import LoginLayout from "./Layout";
 import { PasswordStrengthMeter } from "./components/PasswordStrengthMeter";
 import { TurnstileWidget } from "./components/TurnstileWidget";
@@ -79,6 +80,7 @@ export const RegisterPage: React.FC = () => {
       return;
     }
 
+    posthog.capture("user_registered");
     await refetch();
     setSuccessState(true);
   };

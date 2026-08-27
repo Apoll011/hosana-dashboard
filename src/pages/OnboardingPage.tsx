@@ -25,6 +25,7 @@ import { useTheme } from "../contexts/ThemeContext";
 import { useAppNavigate } from "../hooks/useAppNavigate";
 import { useI18n } from "../i18n";
 import { authClient } from "../lib/authClient";
+import { posthog } from "../lib/posthog";
 import { LanguageSelector } from "./Login/components/LanguageSelector";
 
 interface UserInvitation {
@@ -105,6 +106,7 @@ export const OnboardingPage: React.FC = () => {
         return;
       }
 
+      posthog.capture("invitation_accepted", { invitation_id: invitationId });
       await refetch();
       const orgData = data as {
         organization?: { slug?: string };
@@ -139,6 +141,7 @@ export const OnboardingPage: React.FC = () => {
         return;
       }
 
+      posthog.capture("invitation_rejected", { invitation_id: invitationId });
       setInvitations((prev) => prev.filter((i) => i.id !== invitationId));
     } catch (err: unknown) {
       setErrorMsg((err as Error)?.message || "Erro ao recusar convite.");
@@ -164,6 +167,7 @@ export const OnboardingPage: React.FC = () => {
       return;
     }
 
+    posthog.capture("organization_created");
     localStorage.setItem("active_org_slug", slug);
     await authClient.organization.setActive({
       organizationSlug: slug,

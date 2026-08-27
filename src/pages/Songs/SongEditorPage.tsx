@@ -40,6 +40,7 @@ import { HelpModal } from "../../components/modals/HelpModal";
 import { useAuth } from "../../contexts/AuthContext";
 import { useI18n } from "../../i18n";
 import { useSong, useSongs } from "../../hooks/useSongs";
+import { posthog } from "../../lib/posthog";
 
 type LayoutMode = "editor" | "split" | "preview";
 
@@ -114,12 +115,13 @@ export const SongEditorPage: React.FC = () => {
           updates.song_number = Number(meta.songNumber);
 
         await updateSong({ id: song.id, data: updates });
+        posthog.capture("song_saved", { layout_mode: layoutMode });
         setHasUnsavedChanges(false);
       } finally {
         isSavingRef.current = false;
       }
     },
-    [song, updateSong],
+    [song, updateSong, layoutMode],
   );
 
   useEffect(() => {

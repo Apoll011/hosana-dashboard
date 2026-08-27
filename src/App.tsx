@@ -1,7 +1,8 @@
 import { configureApiClient } from "@hosanna/shared";
 import { preloadEditor } from "@hosanna/shared/editor";
 import { useEffect } from "react";
-import { BrowserRouter } from "react-router-dom";
+import { BrowserRouter, useLocation } from "react-router-dom";
+import { posthog } from "./lib/posthog";
 import { NavigationProgressBar } from "./components/NavigationProgressBar";
 import { AuthProvider } from "./contexts/AuthContext";
 import { CacheHydrationProvider } from "./contexts/CacheHydrationProvider";
@@ -10,6 +11,14 @@ import { SyncProvider } from "./contexts/SyncContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { I18nProvider } from "./i18n";
 import { AppRoutes } from "./routes/AppRoutes";
+
+function PageviewTracker() {
+  const location = useLocation();
+  useEffect(() => {
+    posthog.capture("$pageview", { $current_url: window.location.href });
+  }, [location.pathname, location.search]);
+  return null;
+}
 
 export default function App() {
   configureApiClient(
@@ -33,6 +42,7 @@ export default function App() {
             <CacheHydrationProvider>
               <BrowserRouter>
                 <NavigationTransitionProvider>
+                  <PageviewTracker />
                   <NavigationProgressBar />
                   <AppRoutes />
                 </NavigationTransitionProvider>
