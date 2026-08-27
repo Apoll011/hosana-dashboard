@@ -10,3 +10,4 @@ coverage/
 .agents/
 skills-lock.json
 .wrangler
+.claude/
