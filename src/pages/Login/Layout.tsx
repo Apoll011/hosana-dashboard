@@ -3,6 +3,7 @@ import { AlertCircle, CheckCircle2, Moon, Sun } from "lucide-react";
 import React from "react";
 import bg from "../../assets/images/background.webp";
 import { useTheme } from "../../contexts/ThemeContext";
+import { LanguageSelector } from "./components/LanguageSelector";
 
 interface LoginLayoutProps {
   children: React.ReactNode;
@@ -39,19 +40,22 @@ export default function LoginLayout({
         <div className="absolute inset-0 bg-black/40 dark:bg-black/70 backdrop-blur-[2px] transition-colors duration-500" />
       </div>
 
-      {/* Dark mode toggle button in corner */}
-      <button
-        type="button"
-        onClick={toggleDarkMode}
-        aria-label="Alternar tema"
-        className="fixed top-4 right-4 z-30 p-2.5 rounded-full bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border border-slate-200/80 dark:border-slate-800 text-slate-700 dark:text-slate-200 hover:scale-110 active:scale-95 shadow-lg transition-all duration-200"
-      >
-        {darkMode ? (
-          <Sun className="w-5 h-5 text-amber-400" />
-        ) : (
-          <Moon className="w-5 h-5 text-slate-700" />
-        )}
-      </button>
+      {/* Top-right controls: Language selector + Dark mode toggle */}
+      <div className="fixed top-4 right-4 z-30 flex items-center gap-2">
+        <LanguageSelector />
+        <button
+          type="button"
+          onClick={toggleDarkMode}
+          aria-label="Alternar tema"
+          className="p-2.5 rounded-full bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border border-slate-200/80 dark:border-slate-800 text-slate-700 dark:text-slate-200 hover:scale-110 active:scale-95 shadow-lg transition-all duration-200"
+        >
+          {darkMode ? (
+            <Sun className="w-5 h-5 text-amber-400" />
+          ) : (
+            <Moon className="w-5 h-5 text-slate-700" />
+          )}
+        </button>
+      </div>
 
       <div className="relative max-w-md sm:max-w-lg w-full bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-slate-200/80 dark:border-slate-800/80 rounded-3xl sm:rounded-4xl shadow-2xl shadow-black/30 p-5 sm:p-7 transition-all duration-300 z-20 my-auto max-h-[92vh] flex flex-col overflow-y-auto scrollbar-thin">
         {/* Branding */}
