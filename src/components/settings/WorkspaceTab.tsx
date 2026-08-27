@@ -749,7 +749,7 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Export Area */}
               <Can permission="backup.export">
-                <div className="flex flex-col p-4 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-850 justify-between">
+                <div className="flex flex-col p-4 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/50 dark:bg-m3-bg justify-between">
                   <div className="flex items-start gap-3.5 mb-4">
                     <div className="p-2.5 bg-sky-100 dark:bg-sky-500/15 text-sky-600 dark:text-sky-400 rounded-xl shrink-0">
                       <Download className="w-5 h-5" />
@@ -786,7 +786,7 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
 
               {/* Import Area */}
               <Can permission="backup.import">
-                <div className="flex flex-col p-4 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-850 justify-between">
+                <div className="flex flex-col p-4 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/50 dark:bg-m3-bg justify-between">
                   <div className="flex items-start gap-3.5 mb-4">
                     <div className="p-2.5 bg-emerald-100 dark:bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 rounded-xl shrink-0">
                       <Upload className="w-5 h-5" />
