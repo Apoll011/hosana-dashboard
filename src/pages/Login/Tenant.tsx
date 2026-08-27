@@ -148,7 +148,7 @@ export const RegisterOrganizationPage: React.FC = () => {
             {t("auth.tenant.title")}
           </h2>
           <p className="text-sm leading-6 text-slate-500 dark:text-slate-400">
-            {t("auth.tenant.noOrgs")}
+            {t("auth.tenant.beta")}
           </p>
         </div>
       </LoginLayout>
