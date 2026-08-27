@@ -4,7 +4,6 @@
  */
 
 import { Button, Input } from "@hosanna/shared";
-import { useFeatureFlagEnabled } from "@posthog/react";
 import {
   ArrowLeft,
   ArrowRight,
@@ -19,6 +18,7 @@ import {
 import React, { useRef, useState } from "react";
 
 import { useAppNavigate } from "@/src/hooks/useAppNavigate";
+import { posthog } from "@/src/lib/posthog";
 import { useI18n } from "../../i18n";
 import { authClient } from "../../lib/authClient";
 import { PasswordStrengthMeter } from "./components/PasswordStrengthMeter";
@@ -28,7 +28,13 @@ import LoginLayout from "./Layout";
 export const RegisterOrganizationPage: React.FC = () => {
   const { navigate } = useAppNavigate();
   const { t } = useI18n();
-  const beta_release = useFeatureFlagEnabled("beta-release");
+  let beta_release;
+
+  if (posthog.isFeatureEnabled("beta-release")) {
+    beta_release = false;
+  } else {
+    beta_release = true;
+  }
 
   // Step state
   const [step, setStep] = useState(1);
