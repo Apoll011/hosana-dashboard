@@ -13,6 +13,7 @@ import {
   Server,
   User,
   Users,
+  Zap,
 } from "lucide-react";
 import React, { useState } from "react";
 import { useSync } from "../contexts/SyncContext";
@@ -21,6 +22,7 @@ import { useI18n } from "../i18n";
 import { AboutTab } from "../components/settings/AboutTab";
 import { AccountTab } from "../components/settings/AccountTab";
 import { AppearanceTab } from "../components/settings/AppearanceTab";
+import { FeaturesTab } from "../components/settings/FeaturesTab";
 import { GeneralTab } from "../components/settings/GeneralTab";
 import { MembersTab } from "../components/settings/MembersTab";
 import { WorkspaceTab } from "../components/settings/WorkspaceTab";
@@ -30,7 +32,13 @@ import { CloudOff } from "lucide-react";
 import { useOnline } from "../hooks/useOnline";
 
 type TabType =
-  "general" | "workspace" | "account" | "members" | "app" | "about";
+  | "general"
+  | "workspace"
+  | "account"
+  | "members"
+  | "app"
+  | "features"
+  | "about";
 
 export const SettingsPage: React.FC = () => {
   const { showToast } = useSync();
@@ -111,6 +119,13 @@ export const SettingsPage: React.FC = () => {
       show: true,
     },
     {
+      id: "features",
+      label: t("settings.tabs.features"),
+      icon: Zap,
+      requiresNetwork: false,
+      show: true,
+    },
+    {
       id: "about",
       label: t("settings.tabs.about"),
       icon: Info,
@@ -120,7 +135,7 @@ export const SettingsPage: React.FC = () => {
   ];
 
   return (
-    <div className="h-full w-full overflow-y-auto bg-slate-50/50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 p-4 sm:p-6 lg:p-8">
+    <div className="h-full w-full overflow-y-auto bg-slate-50/50 dark:bg-m3-bg text-slate-900 dark:text-slate-100 p-4 sm:p-6 lg:p-8">
       <div className="max-w-5xl mx-auto space-y-6">
         {!isOnline && (
           <div className="flex items-center gap-3 p-3.5 bg-amber-500/10 border border-amber-500/30 rounded-2xl text-amber-700 dark:text-amber-300 text-xs">
@@ -188,6 +203,7 @@ export const SettingsPage: React.FC = () => {
             <GeneralTab active={activeTab === "general"} />
           </div>
           <AppearanceTab active={activeTab === "app"} />
+          <FeaturesTab active={activeTab === "features"} />
           <AboutTab active={activeTab === "about"} />
         </div>
       </div>
