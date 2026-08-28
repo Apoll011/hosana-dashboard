@@ -122,27 +122,53 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
         role="navigation"
       >
         {/* Integrated Sidebar Header */}
-        <div
-          className="flex items-center justify-between mb-4 mt-2 select-none px-1"
-          role="banner"
-        >
+        <div className="flex items-center mb-4 mt-2 select-none" role="banner">
           <div
             className={`flex items-center ${
-              isSidebarCollapsed ? "justify-center w-full" : "gap-3"
+              isSidebarCollapsed
+                ? "justify-center w-full"
+                : "gap-3 flex-1 min-w-0"
             }`}
           >
-            <div className="w-11 h-11 rounded-xl flex items-center justify-center border border-m3-border/50 bg-m3-card transition-transform hover:scale-105 shadow-xs shrink-0">
-              <img
-                src="/favicon.png"
-                alt="Hosanna Studio"
-                className="w-10 h-10 object-contain rounded-lg"
-              />
-            </div>
+            {isSidebarCollapsed ? (
+              /* In collapsed state: Logo icon turns into expand button on hover */
+              <button
+                onClick={() => setIsSidebarCollapsed(false)}
+                className="w-11 h-11 rounded-xl flex items-center justify-center border border-m3-border/50 bg-m3-card hover:bg-m3-hover hover:border-m3-border text-m3-secondary hover:text-m3-text transition-all shadow-xs shrink-0 relative group cursor-pointer"
+                title={t("sidebar.expand")}
+              >
+                <img
+                  src="/favicon.png"
+                  alt="Hosanna Studio"
+                  className="w-10 h-10 object-contain rounded-lg transition-opacity duration-150 group-hover:opacity-0"
+                />
+                <ChevronRight className="w-5 h-5 absolute inset-0 m-auto opacity-0 group-hover:opacity-100 transition-opacity duration-150" />
+              </button>
+            ) : (
+              <div className="w-11 h-11 rounded-xl flex items-center justify-center border border-m3-border/50 bg-m3-card transition-transform hover:scale-105 shadow-xs shrink-0">
+                <img
+                  src="/favicon.png"
+                  alt="Hosanna Studio"
+                  className="w-10 h-10 object-contain rounded-lg"
+                />
+              </div>
+            )}
+
             {!isSidebarCollapsed && (
               <div className="flex flex-col items-start min-w-0 flex-1">
-                <h1 className="font-display font-black text-xl tracking-tighter text-slate-900 dark:text-slate-100 leading-none truncate">
-                  Hosanna Studio
-                </h1>
+                {/* Title and collapse button in the same line */}
+                <div className="flex items-center justify-between w-full">
+                  <h1 className="font-display font-black text-xl tracking-tighter text-slate-900 dark:text-slate-100 leading-none truncate">
+                    Hosanna Studio
+                  </h1>
+                  <button
+                    onClick={() => setIsSidebarCollapsed(true)}
+                    className="hidden md:flex p-1.5 rounded-xl hover:bg-m3-hover text-m3-secondary hover:text-m3-text border border-transparent hover:border-m3-border/60 transition-all cursor-pointer shrink-0 -mr-2"
+                    title={t("sidebar.collapse")}
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
+                </div>
                 {organization && (
                   <span className="mt-1 text-xs font-medium text-slate-500 dark:text-slate-400 truncate max-w-32.5">
                     {organization?.metadata?.shortName || organization.slug}
@@ -151,27 +177,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
               </div>
             )}
           </div>
-
-          {!isSidebarCollapsed && (
-            <button
-              onClick={() => setIsSidebarCollapsed(true)}
-              className="hidden md:flex p-1.5 rounded-xl hover:bg-m3-hover text-m3-secondary hover:text-m3-text border border-transparent hover:border-m3-border/60 transition-all cursor-pointer shrink-0"
-              title={t("sidebar.collapse")}
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </button>
-          )}
         </div>
-
-        {isSidebarCollapsed && (
-          <button
-            onClick={() => setIsSidebarCollapsed(false)}
-            className="hidden md:flex w-full py-2 items-center justify-center rounded-xl bg-m3-card/50 hover:bg-m3-hover border border-m3-border/40 text-m3-secondary hover:text-m3-text transition-all cursor-pointer mb-3 shadow-xs"
-            title={t("sidebar.expand")}
-          >
-            <ChevronRight className="w-4 h-4" />
-          </button>
-        )}
 
         {!isSidebarCollapsed && (
           <div className="px-3 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-m3-secondary opacity-60">
