@@ -18,6 +18,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { useI18n } from "../i18n";
 import { MainLayout } from "../layouts/MainLayout";
 import { usePreloadPermissions } from "../lib/permissions/client";
+import { CaptchaPage } from "../pages/CaptchaPage";
 import { OnboardingPage } from "../pages/OnboardingPage";
 import { ProtectedRoute } from "./ProtectedRoute";
 
@@ -153,6 +154,7 @@ export const AppRoutes: React.FC = () => {
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="/accept-invitation" element={<AcceptInvitationPage />} />
+          <Route path="/captcha" element={<CaptchaPage />} />
 
           <Route element={<ProtectedRoute />}>
             <Route path="/onboarding" element={<OnboardingPage />} />
