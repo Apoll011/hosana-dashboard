@@ -118,73 +118,82 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
             : "hidden"
         } md:flex md:relative md:bg-m3-sidebar/30 ${
           isSidebarCollapsed ? "md:w-20" : "md:w-64"
-        } w-72 border-r border-m3-border p-4 flex-col gap-1 select-none shrink-0 transition-all duration-300 z-30`}
+        } w-72 border-r border-m3-border p-4 flex-col gap-1 select-none shrink-0 transition-all duration-300 ease-in-out z-30`}
         role="navigation"
       >
         {/* Integrated Sidebar Header */}
         <div className="flex items-center mb-4 mt-2 select-none" role="banner">
-          <div
-            className={`flex items-center ${
-              isSidebarCollapsed
-                ? "justify-center w-full"
-                : "gap-3 flex-1 min-w-0"
-            }`}
-          >
-            {isSidebarCollapsed ? (
-              /* In collapsed state: Logo icon turns into expand button on hover */
-              <button
-                onClick={() => setIsSidebarCollapsed(false)}
-                className="w-11 h-11 rounded-xl flex items-center justify-center border border-m3-border/50 bg-m3-card hover:bg-m3-hover hover:border-m3-border text-m3-secondary hover:text-m3-text transition-all shadow-xs shrink-0 relative group cursor-pointer"
-                title={t("sidebar.expand")}
-              >
-                <img
-                  src="/favicon.png"
-                  alt="Hosanna Studio"
-                  className="w-10 h-10 object-contain rounded-lg transition-opacity duration-150 group-hover:opacity-0"
-                />
-                <ChevronRight className="w-5 h-5 absolute inset-0 m-auto opacity-0 group-hover:opacity-100 transition-opacity duration-150" />
-              </button>
-            ) : (
-              <div className="w-11 h-11 rounded-xl flex items-center justify-center border border-m3-border/50 bg-m3-card transition-transform hover:scale-105 shadow-xs shrink-0">
-                <img
-                  src="/favicon.png"
-                  alt="Hosanna Studio"
-                  className="w-10 h-10 object-contain rounded-lg"
-                />
-              </div>
-            )}
+          <div className="flex items-center gap-3 flex-1 min-w-0">
+            {/* Logo container: expands on click when collapsed, hover swaps icon */}
+            <button
+              onClick={() => isSidebarCollapsed && setIsSidebarCollapsed(false)}
+              disabled={!isSidebarCollapsed}
+              title={isSidebarCollapsed ? t("sidebar.expand") : undefined}
+              className={`w-11 h-11 rounded-xl flex items-center justify-center border border-m3-border/50 bg-m3-card text-m3-secondary shadow-xs shrink-0 relative group transition-all duration-300 ${
+                isSidebarCollapsed
+                  ? "cursor-pointer hover:bg-m3-hover hover:border-m3-border hover:text-m3-text"
+                  : ""
+              }`}
+            >
+              <img
+                src="/favicon.png"
+                alt="Hosanna Studio"
+                className={`w-10 h-10 object-contain rounded-lg transition-all duration-200 ${
+                  isSidebarCollapsed
+                    ? "group-hover:opacity-0"
+                    : "hover:scale-105"
+                }`}
+              />
+              <ChevronRight
+                className={`w-5 h-5 absolute inset-0 m-auto transition-opacity duration-200 pointer-events-none ${
+                  isSidebarCollapsed
+                    ? "opacity-0 group-hover:opacity-100"
+                    : "opacity-0 hidden"
+                }`}
+              />
+            </button>
 
-            {!isSidebarCollapsed && (
-              <div className="flex flex-col items-start min-w-0 flex-1">
-                {/* Title and collapse button in the same line */}
-                <div className="flex items-center justify-between w-full">
-                  <h1 className="font-display font-black text-xl tracking-tighter text-slate-900 dark:text-slate-100 leading-none truncate">
-                    Hosanna Studio
-                  </h1>
-                  <button
-                    onClick={() => setIsSidebarCollapsed(true)}
-                    className="hidden md:flex p-1.5 rounded-xl hover:bg-m3-hover text-m3-secondary hover:text-m3-text border border-transparent hover:border-m3-border/60 transition-all cursor-pointer shrink-0 -mr-2"
-                    title={t("sidebar.collapse")}
-                  >
-                    <ChevronLeft className="w-4 h-4" />
-                  </button>
-                </div>
-                {organization && (
-                  <span className="mt-1 text-xs font-medium text-slate-500 dark:text-slate-400 truncate max-w-32.5">
-                    {organization?.metadata?.shortName || organization.slug}
-                  </span>
-                )}
+            {/* Title & Subtitle + Collapse button with smooth transition */}
+            <div
+              className={`flex flex-col items-start min-w-0 flex-1 transition-all duration-300 ease-in-out overflow-hidden whitespace-nowrap ${
+                isSidebarCollapsed
+                  ? "opacity-0 max-w-0 -translate-x-2 pointer-events-none"
+                  : "opacity-100 max-w-50 translate-x-0"
+              }`}
+            >
+              <div className="flex items-center justify-between w-full">
+                <h1 className="font-display font-black text-xl tracking-tighter text-slate-900 dark:text-slate-100 leading-none truncate">
+                  Hosanna Studio
+                </h1>
+                <button
+                  onClick={() => setIsSidebarCollapsed(true)}
+                  className="hidden md:flex p-1.5 rounded-xl hover:bg-m3-hover text-m3-secondary hover:text-m3-text border border-transparent hover:border-m3-border/60 transition-all cursor-pointer shrink-0 -mr-2"
+                  title={t("sidebar.collapse")}
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
               </div>
-            )}
+              {organization && (
+                <span className="mt-1 text-xs font-medium text-slate-500 dark:text-slate-400 truncate max-w-32.5">
+                  {organization?.metadata?.shortName || organization.slug}
+                </span>
+              )}
+            </div>
           </div>
         </div>
 
-        {!isSidebarCollapsed && (
-          <div className="px-3 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-m3-secondary opacity-60">
-            {t("sidebar.mainMenu")}
-          </div>
-        )}
+        {/* Main Menu Label */}
+        <div
+          className={`px-3 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-m3-secondary transition-all duration-300 ease-in-out overflow-hidden whitespace-nowrap ${
+            isSidebarCollapsed
+              ? "opacity-0 max-h-0 py-0 -translate-x-2 pointer-events-none"
+              : "opacity-60 max-h-8 translate-x-0"
+          }`}
+        >
+          {t("sidebar.mainMenu")}
+        </div>
 
+        {/* Drive Item */}
         <button
           onClick={() => {
             onSelectFolder(null);
@@ -196,95 +205,132 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
               ? t("sidebar.drive", { name: shortName })
               : undefined
           }
-          className={`w-full flex items-center ${
-            isSidebarCollapsed ? "justify-center" : "justify-between"
-          } px-4 py-3 text-[13px] font-bold rounded-2xl transition-all cursor-pointer group ${
+          className={`w-full flex items-center justify-between px-3.5 py-3 text-[13px] font-bold rounded-2xl transition-all cursor-pointer group ${
             isDriveRoot
               ? "bg-m3-primary/10 text-m3-primary border border-m3-primary/20 shadow-sm"
               : "text-m3-secondary hover:bg-m3-hover hover:text-m3-text"
           }`}
         >
-          <div
-            className={`flex items-center ${isSidebarCollapsed ? "" : "gap-3"}`}
-          >
-            <HardDrive
-              className={`w-4.5 h-4.5 ${
-                isDriveRoot ? "text-m3-primary" : "text-m3-secondary"
+          <div className="flex items-center gap-3 min-w-0 flex-1">
+            <div className="w-5 h-5 flex items-center justify-center shrink-0">
+              <HardDrive
+                className={`w-4.5 h-4.5 ${
+                  isDriveRoot ? "text-m3-primary" : "text-m3-secondary"
+                }`}
+              />
+            </div>
+            <span
+              className={`truncate transition-all duration-300 ease-in-out overflow-hidden whitespace-nowrap ${
+                isSidebarCollapsed
+                  ? "opacity-0 max-w-0 -translate-x-2 pointer-events-none"
+                  : "opacity-100 max-w-35 translate-x-0"
               }`}
-            />
-            {!isSidebarCollapsed && (
-              <span>{t("sidebar.drive", { name: shortName })}</span>
-            )}
+            >
+              {t("sidebar.drive", { name: shortName })}
+            </span>
           </div>
-          {!isSidebarCollapsed && (
+          <div
+            className={`transition-all duration-300 ease-in-out overflow-hidden shrink-0 ${
+              isSidebarCollapsed
+                ? "opacity-0 max-w-0 scale-75 pointer-events-none"
+                : "opacity-100 max-w-15 scale-100"
+            }`}
+          >
             <Badge variant={isDriveRoot ? "sky" : "slate"}>
               {rootSongsCount + rootFoldersCount}
             </Badge>
-          )}
+          </div>
         </button>
 
+        {/* Library Item */}
         <button
           onClick={() => {
             navigate(`${slugPrefix}/songs`);
             if (window.innerWidth < 768) setIsSidebarOpen(false);
           }}
           title={isSidebarCollapsed ? t("common.library") : undefined}
-          className={`w-full flex items-center ${
-            isSidebarCollapsed ? "justify-center" : "justify-between"
-          } px-4 py-3 text-[13px] font-bold rounded-2xl transition-all cursor-pointer group ${
+          className={`w-full flex items-center justify-between px-3.5 py-3 text-[13px] font-bold rounded-2xl transition-all cursor-pointer group ${
             view === "songs"
               ? "bg-m3-primary/10 text-m3-primary border border-m3-primary/20 shadow-sm"
               : "text-m3-secondary hover:bg-m3-hover hover:text-m3-text"
           }`}
         >
-          <div
-            className={`flex items-center ${isSidebarCollapsed ? "" : "gap-3"}`}
-          >
-            <Music
-              className={`w-4.5 h-4.5 ${
-                view === "songs" ? "text-m3-primary" : "text-m3-secondary"
+          <div className="flex items-center gap-3 min-w-0 flex-1">
+            <div className="w-5 h-5 flex items-center justify-center shrink-0">
+              <Music
+                className={`w-4.5 h-4.5 ${
+                  view === "songs" ? "text-m3-primary" : "text-m3-secondary"
+                }`}
+              />
+            </div>
+            <span
+              className={`truncate transition-all duration-300 ease-in-out overflow-hidden whitespace-nowrap ${
+                isSidebarCollapsed
+                  ? "opacity-0 max-w-0 -translate-x-2 pointer-events-none"
+                  : "opacity-100 max-w-35 translate-x-0"
               }`}
-            />
-            {!isSidebarCollapsed && <span>{t("common.library")}</span>}
+            >
+              {t("common.library")}
+            </span>
           </div>
-          {!isSidebarCollapsed && (
+          <div
+            className={`transition-all duration-300 ease-in-out overflow-hidden shrink-0 ${
+              isSidebarCollapsed
+                ? "opacity-0 max-w-0 scale-75 pointer-events-none"
+                : "opacity-100 max-w-15 scale-100"
+            }`}
+          >
             <Badge variant={view === "songs" ? "sky" : "slate"}>
               {totalSongs}
             </Badge>
-          )}
+          </div>
         </button>
 
+        {/* Services Item */}
         <button
           onClick={() => {
             navigate(`${slugPrefix}/services`);
             if (window.innerWidth < 768) setIsSidebarOpen(false);
           }}
           title={isSidebarCollapsed ? t("common.services") : undefined}
-          className={`w-full flex items-center ${
-            isSidebarCollapsed ? "justify-center" : "justify-between"
-          } px-4 py-3 text-[13px] font-bold rounded-2xl transition-all cursor-pointer group ${
+          className={`w-full flex items-center justify-between px-3.5 py-3 text-[13px] font-bold rounded-2xl transition-all cursor-pointer group ${
             view === "services"
               ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 shadow-sm"
               : "text-m3-secondary hover:bg-m3-hover hover:text-m3-text"
           }`}
         >
-          <div
-            className={`flex items-center ${isSidebarCollapsed ? "" : "gap-3"}`}
-          >
-            <Church
-              className={`w-4.5 h-4.5 ${
-                view === "services" ? "text-emerald-500" : "text-m3-secondary"
+          <div className="flex items-center gap-3 min-w-0 flex-1">
+            <div className="w-5 h-5 flex items-center justify-center shrink-0">
+              <Church
+                className={`w-4.5 h-4.5 ${
+                  view === "services" ? "text-emerald-500" : "text-m3-secondary"
+                }`}
+              />
+            </div>
+            <span
+              className={`truncate transition-all duration-300 ease-in-out overflow-hidden whitespace-nowrap ${
+                isSidebarCollapsed
+                  ? "opacity-0 max-w-0 -translate-x-2 pointer-events-none"
+                  : "opacity-100 max-w-35 translate-x-0"
               }`}
-            />
-            {!isSidebarCollapsed && <span>{t("common.services")}</span>}
+            >
+              {t("common.services")}
+            </span>
           </div>
-          {!isSidebarCollapsed && (
+          <div
+            className={`transition-all duration-300 ease-in-out overflow-hidden shrink-0 ${
+              isSidebarCollapsed
+                ? "opacity-0 max-w-0 scale-75 pointer-events-none"
+                : "opacity-100 max-w-15 scale-100"
+            }`}
+          >
             <Badge variant={view === "services" ? "sky" : "slate"}>
               {totalServices}
             </Badge>
-          )}
+          </div>
         </button>
 
+        {/* Teams Item */}
         {teamsEnabled && (
           <button
             onClick={() => {
@@ -292,30 +338,43 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
               if (window.innerWidth < 768) setIsSidebarOpen(false);
             }}
             title={isSidebarCollapsed ? t("common.teams") : undefined}
-            className={`w-full flex items-center ${
-              isSidebarCollapsed ? "justify-center" : "justify-between"
-            } px-4 py-3 text-[13px] font-bold rounded-2xl transition-all cursor-pointer group ${
+            className={`w-full flex items-center justify-between px-3.5 py-3 text-[13px] font-bold rounded-2xl transition-all cursor-pointer group ${
               view === "teams"
                 ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 shadow-sm"
                 : "text-m3-secondary hover:bg-m3-hover hover:text-m3-text"
             }`}
           >
-            <div
-              className={`flex items-center ${isSidebarCollapsed ? "" : "gap-3"}`}
-            >
-              <Users
-                className={`w-4.5 h-4.5 ${
-                  view === "teams" ? "text-amber-500" : "text-m3-secondary"
+            <div className="flex items-center gap-3 min-w-0 flex-1">
+              <div className="w-5 h-5 flex items-center justify-center shrink-0">
+                <Users
+                  className={`w-4.5 h-4.5 ${
+                    view === "teams" ? "text-amber-500" : "text-m3-secondary"
+                  }`}
+                />
+              </div>
+              <span
+                className={`truncate transition-all duration-300 ease-in-out overflow-hidden whitespace-nowrap ${
+                  isSidebarCollapsed
+                    ? "opacity-0 max-w-0 -translate-x-2 pointer-events-none"
+                    : "opacity-100 max-w-35 translate-x-0"
                 }`}
-              />
-              {!isSidebarCollapsed && <span>{t("common.teams")}</span>}
+              >
+                {t("common.teams")}
+              </span>
             </div>
           </button>
         )}
 
-        {!isSidebarCollapsed && showFolderTree && (
-          <>
-            <div className="mt-6 px-3 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-m3-secondary opacity-60">
+        {/* Folder Tree */}
+        {showFolderTree && (
+          <div
+            className={`flex-1 flex flex-col min-h-0 transition-all duration-300 ease-in-out overflow-hidden ${
+              isSidebarCollapsed
+                ? "opacity-0 max-h-0 pointer-events-none"
+                : "opacity-100 max-h-full"
+            }`}
+          >
+            <div className="mt-6 px-3 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-m3-secondary opacity-60 shrink-0 whitespace-nowrap">
               {t("sidebar.foldersCount", { count: allFolders.length })}
             </div>
 
@@ -335,36 +394,45 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
                 />
               ))}
             </div>
-          </>
+          </div>
         )}
-        {(isSidebarCollapsed || !showFolderTree) && <div className="flex-1" />}
 
+        {(!showFolderTree || isSidebarCollapsed) && <div className="flex-1" />}
+
+        {/* Trash Item */}
         <button
           onClick={() => {
             navigate(`${slugPrefix}/trash`);
             if (window.innerWidth < 768) setIsSidebarOpen(false);
           }}
           title={isSidebarCollapsed ? t("sidebar.trash") : undefined}
-          className={`w-full flex items-center ${
-            isSidebarCollapsed ? "justify-center" : "justify-between"
-          } px-4 py-3 text-[13px] font-bold rounded-2xl transition-all cursor-pointer group ${
+          className={`w-full flex items-center justify-between px-3.5 py-3 text-[13px] font-bold rounded-2xl transition-all cursor-pointer group ${
             view === "trash"
               ? "bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 shadow-sm"
               : "text-m3-secondary hover:bg-m3-hover hover:text-m3-text"
           }`}
         >
-          <div
-            className={`flex items-center ${isSidebarCollapsed ? "" : "gap-3"}`}
-          >
-            <Trash2
-              className={`w-4.5 h-4.5 ${
-                view === "trash" ? "text-rose-500" : "text-m3-secondary"
+          <div className="flex items-center gap-3 min-w-0 flex-1">
+            <div className="w-5 h-5 flex items-center justify-center shrink-0">
+              <Trash2
+                className={`w-4.5 h-4.5 ${
+                  view === "trash" ? "text-rose-500" : "text-m3-secondary"
+                }`}
+              />
+            </div>
+            <span
+              className={`truncate transition-all duration-300 ease-in-out overflow-hidden whitespace-nowrap ${
+                isSidebarCollapsed
+                  ? "opacity-0 max-w-0 -translate-x-2 pointer-events-none"
+                  : "opacity-100 max-w-35 translate-x-0"
               }`}
-            />
-            {!isSidebarCollapsed && <span>{t("sidebar.trash")}</span>}
+            >
+              {t("sidebar.trash")}
+            </span>
           </div>
         </button>
 
+        {/* User profile footer with smooth transitions */}
         {user && (
           <div
             className="mt-2 pt-2 border-t border-slate-200 dark:border-slate-800 relative shrink-0"
@@ -373,16 +441,10 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
             <button
               onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
               title={isSidebarCollapsed ? user.name : undefined}
-              className={`w-full flex items-center ${
-                isSidebarCollapsed ? "justify-center" : "justify-between"
-              } p-2 rounded-xl hover:bg-slate-200/60 dark:hover:bg-slate-800 transition-colors cursor-pointer`}
+              className="w-full flex items-center justify-between p-2 rounded-xl hover:bg-slate-200/60 dark:hover:bg-slate-800 transition-colors cursor-pointer"
             >
-              <div
-                className={`flex items-center ${
-                  isSidebarCollapsed ? "" : "gap-2"
-                } min-w-0`}
-              >
-                <div className="w-7 h-7 rounded-full bg-linear-to-tr from-[#0284c7] to-sky-400 flex items-center justify-center text-white font-extrabold text-xs shadow-sm shrink-0">
+              <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                <div className="w-8 h-8 rounded-full bg-linear-to-tr from-[#0284c7] to-sky-400 flex items-center justify-center text-white font-extrabold text-xs shadow-sm shrink-0">
                   {user.image ? (
                     <img
                       src={user.image as string}
@@ -393,21 +455,32 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
                     getInitials(user.name)
                   )}
                 </div>
-                {!isSidebarCollapsed && (
-                  <div className="flex flex-col min-w-0 text-left">
-                    <span className="text-xs font-bold text-slate-900 dark:text-slate-100 truncate">
-                      {user.name}
-                    </span>
-                    <span className="text-[9px] text-emerald-600 dark:text-emerald-400 font-bold uppercase tracking-wider">
-                      {getRoleLabel(user.role ?? "guest")}
-                    </span>
-                  </div>
-                )}
+                <div
+                  className={`flex flex-col min-w-0 text-left transition-all duration-300 ease-in-out overflow-hidden whitespace-nowrap ${
+                    isSidebarCollapsed
+                      ? "opacity-0 max-w-0 -translate-x-2 pointer-events-none"
+                      : "opacity-100 max-w-35 translate-x-0"
+                  }`}
+                >
+                  <span className="text-xs font-bold text-slate-900 dark:text-slate-100 truncate">
+                    {user.name}
+                  </span>
+                  <span className="text-[9px] text-emerald-600 dark:text-emerald-400 font-bold uppercase tracking-wider truncate">
+                    {getRoleLabel(user.role ?? "guest")}
+                  </span>
+                </div>
               </div>
-              {!isSidebarCollapsed && (
+              <div
+                className={`transition-all duration-300 ease-in-out overflow-hidden shrink-0 ${
+                  isSidebarCollapsed
+                    ? "opacity-0 max-w-0 scale-75 pointer-events-none"
+                    : "opacity-100 max-w-6 scale-100"
+                }`}
+              >
                 <Settings className="w-4 h-4 text-slate-400 shrink-0" />
-              )}
+              </div>
             </button>
+
             {isUserMenuOpen && (
               <div className="absolute bottom-full left-0 mb-2 w-56 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl z-50 p-2 space-y-1 animate-in fade-in slide-in-from-bottom-2 duration-150">
                 <button
