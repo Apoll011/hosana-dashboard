@@ -1032,6 +1032,8 @@ export const en: typeof pt = {
     exportOrder: "Export Order",
     inService: "In List ×{count}",
     dragToReorder: "Drag to reorder",
+    moveUp: "Move up",
+    moveDown: "Move down",
     closePreview: "Close Preview",
     openPreview: "Open Preview",
     expand: "Expand",
