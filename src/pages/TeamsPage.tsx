@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Button, Input, Modal } from "@hosanna/shared";
+import { Button, Input, Modal } from "@/src/components/common";
 import {
   ArrowLeft,
   Calendar,

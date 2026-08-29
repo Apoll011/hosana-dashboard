@@ -2,7 +2,7 @@
 @license
 SPDX-License-Identifier: Apache-2.0
 */
-import { Button, Input, Spinner } from "@hosanna/shared";
+import { Button, Input, Spinner } from "@/src/components/common";
 import {
   AlertCircle,
   ArrowRight,
@@ -90,7 +90,6 @@ export const OnboardingPage: React.FC = () => {
 
     fetchUserInvitations();
   }, []);
-
 
   const handleAcceptInvitation = async (invitationId: string) => {
     setProcessingInvId(invitationId);

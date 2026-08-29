@@ -4,7 +4,7 @@
  */
 
 import { Can } from "@/src/lib/permissions/components";
-import { Button, Modal } from "@hosanna/shared";
+import { Button, Modal } from "@/src/components/common";
 import {
   AlertTriangle,
   ArrowLeft,

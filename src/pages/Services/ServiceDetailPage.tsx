@@ -4,8 +4,10 @@
  */
 
 import { ChordProPreviewSettings } from "@/src/components/ChorproSettings";
+import { Button, Input, Spinner } from "@/src/components/common";
 import { useAppNavigate } from "@/src/hooks/useAppNavigate";
 import { usePreviewSettings } from "@/src/hooks/usePreviewSettings";
+import { ServiceElement } from "@/src/types";
 import {
   attachClosestEdge,
   extractClosestEdge,
@@ -16,27 +18,22 @@ import {
   dropTargetForElements,
   monitorForElements,
 } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
+import { ChordProRenderer, parseChordPro } from "@hosanna/chordpro";
 import {
-  Button,
-  ChordProRenderer,
-  Input,
-  parseChordPro,
-  ServiceElement,
-  Spinner,
-} from "@hosanna/shared";
-import {
+  ArrowDown,
   ArrowLeft,
+  ArrowUp,
   BookOpen,
-  ChevronDown,
-  ChevronUp,
   Clock3,
   Edit3,
   FileText,
   GripVertical,
   LayoutTemplate,
   Loader2,
+  Maximize2,
   Megaphone,
   MessageSquare,
+  Minimize2,
   MoreHorizontal,
   Music,
   PanelLeftClose,
@@ -47,12 +44,14 @@ import {
   Save,
   Search,
   Settings2,
+  StickyNote,
   Trash2,
   X,
 } from "lucide-react";
 import React, { useDeferredValue, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useSync } from "../../contexts/SyncContext";
+import { useOrgSettings } from "../../hooks/useOrgSettings";
 import { useService, useServices } from "../../hooks/useServices";
 import { useSong, useSongs } from "../../hooks/useSongs";
 import { TranslateFn, useI18n } from "../../i18n";
@@ -263,20 +262,30 @@ interface ServiceRowProps {
   element: ServiceElement;
   index: number;
   isPreviewed: boolean;
+  canMoveUp: boolean;
+  canMoveDown: boolean;
+  onMoveUp: () => void;
+  onMoveDown: () => void;
   onTogglePreview: (el: ServiceElement) => void;
   onRemove: (id: string) => void;
   onEdit: (el: ServiceElement) => void;
   onNoteChange: (id: string, note: string) => void;
+  showNotes?: boolean;
 }
 
 const ServiceRow: React.FC<ServiceRowProps> = ({
   element,
   index,
   isPreviewed,
+  canMoveUp,
+  canMoveDown,
+  onMoveUp,
+  onMoveDown,
   onTogglePreview,
   onRemove,
   onEdit,
   onNoteChange,
+  showNotes = true,
 }) => {
   const { t } = useI18n();
   const rowRef = useRef<HTMLDivElement>(null);
@@ -423,15 +432,40 @@ const ServiceRow: React.FC<ServiceRowProps> = ({
               {element.content}
             </p>
           )}
+          {showNotes && (isEditingNote || element.notes) && !isExpanded && (
+            <div className="flex items-center gap-1.5 mt-1 min-w-0">
+              <StickyNote className="w-3.5 h-3.5 shrink-0 text-amber-500 dark:text-amber-400" />
+              <span className="text-xs italic text-amber-700 dark:text-amber-300/90 truncate">
+                {element.notes}
+              </span>
+            </div>
+          )}
+        </div>
+
+        <div className="flex flex-col items-center gap-0.5 shrink-0">
+          <button
+            type="button"
+            onClick={onMoveUp}
+            disabled={!canMoveUp}
+            className="p-1 rounded text-m3-secondary hover:text-m3-primary hover:bg-m3-primary/10 disabled:opacity-30 disabled:hover:text-m3-secondary disabled:hover:bg-transparent disabled:cursor-not-allowed transition-colors cursor-pointer"
+            title={t("serviceDetailPage.moveUp")}
+            aria-label={t("serviceDetailPage.moveUp")}
+          >
+            <ArrowUp className="w-3.5 h-3.5" />
+          </button>
+          <button
+            type="button"
+            onClick={onMoveDown}
+            disabled={!canMoveDown}
+            className="p-1 rounded text-m3-secondary hover:text-m3-primary hover:bg-m3-primary/10 disabled:opacity-30 disabled:hover:text-m3-secondary disabled:hover:bg-transparent disabled:cursor-not-allowed transition-colors cursor-pointer"
+            title={t("serviceDetailPage.moveDown")}
+            aria-label={t("serviceDetailPage.moveDown")}
+          >
+            <ArrowDown className="w-3.5 h-3.5" />
+          </button>
         </div>
 
         <div className="flex items-center gap-1 shrink-0">
-          {(isEditingNote || element.notes) && !isExpanded && (
-            <div className="text-[10px] max-w-35 truncate italic px-2 py-1 rounded bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-200 border border-amber-200 dark:border-amber-800/50 mr-2">
-              {element.notes}
-            </div>
-          )}
-
           <button
             type="button"
             onClick={handleExpandToggle}
@@ -453,9 +487,9 @@ const ServiceRow: React.FC<ServiceRowProps> = ({
                 <PanelRight className="w-4 h-4" />
               )
             ) : isExpanded ? (
-              <ChevronUp className="w-4 h-4" />
+              <Minimize2 className="w-4 h-4" />
             ) : (
-              <ChevronDown className="w-4 h-4" />
+              <Maximize2 className="w-4 h-4" />
             )}
           </button>
 
@@ -519,48 +553,48 @@ const ServiceRow: React.FC<ServiceRowProps> = ({
         </div>
       </div>
 
-      {isExpanded && (
+      {isExpanded && (isEditingNote || element.notes) && (
         <div className="border-t border-m3-border dark:border-m3-border/30 bg-m3-sidebar/10 dark:bg-black/10 rounded-b-2xl p-4 flex flex-col gap-4">
-          {(isEditingNote || element.notes) && (
-            <div className="flex flex-col gap-2">
-              <label className="text-xs font-bold text-m3-secondary uppercase tracking-wider flex items-center gap-1">
-                <FileText className="w-3 h-3" />{" "}
-                {t("serviceDetailPage.elementNotes")}
-              </label>
-              {isEditingNote ? (
-                <div className="flex items-center gap-2">
-                  <input
-                    type="text"
-                    value={localNote}
-                    onChange={(e) => setLocalNote(e.target.value)}
-                    placeholder={t("serviceDetailPage.elementNotesPlaceholder")}
-                    className="flex-1 text-xs rounded-lg border border-m3-border px-3 py-2 bg-white dark:bg-m3-card focus:outline-none focus:border-m3-primary text-m3-text"
-                    autoFocus
-                  />
-                  <Button
-                    size="sm"
-                    variant="primary"
-                    onClick={() => {
-                      onNoteChange(element.id, localNote);
-                      setIsEditingNote(false);
-                    }}
-                  >
-                    <Save className="w-3.5 h-3.5" />
-                  </Button>
-                </div>
-              ) : (
-                <div className="text-sm text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-900/20 px-3 py-2 rounded-lg border border-amber-200 dark:border-amber-800/50">
-                  {element.notes}
-                </div>
-              )}
-            </div>
-          )}
-
-          {!isSong && (
-            <div className="mt-2 text-sm text-m3-text whitespace-pre-wrap bg-white dark:bg-m3-card p-4 rounded-xl border border-m3-border dark:border-m3-border/50">
-              {element.content || t("serviceDetailPage.noContent")}
-            </div>
-          )}
+          <div className="flex flex-col gap-2">
+            <label className="text-xs font-bold text-m3-secondary uppercase tracking-wider flex items-center gap-1">
+              <FileText className="w-3 h-3" />{" "}
+              {t("serviceDetailPage.elementNotes")}
+            </label>
+            {isEditingNote ? (
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={localNote}
+                  onChange={(e) => setLocalNote(e.target.value)}
+                  placeholder={t("serviceDetailPage.elementNotesPlaceholder")}
+                  className="flex-1 text-xs rounded-lg border border-m3-border px-3 py-2 bg-white dark:bg-m3-card focus:outline-none focus:border-m3-primary text-m3-text"
+                  autoFocus
+                />
+                <Button
+                  size="sm"
+                  variant="primary"
+                  onClick={() => {
+                    onNoteChange(element.id, localNote);
+                    setIsEditingNote(false);
+                    setIsExpanded(false);
+                  }}
+                >
+                  <Save className="w-3.5 h-3.5" />
+                </Button>
+              </div>
+            ) : (
+              <div className="text-sm text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-900/20 px-3 py-2 rounded-lg border border-amber-200 dark:border-amber-800/50">
+                {element.notes}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+      {isExpanded && !isSong && (
+        <div className="pt-0 p-4 flex flex-col gap-4">
+          <div className="mt-2 text-sm text-m3-text whitespace-pre-wrap bg-white dark:bg-m3-card p-4 rounded-xl border border-m3-border dark:border-m3-border/50">
+            {element.content || t("serviceDetailPage.noContent")}
+          </div>
         </div>
       )}
     </div>
@@ -579,6 +613,7 @@ export const ServiceDetailPage: React.FC = () => {
   const { updateElements, updateService } = useServices();
   const { songsQuery } = useSongs({ limit: 1000 });
   const { showToast, syncStatus } = useSync();
+  const { settings: orgSettings } = useOrgSettings();
 
   const [elements, setElements] = useState<ServiceElement[]>([]);
   const elementsRef = useRef<ServiceElement[]>([]);
@@ -617,6 +652,29 @@ export const ServiceDetailPage: React.FC = () => {
   useEffect(() => {
     elementsRef.current = elements;
   }, [elements]);
+
+  // Auto-save general notes after a short debounce when the org autoSave is on
+  useEffect(() => {
+    if (!orgSettings.services.autoSave || !service || isEditingGeneralNotes)
+      return;
+    const timer = setTimeout(async () => {
+      if (generalNotes === (service.notes || "")) return;
+      try {
+        await updateService({
+          id: service.id,
+          data: { notes: generalNotes, updatedAt: service.updatedAt },
+        });
+      } catch {
+        // silent — user can still save manually
+      }
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, [
+    generalNotes,
+    orgSettings.services.autoSave,
+    service,
+    isEditingGeneralNotes,
+  ]);
 
   // Close the preview if the song it references is removed from the plan
   useEffect(() => {
@@ -672,6 +730,8 @@ export const ServiceDetailPage: React.FC = () => {
   }, [previewElement]);
   const previewContent = previewElement ?? previewContentRef.current;
 
+  const [isSavingService, setIsSavingService] = useState(false);
+
   const syncElements = async (
     newElements: ServiceElement[],
     fallbackElements: ServiceElement[] = elementsRef.current,
@@ -679,20 +739,59 @@ export const ServiceDetailPage: React.FC = () => {
     if (!service) return;
     const updated = newElements.map((e, index) => ({ ...e, position: index }));
     setElements(updated);
+    elementsRef.current = updated;
+
+    if (orgSettings.services.autoSave) {
+      try {
+        await updateElements({
+          serviceId: service.id,
+          data: { elements: updated, updatedAt: service.updatedAt },
+        });
+      } catch (error) {
+        setElements(fallbackElements);
+        elementsRef.current = fallbackElements;
+        throw error;
+      }
+    }
+  };
+
+  const handleSaveEntireService = async () => {
+    if (!service) return;
+    setIsSavingService(true);
     try {
-      await updateElements({
-        serviceId: service.id,
-        data: { elements: updated, updatedAt: service.updatedAt },
+      await updateService({
+        id: service.id,
+        data: {
+          elements: elementsRef.current,
+          notes: generalNotes,
+          updatedAt: service.updatedAt,
+        },
       });
+      showToast(t("serviceDetailPage.serviceSavedSuccess"), "success");
     } catch (error) {
-      setElements(fallbackElements);
-      elementsRef.current = fallbackElements;
-      throw error;
+      showToast(
+        t("serviceDetailPage.serviceSaveError", {
+          error:
+            (error as { message?: string | null })?.message || "Save error",
+        }),
+        "error",
+      );
+    } finally {
+      setIsSavingService(false);
     }
   };
 
   const handleRemoveElement = async (elementId: string) => {
     await syncElements(elements.filter((e) => e.id !== elementId));
+  };
+
+  const handleMoveElement = async (elementId: string, direction: -1 | 1) => {
+    const current = elementsRef.current;
+    const oldIndex = current.findIndex((e) => e.id === elementId);
+    if (oldIndex === -1) return;
+    const newIndex = oldIndex + direction;
+    if (newIndex < 0 || newIndex >= current.length) return;
+    await syncElements(arrayMove(current, oldIndex, newIndex));
   };
 
   const handleNoteChange = async (elementId: string, note: string) => {
@@ -703,20 +802,22 @@ export const ServiceDetailPage: React.FC = () => {
 
   const handleSaveGeneralNotes = async () => {
     if (!service) return;
-    try {
-      await updateService({
-        id: service.id,
-        data: { notes: generalNotes, updatedAt: service.updatedAt },
-      });
-      showToast(t("serviceDetailPage.serviceSavedSuccess"), "success");
-    } catch (error) {
-      showToast(
-        t("serviceDetailPage.serviceSaveError", {
-          error:
-            (error as { message?: string | null })?.message || "Sync error",
-        }),
-        "error",
-      );
+    if (orgSettings.services.autoSave) {
+      try {
+        await updateService({
+          id: service.id,
+          data: { notes: generalNotes, updatedAt: service.updatedAt },
+        });
+        showToast(t("serviceDetailPage.serviceSavedSuccess"), "success");
+      } catch (error) {
+        showToast(
+          t("serviceDetailPage.serviceSaveError", {
+            error:
+              (error as { message?: string | null })?.message || "Sync error",
+          }),
+          "error",
+        );
+      }
     }
   };
 
@@ -740,7 +841,9 @@ export const ServiceDetailPage: React.FC = () => {
         songId,
         content: song?.artist || t("serviceDetailPage.noComposer"),
         position: previousElements.length,
-        duration: Number(parsed.metadata.duration || "0"),
+        duration:
+          Number(parsed.metadata.duration || "0") ||
+          orgSettings.services.songDuration,
       };
 
       const nextElements = [...previousElements];
@@ -793,7 +896,7 @@ export const ServiceDetailPage: React.FC = () => {
     } else {
       nextElements.push({
         id: crypto.randomUUID(),
-        type,
+        type: type as ServiceElement["type"],
         title: data.title,
         content: data.content || "",
         passage: data.passage || "",
@@ -928,6 +1031,22 @@ export const ServiceDetailPage: React.FC = () => {
       }
     : undefined;
 
+  // When creating new elements, pre-fill duration from org defaults
+  const newMessageInitial = editInitial ?? {
+    title: "",
+    content: "",
+    passage: "",
+    notes: "",
+    duration: orgSettings.services.sermonDuration,
+  };
+  const newGenericInitial = editInitial ?? {
+    title: "",
+    content: "",
+    passage: "",
+    notes: "",
+    duration: orgSettings.services.songDuration,
+  };
+
   if (isLoading)
     return (
       <div className="flex-1 flex items-center justify-center p-12">
@@ -974,6 +1093,25 @@ export const ServiceDetailPage: React.FC = () => {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          {!orgSettings.services.autoSave && (
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={handleSaveEntireService}
+              disabled={isSavingService}
+              icon={
+                isSavingService ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  <Save className="w-3.5 h-3.5" />
+                )
+              }
+            >
+              {isSavingService
+                ? t("serviceDetailPage.savingService")
+                : t("common.save")}
+            </Button>
+          )}
           <div
             className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-m3-card border border-m3-border/60 shadow-sm"
             title={syncMeta.label}
@@ -1104,10 +1242,12 @@ export const ServiceDetailPage: React.FC = () => {
                   <h2 className="text-base font-bold text-m3-text">
                     {t("serviceDetailPage.serviceOrder")}
                   </h2>
-                  <span className="text-xs font-semibold text-m3-secondary bg-m3-background px-2.5 py-1 rounded-full border border-m3-border/50 shadow-sm">
-                    {t("serviceDetailPage.totalDuration")}:{" "}
-                    {formatDuration(totalDurationSeconds)}
-                  </span>
+                  {orgSettings.services.showServiceDuration && (
+                    <span className="text-xs font-semibold text-m3-secondary bg-m3-background px-2.5 py-1 rounded-full border border-m3-border/50 shadow-sm">
+                      {t("serviceDetailPage.totalDuration")}:{" "}
+                      {formatDuration(totalDurationSeconds)}
+                    </span>
+                  )}
                 </div>
                 <div className="flex flex-wrap items-center gap-1.5">
                   <button
@@ -1141,69 +1281,71 @@ export const ServiceDetailPage: React.FC = () => {
                 </div>
               </div>
 
-              <div className="px-5 py-2.5 border-b border-m3-border/40 shrink-0 bg-m3-background/30 flex flex-col justify-center min-h-11">
-                {isEditingGeneralNotes ? (
-                  <div className="flex items-start gap-2">
-                    <textarea
-                      rows={1}
-                      value={generalNotes}
-                      onChange={(e) => setGeneralNotes(e.target.value)}
-                      placeholder={t(
-                        "serviceDetailPage.generalNotesPlaceholder",
-                      )}
-                      className="flex-1 text-xs rounded-lg border border-m3-border p-2 bg-white dark:bg-m3-card focus:outline-none focus:ring-1 focus:ring-m3-primary text-m3-text resize-y min-h-9"
-                      autoFocus
-                    />
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => {
-                        setGeneralNotes(service?.notes || "");
-                        setIsEditingGeneralNotes(false);
-                      }}
-                      className="h-9 text-xs shrink-0"
-                    >
-                      {t("common.cancel")}
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="primary"
-                      onClick={async () => {
-                        await handleSaveGeneralNotes();
-                        setIsEditingGeneralNotes(false);
-                      }}
-                      className="h-9 text-xs shrink-0"
-                    >
-                      <Save className="w-3.5 h-3.5 mr-1" /> {t("common.save")}
-                    </Button>
-                  </div>
-                ) : (
-                  <div
-                    className="flex items-center justify-between gap-4 group cursor-pointer"
-                    onClick={() => setIsEditingGeneralNotes(true)}
-                  >
-                    <div className="text-xs flex items-center gap-2 flex-1">
-                      <FileText className="w-3.5 h-3.5 text-m3-secondary shrink-0" />
-                      {generalNotes ? (
-                        <span className="text-m3-text line-clamp-1 group-hover:line-clamp-none transition-all">
-                          {generalNotes}
-                        </span>
-                      ) : (
-                        <span className="italic text-m3-secondary/70">
-                          {t("serviceDetailPage.noGeneralNotes")}
-                        </span>
-                      )}
+              {orgSettings.services.showNotes && (
+                <div className="px-5 py-2.5 border-b border-m3-border/40 shrink-0 bg-m3-background/30 flex flex-col justify-center min-h-11">
+                  {isEditingGeneralNotes ? (
+                    <div className="flex items-start gap-2">
+                      <textarea
+                        rows={1}
+                        value={generalNotes}
+                        onChange={(e) => setGeneralNotes(e.target.value)}
+                        placeholder={t(
+                          "serviceDetailPage.generalNotesPlaceholder",
+                        )}
+                        className="flex-1 text-xs rounded-lg border border-m3-border p-2 bg-white dark:bg-m3-card focus:outline-none focus:ring-1 focus:ring-m3-primary text-m3-text resize-y min-h-9"
+                        autoFocus
+                      />
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => {
+                          setGeneralNotes(service?.notes || "");
+                          setIsEditingGeneralNotes(false);
+                        }}
+                        className="h-9 text-xs shrink-0"
+                      >
+                        {t("common.cancel")}
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="primary"
+                        onClick={async () => {
+                          await handleSaveGeneralNotes();
+                          setIsEditingGeneralNotes(false);
+                        }}
+                        className="h-9 text-xs shrink-0"
+                      >
+                        <Save className="w-3.5 h-3.5 mr-1" /> {t("common.save")}
+                      </Button>
                     </div>
-                    <button
-                      type="button"
-                      className="text-m3-secondary hover:text-m3-primary opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-lg hover:bg-m3-primary/10 shrink-0 cursor-pointer"
-                      title={t("serviceDetailPage.editGeneralNotes")}
+                  ) : (
+                    <div
+                      className="flex items-center justify-between gap-4 group cursor-pointer"
+                      onClick={() => setIsEditingGeneralNotes(true)}
                     >
-                      <Edit3 className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                )}
-              </div>
+                      <div className="text-xs flex items-center gap-2 flex-1">
+                        <FileText className="w-3.5 h-3.5 text-m3-secondary shrink-0" />
+                        {generalNotes ? (
+                          <span className="text-m3-text line-clamp-1 group-hover:line-clamp-none transition-all">
+                            {generalNotes}
+                          </span>
+                        ) : (
+                          <span className="italic text-m3-secondary/70">
+                            {t("serviceDetailPage.noGeneralNotes")}
+                          </span>
+                        )}
+                      </div>
+                      <button
+                        type="button"
+                        className="text-m3-secondary hover:text-m3-primary opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-lg hover:bg-m3-primary/10 shrink-0 cursor-pointer"
+                        title={t("serviceDetailPage.editGeneralNotes")}
+                      >
+                        <Edit3 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
 
               <div
                 ref={dropContainerRef}
@@ -1229,10 +1371,15 @@ export const ServiceDetailPage: React.FC = () => {
                         element={el}
                         index={i}
                         isPreviewed={previewElement?.id === el.id}
+                        canMoveUp={i > 0}
+                        canMoveDown={i < elements.length - 1}
+                        onMoveUp={() => handleMoveElement(el.id, -1)}
+                        onMoveDown={() => handleMoveElement(el.id, 1)}
                         onTogglePreview={handleTogglePreview}
                         onRemove={handleRemoveElement}
                         onEdit={openEditModal}
                         onNoteChange={handleNoteChange}
+                        showNotes={orgSettings.services.showNotes}
                       />
                     ))}
                   </div>
@@ -1302,7 +1449,7 @@ export const ServiceDetailPage: React.FC = () => {
           setEditingElement(null);
         }}
         onSave={(data) => handleModalSave("welcome", data)}
-        initial={editInitial}
+        initial={newGenericInitial}
       />
       <ScriptureModal
         isOpen={activeModal === "scripture"}
@@ -1311,7 +1458,7 @@ export const ServiceDetailPage: React.FC = () => {
           setEditingElement(null);
         }}
         onSave={(data) => handleModalSave("scripture", data)}
-        initial={editInitial}
+        initial={newGenericInitial}
       />
       <MessageModal
         isOpen={activeModal === "message"}
@@ -1320,7 +1467,7 @@ export const ServiceDetailPage: React.FC = () => {
           setEditingElement(null);
         }}
         onSave={(data) => handleModalSave("message", data)}
-        initial={editInitial}
+        initial={newMessageInitial}
       />
       <AnnouncementModal
         isOpen={activeModal === "announcement"}
@@ -1329,7 +1476,7 @@ export const ServiceDetailPage: React.FC = () => {
           setEditingElement(null);
         }}
         onSave={(data) => handleModalSave("announcement", data)}
-        initial={editInitial}
+        initial={newGenericInitial}
       />
       <CustomModal
         isOpen={activeModal === "custom"}
@@ -1338,7 +1485,7 @@ export const ServiceDetailPage: React.FC = () => {
           setEditingElement(null);
         }}
         onSave={(data) => handleModalSave("custom", data)}
-        initial={editInitial}
+        initial={newGenericInitial}
       />
     </div>
   );

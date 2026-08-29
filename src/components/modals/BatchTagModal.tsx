@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Badge, Button, Input, Modal } from "@hosanna/shared";
+import { Badge, Button, Input, Modal } from "@/src/components/common";
 import { Check, Plus, Tag as TagIcon, X } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useI18n } from "../../i18n";

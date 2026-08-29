@@ -4,7 +4,8 @@
  */
 
 import React from "react";
-import { Badge, Folder, Song } from "@hosanna/shared";
+import { Badge } from "@/src/components/common";
+import { Folder, Song } from "@/src/types";
 import {
   ArrowRightLeft,
   CheckSquare,

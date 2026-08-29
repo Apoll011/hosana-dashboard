@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Button, Folder, Modal } from "@hosanna/shared";
+import { Button, Modal } from "@/src/components/common";
+import { Folder } from "@/src/types";
 import {
   Check,
   Loader2,

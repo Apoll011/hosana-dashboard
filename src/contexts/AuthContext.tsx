@@ -199,7 +199,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
     try {
       const { data: sessionData, error: sessionError } =
-        await authClient.getSession({ fetchOptions: {} });
+        await authClient.getSession({ query: {} });
       const sessionUser = sessionData?.user;
 
       if (!sessionUser || sessionError) {
@@ -215,13 +215,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       let userRole: string | undefined = undefined;
 
       const { data: initialOrg } =
-        await authClient.organization.getFullOrganization({ fetchOptions: {} });
+        await authClient.organization.getFullOrganization({ query: {} });
 
       if (initialOrg) {
         activeOrg = normalizeOrganization(initialOrg);
       } else {
         const { data: orgs } = await authClient.organization.list({
-          fetchOptions: {},
+          query: {},
         });
         if (orgs && orgs.length > 0) {
           const storedSlug = localStorage.getItem("active_org_slug");
@@ -233,7 +233,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
           const { data: newlyActiveOrg } =
             await authClient.organization.getFullOrganization({
-              fetchOptions: {},
+              query: {},
             });
           activeOrg = normalizeOrganization(newlyActiveOrg);
         }
@@ -256,7 +256,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         } else {
           const { data: roleData } =
             await authClient.organization.getActiveMemberRole({
-              fetchOptions: {},
+              query: {},
             });
           userRole = roleData?.role || undefined;
         }

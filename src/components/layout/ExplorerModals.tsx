@@ -4,14 +4,9 @@
  */
 
 import React from "react";
-import {
-  Button,
-  ConversionResult,
-  Folder,
-  Input,
-  Modal,
-  Song,
-} from "@hosanna/shared";
+import { Button, Input, Modal } from "@/src/components/common";
+import { Folder, Song } from "@/src/types";
+import { ConversionResult } from "@hosanna/chordpro";
 import { AlertTriangle, HardDrive } from "lucide-react";
 import { useI18n } from "../../i18n";
 import { FolderForm } from "../forms/FolderForm";

@@ -3,10 +3,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { GetSongsParams, Song } from "@hosanna/shared";
+import { GetSongsParams, Song } from "@/src/types";
 import { useCallback, useEffect, useState } from "react";
 import { useSync } from "../contexts/SyncContext";
-import { getDatabase, getPurgeAt, SongDocType } from "../db";
+import {
+  getDatabase,
+  getPurgeAt,
+  SongDocType,
+  validateBatchSongs,
+  validateSongMove,
+  validateSongRules,
+} from "../db";
 import { useI18n } from "../i18n";
 
 function useSongMutations() {
@@ -25,13 +32,24 @@ function useSongMutations() {
         const db = await getDatabase();
         const now = new Date().toISOString();
         const id = data.id || crypto.randomUUID();
+        const title = (data.title || t("forms.untitled")).trim();
+        const folderId = data.folderId ?? null;
+
+        // Enforce Prisma schema rules & unique index @@unique([orgId, path]) locally
+        const { path } = await validateSongRules(db, {
+          id,
+          title,
+          folderId,
+          path: data.path,
+        });
+
         const newSong: SongDocType = {
           id,
-          title: data.title || t("forms.untitled"),
+          title,
           artist: data.artist || "",
           content: data.content || "",
-          folderId: data.folderId ?? null,
-          path: data.path || `${data.title || t("forms.untitled")}.pro`,
+          folderId,
+          path,
           tags: Array.isArray(data.tags) ? data.tags : [],
           song_number: data.song_number ?? null,
           createdAt: data.createdAt || now,
@@ -44,13 +62,16 @@ function useSongMutations() {
         showToast(t("hooks.songs.created"), "success");
         return result;
       } catch (err: unknown) {
-        if (err && typeof err === "object" && "message" in err)
+        if (err && typeof err === "object" && "message" in err) {
+          const msg = (err as Error).message;
           showToast(
-            t("hooks.songs.saveError", {
-              error: (err as Error).message || "",
-            }),
+            msg ||
+              t("hooks.songs.saveError", {
+                error: "",
+              }),
             "error",
           );
+        }
         throw err;
       } finally {
         setIsCreating(false);
@@ -77,8 +98,38 @@ function useSongMutations() {
         const now = new Date().toISOString();
 
         if (doc) {
+          const nextTitle =
+            data.title !== undefined ? data.title.trim() : doc.title;
+          const nextFolderId =
+            data.folderId !== undefined
+              ? (data.folderId ?? null)
+              : doc.folderId;
+          const explicitPath = data.path !== undefined ? data.path : undefined;
+
+          let newPath = doc.path;
+          if (
+            data.title !== undefined ||
+            data.folderId !== undefined ||
+            data.path !== undefined
+          ) {
+            const validated = await validateSongRules(
+              db,
+              {
+                id,
+                title: nextTitle,
+                folderId: nextFolderId,
+                path: explicitPath,
+              },
+              { existingId: id },
+            );
+            newPath = validated.path;
+          }
+
           await doc.patch({
             ...data,
+            title: nextTitle,
+            folderId: nextFolderId,
+            path: newPath,
             updatedAt: now,
             _deleted: false,
           });
@@ -86,14 +137,27 @@ function useSongMutations() {
           showToast(t("hooks.songs.updated"), "success");
           return updated;
         } else {
+          const title = (data.title || t("forms.untitled")).trim();
+          const folderId = data.folderId ?? null;
+          const { path } = await validateSongRules(
+            db,
+            {
+              id,
+              title,
+              folderId,
+              path: data.path,
+            },
+            { existingId: id },
+          );
+
           // If not existing locally yet, upsert
           const newDoc = await db.songs.upsert({
             id,
-            title: data.title || t("forms.untitled"),
+            title,
             artist: data.artist || "",
             content: data.content || "",
-            folderId: data.folderId ?? null,
-            path: data.path || `${data.title || t("forms.untitled")}.pro`,
+            folderId,
+            path,
             tags: data.tags || [],
             song_number: data.song_number ?? null,
             createdAt: data.createdAt || now,
@@ -106,13 +170,16 @@ function useSongMutations() {
           return result;
         }
       } catch (err: unknown) {
-        if (err && typeof err === "object" && "message" in err)
+        if (err && typeof err === "object" && "message" in err) {
+          const msg = (err as Error).message;
           showToast(
-            t("hooks.songs.saveError", {
-              error: (err as Error).message || "",
-            }),
+            msg ||
+              t("hooks.songs.saveError", {
+                error: "",
+              }),
             "error",
           );
+        }
         throw err;
       } finally {
         setIsUpdating(false);
@@ -196,28 +263,31 @@ function useSongMutations() {
       setIsUpdating(true);
       try {
         const db = await getDatabase();
-        const doc = await db.songs.findOne(id).exec();
+        const { songDoc, newPath: computedPath } = await validateSongMove(
+          db,
+          id,
+          folderId,
+          newPath,
+        );
         const now = new Date().toISOString();
-        if (doc) {
-          const patchObj: Partial<SongDocType> = {
-            folderId: folderId ?? null,
-            updatedAt: now,
-          };
-          if (newPath) {
-            patchObj.path = newPath;
-          }
-          await doc.patch(patchObj);
-          showToast(t("hooks.songs.moved"), "success");
-          return doc.toJSON() as Song;
-        }
+        await songDoc.patch({
+          folderId: folderId ?? null,
+          path: computedPath,
+          updatedAt: now,
+        });
+        showToast(t("hooks.songs.moved"), "success");
+        return songDoc.toJSON() as Song;
       } catch (err: unknown) {
-        if (err && typeof err === "object" && "message" in err)
+        if (err && typeof err === "object" && "message" in err) {
+          const msg = (err as Error).message;
           showToast(
-            t("hooks.songs.saveError", {
-              error: (err as Error).message || "",
-            }),
+            msg ||
+              t("hooks.songs.saveError", {
+                error: "",
+              }),
             "error",
           );
+        }
         throw err;
       } finally {
         setIsUpdating(false);
@@ -278,8 +348,46 @@ function useSongMutations() {
     [showToast, t],
   );
 
+  const batchCreateSongs = useCallback(
+    async (items: Array<Partial<Song>>) => {
+      setIsCreating(true);
+      try {
+        const db = await getDatabase();
+        const prepared = await validateBatchSongs(
+          db,
+          items.map((i) => ({
+            ...i,
+            title: i.title || t("forms.untitled"),
+          })),
+        );
+        await db.songs.bulkInsert(prepared);
+        showToast(
+          t("songsPage.movedToast", { count: prepared.length }),
+          "success",
+        );
+        return prepared;
+      } catch (err: unknown) {
+        if (err && typeof err === "object" && "message" in err) {
+          const msg = (err as Error).message;
+          showToast(
+            msg ||
+              t("hooks.songs.saveError", {
+                error: "",
+              }),
+            "error",
+          );
+        }
+        throw err;
+      } finally {
+        setIsCreating(false);
+      }
+    },
+    [showToast, t],
+  );
+
   return {
     createSong,
+    batchCreateSongs,
     updateSong,
     deleteSong,
     restoreSong,

@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ConversionResult, Folder, Song } from "@hosanna/shared";
+import { Folder, Song } from "@/src/types";
+import { ConversionResult } from "@hosanna/chordpro";
 import React, {
   useCallback,
   useEffect,
@@ -910,39 +911,55 @@ export const MainLayout: React.FC = () => {
 
   // Folder Actions
   const handleCreateFolderSubmit = async (name: string) => {
-    await createFolder({ name, parentId: currentFolderId });
-    setIsCreateModalOpen(false);
+    try {
+      await createFolder({ name, parentId: currentFolderId });
+      setIsCreateModalOpen(false);
+    } catch {
+      // Toast notification is already handled by useFolders
+    }
   };
 
   const handleRenameFolderSubmit = async (name: string) => {
     if (!renameTarget) return;
-    await renameFolder({
-      id: renameTarget.id,
-      name,
-      updatedAt: renameTarget.updatedAt!,
-    });
-    setRenameTarget(null);
+    try {
+      await renameFolder({
+        id: renameTarget.id,
+        name,
+        updatedAt: renameTarget.updatedAt!,
+      });
+      setRenameTarget(null);
+    } catch {
+      // Toast notification is already handled by useFolders
+    }
   };
 
   const handleCustomizeFolderSubmit = async (color: string, icon: string) => {
     if (!customizeTarget) return;
-    await customizeFolder({
-      id: customizeTarget.id,
-      color,
-      icon,
-      updatedAt: customizeTarget.updatedAt!,
-    });
-    setCustomizeTarget(null);
+    try {
+      await customizeFolder({
+        id: customizeTarget.id,
+        color,
+        icon,
+        updatedAt: customizeTarget.updatedAt!,
+      });
+      setCustomizeTarget(null);
+    } catch {
+      // Toast notification is already handled by useFolders
+    }
   };
 
   const handleMoveFolderSubmit = async () => {
     if (!moveFolderTarget) return;
-    await moveFolder({
-      id: moveFolderTarget.id,
-      parentId: targetParentFolderId,
-      updatedAt: moveFolderTarget.updatedAt!,
-    });
-    setMoveFolderTarget(null);
+    try {
+      await moveFolder({
+        id: moveFolderTarget.id,
+        parentId: targetParentFolderId,
+        updatedAt: moveFolderTarget.updatedAt!,
+      });
+      setMoveFolderTarget(null);
+    } catch {
+      // Toast notification is already handled by useFolders
+    }
   };
 
   const handleDeleteFolderSubmit = async () => {
@@ -970,16 +987,19 @@ export const MainLayout: React.FC = () => {
     folderId: string | null;
     tags: string[];
   }) => {
-    const song = await createSong({
-      title: data.title,
-      artist: data.artist,
-      folderId: data.folderId,
-      content: `{title: ${data.title}}\n{artist: ${data.artist}}\n\n[G] Exemplo de tom e cifra...`,
-      tags: data.tags,
-    });
-    setIsCreateSongModalOpen(false);
-    showToast(t("layout.songCreated"), "success");
-    navigate(`${slugPrefix}/songs/${song.id}`);
+    try {
+      const song = await createSong({
+        title: data.title,
+        artist: data.artist,
+        folderId: data.folderId,
+        content: `{title: ${data.title}}\n{artist: ${data.artist}}\n\n[G] Exemplo de tom e cifra...`,
+        tags: data.tags,
+      });
+      setIsCreateSongModalOpen(false);
+      navigate(`${slugPrefix}/songs/${song.id}`);
+    } catch {
+      // Error toast is already displayed by useSongMutations
+    }
   };
 
   const handleCifraClubSubmit = async (
@@ -987,17 +1007,20 @@ export const MainLayout: React.FC = () => {
     artist: string,
     title: string,
   ) => {
-    const song = await createSong({
-      title,
-      artist,
-      folderId: currentFolderId,
-      content: `{title: ${title}}\n{artist: ${artist}}\n\n${chordpro.chordpro}`,
-      tags: ["cifraclub"],
-    });
-    await Promise.all([songsQuery.refetch(), foldersQuery.refetch()]);
-    setIsCreateSongModalOpen(false);
-    showToast(t("layout.songImported"), "success");
-    navigate(`${slugPrefix}/songs/${song.id}`);
+    try {
+      const song = await createSong({
+        title,
+        artist,
+        folderId: currentFolderId,
+        content: `{title: ${title}}\n{artist: ${artist}}\n\n${chordpro.chordpro}`,
+        tags: ["cifraclub"],
+      });
+      await Promise.all([songsQuery.refetch(), foldersQuery.refetch()]);
+      setIsCreateSongModalOpen(false);
+      navigate(`${slugPrefix}/songs/${song.id}`);
+    } catch {
+      // Error toast is already displayed by useSongMutations
+    }
   };
 
   const handleCreateServiceSubmit = async (data: {
@@ -1005,14 +1028,18 @@ export const MainLayout: React.FC = () => {
     date: string;
     notes: string;
   }) => {
-    const newService = await createService({
-      name: data.name,
-      date: data.date,
-      notes: data.notes,
-      elements: [],
-    });
-    setIsCreateServiceModalOpen(false);
-    navigate(`${slugPrefix}/services/${newService.id}`);
+    try {
+      const newService = await createService({
+        name: data.name,
+        date: data.date,
+        notes: data.notes,
+        elements: [],
+      });
+      setIsCreateServiceModalOpen(false);
+      navigate(`${slugPrefix}/services/${newService.id}`);
+    } catch {
+      // Error toast is already displayed by useServices
+    }
   };
 
   const handleDeleteSongSubmit = async () => {
@@ -1607,12 +1634,16 @@ export const MainLayout: React.FC = () => {
         targetSongFolderId={targetSongFolderId}
         onMoveSongConfirm={async (targetFolderId) => {
           if (!moveSongTarget) return;
-          await moveSong({
-            id: moveSongTarget.id,
-            folderId: targetFolderId,
-            updatedAt: moveSongTarget.updatedAt,
-          });
-          setMoveSongTarget(null);
+          try {
+            await moveSong({
+              id: moveSongTarget.id,
+              folderId: targetFolderId,
+              updatedAt: moveSongTarget.updatedAt,
+            });
+            setMoveSongTarget(null);
+          } catch {
+            // Toast error is handled by useSongMutations
+          }
         }}
         deleteSongTarget={deleteSongTarget}
         setDeleteSongTarget={setDeleteSongTarget}

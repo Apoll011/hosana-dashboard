@@ -1,4 +1,4 @@
-import { getApiClient } from "@hosanna/shared";
+import { getApiClient } from "@/src/api";
 import { RxCollection, RxReplicationWriteToMasterRow, WithDeleted } from "rxdb";
 import {
   replicateRxCollection,

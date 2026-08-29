@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Button, Folder, Input, Modal } from "@hosanna/shared";
+import { Button, Input, Modal } from "@/src/components/common";
+import { Folder } from "@/src/types";
 import { AlertTriangle, Trash2 } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useI18n } from "../../i18n";

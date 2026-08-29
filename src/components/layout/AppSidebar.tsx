@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Badge, Folder } from "@hosanna/shared";
+import { Badge } from "@/src/components/common";
+import { Folder } from "@/src/types";
 import { Organization } from "better-auth/client";
 import {
   ChevronLeft,

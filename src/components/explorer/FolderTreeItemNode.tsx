@@ -1,5 +1,5 @@
 import React from "react";
-import { Folder } from "@hosanna/shared";
+import { Folder } from "@/src/types";
 import {
   ChevronDown,
   ChevronRight,
