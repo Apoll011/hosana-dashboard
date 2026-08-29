@@ -121,6 +121,8 @@ export const SongEditorPage: React.FC = () => {
         await updateSong({ id: song.id, data: updates });
         posthog.capture("song_saved", { layout_mode: layoutMode });
         setHasUnsavedChanges(false);
+      } catch {
+        // Error toast is already displayed by useSongMutations
       } finally {
         isSavingRef.current = false;
       }

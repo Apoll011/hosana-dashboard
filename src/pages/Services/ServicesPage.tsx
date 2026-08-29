@@ -331,15 +331,19 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
     date: string;
     notes: string;
   }) => {
-    const newService = await createService({
-      name: data.name,
-      date: data.date,
-      notes: data.notes,
-      elements: [],
-    });
-    posthog.capture("service_created", { has_notes: !!data.notes });
-    setIsCreateModalOpen(false);
-    navigate(`${slugPrefix}/services/${newService.id}`);
+    try {
+      const newService = await createService({
+        name: data.name,
+        date: data.date,
+        notes: data.notes,
+        elements: [],
+      });
+      posthog.capture("service_created", { has_notes: !!data.notes });
+      setIsCreateModalOpen(false);
+      navigate(`${slugPrefix}/services/${newService.id}`);
+    } catch {
+      // Toast notification is already handled by useServices
+    }
   };
 
   const handleEditServiceSubmit = async (data: {
@@ -348,16 +352,20 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
     notes: string;
   }) => {
     if (!editTarget) return;
-    await updateService({
-      id: editTarget.id,
-      data: {
-        name: data.name,
-        date: data.date,
-        notes: data.notes,
-        updatedAt: editTarget.updatedAt,
-      },
-    });
-    setEditTarget(null);
+    try {
+      await updateService({
+        id: editTarget.id,
+        data: {
+          name: data.name,
+          date: data.date,
+          notes: data.notes,
+          updatedAt: editTarget.updatedAt,
+        },
+      });
+      setEditTarget(null);
+    } catch {
+      // Toast notification is already handled by useServices
+    }
   };
 
   const handleDuplicateService = async (service: Service) => {

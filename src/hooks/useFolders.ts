@@ -6,7 +6,13 @@
 import { Folder } from "@/src/types";
 import { useCallback, useEffect, useState } from "react";
 import { useSync } from "../contexts/SyncContext";
-import { FolderDocType, getDatabase, getPurgeAt } from "../db";
+import {
+  FolderDocType,
+  getDatabase,
+  getPurgeAt,
+  validateFolderRename,
+  validateFolderRules,
+} from "../db";
 
 let cachedFolders: Folder[] | null = null;
 let cachedRootSongsCount: number = 0;
@@ -82,11 +88,17 @@ export function useFolders() {
       setIsCreating(true);
       try {
         const db = await getDatabase();
+        const trimmedName = name.trim();
+        const parent = parentId ?? null;
+
+        // Enforce Prisma schema rules locally
+        await validateFolderRules(db, { name: trimmedName, parentId: parent });
+
         const now = new Date().toISOString();
         const newFolder: FolderDocType = {
           id: crypto.randomUUID(),
-          name,
-          parentId: parentId ?? null,
+          name: trimmedName,
+          parentId: parent,
           songCount: 0,
           folderCount: 0,
           createdAt: now,
@@ -100,7 +112,7 @@ export function useFolders() {
         return result;
       } catch (err: unknown) {
         if (err && typeof err === "object" && "message" in err)
-          showToast(err.message || "Failed to create folder", "error");
+          showToast((err as Error).message || "Failed to create folder", "error");
         throw err;
       } finally {
         setIsCreating(false);
@@ -114,17 +126,30 @@ export function useFolders() {
       setIsRenaming(true);
       try {
         const db = await getDatabase();
-        const doc = await db.folders.findOne(id).exec();
-        if (doc) {
+        const { folderDoc, songsToUpdate } = await validateFolderRename(
+          db,
+          id,
+          name,
+        );
+
+        const now = new Date().toISOString();
+        await folderDoc.patch({
+          name: name.trim(),
+          updatedAt: now,
+        });
+
+        // Cascade path updates to all child songs in local RxDB matching server behavior
+        for (const { doc, newPath } of songsToUpdate) {
           await doc.patch({
-            name,
-            updatedAt: new Date().toISOString(),
+            path: newPath,
+            updatedAt: now,
           });
         }
+
         showToast("Folder renamed", "success");
       } catch (err: unknown) {
         if (err && typeof err === "object" && "message" in err)
-          showToast(err.message || "Failed to rename folder", "error");
+          showToast((err as Error).message || "Failed to rename folder", "error");
         throw err;
       } finally {
         setIsRenaming(false);
@@ -157,7 +182,7 @@ export function useFolders() {
         showToast("Pasta personalizada com sucesso", "success");
       } catch (err: unknown) {
         if (err && typeof err === "object" && "message" in err)
-          showToast(err.message || "Falha ao personalizar pasta", "error");
+          showToast((err as Error).message || "Falha ao personalizar pasta", "error");
         throw err;
       }
     },
@@ -176,6 +201,12 @@ export function useFolders() {
       setIsMoving(true);
       try {
         const db = await getDatabase();
+        await validateFolderRules(
+          db,
+          { id, parentId: parentId ?? null },
+          { existingId: id },
+        );
+
         const doc = await db.folders.findOne(id).exec();
         if (doc) {
           await doc.patch({
@@ -186,7 +217,7 @@ export function useFolders() {
         showToast("Folder moved", "success");
       } catch (err: unknown) {
         if (err && typeof err === "object" && "message" in err)
-          showToast(err.message || "Failed to move folder", "error");
+          showToast((err as Error).message || "Failed to move folder", "error");
         throw err;
       } finally {
         setIsMoving(false);

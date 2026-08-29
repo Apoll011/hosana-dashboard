@@ -442,19 +442,23 @@ export const SongsPage: React.FC<SongsPageProps> = ({
       folderId: string | null;
       tags: string[];
     }) => {
-      const newSong = await createSong({
-        title: data.title,
-        artist: data.artist,
-        folderId: data.folderId,
-        tags: data.tags,
-        content: `{title: ${data.title}}\n{artist: ${data.artist}}\n{key: G}\n\n[G]Enter lyrics and chords...`,
-      });
-      posthog.capture("song_created", {
-        has_tags: data.tags.length > 0,
-        has_folder: !!data.folderId,
-      });
-      setIsCreateModalOpen(false);
-      navigate(`${slugPrefix}/songs/${newSong.id}`);
+      try {
+        const newSong = await createSong({
+          title: data.title,
+          artist: data.artist,
+          folderId: data.folderId,
+          tags: data.tags,
+          content: `{title: ${data.title}}\n{artist: ${data.artist}}\n{key: G}\n\n[G]Enter lyrics and chords...`,
+        });
+        posthog.capture("song_created", {
+          has_tags: data.tags.length > 0,
+          has_folder: !!data.folderId,
+        });
+        setIsCreateModalOpen(false);
+        navigate(`${slugPrefix}/songs/${newSong.id}`);
+      } catch {
+        // Error toast is handled by useSongMutations
+      }
     },
     [createSong, navigate, slugPrefix],
   );
