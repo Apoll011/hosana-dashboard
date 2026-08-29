@@ -509,18 +509,18 @@ export const en: typeof pt = {
       saveError: "Error updating organization: {error}",
       backupTitle: "Backup & Data",
       backupDesc:
-        "Export or restore all repertoires, services, and settings in a secure JSON file.",
+        "Export or restore all repertoires and services in a secure HOSANNA file.",
       exportData: "Export Data",
       exportDesc:
-        "Download a full JSON backup containing songs, service plans, and folders.",
+        "Download a full HOSANNA backup containing songs, service plans, and folders.",
       exportProcessing: "Processing backup...",
-      exportDownloadBtn: "Download Backup (.json)",
+      exportDownloadBtn: "Download Backup (.hosanna)",
       exportSuccess: "Backup downloaded successfully!",
       exportError: "Failed to export backup.",
       restoreData: "Restore Data",
       restoreWarning: "May update or replace existing data.",
-      restoreUploadBtn: "Upload JSON File",
-      invalidJson: "Invalid backup JSON file.",
+      restoreUploadBtn: "Upload HOSANNA File",
+      invalidJson: "Invalid backup HOSANNA file.",
     },
     about: {
       title: "About Hosanna Studio",

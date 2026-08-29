@@ -511,18 +511,18 @@ export const pt = {
       saveError: "Erro ao atualizar organização: {error}",
       backupTitle: "Cópia de Segurança & Dados",
       backupDesc:
-        "Exporte ou restaure todos os repertórios, cultos e definições num ficheiro JSON seguro.",
+        "Exporte ou restaure todos os repertórios e cultos num ficheiro HOSANNA seguro.",
       exportData: "Exportar Dados",
       exportDesc:
-        "Transfira um backup completo em JSON contendo músicas, alinhamentos e pastas.",
+        "Transfira um backup completo em HOSANNA contendo músicas, alinhamentos e pastas.",
       exportProcessing: "A processar backup...",
-      exportDownloadBtn: "Descarregar Cópia (.json)",
+      exportDownloadBtn: "Descarregar Cópia (.hosanna)",
       exportSuccess: "Cópia de segurança descarregada com sucesso!",
       exportError: "Falha ao exportar cópia de segurança.",
       restoreData: "Restaurar Dados",
       restoreWarning: "Pode atualizar ou substituir dados existentes.",
-      restoreUploadBtn: "Carregar Ficheiro JSON",
-      invalidJson: "Ficheiro JSON de cópia de segurança inválido.",
+      restoreUploadBtn: "Carregar Ficheiro HOSANNA",
+      invalidJson: "Ficheiro HOSANNA de cópia de segurança inválido.",
     },
     about: {
       title: "Sobre o Hosanna Studio",
