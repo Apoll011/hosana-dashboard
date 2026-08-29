@@ -1,4 +1,4 @@
-import { Button, Modal } from "@hosanna/shared";
+import { Button, Modal } from "@/src/components/common";
 import { BookOpen, Check, ChevronDown, Loader2, Search } from "lucide-react";
 import React, { useCallback, useEffect, useState } from "react";
 import { useI18n } from "../../../i18n";
@@ -6,7 +6,7 @@ import {
   DurationField,
   durationInputToSeconds,
   secondsToDurationInput,
-} from "./DurationField";
+} from "@/src/components/DurationField";
 
 // ── Bolls Life Bible API Integration ──────────────────────────────────
 // API explicitly permits free web usage. It replaces the buggy NPM package.
@@ -696,7 +696,13 @@ export const ScriptureModal: React.FC<ScriptureModalProps> = ({
         <DurationField
           value={duration}
           onChange={setDuration}
-          accentRingClass="focus:ring-fuchsia-500"
+          accentRingClass="focus:ring-fuchsia-500/40"
+          badgeClass="text-fuchsia-600 dark:text-fuchsia-400 bg-fuchsia-50 dark:bg-fuchsia-950/50 border-fuchsia-200/50 dark:border-fuchsia-800/50"
+          presets={[
+            { label: "2:00", sec: 120 },
+            { label: "3:00", sec: 180 },
+            { label: "5:00", sec: 300 },
+          ]}
         />
 
         {/* Actions */}

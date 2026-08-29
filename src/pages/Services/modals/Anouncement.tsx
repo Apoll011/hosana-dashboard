@@ -2,7 +2,7 @@
 // ── Announcement Modal ────────────────────────────────────────────────
 // ══════════════════════════════════════════════════════════════════════
 
-import { Button, Modal } from "@hosanna/shared";
+import { Button, Modal } from "@/src/components/common";
 import { Megaphone } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useI18n } from "../../../i18n";
@@ -10,7 +10,7 @@ import {
   DurationField,
   durationInputToSeconds,
   secondsToDurationInput,
-} from "./DurationField";
+} from "@/src/components/DurationField";
 
 interface AnnouncementModalProps {
   isOpen: boolean;
@@ -126,7 +126,13 @@ export const AnnouncementModal: React.FC<AnnouncementModalProps> = ({
         <DurationField
           value={duration}
           onChange={setDuration}
-          accentRingClass="focus:ring-emerald-500"
+          accentRingClass="focus:ring-emerald-500/40"
+          badgeClass="text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 border-emerald-200/50 dark:border-emerald-800/50"
+          presets={[
+            { label: "2:00", sec: 120 },
+            { label: "3:00", sec: 180 },
+            { label: "5:00", sec: 300 },
+          ]}
         />
 
         <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-200 dark:border-slate-800">

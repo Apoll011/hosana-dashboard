@@ -2,7 +2,7 @@
 // ── Message Modal ─────────────────────────────────────────────────────
 // ══════════════════════════════════════════════════════════════════════
 
-import { Button, Modal } from "@hosanna/shared";
+import { Button, Modal } from "@/src/components/common";
 import { MessageSquare } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useI18n } from "../../../i18n";
@@ -10,7 +10,7 @@ import {
   DurationField,
   durationInputToSeconds,
   secondsToDurationInput,
-} from "./DurationField";
+} from "@/src/components/DurationField";
 
 interface MessageModalProps {
   isOpen: boolean;
@@ -129,7 +129,14 @@ export const MessageModal: React.FC<MessageModalProps> = ({
         <DurationField
           value={duration}
           onChange={setDuration}
-          accentRingClass="focus:ring-amber-500"
+          accentRingClass="focus:ring-amber-500/40"
+          badgeClass="text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/50 border-amber-200/50 dark:border-amber-800/50"
+          presets={[
+            { label: "30:00", sec: 1800 },
+            { label: "40:00", sec: 2400 },
+            { label: "45:00", sec: 2700 },
+            { label: "60:00", sec: 3600 },
+          ]}
         />
 
         <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-200 dark:border-slate-800">

@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Button, Modal, backupApi } from "@hosanna/shared";
+import { Button, Modal } from "@/src/components/common";
+import { backupApi } from "@/src/api";
 import {
   AlertTriangle,
   AppWindow,

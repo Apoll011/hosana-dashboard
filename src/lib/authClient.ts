@@ -31,5 +31,4 @@ export const authClient = createAuthClient({
   ],
 });
 
-export type Session = typeof authClient.$Infer.Session.session;
-export type User = typeof authClient.$Infer.Session.user;
+export type { Session, User } from "better-auth";

@@ -47,9 +47,9 @@ export const AboutTab: React.FC<{ active: boolean }> = ({ active }) => {
       type: "Drag & Drop",
     },
     {
-      name: "@hosanna/shared",
-      license: "Proprietário",
-      type: "Biblioteca Partilhada",
+      name: "@hosanna/chordpro",
+      license: "Apache-2.0",
+      type: "Editor, Renderizador e Parser ChordPro",
     },
     { name: "@vercel/analytics", license: "MIT", type: "Analítica" },
     { name: "@vercel/node", license: "MIT", type: "Serverless Functions" },

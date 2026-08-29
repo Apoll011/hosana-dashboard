@@ -1,6 +1,6 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@500;600;700&display=swap");
 @import "tailwindcss";
-@source "../node_modules/@hosanna/shared";
+@source "../node_modules/@hosanna/chordpro";
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
@@ -275,8 +275,8 @@ body {
    Dark Mode — Avatar camera-upload icon: tonal, not vivid cyan.
    ============================================================ */
 .dark .bg-m3-primary.rounded-full.absolute {
-  background-color: rgba(91, 171, 219, 0.20) !important;
-  border: 1px solid rgba(91, 171, 219, 0.30);
+  background-color: rgba(91, 171, 219, 0.2) !important;
+  border: 1px solid rgba(91, 171, 219, 0.3);
 }
 
 /* ============================================================

@@ -4,7 +4,7 @@
  */
 
 import { useAppNavigate } from "@/src/hooks/useAppNavigate";
-import { Button, Spinner } from "@hosanna/shared";
+import { Button, Spinner } from "@/src/components/common";
 import { Building2, Check, ShieldAlert, X } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
@@ -58,7 +58,6 @@ export const AcceptInvitationPage: React.FC = () => {
       return;
     }
 
-
     const fetchInvitation = async () => {
       setIsFetching(true);
       setErrorMsg("");
@@ -88,7 +87,6 @@ export const AcceptInvitationPage: React.FC = () => {
 
     fetchInvitation();
   }, [invitationId, user, isAuthLoading, navigate]);
-
 
   const handleAccept = async () => {
     if (!invitationId) return;
@@ -170,7 +168,6 @@ export const AcceptInvitationPage: React.FC = () => {
       setActionLoading(null);
     }
   };
-
 
   return (
     <LoginLayout errorMsg={errorMsg} redirectMessage={successMsg}>

@@ -2,7 +2,8 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  */
-import { Folder, Input, Service, Song } from "@hosanna/shared";
+import { Input } from "@/src/components/common";
+import { Folder, Service, Song } from "@/src/types";
 import {
   Calendar,
   ChevronRight,

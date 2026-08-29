@@ -1,4 +1,4 @@
-import { ServiceElement } from "@hosanna/shared";
+import { ServiceElement } from "@/src/types";
 import { RxJsonSchema } from "rxdb";
 
 export interface SongDocType {

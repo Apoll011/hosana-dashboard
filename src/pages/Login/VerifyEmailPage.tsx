@@ -4,7 +4,7 @@
  */
 
 import { AppLink } from "@/src/components/AppLink";
-import { Button } from "@hosanna/shared";
+import { Button } from "@/src/components/common";
 import {
   CheckCircle2,
   Clock,

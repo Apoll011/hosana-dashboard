@@ -3,10 +3,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Service, ServiceElement } from "@hosanna/shared";
+import { Service, ServiceElement } from "@/src/types";
 import { useCallback, useEffect, useState } from "react";
 import { useSync } from "../contexts/SyncContext";
-import { getDatabase, getPurgeAt, ServiceDocType } from "../db";
+import {
+  getDatabase,
+  getPurgeAt,
+  ServiceDocType,
+  validateServiceRules,
+} from "../db";
 import { useI18n } from "../i18n";
 
 let cachedServicesMap: Map<string, Service[]> = new Map();
@@ -76,11 +81,12 @@ export function useServices(includeArchived: boolean = false) {
     async (data: Partial<Service>) => {
       setIsCreating(true);
       try {
+        validateServiceRules(data);
         const db = await getDatabase();
         const now = new Date().toISOString();
         const newService: ServiceDocType = {
           id: data.id || crypto.randomUUID(),
-          name: data.name || t("forms.untitled"),
+          name: data.name!.trim(),
           date: data.date || now,
           notes: data.notes ?? null,
           elements: data.elements || [],
@@ -97,9 +103,10 @@ export function useServices(includeArchived: boolean = false) {
       } catch (err: unknown) {
         if (err && typeof err === "object" && "message" in err)
           showToast(
-            t("hooks.services.saveError", {
-              error: (err as Error).message || "",
-            }),
+            (err as Error).message ||
+              t("hooks.services.saveError", {
+                error: "",
+              }),
             "error",
           );
         throw err;
@@ -114,6 +121,7 @@ export function useServices(includeArchived: boolean = false) {
     async ({ id, data }: { id: string; data: Partial<Service> }) => {
       setIsUpdating(true);
       try {
+        validateServiceRules(data);
         const db = await getDatabase();
         const doc = await db.services.findOne(id).exec();
         const now = new Date().toISOString();
@@ -121,6 +129,7 @@ export function useServices(includeArchived: boolean = false) {
         if (doc) {
           await doc.patch({
             ...data,
+            name: data.name !== undefined ? data.name.trim() : doc.name,
             updatedAt: now,
             _deleted: false,
           });
@@ -130,7 +139,7 @@ export function useServices(includeArchived: boolean = false) {
         } else {
           const newDoc = await db.services.upsert({
             id,
-            name: data.name || t("forms.untitled"),
+            name: (data.name || t("forms.untitled")).trim(),
             date: data.date || now,
             notes: data.notes ?? null,
             elements: data.elements || [],
@@ -147,9 +156,10 @@ export function useServices(includeArchived: boolean = false) {
       } catch (err: unknown) {
         if (err && typeof err === "object" && "message" in err)
           showToast(
-            t("hooks.services.saveError", {
-              error: (err as Error).message || "",
-            }),
+            (err as Error).message ||
+              t("hooks.services.saveError", {
+                error: "",
+              }),
             "error",
           );
         throw err;
