@@ -4,8 +4,10 @@
  */
 
 import { ChordProPreviewSettings } from "@/src/components/ChorproSettings";
+import { Button, Input, Spinner } from "@/src/components/common";
 import { useAppNavigate } from "@/src/hooks/useAppNavigate";
 import { usePreviewSettings } from "@/src/hooks/usePreviewSettings";
+import { ServiceElement } from "@/src/types";
 import {
   attachClosestEdge,
   extractClosestEdge,
@@ -16,8 +18,6 @@ import {
   dropTargetForElements,
   monitorForElements,
 } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
-import { Button, Input, Spinner } from "@/src/components/common";
-import { ServiceElement } from "@/src/types";
 import { ChordProRenderer, parseChordPro } from "@hosanna/chordpro";
 import {
   ArrowDown,
@@ -550,48 +550,48 @@ const ServiceRow: React.FC<ServiceRowProps> = ({
         </div>
       </div>
 
-      {isExpanded && (
+      {isExpanded && (isEditingNote || element.notes) && (
         <div className="border-t border-m3-border dark:border-m3-border/30 bg-m3-sidebar/10 dark:bg-black/10 rounded-b-2xl p-4 flex flex-col gap-4">
-          {(isEditingNote || element.notes) && (
-            <div className="flex flex-col gap-2">
-              <label className="text-xs font-bold text-m3-secondary uppercase tracking-wider flex items-center gap-1">
-                <FileText className="w-3 h-3" />{" "}
-                {t("serviceDetailPage.elementNotes")}
-              </label>
-              {isEditingNote ? (
-                <div className="flex items-center gap-2">
-                  <input
-                    type="text"
-                    value={localNote}
-                    onChange={(e) => setLocalNote(e.target.value)}
-                    placeholder={t("serviceDetailPage.elementNotesPlaceholder")}
-                    className="flex-1 text-xs rounded-lg border border-m3-border px-3 py-2 bg-white dark:bg-m3-card focus:outline-none focus:border-m3-primary text-m3-text"
-                    autoFocus
-                  />
-                  <Button
-                    size="sm"
-                    variant="primary"
-                    onClick={() => {
-                      onNoteChange(element.id, localNote);
-                      setIsEditingNote(false);
-                    }}
-                  >
-                    <Save className="w-3.5 h-3.5" />
-                  </Button>
-                </div>
-              ) : (
-                <div className="text-sm text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-900/20 px-3 py-2 rounded-lg border border-amber-200 dark:border-amber-800/50">
-                  {element.notes}
-                </div>
-              )}
-            </div>
-          )}
-
-          {!isSong && (
-            <div className="mt-2 text-sm text-m3-text whitespace-pre-wrap bg-white dark:bg-m3-card p-4 rounded-xl border border-m3-border dark:border-m3-border/50">
-              {element.content || t("serviceDetailPage.noContent")}
-            </div>
-          )}
+          <div className="flex flex-col gap-2">
+            <label className="text-xs font-bold text-m3-secondary uppercase tracking-wider flex items-center gap-1">
+              <FileText className="w-3 h-3" />{" "}
+              {t("serviceDetailPage.elementNotes")}
+            </label>
+            {isEditingNote ? (
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={localNote}
+                  onChange={(e) => setLocalNote(e.target.value)}
+                  placeholder={t("serviceDetailPage.elementNotesPlaceholder")}
+                  className="flex-1 text-xs rounded-lg border border-m3-border px-3 py-2 bg-white dark:bg-m3-card focus:outline-none focus:border-m3-primary text-m3-text"
+                  autoFocus
+                />
+                <Button
+                  size="sm"
+                  variant="primary"
+                  onClick={() => {
+                    onNoteChange(element.id, localNote);
+                    setIsEditingNote(false);
+                    setIsExpanded(false);
+                  }}
+                >
+                  <Save className="w-3.5 h-3.5" />
+                </Button>
+              </div>
+            ) : (
+              <div className="text-sm text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-900/20 px-3 py-2 rounded-lg border border-amber-200 dark:border-amber-800/50">
+                {element.notes}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+      {isExpanded && !isSong && (
+        <div className="pt-0 p-4 flex flex-col gap-4">
+          <div className="mt-2 text-sm text-m3-text whitespace-pre-wrap bg-white dark:bg-m3-card p-4 rounded-xl border border-m3-border dark:border-m3-border/50">
+            {element.content || t("serviceDetailPage.noContent")}
+          </div>
         </div>
       )}
     </div>
@@ -833,7 +833,7 @@ export const ServiceDetailPage: React.FC = () => {
     } else {
       nextElements.push({
         id: crypto.randomUUID(),
-        type,
+        type: type as ServiceElement["type"],
         title: data.title,
         content: data.content || "",
         passage: data.passage || "",

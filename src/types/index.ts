@@ -72,13 +72,7 @@ export interface FoldersResponse {
 export interface ServiceElement {
   id: string;
   type:
-    | "welcome"
-    | "scripture"
-    | "message"
-    | "announcement"
-    | "custom"
-    | "song"
-    | string;
+    "welcome" | "scripture" | "message" | "announcement" | "custom" | "song";
   title: string;
   content?: string;
   position?: number;
