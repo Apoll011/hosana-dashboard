@@ -1043,6 +1043,8 @@ export const pt = {
     exportOrder: "Exportar Ordem",
     inService: "Na Lista ×{count}",
     dragToReorder: "Arrastar para reordenar",
+    moveUp: "Mover para cima",
+    moveDown: "Mover para baixo",
     closePreview: "Fechar Prévia",
     openPreview: "Abrir Prévia",
     expand: "Expandir",

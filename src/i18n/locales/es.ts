@@ -1045,6 +1045,8 @@ export const es: typeof pt = {
     exportOrder: "Exportar Orden",
     inService: "En Lista ×{count}",
     dragToReorder: "Arrastrar para reordenar",
+    moveUp: "Mover arriba",
+    moveDown: "Mover abajo",
     closePreview: "Cerrar Vista Previa",
     openPreview: "Abrir Vista Previa",
     expand: "Expandir",

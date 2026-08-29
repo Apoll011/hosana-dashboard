@@ -25,18 +25,20 @@ import {
   Spinner,
 } from "@hosanna/shared";
 import {
+  ArrowDown,
   ArrowLeft,
+  ArrowUp,
   BookOpen,
-  ChevronDown,
-  ChevronUp,
   Clock3,
   Edit3,
   FileText,
   GripVertical,
   LayoutTemplate,
   Loader2,
+  Maximize2,
   Megaphone,
   MessageSquare,
+  Minimize2,
   MoreHorizontal,
   Music,
   PanelLeftClose,
@@ -263,6 +265,10 @@ interface ServiceRowProps {
   element: ServiceElement;
   index: number;
   isPreviewed: boolean;
+  canMoveUp: boolean;
+  canMoveDown: boolean;
+  onMoveUp: () => void;
+  onMoveDown: () => void;
   onTogglePreview: (el: ServiceElement) => void;
   onRemove: (id: string) => void;
   onEdit: (el: ServiceElement) => void;
@@ -273,6 +279,10 @@ const ServiceRow: React.FC<ServiceRowProps> = ({
   element,
   index,
   isPreviewed,
+  canMoveUp,
+  canMoveDown,
+  onMoveUp,
+  onMoveDown,
   onTogglePreview,
   onRemove,
   onEdit,
@@ -425,6 +435,29 @@ const ServiceRow: React.FC<ServiceRowProps> = ({
           )}
         </div>
 
+        <div className="flex flex-col items-center gap-0.5 shrink-0">
+          <button
+            type="button"
+            onClick={onMoveUp}
+            disabled={!canMoveUp}
+            className="p-1 rounded text-m3-secondary hover:text-m3-primary hover:bg-m3-primary/10 disabled:opacity-30 disabled:hover:text-m3-secondary disabled:hover:bg-transparent disabled:cursor-not-allowed transition-colors cursor-pointer"
+            title={t("serviceDetailPage.moveUp")}
+            aria-label={t("serviceDetailPage.moveUp")}
+          >
+            <ArrowUp className="w-3.5 h-3.5" />
+          </button>
+          <button
+            type="button"
+            onClick={onMoveDown}
+            disabled={!canMoveDown}
+            className="p-1 rounded text-m3-secondary hover:text-m3-primary hover:bg-m3-primary/10 disabled:opacity-30 disabled:hover:text-m3-secondary disabled:hover:bg-transparent disabled:cursor-not-allowed transition-colors cursor-pointer"
+            title={t("serviceDetailPage.moveDown")}
+            aria-label={t("serviceDetailPage.moveDown")}
+          >
+            <ArrowDown className="w-3.5 h-3.5" />
+          </button>
+        </div>
+
         <div className="flex items-center gap-1 shrink-0">
           {(isEditingNote || element.notes) && !isExpanded && (
             <div className="text-[10px] max-w-35 truncate italic px-2 py-1 rounded bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-200 border border-amber-200 dark:border-amber-800/50 mr-2">
@@ -453,9 +486,9 @@ const ServiceRow: React.FC<ServiceRowProps> = ({
                 <PanelRight className="w-4 h-4" />
               )
             ) : isExpanded ? (
-              <ChevronUp className="w-4 h-4" />
+              <Minimize2 className="w-4 h-4" />
             ) : (
-              <ChevronDown className="w-4 h-4" />
+              <Maximize2 className="w-4 h-4" />
             )}
           </button>
 
@@ -693,6 +726,15 @@ export const ServiceDetailPage: React.FC = () => {
 
   const handleRemoveElement = async (elementId: string) => {
     await syncElements(elements.filter((e) => e.id !== elementId));
+  };
+
+  const handleMoveElement = async (elementId: string, direction: -1 | 1) => {
+    const current = elementsRef.current;
+    const oldIndex = current.findIndex((e) => e.id === elementId);
+    if (oldIndex === -1) return;
+    const newIndex = oldIndex + direction;
+    if (newIndex < 0 || newIndex >= current.length) return;
+    await syncElements(arrayMove(current, oldIndex, newIndex));
   };
 
   const handleNoteChange = async (elementId: string, note: string) => {
@@ -1229,6 +1271,10 @@ export const ServiceDetailPage: React.FC = () => {
                         element={el}
                         index={i}
                         isPreviewed={previewElement?.id === el.id}
+                        canMoveUp={i > 0}
+                        canMoveDown={i < elements.length - 1}
+                        onMoveUp={() => handleMoveElement(el.id, -1)}
+                        onMoveDown={() => handleMoveElement(el.id, 1)}
                         onTogglePreview={handleTogglePreview}
                         onRemove={handleRemoveElement}
                         onEdit={openEditModal}
