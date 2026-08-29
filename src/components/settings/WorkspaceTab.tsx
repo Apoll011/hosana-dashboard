@@ -3,10 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { backupApi } from "@/src/api";
+import { Button, Input } from "@/src/components/common";
 import { useCan } from "@/src/lib/permissions/client";
 import { Can, CanAny } from "@/src/lib/permissions/components";
-import { Button, Input } from "@/src/components/common";
-import { backupApi } from "@/src/api";
 import {
   Building2,
   Camera,
@@ -806,7 +806,7 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
                   <input
                     ref={restoreInputRef}
                     type="file"
-                    accept=".json"
+                    accept=".hosanna"
                     onChange={handleRestoreFile}
                     className="hidden"
                   />
