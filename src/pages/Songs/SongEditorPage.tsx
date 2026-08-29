@@ -10,12 +10,16 @@ import { useCan } from "@/src/lib/permissions/client";
 import { Can } from "@/src/lib/permissions/components";
 import {
   Button,
+  Spinner,
+} from "@/src/components/common";
+import { EditorSettingsPanel } from "@/src/components/EditorSettingsPanel";
+import { useEditorSettings } from "@/src/hooks/useEditorSettings";
+import { Song } from "@/src/types";
+import {
   ChordProRenderer,
   parseChordPro,
-  Song,
-  Spinner,
-} from "@hosanna/shared";
-import { Editor, EditorSettingsPanel } from "@hosanna/shared/editor";
+} from "@hosanna/chordpro";
+import { Editor } from "@hosanna/chordpro/editor";
 import {
   ArrowLeft,
   Columns,
@@ -73,6 +77,12 @@ export const SongEditorPage: React.FC = () => {
 
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
+
+  const {
+    settings: editorSettings,
+    updateSetting: updateEditorSetting,
+    resetSettings: resetEditorSettings,
+  } = useEditorSettings();
 
   const { settings, updateSetting, resetSettings } = usePreviewSettings();
   const {
@@ -270,6 +280,9 @@ export const SongEditorPage: React.FC = () => {
             <EditorSettingsPanel
               isOpen={showEditorSettings}
               onClose={() => setShowEditorSettings(false)}
+              settings={editorSettings}
+              updateSetting={updateEditorSetting}
+              resetSettings={resetEditorSettings}
             />
 
             <div className="flex-1 overflow-hidden relative">
@@ -279,6 +292,7 @@ export const SongEditorPage: React.FC = () => {
                   setContent(val);
                   setHasUnsavedChanges(true);
                 }}
+                settings={editorSettings}
                 readOnly={!canUpdateSong}
                 onSave={handleSave}
                 mode="chordpro"

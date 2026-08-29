@@ -4,7 +4,7 @@
  */
 
 import { useAppNavigate } from "@/src/hooks/useAppNavigate";
-import { Button, Spinner } from "@hosanna/shared";
+import { Button, Spinner } from "@/src/components/common";
 import { Building2, Check, ShieldAlert, X } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";

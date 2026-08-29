@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Folder } from "@hosanna/shared";
+import { Folder } from "@/src/types";
 import { useCallback, useEffect, useState } from "react";
 import { useSync } from "../contexts/SyncContext";
 import { FolderDocType, getDatabase, getPurgeAt } from "../db";

@@ -1,5 +1,5 @@
 import { useI18n } from "@/src/i18n";
-import { Button } from "@hosanna/shared";
+import { Button } from "@/src/components/common";
 import { Archive, Trash2, X } from "lucide-react";
 import React from "react";
 

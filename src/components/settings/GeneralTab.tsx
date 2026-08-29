@@ -4,7 +4,7 @@
  */
 
 import { useCan } from "@/src/lib/permissions/client";
-import { Button, Input, Spinner } from "@hosanna/shared";
+import { Button, Input, Spinner } from "@/src/components/common";
 import {
   Calendar,
   Clock,

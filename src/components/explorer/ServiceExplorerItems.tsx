@@ -1,5 +1,6 @@
 import React from "react";
-import { Badge, Button, Service } from "@hosanna/shared";
+import { Badge, Button } from "@/src/components/common";
+import { Service } from "@/src/types";
 import { Archive, Calendar, Church, MoreVertical } from "lucide-react";
 import { useI18n } from "../../i18n";
 

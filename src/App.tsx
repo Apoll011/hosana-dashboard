@@ -1,5 +1,5 @@
-import { configureApiClient } from "@hosanna/shared";
-import { preloadEditor } from "@hosanna/shared/editor";
+import { configureApiClient } from "@/src/api";
+import { preloadEditor } from "@hosanna/chordpro/editor";
 import { useEffect } from "react";
 import { BrowserRouter, useLocation } from "react-router-dom";
 import { posthog } from "./lib/posthog";

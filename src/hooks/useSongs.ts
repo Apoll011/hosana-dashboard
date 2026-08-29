@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { GetSongsParams, Song } from "@hosanna/shared";
+import { GetSongsParams, Song } from "@/src/types";
 import { useCallback, useEffect, useState } from "react";
 import { useSync } from "../contexts/SyncContext";
 import { getDatabase, getPurgeAt, SongDocType } from "../db";

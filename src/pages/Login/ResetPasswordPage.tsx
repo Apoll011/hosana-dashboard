@@ -5,7 +5,7 @@
 
 import { AppLink } from "@/src/components/AppLink";
 import { useAppNavigate } from "@/src/hooks/useAppNavigate";
-import { Button, Input } from "@hosanna/shared";
+import { Button, Input } from "@/src/components/common";
 import { ArrowRight, CheckCircle2, Clock, Lock, XCircle } from "lucide-react";
 import React, { useState } from "react";
 import { useSearchParams } from "react-router-dom";

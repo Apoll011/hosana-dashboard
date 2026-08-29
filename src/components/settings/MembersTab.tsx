@@ -4,7 +4,7 @@
  */
 
 import { Can, CanAny } from "@/src/lib/permissions/components";
-import { Button, Input, Modal } from "@hosanna/shared";
+import { Button, Input, Modal } from "@/src/components/common";
 import {
   ChevronRight,
   Loader2,

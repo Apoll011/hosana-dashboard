@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Button, Input } from "@hosanna/shared";
+import { Button, Input } from "@/src/components/common";
 import { ArrowRight, CheckCircle2, Lock, Mail, User } from "lucide-react";
 import React, { useRef, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
