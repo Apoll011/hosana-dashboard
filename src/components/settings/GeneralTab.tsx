@@ -4,7 +4,7 @@
  */
 
 import { useCan } from "@/src/lib/permissions/client";
-import { Button, Input, Spinner } from "@/src/components/common";
+import { Button, Spinner } from "@/src/components/common";
 import {
   Calendar,
   Clock,
@@ -19,10 +19,11 @@ import {
   Shield,
   Timer,
 } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { useI18n } from "../../i18n";
-import { authClient } from "../../lib/authClient";
+import { useOrgSettings } from "../../hooks/useOrgSettings";
+import { secondsToDurationInput, durationInputToSeconds } from "../DurationField";
 
 export interface GeneralTabProps {
   active: boolean;
@@ -32,67 +33,7 @@ export interface GeneralTabProps {
   ) => void;
 }
 
-interface GeneralOrgSettings {
-  locale: string;
-  timezone: string;
-  weekStartsOn: number;
-  sermonDurationMMSS: string; // formato "MM:SS" para UI
-  songDurationMMSS: string; // formato "MM:SS" para UI
-  showNotes: boolean;
-  showServiceDuration: boolean;
-  autoSave: boolean;
-}
-
-interface OrgMetadataStructure {
-  settings?: {
-    general?: {
-      locale?: string;
-      timezone?: string;
-      weekStartsOn?: number;
-    };
-    services?: {
-      defaultDurations?: {
-        sermon?: number; // em segundos no backend
-        song?: number; // em segundos no backend
-      };
-      showNotes?: boolean;
-      showServiceDuration?: boolean;
-      autoSave?: boolean;
-    };
-    [key: string]: unknown;
-  };
-  [key: string]: unknown;
-}
-
-// Helpers para conversão e validação MM:SS <-> Segundos
-function secondsToMMSS(totalSeconds: number): string {
-  const safeSec = Math.max(0, Math.floor(totalSeconds || 0));
-  const mins = Math.floor(safeSec / 60);
-  const secs = safeSec % 60;
-  return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
-}
-
-function parseMMSSToSeconds(value: string, fallbackSeconds = 300): number {
-  if (!value || typeof value !== "string") return fallbackSeconds;
-  const clean = value.trim();
-
-  // Caso seja inserido formato MM:SS ou M:SS
-  if (clean.includes(":")) {
-    const parts = clean.split(":");
-    const mins = parseInt(parts[0], 10) || 0;
-    const secs = parseInt(parts[1], 10) || 0;
-    const total = mins * 60 + secs;
-    return total > 0 ? total : fallbackSeconds;
-  }
-
-  // Se o utilizador digitar apenas um número inteiro (ex: "5"), assume como minutos
-  const numeric = parseInt(clean, 10);
-  if (!isNaN(numeric) && numeric > 0) {
-    return numeric * 60;
-  }
-
-  return fallbackSeconds;
-}
+// ─── Duration display helpers ─────────────────────────────────────────────────
 
 function formatHumanDuration(
   seconds: number,
@@ -119,61 +60,54 @@ const SERMON_PRESETS = [
   { label: "60:00", sec: 3600 },
 ];
 
-const DEFAULT_SETTINGS: GeneralOrgSettings = {
-  locale: "pt-PT",
-  timezone: "Europe/Lisbon",
-  weekStartsOn: 1, // 0 = Domingo, 1 = Segunda-feira
-  sermonDurationMMSS: "40:00",
-  songDurationMMSS: "05:00",
-  showNotes: true,
-  showServiceDuration: true,
-  autoSave: true,
-};
+// ─── Duration input local state helper ───────────────────────────────────────
+
+/**
+ * We keep the MM:SS text inputs as local state so typing is smooth,
+ * then sync back to the hook (in seconds) on blur.
+ */
+function useDurationInput(
+  initialSeconds: number,
+  onCommit: (seconds: number) => void,
+) {
+  const [raw, setRaw] = React.useState(secondsToDurationInput(initialSeconds));
+
+  // Sync when initialSeconds changes externally (e.g. after save/reset)
+  React.useEffect(() => {
+    setRaw(secondsToDurationInput(initialSeconds));
+  }, [initialSeconds]);
+
+  const handleBlur = () => {
+    const seconds = durationInputToSeconds(raw);
+    const normalized = secondsToDurationInput(seconds);
+    setRaw(normalized);
+    onCommit(seconds);
+  };
+
+  return { raw, setRaw, handleBlur };
+}
+
+// ─── Component ────────────────────────────────────────────────────────────────
 
 export const GeneralTab: React.FC<GeneralTabProps> = ({
   active,
   showToast,
 }) => {
-  const { organization, refetch: refetchAuth } = useAuth();
+  const { organization } = useAuth();
   const { t } = useI18n();
   const { granted: canManageOrg, loading: canLoading } = useCan(
     "organization.update",
   );
 
-  const [isSaving, setIsSaving] = useState(false);
-  const [orgFormData, setOrgFormData] =
-    useState<GeneralOrgSettings>(DEFAULT_SETTINGS);
-  const [initialData, setInitialData] =
-    useState<GeneralOrgSettings>(DEFAULT_SETTINGS);
+  const { settings, isSaving, update, reset, save } = useOrgSettings();
 
-  // Sincronizar dados ao carregar organização
-  useEffect(() => {
-    if (organization) {
-      const metadata = (organization.metadata as OrgMetadataStructure) || {};
-      const settings = metadata.settings || {};
-      const general = settings.general || {};
-      const services = settings.services || {};
-      const durations = services.defaultDurations || {};
-
-      const songSec = durations.song ?? 300; // 5 min por defeito
-      const sermonSec = durations.sermon ?? 2400; // 40 min por defeito
-
-      const loaded: GeneralOrgSettings = {
-        locale: general.locale ?? DEFAULT_SETTINGS.locale,
-        timezone: general.timezone ?? DEFAULT_SETTINGS.timezone,
-        weekStartsOn: general.weekStartsOn ?? DEFAULT_SETTINGS.weekStartsOn,
-        sermonDurationMMSS: secondsToMMSS(sermonSec),
-        songDurationMMSS: secondsToMMSS(songSec),
-        showNotes: services.showNotes ?? DEFAULT_SETTINGS.showNotes,
-        showServiceDuration:
-          services.showServiceDuration ?? DEFAULT_SETTINGS.showServiceDuration,
-        autoSave: services.autoSave ?? DEFAULT_SETTINGS.autoSave,
-      };
-
-      setOrgFormData(loaded);
-      setInitialData(loaded);
-    }
-  }, [organization]);
+  // Duration MM:SS inputs (kept as text; committed as seconds to hook)
+  const song = useDurationInput(settings.services.songDuration, (sec) =>
+    update("services", "songDuration", sec),
+  );
+  const sermon = useDurationInput(settings.services.sermonDuration, (sec) =>
+    update("services", "sermonDuration", sec),
+  );
 
   if (!active) return null;
 
@@ -185,72 +119,11 @@ export const GeneralTab: React.FC<GeneralTabProps> = ({
     );
   }
 
-  const handleNormalizeOnBlur = (
-    field: "songDurationMMSS" | "sermonDurationMMSS",
-  ) => {
-    const raw = orgFormData[field];
-    const fallback = field === "songDurationMMSS" ? 300 : 2400;
-    const parsedSeconds = parseMMSSToSeconds(raw, fallback);
-    setOrgFormData((prev) => ({
-      ...prev,
-      [field]: secondsToMMSS(parsedSeconds),
-    }));
-  };
-
-  const handleReset = () => {
-    setOrgFormData(initialData);
-  };
-
-  const handleSubmitOrgSettings = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!canManageOrg) return;
-
     try {
-      setIsSaving(true);
-      const currentMetadata =
-        (organization.metadata as OrgMetadataStructure) || {};
-
-      const songSeconds = parseMMSSToSeconds(orgFormData.songDurationMMSS, 300);
-      const sermonSeconds = parseMMSSToSeconds(
-        orgFormData.sermonDurationMMSS,
-        2400,
-      );
-
-      await authClient.organization.update({
-        data: {
-          metadata: {
-            ...currentMetadata,
-            settings: {
-              ...currentMetadata.settings,
-              general: {
-                ...currentMetadata.settings?.general,
-                locale: orgFormData.locale,
-                timezone: orgFormData.timezone,
-                weekStartsOn: orgFormData.weekStartsOn,
-              },
-              services: {
-                ...currentMetadata.settings?.services,
-                defaultDurations: {
-                  song: songSeconds,
-                  sermon: sermonSeconds,
-                },
-                showNotes: orgFormData.showNotes,
-                showServiceDuration: orgFormData.showServiceDuration,
-                autoSave: orgFormData.autoSave,
-              },
-            },
-          },
-        },
-      });
-
-      // Normaliza o display
-      setOrgFormData((prev) => ({
-        ...prev,
-        songDurationMMSS: secondsToMMSS(songSeconds),
-        sermonDurationMMSS: secondsToMMSS(sermonSeconds),
-      }));
-
-      await refetchAuth();
+      await save();
       showToast?.(t("settings.toast.orgSaved"), "success");
     } catch (err) {
       showToast?.(
@@ -261,24 +134,12 @@ export const GeneralTab: React.FC<GeneralTabProps> = ({
         }),
         "error",
       );
-    } finally {
-      setIsSaving(false);
     }
   };
 
-  // Cálculo das durações para live-preview
-  const songSecondsPreview = parseMMSSToSeconds(
-    orgFormData.songDurationMMSS,
-    300,
-  );
-  const sermonSecondsPreview = parseMMSSToSeconds(
-    orgFormData.sermonDurationMMSS,
-    2400,
-  );
-
   return (
     <form
-      onSubmit={handleSubmitOrgSettings}
+      onSubmit={handleSubmit}
       className="space-y-6 max-w-4xl mx-auto w-full animate-in fade-in slide-in-from-bottom-2 duration-300"
     >
       {/* ========================================== */}
@@ -313,10 +174,8 @@ export const GeneralTab: React.FC<GeneralTabProps> = ({
               </label>
               <select
                 disabled={!canManageOrg || isSaving}
-                value={orgFormData.locale}
-                onChange={(e) =>
-                  setOrgFormData({ ...orgFormData, locale: e.target.value })
-                }
+                value={settings.general.locale}
+                onChange={(e) => update("general", "locale", e.target.value)}
                 className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-sm px-3.5 py-2.5 focus:outline-hidden focus:ring-2 focus:ring-m3-primary/40 focus:border-m3-primary disabled:opacity-60 disabled:bg-slate-50 dark:disabled:bg-slate-800/50 transition-colors cursor-pointer"
               >
                 <option value="pt-PT">
@@ -342,10 +201,8 @@ export const GeneralTab: React.FC<GeneralTabProps> = ({
               </label>
               <select
                 disabled={!canManageOrg || isSaving}
-                value={orgFormData.timezone}
-                onChange={(e) =>
-                  setOrgFormData({ ...orgFormData, timezone: e.target.value })
-                }
+                value={settings.general.timezone}
+                onChange={(e) => update("general", "timezone", e.target.value)}
                 className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-sm px-3.5 py-2.5 focus:outline-hidden focus:ring-2 focus:ring-m3-primary/40 focus:border-m3-primary disabled:opacity-60 disabled:bg-slate-50 dark:disabled:bg-slate-800/50 transition-colors cursor-pointer"
               >
                 <optgroup label={t("settings.general.timezones.portugalGroup")}>
@@ -399,7 +256,7 @@ export const GeneralTab: React.FC<GeneralTabProps> = ({
                     desc: t("settings.general.sundayDesc"),
                   },
                 ].map((day) => {
-                  const isChecked = orgFormData.weekStartsOn === day.value;
+                  const isChecked = settings.general.weekStartsOn === day.value;
                   return (
                     <label
                       key={day.value}
@@ -417,10 +274,7 @@ export const GeneralTab: React.FC<GeneralTabProps> = ({
                           disabled={!canManageOrg || isSaving}
                           checked={isChecked}
                           onChange={() =>
-                            setOrgFormData({
-                              ...orgFormData,
-                              weekStartsOn: day.value,
-                            })
+                            update("general", "weekStartsOn", day.value)
                           }
                           className="w-4 h-4 text-m3-primary focus:ring-m3-primary cursor-pointer"
                         />
@@ -463,22 +317,18 @@ export const GeneralTab: React.FC<GeneralTabProps> = ({
                   {t("settings.general.songLabel")}
                 </label>
                 <span className="text-xs font-mono font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/50 px-2 py-0.5 rounded border border-indigo-200/50 dark:border-indigo-800/50">
-                  {formatHumanDuration(songSecondsPreview, t)}
+                  {formatHumanDuration(settings.services.songDuration, t)}
                 </span>
               </div>
 
-              <Input
-                value={orgFormData.songDurationMMSS}
+              <input
+                type="text"
+                value={song.raw}
                 disabled={!canManageOrg || isSaving}
                 placeholder="05:00"
-                onChange={(e) =>
-                  setOrgFormData({
-                    ...orgFormData,
-                    songDurationMMSS: e.target.value,
-                  })
-                }
-                onBlur={() => handleNormalizeOnBlur("songDurationMMSS")}
-                className="font-mono text-base tracking-widest text-center"
+                onChange={(e) => song.setRaw(e.target.value)}
+                onBlur={song.handleBlur}
+                className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-sm px-3.5 py-2.5 font-mono tracking-widest text-center focus:outline-none focus:ring-2 focus:ring-m3-primary/40 focus:border-m3-primary disabled:opacity-60 disabled:bg-slate-50 dark:disabled:bg-slate-800/50 transition-colors"
               />
 
               {/* Presets Cânticos */}
@@ -492,12 +342,10 @@ export const GeneralTab: React.FC<GeneralTabProps> = ({
                       <button
                         key={preset.label}
                         type="button"
-                        onClick={() =>
-                          setOrgFormData({
-                            ...orgFormData,
-                            songDurationMMSS: secondsToMMSS(preset.sec),
-                          })
-                        }
+                        onClick={() => {
+                          song.setRaw(secondsToDurationInput(preset.sec));
+                          update("services", "songDuration", preset.sec);
+                        }}
                         className="px-2 py-0.5 text-xs font-mono rounded-md bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-indigo-400 dark:hover:border-indigo-500 text-slate-600 dark:text-slate-300 transition-colors"
                       >
                         {preset.label}
@@ -516,22 +364,18 @@ export const GeneralTab: React.FC<GeneralTabProps> = ({
                   {t("settings.general.sermonLabel")}
                 </label>
                 <span className="text-xs font-mono font-bold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/50 px-2 py-0.5 rounded border border-rose-200/50 dark:border-rose-800/50">
-                  {formatHumanDuration(sermonSecondsPreview, t)}
+                  {formatHumanDuration(settings.services.sermonDuration, t)}
                 </span>
               </div>
 
-              <Input
-                value={orgFormData.sermonDurationMMSS}
+              <input
+                type="text"
+                value={sermon.raw}
                 disabled={!canManageOrg || isSaving}
                 placeholder="40:00"
-                onChange={(e) =>
-                  setOrgFormData({
-                    ...orgFormData,
-                    sermonDurationMMSS: e.target.value,
-                  })
-                }
-                onBlur={() => handleNormalizeOnBlur("sermonDurationMMSS")}
-                className="font-mono text-base tracking-widest text-center"
+                onChange={(e) => sermon.setRaw(e.target.value)}
+                onBlur={sermon.handleBlur}
+                className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-sm px-3.5 py-2.5 font-mono tracking-widest text-center focus:outline-none focus:ring-2 focus:ring-m3-primary/40 focus:border-m3-primary disabled:opacity-60 disabled:bg-slate-50 dark:disabled:bg-slate-800/50 transition-colors"
               />
 
               {/* Presets Sermão */}
@@ -545,12 +389,10 @@ export const GeneralTab: React.FC<GeneralTabProps> = ({
                       <button
                         key={preset.label}
                         type="button"
-                        onClick={() =>
-                          setOrgFormData({
-                            ...orgFormData,
-                            sermonDurationMMSS: secondsToMMSS(preset.sec),
-                          })
-                        }
+                        onClick={() => {
+                          sermon.setRaw(secondsToDurationInput(preset.sec));
+                          update("services", "sermonDuration", preset.sec);
+                        }}
                         className="px-2 py-0.5 text-xs font-mono rounded-md bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-rose-400 dark:hover:border-rose-500 text-slate-600 dark:text-slate-300 transition-colors"
                       >
                         {preset.label}
@@ -571,26 +413,28 @@ export const GeneralTab: React.FC<GeneralTabProps> = ({
               {t("settings.general.behaviorTitle")}
             </h4>
 
-            {[
-              {
-                id: "showServiceDuration" as const,
-                label: t("settings.general.showDuration"),
-                description: t("settings.general.showDurationDesc"),
-                checked: orgFormData.showServiceDuration,
-              },
-              {
-                id: "showNotes" as const,
-                label: t("settings.general.showNotes"),
-                description: t("settings.general.showNotesDesc"),
-                checked: orgFormData.showNotes,
-              },
-              {
-                id: "autoSave" as const,
-                label: t("settings.general.autoSave"),
-                description: t("settings.general.autoSaveDesc"),
-                checked: orgFormData.autoSave,
-              },
-            ].map((toggle) => (
+            {(
+              [
+                {
+                  id: "showServiceDuration" as const,
+                  label: t("settings.general.showDuration"),
+                  description: t("settings.general.showDurationDesc"),
+                  checked: settings.services.showServiceDuration,
+                },
+                {
+                  id: "showNotes" as const,
+                  label: t("settings.general.showNotes"),
+                  description: t("settings.general.showNotesDesc"),
+                  checked: settings.services.showNotes,
+                },
+                {
+                  id: "autoSave" as const,
+                  label: t("settings.general.autoSave"),
+                  description: t("settings.general.autoSaveDesc"),
+                  checked: settings.services.autoSave,
+                },
+              ] as const
+            ).map((toggle) => (
               <label
                 key={toggle.id}
                 className={`flex items-start gap-4 p-4 border border-slate-200 dark:border-slate-800 rounded-xl transition-colors ${
@@ -605,10 +449,7 @@ export const GeneralTab: React.FC<GeneralTabProps> = ({
                     disabled={!canManageOrg || isSaving}
                     checked={toggle.checked}
                     onChange={(e) =>
-                      setOrgFormData({
-                        ...orgFormData,
-                        [toggle.id]: e.target.checked,
-                      })
+                      update("services", toggle.id, e.target.checked)
                     }
                     className="w-4.5 h-4.5 text-m3-primary border-slate-300 rounded focus:ring-m3-primary cursor-pointer"
                   />
@@ -631,7 +472,7 @@ export const GeneralTab: React.FC<GeneralTabProps> = ({
           <div className="px-6 py-4 bg-slate-50/70 dark:bg-slate-900/70 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center">
             <button
               type="button"
-              onClick={handleReset}
+              onClick={reset}
               disabled={isSaving}
               className="text-xs text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 flex items-center gap-1 font-medium transition-colors"
             >
