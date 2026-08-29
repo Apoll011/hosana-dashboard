@@ -112,7 +112,10 @@ export function useFolders() {
         return result;
       } catch (err: unknown) {
         if (err && typeof err === "object" && "message" in err)
-          showToast((err as Error).message || "Failed to create folder", "error");
+          showToast(
+            (err as Error).message || "Failed to create folder",
+            "error",
+          );
         throw err;
       } finally {
         setIsCreating(false);
@@ -149,7 +152,10 @@ export function useFolders() {
         showToast("Folder renamed", "success");
       } catch (err: unknown) {
         if (err && typeof err === "object" && "message" in err)
-          showToast((err as Error).message || "Failed to rename folder", "error");
+          showToast(
+            (err as Error).message || "Failed to rename folder",
+            "error",
+          );
         throw err;
       } finally {
         setIsRenaming(false);
@@ -182,7 +188,10 @@ export function useFolders() {
         showToast("Pasta personalizada com sucesso", "success");
       } catch (err: unknown) {
         if (err && typeof err === "object" && "message" in err)
-          showToast((err as Error).message || "Falha ao personalizar pasta", "error");
+          showToast(
+            (err as Error).message || "Falha ao personalizar pasta",
+            "error",
+          );
         throw err;
       }
     },
