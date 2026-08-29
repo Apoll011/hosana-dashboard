@@ -8,17 +8,11 @@ import { useAppNavigate } from "@/src/hooks/useAppNavigate";
 import { usePreviewSettings } from "@/src/hooks/usePreviewSettings";
 import { useCan } from "@/src/lib/permissions/client";
 import { Can } from "@/src/lib/permissions/components";
-import {
-  Button,
-  Spinner,
-} from "@/src/components/common";
+import { Button, Spinner } from "@/src/components/common";
 import { EditorSettingsPanel } from "@/src/components/EditorSettingsPanel";
 import { useEditorSettings } from "@/src/hooks/useEditorSettings";
 import { Song } from "@/src/types";
-import {
-  ChordProRenderer,
-  parseChordPro,
-} from "@hosanna/chordpro";
+import { ChordProRenderer, parseChordPro } from "@hosanna/chordpro";
 import { Editor } from "@hosanna/chordpro/editor";
 import {
   ArrowLeft,

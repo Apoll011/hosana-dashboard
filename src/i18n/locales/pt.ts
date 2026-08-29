@@ -914,9 +914,11 @@ export const pt = {
       theme: "Tema",
       fontSize: "Tamanho da Fonte ({size}px)",
       wordWrap: "Quebra de Linha Automática",
-      wordWrapDesc: "Ajusta o texto à largura do editor, sem scroll horizontal.",
+      wordWrapDesc:
+        "Ajusta o texto à largura do editor, sem scroll horizontal.",
       showLineNumbers: "Mostrar Números de Linha",
-      showLineNumbersDesc: "Apresenta a numeração de linhas na margem esquerda do editor.",
+      showLineNumbersDesc:
+        "Apresenta a numeração de linhas na margem esquerda do editor.",
       themes: {
         textmate: "Textmate (claro)",
         github: "GitHub (claro)",
