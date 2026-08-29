@@ -1,4 +1,4 @@
-import { Button, Modal } from "@hosanna/shared";
+import { Button, Modal } from "@/src/components/common";
 import { BookOpen, Check, ChevronDown, Loader2, Search } from "lucide-react";
 import React, { useCallback, useEffect, useState } from "react";
 import { useI18n } from "../../../i18n";

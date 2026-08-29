@@ -1,4 +1,4 @@
-import { Song } from "@hosanna/shared";
+import { Song } from "@/src/types";
 import {
   ImportResult,
   ProviderImportResult,

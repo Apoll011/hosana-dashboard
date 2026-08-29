@@ -1,4 +1,5 @@
-import { Song, songsApi } from "@hosanna/shared";
+import { songsApi } from "@/src/api";
+import { Song } from "@/src/types";
 import { ProviderImportResult, SongImportProvider } from "../utils/import";
 
 export class ChordProImportProvider implements SongImportProvider {

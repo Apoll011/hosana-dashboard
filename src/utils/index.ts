@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { getApiClient, Song } from "@hosanna/shared";
+import { getApiClient } from "@/src/api";
+import { Song } from "@/src/types";
 import { CifraResult, FolderNode } from "../types";
 
 // ---------------------------------------------------------------------------

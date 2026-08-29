@@ -19,7 +19,7 @@ import {
   Upload,
 } from "lucide-react";
 import React, { useMemo } from "react";
-import { Song } from "@hosanna/shared";
+import { Song } from "@/src/types";
 import { useI18n } from "../i18n";
 import { ViewName } from "../layouts/view";
 import {

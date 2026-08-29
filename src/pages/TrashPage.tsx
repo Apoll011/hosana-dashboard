@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Badge, Button, EmptyState, Spinner } from "@hosanna/shared";
+import { Badge, Button, EmptyState, Spinner } from "@/src/components/common";
 import {
   Calendar,
   FileMusic,

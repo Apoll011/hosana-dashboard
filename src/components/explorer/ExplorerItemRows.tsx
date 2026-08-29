@@ -1,4 +1,5 @@
-import { Button, Folder, Song } from "@hosanna/shared";
+import { Button } from "@/src/components/common";
+import { Folder, Song } from "@/src/types";
 import { FileText, MoreVertical } from "lucide-react";
 import React from "react";
 import { useI18n } from "../../i18n";

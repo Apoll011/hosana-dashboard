@@ -16,14 +16,9 @@ import {
   dropTargetForElements,
   monitorForElements,
 } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
-import {
-  Button,
-  ChordProRenderer,
-  Input,
-  parseChordPro,
-  ServiceElement,
-  Spinner,
-} from "@hosanna/shared";
+import { Button, Input, Spinner } from "@/src/components/common";
+import { ServiceElement } from "@/src/types";
+import { ChordProRenderer, parseChordPro } from "@hosanna/chordpro";
 import {
   ArrowDown,
   ArrowLeft,

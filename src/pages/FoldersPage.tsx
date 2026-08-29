@@ -1,4 +1,5 @@
-import { Button, Folder, Song, Spinner } from "@hosanna/shared";
+import { Button, Spinner } from "@/src/components/common";
+import { Folder, Song } from "@/src/types";
 import { FolderOpen, Plus, Upload } from "lucide-react";
 import React from "react";
 import { useOutletContext } from "react-router-dom";

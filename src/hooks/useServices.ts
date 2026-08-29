@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Service, ServiceElement } from "@hosanna/shared";
+import { Service, ServiceElement } from "@/src/types";
 import { useCallback, useEffect, useState } from "react";
 import { useSync } from "../contexts/SyncContext";
 import { getDatabase, getPurgeAt, ServiceDocType } from "../db";

@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ConversionResult, Folder, Song } from "@hosanna/shared";
+import { Folder, Song } from "@/src/types";
+import { ConversionResult } from "@hosanna/chordpro";
 import React, {
   useCallback,
   useEffect,

@@ -4,7 +4,7 @@
  */
 
 import { useAppNavigate } from "@/src/hooks/useAppNavigate";
-import { Button } from "@hosanna/shared";
+import { Button } from "@/src/components/common";
 import {
   ArrowRight,
   KeyRound,

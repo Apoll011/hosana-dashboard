@@ -1,4 +1,4 @@
-import { Song } from "@hosanna/shared";
+import { Song } from "@/src/types";
 
 export interface SongImportProvider {
   readonly id: string;

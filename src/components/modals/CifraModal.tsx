@@ -1,11 +1,7 @@
 import { CifraResult } from "@/src/types";
 import { getCifra } from "@/src/utils";
-import {
-  Button,
-  ConversionResult,
-  Modal,
-  convertToChordProDetailed,
-} from "@hosanna/shared";
+import { Button, Modal } from "@/src/components/common";
+import { ConversionResult, convertToChordProDetailed } from "@hosanna/chordpro";
 import React, { useState } from "react";
 import { useI18n } from "../../i18n";
 

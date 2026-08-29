@@ -1,13 +1,7 @@
 import { useAppNavigate } from "@/src/hooks/useAppNavigate";
 import { usePermissionValue } from "@/src/lib/permissions/client";
-import {
-  Badge,
-  ConfirmDialog,
-  EmptyState,
-  Modal,
-  Service,
-  Spinner,
-} from "@hosanna/shared";
+import { Badge, ConfirmDialog, EmptyState, Modal, Spinner } from "@/src/components/common";
+import { Service } from "@/src/types";
 import {
   Archive,
   ArchiveRestore,

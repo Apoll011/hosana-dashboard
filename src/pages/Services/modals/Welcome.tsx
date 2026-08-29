@@ -2,7 +2,7 @@
 // ── Welcome Modal ─────────────────────────────────────────────────────
 // ══════════════════════════════════════════════════════════════════════
 
-import { Button, Modal } from "@hosanna/shared";
+import { Button, Modal } from "@/src/components/common";
 import { FileText } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useI18n } from "../../../i18n";
