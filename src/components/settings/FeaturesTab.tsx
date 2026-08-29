@@ -127,7 +127,7 @@ const EarlyAccessPanel: React.FC = () => {
         true,
         ["concept", "alpha", "beta"],
       );
-    } catch (err) {
+    } catch {
       setError(t("settings.features.earlyAccess.loadError"));
       setLoading(false);
     }
@@ -482,9 +482,11 @@ const SupportPanel: React.FC = () => {
     try {
       await posthog!.conversations!.requestRestoreLink(restoreEmail.trim());
       setRestoreSent(true);
-    } catch (err: any) {
+    } catch (err) {
+      const errObj = err as
+        { message?: string; status?: number } | null | undefined;
       setError(
-        err?.message?.includes("Too many requests") || err?.status === 429
+        errObj?.message?.includes("Too many requests") || errObj?.status === 429
           ? t("settings.features.support.restoreRateLimited")
           : t("settings.features.support.restoreError"),
       );

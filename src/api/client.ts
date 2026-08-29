@@ -1,9 +1,14 @@
 export class ApiError extends Error {
   public status: number;
   public code?: string;
-  public details?: any;
+  public details?: unknown;
 
-  constructor(message: string, status: number, code?: string, details?: any) {
+  constructor(
+    message: string,
+    status: number,
+    code?: string,
+    details?: unknown,
+  ) {
     super(message);
     this.name = "ApiError";
     this.status = status;
@@ -120,11 +125,10 @@ export class ApiClient {
     let response: Response;
     try {
       response = await fetch(url, config);
-    } catch (err: any) {
-      throw new ApiError(
-        `Network Error: ${err.message || "Failed to connect to server"}`,
-        0,
-      );
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Failed to connect to server";
+      throw new ApiError(`Network Error: ${message}`, 0);
     }
 
     // Handle 401 Unauthorized -> Attempt token refresh
@@ -161,7 +165,7 @@ export class ApiClient {
     if (!response.ok) {
       let errorMessage = `Server error (${response.status})`;
       let errorCode: string | undefined;
-      let errorDetails: any;
+      let errorDetails: unknown;
       try {
         const errorData = await response.json();
         if (errorData.error) {
