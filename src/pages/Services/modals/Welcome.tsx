@@ -129,7 +129,13 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({
         <DurationField
           value={duration}
           onChange={setDuration}
-          accentRingClass="focus:ring-blue-500"
+          accentRingClass="focus:ring-blue-500/40"
+          badgeClass="text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/50 border-blue-200/50 dark:border-blue-800/50"
+          presets={[
+            { label: "2:00", sec: 120 },
+            { label: "5:00", sec: 300 },
+            { label: "10:00", sec: 600 },
+          ]}
         />
 
         <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-200 dark:border-slate-800">

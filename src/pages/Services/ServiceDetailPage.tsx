@@ -270,6 +270,7 @@ interface ServiceRowProps {
   onRemove: (id: string) => void;
   onEdit: (el: ServiceElement) => void;
   onNoteChange: (id: string, note: string) => void;
+  showNotes?: boolean;
 }
 
 const ServiceRow: React.FC<ServiceRowProps> = ({
@@ -284,6 +285,7 @@ const ServiceRow: React.FC<ServiceRowProps> = ({
   onRemove,
   onEdit,
   onNoteChange,
+  showNotes = true,
 }) => {
   const { t } = useI18n();
   const rowRef = useRef<HTMLDivElement>(null);
@@ -430,7 +432,7 @@ const ServiceRow: React.FC<ServiceRowProps> = ({
               {element.content}
             </p>
           )}
-          {(isEditingNote || element.notes) && !isExpanded && (
+          {showNotes && (isEditingNote || element.notes) && !isExpanded && (
             <div className="flex items-center gap-1.5 mt-1 min-w-0">
               <StickyNote className="w-3.5 h-3.5 shrink-0 text-amber-500 dark:text-amber-400" />
               <span className="text-xs italic text-amber-700 dark:text-amber-300/90 truncate">
@@ -724,6 +726,8 @@ export const ServiceDetailPage: React.FC = () => {
   }, [previewElement]);
   const previewContent = previewElement ?? previewContentRef.current;
 
+  const [isSavingService, setIsSavingService] = useState(false);
+
   const syncElements = async (
     newElements: ServiceElement[],
     fallbackElements: ServiceElement[] = elementsRef.current,
@@ -731,15 +735,45 @@ export const ServiceDetailPage: React.FC = () => {
     if (!service) return;
     const updated = newElements.map((e, index) => ({ ...e, position: index }));
     setElements(updated);
+    elementsRef.current = updated;
+
+    if (orgSettings.services.autoSave) {
+      try {
+        await updateElements({
+          serviceId: service.id,
+          data: { elements: updated, updatedAt: service.updatedAt },
+        });
+      } catch (error) {
+        setElements(fallbackElements);
+        elementsRef.current = fallbackElements;
+        throw error;
+      }
+    }
+  };
+
+  const handleSaveEntireService = async () => {
+    if (!service) return;
+    setIsSavingService(true);
     try {
-      await updateElements({
-        serviceId: service.id,
-        data: { elements: updated, updatedAt: service.updatedAt },
+      await updateService({
+        id: service.id,
+        data: {
+          elements: elementsRef.current,
+          notes: generalNotes,
+          updatedAt: service.updatedAt,
+        },
       });
+      showToast(t("serviceDetailPage.serviceSavedSuccess"), "success");
     } catch (error) {
-      setElements(fallbackElements);
-      elementsRef.current = fallbackElements;
-      throw error;
+      showToast(
+        t("serviceDetailPage.serviceSaveError", {
+          error:
+            (error as { message?: string | null })?.message || "Save error",
+        }),
+        "error",
+      );
+    } finally {
+      setIsSavingService(false);
     }
   };
 
@@ -764,20 +798,22 @@ export const ServiceDetailPage: React.FC = () => {
 
   const handleSaveGeneralNotes = async () => {
     if (!service) return;
-    try {
-      await updateService({
-        id: service.id,
-        data: { notes: generalNotes, updatedAt: service.updatedAt },
-      });
-      showToast(t("serviceDetailPage.serviceSavedSuccess"), "success");
-    } catch (error) {
-      showToast(
-        t("serviceDetailPage.serviceSaveError", {
-          error:
-            (error as { message?: string | null })?.message || "Sync error",
-        }),
-        "error",
-      );
+    if (orgSettings.services.autoSave) {
+      try {
+        await updateService({
+          id: service.id,
+          data: { notes: generalNotes, updatedAt: service.updatedAt },
+        });
+        showToast(t("serviceDetailPage.serviceSavedSuccess"), "success");
+      } catch (error) {
+        showToast(
+          t("serviceDetailPage.serviceSaveError", {
+            error:
+              (error as { message?: string | null })?.message || "Sync error",
+          }),
+          "error",
+        );
+      }
     }
   };
 
@@ -993,12 +1029,14 @@ export const ServiceDetailPage: React.FC = () => {
   const newMessageInitial = editInitial ?? {
     title: "",
     content: "",
+    passage: "",
     notes: "",
     duration: orgSettings.services.sermonDuration,
   };
   const newGenericInitial = editInitial ?? {
     title: "",
     content: "",
+    passage: "",
     notes: "",
     duration: orgSettings.services.songDuration,
   };
@@ -1049,6 +1087,23 @@ export const ServiceDetailPage: React.FC = () => {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          {!orgSettings.services.autoSave && (
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={handleSaveEntireService}
+              disabled={isSavingService}
+              icon={
+                isSavingService ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  <Save className="w-3.5 h-3.5" />
+                )
+              }
+            >
+              {isSavingService ? t("common.saving") : t("common.save")}
+            </Button>
+          )}
           <div
             className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-m3-card border border-m3-border/60 shadow-sm"
             title={syncMeta.label}
@@ -1218,69 +1273,71 @@ export const ServiceDetailPage: React.FC = () => {
                 </div>
               </div>
 
-              <div className="px-5 py-2.5 border-b border-m3-border/40 shrink-0 bg-m3-background/30 flex flex-col justify-center min-h-11">
-                {isEditingGeneralNotes ? (
-                  <div className="flex items-start gap-2">
-                    <textarea
-                      rows={1}
-                      value={generalNotes}
-                      onChange={(e) => setGeneralNotes(e.target.value)}
-                      placeholder={t(
-                        "serviceDetailPage.generalNotesPlaceholder",
-                      )}
-                      className="flex-1 text-xs rounded-lg border border-m3-border p-2 bg-white dark:bg-m3-card focus:outline-none focus:ring-1 focus:ring-m3-primary text-m3-text resize-y min-h-9"
-                      autoFocus
-                    />
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => {
-                        setGeneralNotes(service?.notes || "");
-                        setIsEditingGeneralNotes(false);
-                      }}
-                      className="h-9 text-xs shrink-0"
-                    >
-                      {t("common.cancel")}
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="primary"
-                      onClick={async () => {
-                        await handleSaveGeneralNotes();
-                        setIsEditingGeneralNotes(false);
-                      }}
-                      className="h-9 text-xs shrink-0"
-                    >
-                      <Save className="w-3.5 h-3.5 mr-1" /> {t("common.save")}
-                    </Button>
-                  </div>
-                ) : (
-                  <div
-                    className="flex items-center justify-between gap-4 group cursor-pointer"
-                    onClick={() => setIsEditingGeneralNotes(true)}
-                  >
-                    <div className="text-xs flex items-center gap-2 flex-1">
-                      <FileText className="w-3.5 h-3.5 text-m3-secondary shrink-0" />
-                      {generalNotes ? (
-                        <span className="text-m3-text line-clamp-1 group-hover:line-clamp-none transition-all">
-                          {generalNotes}
-                        </span>
-                      ) : (
-                        <span className="italic text-m3-secondary/70">
-                          {t("serviceDetailPage.noGeneralNotes")}
-                        </span>
-                      )}
+              {orgSettings.services.showNotes && (
+                <div className="px-5 py-2.5 border-b border-m3-border/40 shrink-0 bg-m3-background/30 flex flex-col justify-center min-h-11">
+                  {isEditingGeneralNotes ? (
+                    <div className="flex items-start gap-2">
+                      <textarea
+                        rows={1}
+                        value={generalNotes}
+                        onChange={(e) => setGeneralNotes(e.target.value)}
+                        placeholder={t(
+                          "serviceDetailPage.generalNotesPlaceholder",
+                        )}
+                        className="flex-1 text-xs rounded-lg border border-m3-border p-2 bg-white dark:bg-m3-card focus:outline-none focus:ring-1 focus:ring-m3-primary text-m3-text resize-y min-h-9"
+                        autoFocus
+                      />
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => {
+                          setGeneralNotes(service?.notes || "");
+                          setIsEditingGeneralNotes(false);
+                        }}
+                        className="h-9 text-xs shrink-0"
+                      >
+                        {t("common.cancel")}
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="primary"
+                        onClick={async () => {
+                          await handleSaveGeneralNotes();
+                          setIsEditingGeneralNotes(false);
+                        }}
+                        className="h-9 text-xs shrink-0"
+                      >
+                        <Save className="w-3.5 h-3.5 mr-1" /> {t("common.save")}
+                      </Button>
                     </div>
-                    <button
-                      type="button"
-                      className="text-m3-secondary hover:text-m3-primary opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-lg hover:bg-m3-primary/10 shrink-0 cursor-pointer"
-                      title={t("serviceDetailPage.editGeneralNotes")}
+                  ) : (
+                    <div
+                      className="flex items-center justify-between gap-4 group cursor-pointer"
+                      onClick={() => setIsEditingGeneralNotes(true)}
                     >
-                      <Edit3 className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                )}
-              </div>
+                      <div className="text-xs flex items-center gap-2 flex-1">
+                        <FileText className="w-3.5 h-3.5 text-m3-secondary shrink-0" />
+                        {generalNotes ? (
+                          <span className="text-m3-text line-clamp-1 group-hover:line-clamp-none transition-all">
+                            {generalNotes}
+                          </span>
+                        ) : (
+                          <span className="italic text-m3-secondary/70">
+                            {t("serviceDetailPage.noGeneralNotes")}
+                          </span>
+                        )}
+                      </div>
+                      <button
+                        type="button"
+                        className="text-m3-secondary hover:text-m3-primary opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-lg hover:bg-m3-primary/10 shrink-0 cursor-pointer"
+                        title={t("serviceDetailPage.editGeneralNotes")}
+                      >
+                        <Edit3 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
 
               <div
                 ref={dropContainerRef}
@@ -1314,6 +1371,7 @@ export const ServiceDetailPage: React.FC = () => {
                         onRemove={handleRemoveElement}
                         onEdit={openEditModal}
                         onNoteChange={handleNoteChange}
+                        showNotes={orgSettings.services.showNotes}
                       />
                     ))}
                   </div>

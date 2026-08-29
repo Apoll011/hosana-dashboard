@@ -127,7 +127,13 @@ export const CustomModal: React.FC<CustomModalProps> = ({
         <DurationField
           value={duration}
           onChange={setDuration}
-          accentRingClass="focus:ring-slate-500"
+          accentRingClass="focus:ring-slate-500/40"
+          badgeClass="text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700"
+          presets={[
+            { label: "2:00", sec: 120 },
+            { label: "5:00", sec: 300 },
+            { label: "10:00", sec: 600 },
+          ]}
         />
 
         <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-200 dark:border-slate-800">
