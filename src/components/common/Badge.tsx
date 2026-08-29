@@ -33,3 +33,4 @@ export const Badge: React.FC<BadgeProps> = React.memo(
     );
   },
 );
+Badge.displayName = "Badge";

@@ -2,7 +2,7 @@ import { RotateCcw, X } from "lucide-react";
 import React from "react";
 import { Button } from "./common/Button";
 import { EDITOR_THEMES, useEditorSettings } from "../hooks/useEditorSettings";
-import { useI18n } from "../i18n";
+import { TranslationKey, useI18n } from "../i18n";
 
 export interface EditorSettingsPanelProps {
   isOpen: boolean;
@@ -29,7 +29,7 @@ export const EditorSettingsPanel: React.FC<EditorSettingsPanelProps> = ({
 
   const getThemeLabel = (themeValue: string, defaultLabel: string) => {
     try {
-      const key = `misc.editorSettings.themes.${themeValue}` as any;
+      const key = `misc.editorSettings.themes.${themeValue}` as TranslationKey;
       const translated = t(key);
       if (translated && translated !== key) return translated;
     } catch {

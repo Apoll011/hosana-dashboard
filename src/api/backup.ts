@@ -26,7 +26,7 @@ export const backupApi = {
   },
 
   restoreBackup: async (
-    backupData: any,
+    backupData: unknown,
   ): Promise<{ message: string; counts: Record<string, number> }> => {
     return getApiClient().request<{
       message: string;
