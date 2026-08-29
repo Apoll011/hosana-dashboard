@@ -49,6 +49,7 @@ import {
   Save,
   Search,
   Settings2,
+  StickyNote,
   Trash2,
   X,
 } from "lucide-react";
@@ -433,6 +434,14 @@ const ServiceRow: React.FC<ServiceRowProps> = ({
               {element.content}
             </p>
           )}
+          {(isEditingNote || element.notes) && !isExpanded && (
+            <div className="flex items-center gap-1.5 mt-1 min-w-0">
+              <StickyNote className="w-3.5 h-3.5 shrink-0 text-amber-500 dark:text-amber-400" />
+              <span className="text-xs italic text-amber-700 dark:text-amber-300/90 truncate">
+                {element.notes}
+              </span>
+            </div>
+          )}
         </div>
 
         <div className="flex flex-col items-center gap-0.5 shrink-0">
@@ -459,12 +468,6 @@ const ServiceRow: React.FC<ServiceRowProps> = ({
         </div>
 
         <div className="flex items-center gap-1 shrink-0">
-          {(isEditingNote || element.notes) && !isExpanded && (
-            <div className="text-[10px] max-w-35 truncate italic px-2 py-1 rounded bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-200 border border-amber-200 dark:border-amber-800/50 mr-2">
-              {element.notes}
-            </div>
-          )}
-
           <button
             type="button"
             onClick={handleExpandToggle}
