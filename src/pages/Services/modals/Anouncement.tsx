@@ -10,7 +10,7 @@ import {
   DurationField,
   durationInputToSeconds,
   secondsToDurationInput,
-} from "./DurationField";
+} from "@/src/components/DurationField";
 
 interface AnnouncementModalProps {
   isOpen: boolean;
