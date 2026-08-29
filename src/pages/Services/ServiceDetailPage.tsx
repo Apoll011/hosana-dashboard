@@ -1101,7 +1101,9 @@ export const ServiceDetailPage: React.FC = () => {
                 )
               }
             >
-              {isSavingService ? t("common.saving") : t("common.save")}
+              {isSavingService
+                ? t("serviceDetailPage.savingService")
+                : t("common.save")}
             </Button>
           )}
           <div
