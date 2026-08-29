@@ -54,7 +54,7 @@ export const DEFAULT_ORG_SETTINGS: OrgSettings = {
   },
   services: {
     sermonDuration: 2400, // 40 min
-    songDuration: 300,    // 5 min
+    songDuration: 300, // 5 min
     showNotes: true,
     showServiceDuration: true,
     autoSave: true,
@@ -76,11 +76,13 @@ function parseOrgSettings(metadata: OrgMetadataStructure): OrgSettings {
       weekStartsOn: g.weekStartsOn ?? DEFAULT_ORG_SETTINGS.general.weekStartsOn,
     },
     services: {
-      sermonDuration: dur.sermon ?? DEFAULT_ORG_SETTINGS.services.sermonDuration,
+      sermonDuration:
+        dur.sermon ?? DEFAULT_ORG_SETTINGS.services.sermonDuration,
       songDuration: dur.song ?? DEFAULT_ORG_SETTINGS.services.songDuration,
       showNotes: svc.showNotes ?? DEFAULT_ORG_SETTINGS.services.showNotes,
       showServiceDuration:
-        svc.showServiceDuration ?? DEFAULT_ORG_SETTINGS.services.showServiceDuration,
+        svc.showServiceDuration ??
+        DEFAULT_ORG_SETTINGS.services.showServiceDuration,
       autoSave: svc.autoSave ?? DEFAULT_ORG_SETTINGS.services.autoSave,
     },
   };
@@ -185,5 +187,14 @@ export function useOrgSettings(): UseOrgSettingsReturn {
     }
   };
 
-  return { settings, savedSettings, isDirty, isSaving, update, set, reset, save };
+  return {
+    settings,
+    savedSettings,
+    isDirty,
+    isSaving,
+    update,
+    set,
+    reset,
+    save,
+  };
 }

@@ -615,7 +615,6 @@ export const ServiceDetailPage: React.FC = () => {
   const { showToast, syncStatus } = useSync();
   const { settings: orgSettings } = useOrgSettings();
 
-
   const [elements, setElements] = useState<ServiceElement[]>([]);
   const elementsRef = useRef<ServiceElement[]>([]);
   const [generalNotes, setGeneralNotes] = useState("");
@@ -670,7 +669,12 @@ export const ServiceDetailPage: React.FC = () => {
       }
     }, 1500);
     return () => clearTimeout(timer);
-  }, [generalNotes, orgSettings.services.autoSave, service, isEditingGeneralNotes]);
+  }, [
+    generalNotes,
+    orgSettings.services.autoSave,
+    service,
+    isEditingGeneralNotes,
+  ]);
 
   // Close the preview if the song it references is removed from the plan
   useEffect(() => {
@@ -837,7 +841,9 @@ export const ServiceDetailPage: React.FC = () => {
         songId,
         content: song?.artist || t("serviceDetailPage.noComposer"),
         position: previousElements.length,
-        duration: Number(parsed.metadata.duration || "0") || orgSettings.services.songDuration,
+        duration:
+          Number(parsed.metadata.duration || "0") ||
+          orgSettings.services.songDuration,
       };
 
       const nextElements = [...previousElements];

@@ -101,7 +101,9 @@ function useSongMutations() {
           const nextTitle =
             data.title !== undefined ? data.title.trim() : doc.title;
           const nextFolderId =
-            data.folderId !== undefined ? (data.folderId ?? null) : doc.folderId;
+            data.folderId !== undefined
+              ? (data.folderId ?? null)
+              : doc.folderId;
           const explicitPath = data.path !== undefined ? data.path : undefined;
 
           let newPath = doc.path;

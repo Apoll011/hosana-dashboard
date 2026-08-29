@@ -110,12 +110,7 @@ export async function validateSongRules(
   }
 
   const folderId = song.folderId ?? null;
-  const computedPath = await computeSongPath(
-    db,
-    title,
-    folderId,
-    song.path,
-  );
+  const computedPath = await computeSongPath(db, title, folderId, song.path);
 
   // Check unique index rule @@unique([orgId, path])
   const targetId = options.existingId || song.id;
@@ -131,9 +126,7 @@ export async function validateSongRules(
 
   const conflict = existingWithSamePath.find((doc) => doc.id !== targetId);
   if (conflict) {
-    const inFolderMsg = folderId
-      ? `in this folder`
-      : `at the root level`;
+    const inFolderMsg = folderId ? `in this folder` : `at the root level`;
     throw new UniqueConstraintError(
       `A song with this title already exists ${inFolderMsg} ("${computedPath}").`,
       ["orgId", "path"],
@@ -365,12 +358,7 @@ export async function validateBatchSongs(
     }
 
     const folderId = item.folderId ?? null;
-    const computedPath = await computeSongPath(
-      db,
-      title,
-      folderId,
-      item.path,
-    );
+    const computedPath = await computeSongPath(db, title, folderId, item.path);
 
     if (seenPaths.has(computedPath)) {
       throw new UniqueConstraintError(
