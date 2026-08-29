@@ -914,9 +914,11 @@ export const es: typeof pt = {
       theme: "Tema",
       fontSize: "Tamaño de Fuente ({size}px)",
       wordWrap: "Ajuste de Línea",
-      wordWrapDesc: "Ajusta el texto al ancho del editor sin desplazamiento horizontal.",
+      wordWrapDesc:
+        "Ajusta el texto al ancho del editor sin desplazamiento horizontal.",
       showLineNumbers: "Mostrar Números de Línea",
-      showLineNumbersDesc: "Muestra la numeración de líneas en el margen izquierdo del editor.",
+      showLineNumbersDesc:
+        "Muestra la numeración de líneas en el margen izquierdo del editor.",
       themes: {
         textmate: "Textmate (claro)",
         github: "GitHub (claro)",

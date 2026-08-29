@@ -91,7 +91,6 @@ export const OnboardingPage: React.FC = () => {
     fetchUserInvitations();
   }, []);
 
-
   const handleAcceptInvitation = async (invitationId: string) => {
     setProcessingInvId(invitationId);
     setErrorMsg("");

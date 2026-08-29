@@ -1,6 +1,12 @@
 import { useAppNavigate } from "@/src/hooks/useAppNavigate";
 import { usePermissionValue } from "@/src/lib/permissions/client";
-import { Badge, ConfirmDialog, EmptyState, Modal, Spinner } from "@/src/components/common";
+import {
+  Badge,
+  ConfirmDialog,
+  EmptyState,
+  Modal,
+  Spinner,
+} from "@/src/components/common";
 import { Service } from "@/src/types";
 import {
   Archive,

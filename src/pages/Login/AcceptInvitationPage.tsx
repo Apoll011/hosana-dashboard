@@ -58,7 +58,6 @@ export const AcceptInvitationPage: React.FC = () => {
       return;
     }
 
-
     const fetchInvitation = async () => {
       setIsFetching(true);
       setErrorMsg("");
@@ -88,7 +87,6 @@ export const AcceptInvitationPage: React.FC = () => {
 
     fetchInvitation();
   }, [invitationId, user, isAuthLoading, navigate]);
-
 
   const handleAccept = async () => {
     if (!invitationId) return;
@@ -170,7 +168,6 @@ export const AcceptInvitationPage: React.FC = () => {
       setActionLoading(null);
     }
   };
-
 
   return (
     <LoginLayout errorMsg={errorMsg} redirectMessage={successMsg}>
