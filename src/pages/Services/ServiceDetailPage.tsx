@@ -51,6 +51,7 @@ import {
 import React, { useDeferredValue, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useSync } from "../../contexts/SyncContext";
+import { useOrgSettings } from "../../hooks/useOrgSettings";
 import { useService, useServices } from "../../hooks/useServices";
 import { useSong, useSongs } from "../../hooks/useSongs";
 import { TranslateFn, useI18n } from "../../i18n";
@@ -610,6 +611,8 @@ export const ServiceDetailPage: React.FC = () => {
   const { updateElements, updateService } = useServices();
   const { songsQuery } = useSongs({ limit: 1000 });
   const { showToast, syncStatus } = useSync();
+  const { settings: orgSettings } = useOrgSettings();
+
 
   const [elements, setElements] = useState<ServiceElement[]>([]);
   const elementsRef = useRef<ServiceElement[]>([]);
@@ -648,6 +651,24 @@ export const ServiceDetailPage: React.FC = () => {
   useEffect(() => {
     elementsRef.current = elements;
   }, [elements]);
+
+  // Auto-save general notes after a short debounce when the org autoSave is on
+  useEffect(() => {
+    if (!orgSettings.services.autoSave || !service || isEditingGeneralNotes)
+      return;
+    const timer = setTimeout(async () => {
+      if (generalNotes === (service.notes || "")) return;
+      try {
+        await updateService({
+          id: service.id,
+          data: { notes: generalNotes, updatedAt: service.updatedAt },
+        });
+      } catch {
+        // silent — user can still save manually
+      }
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, [generalNotes, orgSettings.services.autoSave, service, isEditingGeneralNotes]);
 
   // Close the preview if the song it references is removed from the plan
   useEffect(() => {
@@ -780,7 +801,7 @@ export const ServiceDetailPage: React.FC = () => {
         songId,
         content: song?.artist || t("serviceDetailPage.noComposer"),
         position: previousElements.length,
-        duration: Number(parsed.metadata.duration || "0"),
+        duration: Number(parsed.metadata.duration || "0") || orgSettings.services.songDuration,
       };
 
       const nextElements = [...previousElements];
@@ -968,6 +989,20 @@ export const ServiceDetailPage: React.FC = () => {
       }
     : undefined;
 
+  // When creating new elements, pre-fill duration from org defaults
+  const newMessageInitial = editInitial ?? {
+    title: "",
+    content: "",
+    notes: "",
+    duration: orgSettings.services.sermonDuration,
+  };
+  const newGenericInitial = editInitial ?? {
+    title: "",
+    content: "",
+    notes: "",
+    duration: orgSettings.services.songDuration,
+  };
+
   if (isLoading)
     return (
       <div className="flex-1 flex items-center justify-center p-12">
@@ -1144,10 +1179,12 @@ export const ServiceDetailPage: React.FC = () => {
                   <h2 className="text-base font-bold text-m3-text">
                     {t("serviceDetailPage.serviceOrder")}
                   </h2>
-                  <span className="text-xs font-semibold text-m3-secondary bg-m3-background px-2.5 py-1 rounded-full border border-m3-border/50 shadow-sm">
-                    {t("serviceDetailPage.totalDuration")}:{" "}
-                    {formatDuration(totalDurationSeconds)}
-                  </span>
+                  {orgSettings.services.showServiceDuration && (
+                    <span className="text-xs font-semibold text-m3-secondary bg-m3-background px-2.5 py-1 rounded-full border border-m3-border/50 shadow-sm">
+                      {t("serviceDetailPage.totalDuration")}:{" "}
+                      {formatDuration(totalDurationSeconds)}
+                    </span>
+                  )}
                 </div>
                 <div className="flex flex-wrap items-center gap-1.5">
                   <button
@@ -1346,7 +1383,7 @@ export const ServiceDetailPage: React.FC = () => {
           setEditingElement(null);
         }}
         onSave={(data) => handleModalSave("welcome", data)}
-        initial={editInitial}
+        initial={newGenericInitial}
       />
       <ScriptureModal
         isOpen={activeModal === "scripture"}
@@ -1355,7 +1392,7 @@ export const ServiceDetailPage: React.FC = () => {
           setEditingElement(null);
         }}
         onSave={(data) => handleModalSave("scripture", data)}
-        initial={editInitial}
+        initial={newGenericInitial}
       />
       <MessageModal
         isOpen={activeModal === "message"}
@@ -1364,7 +1401,7 @@ export const ServiceDetailPage: React.FC = () => {
           setEditingElement(null);
         }}
         onSave={(data) => handleModalSave("message", data)}
-        initial={editInitial}
+        initial={newMessageInitial}
       />
       <AnnouncementModal
         isOpen={activeModal === "announcement"}
@@ -1373,7 +1410,7 @@ export const ServiceDetailPage: React.FC = () => {
           setEditingElement(null);
         }}
         onSave={(data) => handleModalSave("announcement", data)}
-        initial={editInitial}
+        initial={newGenericInitial}
       />
       <CustomModal
         isOpen={activeModal === "custom"}
@@ -1382,7 +1419,7 @@ export const ServiceDetailPage: React.FC = () => {
           setEditingElement(null);
         }}
         onSave={(data) => handleModalSave("custom", data)}
-        initial={editInitial}
+        initial={newGenericInitial}
       />
     </div>
   );
