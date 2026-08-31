@@ -6,6 +6,7 @@ import { Input } from "@/src/components/common";
 import { Folder, Service, Song } from "@/src/types";
 import {
   Calendar,
+  Calendar1,
   ChevronRight,
   CornerLeftUp,
   FileText,
@@ -278,6 +279,16 @@ export const ExplorerAddressBar: React.FC<ExplorerAddressBarProps> = ({
               <div className="flex items-center gap-2 font-black text-m3-primary shrink-0 tracking-wide">
                 <Users className="w-4 h-4" />
                 <span>{t("common.teams")}</span>
+              </div>
+            </>
+          )}
+
+          {view === "agenda" && (
+            <>
+              <ChevronRight className="w-3.5 h-3.5 text-m3-secondary/40 shrink-0" />
+              <div className="flex items-center gap-2 font-black text-m3-primary shrink-0 tracking-wide">
+                <Calendar1 className="w-4 h-4" />
+                <span>{t("common.agenda")}</span>
               </div>
             </>
           )}
