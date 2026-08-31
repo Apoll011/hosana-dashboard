@@ -65,12 +65,16 @@ export class RequiredFieldError extends SchemaValidationError {
  * - If explicitPath is provided, returns explicitPath.
  * - If folderId is provided, resolves folder and returns `${folder.name}/${title}.pro`.
  * - Otherwise (root), returns `${title}.pro`.
+ *
+ * Pass folderNameOverride when the folder is being renamed and its doc still has the
+ * old name, so the path can be computed with the *new* folder name.
  */
 export async function computeSongPath(
   db: HosanaDatabase,
   title: string,
   folderId: string | null | undefined,
   explicitPath?: string,
+  folderNameOverride?: string,
 ): Promise<string> {
   const trimmedTitle = title.trim();
   if (explicitPath && explicitPath.trim().length > 0) {
@@ -81,16 +85,62 @@ export async function computeSongPath(
     return `${trimmedTitle}.pro`;
   }
 
-  const folderDoc = await db.folders.findOne(folderId).exec();
-  if (!folderDoc || folderDoc.isDeleted || folderDoc._deleted) {
-    throw new ForeignKeyError(
-      `Folder with ID "${folderId}" does not exist or has been deleted.`,
-      "folder",
-      folderId,
-    );
+  let folderName: string;
+  if (folderNameOverride !== undefined) {
+    folderName = folderNameOverride;
+  } else {
+    const folderDoc = await db.folders.findOne(folderId).exec();
+    if (!folderDoc || folderDoc.isDeleted || folderDoc._deleted) {
+      throw new ForeignKeyError(
+        `Folder with ID "${folderId}" does not exist or has been deleted.`,
+        "folder",
+        folderId,
+      );
+    }
+    folderName = folderDoc.name;
   }
 
-  return `${folderDoc.name.trim()}/${trimmedTitle}.pro`;
+  return `${folderName.trim()}/${trimmedTitle}.pro`;
+}
+
+/**
+ * Recomputes the path of every active song inside a folder via computeSongPath.
+ * Returns only the songs whose path actually changes, so callers can patch them.
+ *
+ * Used when a folder is moved, renamed (folderNameOverride with the new name), or
+ * when its songs are detached (e.g. folder deleted with move-to-root).
+ */
+export async function computeFolderSongPaths(
+  db: HosanaDatabase,
+  folderId: string,
+  options: { folderNameOverride?: string } = {},
+): Promise<{ doc: RxDocument<SongDocType>; newPath: string }[]> {
+  const songsInFolder = await db.songs
+    .find({
+      selector: {
+        folderId,
+        isDeleted: { $ne: true },
+        _deleted: { $ne: true },
+      },
+    })
+    .exec();
+
+  const songsToUpdate: { doc: RxDocument<SongDocType>; newPath: string }[] = [];
+
+  for (const songDoc of songsInFolder) {
+    const newPath = await computeSongPath(
+      db,
+      songDoc.title,
+      folderId,
+      undefined,
+      options.folderNameOverride,
+    );
+    if (newPath !== songDoc.path) {
+      songsToUpdate.push({ doc: songDoc, newPath });
+    }
+  }
+
+  return songsToUpdate;
 }
 
 /**
@@ -222,23 +272,13 @@ export async function validateFolderRename(
     );
   }
 
-  // Find all active songs inside this folder
-  const songsInFolder = await db.songs
-    .find({
-      selector: {
-        folderId,
-        isDeleted: { $ne: true },
-        _deleted: { $ne: true },
-      },
-    })
-    .exec();
+  // Recompute paths for all active child songs using the new folder name
+  const songsToUpdate = await computeFolderSongPaths(db, folderId, {
+    folderNameOverride: trimmedName,
+  });
 
-  const songsToUpdate: { doc: RxDocument<SongDocType>; newPath: string }[] = [];
-
-  for (const songDoc of songsInFolder) {
-    const newPath = `${trimmedName}/${songDoc.title.trim()}.pro`;
-
-    // Check if any other song in db has this newPath
+  // Ensure none of the child songs will collide with an existing song in the database
+  for (const { doc: songDoc, newPath } of songsToUpdate) {
     const existing = await db.songs
       .find({
         selector: {
@@ -257,8 +297,6 @@ export async function validateFolderRename(
         newPath,
       );
     }
-
-    songsToUpdate.push({ doc: songDoc, newPath });
   }
 
   return { folderDoc, songsToUpdate };

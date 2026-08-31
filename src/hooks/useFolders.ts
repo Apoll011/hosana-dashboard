@@ -7,6 +7,8 @@ import { Folder } from "@/src/types";
 import { useCallback, useEffect, useState } from "react";
 import { useSync } from "../contexts/SyncContext";
 import {
+  computeFolderSongPaths,
+  computeSongPath,
   FolderDocType,
   getDatabase,
   getPurgeAt,
@@ -218,10 +220,22 @@ export function useFolders() {
 
         const doc = await db.folders.findOne(id).exec();
         if (doc) {
+          const now = new Date().toISOString();
           await doc.patch({
             parentId: parentId ?? null,
-            updatedAt: new Date().toISOString(),
+            updatedAt: now,
           });
+
+          // Recalculate song paths for songs inside the moved folder
+          // (mirrors server behavior; no-op while paths only embed the
+          // folder name, but repairs any stale paths in this folder)
+          const songsToUpdate = await computeFolderSongPaths(db, id);
+          for (const { doc: songDoc, newPath } of songsToUpdate) {
+            await songDoc.patch({
+              path: newPath,
+              updatedAt: now,
+            });
+          }
         }
         showToast("Folder moved", "success");
       } catch (err: unknown) {
@@ -278,8 +292,12 @@ export function useFolders() {
               updatedAt: now,
             });
           } else {
+            // Move song to root: recalculate its path from the title so it
+            // no longer references the deleted folder ("Title.pro")
+            const newPath = await computeSongPath(db, songDoc.title, null);
             await songDoc.patch({
               folderId: null,
+              path: newPath,
               updatedAt: now,
             });
           }
