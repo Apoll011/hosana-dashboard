@@ -79,22 +79,3 @@ export const COLOR_MAP: Record<
     ring: "ring-indigo-500/20",
   },
 };
-
-/** Deterministic-ish color for an avatar initial, based on the name. */
-const AVATAR_COLORS = [
-  "from-sky-500 to-cyan-400",
-  "from-violet-500 to-purple-400",
-  "from-amber-500 to-orange-400",
-  "from-emerald-500 to-teal-400",
-  "from-rose-500 to-pink-400",
-  "from-indigo-500 to-blue-400",
-];
-
-export function getAvatarGradient(seed: string): string {
-  let hash = 0;
-  for (let i = 0; i < seed.length; i++) {
-    hash = (hash << 5) - hash + seed.charCodeAt(i);
-    hash |= 0;
-  }
-  return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
-}

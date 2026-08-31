@@ -3,11 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { getInitials } from "@/src/utils";
+import { getAvatarGradient, getInitials } from "@/src/utils";
 import { X } from "lucide-react";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useAuth } from "../../../contexts/AuthContext";
-import { getAvatarGradient } from "../iconMap";
 import { Assignee } from "../types";
 
 interface AssigneeTagInputProps {
