@@ -3,9 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Bell, Pencil } from "lucide-react";
+import { Bell, ExternalLink, Link2, Pencil } from "lucide-react";
 import React from "react";
+import { useAuth } from "../../../contexts/AuthContext";
+import { useAppNavigate } from "../../../hooks/useAppNavigate";
+import { useServices } from "../../../hooks/useServices";
 import { AgendaEvent } from "../types";
+import { serviceTotalMinutes } from "./ServiceLinkField";
 
 interface DetailsSidebarProps {
   event: AgendaEvent | undefined;
@@ -14,12 +18,28 @@ interface DetailsSidebarProps {
   onEditReminder: () => void;
 }
 
+function formatShortDate(iso: string): string {
+  const [y, m, d] = (iso || "").split("T")[0].split("-").map(Number);
+  if (!y || !m || !d) return iso || "";
+  return `${String(d).padStart(2, "0")}/${String(m).padStart(2, "0")}/${y}`;
+}
+
 export const DetailsSidebar: React.FC<DetailsSidebarProps> = ({
   event,
   onEditDetails,
   onToggleReminder,
   onEditReminder,
 }) => {
+  const { servicesQuery } = useServices();
+  const { organization } = useAuth();
+  const { navigate } = useAppNavigate();
+  const slugPrefix = organization?.slug ? `/${organization.slug}` : "";
+
+  const linkedService = event?.linkedServiceId
+    ? (servicesQuery.data ?? []).find((s) => s.id === event.linkedServiceId) ??
+      null
+    : null;
+
   if (!event) return null;
 
   return (
@@ -46,6 +66,38 @@ export const DetailsSidebar: React.FC<DetailsSidebarProps> = ({
             <p className="text-sm font-bold text-[#0284c7] mt-0.5">
               {event.type}
             </p>
+          </div>
+          <div>
+            <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wide">
+              Serviço ligado
+            </p>
+            {linkedService ? (
+              <div className="mt-0.5">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-sm font-bold text-slate-800 dark:text-slate-200 truncate flex items-center gap-1.5 min-w-0">
+                    <Link2 className="w-3.5 h-3.5 text-[#0284c7] shrink-0" />
+                    <span className="truncate">{linkedService.name}</span>
+                  </span>
+                  <button
+                    onClick={() =>
+                      navigate(`${slugPrefix}/services/${linkedService.id}`)
+                    }
+                    title="Abrir serviço"
+                    className="p-1 rounded-lg text-slate-400 hover:text-[#0284c7] hover:bg-m3-hover transition-colors cursor-pointer shrink-0"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+                <p className="text-[11px] font-semibold text-slate-400 mt-0.5">
+                  {formatShortDate(linkedService.date)} ·{" "}
+                  {serviceTotalMinutes(linkedService)} min
+                </p>
+              </div>
+            ) : (
+              <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 mt-0.5">
+                —
+              </p>
+            )}
           </div>
           <div>
             <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wide">
