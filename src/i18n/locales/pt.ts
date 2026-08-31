@@ -9,6 +9,7 @@ export const pt = {
     services: "Cultos",
     settings: "Definições",
     teams: "Equipas",
+    agenda: "Agenda",
     trash: "Lixeira",
     home: "Início",
     folders: "Pastas",

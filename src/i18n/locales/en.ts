@@ -11,6 +11,7 @@ export const en: typeof pt = {
     services: "Services",
     settings: "Settings",
     teams: "Teams",
+    agenda: "Agenda",
     trash: "Trash",
     home: "Home",
     folders: "Folders",

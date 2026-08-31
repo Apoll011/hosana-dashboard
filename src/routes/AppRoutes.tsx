@@ -31,6 +31,7 @@ const PageLoader = () => {
   );
 };
 
+import { AgendaPage } from "../pages/agenda/AgendaPage";
 import {
   AcceptInvitationPage,
   FoldersPage,
@@ -169,6 +170,7 @@ export const AppRoutes: React.FC = () => {
                 <Route path="services" element={<ServicesPage hideHeader />} />
                 <Route path="services/:id" element={<ServiceDetailPage />} />
                 <Route path="teams" element={<TeamsPage />} />
+                <Route path="agenda" element={<AgendaPage />} />
                 <Route path="trash" element={<TrashPage />} />
                 <Route path="settings" element={<SettingsPage />} />
               </Route>
