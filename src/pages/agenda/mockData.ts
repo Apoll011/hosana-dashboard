@@ -9,21 +9,15 @@ import { AgendaState } from "./types";
  * Seed data used the first time the agenda loads (empty storage). Feel free
  * to delete this once real data is flowing in — `useAgendaStorage` only
  * falls back to this when nothing is found under the storage key.
+ *
+ * Responsibility categories are NOT here: the master list lives in the org
+ * metadata (see `DEFAULT_ORG_SETTINGS.agenda.responsibilityCategories` in
+ * `useOrgSettings`) and is seeded there once, if missing.
  */
-export const DEFAULT_CATEGORIES: AgendaState["categories"] = {
-  leader: { id: "leader", label: "Líder do Culto", icon: "mic", color: "amber" },
-  musicians: { id: "musicians", label: "Músicos", icon: "music", color: "violet" },
-  sound: { id: "sound", label: "Som", icon: "volume", color: "sky" },
-  lighting: { id: "lighting", label: "Iluminação", icon: "light", color: "rose" },
-  projection: { id: "projection", label: "Projeção", icon: "monitor", color: "cyan" },
-  preacher: { id: "preacher", label: "Pregador", icon: "book", color: "indigo" },
-  welcome: { id: "welcome", label: "Bem-vindos", icon: "heart", color: "emerald" },
-};
 
 const todayIso = new Date().toISOString().slice(0, 10);
 
 export const MOCK_STATE: AgendaState = {
-  categories: DEFAULT_CATEGORIES,
   events: {
     "evt-1": {
       id: "evt-1",

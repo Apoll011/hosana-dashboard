@@ -305,6 +305,7 @@ export const es: typeof pt = {
           other: "{count} responsabilidades",
         },
         empty: "Aún no se ha creado ninguna responsabilidad.",
+        hint: "Los cambios se aplican al guardar los ajustes.",
         newLabel: "Nueva responsabilidad",
         nameLabel: "Nombre",
         namePlaceholder: "Ej: Vídeo, Transmisión...",

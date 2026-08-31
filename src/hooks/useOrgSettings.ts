@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { ResponsibilityCategory } from "@/src/types";
 import { useEffect, useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { authClient } from "../lib/authClient";
@@ -25,9 +26,19 @@ export interface OrgGeneralSettings {
   weekStartsOn: number;
 }
 
+export interface OrgAgendaSettings {
+  /**
+   * Master list of responsibility categories ("Responsabilidades") for the
+   * Agenda. Stored in org metadata like every other setting on this tab, so
+   * the Settings → General card and the Agenda page share the same list.
+   */
+  responsibilityCategories: ResponsibilityCategory[];
+}
+
 export interface OrgSettings {
   general: OrgGeneralSettings;
   services: OrgServicesSettings;
+  agenda: OrgAgendaSettings;
 }
 
 interface OrgMetadataStructure {
@@ -39,12 +50,25 @@ interface OrgMetadataStructure {
       showServiceDuration?: boolean;
       autoSave?: boolean;
     };
+    agenda?: {
+      responsibilityCategories?: ResponsibilityCategory[];
+    };
     [key: string]: unknown;
   };
   [key: string]: unknown;
 }
 
 // ─── Defaults ────────────────────────────────────────────────────────────────
+
+export const DEFAULT_RESPONSIBILITY_CATEGORIES: ResponsibilityCategory[] = [
+  { id: "leader", label: "Líder do Culto", icon: "mic", color: "amber" },
+  { id: "musicians", label: "Músicos", icon: "music", color: "violet" },
+  { id: "sound", label: "Som", icon: "volume", color: "sky" },
+  { id: "lighting", label: "Iluminação", icon: "light", color: "rose" },
+  { id: "projection", label: "Projeção", icon: "monitor", color: "cyan" },
+  { id: "preacher", label: "Pregador", icon: "book", color: "indigo" },
+  { id: "welcome", label: "Bem-vindos", icon: "heart", color: "emerald" },
+];
 
 export const DEFAULT_ORG_SETTINGS: OrgSettings = {
   general: {
@@ -59,6 +83,9 @@ export const DEFAULT_ORG_SETTINGS: OrgSettings = {
     showServiceDuration: true,
     autoSave: true,
   },
+  agenda: {
+    responsibilityCategories: DEFAULT_RESPONSIBILITY_CATEGORIES,
+  },
 };
 
 // ─── Helper to parse metadata → OrgSettings ──────────────────────────────────
@@ -68,6 +95,7 @@ function parseOrgSettings(metadata: OrgMetadataStructure): OrgSettings {
   const g = s.general || {};
   const svc = s.services || {};
   const dur = svc.defaultDurations || {};
+  const agenda = s.agenda || {};
 
   return {
     general: {
@@ -84,6 +112,11 @@ function parseOrgSettings(metadata: OrgMetadataStructure): OrgSettings {
         svc.showServiceDuration ??
         DEFAULT_ORG_SETTINGS.services.showServiceDuration,
       autoSave: svc.autoSave ?? DEFAULT_ORG_SETTINGS.services.autoSave,
+    },
+    agenda: {
+      responsibilityCategories:
+        agenda.responsibilityCategories ??
+        DEFAULT_ORG_SETTINGS.agenda.responsibilityCategories,
     },
   };
 }
@@ -108,6 +141,12 @@ export interface UseOrgSettingsReturn {
   reset: () => void;
   /** Persist to backend */
   save: () => Promise<void>;
+  /** Stage a new responsibility category (persisted on `save`) */
+  addResponsibilityCategory: (
+    category: Omit<ResponsibilityCategory, "id">,
+  ) => void;
+  /** Stage removal of a responsibility category (persisted on `save`) */
+  removeResponsibilityCategory: (id: string) => void;
 }
 
 export function useOrgSettings(): UseOrgSettingsReturn {
@@ -146,6 +185,34 @@ export function useOrgSettings(): UseOrgSettingsReturn {
 
   const reset = () => setSettings(savedSettings);
 
+  const addResponsibilityCategory = (
+    category: Omit<ResponsibilityCategory, "id">,
+  ) => {
+    const id = `cat-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+    setSettings((prev) => ({
+      ...prev,
+      agenda: {
+        ...prev.agenda,
+        responsibilityCategories: [
+          ...prev.agenda.responsibilityCategories,
+          { ...category, id },
+        ],
+      },
+    }));
+  };
+
+  const removeResponsibilityCategory = (id: string) => {
+    setSettings((prev) => ({
+      ...prev,
+      agenda: {
+        ...prev.agenda,
+        responsibilityCategories: prev.agenda.responsibilityCategories.filter(
+          (c) => c.id !== id,
+        ),
+      },
+    }));
+  };
+
   const save = async () => {
     if (!organization) return;
     setIsSaving(true);
@@ -175,6 +242,11 @@ export function useOrgSettings(): UseOrgSettingsReturn {
                 showServiceDuration: settings.services.showServiceDuration,
                 autoSave: settings.services.autoSave,
               },
+              agenda: {
+                ...currentMetadata.settings?.agenda,
+                responsibilityCategories:
+                  settings.agenda.responsibilityCategories,
+              },
             },
           },
         },
@@ -196,5 +268,7 @@ export function useOrgSettings(): UseOrgSettingsReturn {
     set,
     reset,
     save,
+    addResponsibilityCategory,
+    removeResponsibilityCategory,
   };
 }

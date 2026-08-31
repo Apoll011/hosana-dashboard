@@ -4,6 +4,8 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useAuth } from "../../contexts/AuthContext";
+import { useOrgSettings } from "../../hooks/useOrgSettings";
 import { MOCK_STATE } from "./mockData";
 import {
   AgendaState,
@@ -11,7 +13,6 @@ import {
   Assignee,
   ReminderSettings,
   Responsibility,
-  ResponsibilityCategory,
 } from "./types";
 
 const STORAGE_KEY = "hosanna:agenda:v1";
@@ -41,9 +42,12 @@ const uid = (prefix: string) =>
 /**
  * Everything the Agenda UI needs to read/write its data.
  *
- * Responsibilities live *inside* their `AgendaEvent` (see
- * `AgendaEvent.responsibilities`), so every responsibility mutator takes an
- * `eventId` to know which event to update.
+ * Two sources of truth:
+ * - **Events** (with their embedded responsibilities) live in localStorage
+ *   under `hosanna:agenda:v1`, seeded from `MOCK_STATE` the first time.
+ * - **Responsibility categories** are org-wide and live in the org metadata
+ *   (Settings → General → Responsabilidades) — they're read from
+ *   `useOrgSettings` here, never persisted by this hook.
  *
  * ── Swapping this for a real backend later ──────────────────────────────
  * Every mutator below follows the same shape: update local state, then
@@ -53,6 +57,9 @@ const uid = (prefix: string) =>
  * components needs to change.
  */
 export function useAgendaStorage() {
+  const { organization } = useAuth();
+  const { settings, savedSettings } = useOrgSettings();
+
   const [state, setState] = useState<AgendaState>(() => loadState());
 
   useEffect(() => {
@@ -60,10 +67,7 @@ export function useAgendaStorage() {
   }, [state]);
 
   const events = useMemo(() => Object.values(state.events), [state.events]);
-  const categories = useMemo(
-    () => Object.values(state.categories),
-    [state.categories],
-  );
+  const categories = settings.agenda.responsibilityCategories;
 
   const getEventsForDate = useCallback(
     (date: string) => events.filter((ev) => ev.date === date),
@@ -97,6 +101,41 @@ export function useAgendaStorage() {
     }
     return out;
   }, [events]);
+
+  // Categories that are actually persisted in the org metadata. The Agenda's
+  // own instance of useOrgSettings never mutates, so this equals `settings`
+  // here — but using the persisted set keeps the cleanup honest even if a
+  // draft were ever introduced.
+  const persistedCategoryIds = useMemo(
+    () =>
+      new Set(
+        savedSettings.agenda.responsibilityCategories.map((c) => c.id),
+      ),
+    [savedSettings.agenda.responsibilityCategories],
+  );
+
+  /**
+   * Scrub responsibilities whose category no longer exists in the org
+   * metadata (e.g. it was deleted in Settings → General → Responsabilidades).
+   * Runs on mount and whenever the persisted categories change, so it also
+   * catches deletes that happened while the Agenda page was closed. Skips
+   * until the org is loaded to avoid reacting to the default pre-load state.
+   */
+  useEffect(() => {
+    if (!organization) return;
+    setState((prev) => {
+      let changed = false;
+      const nextEvents: AgendaState["events"] = {};
+      for (const [evId, ev] of Object.entries(prev.events)) {
+        const kept = ev.responsibilities.filter((r) =>
+          persistedCategoryIds.has(r.categoryId),
+        );
+        if (kept.length !== ev.responsibilities.length) changed = true;
+        nextEvents[evId] = { ...ev, responsibilities: kept };
+      }
+      return changed ? { ...prev, events: nextEvents } : prev;
+    });
+  }, [organization, persistedCategoryIds]);
 
   const addEvent = useCallback(
     (input: Omit<AgendaEvent, "id" | "reminder" | "responsibilities"> & {
@@ -214,36 +253,6 @@ export function useAgendaStorage() {
     [],
   );
 
-  const addCategory = useCallback((category: Omit<ResponsibilityCategory, "id">) => {
-    const id = uid("cat");
-    setState((prev) => ({
-      ...prev,
-      categories: { ...prev.categories, [id]: { ...category, id } },
-    }));
-    return id;
-  }, []);
-
-  const removeCategory = useCallback((id: string) => {
-    setState((prev) => {
-      const next = { ...prev.categories };
-      delete next[id];
-      // Drop responsibilities that referenced the deleted category from every
-      // event, so no orphaned rows linger in the Agenda.
-      const nextEvents = Object.fromEntries(
-        Object.entries(prev.events).map(([evId, ev]) => [
-          evId,
-          {
-            ...ev,
-            responsibilities: ev.responsibilities.filter(
-              (r) => r.categoryId !== id,
-            ),
-          },
-        ]),
-      );
-      return { ...prev, categories: next, events: nextEvents };
-    });
-  }, []);
-
   const resetToMockData = useCallback(() => setState(MOCK_STATE), []);
 
   return {
@@ -259,8 +268,6 @@ export function useAgendaStorage() {
     addResponsibility,
     updateResponsibilityAssignees,
     removeResponsibility,
-    addCategory,
-    removeCategory,
     resetToMockData,
   };
 }

@@ -9,30 +9,19 @@
  * These are intentionally storage-agnostic — nothing here knows about
  * localStorage, Prisma, or RxDB. That's on purpose: when it's time to wire
  * this up to the real backend, only `useAgendaStorage.ts` needs to change.
+ *
+ * The responsibility-category types (`ResponsibilityCategory`,
+ * `ResponsibilityColor`, `ResponsibilityIconKey`) live in `@/src/types` and
+ * are re-exported here for convenience — the master list is stored in the
+ * org metadata (Settings → General → Responsabilidades), not in the agenda's
+ * local storage.
  */
 
-export type ResponsibilityColor =
-  | "amber"
-  | "violet"
-  | "sky"
-  | "rose"
-  | "emerald"
-  | "cyan"
-  | "slate"
-  | "indigo";
-
-/** Icon key — mapped to an actual lucide-react component in `iconMap.ts`. */
-export type ResponsibilityIconKey =
-  | "mic"
-  | "music"
-  | "volume"
-  | "light"
-  | "monitor"
-  | "book"
-  | "heart"
-  | "users"
-  | "camera"
-  | "custom";
+export type {
+  ResponsibilityCategory,
+  ResponsibilityColor,
+  ResponsibilityIconKey,
+} from "@/src/types";
 
 export interface Assignee {
   id: string;
@@ -44,18 +33,6 @@ export interface Assignee {
   memberId?: string;
   /** Optional avatar image URL. Falls back to initials when absent. */
   avatarUrl?: string;
-}
-
-/**
- * A "role" that can be assigned to an event — e.g. "Líder do Culto",
- * "Músicos", "Som". Reusable across events (this is the master list
- * managed from the Settings → General "Responsabilidades" card).
- */
-export interface ResponsibilityCategory {
-  id: string;
-  label: string;
-  icon: ResponsibilityIconKey;
-  color: ResponsibilityColor;
 }
 
 /**
@@ -109,8 +86,11 @@ export interface AgendaEvent {
   responsibilities: Responsibility[];
 }
 
-/** Shape persisted to storage. Kept flat/normalized (by id) on purpose. */
+/**
+ * Shape persisted to the agenda's local storage. Kept flat/normalized (by id)
+ * on purpose. Categories are NOT here — the master responsibility list lives
+ * in the org metadata (`useOrgSettings`) and is read from there.
+ */
 export interface AgendaState {
   events: Record<string, AgendaEvent>;
-  categories: Record<string, ResponsibilityCategory>;
 }

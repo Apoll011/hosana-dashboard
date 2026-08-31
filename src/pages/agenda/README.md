@@ -75,13 +75,23 @@ const { data: linkedService } = useService(agendaEvent.linkedServiceId ?? null);
   (`organization.members[].id` from Better Auth). Assignees without a
   `memberId` are free-typed names; `useAgendaStorage.manualAssignees`
   collects those across all events so the picker can suggest them.
+- **Responsibility categories are org-wide**: they live in the org metadata
+  (`metadata.settings.agenda.responsibilityCategories`, managed by
+  `useOrgSettings`) and are edited in Settings → General → "Responsabilidades
+  da Agenda" — the same save flow as every other setting on that tab. The
+  Agenda reads them through `useAgendaStorage` (which pulls them from
+  `useOrgSettings`), never from its own local storage. On first run the hook
+  seeds the metadata with `DEFAULT_RESPONSIBILITY_CATEGORIES` if the field is
+  missing (one-time; an intentionally empty list is respected). Events whose
+  responsibilities reference a deleted category are cleaned up automatically
+  when the persisted category list changes.
 
 Nothing is wired to the real backend yet — it's UI-only, as requested.
 
 ## Swapping localStorage for the real backend later
 
 Everything reads/writes through the `useAgendaStorage()` hook. Its public
-surface (`events`, `responsibilities`, `categories`, `addEvent`,
+surface (`events`, `categories`, `manualAssignees`, `addEvent`,
 `updateEvent`, `addResponsibility`, `updateResponsibilityAssignees`, etc.)
 is the contract the UI depends on — nothing else touches storage directly.
 To go live:
