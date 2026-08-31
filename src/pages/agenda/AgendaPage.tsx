@@ -5,31 +5,28 @@
 
 import { CalendarPlus, Settings2 } from "lucide-react";
 import React, { useMemo, useState } from "react";
-import { AddResponsibilityModal } from "./components/ServiceModals";
 import { DayAgendaList } from "./components/DayAgendaList";
 import { DetailsSidebar } from "./components/DetailsSidebar";
 import { MiniCalendar, toIso } from "./components/MiniCalendar";
+import { ServiceDetailPanel } from "./components/ServiceDetailPanel";
 import {
+  AddResponsibilityModal,
   EditAssigneesModal,
   EditReminderModal,
   ManageCategoriesModal,
   ServiceFormModal,
   ServiceFormValue,
 } from "./components/ServiceModals";
-import { ServiceDetailPanel } from "./components/ServiceDetailPanel";
 import { useAgendaStorage } from "./useAgendaStorage";
 
-/**
- * UI-complete Agenda page. All persistence goes through `useAgendaStorage`,
- * which currently backs onto localStorage — swap that hook's internals for
- * real API/sync calls later without touching anything below.
- */
 export const AgendaPage: React.FC = () => {
   const store = useAgendaStorage();
 
   const [visibleMonth, setVisibleMonth] = useState(() => new Date());
   const [selectedDate, setSelectedDate] = useState(() => toIso(new Date()));
-  const [selectedServiceId, setSelectedServiceId] = useState<string | null>(null);
+  const [selectedServiceId, setSelectedServiceId] = useState<string | null>(
+    null,
+  );
 
   const [isNewServiceOpen, setIsNewServiceOpen] = useState(false);
   const [isEditServiceOpen, setIsEditServiceOpen] = useState(false);
@@ -147,7 +144,8 @@ export const AgendaPage: React.FC = () => {
               onSelectDate={handleSelectDate}
               onChangeMonth={(delta) =>
                 setVisibleMonth(
-                  (prev) => new Date(prev.getFullYear(), prev.getMonth() + delta, 1),
+                  (prev) =>
+                    new Date(prev.getFullYear(), prev.getMonth() + delta, 1),
                 )
               }
               onGoToday={() => {
@@ -171,7 +169,9 @@ export const AgendaPage: React.FC = () => {
             onEditService={() => setIsEditServiceOpen(true)}
             onAddResponsibility={() => setIsAddResponsibilityOpen(true)}
             onEditAssignees={(respId) => setEditingAssigneesFor(respId)}
-            onRemoveResponsibility={(respId) => store.removeResponsibility(respId)}
+            onRemoveResponsibility={(respId) =>
+              store.removeResponsibility(respId)
+            }
           />
 
           <DetailsSidebar
@@ -261,7 +261,10 @@ export const AgendaPage: React.FC = () => {
           }
           assignees={editingAssigneesResp.assignees}
           onSubmit={(assignees) => {
-            store.updateResponsibilityAssignees(editingAssigneesResp.id, assignees);
+            store.updateResponsibilityAssignees(
+              editingAssigneesResp.id,
+              assignees,
+            );
             setEditingAssigneesFor(null);
           }}
         />

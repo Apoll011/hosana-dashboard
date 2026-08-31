@@ -96,7 +96,9 @@ export const DetailsSidebar: React.FC<DetailsSidebarProps> = ({
           >
             <span
               className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform ${
-                service.reminder.enabled ? "translate-x-4.5" : "translate-x-0.5"
+                service.reminder.enabled
+                  ? "-translate-x-0.5"
+                  : "-translate-x-4.5"
               }`}
             />
           </button>
