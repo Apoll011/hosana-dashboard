@@ -37,6 +37,7 @@ interface AppSidebarProps {
   rootFoldersCount: number;
   totalSongs: number;
   totalServices: number;
+  trashCount: number;
   allFolders: Folder[];
   folderTree: FolderTreeNode[];
   expandedFolderIds: Set<string>;
@@ -71,6 +72,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
   rootFoldersCount,
   totalSongs,
   totalServices,
+  trashCount,
   allFolders,
   folderTree,
   expandedFolderIds,
@@ -430,6 +432,17 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
             >
               {t("sidebar.trash")}
             </span>
+          </div>
+          <div
+            className={`transition-all duration-300 ease-in-out overflow-hidden shrink-0 ${
+              isSidebarCollapsed
+                ? "opacity-0 max-w-0 scale-75 pointer-events-none"
+                : "opacity-100 max-w-15 scale-100"
+            }`}
+          >
+            <Badge variant={view === "trash" ? "rose" : "slate"}>
+              {trashCount}
+            </Badge>
           </div>
         </button>
 
