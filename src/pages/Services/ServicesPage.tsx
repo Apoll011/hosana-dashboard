@@ -136,7 +136,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
       showArchived
         ? ((context.archivedServices as Service[] | null) ??
           archivedServicesQuery.data ??
-          [])
+          []).filter((s) => s.archived)
         : [],
     [showArchived, context.archivedServices, archivedServicesQuery.data],
   );

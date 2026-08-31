@@ -116,7 +116,10 @@ export const MainLayout: React.FC = () => {
   const [showArchived, setShowArchived] = useState(false);
   const { servicesQuery: archivedServicesQuery } = useServices(true);
   const archivedServices = useMemo(
-    () => (showArchived ? (archivedServicesQuery.data ?? []) : []),
+    () =>
+      showArchived
+        ? (archivedServicesQuery.data ?? []).filter((s) => s.archived)
+        : [],
     [showArchived, archivedServicesQuery.data],
   );
 
