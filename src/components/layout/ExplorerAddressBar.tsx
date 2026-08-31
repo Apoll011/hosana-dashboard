@@ -18,6 +18,7 @@ import {
   Plus,
   Search,
   Settings,
+  Trash2Icon,
   Users,
   X,
 } from "lucide-react";
@@ -285,7 +286,7 @@ export const ExplorerAddressBar: React.FC<ExplorerAddressBarProps> = ({
             <>
               <ChevronRight className="w-3.5 h-3.5 text-m3-secondary/40 shrink-0" />
               <div className="flex items-center gap-2 font-black text-m3-primary shrink-0 tracking-wide">
-                <Users className="w-4 h-4" />
+                <Trash2Icon className="w-4 h-4" />
                 <span>{t("common.trash")}</span>
               </div>
             </>
