@@ -24,9 +24,9 @@ const todayIso = new Date().toISOString().slice(0, 10);
 
 export const MOCK_STATE: AgendaState = {
   categories: DEFAULT_CATEGORIES,
-  services: {
-    "svc-1": {
-      id: "svc-1",
+  events: {
+    "evt-1": {
+      id: "evt-1",
       date: todayIso,
       title: "Culto da Manhã",
       type: "Culto Dominical",
@@ -36,8 +36,8 @@ export const MOCK_STATE: AgendaState = {
       notes: "Levar instrumentos adicionais.",
       reminder: { enabled: true, label: "2 dias antes às 18:00" },
     },
-    "svc-2": {
-      id: "svc-2",
+    "evt-2": {
+      id: "evt-2",
       date: todayIso,
       title: "Ensaio de Louvor",
       type: "Ensaio",
@@ -51,13 +51,13 @@ export const MOCK_STATE: AgendaState = {
   responsibilities: {
     "resp-1": {
       id: "resp-1",
-      serviceId: "svc-1",
+      eventId: "evt-1",
       categoryId: "leader",
       assignees: [{ id: "u1", name: "Judson Weeden" }],
     },
     "resp-2": {
       id: "resp-2",
-      serviceId: "svc-1",
+      eventId: "evt-1",
       categoryId: "musicians",
       assignees: [
         { id: "u2", name: "Tiago Inês" },
@@ -68,31 +68,31 @@ export const MOCK_STATE: AgendaState = {
     },
     "resp-3": {
       id: "resp-3",
-      serviceId: "svc-1",
+      eventId: "evt-1",
       categoryId: "sound",
       assignees: [{ id: "u4", name: "Carlos Silva" }],
     },
     "resp-4": {
       id: "resp-4",
-      serviceId: "svc-1",
+      eventId: "evt-1",
       categoryId: "lighting",
       assignees: [{ id: "u6", name: "Mariana Costa" }],
     },
     "resp-5": {
       id: "resp-5",
-      serviceId: "svc-1",
+      eventId: "evt-1",
       categoryId: "projection",
       assignees: [{ id: "u2", name: "Tiago Inês" }],
     },
     "resp-6": {
       id: "resp-6",
-      serviceId: "svc-1",
+      eventId: "evt-1",
       categoryId: "preacher",
       assignees: [{ id: "u7", name: "Pr. João Mendes" }],
     },
     "resp-7": {
       id: "resp-7",
-      serviceId: "svc-1",
+      eventId: "evt-1",
       categoryId: "welcome",
       assignees: [
         { id: "u8", name: "Maria Santos" },

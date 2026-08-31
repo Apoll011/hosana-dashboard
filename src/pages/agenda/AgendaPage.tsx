@@ -7,15 +7,15 @@ import { CalendarPlus } from "lucide-react";
 import React, { useMemo, useState } from "react";
 import { DayAgendaList } from "./components/DayAgendaList";
 import { DetailsSidebar } from "./components/DetailsSidebar";
-import { MiniCalendar, toIso } from "./components/MiniCalendar";
-import { ServiceDetailPanel } from "./components/ServiceDetailPanel";
+import { EventDetailPanel } from "./components/EventDetailPanel";
 import {
   AddResponsibilityModal,
   EditAssigneesModal,
   EditReminderModal,
-  ServiceFormModal,
-  ServiceFormValue,
-} from "./components/ServiceModals";
+  EventFormModal,
+  EventFormValue,
+} from "./components/EventModals";
+import { MiniCalendar, toIso } from "./components/MiniCalendar";
 import { useAgendaStorage } from "./useAgendaStorage";
 
 export const AgendaPage: React.FC = () => {
@@ -23,12 +23,10 @@ export const AgendaPage: React.FC = () => {
 
   const [visibleMonth, setVisibleMonth] = useState(() => new Date());
   const [selectedDate, setSelectedDate] = useState(() => toIso(new Date()));
-  const [selectedServiceId, setSelectedServiceId] = useState<string | null>(
-    null,
-  );
+  const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
 
-  const [isNewServiceOpen, setIsNewServiceOpen] = useState(false);
-  const [isEditServiceOpen, setIsEditServiceOpen] = useState(false);
+  const [isNewEventOpen, setIsNewEventOpen] = useState(false);
+  const [isEditEventOpen, setIsEditEventOpen] = useState(false);
   const [isEditDetailsOpen, setIsEditDetailsOpen] = useState(false);
   const [isAddResponsibilityOpen, setIsAddResponsibilityOpen] = useState(false);
   const [isReminderOpen, setIsReminderOpen] = useState(false);
@@ -37,43 +35,43 @@ export const AgendaPage: React.FC = () => {
   );
 
   const markedDates = useMemo(
-    () => new Set(store.services.map((s) => s.date)),
-    [store.services],
+    () => new Set(store.events.map((ev) => ev.date)),
+    [store.events],
   );
 
-  const servicesForSelectedDate = useMemo(
-    () => store.getServicesForDate(selectedDate),
+  const eventsForSelectedDate = useMemo(
+    () => store.getEventsForDate(selectedDate),
     [store, selectedDate],
   );
 
   // Keep a valid selection whenever the day or the underlying data changes.
-  const effectiveServiceId = useMemo(() => {
+  const effectiveEventId = useMemo(() => {
     if (
-      selectedServiceId &&
-      servicesForSelectedDate.some((s) => s.id === selectedServiceId)
+      selectedEventId &&
+      eventsForSelectedDate.some((ev) => ev.id === selectedEventId)
     ) {
-      return selectedServiceId;
+      return selectedEventId;
     }
-    return servicesForSelectedDate[0]?.id ?? null;
-  }, [selectedServiceId, servicesForSelectedDate]);
+    return eventsForSelectedDate[0]?.id ?? null;
+  }, [selectedEventId, eventsForSelectedDate]);
 
-  const selectedService = useMemo(
-    () => store.services.find((s) => s.id === effectiveServiceId),
-    [store.services, effectiveServiceId],
+  const selectedEvent = useMemo(
+    () => store.events.find((ev) => ev.id === effectiveEventId),
+    [store.events, effectiveEventId],
   );
 
-  const responsibilitiesForSelectedService = useMemo(
+  const responsibilitiesForSelectedEvent = useMemo(
     () =>
-      effectiveServiceId
-        ? store.getResponsibilitiesForService(effectiveServiceId)
+      effectiveEventId
+        ? store.getResponsibilitiesForEvent(effectiveEventId)
         : [],
-    [store, effectiveServiceId],
+    [store, effectiveEventId],
   );
 
   const responsibilityCounts = useMemo(() => {
     const counts: Record<string, number> = {};
     for (const r of store.responsibilities) {
-      counts[r.serviceId] = (counts[r.serviceId] ?? 0) + 1;
+      counts[r.eventId] = (counts[r.eventId] ?? 0) + 1;
     }
     return counts;
   }, [store.responsibilities]);
@@ -91,14 +89,14 @@ export const AgendaPage: React.FC = () => {
 
   const handleSelectDate = (date: string) => {
     setSelectedDate(date);
-    setSelectedServiceId(null);
+    setSelectedEventId(null);
   };
 
-  const handleCreateService = (value: ServiceFormValue) => {
-    const id = store.addService(value);
+  const handleCreateEvent = (value: EventFormValue) => {
+    const id = store.addEvent(value);
     setSelectedDate(value.date);
-    setSelectedServiceId(id);
-    setIsNewServiceOpen(false);
+    setSelectedEventId(id);
+    setIsNewEventOpen(false);
   };
 
   return (
@@ -116,16 +114,16 @@ export const AgendaPage: React.FC = () => {
           </div>
           <div className="flex items-center gap-2">
             <button
-              onClick={() => setIsNewServiceOpen(true)}
+              onClick={() => setIsNewEventOpen(true)}
               className="flex items-center gap-2 px-4 py-2.5 text-xs font-bold rounded-xl bg-[#0284c7] text-white hover:bg-sky-600 shadow-sm transition-colors cursor-pointer"
             >
               <CalendarPlus className="w-4 h-4" />
-              Nova Agenda
+              Novo Evento
             </button>
           </div>
         </div>
 
-        {/* Body: calendar / responsibilities / details */}
+        {/* Body: calendar / events / details */}
         <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr_280px] gap-5 items-start">
           <div className="space-y-4">
             <MiniCalendar
@@ -146,18 +144,18 @@ export const AgendaPage: React.FC = () => {
               }}
             />
             <DayAgendaList
-              services={servicesForSelectedDate}
-              selectedServiceId={effectiveServiceId}
+              events={eventsForSelectedDate}
+              selectedEventId={effectiveEventId}
               responsibilityCounts={responsibilityCounts}
-              onSelectService={setSelectedServiceId}
+              onSelectEvent={setSelectedEventId}
             />
           </div>
 
-          <ServiceDetailPanel
-            service={selectedService}
-            responsibilities={responsibilitiesForSelectedService}
+          <EventDetailPanel
+            event={selectedEvent}
+            responsibilities={responsibilitiesForSelectedEvent}
             categories={categoriesById}
-            onEditService={() => setIsEditServiceOpen(true)}
+            onEditEvent={() => setIsEditEventOpen(true)}
             onAddResponsibility={() => setIsAddResponsibilityOpen(true)}
             onEditAssignees={(respId) => setEditingAssigneesFor(respId)}
             onRemoveResponsibility={(respId) =>
@@ -166,13 +164,13 @@ export const AgendaPage: React.FC = () => {
           />
 
           <DetailsSidebar
-            service={selectedService}
+            event={selectedEvent}
             onEditDetails={() => setIsEditDetailsOpen(true)}
             onToggleReminder={() => {
-              if (!selectedService) return;
-              store.updateReminder(selectedService.id, {
-                ...selectedService.reminder,
-                enabled: !selectedService.reminder.enabled,
+              if (!selectedEvent) return;
+              store.updateReminder(selectedEvent.id, {
+                ...selectedEvent.reminder,
+                enabled: !selectedEvent.reminder.enabled,
               });
             }}
             onEditReminder={() => setIsReminderOpen(true)}
@@ -180,63 +178,63 @@ export const AgendaPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Create service */}
-      <ServiceFormModal
-        isOpen={isNewServiceOpen}
-        onClose={() => setIsNewServiceOpen(false)}
-        onSubmit={handleCreateService}
-        title="Nova Agenda"
-        submitLabel="Criar Agenda"
+      {/* Create event */}
+      <EventFormModal
+        isOpen={isNewEventOpen}
+        onClose={() => setIsNewEventOpen(false)}
+        onSubmit={handleCreateEvent}
+        title="Novo Evento"
+        submitLabel="Criar Evento"
         initial={{ date: selectedDate }}
       />
 
-      {/* Edit service (title/time/type/duration) */}
-      {selectedService && (
-        <ServiceFormModal
-          isOpen={isEditServiceOpen}
-          onClose={() => setIsEditServiceOpen(false)}
+      {/* Edit event (title/time/type/duration) */}
+      {selectedEvent && (
+        <EventFormModal
+          isOpen={isEditEventOpen}
+          onClose={() => setIsEditEventOpen(false)}
           onSubmit={(value) => {
-            store.updateService(selectedService.id, value);
+            store.updateEvent(selectedEvent.id, value);
             setSelectedDate(value.date);
-            setIsEditServiceOpen(false);
+            setIsEditEventOpen(false);
           }}
           onDelete={() => {
-            store.deleteService(selectedService.id);
-            setSelectedServiceId(null);
-            setIsEditServiceOpen(false);
+            store.deleteEvent(selectedEvent.id);
+            setSelectedEventId(null);
+            setIsEditEventOpen(false);
           }}
-          title="Editar Agenda"
+          title="Editar Evento"
           submitLabel="Guardar"
-          initial={selectedService}
+          initial={selectedEvent}
         />
       )}
 
       {/* Edit details panel (location / notes) reuses the same form */}
-      {selectedService && (
-        <ServiceFormModal
+      {selectedEvent && (
+        <EventFormModal
           isOpen={isEditDetailsOpen}
           onClose={() => setIsEditDetailsOpen(false)}
           onSubmit={(value) => {
-            store.updateService(selectedService.id, value);
+            store.updateEvent(selectedEvent.id, value);
             setIsEditDetailsOpen(false);
           }}
           title="Editar Detalhes"
           submitLabel="Guardar"
-          initial={selectedService}
+          initial={selectedEvent}
         />
       )}
 
       {/* Add responsibility */}
-      {selectedService && (
+      {selectedEvent && (
         <AddResponsibilityModal
           isOpen={isAddResponsibilityOpen}
           onClose={() => setIsAddResponsibilityOpen(false)}
           categories={store.categories}
-          existingCategoryIds={responsibilitiesForSelectedService.map(
+          existingCategoryIds={responsibilitiesForSelectedEvent.map(
             (r) => r.categoryId,
           )}
           onSubmit={(categoryId, assignees) => {
-            store.addResponsibility(selectedService.id, categoryId, assignees);
+            store.addResponsibility(selectedEvent.id, categoryId, assignees);
             setIsAddResponsibilityOpen(false);
           }}
         />
@@ -262,14 +260,14 @@ export const AgendaPage: React.FC = () => {
       )}
 
       {/* Edit reminder */}
-      {selectedService && (
+      {selectedEvent && (
         <EditReminderModal
           isOpen={isReminderOpen}
           onClose={() => setIsReminderOpen(false)}
-          initialLabel={selectedService.reminder.label}
+          initialLabel={selectedEvent.reminder.label}
           onSubmit={(label) => {
-            store.updateReminder(selectedService.id, {
-              ...selectedService.reminder,
+            store.updateReminder(selectedEvent.id, {
+              ...selectedEvent.reminder,
               label,
               enabled: true,
             });
