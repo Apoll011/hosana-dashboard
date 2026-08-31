@@ -4,9 +4,11 @@
  */
 
 import { Badge } from "@/src/components/common";
+import { posthog } from "@/src/lib/posthog";
 import { Folder } from "@/src/types";
 import { Organization } from "better-auth/client";
 import {
+  Calendar1,
   ChevronLeft,
   ChevronRight,
   Church,
@@ -42,7 +44,6 @@ interface AppSidebarProps {
   folderTree: FolderTreeNode[];
   expandedFolderIds: Set<string>;
   showFolderTree: boolean;
-  teamsEnabled?: boolean;
   user?: {
     name: string;
     image?: unknown;
@@ -77,7 +78,6 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
   folderTree,
   expandedFolderIds,
   showFolderTree,
-  teamsEnabled = false,
   user,
   onSelectFolder,
   onContextMenu,
@@ -90,6 +90,9 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
   const isDriveRoot = view === "explorer" && currentFolderId === null;
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
+
+  const teams_enabled = posthog.isFeatureEnabled("teams-enable") || false;
+  const agenda_enabled = posthog.isFeatureEnabled("agenda") || false;
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -333,8 +336,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
           </div>
         </button>
 
-        {/* Teams Item */}
-        {teamsEnabled && (
+        {teams_enabled && (
           <button
             onClick={() => {
               navigate(`${slugPrefix}/teams`);
@@ -363,6 +365,40 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
                 }`}
               >
                 {t("common.teams")}
+              </span>
+            </div>
+          </button>
+        )}
+
+        {agenda_enabled && (
+          <button
+            onClick={() => {
+              navigate(`${slugPrefix}/agenda`);
+              if (window.innerWidth < 768) setIsSidebarOpen(false);
+            }}
+            title={isSidebarCollapsed ? t("common.agenda") : undefined}
+            className={`w-full flex items-center justify-between px-3.5 py-3 text-[13px] font-bold rounded-2xl transition-all cursor-pointer group ${
+              view === "agenda"
+                ? "bg-amber-500/10 text-red-600 dark:text-red-400 border border-red-500/20 shadow-sm"
+                : "text-m3-secondary hover:bg-m3-hover hover:text-m3-text"
+            }`}
+          >
+            <div className="flex items-center gap-3 min-w-0 flex-1">
+              <div className="w-5 h-5 flex items-center justify-center shrink-0">
+                <Calendar1
+                  className={`w-4.5 h-4.5 ${
+                    view === "agenda" ? "text-red-500" : "text-m3-secondary"
+                  }`}
+                />
+              </div>
+              <span
+                className={`truncate transition-all duration-300 ease-in-out overflow-hidden whitespace-nowrap ${
+                  isSidebarCollapsed
+                    ? "opacity-0 max-w-0 -translate-x-2 pointer-events-none"
+                    : "opacity-100 max-w-35 translate-x-0"
+                }`}
+              >
+                {t("common.agenda")}
               </span>
             </div>
           </button>
