@@ -253,10 +253,26 @@ export const SongEditorPage: React.FC = () => {
       </div>
 
       <div className="flex-1 flex flex-col md:flex-row overflow-hidden relative">
-        {(layoutMode === "split" || layoutMode === "editor") && (
-          <div
-            className={`flex flex-col h-1/2 md:h-full transition-all duration-300 relative bg-m3-card ${layoutMode === "split" ? "md:w-1/2 md:border-r border-m3-border" : "w-full"}`}
-          >
+        {/* Editor pane — always mounted so layout-mode switches animate smoothly */}
+        <div
+          className={[
+            "flex flex-col overflow-hidden relative bg-m3-card min-w-0",
+            "transition-all duration-300 ease-in-out",
+            layoutMode === "preview" ? "max-md:hidden" : "",
+            layoutMode === "editor"
+              ? "h-full"
+              : layoutMode === "split"
+                ? "h-1/2"
+                : "",
+            "md:h-auto",
+            layoutMode === "editor"
+              ? "md:basis-full"
+              : layoutMode === "split"
+                ? "md:basis-1/2 md:border-r border-m3-border"
+                : "md:basis-0",
+            layoutMode === "preview" ? "md:opacity-0" : "md:opacity-100",
+          ].join(" ")}
+        >
             {/* Editor Tab Header */}
             <div className="h-9 bg-m3-sidebar/30 border-b border-m3-border flex items-center justify-between px-3 shrink-0">
               <span className="text-[10px] font-semibold text-m3-secondary uppercase tracking-wider flex items-center gap-1.5">
@@ -300,12 +316,27 @@ export const SongEditorPage: React.FC = () => {
               />
             </div>
           </div>
-        )}
 
-        {(layoutMode === "split" || layoutMode === "preview") && (
-          <div
-            className={`flex flex-col h-1/2 md:h-full transition-all duration-300 relative bg-m3-card ${layoutMode === "split" ? "md:w-1/2" : "w-full"}`}
-          >
+        {/* Preview pane — always mounted so layout-mode switches animate smoothly */}
+        <div
+          className={[
+            "flex flex-col overflow-hidden relative bg-m3-card min-w-0",
+            "transition-all duration-300 ease-in-out",
+            layoutMode === "editor" ? "max-md:hidden" : "",
+            layoutMode === "preview"
+              ? "h-full"
+              : layoutMode === "split"
+                ? "h-1/2"
+                : "",
+            "md:h-auto",
+            layoutMode === "preview"
+              ? "md:basis-full"
+              : layoutMode === "split"
+                ? "md:basis-1/2"
+                : "md:basis-0",
+            layoutMode === "editor" ? "md:opacity-0" : "md:opacity-100",
+          ].join(" ")}
+        >
             {/* Preview Tab Header */}
             <div className="h-9 bg-m3-sidebar/30 border-b border-m3-border flex items-center justify-between px-3 shrink-0">
               <span className="text-[10px] font-semibold text-m3-secondary uppercase tracking-wider flex items-center gap-1.5">
@@ -349,7 +380,6 @@ export const SongEditorPage: React.FC = () => {
               />
             </div>
           </div>
-        )}
       </div>
     </div>
   );
