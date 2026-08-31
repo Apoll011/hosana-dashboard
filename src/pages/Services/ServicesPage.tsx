@@ -854,7 +854,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
             initialValues={{
               name: editTarget.name,
               date: editTarget.date,
-              notes: editTarget.notes,
+              notes: editTarget.notes || "",
             }}
             onSubmit={handleEditServiceSubmit}
             onCancel={() => setEditTarget(null)}
