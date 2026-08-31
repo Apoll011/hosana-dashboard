@@ -662,7 +662,11 @@ export const ServiceDetailPage: React.FC = () => {
       try {
         await updateService({
           id: service.id,
-          data: { notes: generalNotes, updatedAt: service.updatedAt },
+          data: {
+            name: service.name,
+            notes: generalNotes,
+            updatedAt: service.updatedAt,
+          },
         });
       } catch {
         // silent — user can still save manually
@@ -762,6 +766,7 @@ export const ServiceDetailPage: React.FC = () => {
       await updateService({
         id: service.id,
         data: {
+          name: service.name,
           elements: elementsRef.current,
           notes: generalNotes,
           updatedAt: service.updatedAt,
@@ -806,7 +811,11 @@ export const ServiceDetailPage: React.FC = () => {
       try {
         await updateService({
           id: service.id,
-          data: { notes: generalNotes, updatedAt: service.updatedAt },
+          data: {
+            name: service.name,
+            notes: generalNotes,
+            updatedAt: service.updatedAt,
+          },
         });
         showToast(t("serviceDetailPage.serviceSavedSuccess"), "success");
       } catch (error) {

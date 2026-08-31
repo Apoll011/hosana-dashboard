@@ -1,5 +1,3 @@
-import { useAppNavigate } from "@/src/hooks/useAppNavigate";
-import { usePermissionValue } from "@/src/lib/permissions/client";
 import {
   Badge,
   ConfirmDialog,
@@ -7,6 +5,8 @@ import {
   Modal,
   Spinner,
 } from "@/src/components/common";
+import { useAppNavigate } from "@/src/hooks/useAppNavigate";
+import { usePermissionValue } from "@/src/lib/permissions/client";
 import { Service } from "@/src/types";
 import {
   Archive,
@@ -410,6 +410,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
     await updateService({
       id: service.id,
       data: {
+        name: service.name,
         archived: nextArchived,
         updatedAt: service.updatedAt,
       },
@@ -434,7 +435,11 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
       if (service) {
         return updateService({
           id,
-          data: { archived: !service.archived, updatedAt: service.updatedAt },
+          data: {
+            name: service.name,
+            archived: !service.archived,
+            updatedAt: service.updatedAt,
+          },
         });
       }
       return Promise.resolve();
