@@ -28,6 +28,7 @@ import {
   durationInputToSeconds,
   secondsToDurationInput,
 } from "../DurationField";
+import { ResponsibilityCategoriesCard } from "./ResponsibilityCategoriesCard";
 
 export interface GeneralTabProps {
   active: boolean;
@@ -402,6 +403,9 @@ export const GeneralTab: React.FC<GeneralTabProps> = ({
           </div>
         )}
       </div>
+
+      {/* ── 3. RESPONSABILIDADES DA AGENDA ─────────────────────────── */}
+      <ResponsibilityCategoriesCard disabled={!canManageOrg || isSaving} />
     </form>
   );
 };

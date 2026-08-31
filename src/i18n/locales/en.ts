@@ -295,6 +295,22 @@ export const en: typeof pt = {
         newYork: "New York (EST / GMT-5)",
         utc: "UTC (Coordinated Universal Time)",
       },
+      responsibilities: {
+        title: "Agenda Responsibilities",
+        desc: "Manage the list of responsibilities you can assign to services on the Agenda page.",
+        count: {
+          one: "{count} responsibility",
+          other: "{count} responsibilities",
+        },
+        empty: "No responsibilities created yet.",
+        newLabel: "New responsibility",
+        nameLabel: "Name",
+        namePlaceholder: "e.g. Video, Livestream...",
+        iconLabel: "Icon",
+        colorLabel: "Color",
+        add: "Add",
+        remove: "Remove responsibility",
+      },
     },
     restore: {
       confirmTitle: "Confirm Database Restore",

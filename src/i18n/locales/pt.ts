@@ -295,6 +295,22 @@ export const pt = {
         newYork: "Nova Iorque (EST / GMT-5)",
         utc: "UTC (Tempo Universal)",
       },
+      responsibilities: {
+        title: "Responsabilidades da Agenda",
+        desc: "Gestão da lista de responsabilidades que pode atribuir aos cultos na página Agenda.",
+        count: {
+          one: "{count} responsabilidade",
+          other: "{count} responsabilidades",
+        },
+        empty: "Nenhuma responsabilidade criada ainda.",
+        newLabel: "Nova responsabilidade",
+        nameLabel: "Nome",
+        namePlaceholder: "Ex: Vídeo, Transmissão...",
+        iconLabel: "Ícone",
+        colorLabel: "Cor",
+        add: "Adicionar",
+        remove: "Remover responsabilidade",
+      },
     },
     restore: {
       confirmTitle: "Confirmar Restauração da Base de Dados",

@@ -201,7 +201,10 @@ export const SettingsPage: React.FC = () => {
               setIsTogglingWs={setIsTogglingWs}
             />
             <MembersTab active={activeTab === "members"} />
-            <GeneralTab active={activeTab === "general"} />
+            <GeneralTab
+              active={activeTab === "general"}
+              showToast={showToast}
+            />
           </div>
           <AppearanceTab active={activeTab === "app"} />
           <FeaturesTab active={activeTab === "features"} />

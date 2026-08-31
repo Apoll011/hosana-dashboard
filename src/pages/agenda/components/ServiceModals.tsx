@@ -6,14 +6,7 @@
 import { Button, Input, Modal } from "@/src/components/common";
 import { Trash2 } from "lucide-react";
 import React, { useEffect, useState } from "react";
-import { COLOR_MAP, ICON_MAP } from "../iconMap";
-import {
-  Assignee,
-  ResponsibilityCategory,
-  ResponsibilityColor,
-  ResponsibilityIconKey,
-  AgendaService,
-} from "../types";
+import { Assignee, ResponsibilityCategory, AgendaService } from "../types";
 import { AssigneeTagInput } from "./AssigneeTagInput";
 
 /* ------------------------------------------------------------------ */
@@ -226,7 +219,8 @@ export const AddResponsibilityModal: React.FC<AddResponsibilityModalProps> = ({
         {available.length === 0 ? (
           <p className="text-xs text-slate-500 dark:text-slate-400">
             Todas as responsabilidades disponíveis já foram adicionadas a esta
-            agenda. Pode criar novas categorias em &quot;Responsabilidades&quot;.
+            agenda. Pode criar novas responsabilidades em Definições &gt;
+            Servidor.
           </p>
         ) : (
           <>
@@ -307,162 +301,6 @@ export const EditAssigneesModal: React.FC<EditAssigneesModalProps> = ({
           </Button>
           <Button variant="primary" type="button" onClick={() => onSubmit(value)}>
             Guardar
-          </Button>
-        </div>
-      </div>
-    </Modal>
-  );
-};
-
-/* ------------------------------------------------------------------ */
-/* Manage the master list of responsibility categories                */
-/* ------------------------------------------------------------------ */
-
-const ICON_OPTIONS: ResponsibilityIconKey[] = [
-  "mic", "music", "volume", "light", "monitor", "book", "heart", "users", "camera",
-];
-const COLOR_OPTIONS: ResponsibilityColor[] = [
-  "amber", "violet", "sky", "rose", "emerald", "cyan", "indigo", "slate",
-];
-
-interface ManageCategoriesModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  categories: ResponsibilityCategory[];
-  onAdd: (category: Omit<ResponsibilityCategory, "id">) => void;
-  onRemove: (id: string) => void;
-}
-
-export const ManageCategoriesModal: React.FC<ManageCategoriesModalProps> = ({
-  isOpen,
-  onClose,
-  categories,
-  onAdd,
-  onRemove,
-}) => {
-  const [label, setLabel] = useState("");
-  const [icon, setIcon] = useState<ResponsibilityIconKey>("mic");
-  const [color, setColor] = useState<ResponsibilityColor>("sky");
-
-  if (!isOpen) return null;
-
-  return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Gerir Responsabilidades">
-      <div className="space-y-5 pt-2">
-        <div className="space-y-1.5 max-h-56 overflow-y-auto pr-1">
-          {categories.map((c) => {
-            const Icon = ICON_MAP[c.icon];
-            const colors = COLOR_MAP[c.color];
-            return (
-              <div
-                key={c.id}
-                className="flex items-center justify-between gap-2 p-2 rounded-xl border border-m3-border/60"
-              >
-                <div className="flex items-center gap-2.5 min-w-0">
-                  <div
-                    className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${colors.bg} ${colors.text}`}
-                  >
-                    <Icon className="w-4 h-4" />
-                  </div>
-                  <span className="text-xs font-bold text-slate-800 dark:text-slate-200 truncate">
-                    {c.label}
-                  </span>
-                </div>
-                <button
-                  onClick={() => onRemove(c.id)}
-                  className="p-1.5 text-slate-400 hover:text-rose-500 rounded-lg transition-colors cursor-pointer shrink-0"
-                  title="Remover categoria"
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            );
-          })}
-          {categories.length === 0 && (
-            <p className="text-xs text-slate-400 text-center py-4">
-              Nenhuma responsabilidade criada ainda.
-            </p>
-          )}
-        </div>
-
-        <div className="border-t border-m3-border/60 pt-4 space-y-3">
-          <p className="text-xs font-black text-slate-700 dark:text-slate-300">
-            Nova responsabilidade
-          </p>
-          <Input
-            label="Nome"
-            placeholder="Ex: Vídeo, Transmissão..."
-            value={label}
-            onChange={(e) => setLabel(e.target.value)}
-          />
-
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                Ícone
-              </label>
-              <div className="flex flex-wrap gap-1.5">
-                {ICON_OPTIONS.map((opt) => {
-                  const Icon = ICON_MAP[opt];
-                  return (
-                    <button
-                      key={opt}
-                      type="button"
-                      onClick={() => setIcon(opt)}
-                      className={`w-8 h-8 rounded-lg flex items-center justify-center border transition-colors cursor-pointer ${
-                        icon === opt
-                          ? "border-[#0284c7] bg-sky-50 dark:bg-sky-950/40 text-[#0284c7]"
-                          : "border-m3-border text-slate-400 hover:bg-m3-hover"
-                      }`}
-                    >
-                      <Icon className="w-4 h-4" />
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                Cor
-              </label>
-              <div className="flex flex-wrap gap-1.5">
-                {COLOR_OPTIONS.map((opt) => {
-                  const colors = COLOR_MAP[opt];
-                  return (
-                    <button
-                      key={opt}
-                      type="button"
-                      onClick={() => setColor(opt)}
-                      className={`w-8 h-8 rounded-lg border-2 transition-colors cursor-pointer ${colors.bg} ${
-                        color === opt ? "border-slate-900 dark:border-white" : "border-transparent"
-                      }`}
-                    />
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-
-          <div className="flex justify-end">
-            <Button
-              variant="primary"
-              type="button"
-              disabled={!label.trim()}
-              onClick={() => {
-                if (!label.trim()) return;
-                onAdd({ label: label.trim(), icon, color });
-                setLabel("");
-              }}
-            >
-              Adicionar
-            </Button>
-          </div>
-        </div>
-
-        <div className="flex justify-end pt-2 border-t border-m3-border/60">
-          <Button variant="outline" type="button" onClick={onClose}>
-            Fechar
           </Button>
         </div>
       </div>
