@@ -21,6 +21,8 @@ components/
   AvatarStack.tsx            overlapping avatar circles
   AssigneeTagInput.tsx       member-aware "type a name" chip input with
                              suggestions (org members + previously used names)
+  ServiceLinkField.tsx       searchable service picker + linked-service card
+                             (used by the create/edit event modal)
   DetailsSidebar.tsx         details card + notifications/reminder card
   EventModals.tsx            all modals: create/edit event, add/edit
                              responsibility, edit reminder
@@ -58,6 +60,14 @@ these responsibilities filled" (e.g. a Culto, an Ensaio, a meeting). An Event
 ```ts
 const { data: linkedService } = useService(agendaEvent.linkedServiceId ?? null);
 ```
+
+  The create/edit event modal includes a searchable service picker
+  (`ServiceLinkField`) fed by `useServices()`. Selecting a service sets
+  `linkedServiceId` and **auto-fills the event's info from the service**:
+  the date comes from `Service.date`, the duration from the sum of the
+  service's `elements[].duration` (seconds → rounded minutes), and the title
+  is pre-filled only if it's still empty. `DetailsSidebar` shows the linked
+  service and jumps to `ServiceDetailPage` via its external-link button.
 
 - Responsibilities are **embedded** in their event
   (`AgendaEvent.responsibilities`) — no `eventId` back-reference needed.

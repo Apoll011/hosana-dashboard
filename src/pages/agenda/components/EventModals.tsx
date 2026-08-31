@@ -4,10 +4,20 @@
  */
 
 import { Button, Input, Modal } from "@/src/components/common";
-import { Trash2 } from "lucide-react";
+import { useServices } from "../../../hooks/useServices";
+import {
+  Calendar,
+  Clock,
+  Clock3,
+  FileText,
+  MapPin,
+  Tag,
+  Trash2,
+} from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { Assignee, ResponsibilityCategory } from "../types";
 import { AssigneeTagInput } from "./AssigneeTagInput";
+import { ServiceLinkField } from "./ServiceLinkField";
 
 /* ------------------------------------------------------------------ */
 /* Create / edit an event                                             */
@@ -21,7 +31,35 @@ export interface EventFormValue {
   durationMinutes: number;
   location: string;
   notes: string;
+  /** Linked order-of-worship `Service.id` (`@/src/types`), or null. */
+  linkedServiceId: string | null;
 }
+
+const COMMON_EVENT_TYPES = [
+  "Culto Dominical",
+  "Culto de Oração",
+  "Ensaio de Louvor",
+  "Estudo Bíblico",
+  "Reunião de Equipa",
+  "Evento Especial",
+];
+
+const DURATION_PRESETS = [30, 45, 60, 90, 120];
+
+const SectionLabel: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">
+    {children}
+  </p>
+);
+
+const FieldLabel: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <label className="block text-[11px] font-bold text-m3-text/60 uppercase tracking-wider ml-1 mb-1.5">
+    {children}
+  </label>
+);
+
+const fieldInputClass =
+  "w-full h-11 pl-10 pr-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-sm font-semibold focus:outline-none focus:border-[#0284c7]";
 
 interface EventFormModalProps {
   isOpen: boolean;
@@ -42,6 +80,10 @@ export const EventFormModal: React.FC<EventFormModalProps> = ({
   title,
   submitLabel,
 }) => {
+  const { servicesQuery } = useServices();
+  const services = servicesQuery.data ?? [];
+  const servicesLoading = servicesQuery.isLoading;
+
   const [form, setForm] = useState<EventFormValue>({
     title: initial?.title ?? "",
     type: initial?.type ?? "Culto Dominical",
@@ -50,6 +92,7 @@ export const EventFormModal: React.FC<EventFormModalProps> = ({
     durationMinutes: initial?.durationMinutes ?? 90,
     location: initial?.location ?? "",
     notes: initial?.notes ?? "",
+    linkedServiceId: initial?.linkedServiceId ?? null,
   });
 
   useEffect(() => {
@@ -62,91 +105,183 @@ export const EventFormModal: React.FC<EventFormModalProps> = ({
         durationMinutes: initial?.durationMinutes ?? 90,
         location: initial?.location ?? "",
         notes: initial?.notes ?? "",
+        linkedServiceId: initial?.linkedServiceId ?? null,
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
+  /**
+   * Linking a service pulls its info into the event: the date comes from the
+   * service's date and the duration from the sum of its elements. The title
+   * is only pre-filled when empty (so the user's own title wins).
+   */
+  const handleSelectService = (serviceId: string | null) => {
+    if (!serviceId) {
+      setForm((f) => ({ ...f, linkedServiceId: null }));
+      return;
+    }
+    const service = services.find((s) => s.id === serviceId);
+    if (!service) return;
+    const seconds = (service.elements ?? []).reduce(
+      (acc, el) => acc + Math.max(0, Number(el.duration || 0)),
+      0,
+    );
+    setForm((f) => ({
+      ...f,
+      linkedServiceId: serviceId,
+      date: service.date.slice(0, 10) || f.date,
+      durationMinutes:
+        seconds > 0 ? Math.max(1, Math.round(seconds / 60)) : f.durationMinutes,
+      title: f.title.trim() ? f.title : service.name,
+    }));
+  };
+
   if (!isOpen) return null;
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={title}>
+    <Modal isOpen={isOpen} onClose={onClose} title={title} maxWidth="xl">
       <form
         onSubmit={(e) => {
           e.preventDefault();
           if (!form.title.trim()) return;
           onSubmit(form);
         }}
-        className="space-y-4 pt-2"
+        className="space-y-6 pt-1"
       >
-        <Input
-          label="Título"
-          placeholder="Ex: Culto da Manhã"
-          value={form.title}
-          onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
-          required
-        />
-
-        <div>
-          <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-            Tipo
-          </label>
-          <input
-            value={form.type}
-            onChange={(e) => setForm((f) => ({ ...f, type: e.target.value }))}
-            placeholder="Ex: Culto Dominical, Ensaio..."
-            className="w-full h-11 px-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-sm font-semibold focus:outline-none focus:border-[#0284c7]"
+        {/* ── Serviço ligado ─────────────────────────────────────────── */}
+        <section className="space-y-2">
+          <SectionLabel>Serviço ligado</SectionLabel>
+          <ServiceLinkField
+            services={services}
+            isLoading={servicesLoading}
+            value={form.linkedServiceId}
+            onChange={handleSelectService}
           />
-        </div>
+          <p className="text-[11px] font-medium text-slate-400 dark:text-slate-500">
+            Ligar um serviço preenche automaticamente a data e a duração do
+            evento.
+          </p>
+        </section>
 
-        <div className="grid grid-cols-2 gap-3">
+        {/* ── Informações ────────────────────────────────────────────── */}
+        <section className="space-y-2">
+          <SectionLabel>Informações</SectionLabel>
           <Input
-            type="date"
-            label="Data"
-            value={form.date}
-            onChange={(e) => setForm((f) => ({ ...f, date: e.target.value }))}
+            label="Título"
+            placeholder="Ex: Culto da Manhã"
+            icon={<FileText className="w-4 h-4" />}
+            value={form.title}
+            onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
             required
           />
+          <div>
+            <FieldLabel>Tipo</FieldLabel>
+            <div className="relative">
+              <Tag className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+              <input
+                list="agenda-event-types"
+                value={form.type}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, type: e.target.value }))
+                }
+                placeholder="Ex: Culto Dominical, Ensaio…"
+                className={fieldInputClass}
+              />
+            </div>
+            <datalist id="agenda-event-types">
+              {COMMON_EVENT_TYPES.map((t) => (
+                <option key={t} value={t} />
+              ))}
+            </datalist>
+          </div>
+        </section>
+
+        {/* ── Agendamento ────────────────────────────────────────────── */}
+        <section className="space-y-2">
+          <SectionLabel>Agendamento</SectionLabel>
+          <div className="grid grid-cols-2 gap-3">
+            <Input
+              type="date"
+              label="Data"
+              icon={<Calendar className="w-4 h-4" />}
+              value={form.date}
+              onChange={(e) => setForm((f) => ({ ...f, date: e.target.value }))}
+              required
+            />
+            <Input
+              type="time"
+              label="Hora"
+              icon={<Clock className="w-4 h-4" />}
+              value={form.time}
+              onChange={(e) => setForm((f) => ({ ...f, time: e.target.value }))}
+              required
+            />
+          </div>
+          <div>
+            <FieldLabel>Duração</FieldLabel>
+            <div className="flex gap-1.5 flex-wrap">
+              {DURATION_PRESETS.map((m) => (
+                <button
+                  key={m}
+                  type="button"
+                  onClick={() =>
+                    setForm((f) => ({ ...f, durationMinutes: m }))
+                  }
+                  className={`px-3 h-8 rounded-lg text-[11px] font-bold transition-colors cursor-pointer border ${
+                    form.durationMinutes === m
+                      ? "bg-[#0284c7] text-white border-[#0284c7]"
+                      : "bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:border-[#0284c7]/40"
+                  }`}
+                >
+                  {m} min
+                </button>
+              ))}
+            </div>
+            <div className="mt-2 relative">
+              <Clock3 className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+              <input
+                type="number"
+                min={0}
+                step={5}
+                value={String(form.durationMinutes)}
+                onChange={(e) =>
+                  setForm((f) => ({
+                    ...f,
+                    durationMinutes: Number(e.target.value) || 0,
+                  }))
+                }
+                className={fieldInputClass}
+              />
+            </div>
+          </div>
+        </section>
+
+        {/* ── Detalhes ───────────────────────────────────────────────── */}
+        <section className="space-y-2">
+          <SectionLabel>Detalhes</SectionLabel>
           <Input
-            type="time"
-            label="Hora"
-            value={form.time}
-            onChange={(e) => setForm((f) => ({ ...f, time: e.target.value }))}
-            required
+            label="Local"
+            placeholder="Ex: Templo Principal"
+            icon={<MapPin className="w-4 h-4" />}
+            value={form.location}
+            onChange={(e) =>
+              setForm((f) => ({ ...f, location: e.target.value }))
+            }
           />
-        </div>
+          <div>
+            <FieldLabel>Observações</FieldLabel>
+            <textarea
+              value={form.notes}
+              onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))}
+              placeholder="Notas de planeamento…"
+              className="w-full h-20 p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-medium focus:outline-none focus:border-[#0284c7] resize-none"
+            />
+          </div>
+        </section>
 
-        <Input
-          type="number"
-          label="Duração (minutos)"
-          value={String(form.durationMinutes)}
-          onChange={(e) =>
-            setForm((f) => ({
-              ...f,
-              durationMinutes: Number(e.target.value) || 0,
-            }))
-          }
-        />
-
-        <Input
-          label="Local"
-          placeholder="Ex: Templo Principal"
-          value={form.location}
-          onChange={(e) => setForm((f) => ({ ...f, location: e.target.value }))}
-        />
-
-        <div>
-          <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-            Observações
-          </label>
-          <textarea
-            value={form.notes}
-            onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))}
-            className="w-full h-20 p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-medium focus:outline-none focus:border-[#0284c7] resize-none"
-          />
-        </div>
-
-        <div className="flex items-center justify-between gap-2 pt-2">
+        {/* ── Footer ─────────────────────────────────────────────────── */}
+        <div className="flex items-center justify-between gap-2 pt-4 border-t border-m3-border/40">
           {onDelete ? (
             <Button
               variant="outline"
