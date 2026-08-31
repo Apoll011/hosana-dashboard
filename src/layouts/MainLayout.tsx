@@ -39,6 +39,7 @@ import { useFolders } from "../hooks/useFolders";
 import { usePersonalSettings } from "../hooks/usePersonalSettings";
 import { useServices } from "../hooks/useServices";
 import { useSongs } from "../hooks/useSongs";
+import { useTrash } from "../hooks/useTrash";
 import { useI18n } from "../i18n";
 import { songImportRegistry } from "../import";
 import { ProviderImportResult } from "../utils/import";
@@ -130,6 +131,8 @@ export const MainLayout: React.FC = () => {
 
   const { songsQuery, moveSong, deleteSong, updateBatchTags, createSong } =
     useSongs();
+
+  const { items: trashItems } = useTrash();
 
   // Folder & Navigation State
   const [currentFolderId, setCurrentFolderId] = useState<string | null>(null);
@@ -257,7 +260,8 @@ export const MainLayout: React.FC = () => {
     [songsQuery.data?.songs],
   );
   const totalSongs = songsQuery.data?.total || 0;
-  const totalServices = servicesQuery.data?.length || 0;
+  const totalServices =
+    servicesQuery.data?.filter((s) => !s.archived).length || 0;
   const rootSongsCount = foldersQuery.data?.rootSongsCount || 0;
   const rootFoldersCount = foldersQuery.data?.folders.length || 0;
 
@@ -1381,6 +1385,7 @@ export const MainLayout: React.FC = () => {
           rootFoldersCount={rootFoldersCount}
           totalSongs={totalSongs}
           totalServices={totalServices}
+          trashCount={trashItems.length}
           allFolders={allFolders}
           folderTree={folderTree}
           expandedFolderIds={expandedFolderIds}
