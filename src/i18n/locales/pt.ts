@@ -325,6 +325,7 @@ export const pt = {
         refreshTitle: "Atualizar sessões",
         loading: "A carregar sessões...",
         browserSession: "Sessão do Navegador",
+        nativeApp: "App {name}",
         ip: "IP: {ip} · Criada a {date}",
         currentIp: "Atual",
         terminate: "Encerrar",

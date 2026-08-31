@@ -325,6 +325,7 @@ export const en: typeof pt = {
         refreshTitle: "Refresh sessions",
         loading: "Loading sessions...",
         browserSession: "Browser Session",
+        nativeApp: "{name} App",
         ip: "IP: {ip} · Created on {date}",
         currentIp: "Current",
         terminate: "Sign out",
