@@ -437,7 +437,7 @@ export const MembersTab: React.FC<{ active: boolean }> = ({ active }) => {
                     <div
                       className={`w-10 h-10 rounded-full bg-linear-to-tr ${getAvatarGradient(
                         member.name,
-                      )} flex items-center justify-center text-white font-extrabold text-xs shadow-sm shrink-0`}
+                      )} text-white font-black text-sm flex items-center justify-center shrink-0 overflow-hidden`}
                     >
                       {member.image ? (
                         <img
