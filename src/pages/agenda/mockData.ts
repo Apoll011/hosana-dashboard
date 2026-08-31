@@ -35,6 +35,51 @@ export const MOCK_STATE: AgendaState = {
       location: "Templo Principal",
       notes: "Levar instrumentos adicionais.",
       reminder: { enabled: true, label: "2 dias antes às 18:00" },
+      responsibilities: [
+        {
+          id: "resp-1",
+          categoryId: "leader",
+          assignees: [{ id: "manual-u1", name: "Judson Weeden" }],
+        },
+        {
+          id: "resp-2",
+          categoryId: "musicians",
+          assignees: [
+            { id: "manual-u2", name: "Tiago Inês" },
+            { id: "manual-u3", name: "Mariana Weeden" },
+            { id: "manual-u4", name: "Carlos Silva" },
+            { id: "manual-u5", name: "Ana Lima" },
+          ],
+        },
+        {
+          id: "resp-3",
+          categoryId: "sound",
+          assignees: [{ id: "manual-u4", name: "Carlos Silva" }],
+        },
+        {
+          id: "resp-4",
+          categoryId: "lighting",
+          assignees: [{ id: "manual-u6", name: "Mariana Costa" }],
+        },
+        {
+          id: "resp-5",
+          categoryId: "projection",
+          assignees: [{ id: "manual-u2", name: "Tiago Inês" }],
+        },
+        {
+          id: "resp-6",
+          categoryId: "preacher",
+          assignees: [{ id: "manual-u7", name: "Pr. João Mendes" }],
+        },
+        {
+          id: "resp-7",
+          categoryId: "welcome",
+          assignees: [
+            { id: "manual-u8", name: "Maria Santos" },
+            { id: "manual-u5", name: "Ana Lima" },
+          ],
+        },
+      ],
     },
     "evt-2": {
       id: "evt-2",
@@ -46,58 +91,7 @@ export const MOCK_STATE: AgendaState = {
       location: "Sala de Ensaios",
       notes: "",
       reminder: { enabled: false, label: "1 dia antes às 20:00" },
-    },
-  },
-  responsibilities: {
-    "resp-1": {
-      id: "resp-1",
-      eventId: "evt-1",
-      categoryId: "leader",
-      assignees: [{ id: "u1", name: "Judson Weeden" }],
-    },
-    "resp-2": {
-      id: "resp-2",
-      eventId: "evt-1",
-      categoryId: "musicians",
-      assignees: [
-        { id: "u2", name: "Tiago Inês" },
-        { id: "u3", name: "Mariana Weeden" },
-        { id: "u4", name: "Carlos Silva" },
-        { id: "u5", name: "Ana Lima" },
-      ],
-    },
-    "resp-3": {
-      id: "resp-3",
-      eventId: "evt-1",
-      categoryId: "sound",
-      assignees: [{ id: "u4", name: "Carlos Silva" }],
-    },
-    "resp-4": {
-      id: "resp-4",
-      eventId: "evt-1",
-      categoryId: "lighting",
-      assignees: [{ id: "u6", name: "Mariana Costa" }],
-    },
-    "resp-5": {
-      id: "resp-5",
-      eventId: "evt-1",
-      categoryId: "projection",
-      assignees: [{ id: "u2", name: "Tiago Inês" }],
-    },
-    "resp-6": {
-      id: "resp-6",
-      eventId: "evt-1",
-      categoryId: "preacher",
-      assignees: [{ id: "u7", name: "Pr. João Mendes" }],
-    },
-    "resp-7": {
-      id: "resp-7",
-      eventId: "evt-1",
-      categoryId: "welcome",
-      assignees: [
-        { id: "u8", name: "Maria Santos" },
-        { id: "u5", name: "Ana Lima" },
-      ],
+      responsibilities: [],
     },
   },
 };

@@ -70,11 +70,11 @@ export const AgendaPage: React.FC = () => {
 
   const responsibilityCounts = useMemo(() => {
     const counts: Record<string, number> = {};
-    for (const r of store.responsibilities) {
-      counts[r.eventId] = (counts[r.eventId] ?? 0) + 1;
+    for (const ev of store.events) {
+      counts[ev.id] = ev.responsibilities.length;
     }
     return counts;
-  }, [store.responsibilities]);
+  }, [store.events]);
 
   const categoriesById = useMemo(() => {
     const map: Record<string, (typeof store.categories)[number]> = {};
@@ -82,10 +82,16 @@ export const AgendaPage: React.FC = () => {
     return map;
   }, [store.categories]);
 
-  const editingAssigneesResp = useMemo(
-    () => store.responsibilities.find((r) => r.id === editingAssigneesFor),
-    [store.responsibilities, editingAssigneesFor],
-  );
+  // The responsibility being edited, plus the event it lives in (needed to
+  // persist assignee changes since responsibilities are embedded in events).
+  const editingAssigneesResp = useMemo(() => {
+    if (!editingAssigneesFor) return null;
+    for (const ev of store.events) {
+      const r = ev.responsibilities.find((x) => x.id === editingAssigneesFor);
+      if (r) return { eventId: ev.id, responsibility: r };
+    }
+    return null;
+  }, [store.events, editingAssigneesFor]);
 
   const handleSelectDate = (date: string) => {
     setSelectedDate(date);
@@ -158,9 +164,11 @@ export const AgendaPage: React.FC = () => {
             onEditEvent={() => setIsEditEventOpen(true)}
             onAddResponsibility={() => setIsAddResponsibilityOpen(true)}
             onEditAssignees={(respId) => setEditingAssigneesFor(respId)}
-            onRemoveResponsibility={(respId) =>
-              store.removeResponsibility(respId)
-            }
+            onRemoveResponsibility={(respId) => {
+              if (selectedEvent) {
+                store.removeResponsibility(selectedEvent.id, respId);
+              }
+            }}
           />
 
           <DetailsSidebar
@@ -233,6 +241,7 @@ export const AgendaPage: React.FC = () => {
           existingCategoryIds={responsibilitiesForSelectedEvent.map(
             (r) => r.categoryId,
           )}
+          manualSuggestions={store.manualAssignees}
           onSubmit={(categoryId, assignees) => {
             store.addResponsibility(selectedEvent.id, categoryId, assignees);
             setIsAddResponsibilityOpen(false);
@@ -246,12 +255,15 @@ export const AgendaPage: React.FC = () => {
           isOpen={!!editingAssigneesFor}
           onClose={() => setEditingAssigneesFor(null)}
           categoryLabel={
-            categoriesById[editingAssigneesResp.categoryId]?.label ?? ""
+            categoriesById[editingAssigneesResp.responsibility.categoryId]
+              ?.label ?? ""
           }
-          assignees={editingAssigneesResp.assignees}
+          assignees={editingAssigneesResp.responsibility.assignees}
+          manualSuggestions={store.manualAssignees}
           onSubmit={(assignees) => {
             store.updateResponsibilityAssignees(
-              editingAssigneesResp.id,
+              editingAssigneesResp.eventId,
+              editingAssigneesResp.responsibility.id,
               assignees,
             );
             setEditingAssigneesFor(null);

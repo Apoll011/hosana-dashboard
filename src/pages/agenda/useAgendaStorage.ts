@@ -41,6 +41,10 @@ const uid = (prefix: string) =>
 /**
  * Everything the Agenda UI needs to read/write its data.
  *
+ * Responsibilities live *inside* their `AgendaEvent` (see
+ * `AgendaEvent.responsibilities`), so every responsibility mutator takes an
+ * `eventId` to know which event to update.
+ *
  * ── Swapping this for a real backend later ──────────────────────────────
  * Every mutator below follows the same shape: update local state, then
  * `persist()`. To move to Prisma/RxDB/whatever, keep the function
@@ -56,10 +60,6 @@ export function useAgendaStorage() {
   }, [state]);
 
   const events = useMemo(() => Object.values(state.events), [state.events]);
-  const responsibilities = useMemo(
-    () => Object.values(state.responsibilities),
-    [state.responsibilities],
-  );
   const categories = useMemo(
     () => Object.values(state.categories),
     [state.categories],
@@ -71,13 +71,37 @@ export function useAgendaStorage() {
   );
 
   const getResponsibilitiesForEvent = useCallback(
-    (eventId: string) =>
-      responsibilities.filter((r) => r.eventId === eventId),
-    [responsibilities],
+    (eventId: string) => state.events[eventId]?.responsibilities ?? [],
+    [state.events],
   );
 
+  /**
+   * Manually-typed assignees (no `memberId`) used anywhere across all events,
+   * deduped by name. Suggested by the assignee picker so users don't have to
+   * retype a name for every event. Member-linked assignees are excluded here —
+   * they're suggested from the org member list instead.
+   */
+  const manualAssignees = useMemo(() => {
+    const seen = new Set<string>();
+    const out: Assignee[] = [];
+    for (const ev of events) {
+      for (const r of ev.responsibilities) {
+        for (const a of r.assignees) {
+          if (a.memberId) continue;
+          const key = a.name.trim().toLowerCase();
+          if (!key || seen.has(key)) continue;
+          seen.add(key);
+          out.push(a);
+        }
+      }
+    }
+    return out;
+  }, [events]);
+
   const addEvent = useCallback(
-    (input: Omit<AgendaEvent, "id" | "reminder"> & { reminder?: ReminderSettings }) => {
+    (input: Omit<AgendaEvent, "id" | "reminder" | "responsibilities"> & {
+      reminder?: ReminderSettings;
+    }) => {
       const id = uid("evt");
       const event: AgendaEvent = {
         ...input,
@@ -86,6 +110,7 @@ export function useAgendaStorage() {
           enabled: false,
           label: "1 dia antes às 18:00",
         },
+        responsibilities: [],
       };
       setState((prev) => ({
         ...prev,
@@ -109,14 +134,9 @@ export function useAgendaStorage() {
 
   const deleteEvent = useCallback((id: string) => {
     setState((prev) => {
-      const nextEvents = { ...prev.events };
-      delete nextEvents[id];
-      const nextResp = Object.fromEntries(
-        Object.entries(prev.responsibilities).filter(
-          ([, r]) => r.eventId !== id,
-        ),
-      );
-      return { ...prev, events: nextEvents, responsibilities: nextResp };
+      const next = { ...prev.events };
+      delete next[id];
+      return { ...prev, events: next };
     });
   }, []);
 
@@ -130,31 +150,41 @@ export function useAgendaStorage() {
   const addResponsibility = useCallback(
     (eventId: string, categoryId: string, assignees: Assignee[] = []) => {
       const id = uid("resp");
-      const responsibility: Responsibility = {
-        id,
-        eventId,
-        categoryId,
-        assignees,
-      };
-      setState((prev) => ({
-        ...prev,
-        responsibilities: { ...prev.responsibilities, [id]: responsibility },
-      }));
+      const responsibility: Responsibility = { id, categoryId, assignees };
+      setState((prev) => {
+        const existing = prev.events[eventId];
+        if (!existing) return prev;
+        return {
+          ...prev,
+          events: {
+            ...prev.events,
+            [eventId]: {
+              ...existing,
+              responsibilities: [...existing.responsibilities, responsibility],
+            },
+          },
+        };
+      });
       return id;
     },
     [],
   );
 
   const updateResponsibilityAssignees = useCallback(
-    (id: string, assignees: Assignee[]) => {
+    (eventId: string, respId: string, assignees: Assignee[]) => {
       setState((prev) => {
-        const existing = prev.responsibilities[id];
+        const existing = prev.events[eventId];
         if (!existing) return prev;
         return {
           ...prev,
-          responsibilities: {
-            ...prev.responsibilities,
-            [id]: { ...existing, assignees },
+          events: {
+            ...prev.events,
+            [eventId]: {
+              ...existing,
+              responsibilities: existing.responsibilities.map((r) =>
+                r.id === respId ? { ...r, assignees } : r,
+              ),
+            },
           },
         };
       });
@@ -162,13 +192,27 @@ export function useAgendaStorage() {
     [],
   );
 
-  const removeResponsibility = useCallback((id: string) => {
-    setState((prev) => {
-      const next = { ...prev.responsibilities };
-      delete next[id];
-      return { ...prev, responsibilities: next };
-    });
-  }, []);
+  const removeResponsibility = useCallback(
+    (eventId: string, respId: string) => {
+      setState((prev) => {
+        const existing = prev.events[eventId];
+        if (!existing) return prev;
+        return {
+          ...prev,
+          events: {
+            ...prev.events,
+            [eventId]: {
+              ...existing,
+              responsibilities: existing.responsibilities.filter(
+                (r) => r.id !== respId,
+              ),
+            },
+          },
+        };
+      });
+    },
+    [],
+  );
 
   const addCategory = useCallback((category: Omit<ResponsibilityCategory, "id">) => {
     const id = uid("cat");
@@ -183,14 +227,20 @@ export function useAgendaStorage() {
     setState((prev) => {
       const next = { ...prev.categories };
       delete next[id];
-      // Remove responsibilities that referenced the deleted category so no
-      // orphaned rows linger on events in the Agenda.
-      const nextResp = Object.fromEntries(
-        Object.entries(prev.responsibilities).filter(
-          ([, r]) => r.categoryId !== id,
-        ),
+      // Drop responsibilities that referenced the deleted category from every
+      // event, so no orphaned rows linger in the Agenda.
+      const nextEvents = Object.fromEntries(
+        Object.entries(prev.events).map(([evId, ev]) => [
+          evId,
+          {
+            ...ev,
+            responsibilities: ev.responsibilities.filter(
+              (r) => r.categoryId !== id,
+            ),
+          },
+        ]),
       );
-      return { ...prev, categories: next, responsibilities: nextResp };
+      return { ...prev, categories: next, events: nextEvents };
     });
   }, []);
 
@@ -198,8 +248,8 @@ export function useAgendaStorage() {
 
   return {
     events,
-    responsibilities,
     categories,
+    manualAssignees,
     getEventsForDate,
     getResponsibilitiesForEvent,
     addEvent,
