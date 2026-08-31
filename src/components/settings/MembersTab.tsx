@@ -3,8 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Can, CanAny } from "@/src/lib/permissions/components";
 import { Button, Input, Modal } from "@/src/components/common";
+import { Can, CanAny } from "@/src/lib/permissions/components";
+import { getInitials } from "@/src/utils";
 import {
   ChevronRight,
   Loader2,
@@ -441,7 +442,7 @@ export const MembersTab: React.FC<{ active: boolean }> = ({ active }) => {
                           className="w-full h-full object-cover"
                         />
                       ) : (
-                        member.name.charAt(0).toUpperCase()
+                        getInitials(member.name)
                       )}
                     </div>
                     <div className="min-w-0">
