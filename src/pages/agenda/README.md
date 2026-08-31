@@ -19,7 +19,8 @@ components/
   EventDetailPanel.tsx       header card + responsibilities list
   ResponsibilityRow.tsx      one responsibility row (icon, avatars, actions)
   AvatarStack.tsx            overlapping avatar circles
-  AssigneeTagInput.tsx       free-text "type a name, press Enter" chip input
+  AssigneeTagInput.tsx       member-aware "type a name" chip input with
+                             suggestions (org members + previously used names)
   DetailsSidebar.tsx         details card + notifications/reminder card
   EventModals.tsx            all modals: create/edit event, add/edit
                              responsibility, edit reminder
@@ -58,8 +59,12 @@ these responsibilities filled" (e.g. a Culto, an Ensaio, a meeting). An Event
 const { data: linkedService } = useService(agendaEvent.linkedServiceId ?? null);
 ```
 
-- `Responsibility.eventId` points at the `AgendaEvent` the responsibility is
-  assigned to (not at a `Service`).
+- Responsibilities are **embedded** in their event
+  (`AgendaEvent.responsibilities`) — no `eventId` back-reference needed.
+- Assignees may be **linked to org members** via `Assignee.memberId`
+  (`organization.members[].id` from Better Auth). Assignees without a
+  `memberId` are free-typed names; `useAgendaStorage.manualAssignees`
+  collects those across all events so the picker can suggest them.
 
 Nothing is wired to the real backend yet — it's UI-only, as requested.
 

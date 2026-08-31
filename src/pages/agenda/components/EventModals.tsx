@@ -182,6 +182,7 @@ interface AddResponsibilityModalProps {
   onClose: () => void;
   categories: ResponsibilityCategory[];
   existingCategoryIds: string[];
+  manualSuggestions?: Assignee[];
   onSubmit: (categoryId: string, assignees: Assignee[]) => void;
 }
 
@@ -190,6 +191,7 @@ export const AddResponsibilityModal: React.FC<AddResponsibilityModalProps> = ({
   onClose,
   categories,
   existingCategoryIds,
+  manualSuggestions,
   onSubmit,
 }) => {
   const available = categories.filter((c) => !existingCategoryIds.includes(c.id));
@@ -245,7 +247,11 @@ export const AddResponsibilityModal: React.FC<AddResponsibilityModalProps> = ({
               <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
                 Atribuir a
               </label>
-              <AssigneeTagInput assignees={assignees} onChange={setAssignees} />
+              <AssigneeTagInput
+                assignees={assignees}
+                onChange={setAssignees}
+                manualSuggestions={manualSuggestions}
+              />
             </div>
           </>
         )}
@@ -272,6 +278,7 @@ interface EditAssigneesModalProps {
   onClose: () => void;
   categoryLabel: string;
   assignees: Assignee[];
+  manualSuggestions?: Assignee[];
   onSubmit: (assignees: Assignee[]) => void;
 }
 
@@ -280,6 +287,7 @@ export const EditAssigneesModal: React.FC<EditAssigneesModalProps> = ({
   onClose,
   categoryLabel,
   assignees,
+  manualSuggestions,
   onSubmit,
 }) => {
   const [value, setValue] = useState<Assignee[]>(assignees);
@@ -294,7 +302,11 @@ export const EditAssigneesModal: React.FC<EditAssigneesModalProps> = ({
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={`Atribuídos — ${categoryLabel}`}>
       <div className="space-y-4 pt-2">
-        <AssigneeTagInput assignees={value} onChange={setValue} />
+        <AssigneeTagInput
+          assignees={value}
+          onChange={setValue}
+          manualSuggestions={manualSuggestions}
+        />
         <div className="flex justify-end gap-2 pt-2">
           <Button variant="outline" type="button" onClick={onClose}>
             Cancelar

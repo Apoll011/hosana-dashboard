@@ -37,6 +37,11 @@ export type ResponsibilityIconKey =
 export interface Assignee {
   id: string;
   name: string;
+  /**
+   * Better Auth organization member id (`organization.members[].id`) when
+   * this assignee is an org member. Absent for manually-typed assignees.
+   */
+  memberId?: string;
   /** Optional avatar image URL. Falls back to initials when absent. */
   avatarUrl?: string;
 }
@@ -53,11 +58,13 @@ export interface ResponsibilityCategory {
   color: ResponsibilityColor;
 }
 
-/** A category assigned to one specific event, with its assignees. */
+/**
+ * A category assigned to one specific event, with its assignees.
+ * Lives inside its `AgendaEvent` (see `AgendaEvent.responsibilities`), so it
+ * doesn't need to know which event it belongs to.
+ */
 export interface Responsibility {
   id: string;
-  /** The id of the `AgendaEvent` this responsibility belongs to. */
-  eventId: string;
   categoryId: string;
   assignees: Assignee[];
 }
@@ -98,11 +105,12 @@ export interface AgendaEvent {
    * Set it to jump straight to `ServiceDetailPage` from the Agenda.
    */
   linkedServiceId?: string | null;
+  /** Responsibilities assigned to this event (embedded — no `eventId` needed). */
+  responsibilities: Responsibility[];
 }
 
 /** Shape persisted to storage. Kept flat/normalized (by id) on purpose. */
 export interface AgendaState {
   events: Record<string, AgendaEvent>;
-  responsibilities: Record<string, Responsibility>;
   categories: Record<string, ResponsibilityCategory>;
 }
