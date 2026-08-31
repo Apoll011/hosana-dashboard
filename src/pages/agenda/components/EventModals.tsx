@@ -6,14 +6,14 @@
 import { Button, Input, Modal } from "@/src/components/common";
 import { Trash2 } from "lucide-react";
 import React, { useEffect, useState } from "react";
-import { Assignee, ResponsibilityCategory, AgendaService } from "../types";
+import { Assignee, ResponsibilityCategory } from "../types";
 import { AssigneeTagInput } from "./AssigneeTagInput";
 
 /* ------------------------------------------------------------------ */
-/* Create / edit a service                                            */
+/* Create / edit an event                                             */
 /* ------------------------------------------------------------------ */
 
-export interface ServiceFormValue {
+export interface EventFormValue {
   title: string;
   type: string;
   date: string;
@@ -23,17 +23,17 @@ export interface ServiceFormValue {
   notes: string;
 }
 
-interface ServiceFormModalProps {
+interface EventFormModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (value: ServiceFormValue) => void;
+  onSubmit: (value: EventFormValue) => void;
   onDelete?: () => void;
-  initial?: Partial<ServiceFormValue>;
+  initial?: Partial<EventFormValue>;
   title: string;
   submitLabel: string;
 }
 
-export const ServiceFormModal: React.FC<ServiceFormModalProps> = ({
+export const EventFormModal: React.FC<EventFormModalProps> = ({
   isOpen,
   onClose,
   onSubmit,
@@ -42,7 +42,7 @@ export const ServiceFormModal: React.FC<ServiceFormModalProps> = ({
   title,
   submitLabel,
 }) => {
-  const [form, setForm] = useState<ServiceFormValue>({
+  const [form, setForm] = useState<EventFormValue>({
     title: initial?.title ?? "",
     type: initial?.type ?? "Culto Dominical",
     date: initial?.date ?? new Date().toISOString().slice(0, 10),
@@ -174,7 +174,7 @@ export const ServiceFormModal: React.FC<ServiceFormModalProps> = ({
 };
 
 /* ------------------------------------------------------------------ */
-/* Add a responsibility (pick category + assignees) to a service      */
+/* Add a responsibility (pick category + assignees) to an event       */
 /* ------------------------------------------------------------------ */
 
 interface AddResponsibilityModalProps {
@@ -218,8 +218,8 @@ export const AddResponsibilityModal: React.FC<AddResponsibilityModalProps> = ({
       >
         {available.length === 0 ? (
           <p className="text-xs text-slate-500 dark:text-slate-400">
-            Todas as responsabilidades disponíveis já foram adicionadas a esta
-            agenda. Pode criar novas responsabilidades em Definições &gt;
+            Todas as responsabilidades disponíveis já foram adicionadas a este
+            evento. Pode criar novas responsabilidades em Definições &gt;
             Servidor.
           </p>
         ) : (
@@ -309,7 +309,7 @@ export const EditAssigneesModal: React.FC<EditAssigneesModalProps> = ({
 };
 
 /* ------------------------------------------------------------------ */
-/* Edit the reminder for a service                                    */
+/* Edit the reminder for an event                                     */
 /* ------------------------------------------------------------------ */
 
 interface EditReminderModalProps {

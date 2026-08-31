@@ -7,11 +7,11 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { MOCK_STATE } from "./mockData";
 import {
   AgendaState,
+  AgendaEvent,
   Assignee,
   ReminderSettings,
   Responsibility,
   ResponsibilityCategory,
-  AgendaService,
 } from "./types";
 
 const STORAGE_KEY = "hosanna:agenda:v1";
@@ -55,7 +55,7 @@ export function useAgendaStorage() {
     persist(state);
   }, [state]);
 
-  const services = useMemo(() => Object.values(state.services), [state.services]);
+  const events = useMemo(() => Object.values(state.events), [state.events]);
   const responsibilities = useMemo(
     () => Object.values(state.responsibilities),
     [state.responsibilities],
@@ -65,21 +65,21 @@ export function useAgendaStorage() {
     [state.categories],
   );
 
-  const getServicesForDate = useCallback(
-    (date: string) => services.filter((s) => s.date === date),
-    [services],
+  const getEventsForDate = useCallback(
+    (date: string) => events.filter((ev) => ev.date === date),
+    [events],
   );
 
-  const getResponsibilitiesForService = useCallback(
-    (serviceId: string) =>
-      responsibilities.filter((r) => r.serviceId === serviceId),
+  const getResponsibilitiesForEvent = useCallback(
+    (eventId: string) =>
+      responsibilities.filter((r) => r.eventId === eventId),
     [responsibilities],
   );
 
-  const addService = useCallback(
-    (input: Omit<AgendaService, "id" | "reminder"> & { reminder?: ReminderSettings }) => {
-      const id = uid("svc");
-      const service: AgendaService = {
+  const addEvent = useCallback(
+    (input: Omit<AgendaEvent, "id" | "reminder"> & { reminder?: ReminderSettings }) => {
+      const id = uid("evt");
+      const event: AgendaEvent = {
         ...input,
         id,
         reminder: input.reminder ?? {
@@ -89,50 +89,50 @@ export function useAgendaStorage() {
       };
       setState((prev) => ({
         ...prev,
-        services: { ...prev.services, [id]: service },
+        events: { ...prev.events, [id]: event },
       }));
       return id;
     },
     [],
   );
 
-  const updateService = useCallback((id: string, patch: Partial<AgendaService>) => {
+  const updateEvent = useCallback((id: string, patch: Partial<AgendaEvent>) => {
     setState((prev) => {
-      const existing = prev.services[id];
+      const existing = prev.events[id];
       if (!existing) return prev;
       return {
         ...prev,
-        services: { ...prev.services, [id]: { ...existing, ...patch } },
+        events: { ...prev.events, [id]: { ...existing, ...patch } },
       };
     });
   }, []);
 
-  const deleteService = useCallback((id: string) => {
+  const deleteEvent = useCallback((id: string) => {
     setState((prev) => {
-      const nextServices = { ...prev.services };
-      delete nextServices[id];
+      const nextEvents = { ...prev.events };
+      delete nextEvents[id];
       const nextResp = Object.fromEntries(
         Object.entries(prev.responsibilities).filter(
-          ([, r]) => r.serviceId !== id,
+          ([, r]) => r.eventId !== id,
         ),
       );
-      return { ...prev, services: nextServices, responsibilities: nextResp };
+      return { ...prev, events: nextEvents, responsibilities: nextResp };
     });
   }, []);
 
   const updateReminder = useCallback(
-    (serviceId: string, reminder: ReminderSettings) => {
-      updateService(serviceId, { reminder });
+    (eventId: string, reminder: ReminderSettings) => {
+      updateEvent(eventId, { reminder });
     },
-    [updateService],
+    [updateEvent],
   );
 
   const addResponsibility = useCallback(
-    (serviceId: string, categoryId: string, assignees: Assignee[] = []) => {
+    (eventId: string, categoryId: string, assignees: Assignee[] = []) => {
       const id = uid("resp");
       const responsibility: Responsibility = {
         id,
-        serviceId,
+        eventId,
         categoryId,
         assignees,
       };
@@ -184,7 +184,7 @@ export function useAgendaStorage() {
       const next = { ...prev.categories };
       delete next[id];
       // Remove responsibilities that referenced the deleted category so no
-      // orphaned rows linger on services in the Agenda.
+      // orphaned rows linger on events in the Agenda.
       const nextResp = Object.fromEntries(
         Object.entries(prev.responsibilities).filter(
           ([, r]) => r.categoryId !== id,
@@ -197,14 +197,14 @@ export function useAgendaStorage() {
   const resetToMockData = useCallback(() => setState(MOCK_STATE), []);
 
   return {
-    services,
+    events,
     responsibilities,
     categories,
-    getServicesForDate,
-    getResponsibilitiesForService,
-    addService,
-    updateService,
-    deleteService,
+    getEventsForDate,
+    getResponsibilitiesForEvent,
+    addEvent,
+    updateEvent,
+    deleteEvent,
     updateReminder,
     addResponsibility,
     updateResponsibilityAssignees,

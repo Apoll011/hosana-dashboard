@@ -5,22 +5,22 @@
 
 import { Bell, Pencil } from "lucide-react";
 import React from "react";
-import { AgendaService } from "../types";
+import { AgendaEvent } from "../types";
 
 interface DetailsSidebarProps {
-  service: AgendaService | undefined;
+  event: AgendaEvent | undefined;
   onEditDetails: () => void;
   onToggleReminder: () => void;
   onEditReminder: () => void;
 }
 
 export const DetailsSidebar: React.FC<DetailsSidebarProps> = ({
-  service,
+  event,
   onEditDetails,
   onToggleReminder,
   onEditReminder,
 }) => {
-  if (!service) return null;
+  if (!event) return null;
 
   return (
     <div className="space-y-4">
@@ -41,10 +41,10 @@ export const DetailsSidebar: React.FC<DetailsSidebarProps> = ({
         <div className="space-y-3">
           <div>
             <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wide">
-              Serviço
+              Tipo
             </p>
             <p className="text-sm font-bold text-[#0284c7] mt-0.5">
-              {service.type}
+              {event.type}
             </p>
           </div>
           <div>
@@ -52,7 +52,7 @@ export const DetailsSidebar: React.FC<DetailsSidebarProps> = ({
               Local
             </p>
             <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 mt-0.5">
-              {service.location || "—"}
+              {event.location || "—"}
             </p>
           </div>
           <div>
@@ -60,7 +60,7 @@ export const DetailsSidebar: React.FC<DetailsSidebarProps> = ({
               Observações
             </p>
             <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5 leading-relaxed">
-              {service.notes || "Sem observações."}
+              {event.notes || "Sem observações."}
             </p>
           </div>
         </div>
@@ -81,22 +81,22 @@ export const DetailsSidebar: React.FC<DetailsSidebarProps> = ({
               onClick={onEditReminder}
               className="text-xs font-bold text-[#0284c7] hover:underline cursor-pointer mt-0.5"
             >
-              {service.reminder.label}
+              {event.reminder.label}
             </button>
           </div>
           <button
             onClick={onToggleReminder}
             role="switch"
-            aria-checked={service.reminder.enabled}
+            aria-checked={event.reminder.enabled}
             className={`w-10 h-6 rounded-full relative shrink-0 transition-colors cursor-pointer ${
-              service.reminder.enabled
+              event.reminder.enabled
                 ? "bg-[#0284c7]"
                 : "bg-slate-200 dark:bg-slate-700"
             }`}
           >
             <span
               className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform ${
-                service.reminder.enabled
+                event.reminder.enabled
                   ? "-translate-x-0.5"
                   : "-translate-x-4.5"
               }`}

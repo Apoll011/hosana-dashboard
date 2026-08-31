@@ -42,9 +42,9 @@ export interface Assignee {
 }
 
 /**
- * A "role" that can be assigned in a service — e.g. "Líder do Culto",
- * "Músicos", "Som". Reusable across services (this is the master list
- * managed from the "Responsabilidades" button).
+ * A "role" that can be assigned to an event — e.g. "Líder do Culto",
+ * "Músicos", "Som". Reusable across events (this is the master list
+ * managed from the Settings → General "Responsabilidades" card).
  */
 export interface ResponsibilityCategory {
   id: string;
@@ -53,10 +53,11 @@ export interface ResponsibilityCategory {
   color: ResponsibilityColor;
 }
 
-/** A category assigned to one specific service, with its assignees. */
+/** A category assigned to one specific event, with its assignees. */
 export interface Responsibility {
   id: string;
-  serviceId: string;
+  /** The id of the `AgendaEvent` this responsibility belongs to. */
+  eventId: string;
   categoryId: string;
   assignees: Assignee[];
 }
@@ -68,24 +69,23 @@ export interface ReminderSettings {
 }
 
 /**
- * A calendar entry in the Agenda: "there's a Culto on this day, at this
- * time, for this long". This is deliberately NOT the same thing as the
- * `Service` type in `@/src/types` (that one is an order-of-worship — a
- * `name`, a `date`, and an ordered list of `elements` like songs/scripture/
- * announcements). Two different concepts that happen to share a real-world
- * subject: a given Sunday morning culto has both a schedule entry (this
- * type) and, usually, an order of worship (their `Service`).
+ * A calendar entry in the Agenda: "there's an Event on this day, at this
+ * time, for this long" — e.g. a Culto, an Ensaio, a team meeting.
  *
- * `linkedServiceId` is the seam for connecting the two later: set it to an
- * `@/src/types` `Service.id` once you want "open order of worship" from
- * the Agenda to jump straight to `ServiceDetailPage`.
+ * This is deliberately NOT the same thing as the `Service` type in
+ * `@/src/types` (that one is an order-of-worship — a `name`, a `date`, and
+ * an ordered list of `elements` like songs/scripture/announcements). An
+ * Event is just a calendar slot: it MAY be linked to an order of worship
+ * through `linkedServiceId`, but it doesn't have to be. A given Sunday
+ * morning culto typically has both an Event (this type) and, usually, an
+ * order of worship (their `Service`).
  */
-export interface AgendaService {
+export interface AgendaEvent {
   id: string;
   /** ISO date string, yyyy-mm-dd, in local time. */
   date: string;
   title: string;
-  /** Free-text service type, e.g. "Culto Dominical", "Ensaio de Louvor". */
+  /** Free-text event type, e.g. "Culto Dominical", "Ensaio de Louvor". */
   type: string;
   /** 24h time, "HH:mm". */
   time: string;
@@ -93,13 +93,16 @@ export interface AgendaService {
   location?: string;
   notes?: string;
   reminder: ReminderSettings;
-  /** Optional link to the matching order-of-worship `Service.id`. */
+  /**
+   * Optional link to an order-of-worship `Service.id` (`@/src/types`).
+   * Set it to jump straight to `ServiceDetailPage` from the Agenda.
+   */
   linkedServiceId?: string | null;
 }
 
 /** Shape persisted to storage. Kept flat/normalized (by id) on purpose. */
 export interface AgendaState {
-  services: Record<string, AgendaService>;
+  events: Record<string, AgendaEvent>;
   responsibilities: Record<string, Responsibility>;
   categories: Record<string, ResponsibilityCategory>;
 }
