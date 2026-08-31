@@ -1,3 +1,4 @@
+import { Folder, Service, Song } from "@/src/types";
 import {
   Calendar,
   ChevronRight,
@@ -19,20 +20,14 @@ import {
   Upload,
 } from "lucide-react";
 import React, { useMemo } from "react";
-import { Song } from "@/src/types";
-import { useI18n } from "../i18n";
-import { ViewName } from "../layouts/view";
-import {
-  CommandAction,
-  FolderItem,
-  ServiceItem,
-  SongItem,
-} from "../command-palette.types";
+import { CommandAction } from "../command-palette.types";
 import {
   CommandPaletteProvider,
   useCommandPalette,
 } from "../contexts/CommandPaletteContext";
 import { useRxDbSearch } from "../hooks/useRxDbSearch";
+import { useI18n } from "../i18n";
+import { ViewName } from "../layouts/view";
 import { CommandPaletteModal } from "./modals/CommandPaletteModal";
 
 export interface HosannaCommandPaletteProps {
@@ -43,7 +38,7 @@ export interface HosannaCommandPaletteProps {
   // State from view contexts
   currentFolderId?: string | null;
   currentSong?: Song | null;
-  currentService?: ServiceItem | null;
+  currentService?: Service | null;
   view?: ViewName;
   isSidebarCollapsed?: boolean;
   setIsSidebarCollapsed: (v: boolean) => void;
@@ -59,11 +54,11 @@ export interface HosannaCommandPaletteProps {
   setTargetSongFolderId: (folderId: string) => void;
   setDeleteSongTarget: (song: Song | null) => void;
   deleteService: (id: string) => Promise<void>;
-  fileInputRef: React.RefObject<HTMLInputElement>;
+  fileInputRef: React.RefObject<HTMLInputElement | null>;
   // RxDB finders
-  searchSongsDb: (query: string) => Promise<SongItem[]>;
-  searchFoldersDb: (query: string) => Promise<FolderItem[]>;
-  searchServicesDb: (query: string) => Promise<ServiceItem[]>;
+  searchSongsDb: (query: string) => Promise<Song[]>;
+  searchFoldersDb: (query: string) => Promise<Folder[]>;
+  searchServicesDb: (query: string) => Promise<Service[]>;
   getFolderPathString: (parentId?: string | null) => string;
   isDataLoading?: boolean;
 }
