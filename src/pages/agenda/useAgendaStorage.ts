@@ -183,7 +183,14 @@ export function useAgendaStorage() {
     setState((prev) => {
       const next = { ...prev.categories };
       delete next[id];
-      return { ...prev, categories: next };
+      // Remove responsibilities that referenced the deleted category so no
+      // orphaned rows linger on services in the Agenda.
+      const nextResp = Object.fromEntries(
+        Object.entries(prev.responsibilities).filter(
+          ([, r]) => r.categoryId !== id,
+        ),
+      );
+      return { ...prev, categories: next, responsibilities: nextResp };
     });
   }, []);
 

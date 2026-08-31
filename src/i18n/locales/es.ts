@@ -297,6 +297,22 @@ export const es: typeof pt = {
         newYork: "Nueva York (EST / GMT-5)",
         utc: "UTC (Tiempo Universal Coordinado)",
       },
+      responsibilities: {
+        title: "Responsabilidades de la Agenda",
+        desc: "Gestione la lista de responsabilidades que puede asignar a los cultos en la página Agenda.",
+        count: {
+          one: "{count} responsabilidad",
+          other: "{count} responsabilidades",
+        },
+        empty: "Aún no se ha creado ninguna responsabilidad.",
+        newLabel: "Nueva responsabilidad",
+        nameLabel: "Nombre",
+        namePlaceholder: "Ej: Vídeo, Transmisión...",
+        iconLabel: "Icono",
+        colorLabel: "Color",
+        add: "Añadir",
+        remove: "Eliminar responsabilidad",
+      },
     },
     restore: {
       confirmTitle: "Confirmar Restauración de Base de Datos",

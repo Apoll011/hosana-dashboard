@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { CalendarPlus, Settings2 } from "lucide-react";
+import { CalendarPlus } from "lucide-react";
 import React, { useMemo, useState } from "react";
 import { DayAgendaList } from "./components/DayAgendaList";
 import { DetailsSidebar } from "./components/DetailsSidebar";
@@ -13,7 +13,6 @@ import {
   AddResponsibilityModal,
   EditAssigneesModal,
   EditReminderModal,
-  ManageCategoriesModal,
   ServiceFormModal,
   ServiceFormValue,
 } from "./components/ServiceModals";
@@ -32,7 +31,6 @@ export const AgendaPage: React.FC = () => {
   const [isEditServiceOpen, setIsEditServiceOpen] = useState(false);
   const [isEditDetailsOpen, setIsEditDetailsOpen] = useState(false);
   const [isAddResponsibilityOpen, setIsAddResponsibilityOpen] = useState(false);
-  const [isManageCategoriesOpen, setIsManageCategoriesOpen] = useState(false);
   const [isReminderOpen, setIsReminderOpen] = useState(false);
   const [editingAssigneesFor, setEditingAssigneesFor] = useState<string | null>(
     null,
@@ -117,13 +115,6 @@ export const AgendaPage: React.FC = () => {
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <button
-              onClick={() => setIsManageCategoriesOpen(true)}
-              className="flex items-center gap-2 px-4 py-2.5 text-xs font-bold rounded-xl border border-m3-border text-slate-600 dark:text-slate-300 hover:bg-m3-hover transition-colors cursor-pointer"
-            >
-              <Settings2 className="w-4 h-4" />
-              Responsabilidades
-            </button>
             <button
               onClick={() => setIsNewServiceOpen(true)}
               className="flex items-center gap-2 px-4 py-2.5 text-xs font-bold rounded-xl bg-[#0284c7] text-white hover:bg-sky-600 shadow-sm transition-colors cursor-pointer"
@@ -269,15 +260,6 @@ export const AgendaPage: React.FC = () => {
           }}
         />
       )}
-
-      {/* Manage master category list */}
-      <ManageCategoriesModal
-        isOpen={isManageCategoriesOpen}
-        onClose={() => setIsManageCategoriesOpen(false)}
-        categories={store.categories}
-        onAdd={(cat) => store.addCategory(cat)}
-        onRemove={(id) => store.removeCategory(id)}
-      />
 
       {/* Edit reminder */}
       {selectedService && (

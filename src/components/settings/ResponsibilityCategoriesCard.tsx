@@ -1,0 +1,223 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import { Plus, Trash2, Users } from "lucide-react";
+import React, { useState } from "react";
+import { useI18n } from "../../i18n";
+import { COLOR_MAP, ICON_MAP } from "../../pages/agenda/iconMap";
+import {
+  ResponsibilityColor,
+  ResponsibilityIconKey,
+} from "../../pages/agenda/types";
+import { useAgendaStorage } from "../../pages/agenda/useAgendaStorage";
+import { Button, Input } from "../common";
+
+const ICON_OPTIONS: ResponsibilityIconKey[] = [
+  "mic",
+  "music",
+  "volume",
+  "light",
+  "monitor",
+  "book",
+  "heart",
+  "users",
+  "camera",
+];
+
+const COLOR_OPTIONS: ResponsibilityColor[] = [
+  "amber",
+  "violet",
+  "sky",
+  "rose",
+  "emerald",
+  "cyan",
+  "indigo",
+  "slate",
+];
+
+export interface ResponsibilityCategoriesCardProps {
+  /** Disable creation/removal (e.g. read-only org or while saving). */
+  disabled?: boolean;
+}
+
+/**
+ * Master list of responsibility categories ("Responsabilidades") that can be
+ * assigned to services in the Agenda. Rendered as a standalone settings card —
+ * the same data the Agenda page reads from `useAgendaStorage`, so changes made
+ * here show up there (and vice-versa).
+ */
+export const ResponsibilityCategoriesCard: React.FC<
+  ResponsibilityCategoriesCardProps
+> = ({ disabled = false }) => {
+  const { t, tc } = useI18n();
+  const { categories, addCategory, removeCategory } = useAgendaStorage();
+
+  const [label, setLabel] = useState("");
+  const [icon, setIcon] = useState<ResponsibilityIconKey>("mic");
+  const [color, setColor] = useState<ResponsibilityColor>("sky");
+
+  const handleAdd = () => {
+    if (!label.trim() || disabled) return;
+    addCategory({ label: label.trim(), icon, color });
+    setLabel("");
+  };
+
+  return (
+    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xs overflow-hidden">
+      {/* Header */}
+      <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+              <Users className="w-5 h-5 text-emerald-500" />
+              {t("settings.general.responsibilities.title")}
+            </h3>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+              {t("settings.general.responsibilities.desc")}
+            </p>
+          </div>
+          {categories.length > 0 && (
+            <span className="text-xs font-bold text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-3 py-1.5 rounded-full shrink-0">
+              {tc("settings.general.responsibilities.count", categories.length)}
+            </span>
+          )}
+        </div>
+      </div>
+
+      <div className="p-6 space-y-5">
+        {/* Existing categories */}
+        <div className="space-y-1.5 max-h-64 overflow-y-auto pr-1">
+          {categories.map((c) => {
+            const Icon = ICON_MAP[c.icon];
+            const colors = COLOR_MAP[c.color];
+            return (
+              <div
+                key={c.id}
+                className="flex items-center justify-between gap-2 p-2 rounded-xl border border-slate-200 dark:border-slate-800"
+              >
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div
+                    className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${colors.bg} ${colors.text}`}
+                  >
+                    <Icon className="w-4 h-4" />
+                  </div>
+                  <span className="text-xs font-bold text-slate-800 dark:text-slate-200 truncate">
+                    {c.label}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => removeCategory(c.id)}
+                  disabled={disabled}
+                  className="p-1.5 text-slate-400 hover:text-rose-500 rounded-lg transition-colors cursor-pointer shrink-0 disabled:opacity-40 disabled:cursor-not-allowed"
+                  title={t("settings.general.responsibilities.remove")}
+                  aria-label={t("settings.general.responsibilities.remove")}
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            );
+          })}
+          {categories.length === 0 && (
+            <p className="text-xs text-slate-400 text-center py-4">
+              {t("settings.general.responsibilities.empty")}
+            </p>
+          )}
+        </div>
+
+        {/* Create new category */}
+        <div className="border-t border-slate-100 dark:border-slate-800 pt-5 space-y-3">
+          <p className="text-xs font-black text-slate-700 dark:text-slate-300 uppercase tracking-wide">
+            {t("settings.general.responsibilities.newLabel")}
+          </p>
+
+          <Input
+            label={t("settings.general.responsibilities.nameLabel")}
+            placeholder={t("settings.general.responsibilities.namePlaceholder")}
+            value={label}
+            onChange={(e) => setLabel(e.target.value)}
+            disabled={disabled}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                handleAdd();
+              }
+            }}
+          />
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* Icon picker */}
+            <div>
+              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                {t("settings.general.responsibilities.iconLabel")}
+              </label>
+              <div className="flex flex-wrap gap-1.5">
+                {ICON_OPTIONS.map((opt) => {
+                  const Icon = ICON_MAP[opt];
+                  const isSelected = icon === opt;
+                  return (
+                    <button
+                      key={opt}
+                      type="button"
+                      onClick={() => setIcon(opt)}
+                      disabled={disabled}
+                      className={`w-8 h-8 rounded-lg flex items-center justify-center border transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed ${
+                        isSelected
+                          ? "border-[#0284c7] bg-sky-50 dark:bg-sky-950/40 text-[#0284c7]"
+                          : "border-slate-200 dark:border-slate-700 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+                      }`}
+                      aria-label={opt}
+                    >
+                      <Icon className="w-4 h-4" />
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Color picker */}
+            <div>
+              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                {t("settings.general.responsibilities.colorLabel")}
+              </label>
+              <div className="flex flex-wrap gap-1.5">
+                {COLOR_OPTIONS.map((opt) => {
+                  const colors = COLOR_MAP[opt];
+                  const isSelected = color === opt;
+                  return (
+                    <button
+                      key={opt}
+                      type="button"
+                      onClick={() => setColor(opt)}
+                      disabled={disabled}
+                      className={`w-8 h-8 rounded-lg border-2 transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed ${colors.bg} ${
+                        isSelected
+                          ? "border-slate-900 dark:border-white"
+                          : "border-transparent"
+                      }`}
+                      aria-label={opt}
+                    />
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          <div className="flex justify-end pt-1">
+            <Button
+              variant="primary"
+              type="button"
+              disabled={!label.trim() || disabled}
+              onClick={handleAdd}
+              icon={<Plus className="w-4 h-4" />}
+            >
+              {t("settings.general.responsibilities.add")}
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
