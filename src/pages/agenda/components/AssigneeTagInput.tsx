@@ -3,10 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { getInitials } from "@/src/utils";
 import { X } from "lucide-react";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useAuth } from "../../../contexts/AuthContext";
-import { getAvatarGradient, getInitials } from "../iconMap";
+import { getAvatarGradient } from "../iconMap";
 import { Assignee } from "../types";
 
 interface AssigneeTagInputProps {
@@ -23,7 +24,13 @@ interface AssigneeTagInputProps {
 const manualId = () =>
   `manual-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
 
-function Avatar({ assignee, className }: { assignee: Assignee; className: string }) {
+function Avatar({
+  assignee,
+  className,
+}: {
+  assignee: Assignee;
+  className: string;
+}) {
   return (
     <span
       className={`${className} rounded-full flex items-center justify-center font-extrabold text-white shrink-0 bg-linear-to-tr ${getAvatarGradient(
@@ -98,10 +105,7 @@ export const AssigneeTagInput: React.FC<AssigneeTagInputProps> = ({
 
   const addAssignee = (a: Assignee) => {
     if (!isDuplicate(a)) {
-      onChange([
-        ...assignees,
-        a.memberId ? a : { ...a, id: manualId() },
-      ]);
+      onChange([...assignees, a.memberId ? a : { ...a, id: manualId() }]);
     }
     setDraft("");
     setOpen(false);
