@@ -62,7 +62,8 @@ export const GeneralTab: React.FC<GeneralTabProps> = ({
     "organization.update",
   );
 
-  const { settings, isSaving, update, reset, save } = useOrgSettings();
+  const { settings, isSaving, update, reset, save, addResponsibilityCategory, removeResponsibilityCategory } =
+    useOrgSettings();
 
   // Local MM:SS text state for the duration inputs — committed to hook on blur/preset
   const [songRaw, setSongRaw] = React.useState(
@@ -405,7 +406,12 @@ export const GeneralTab: React.FC<GeneralTabProps> = ({
       </div>
 
       {/* ── 3. RESPONSABILIDADES DA AGENDA ─────────────────────────── */}
-      <ResponsibilityCategoriesCard disabled={!canManageOrg || isSaving} />
+      <ResponsibilityCategoriesCard
+        disabled={!canManageOrg || isSaving}
+        categories={settings.agenda.responsibilityCategories}
+        onAdd={addResponsibilityCategory}
+        onRemove={removeResponsibilityCategory}
+      />
     </form>
   );
 };

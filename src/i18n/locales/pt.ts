@@ -303,6 +303,7 @@ export const pt = {
           other: "{count} responsabilidades",
         },
         empty: "Nenhuma responsabilidade criada ainda.",
+        hint: "As alterações são aplicadas ao guardar as definições.",
         newLabel: "Nova responsabilidade",
         nameLabel: "Nome",
         namePlaceholder: "Ex: Vídeo, Transmissão...",

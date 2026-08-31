@@ -5,13 +5,13 @@
 
 import { Plus, Trash2, Users } from "lucide-react";
 import React, { useState } from "react";
+import { ResponsibilityCategory } from "@/src/types";
 import { useI18n } from "../../i18n";
 import { COLOR_MAP, ICON_MAP } from "../../pages/agenda/iconMap";
 import {
   ResponsibilityColor,
   ResponsibilityIconKey,
 } from "../../pages/agenda/types";
-import { useAgendaStorage } from "../../pages/agenda/useAgendaStorage";
 import { Button, Input } from "../common";
 
 const ICON_OPTIONS: ResponsibilityIconKey[] = [
@@ -40,19 +40,25 @@ const COLOR_OPTIONS: ResponsibilityColor[] = [
 export interface ResponsibilityCategoriesCardProps {
   /** Disable creation/removal (e.g. read-only org or while saving). */
   disabled?: boolean;
+  /** Current (staged) list of responsibility categories. */
+  categories: ResponsibilityCategory[];
+  /** Stage a new category (persisted when the tab's "Guardar" is pressed). */
+  onAdd: (category: Omit<ResponsibilityCategory, "id">) => void;
+  /** Stage removal of a category (persisted when the tab's "Guardar" is pressed). */
+  onRemove: (id: string) => void;
 }
 
 /**
  * Master list of responsibility categories ("Responsabilidades") that can be
- * assigned to services in the Agenda. Rendered as a standalone settings card —
- * the same data the Agenda page reads from `useAgendaStorage`, so changes made
- * here show up there (and vice-versa).
+ * assigned to services in the Agenda. Rendered as a standalone settings card
+ * inside the General tab's form — like every other setting on this tab it's
+ * staged locally and persisted to the org metadata on save, and the Agenda
+ * page reads the same list from `useOrgSettings`.
  */
 export const ResponsibilityCategoriesCard: React.FC<
   ResponsibilityCategoriesCardProps
-> = ({ disabled = false }) => {
+> = ({ disabled = false, categories, onAdd, onRemove }) => {
   const { t, tc } = useI18n();
-  const { categories, addCategory, removeCategory } = useAgendaStorage();
 
   const [label, setLabel] = useState("");
   const [icon, setIcon] = useState<ResponsibilityIconKey>("mic");
@@ -60,7 +66,7 @@ export const ResponsibilityCategoriesCard: React.FC<
 
   const handleAdd = () => {
     if (!label.trim() || disabled) return;
-    addCategory({ label: label.trim(), icon, color });
+    onAdd({ label: label.trim(), icon, color });
     setLabel("");
   };
 
@@ -109,7 +115,7 @@ export const ResponsibilityCategoriesCard: React.FC<
                 </div>
                 <button
                   type="button"
-                  onClick={() => removeCategory(c.id)}
+                  onClick={() => onRemove(c.id)}
                   disabled={disabled}
                   className="p-1.5 text-slate-400 hover:text-rose-500 rounded-lg transition-colors cursor-pointer shrink-0 disabled:opacity-40 disabled:cursor-not-allowed"
                   title={t("settings.general.responsibilities.remove")}
@@ -217,6 +223,10 @@ export const ResponsibilityCategoriesCard: React.FC<
             </Button>
           </div>
         </div>
+
+        <p className="text-[11px] font-medium text-slate-400 dark:text-slate-500">
+          {t("settings.general.responsibilities.hint")}
+        </p>
       </div>
     </div>
   );

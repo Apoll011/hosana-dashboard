@@ -303,6 +303,7 @@ export const en: typeof pt = {
           other: "{count} responsibilities",
         },
         empty: "No responsibilities created yet.",
+        hint: "Changes are applied when you save the settings.",
         newLabel: "New responsibility",
         nameLabel: "Name",
         namePlaceholder: "e.g. Video, Livestream...",
