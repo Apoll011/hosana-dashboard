@@ -3,8 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Can } from "@/src/lib/permissions/components";
 import { Button, Modal } from "@/src/components/common";
+import { Can } from "@/src/lib/permissions/components";
+import { getAvatarGradient, getInitials } from "@/src/utils";
 import {
   AlertTriangle,
   ArrowLeft,
@@ -97,16 +98,6 @@ export const MemberProfilePage: React.FC<MemberProfilePageProps> = ({
     }
   };
 
-  const getUserInitials = (name?: string) => {
-    if (!name) return "U";
-    return name
-      .split(" ")
-      .map((w) => w.charAt(0))
-      .join("")
-      .toUpperCase()
-      .slice(0, 2);
-  };
-
   const formatDate = (date?: string | Date) => {
     if (!date) return null;
     try {
@@ -142,7 +133,11 @@ export const MemberProfilePage: React.FC<MemberProfilePageProps> = ({
 
         <div className="px-6 pb-6">
           <div className="-mt-12 mb-4 flex items-end justify-between">
-            <div className="relative w-20 h-20 rounded-full border-4 border-white dark:border-slate-900 overflow-hidden shadow-md bg-linear-to-tr from-sky-600 to-indigo-600 flex items-center justify-center">
+            <div
+              className={`relative w-20 h-20 rounded-full border-4 border-white dark:border-slate-900 overflow-hidden shadow-md bg-linear-to-tr ${getAvatarGradient(
+                member.name || "",
+              )} flex items-center justify-center`}
+            >
               {member.logo || member.image ? (
                 <img
                   src={member.image}
@@ -151,7 +146,7 @@ export const MemberProfilePage: React.FC<MemberProfilePageProps> = ({
                 />
               ) : (
                 <span className="text-2xl font-black text-white">
-                  {getUserInitials(member.name)}
+                  {getInitials(member.name || "?")}
                 </span>
               )}
             </div>

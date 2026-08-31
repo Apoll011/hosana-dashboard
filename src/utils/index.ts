@@ -157,3 +157,21 @@ export function getInitials(name: string): string {
   if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 }
+
+const AVATAR_COLORS = [
+  "from-sky-500 to-cyan-400",
+  "from-violet-500 to-purple-400",
+  "from-amber-500 to-orange-400",
+  "from-emerald-500 to-teal-400",
+  "from-rose-500 to-pink-400",
+  "from-indigo-500 to-blue-400",
+];
+
+export function getAvatarGradient(seed: string): string {
+  let hash = 0;
+  for (let i = 0; i < seed.length; i++) {
+    hash = (hash << 5) - hash + seed.charCodeAt(i);
+    hash |= 0;
+  }
+  return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
+}

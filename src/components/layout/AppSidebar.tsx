@@ -22,7 +22,7 @@ import {
 import React, { useEffect, useRef, useState } from "react";
 import { useI18n } from "../../i18n";
 import { ViewName } from "../../layouts/view";
-import { getInitials } from "../../utils";
+import { getAvatarGradient, getInitials } from "../../utils";
 import { FolderTreeItemNode, FolderTreeNode } from "../explorer";
 import { getRoleLabel } from "../settings/settingsUtils";
 
@@ -494,7 +494,11 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
               className="w-full flex items-center justify-between p-2 rounded-xl hover:bg-slate-200/60 dark:hover:bg-slate-800 transition-colors cursor-pointer"
             >
               <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                <div className="w-8 h-8 rounded-full bg-linear-to-tr from-[#0284c7] to-sky-400 flex items-center justify-center text-white font-extrabold text-xs shadow-sm shrink-0">
+                <div
+                  className={`w-8 h-8 rounded-full bg-linear-to-tr ${getAvatarGradient(
+                    user.name,
+                  )} flex items-center justify-center text-white font-extrabold text-xs shadow-sm shrink-0`}
+                >
                   {user.image ? (
                     <img
                       src={user.image as string}
