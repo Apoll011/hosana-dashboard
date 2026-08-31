@@ -4,147 +4,24 @@
  */
 
 import { Button, Input } from "@/src/components/common";
-import { Session } from "better-auth";
 import {
   Camera,
   CheckCircle2,
   Info,
   KeyRound,
-  Loader2,
   Lock,
-  MonitorSmartphone,
   PenLine,
-  RefreshCw,
   Save,
   Trash2,
 } from "lucide-react";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { useSync } from "../../contexts/SyncContext";
 import { useI18n } from "../../i18n";
 import { authClient } from "../../lib/authClient";
+import { ActiveSessionsSection } from "./ActiveSession";
 import { compressImage, getRoleBadge } from "./settingsUtils";
 import { TwoFactorSection } from "./TwoFactor";
-
-const ActiveSessionsSection: React.FC = () => {
-  const { showToast } = useSync();
-  const { t } = useI18n();
-
-  const [sessions, setSessions] = useState<Session[] | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  const fetchSessions = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const { data } = await authClient.listSessions({ query: {} });
-      setSessions(data || []);
-    } catch {
-      setSessions([]);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    void fetchSessions();
-  }, [fetchSessions]);
-
-  const refetch = fetchSessions;
-
-  const handleRevoke = async (token: string) => {
-    try {
-      await authClient.revokeSession({ token });
-      showToast(t("settings.account.activeSessions.revokeSuccess"), "success");
-      refetch();
-    } catch {
-      showToast(t("settings.account.activeSessions.revokeError"), "error");
-    }
-  };
-
-  return (
-    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs">
-      <div className="flex items-center justify-between mb-4">
-        <div>
-          <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-            <MonitorSmartphone className="w-4 h-4 text-slate-400" />
-            {t("settings.account.activeSessions.title")}
-          </h3>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-            {t("settings.account.activeSessions.desc")}
-          </p>
-        </div>
-        <button
-          onClick={() => refetch()}
-          className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-          title={t("settings.account.activeSessions.refreshTitle")}
-        >
-          <RefreshCw className="w-4 h-4" />
-        </button>
-      </div>
-
-      {isLoading ? (
-        <div className="py-6 text-center text-xs text-slate-400 flex items-center justify-center gap-2">
-          <Loader2 className="w-4 h-4 animate-spin text-m3-primary" />
-          {t("settings.account.activeSessions.loading")}
-        </div>
-      ) : sessions && sessions.length > 0 ? (
-        <div className="space-y-3">
-          {sessions.map(
-            (
-              sess: {
-                id: string;
-                createdAt: Date;
-                updatedAt: Date;
-                userId: string;
-                expiresAt: Date;
-                token: string;
-                ipAddress?: string | null | undefined;
-                userAgent?: string | null | undefined;
-              },
-              idx: number,
-            ) => (
-              <div
-                key={sess.id || idx}
-                className="p-3 bg-slate-50 dark:bg-slate-950/50 rounded-xl border border-slate-100 dark:border-slate-800/60 flex items-center justify-between gap-3"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800">
-                    <MonitorSmartphone className="w-4 h-4 text-m3-primary" />
-                  </div>
-                  <div>
-                    <p className="text-xs font-bold text-slate-900 dark:text-slate-100">
-                      {sess.userAgent ||
-                        t("settings.account.activeSessions.browserSession")}
-                    </p>
-                    <p className="text-[10px] text-slate-400 font-mono mt-0.5">
-                      {t("settings.account.activeSessions.ip", {
-                        ip:
-                          sess.ipAddress ||
-                          t("settings.account.activeSessions.currentIp"),
-                        date: new Date(sess.createdAt).toLocaleDateString(),
-                      })}
-                    </p>
-                  </div>
-                </div>
-
-                <button
-                  onClick={() => handleRevoke(sess.token)}
-                  className="px-2.5 py-1 text-xs font-bold text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-lg transition-colors border border-red-200 dark:border-red-900/50 cursor-pointer"
-                >
-                  {t("settings.account.activeSessions.terminate")}
-                </button>
-              </div>
-            ),
-          )}
-        </div>
-      ) : (
-        <p className="text-xs text-slate-500 py-4 text-center">
-          {t("settings.account.activeSessions.currentSessionOnly")}
-        </p>
-      )}
-    </div>
-  );
-};
 
 export const AccountTab: React.FC<{ active: boolean }> = ({ active }) => {
   const { user, refetch: refetchAuth } = useAuth();
