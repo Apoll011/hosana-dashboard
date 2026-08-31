@@ -3,8 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { getInitials } from "@/src/utils";
 import React from "react";
-import { getAvatarGradient, getInitials } from "../iconMap";
+import { getAvatarGradient } from "../iconMap";
 import { Assignee } from "../types";
 
 interface AvatarStackProps {
