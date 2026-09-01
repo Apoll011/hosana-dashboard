@@ -6,6 +6,7 @@ import {
   Spinner,
 } from "@/src/components/common";
 import { useAppNavigate } from "@/src/hooks/useAppNavigate";
+import { useI18n } from "@/src/lib/i18n";
 import { usePermissionValue } from "@/src/lib/permissions/client";
 import { Service } from "@/src/types";
 import {
@@ -35,7 +36,6 @@ import { ServiceForm } from "../../components/forms/ServiceForm";
 import { useAuth } from "../../contexts/AuthContext";
 import { useMarqueeSelection } from "../../hooks/useMarqueeSelection";
 import { useServices } from "../../hooks/useServices";
-import { useI18n } from "../../i18n";
 import { posthog } from "../../lib/posthog";
 
 interface ServicesPageProps {
@@ -134,9 +134,11 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
   const archivedServices = useMemo(
     () =>
       showArchived
-        ? ((context.archivedServices as Service[] | null) ??
-          archivedServicesQuery.data ??
-          []).filter((s) => s.archived)
+        ? (
+            (context.archivedServices as Service[] | null) ??
+            archivedServicesQuery.data ??
+            []
+          ).filter((s) => s.archived)
         : [],
     [showArchived, context.archivedServices, archivedServicesQuery.data],
   );

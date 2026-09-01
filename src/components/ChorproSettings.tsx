@@ -1,6 +1,6 @@
+import { useI18n } from "@/src/lib/i18n";
 import { Eye, EyeOff, Minus, Plus, RotateCcw } from "lucide-react";
 import { usePreviewSettings } from "../hooks/usePreviewSettings";
-import { useI18n } from "../i18n";
 
 export const ChordProPreviewSettings: React.FC<{
   settings: ReturnType<typeof usePreviewSettings>["settings"];

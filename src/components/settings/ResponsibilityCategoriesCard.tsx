@@ -3,10 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { useI18n } from "@/src/lib/i18n";
 import { ResponsibilityCategory } from "@/src/types";
 import { Plus, Trash2, Users } from "lucide-react";
 import React, { useState } from "react";
-import { useI18n } from "../../i18n";
 import {
   ResponsibilityColor,
   ResponsibilityIconKey,

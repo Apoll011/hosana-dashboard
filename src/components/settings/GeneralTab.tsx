@@ -4,6 +4,7 @@
  */
 
 import { Button, Spinner } from "@/src/components/common";
+import { useI18n } from "@/src/lib/i18n";
 import { useCan } from "@/src/lib/permissions/client";
 import {
   Calendar,
@@ -22,7 +23,6 @@ import {
 import React from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { useOrgSettings } from "../../hooks/useOrgSettings";
-import { useI18n } from "../../i18n";
 import {
   DurationField,
   durationInputToSeconds,
@@ -62,8 +62,15 @@ export const GeneralTab: React.FC<GeneralTabProps> = ({
     "organization.update",
   );
 
-  const { settings, isSaving, update, reset, save, addResponsibilityCategory, removeResponsibilityCategory } =
-    useOrgSettings();
+  const {
+    settings,
+    isSaving,
+    update,
+    reset,
+    save,
+    addResponsibilityCategory,
+    removeResponsibilityCategory,
+  } = useOrgSettings();
 
   // Local MM:SS text state for the duration inputs — committed to hook on blur/preset
   const [songRaw, setSongRaw] = React.useState(

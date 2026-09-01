@@ -4,6 +4,7 @@
  */
 
 import { Badge } from "@/src/components/common";
+import { useI18n } from "@/src/lib/i18n";
 import { posthog } from "@/src/lib/posthog";
 import { Folder } from "@/src/types";
 import { Organization } from "better-auth/client";
@@ -20,7 +21,6 @@ import {
   Users,
 } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
-import { useI18n } from "../../i18n";
 import { ViewName } from "../../layouts/view";
 import { getAvatarGradient, getInitials } from "../../utils";
 import { FolderTreeItemNode, FolderTreeNode } from "../explorer";

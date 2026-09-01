@@ -3,10 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { TranslateFn, useI18n } from "@/src/i18n";
+import { TranslateFn, useI18n } from "@/src/lib/i18n";
+import { Service } from "@/src/types";
 import { Link2, Search, X } from "lucide-react";
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { Service } from "@/src/types";
 
 /** Sum of an order-of-worship's element durations, rounded up to whole minutes. */
 export function serviceTotalMinutes(service: Service): number {

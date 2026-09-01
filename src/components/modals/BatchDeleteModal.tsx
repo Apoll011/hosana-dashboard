@@ -4,10 +4,10 @@
  */
 
 import { Button, Input, Modal } from "@/src/components/common";
+import { useI18n } from "@/src/lib/i18n";
 import { Folder } from "@/src/types";
 import { AlertTriangle, Trash2 } from "lucide-react";
 import React, { useEffect, useState } from "react";
-import { useI18n } from "../../i18n";
 
 interface BatchDeleteModalProps {
   isOpen: boolean;

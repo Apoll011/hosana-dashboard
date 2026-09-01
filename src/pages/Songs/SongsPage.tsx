@@ -4,11 +4,6 @@
  */
 
 import { OverflowTagList } from "@/src/components/OverflowTagList";
-import { MarqueeSelectionBox } from "@/src/components/explorer";
-import { useAppNavigate } from "@/src/hooks/useAppNavigate";
-import { useMarqueeSelection } from "@/src/hooks/useMarqueeSelection";
-import { usePermissionValue } from "@/src/lib/permissions/client";
-import { Can } from "@/src/lib/permissions/components";
 import {
   Badge,
   Button,
@@ -18,6 +13,12 @@ import {
   Modal,
   Spinner,
 } from "@/src/components/common";
+import { MarqueeSelectionBox } from "@/src/components/explorer";
+import { useAppNavigate } from "@/src/hooks/useAppNavigate";
+import { useMarqueeSelection } from "@/src/hooks/useMarqueeSelection";
+import { useI18n } from "@/src/lib/i18n";
+import { usePermissionValue } from "@/src/lib/permissions/client";
+import { Can } from "@/src/lib/permissions/components";
 import { Song } from "@/src/types";
 import {
   ArrowUpDown,
@@ -52,9 +53,8 @@ import { MoveSongModal } from "../../components/modals/MoveSongModal";
 import { useAuth } from "../../contexts/AuthContext";
 import { useSync } from "../../contexts/SyncContext";
 import { useFolders } from "../../hooks/useFolders";
-import { useAllSongs } from "../../hooks/useSongs";
 import { usePersonalSettings } from "../../hooks/usePersonalSettings";
-import { useI18n } from "../../i18n";
+import { useAllSongs } from "../../hooks/useSongs";
 import { posthog } from "../../lib/posthog";
 
 interface SongsPageProps {

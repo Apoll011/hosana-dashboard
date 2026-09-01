@@ -1,6 +1,6 @@
+import { useI18n } from "@/src/lib/i18n";
 import { Keyboard, Lightbulb, X } from "lucide-react";
 import React, { useEffect } from "react";
-import { useI18n } from "../../i18n";
 
 interface HelpModalProps {
   isOpen: boolean;

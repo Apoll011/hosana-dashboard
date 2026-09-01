@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { TranslateFn, TranslationKey, useI18n } from "@/src/i18n";
+import { TranslateFn, TranslationKey, useI18n } from "@/src/lib/i18n";
 import { AgendaEvent, Responsibility } from "@/src/pages/agenda/types";
 import { ResponsibilityCategory } from "@/src/types";
 import { Calendar, Clock, Pencil, Plus } from "lucide-react";

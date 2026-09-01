@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { useI18n } from "@/src/lib/i18n";
 import {
   ChevronDown,
   ChevronUp,
@@ -14,7 +15,6 @@ import {
 } from "lucide-react";
 import React, { useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
-import { useI18n } from "../../i18n";
 import { songImportRegistry } from "../../import";
 
 export const AboutTab: React.FC<{ active: boolean }> = ({ active }) => {

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useI18n } from "@/src/i18n";
+import { useI18n } from "@/src/lib/i18n";
 import { Responsibility } from "@/src/pages/agenda/types";
 import { ResponsibilityCategory } from "@/src/types";
 import { COLOR_MAP, ICON_MAP } from "@/src/utils/iconMap";

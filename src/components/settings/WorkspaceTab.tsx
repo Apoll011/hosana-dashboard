@@ -5,6 +5,7 @@
 
 import { backupApi } from "@/src/api";
 import { Button, Input } from "@/src/components/common";
+import { useI18n } from "@/src/lib/i18n";
 import { useCan } from "@/src/lib/permissions/client";
 import { Can, CanAny } from "@/src/lib/permissions/components";
 import {
@@ -27,7 +28,6 @@ import {
 } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
-import { useI18n } from "../../i18n";
 import { authClient } from "../../lib/authClient";
 import { compressImage } from "./settingsUtils";
 

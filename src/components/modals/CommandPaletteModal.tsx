@@ -1,6 +1,6 @@
 import { CommandAction } from "@/src/command-palette.types";
 import { useCommandPalette } from "@/src/contexts/CommandPaletteContext";
-import { useI18n } from "@/src/i18n";
+import { useI18n } from "@/src/lib/i18n";
 import {
   ChevronRight,
   Command,

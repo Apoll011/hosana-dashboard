@@ -4,6 +4,7 @@
  */
 
 import { Button, Input } from "@/src/components/common";
+import { useI18n } from "@/src/lib/i18n";
 import {
   Camera,
   CheckCircle2,
@@ -17,7 +18,6 @@ import {
 import React, { useEffect, useRef, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { useSync } from "../../contexts/SyncContext";
-import { useI18n } from "../../i18n";
 import { authClient } from "../../lib/authClient";
 import { ActiveSessionsSection } from "./ActiveSession";
 import { compressImage, getRoleBadge } from "./settingsUtils";

@@ -4,6 +4,7 @@
  */
 
 import { Button, Input, Modal } from "@/src/components/common";
+import { useI18n } from "@/src/lib/i18n";
 import { Can, CanAny } from "@/src/lib/permissions/components";
 import { getAvatarGradient, getInitials } from "@/src/utils";
 import {
@@ -19,7 +20,6 @@ import {
 import React, { useCallback, useEffect, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { useSync } from "../../contexts/SyncContext";
-import { useI18n } from "../../i18n";
 import { authClient } from "../../lib/authClient";
 import { MemberProfilePage } from "./MemberProfilePage";
 import { getRoleBadge } from "./settingsUtils";

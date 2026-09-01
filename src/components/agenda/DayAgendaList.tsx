@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useI18n } from "@/src/i18n";
+import { useI18n } from "@/src/lib/i18n";
 import { AgendaEvent } from "@/src/pages/agenda/types";
 import { Users } from "lucide-react";
 import React from "react";

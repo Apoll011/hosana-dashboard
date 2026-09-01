@@ -14,7 +14,7 @@ import {
   EventFormValue,
 } from "@/src/components/agenda/EventModals";
 import { MiniCalendar, toIso } from "@/src/components/agenda/MiniCalendar";
-import { useI18n } from "@/src/i18n";
+import { useI18n } from "@/src/lib/i18n";
 import { CalendarPlus } from "lucide-react";
 import React, { useMemo, useState } from "react";
 import { useAgendaStorage } from "./useAgendaStorage";

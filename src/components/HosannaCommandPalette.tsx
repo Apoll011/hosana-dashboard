@@ -1,3 +1,4 @@
+import { useI18n } from "@/src/lib/i18n";
 import { Folder, Service, Song } from "@/src/types";
 import {
   Calendar,
@@ -26,7 +27,6 @@ import {
   useCommandPalette,
 } from "../contexts/CommandPaletteContext";
 import { useRxDbSearch } from "../hooks/useRxDbSearch";
-import { useI18n } from "../i18n";
 import { ViewName } from "../layouts/view";
 import { CommandPaletteModal } from "./modals/CommandPaletteModal";
 

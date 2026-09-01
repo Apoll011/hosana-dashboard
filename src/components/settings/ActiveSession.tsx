@@ -1,6 +1,6 @@
 import { useSync } from "@/src/contexts/SyncContext";
-import { useI18n } from "@/src/i18n";
 import { authClient } from "@/src/lib/authClient";
+import { useI18n } from "@/src/lib/i18n";
 import { DeviceType, parseUserAgent } from "@/src/lib/parseUserAgent";
 import { Session } from "better-auth";
 import {
