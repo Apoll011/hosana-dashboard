@@ -34,6 +34,7 @@ import { ToastContainer } from "../components/Toast";
 import { useAuth } from "../contexts/AuthContext";
 import { useSync } from "../contexts/SyncContext";
 import { getDatabase, purgeExpiredTrash } from "../db";
+import { useAgenda } from "../hooks/useAgenda";
 import { useAppNavigate } from "../hooks/useAppNavigate";
 import { useFolders } from "../hooks/useFolders";
 import { usePersonalSettings } from "../hooks/usePersonalSettings";
@@ -65,6 +66,8 @@ export const MainLayout: React.FC = () => {
     (v: boolean) => updateSetting("sidebarCollapsed", v),
     [updateSetting],
   );
+
+  const { events } = useAgenda();
 
   // Service Worker & Sync
   const { showToast, triggerSyncCheck } = useSync();
@@ -1388,6 +1391,7 @@ export const MainLayout: React.FC = () => {
           totalSongs={totalSongs}
           totalServices={totalServices}
           trashCount={trashItems.length}
+          eventCount={events.length}
           allFolders={allFolders}
           folderTree={folderTree}
           expandedFolderIds={expandedFolderIds}

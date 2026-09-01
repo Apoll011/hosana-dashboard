@@ -40,6 +40,7 @@ interface AppSidebarProps {
   totalSongs: number;
   totalServices: number;
   trashCount: number;
+  eventCount: number;
   allFolders: Folder[];
   folderTree: FolderTreeNode[];
   expandedFolderIds: Set<string>;
@@ -74,6 +75,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
   totalSongs,
   totalServices,
   trashCount,
+  eventCount,
   allFolders,
   folderTree,
   expandedFolderIds,
@@ -400,6 +402,17 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
               >
                 {t("common.agenda")}
               </span>
+            </div>
+            <div
+              className={`transition-all duration-300 ease-in-out overflow-hidden shrink-0 ${
+                isSidebarCollapsed
+                  ? "opacity-0 max-w-0 scale-75 pointer-events-none"
+                  : "opacity-100 max-w-15 scale-100"
+              }`}
+            >
+              <Badge variant={view === "services" ? "sky" : "slate"}>
+                {eventCount}
+              </Badge>
             </div>
           </button>
         )}
