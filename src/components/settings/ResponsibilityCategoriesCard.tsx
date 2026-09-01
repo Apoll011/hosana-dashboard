@@ -4,10 +4,14 @@
  */
 
 import { useI18n } from "@/src/lib/i18n";
-import { ResponsibilityCategory } from "@/src/types";
+import { posthog } from "@/src/lib/posthog";
+import {
+  ResponsibilityCategory,
+  ResponsibilityColor,
+  ResponsibilityIconKey,
+} from "@/src/types";
 import { Plus, Trash2, Users } from "lucide-react";
 import React, { useState } from "react";
-import { ResponsibilityColor, ResponsibilityIconKey } from "@/src/types";
 import { COLOR_MAP, ICON_MAP } from "../../utils/iconMap";
 import { Button, Input } from "../common";
 
@@ -66,6 +70,8 @@ export const ResponsibilityCategoriesCard: React.FC<
     onAdd({ label: label.trim(), icon, color });
     setLabel("");
   };
+
+  if (!posthog.isFeatureEnabled("agenda")) return <></>;
 
   return (
     <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xs overflow-hidden">
