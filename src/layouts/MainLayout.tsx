@@ -40,7 +40,7 @@ import { usePersonalSettings } from "../hooks/usePersonalSettings";
 import { useServices } from "../hooks/useServices";
 import { useSongs } from "../hooks/useSongs";
 import { useTrash } from "../hooks/useTrash";
-import { songImportRegistry } from "../import";
+import { songImportRegistry } from "../lib/import";
 import { ProviderImportResult } from "../utils/import";
 import { deriveView } from "./view";
 
