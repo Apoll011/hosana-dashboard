@@ -6,7 +6,7 @@
 import { useI18n } from "@/src/lib/i18n";
 import { Responsibility, ResponsibilityCategory } from "@/src/types";
 import { COLOR_MAP, ICON_MAP } from "@/src/utils/iconMap";
-import { MessageCircle, MoreVertical, Trash2, UserPlus } from "lucide-react";
+import { MoreVertical, Trash2, UserPlus } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import { AvatarStack } from "./AvatarStack";
 
@@ -60,13 +60,6 @@ export const ResponsibilityRow: React.FC<ResponsibilityRowProps> = ({
           title={t("agenda.editAssignments")}
         >
           <AvatarStack assignees={responsibility.assignees} />
-        </button>
-
-        <button
-          className="p-1.5 rounded-lg text-slate-400 hover:text-[#0284c7] hover:bg-m3-hover transition-colors cursor-pointer"
-          title={t("agenda.comment")}
-        >
-          <MessageCircle className="w-4 h-4" />
         </button>
 
         <div className="relative" ref={menuRef}>
