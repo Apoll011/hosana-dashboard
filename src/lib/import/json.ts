@@ -1,6 +1,6 @@
 import { songsApi } from "@/src/api";
 import { Song } from "@/src/types";
-import { SongImportProvider } from "@/src/utils/import";
+import { ProviderImportResult, SongImportProvider } from "@/src/utils/import";
 
 export class JsonImportProvider implements SongImportProvider {
   readonly id = "json";
