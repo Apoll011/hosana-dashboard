@@ -5,7 +5,7 @@
 
 import { useAuth } from "@/src/contexts/AuthContext";
 import { useI18n } from "@/src/lib/i18n";
-import { Assignee } from "@/src/pages/agenda/types";
+import { Assignee } from "@/src/types";
 import { getAvatarGradient, getInitials } from "@/src/utils";
 import { X } from "lucide-react";
 import React, { useEffect, useMemo, useRef, useState } from "react";

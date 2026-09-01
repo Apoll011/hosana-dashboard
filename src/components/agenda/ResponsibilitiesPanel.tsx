@@ -4,7 +4,7 @@
  */
 
 import { useI18n } from "@/src/lib/i18n";
-import { AgendaEvent, Responsibility } from "@/src/pages/agenda/types";
+import { AgendaEvent, Responsibility } from "@/src/types";
 import { ResponsibilityCategory } from "@/src/types";
 import { Calendar, Plus } from "lucide-react";
 import React from "react";

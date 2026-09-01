@@ -126,6 +126,42 @@ export interface ResponsibilityCategory {
   color: ResponsibilityColor;
 }
 
+export interface Assignee {
+  id: string;
+  name: string;
+  memberId?: string;
+  avatarUrl?: string | null;
+}
+
+export interface Responsibility {
+  id: string;
+  categoryId: string;
+  assignees: Assignee[];
+}
+
+export interface ReminderSettings {
+  enabled: boolean;
+  label: string;
+}
+
+export interface AgendaEvent {
+  id: string;
+  date: string;
+  title: string;
+  type: string;
+  time: string;
+  durationMinutes: number;
+  location?: string | null;
+  notes?: string | null;
+  reminder: ReminderSettings;
+  linkedServiceId?: string | null;
+  responsibilities: Responsibility[];
+  createdAt?: string;
+  updatedAt?: string;
+  isDeleted?: boolean;
+  purgeAt?: string | null;
+}
+
 export interface SyncStatusResponse {
   versionHash: string;
   timestamp: string;
