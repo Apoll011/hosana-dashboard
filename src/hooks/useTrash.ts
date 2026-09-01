@@ -5,7 +5,7 @@
 
 import { useEffect, useState } from "react";
 import { getDatabase } from "../db";
-import { useAgenda } from "../pages/agenda/useAgenda";
+import { useAgenda } from "./useAgenda";
 import { useFolders } from "./useFolders";
 import { useServices } from "./useServices";
 import { useSongs } from "./useSongs";

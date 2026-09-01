@@ -5,7 +5,6 @@
 
 import { DayAgendaList } from "@/src/components/agenda/DayAgendaList";
 import { DetailsSidebar } from "@/src/components/agenda/DetailsSidebar";
-import { ResponsibilitiesPanel } from "@/src/components/agenda/ResponsibilitiesPanel";
 import {
   AddResponsibilityModal,
   EditAssigneesModal,
@@ -14,10 +13,11 @@ import {
   EventFormValue,
 } from "@/src/components/agenda/EventModals";
 import { MiniCalendar, toIso } from "@/src/components/agenda/MiniCalendar";
+import { ResponsibilitiesPanel } from "@/src/components/agenda/ResponsibilitiesPanel";
 import { useI18n } from "@/src/lib/i18n";
 import { CalendarPlus } from "lucide-react";
 import React, { useMemo, useState } from "react";
-import { useAgenda } from "./useAgenda";
+import { useAgenda } from "../hooks/useAgenda";
 
 export const AgendaPage: React.FC = () => {
   const { t } = useI18n();
@@ -214,7 +214,7 @@ export const AgendaPage: React.FC = () => {
           }}
           title={t("agenda.editEvent")}
           submitLabel={t("common.save")}
-          initial={selectedEvent}
+          initial={selectedEvent as EventFormValue}
         />
       )}
 

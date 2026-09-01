@@ -31,7 +31,7 @@ const PageLoader = () => {
   );
 };
 
-import { AgendaPage } from "../pages/agenda/AgendaPage";
+import { AgendaPage } from "../pages/AgendaPage";
 import {
   AcceptInvitationPage,
   FoldersPage,

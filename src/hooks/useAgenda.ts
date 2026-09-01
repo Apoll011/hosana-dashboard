@@ -4,22 +4,22 @@
  */
 
 import { useI18n } from "@/src/lib/i18n";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { useSync } from "../../contexts/SyncContext";
-import {
-  AgendaEventDocType,
-  getDatabase,
-  getPurgeAt,
-  validateAgendaEventRules,
-} from "../../db";
-import { useAuth } from "../../contexts/AuthContext";
-import { useOrgSettings } from "../../hooks/useOrgSettings";
 import {
   AgendaEvent,
   Assignee,
   ReminderSettings,
   Responsibility,
 } from "@/src/types";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useAuth } from "../contexts/AuthContext";
+import { useSync } from "../contexts/SyncContext";
+import {
+  AgendaEventDocType,
+  getDatabase,
+  getPurgeAt,
+  validateAgendaEventRules,
+} from "../db";
+import { useOrgSettings } from "./useOrgSettings";
 
 const DEFAULT_REMINDER: ReminderSettings = {
   enabled: false,
