@@ -8,8 +8,8 @@ import { useAuth } from "../../contexts/AuthContext";
 import { useOrgSettings } from "../../hooks/useOrgSettings";
 import { MOCK_STATE } from "./mockData";
 import {
-  AgendaState,
   AgendaEvent,
+  AgendaState,
   Assignee,
   ReminderSettings,
   Responsibility,
@@ -48,13 +48,6 @@ const uid = (prefix: string) =>
  * - **Responsibility categories** are org-wide and live in the org metadata
  *   (Settings → General → Responsabilidades) — they're read from
  *   `useOrgSettings` here, never persisted by this hook.
- *
- * ── Swapping this for a real backend later ──────────────────────────────
- * Every mutator below follows the same shape: update local state, then
- * `persist()`. To move to Prisma/RxDB/whatever, keep the function
- * signatures the same and replace the body (e.g. call your API / mutate
- * your sync engine instead of `setState` + `persist`). Nothing in the
- * components needs to change.
  */
 export function useAgendaStorage() {
   const { organization } = useAuth();
@@ -108,9 +101,7 @@ export function useAgendaStorage() {
   // draft were ever introduced.
   const persistedCategoryIds = useMemo(
     () =>
-      new Set(
-        savedSettings.agenda.responsibilityCategories.map((c) => c.id),
-      ),
+      new Set(savedSettings.agenda.responsibilityCategories.map((c) => c.id)),
     [savedSettings.agenda.responsibilityCategories],
   );
 
@@ -138,9 +129,11 @@ export function useAgendaStorage() {
   }, [organization, persistedCategoryIds]);
 
   const addEvent = useCallback(
-    (input: Omit<AgendaEvent, "id" | "reminder" | "responsibilities"> & {
-      reminder?: ReminderSettings;
-    }) => {
+    (
+      input: Omit<AgendaEvent, "id" | "reminder" | "responsibilities"> & {
+        reminder?: ReminderSettings;
+      },
+    ) => {
       const id = uid("evt");
       const event: AgendaEvent = {
         ...input,
@@ -253,8 +246,6 @@ export function useAgendaStorage() {
     [],
   );
 
-  const resetToMockData = useCallback(() => setState(MOCK_STATE), []);
-
   return {
     events,
     categories,
@@ -268,7 +259,6 @@ export function useAgendaStorage() {
     addResponsibility,
     updateResponsibilityAssignees,
     removeResponsibility,
-    resetToMockData,
   };
 }
 

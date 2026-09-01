@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { AgendaEvent } from "@/src/pages/agenda/types";
 import { Users } from "lucide-react";
 import React from "react";
-import { AgendaEvent } from "../types";
 
 interface DayAgendaListProps {
   events: AgendaEvent[];
@@ -54,7 +54,9 @@ export const DayAgendaList: React.FC<DayAgendaListProps> = ({
                   <div className="flex items-center gap-1.5 text-xs font-black text-slate-900 dark:text-slate-100">
                     <span
                       className={`w-1.5 h-1.5 rounded-full ${
-                        isSelected ? "bg-[#0284c7]" : "bg-slate-300 dark:bg-slate-600"
+                        isSelected
+                          ? "bg-[#0284c7]"
+                          : "bg-slate-300 dark:bg-slate-600"
                       }`}
                     />
                     {event.time}

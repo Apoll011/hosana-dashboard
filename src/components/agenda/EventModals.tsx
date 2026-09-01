@@ -4,6 +4,9 @@
  */
 
 import { Button, Input, Modal } from "@/src/components/common";
+import { useServices } from "@/src/hooks/useServices";
+import { Assignee } from "@/src/pages/agenda/types";
+import { ResponsibilityCategory } from "@/src/types";
 import {
   BellRing,
   Calendar,
@@ -25,8 +28,6 @@ import {
   X,
 } from "lucide-react";
 import React, { useEffect, useMemo, useState } from "react";
-import { useServices } from "../../../hooks/useServices";
-import { Assignee, ResponsibilityCategory } from "../types";
 import { AssigneeTagInput } from "./AssigneeTagInput";
 import { ServiceLinkField } from "./ServiceLinkField";
 
@@ -510,7 +511,7 @@ export const AddResponsibilityModal: React.FC<AddResponsibilityModalProps> = ({
             <p className="text-sm font-bold text-slate-600 dark:text-slate-300">
               Já foram adicionadas todas as responsabilidades
             </p>
-            <p className="text-xs font-medium text-slate-400 max-w-[240px] leading-relaxed">
+            <p className="text-xs font-medium text-slate-400 max-w-60 leading-relaxed">
               Pode criar novas categorias em Definições → Servidor.
             </p>
           </div>
@@ -532,7 +533,7 @@ export const AddResponsibilityModal: React.FC<AddResponsibilityModalProps> = ({
                       onClick={() => setCategoryId(c.id)}
                       className={`flex items-center justify-between gap-3 px-3.5 h-11 rounded-xl border text-sm font-bold transition-colors cursor-pointer ${
                         selected
-                          ? "border-[#0284c7] bg-[#0284c7]/[0.06] text-[#0284c7]"
+                          ? "border-[#0284c7] bg-[#0284c7]/6 text-[#0284c7]"
                           : "border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:border-[#0284c7]/40"
                       }`}
                     >
@@ -744,7 +745,7 @@ export const EditReminderModal: React.FC<EditReminderModalProps> = ({
         <div
           className={`flex items-center gap-2.5 px-3.5 h-11 rounded-xl border text-sm font-semibold ${
             trimmed
-              ? "border-[#0284c7]/30 bg-[#0284c7]/[0.06] text-[#0284c7]"
+              ? "border-[#0284c7]/30 bg-[#0284c7]/6 text-[#0284c7]"
               : "border-dashed border-slate-200 dark:border-slate-800 text-slate-400"
           }`}
         >

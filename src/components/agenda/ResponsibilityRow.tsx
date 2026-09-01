@@ -3,10 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { Responsibility } from "@/src/pages/agenda/types";
+import { ResponsibilityCategory } from "@/src/types";
+import { COLOR_MAP, ICON_MAP } from "@/src/utils/iconMap";
 import { MessageCircle, MoreVertical, Trash2, UserPlus } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
-import { COLOR_MAP, ICON_MAP } from "../iconMap";
-import { Responsibility, ResponsibilityCategory } from "../types";
 import { AvatarStack } from "./AvatarStack";
 
 interface ResponsibilityRowProps {

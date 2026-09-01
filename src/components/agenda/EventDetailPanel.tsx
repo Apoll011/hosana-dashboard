@@ -3,9 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { AgendaEvent, Responsibility } from "@/src/pages/agenda/types";
+import { ResponsibilityCategory } from "@/src/types";
 import { Calendar, Clock, Pencil, Plus } from "lucide-react";
 import React from "react";
-import { AgendaEvent, Responsibility, ResponsibilityCategory } from "../types";
 import { ResponsibilityRow } from "./ResponsibilityRow";
 
 interface EventDetailPanelProps {
@@ -19,12 +20,27 @@ interface EventDetailPanelProps {
 }
 
 const WEEKDAY_LONG = [
-  "Domingo", "Segunda-feira", "Terça-feira", "Quarta-feira",
-  "Quinta-feira", "Sexta-feira", "Sábado",
+  "Domingo",
+  "Segunda-feira",
+  "Terça-feira",
+  "Quarta-feira",
+  "Quinta-feira",
+  "Sexta-feira",
+  "Sábado",
 ];
 const MONTH_LABELS = [
-  "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
-  "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro",
+  "Janeiro",
+  "Fevereiro",
+  "Março",
+  "Abril",
+  "Maio",
+  "Junho",
+  "Julho",
+  "Agosto",
+  "Setembro",
+  "Outubro",
+  "Novembro",
+  "Dezembro",
 ];
 
 function formatLongDate(iso: string): string {
