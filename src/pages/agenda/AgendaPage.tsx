@@ -3,19 +3,19 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { CalendarPlus } from "lucide-react";
-import React, { useMemo, useState } from "react";
-import { DayAgendaList } from "./components/DayAgendaList";
-import { DetailsSidebar } from "./components/DetailsSidebar";
-import { EventDetailPanel } from "./components/EventDetailPanel";
+import { DayAgendaList } from "@/src/components/agenda/DayAgendaList";
+import { DetailsSidebar } from "@/src/components/agenda/DetailsSidebar";
+import { EventDetailPanel } from "@/src/components/agenda/EventDetailPanel";
 import {
   AddResponsibilityModal,
   EditAssigneesModal,
   EditReminderModal,
   EventFormModal,
   EventFormValue,
-} from "./components/EventModals";
-import { MiniCalendar, toIso } from "./components/MiniCalendar";
+} from "@/src/components/agenda/EventModals";
+import { MiniCalendar, toIso } from "@/src/components/agenda/MiniCalendar";
+import { CalendarPlus } from "lucide-react";
+import React, { useMemo, useState } from "react";
 import { useAgendaStorage } from "./useAgendaStorage";
 
 export const AgendaPage: React.FC = () => {

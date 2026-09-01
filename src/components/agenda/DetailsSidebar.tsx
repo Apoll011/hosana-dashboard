@@ -3,12 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { useAuth } from "@/src/contexts/AuthContext";
+import { useAppNavigate } from "@/src/hooks/useAppNavigate";
+import { useServices } from "@/src/hooks/useServices";
+import { AgendaEvent } from "@/src/pages/agenda/types";
 import { Bell, ExternalLink, Link2, Pencil } from "lucide-react";
 import React from "react";
-import { useAuth } from "../../../contexts/AuthContext";
-import { useAppNavigate } from "../../../hooks/useAppNavigate";
-import { useServices } from "../../../hooks/useServices";
-import { AgendaEvent } from "../types";
 import { serviceTotalMinutes } from "./ServiceLinkField";
 
 interface DetailsSidebarProps {
@@ -36,8 +36,8 @@ export const DetailsSidebar: React.FC<DetailsSidebarProps> = ({
   const slugPrefix = organization?.slug ? `/${organization.slug}` : "";
 
   const linkedService = event?.linkedServiceId
-    ? (servicesQuery.data ?? []).find((s) => s.id === event.linkedServiceId) ??
-      null
+    ? ((servicesQuery.data ?? []).find((s) => s.id === event.linkedServiceId) ??
+      null)
     : null;
 
   if (!event) return null;
@@ -148,9 +148,7 @@ export const DetailsSidebar: React.FC<DetailsSidebarProps> = ({
           >
             <span
               className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform ${
-                event.reminder.enabled
-                  ? "-translate-x-0.5"
-                  : "-translate-x-4.5"
+                event.reminder.enabled ? "-translate-x-0.5" : "-translate-x-4.5"
               }`}
             />
           </button>
