@@ -1,7 +1,7 @@
+import { useI18n } from "@/src/lib/i18n";
 import { Folder, Song } from "@/src/types";
 import { FileText, MoreVertical } from "lucide-react";
 import React from "react";
-import { useI18n } from "../../i18n";
 import {
   getFolderColorStyle,
   getFolderIconComponent,

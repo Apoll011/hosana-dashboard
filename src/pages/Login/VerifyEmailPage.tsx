@@ -5,6 +5,7 @@
 
 import { AppLink } from "@/src/components/AppLink";
 import { Button } from "@/src/components/common";
+import { useI18n } from "@/src/lib/i18n";
 import {
   CheckCircle2,
   Clock,
@@ -15,7 +16,6 @@ import {
 } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { useI18n } from "../../i18n";
 import { authClient } from "../../lib/authClient";
 import LoginLayout from "./Layout";
 

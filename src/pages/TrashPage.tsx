@@ -4,6 +4,7 @@
  */
 
 import { Badge, Button, EmptyState, Spinner } from "@/src/components/common";
+import { useI18n } from "@/src/lib/i18n";
 import {
   Calendar,
   FileMusic,
@@ -12,7 +13,6 @@ import {
   Trash2,
 } from "lucide-react";
 import React from "react";
-import { useI18n } from "../i18n";
 import { useTrash } from "../hooks/useTrash";
 
 const TYPE_ICONS: Record<string, React.ReactNode> = {

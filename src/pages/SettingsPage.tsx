@@ -3,8 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Button, Modal } from "@/src/components/common";
 import { backupApi } from "@/src/api";
+import { Button, Modal } from "@/src/components/common";
+import { useI18n } from "@/src/lib/i18n";
 import {
   AlertTriangle,
   AppWindow,
@@ -18,7 +19,6 @@ import {
 } from "lucide-react";
 import React, { useState } from "react";
 import { useSync } from "../contexts/SyncContext";
-import { useI18n } from "../i18n";
 
 import { AboutTab } from "../components/settings/AboutTab";
 import { AccountTab } from "../components/settings/AccountTab";

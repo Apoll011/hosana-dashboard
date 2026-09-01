@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { useI18n } from "@/src/lib/i18n";
 import { Folder, Service, Song } from "@/src/types";
 import { ConversionResult } from "@hosanna/chordpro";
 import React, {
@@ -39,7 +40,6 @@ import { usePersonalSettings } from "../hooks/usePersonalSettings";
 import { useServices } from "../hooks/useServices";
 import { useSongs } from "../hooks/useSongs";
 import { useTrash } from "../hooks/useTrash";
-import { useI18n } from "../i18n";
 import { songImportRegistry } from "../import";
 import { ProviderImportResult } from "../utils/import";
 import { deriveView } from "./view";

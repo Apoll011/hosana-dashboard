@@ -3,6 +3,7 @@
 SPDX-License-Identifier: Apache-2.0
 */
 import { Button, Input, Spinner } from "@/src/components/common";
+import { useI18n } from "@/src/lib/i18n";
 import {
   AlertCircle,
   ArrowRight,
@@ -23,7 +24,6 @@ import bg from "../assets/images/background.webp";
 import { useAuth } from "../contexts/AuthContext";
 import { useTheme } from "../contexts/ThemeContext";
 import { useAppNavigate } from "../hooks/useAppNavigate";
-import { useI18n } from "../i18n";
 import { authClient } from "../lib/authClient";
 import { posthog } from "../lib/posthog";
 import { LanguageSelector } from "./Login/components/LanguageSelector";

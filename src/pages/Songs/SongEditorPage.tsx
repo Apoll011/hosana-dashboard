@@ -4,13 +4,14 @@
  */
 
 import { ChordProPreviewSettings } from "@/src/components/ChorproSettings";
-import { useAppNavigate } from "@/src/hooks/useAppNavigate";
-import { usePreviewSettings } from "@/src/hooks/usePreviewSettings";
-import { useCan } from "@/src/lib/permissions/client";
-import { Can } from "@/src/lib/permissions/components";
 import { Button, Spinner } from "@/src/components/common";
 import { EditorSettingsPanel } from "@/src/components/EditorSettingsPanel";
+import { useAppNavigate } from "@/src/hooks/useAppNavigate";
 import { useEditorSettings } from "@/src/hooks/useEditorSettings";
+import { usePreviewSettings } from "@/src/hooks/usePreviewSettings";
+import { useI18n } from "@/src/lib/i18n";
+import { useCan } from "@/src/lib/permissions/client";
+import { Can } from "@/src/lib/permissions/components";
 import { Song } from "@/src/types";
 import { ChordProRenderer, parseChordPro } from "@hosanna/chordpro";
 import { Editor } from "@hosanna/chordpro/editor";
@@ -36,7 +37,6 @@ import React, {
 import { useParams } from "react-router-dom";
 import { HelpModal } from "../../components/modals/HelpModal";
 import { useAuth } from "../../contexts/AuthContext";
-import { useI18n } from "../../i18n";
 import { useSong, useSongs } from "../../hooks/useSongs";
 import { posthog } from "../../lib/posthog";
 
@@ -273,49 +273,49 @@ export const SongEditorPage: React.FC = () => {
             layoutMode === "preview" ? "md:opacity-0" : "md:opacity-100",
           ].join(" ")}
         >
-            {/* Editor Tab Header */}
-            <div className="h-9 bg-m3-sidebar/30 border-b border-m3-border flex items-center justify-between px-3 shrink-0">
-              <span className="text-[10px] font-semibold text-m3-secondary uppercase tracking-wider flex items-center gap-1.5">
-                <EditIcon className="w-3 h-3" />
-                {t("songEditor.code")}
-              </span>
-              <button
-                onClick={() => setShowEditorSettings(!showEditorSettings)}
-                className={`p-1 rounded transition-colors ${showEditorSettings ? "bg-m3-primary/10 text-m3-primary" : "text-m3-secondary hover:bg-m3-hover hover:text-m3-text"}`}
-                title={t("songEditor.editorSettings")}
-              >
-                <Settings className="w-3.5 h-3.5" />
-              </button>
-            </div>
-
-            {/* Contextual Editor Settings Modal */}
-            <EditorSettingsPanel
-              isOpen={showEditorSettings}
-              onClose={() => setShowEditorSettings(false)}
-              settings={editorSettings}
-              updateSetting={updateEditorSetting}
-              resetSettings={resetEditorSettings}
-            />
-
-            <div className="flex-1 overflow-hidden relative">
-              <Editor
-                value={content}
-                onChange={(val) => {
-                  setContent(val);
-                  setHasUnsavedChanges(true);
-                }}
-                settings={editorSettings}
-                readOnly={!canUpdateSong}
-                onSave={handleSave}
-                mode="chordpro"
-                fallback={
-                  <div className="h-full w-full flex items-center justify-center">
-                    <Spinner size="md" label={t("songEditor.loadingEditor")} />
-                  </div>
-                }
-              />
-            </div>
+          {/* Editor Tab Header */}
+          <div className="h-9 bg-m3-sidebar/30 border-b border-m3-border flex items-center justify-between px-3 shrink-0">
+            <span className="text-[10px] font-semibold text-m3-secondary uppercase tracking-wider flex items-center gap-1.5">
+              <EditIcon className="w-3 h-3" />
+              {t("songEditor.code")}
+            </span>
+            <button
+              onClick={() => setShowEditorSettings(!showEditorSettings)}
+              className={`p-1 rounded transition-colors ${showEditorSettings ? "bg-m3-primary/10 text-m3-primary" : "text-m3-secondary hover:bg-m3-hover hover:text-m3-text"}`}
+              title={t("songEditor.editorSettings")}
+            >
+              <Settings className="w-3.5 h-3.5" />
+            </button>
           </div>
+
+          {/* Contextual Editor Settings Modal */}
+          <EditorSettingsPanel
+            isOpen={showEditorSettings}
+            onClose={() => setShowEditorSettings(false)}
+            settings={editorSettings}
+            updateSetting={updateEditorSetting}
+            resetSettings={resetEditorSettings}
+          />
+
+          <div className="flex-1 overflow-hidden relative">
+            <Editor
+              value={content}
+              onChange={(val) => {
+                setContent(val);
+                setHasUnsavedChanges(true);
+              }}
+              settings={editorSettings}
+              readOnly={!canUpdateSong}
+              onSave={handleSave}
+              mode="chordpro"
+              fallback={
+                <div className="h-full w-full flex items-center justify-center">
+                  <Spinner size="md" label={t("songEditor.loadingEditor")} />
+                </div>
+              }
+            />
+          </div>
+        </div>
 
         {/* Preview pane — always mounted so layout-mode switches animate smoothly */}
         <div
@@ -337,49 +337,47 @@ export const SongEditorPage: React.FC = () => {
             layoutMode === "editor" ? "md:opacity-0" : "md:opacity-100",
           ].join(" ")}
         >
-            {/* Preview Tab Header */}
-            <div className="h-9 bg-m3-sidebar/30 border-b border-m3-border flex items-center justify-between px-3 shrink-0">
-              <span className="text-[10px] font-semibold text-m3-secondary uppercase tracking-wider flex items-center gap-1.5">
-                <LayoutTemplate className="w-3 h-3" />
-                {t("songEditor.preview")}
-              </span>
-              <button
-                onClick={() => setShowPreviewSettings(!showPreviewSettings)}
-                className={`p-1 rounded transition-colors ${showPreviewSettings ? "bg-m3-primary/10 text-m3-primary" : "text-m3-secondary hover:bg-m3-hover hover:text-m3-text"}`}
-                title={t("songEditor.readingSettings")}
-              >
-                <Settings2 className="w-3.5 h-3.5" />
-              </button>
-            </div>
-
-            {showPreviewSettings && (
-              <ChordProPreviewSettings
-                settings={settings}
-                updateSetting={updateSetting}
-                resetSettings={resetSettings}
-              />
-            )}
-            <div
-              className="flex-1 overflow-auto bg-m3-card relative"
-              onClick={() =>
-                showPreviewSettings && setShowPreviewSettings(false)
-              }
+          {/* Preview Tab Header */}
+          <div className="h-9 bg-m3-sidebar/30 border-b border-m3-border flex items-center justify-between px-3 shrink-0">
+            <span className="text-[10px] font-semibold text-m3-secondary uppercase tracking-wider flex items-center gap-1.5">
+              <LayoutTemplate className="w-3 h-3" />
+              {t("songEditor.preview")}
+            </span>
+            <button
+              onClick={() => setShowPreviewSettings(!showPreviewSettings)}
+              className={`p-1 rounded transition-colors ${showPreviewSettings ? "bg-m3-primary/10 text-m3-primary" : "text-m3-secondary hover:bg-m3-hover hover:text-m3-text"}`}
+              title={t("songEditor.readingSettings")}
             >
-              <ChordProRenderer
-                content={deferredContent} // PERFORMANCE: Re-renders softly while user types
-                showChords={showChords}
-                transposeVal={transposeVal}
-                onTransposeChange={(val) => updateSetting("transposeVal", val)}
-                fontSize={fontSize}
-                instrument={instrument}
-                showDiagrams={showDiagrams}
-                showYoutubePlayer={showYoutubePlayer}
-                onShowYoutubePlayerChange={(show) =>
-                  updateSetting("showYoutubePlayer", show)
-                }
-              />
-            </div>
+              <Settings2 className="w-3.5 h-3.5" />
+            </button>
           </div>
+
+          {showPreviewSettings && (
+            <ChordProPreviewSettings
+              settings={settings}
+              updateSetting={updateSetting}
+              resetSettings={resetSettings}
+            />
+          )}
+          <div
+            className="flex-1 overflow-auto bg-m3-card relative"
+            onClick={() => showPreviewSettings && setShowPreviewSettings(false)}
+          >
+            <ChordProRenderer
+              content={deferredContent} // PERFORMANCE: Re-renders softly while user types
+              showChords={showChords}
+              transposeVal={transposeVal}
+              onTransposeChange={(val) => updateSetting("transposeVal", val)}
+              fontSize={fontSize}
+              instrument={instrument}
+              showDiagrams={showDiagrams}
+              showYoutubePlayer={showYoutubePlayer}
+              onShowYoutubePlayerChange={(show) =>
+                updateSetting("showYoutubePlayer", show)
+              }
+            />
+          </div>
+        </div>
       </div>
     </div>
   );

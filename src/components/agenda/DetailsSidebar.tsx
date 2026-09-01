@@ -6,7 +6,7 @@
 import { useAuth } from "@/src/contexts/AuthContext";
 import { useAppNavigate } from "@/src/hooks/useAppNavigate";
 import { useServices } from "@/src/hooks/useServices";
-import { TranslateFn, useI18n } from "@/src/i18n";
+import { TranslateFn, useI18n } from "@/src/lib/i18n";
 import { AgendaEvent } from "@/src/pages/agenda/types";
 import { Bell, ExternalLink, Link2, Pencil } from "lucide-react";
 import React from "react";

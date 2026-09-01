@@ -1,12 +1,12 @@
 import { Button, Modal } from "@/src/components/common";
-import { BookOpen, Check, ChevronDown, Loader2, Search } from "lucide-react";
-import React, { useCallback, useEffect, useState } from "react";
-import { useI18n } from "../../../i18n";
 import {
   DurationField,
   durationInputToSeconds,
   secondsToDurationInput,
 } from "@/src/components/DurationField";
+import { useI18n } from "@/src/lib/i18n";
+import { BookOpen, Check, ChevronDown, Loader2, Search } from "lucide-react";
+import React, { useCallback, useEffect, useState } from "react";
 
 // ── Bolls Life Bible API Integration ──────────────────────────────────
 // API explicitly permits free web usage. It replaces the buggy NPM package.

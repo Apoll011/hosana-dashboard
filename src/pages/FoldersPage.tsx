@@ -1,4 +1,5 @@
 import { Button, Spinner } from "@/src/components/common";
+import { useI18n } from "@/src/lib/i18n";
 import { Folder, Song } from "@/src/types";
 import { FolderOpen, Plus, Upload } from "lucide-react";
 import React from "react";
@@ -11,7 +12,6 @@ import {
 } from "../components/explorer";
 import { useAuth } from "../contexts/AuthContext";
 import { useAppNavigate } from "../hooks/useAppNavigate";
-import { useI18n } from "../i18n";
 import { Can, CanAll } from "../lib/permissions/components";
 
 interface FolderExplorerContext {

@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from "react";
 import { Badge } from "@/src/components/common";
+import { useI18n } from "@/src/lib/i18n";
 import { Folder, Song } from "@/src/types";
 import {
   ArrowRightLeft,
@@ -23,7 +23,7 @@ import {
   Upload,
   X,
 } from "lucide-react";
-import { useI18n } from "../../i18n";
+import React from "react";
 import { Can, CanAll } from "../../lib/permissions/components";
 
 export interface ContextMenuState {

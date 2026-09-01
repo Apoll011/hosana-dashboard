@@ -7,6 +7,7 @@ import { ChordProPreviewSettings } from "@/src/components/ChorproSettings";
 import { Button, Input, Spinner } from "@/src/components/common";
 import { useAppNavigate } from "@/src/hooks/useAppNavigate";
 import { usePreviewSettings } from "@/src/hooks/usePreviewSettings";
+import { TranslateFn, useI18n } from "@/src/lib/i18n";
 import { ServiceElement } from "@/src/types";
 import {
   attachClosestEdge,
@@ -54,7 +55,6 @@ import { useSync } from "../../contexts/SyncContext";
 import { useOrgSettings } from "../../hooks/useOrgSettings";
 import { useService, useServices } from "../../hooks/useServices";
 import { useSong, useSongs } from "../../hooks/useSongs";
-import { TranslateFn, useI18n } from "../../i18n";
 import { AnnouncementModal } from "./modals/Anouncement";
 import { ScriptureModal } from "./modals/Bible";
 import { CustomModal } from "./modals/Custom";

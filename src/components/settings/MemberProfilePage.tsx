@@ -4,6 +4,7 @@
  */
 
 import { Button, Modal } from "@/src/components/common";
+import { useI18n } from "@/src/lib/i18n";
 import { Can } from "@/src/lib/permissions/components";
 import { getAvatarGradient, getInitials } from "@/src/utils";
 import {
@@ -17,7 +18,6 @@ import {
   Trash2,
 } from "lucide-react";
 import React, { useState } from "react";
-import { useI18n } from "../../i18n";
 import { authClient } from "../../lib/authClient";
 import { getRoleBadge, getRoleLabel } from "./settingsUtils";
 

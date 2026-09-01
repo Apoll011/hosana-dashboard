@@ -1,8 +1,8 @@
+import { useI18n } from "@/src/lib/i18n";
 import { Calendar, Folder as FolderIcon, Music } from "lucide-react";
 import { useEffect, useState } from "react";
 import { CommandAction } from "../command-palette.types";
 import { useCommandPalette } from "../contexts/CommandPaletteContext";
-import { useI18n } from "../i18n";
 import { Folder, Service, Song } from "../types";
 
 interface UseRxDbSearchProps {

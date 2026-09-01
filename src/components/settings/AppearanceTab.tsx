@@ -4,6 +4,7 @@
  */
 
 import { usePersonalSettings } from "@/src/hooks/usePersonalSettings";
+import { useI18n } from "@/src/lib/i18n";
 import {
   Check,
   FolderTree,
@@ -19,7 +20,6 @@ import {
 } from "lucide-react";
 import React from "react";
 import { useTheme } from "../../contexts/ThemeContext";
-import { useI18n } from "../../i18n";
 import { LANGUAGES } from "../../i18n/languages";
 import { PersonalLanguage } from "../../i18n/types";
 

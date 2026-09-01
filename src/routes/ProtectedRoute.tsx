@@ -4,10 +4,10 @@
  */
 
 import { Spinner } from "@/src/components/common";
+import { useI18n } from "@/src/lib/i18n";
 import React from "react";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
-import { useI18n } from "../i18n";
 
 export const ProtectedRoute: React.FC = () => {
   const { isAuthenticated, isLoading, organization } = useAuth();

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { TranslationKey, useI18n } from "@/src/i18n";
+import { TranslationKey, useI18n } from "@/src/lib/i18n";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import React from "react";
 
