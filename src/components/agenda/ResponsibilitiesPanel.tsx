@@ -3,63 +3,26 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { TranslateFn, TranslationKey, useI18n } from "@/src/lib/i18n";
+import { useI18n } from "@/src/lib/i18n";
 import { AgendaEvent, Responsibility } from "@/src/pages/agenda/types";
 import { ResponsibilityCategory } from "@/src/types";
-import { Calendar, Clock, Pencil, Plus } from "lucide-react";
+import { Calendar, Plus } from "lucide-react";
 import React from "react";
 import { ResponsibilityRow } from "./ResponsibilityRow";
 
-interface EventDetailPanelProps {
+interface ResponsibilitiesPanelProps {
   event: AgendaEvent | undefined;
   responsibilities: Responsibility[];
   categories: Record<string, ResponsibilityCategory>;
-  onEditEvent: () => void;
   onAddResponsibility: () => void;
   onEditAssignees: (responsibilityId: string) => void;
   onRemoveResponsibility: (responsibilityId: string) => void;
 }
 
-const WEEKDAY_KEYS: TranslationKey[] = [
-  "agenda.weekdaysFull.sunday",
-  "agenda.weekdaysFull.monday",
-  "agenda.weekdaysFull.tuesday",
-  "agenda.weekdaysFull.wednesday",
-  "agenda.weekdaysFull.thursday",
-  "agenda.weekdaysFull.friday",
-  "agenda.weekdaysFull.saturday",
-];
-const MONTH_KEYS: TranslationKey[] = [
-  "agenda.months.january",
-  "agenda.months.february",
-  "agenda.months.march",
-  "agenda.months.april",
-  "agenda.months.may",
-  "agenda.months.june",
-  "agenda.months.july",
-  "agenda.months.august",
-  "agenda.months.september",
-  "agenda.months.october",
-  "agenda.months.november",
-  "agenda.months.december",
-];
-
-function formatLongDate(iso: string, t: TranslateFn): string {
-  const [y, m, d] = iso.split("-").map(Number);
-  const date = new Date(y, m - 1, d);
-  return t("agenda.dateLong", {
-    weekday: t(WEEKDAY_KEYS[date.getDay()]),
-    day: d,
-    month: t(MONTH_KEYS[m - 1]),
-    year: y,
-  });
-}
-
-export const EventDetailPanel: React.FC<EventDetailPanelProps> = ({
+export const ResponsibilitiesPanel: React.FC<ResponsibilitiesPanelProps> = ({
   event,
   responsibilities,
   categories,
-  onEditEvent,
   onAddResponsibility,
   onEditAssignees,
   onRemoveResponsibility,
@@ -82,40 +45,6 @@ export const EventDetailPanel: React.FC<EventDetailPanelProps> = ({
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2 text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-wide">
-        <Calendar className="w-3.5 h-3.5" />
-        {formatLongDate(event.date, t)}
-      </div>
-
-      <div className="bg-white dark:bg-slate-900 border border-m3-border rounded-2xl p-5 shadow-xs flex items-center justify-between gap-4">
-        <div className="min-w-0">
-          <h2 className="text-lg font-black text-slate-900 dark:text-slate-100 truncate">
-            {event.title}
-          </h2>
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1.5 text-xs font-semibold text-slate-500 dark:text-slate-400">
-            <span className="flex items-center gap-1">
-              <Clock className="w-3.5 h-3.5" />
-              {event.time}
-            </span>
-            <span>•</span>
-            <span className="text-[#0284c7] bg-sky-50 dark:bg-sky-950/40 px-2 py-0.5 rounded-md">
-              {event.type}
-            </span>
-            <span>•</span>
-            <span>
-              {t("agenda.durationLabel", { minutes: event.durationMinutes })}
-            </span>
-          </div>
-        </div>
-        <button
-          onClick={onEditEvent}
-          className="p-2 rounded-xl border border-m3-border text-slate-400 hover:text-[#0284c7] hover:border-sky-300 transition-colors cursor-pointer shrink-0"
-          title={t("agenda.editEvent")}
-        >
-          <Pencil className="w-4 h-4" />
-        </button>
-      </div>
-
       <div className="bg-white dark:bg-slate-900 border border-m3-border rounded-2xl p-5 shadow-xs">
         <div className="flex items-center justify-between mb-1">
           <h3 className="text-sm font-black text-slate-900 dark:text-slate-100">

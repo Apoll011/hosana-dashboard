@@ -704,7 +704,6 @@ export const en: typeof pt = {
     noEventsForDay: "No events for this day.",
     selectEventToSeeDetails: "Select an event to see details",
     pickDayHint: "Choose a day in the calendar on the left.",
-    durationLabel: "Duration: {minutes} min",
     durationZero: "0 min",
     durationHoursMinutes: "{hours} h {minutes} min",
     durationHours: "{hours} h",

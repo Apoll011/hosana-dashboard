@@ -706,7 +706,6 @@ export const pt = {
     noEventsForDay: "Sem eventos para este dia.",
     selectEventToSeeDetails: "Selecione um evento para ver os detalhes",
     pickDayHint: "Escolha um dia no calendário à esquerda.",
-    durationLabel: "Duração: {minutes} min",
     durationZero: "0 min",
     durationHoursMinutes: "{hours} h {minutes} min",
     durationHours: "{hours} h",
