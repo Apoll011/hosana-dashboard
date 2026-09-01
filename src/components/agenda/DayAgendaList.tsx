@@ -4,7 +4,7 @@
  */
 
 import { useI18n } from "@/src/lib/i18n";
-import { AgendaEvent } from "@/src/pages/agenda/types";
+import { AgendaEvent } from "@/src/types";
 import { Users } from "lucide-react";
 import React from "react";
 

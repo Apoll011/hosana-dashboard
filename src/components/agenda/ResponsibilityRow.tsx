@@ -4,8 +4,7 @@
  */
 
 import { useI18n } from "@/src/lib/i18n";
-import { Responsibility } from "@/src/pages/agenda/types";
-import { ResponsibilityCategory } from "@/src/types";
+import { Responsibility, ResponsibilityCategory } from "@/src/types";
 import { COLOR_MAP, ICON_MAP } from "@/src/utils/iconMap";
 import { MessageCircle, MoreVertical, Trash2, UserPlus } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";

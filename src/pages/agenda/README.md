@@ -9,7 +9,6 @@ which replicates with the server over the same HTTP pull/push protocol as
 
 ```
 AgendaPage.tsx              main page (drop into your router, e.g. next to FoldersPage/TeamsPage)
-types.ts                    domain types (AgendaEvent, Responsibility, Category, Assignee...)
 useAgenda.ts                ← the data hook. All CRUD goes through here (RxDB-backed).
 components/
   MiniCalendar.tsx           month calendar with dots for days with events

@@ -15,10 +15,7 @@ import {
   Users,
   Volume2,
 } from "lucide-react";
-import {
-  ResponsibilityColor,
-  ResponsibilityIconKey,
-} from "../pages/agenda/types";
+import { ResponsibilityColor, ResponsibilityIconKey } from "@/src/types";
 
 export const ICON_MAP: Record<ResponsibilityIconKey, LucideIcon> = {
   mic: Mic,

@@ -4,7 +4,7 @@
  */
 
 import { useI18n } from "@/src/lib/i18n";
-import { Assignee } from "@/src/pages/agenda/types";
+import { Assignee } from "@/src/types";
 import { getAvatarGradient, getInitials } from "@/src/utils";
 import React from "react";
 

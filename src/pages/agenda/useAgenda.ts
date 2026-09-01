@@ -19,7 +19,7 @@ import {
   Assignee,
   ReminderSettings,
   Responsibility,
-} from "./types";
+} from "@/src/types";
 
 const DEFAULT_REMINDER: ReminderSettings = {
   enabled: false,

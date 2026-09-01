@@ -6,7 +6,7 @@
 import { Button, Input, Modal } from "@/src/components/common";
 import { useServices } from "@/src/hooks/useServices";
 import { TranslateFn, useI18n } from "@/src/lib/i18n";
-import { Assignee } from "@/src/pages/agenda/types";
+import { Assignee } from "@/src/types";
 import { ResponsibilityCategory } from "@/src/types";
 import {
   BellRing,

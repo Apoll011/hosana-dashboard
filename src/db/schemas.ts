@@ -1,5 +1,4 @@
-import { ReminderSettings, Responsibility } from "@/src/pages/agenda/types";
-import { ServiceElement } from "@/src/types";
+import { ReminderSettings, Responsibility, ServiceElement } from "@/src/types";
 import { RxJsonSchema } from "rxdb";
 
 export interface SongDocType {
@@ -203,7 +202,7 @@ export const serviceSchema: RxJsonSchema<ServiceDocType> = {
  * Wire/doc shape of an agenda event — mirrors the server's `agendaEvents`
  * replication collection (see the replication contract). The `reminder` and
  * `responsibilities` payloads are the same domain types used by the Agenda UI
- * (`@/src/pages/agenda/types`), stored verbatim in jsonb columns on the server.
+ * (`@/src/types`), stored verbatim in jsonb columns on the server.
  *
  * Notes on the contract:
  * - `date` is a **local** "yyyy-mm-dd" string. It is never converted to/from

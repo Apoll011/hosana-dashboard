@@ -7,10 +7,7 @@ import { useI18n } from "@/src/lib/i18n";
 import { ResponsibilityCategory } from "@/src/types";
 import { Plus, Trash2, Users } from "lucide-react";
 import React, { useState } from "react";
-import {
-  ResponsibilityColor,
-  ResponsibilityIconKey,
-} from "../../pages/agenda/types";
+import { ResponsibilityColor, ResponsibilityIconKey } from "@/src/types";
 import { COLOR_MAP, ICON_MAP } from "../../utils/iconMap";
 import { Button, Input } from "../common";
 
