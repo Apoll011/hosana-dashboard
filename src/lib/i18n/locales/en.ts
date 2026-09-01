@@ -663,7 +663,6 @@ export const en: typeof pt = {
     newEvent: "New Event",
     createEvent: "Create Event",
     editEvent: "Edit Event",
-    editDetails: "Edit Details",
     today: "Today",
     previousMonth: "Previous month",
     nextMonth: "Next month",

@@ -29,7 +29,6 @@ export const AgendaPage: React.FC = () => {
 
   const [isNewEventOpen, setIsNewEventOpen] = useState(false);
   const [isEditEventOpen, setIsEditEventOpen] = useState(false);
-  const [isEditDetailsOpen, setIsEditDetailsOpen] = useState(false);
   const [isAddResponsibilityOpen, setIsAddResponsibilityOpen] = useState(false);
   const [isReminderOpen, setIsReminderOpen] = useState(false);
   const [editingAssigneesFor, setEditingAssigneesFor] = useState<string | null>(
@@ -175,7 +174,7 @@ export const AgendaPage: React.FC = () => {
 
           <DetailsSidebar
             event={selectedEvent}
-            onEditDetails={() => setIsEditDetailsOpen(true)}
+            onEdit={() => setIsEditEventOpen(true)}
             onToggleReminder={() => {
               if (!selectedEvent) return;
               store.updateReminder(selectedEvent.id, {
@@ -198,7 +197,8 @@ export const AgendaPage: React.FC = () => {
         initial={{ date: selectedDate }}
       />
 
-      {/* Edit event (title/time/type/duration) */}
+      {/* Edit event (title / type / date-time / duration / linked service /
+          location / notes) */}
       {selectedEvent && (
         <EventFormModal
           isOpen={isEditEventOpen}
@@ -214,21 +214,6 @@ export const AgendaPage: React.FC = () => {
             setIsEditEventOpen(false);
           }}
           title={t("agenda.editEvent")}
-          submitLabel={t("common.save")}
-          initial={selectedEvent}
-        />
-      )}
-
-      {/* Edit details panel (location / notes) reuses the same form */}
-      {selectedEvent && (
-        <EventFormModal
-          isOpen={isEditDetailsOpen}
-          onClose={() => setIsEditDetailsOpen(false)}
-          onSubmit={(value) => {
-            store.updateEvent(selectedEvent.id, value);
-            setIsEditDetailsOpen(false);
-          }}
-          title={t("agenda.editDetails")}
           submitLabel={t("common.save")}
           initial={selectedEvent}
         />
