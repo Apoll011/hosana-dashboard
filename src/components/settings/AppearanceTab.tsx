@@ -5,6 +5,8 @@
 
 import { usePersonalSettings } from "@/src/hooks/usePersonalSettings";
 import { useI18n } from "@/src/lib/i18n";
+import { LANGUAGES } from "@/src/lib/i18n/languages";
+import { PersonalLanguage } from "@/src/lib/i18n/types";
 import {
   Check,
   FolderTree,
@@ -20,8 +22,6 @@ import {
 } from "lucide-react";
 import React from "react";
 import { useTheme } from "../../contexts/ThemeContext";
-import { LANGUAGES } from "../../i18n/languages";
-import { PersonalLanguage } from "../../i18n/types";
 
 export interface AppearanceTabProps {
   active: boolean;
