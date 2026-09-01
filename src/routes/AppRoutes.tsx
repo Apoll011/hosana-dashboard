@@ -4,6 +4,7 @@
  */
 
 import { Spinner } from "@/src/components/common";
+import { useI18n } from "@/src/lib/i18n";
 import React, { Suspense, useEffect } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import {
@@ -15,7 +16,6 @@ import {
   useParams,
 } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
-import { useI18n } from "../i18n";
 import { MainLayout } from "../layouts/MainLayout";
 import { usePreloadPermissions } from "../lib/permissions/client";
 import { CaptchaPage } from "../pages/CaptchaPage";
@@ -31,6 +31,7 @@ const PageLoader = () => {
   );
 };
 
+import { AgendaPage } from "../pages/AgendaPage";
 import {
   AcceptInvitationPage,
   FoldersPage,
@@ -169,6 +170,7 @@ export const AppRoutes: React.FC = () => {
                 <Route path="services" element={<ServicesPage hideHeader />} />
                 <Route path="services/:id" element={<ServiceDetailPage />} />
                 <Route path="teams" element={<TeamsPage />} />
+                <Route path="agenda" element={<AgendaPage />} />
                 <Route path="trash" element={<TrashPage />} />
                 <Route path="settings" element={<SettingsPage />} />
               </Route>

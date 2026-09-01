@@ -3,8 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useAppNavigate } from "@/src/hooks/useAppNavigate";
 import { Button, Input } from "@/src/components/common";
+import { useAppNavigate } from "@/src/hooks/useAppNavigate";
+import { useI18n } from "@/src/lib/i18n";
 import {
   ArrowRight,
   CheckCircle2,
@@ -13,7 +14,6 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import React, { useState } from "react";
-import { useI18n } from "../../i18n";
 import { authClient } from "../../lib/authClient";
 import LoginLayout from "./Layout";
 

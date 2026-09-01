@@ -3,7 +3,7 @@ import {
   ImportResult,
   ProviderImportResult,
   SongImportProvider,
-} from "../utils/import";
+} from "@/src/utils/import";
 
 export class SongImportRegistry {
   private readonly providers = new Map<string, SongImportProvider>();

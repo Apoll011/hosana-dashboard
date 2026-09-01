@@ -1,5 +1,5 @@
+import { TranslateFn, useI18n } from "@/src/lib/i18n";
 import React from "react";
-import { TranslateFn, useI18n } from "../i18n";
 
 // ─── Pure helpers (exported for reuse) ───────────────────────────────────────
 

@@ -1,7 +1,7 @@
+import { useI18n } from "@/src/lib/i18n";
 import { AlertCircle, Cloud, CloudOff, RefreshCw } from "lucide-react";
 import React from "react";
 import { useSync } from "../contexts/SyncContext";
-import { useI18n } from "../i18n";
 
 interface SyncStatusBadgeProps {
   className?: string;

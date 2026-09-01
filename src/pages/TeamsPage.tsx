@@ -4,6 +4,7 @@
  */
 
 import { Button, Input, Modal } from "@/src/components/common";
+import { useI18n } from "@/src/lib/i18n";
 import {
   ArrowLeft,
   Calendar,
@@ -19,7 +20,6 @@ import {
 import React, { useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { useSync } from "../contexts/SyncContext";
-import { useI18n } from "../i18n";
 
 export interface TeamMember {
   id: string;

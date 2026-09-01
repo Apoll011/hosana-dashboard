@@ -96,6 +96,72 @@ export interface Service {
   purgeAt?: string | null;
 }
 
+/**
+ * A responsibility category ("Líder do Culto", "Som", "Projeção"...) that can
+ * be assigned to agenda events. The master list lives in the org metadata
+ * (`metadata.settings.agenda.responsibilityCategories`, see
+ * `useOrgSettings`) so it's shared between the Agenda page and the Settings →
+ * General "Responsabilidades" card — not per-user local storage.
+ */
+export type ResponsibilityColor =
+  "amber" | "violet" | "sky" | "rose" | "emerald" | "cyan" | "slate" | "indigo";
+
+/** Icon key — mapped to an actual lucide-react component in `agenda/iconMap.ts`. */
+export type ResponsibilityIconKey =
+  | "mic"
+  | "music"
+  | "volume"
+  | "light"
+  | "monitor"
+  | "book"
+  | "heart"
+  | "users"
+  | "camera"
+  | "custom";
+
+export interface ResponsibilityCategory {
+  id: string;
+  label: string;
+  icon: ResponsibilityIconKey;
+  color: ResponsibilityColor;
+}
+
+export interface Assignee {
+  id: string;
+  name: string;
+  memberId?: string;
+  avatarUrl?: string | null;
+}
+
+export interface Responsibility {
+  id: string;
+  categoryId: string;
+  assignees: Assignee[];
+}
+
+export interface ReminderSettings {
+  enabled: boolean;
+  label: string;
+}
+
+export interface AgendaEvent {
+  id: string;
+  date: string;
+  title: string;
+  type: string;
+  time: string;
+  durationMinutes: number;
+  location?: string | null;
+  notes?: string | null;
+  reminder: ReminderSettings;
+  linkedServiceId?: string | null;
+  responsibilities: Responsibility[];
+  createdAt?: string;
+  updatedAt?: string;
+  isDeleted?: boolean;
+  purgeAt?: string | null;
+}
+
 export interface SyncStatusResponse {
   versionHash: string;
   timestamp: string;

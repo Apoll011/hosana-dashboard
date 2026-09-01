@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { useI18n } from "@/src/lib/i18n";
 import {
   Bell,
   Building2,
@@ -14,7 +15,6 @@ import {
   X,
 } from "lucide-react";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { useI18n } from "../i18n";
 
 export type InboxNotification = {
   id: string;
