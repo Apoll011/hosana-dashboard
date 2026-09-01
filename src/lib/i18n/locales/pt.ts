@@ -665,7 +665,6 @@ export const pt = {
     newEvent: "Novo Evento",
     createEvent: "Criar Evento",
     editEvent: "Editar Evento",
-    editDetails: "Editar Detalhes",
     today: "Hoje",
     previousMonth: "Mês anterior",
     nextMonth: "Mês seguinte",

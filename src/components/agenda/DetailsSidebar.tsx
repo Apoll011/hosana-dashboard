@@ -14,7 +14,7 @@ import { serviceTotalMinutes } from "./ServiceLinkField";
 
 interface DetailsSidebarProps {
   event: AgendaEvent | undefined;
-  onEditDetails: () => void;
+  onEdit: () => void;
   onToggleReminder: () => void;
   onEditReminder: () => void;
 }
@@ -31,7 +31,7 @@ function formatShortDate(iso: string, t: TranslateFn): string {
 
 export const DetailsSidebar: React.FC<DetailsSidebarProps> = ({
   event,
-  onEditDetails,
+  onEdit,
   onToggleReminder,
   onEditReminder,
 }) => {
@@ -56,9 +56,9 @@ export const DetailsSidebar: React.FC<DetailsSidebarProps> = ({
             {t("common.details")}
           </h3>
           <button
-            onClick={onEditDetails}
+            onClick={onEdit}
             className="p-1 rounded-lg text-slate-400 hover:text-[#0284c7] hover:bg-m3-hover transition-colors cursor-pointer"
-            title={t("agenda.editDetails")}
+            title={t("agenda.editEvent")}
           >
             <Pencil className="w-3.5 h-3.5" />
           </button>
