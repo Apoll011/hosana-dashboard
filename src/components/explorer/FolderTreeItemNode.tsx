@@ -1,4 +1,4 @@
-import React from "react";
+import { useI18n } from "@/src/lib/i18n";
 import { Folder } from "@/src/types";
 import {
   ChevronDown,
@@ -7,7 +7,7 @@ import {
   FolderOpen,
   MoreVertical,
 } from "lucide-react";
-import { useI18n } from "../../i18n";
+import React from "react";
 import {
   getFolderColorStyle,
   getFolderIconComponent,

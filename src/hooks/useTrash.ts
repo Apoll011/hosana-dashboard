@@ -5,13 +5,14 @@
 
 import { useEffect, useState } from "react";
 import { getDatabase } from "../db";
+import { useAgenda } from "./useAgenda";
 import { useFolders } from "./useFolders";
 import { useServices } from "./useServices";
 import { useSongs } from "./useSongs";
 
 export interface TrashItem {
   id: string;
-  type: "folder" | "song" | "service";
+  type: "folder" | "song" | "service" | "agenda";
   name: string;
   updatedAt: string;
   purgeAt: string | null;
@@ -24,6 +25,7 @@ export function useTrash() {
   const { restoreFolder, isRestoring: isRestoringFolder } = useFolders();
   const { restoreSong, isRestoring: isRestoringSong } = useSongs();
   const { restoreService, isRestoring: isRestoringService } = useServices();
+  const { restoreEvent, isRestoring: isRestoringEvent } = useAgenda();
 
   useEffect(() => {
     let isSubscribed = true;
@@ -36,9 +38,15 @@ export function useTrash() {
       let latestFolders: TrashItem[] = [];
       let latestSongs: TrashItem[] = [];
       let latestServices: TrashItem[] = [];
+      let latestAgendaEvents: TrashItem[] = [];
 
       const emit = () => {
-        setItems([...latestFolders, ...latestSongs, ...latestServices]);
+        setItems([
+          ...latestFolders,
+          ...latestSongs,
+          ...latestServices,
+          ...latestAgendaEvents,
+        ]);
         setIsLoading(false);
       };
 
@@ -87,6 +95,22 @@ export function useTrash() {
             emit();
           }),
       );
+
+      subs.push(
+        db.agendaEvents
+          .find({ selector: { isDeleted: true } })
+          .$.subscribe((docs) => {
+            if (!isSubscribed) return;
+            latestAgendaEvents = docs.map((d) => ({
+              id: d.id,
+              type: "agenda" as const,
+              name: d.title,
+              updatedAt: d.updatedAt,
+              purgeAt: d.purgeAt ?? null,
+            }));
+            emit();
+          }),
+      );
     }
 
     void subscribeTrash();
@@ -100,13 +124,18 @@ export function useTrash() {
   const restoreItem = async (item: TrashItem) => {
     if (item.type === "folder") await restoreFolder(item.id);
     else if (item.type === "song") await restoreSong(item.id);
-    else await restoreService(item.id);
+    else if (item.type === "service") await restoreService(item.id);
+    else await restoreEvent(item.id);
   };
 
   return {
     items,
     isLoading,
     restoreItem,
-    isRestoring: isRestoringFolder || isRestoringSong || isRestoringService,
+    isRestoring:
+      isRestoringFolder ||
+      isRestoringSong ||
+      isRestoringService ||
+      isRestoringEvent,
   };
 }

@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Folder, Song } from "@/src/types";
+import { useI18n } from "@/src/lib/i18n";
+import { Folder, Service, Song } from "@/src/types";
 import { ConversionResult } from "@hosanna/chordpro";
 import React, {
   useCallback,
@@ -14,7 +15,6 @@ import React, {
 } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import { useRegisterSW } from "virtual:pwa-register/react";
-import { FolderItem, ServiceItem, SongItem } from "../command-palette.types";
 import {
   BatchActionFloatingBar,
   buildFolderTree,
@@ -40,8 +40,7 @@ import { usePersonalSettings } from "../hooks/usePersonalSettings";
 import { useServices } from "../hooks/useServices";
 import { useSongs } from "../hooks/useSongs";
 import { useTrash } from "../hooks/useTrash";
-import { useI18n } from "../i18n";
-import { songImportRegistry } from "../import";
+import { songImportRegistry } from "../lib/import";
 import { ProviderImportResult } from "../utils/import";
 import { deriveView } from "./view";
 
@@ -1393,7 +1392,6 @@ export const MainLayout: React.FC = () => {
           folderTree={folderTree}
           expandedFolderIds={expandedFolderIds}
           showFolderTree={settings.showFolderTree}
-          teamsEnabled={false}
           user={user}
           onSelectFolder={handleSelectFolder}
           onContextMenu={handleContextMenu}
@@ -1719,7 +1717,7 @@ export const MainLayout: React.FC = () => {
         if (songsQuery.isLoading || !songsQuery.data?.songs) return [];
         const lowerQuery = query.toLowerCase().trim();
         const allSongsList = songsQuery.data.songs;
-        const matches: SongItem[] = [];
+        const matches: Song[] = [];
         for (const song of allSongsList) {
           const matchTitle = song.title?.toLowerCase().includes(lowerQuery);
           const matchArtist = song.artist?.toLowerCase().includes(lowerQuery);
@@ -1738,7 +1736,7 @@ export const MainLayout: React.FC = () => {
         if (foldersQuery.isLoading || !foldersQuery.data?.folders) return [];
         const lowerQuery = query.toLowerCase().trim();
         const allFoldersList = foldersQuery.data.folders;
-        const matches: FolderItem[] = [];
+        const matches: Folder[] = [];
         for (const folder of allFoldersList) {
           if (folder.name?.toLowerCase().includes(lowerQuery)) {
             matches.push(folder);
@@ -1751,7 +1749,7 @@ export const MainLayout: React.FC = () => {
         const rawServices = servicesQuery.data;
         if (servicesQuery.isLoading || !Array.isArray(rawServices)) return [];
         const lowerQuery = query.toLowerCase().trim();
-        const matches: ServiceItem[] = [];
+        const matches: Service[] = [];
         for (const service of rawServices) {
           const matchName = service.name?.toLowerCase().includes(lowerQuery);
           const matchNotes = service.notes?.toLowerCase().includes(lowerQuery);

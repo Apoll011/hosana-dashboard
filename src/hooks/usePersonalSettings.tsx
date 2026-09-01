@@ -4,7 +4,7 @@
  */
 
 import { useCallback, useSyncExternalStore } from "react";
-import { PersonalLanguage } from "../i18n/types";
+import { PersonalLanguage } from "../lib/i18n/types";
 
 export type PersonalTheme = "light" | "dark" | "system";
 export type ViewMode = "grid" | "list";

@@ -1,8 +1,8 @@
+import { TranslationKey, useI18n } from "@/src/lib/i18n";
 import { RotateCcw, X } from "lucide-react";
 import React from "react";
-import { Button } from "./common/Button";
 import { EDITOR_THEMES, useEditorSettings } from "../hooks/useEditorSettings";
-import { TranslationKey, useI18n } from "../i18n";
+import { Button } from "./common/Button";
 
 export interface EditorSettingsPanelProps {
   isOpen: boolean;

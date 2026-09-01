@@ -3,13 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useAppNavigate } from "@/src/hooks/useAppNavigate";
 import { Button, Spinner } from "@/src/components/common";
+import { useAppNavigate } from "@/src/hooks/useAppNavigate";
+import { useI18n } from "@/src/lib/i18n";
 import { Building2, Check, ShieldAlert, X } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
-import { useI18n } from "../../i18n";
 import { authClient } from "../../lib/authClient";
 import LoginLayout from "./Layout";
 

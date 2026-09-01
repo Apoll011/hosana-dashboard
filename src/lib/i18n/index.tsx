@@ -10,13 +10,14 @@ import React, {
   useEffect,
   useMemo,
 } from "react";
-import { useAuth } from "../contexts/AuthContext";
-import { usePersonalSettings } from "../hooks/usePersonalSettings";
+
+import { useAuth } from "@/src/contexts/AuthContext";
+import { usePersonalSettings } from "@/src/hooks/usePersonalSettings";
 import { DEFAULT_LANGUAGE } from "./languages";
-import { resolveLanguage } from "./resolve";
 import { en } from "./locales/en";
 import { es } from "./locales/es";
 import { pt } from "./locales/pt";
+import { resolveLanguage } from "./resolve";
 import {
   LANGUAGE_LOCALE,
   Language,

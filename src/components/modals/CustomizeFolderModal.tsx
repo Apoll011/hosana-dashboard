@@ -4,6 +4,7 @@
  */
 
 import { Button, Modal } from "@/src/components/common";
+import { useI18n } from "@/src/lib/i18n";
 import { Folder } from "@/src/types";
 import {
   Check,
@@ -15,7 +16,6 @@ import {
   X,
 } from "lucide-react";
 import React, { useEffect, useMemo, useState } from "react";
-import { useI18n } from "../../i18n";
 import {
   FOLDER_COLORS,
   FOLDER_ICONS,
