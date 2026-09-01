@@ -1500,6 +1500,14 @@ export const es: typeof pt = {
       deleteError: "Error al eliminar culto: {error}",
       saveError: "Error al guardar culto: {error}",
     },
+    agenda: {
+      created: "¡Evento creado con éxito!",
+      updated: "¡Evento actualizado con éxito!",
+      deleted: "¡Evento movido a la papelera!",
+      restored: "¡Evento restaurado con éxito!",
+      deleteError: "Error al eliminar evento: {error}",
+      saveError: "Error al guardar evento: {error}",
+    },
     search: {
       searching: "Buscando...",
       noResults: "No se encontraron resultados.",

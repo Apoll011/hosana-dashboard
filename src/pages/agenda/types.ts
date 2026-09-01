@@ -7,8 +7,11 @@
  * Domain types for the Agenda (schedule) feature.
  *
  * These are intentionally storage-agnostic — nothing here knows about
- * localStorage, Prisma, or RxDB. That's on purpose: when it's time to wire
- * this up to the real backend, only `useAgendaStorage.ts` needs to change.
+ * localStorage, Prisma, or RxDB. The RxDB document shape
+ * (`AgendaEventDocType` in `src/db/schemas.ts`) extends `AgendaEvent` with
+ * the replication bookkeeping fields (`createdAt`, `updatedAt`, `isDeleted`,
+ * `purgeAt`, `_deleted`), so the UI keeps working against this narrower view
+ * while `useAgenda` (`src/pages/agenda/useAgenda.ts`) handles the sync.
  *
  * The responsibility-category types (`ResponsibilityCategory`,
  * `ResponsibilityColor`, `ResponsibilityIconKey`) live in `@/src/types` and
@@ -66,7 +69,7 @@ export interface ReminderSettings {
  */
 export interface AgendaEvent {
   id: string;
-  /** ISO date string, yyyy-mm-dd, in local time. */
+  /** Local calendar date "yyyy-mm-dd" — never timezone-shifted. */
   date: string;
   title: string;
   /** Free-text event type, e.g. "Culto Dominical", "Ensaio de Louvor". */
@@ -74,8 +77,8 @@ export interface AgendaEvent {
   /** 24h time, "HH:mm". */
   time: string;
   durationMinutes: number;
-  location?: string;
-  notes?: string;
+  location?: string | null;
+  notes?: string | null;
   reminder: ReminderSettings;
   /**
    * Optional link to an order-of-worship `Service.id` (`@/src/types`).
@@ -84,12 +87,25 @@ export interface AgendaEvent {
   linkedServiceId?: string | null;
   /** Responsibilities assigned to this event (embedded — no `eventId` needed). */
   responsibilities: Responsibility[];
+  /**
+   * Replication bookkeeping fields (filled by `AgendaEventDocType`). The UI
+   * doesn't depend on them, but they're kept on the type so RxDB docs can be
+   * used directly as `AgendaEvent`.
+   */
+  createdAt?: string;
+  updatedAt?: string;
+  isDeleted?: boolean;
+  purgeAt?: string | null;
 }
 
 /**
  * Shape persisted to the agenda's local storage. Kept flat/normalized (by id)
  * on purpose. Categories are NOT here — the master responsibility list lives
  * in the org metadata (`useOrgSettings`) and is read from there.
+ *
+ * Kept for reference only: the live Agenda is backed by the RxDB
+ * `agendaEvents` collection (see `useAgenda`), so nothing persists to
+ * localStorage anymore.
  */
 export interface AgendaState {
   events: Record<string, AgendaEvent>;

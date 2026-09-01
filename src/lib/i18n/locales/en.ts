@@ -1482,6 +1482,14 @@ export const en: typeof pt = {
       deleteError: "Error deleting service: {error}",
       saveError: "Error saving service: {error}",
     },
+    agenda: {
+      created: "Event created successfully!",
+      updated: "Event updated successfully!",
+      deleted: "Event moved to trash!",
+      restored: "Event restored successfully!",
+      deleteError: "Error deleting event: {error}",
+      saveError: "Error saving event: {error}",
+    },
     search: {
       searching: "Searching...",
       noResults: "No results found.",

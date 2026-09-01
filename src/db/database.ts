@@ -6,6 +6,8 @@ import { getRxStorageDexie } from "rxdb/plugins/storage-dexie";
 import { RxDBUpdatePlugin } from "rxdb/plugins/update";
 import { wrappedValidateAjvStorage } from "rxdb/plugins/validate-ajv";
 import {
+  AgendaEventDocType,
+  agendaEventSchema,
   FolderDocType,
   folderSchema,
   ServiceDocType,
@@ -27,6 +29,7 @@ export type HosanaDatabaseCollections = {
   songs: import("rxdb").RxCollection<SongDocType>;
   folders: import("rxdb").RxCollection<FolderDocType>;
   services: import("rxdb").RxCollection<ServiceDocType>;
+  agendaEvents: import("rxdb").RxCollection<AgendaEventDocType>;
 };
 
 export type HosanaDatabase = RxDatabase<HosanaDatabaseCollections>;
@@ -76,6 +79,12 @@ export async function getDatabase(): Promise<HosanaDatabase> {
           schema: serviceSchema,
           migrationStrategies: {
             1: migrateToTrash<ServiceDocType>,
+          },
+        },
+        agendaEvents: {
+          schema: agendaEventSchema,
+          migrationStrategies: {
+            1: migrateToTrash<AgendaEventDocType>,
           },
         },
       });

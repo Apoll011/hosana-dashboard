@@ -1,18 +1,16 @@
 # Agenda page
 
 UI-complete "Agenda" page (calendar + day list + events + responsibilities + details/notifications),
-matching the Hosanna Studio look. No backend calls — state is persisted to
-`localStorage` under the key `hosanna:agenda:v1`, seeded from `mockData.ts`
-the first time it runs.
+matching the Hosanna Studio look. Backed by the RxDB `agendaEvents` collection,
+which replicates with the server over the same HTTP pull/push protocol as
+`songs`, `folders` and `services` (see the agendaEvents replication contract).
 
 ## Files
 
 ```
 AgendaPage.tsx              main page (drop into your router, e.g. next to FoldersPage/TeamsPage)
 types.ts                    domain types (AgendaEvent, Responsibility, Category, Assignee...)
-mockData.ts                 seed data (matches the reference screenshot)
-useAgendaStorage.ts         ← the swap point. All CRUD goes through here.
-iconMap.ts                  icon + color lookup for responsibility categories
+useAgenda.ts                ← the data hook. All CRUD goes through here (RxDB-backed).
 components/
   MiniCalendar.tsx           month calendar with dots for days with events
   DayAgendaList.tsx          list of events for the selected day
@@ -28,6 +26,17 @@ components/
   DetailsSidebar.tsx         details card + notifications/reminder card
   EventModals.tsx            all modals: create/edit event, add/edit
                              responsibility, edit reminder
+```
+
+The RxDB side lives in `src/db`:
+
+```
+schemas.ts      AgendaEventDocType + agendaEventSchema (mirrors the wire doc)
+database.ts     registers the agendaEvents collection on the hosanadb instance
+replication.ts  live pull/push replication for agendaEvents (services pushed
+                first — linkedServiceId is a real FK, see §6 of the contract)
+trash.ts        agenda events join the expired-trash purge sweep
+validation.ts   validateAgendaEventRules (title/date/type/time/duration)
 ```
 
 ## Wiring it up
@@ -71,36 +80,36 @@ service's `elements[].duration` (seconds → rounded minutes), and the title
 is pre-filled only if it's still empty. `DetailsSidebar` shows the linked
 service and jumps to `ServiceDetailPage` via its external-link button.
 
+Because `linkedServiceId` is a **real foreign key** on the server
+(`ON DELETE SET NULL`), pushes are ordered so `services` change rows reach the
+server before the `agendaEvents` rows that reference them; if a push is still
+rejected for FK ordering, `src/db/replication.ts` nudges the services
+replication and lets RxDB retry. A dangling `linkedServiceId` (no matching
+local service) is treated as "link lost" by the UI.
+
 - Responsibilities are **embedded** in their event
   (`AgendaEvent.responsibilities`) — no `eventId` back-reference needed.
 - Assignees may be **linked to org members** via `Assignee.memberId`
   (`organization.members[].id` from Better Auth). Assignees without a
-  `memberId` are free-typed names; `useAgendaStorage.manualAssignees`
+  `memberId` are free-typed names; `useAgenda.manualAssignees`
   collects those across all events so the picker can suggest them.
 - **Responsibility categories are org-wide**: they live in the org metadata
   (`metadata.settings.agenda.responsibilityCategories`, managed by
   `useOrgSettings`) and are edited in Settings → General → "Responsabilidades
   da Agenda" — the same save flow as every other setting on that tab. The
-  Agenda reads them through `useAgendaStorage` (which pulls them from
-  `useOrgSettings`), never from its own local storage. On first run the hook
-  seeds the metadata with `DEFAULT_RESPONSIBILITY_CATEGORIES` if the field is
-  missing (one-time; an intentionally empty list is respected). Events whose
+  Agenda reads them through `useAgenda` (which pulls them from
+  `useOrgSettings`), never from its own storage. Events whose
   responsibilities reference a deleted category are cleaned up automatically
   when the persisted category list changes.
 
-Nothing is wired to the real backend yet — it's UI-only, as requested.
+## Trash semantics
 
-## Swapping localStorage for the real backend later
+`isDeleted`/`purgeAt` work exactly like songs/folders/services:
 
-Everything reads/writes through the `useAgendaStorage()` hook. Its public
-surface (`events`, `categories`, `manualAssignees`, `addEvent`,
-`updateEvent`, `addResponsibility`, `updateResponsibilityAssignees`, etc.)
-is the contract the UI depends on — nothing else touches storage directly.
-To go live:
-
-- Replace `loadState()`/`persist()` with your Prisma/RxDB calls (or a
-  `useQuery`/`useMutation` pair per entity).
-- Keep the function names and shapes the same, or update `AgendaPage.tsx`'s
-  calls accordingly.
-- `resetToMockData()` is there for quick manual testing/demoing — delete it
-  once real data exists.
+- Deleting an event sets `isDeleted: true` + `purgeAt` (30 days). The row
+  keeps replicating, so the Trash page (`useTrash`/`TrashPage`) lists it and
+  can restore it via `useAgenda.restoreEvent`.
+- Hard purge is server-side (cron) once `purgeAt` expires; `purgeExpiredTrash`
+  in `src/db/trash.ts` mirrors it for the local store.
+- `date` is a local "yyyy-mm-dd" string — never run it through
+  `new Date(doc.date).toISOString()` or any timezone logic.

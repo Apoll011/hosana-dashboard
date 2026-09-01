@@ -377,6 +377,53 @@ export function validateServiceRules(
 }
 
 /**
+ * Validates an agenda event against the server's required fields:
+ * `date` (local "yyyy-mm-dd" — never timezone-shifted), `title`, `type`
+ * (non-empty), `time` ("HH:mm") and `durationMinutes` (required number ≥ 0).
+ * Mirrors the defaults table in the agendaEvents replication contract.
+ */
+export function validateAgendaEventRules(event: {
+  title?: string;
+  date?: string;
+  type?: string;
+  time?: string;
+  durationMinutes?: number;
+}): void {
+  if (!event.title || !event.title.trim()) {
+    throw new RequiredFieldError("title", "Event title is required.");
+  }
+
+  if (!event.date || !/^\d{4}-\d{2}-\d{2}$/.test(event.date)) {
+    throw new SchemaValidationError(
+      "Invalid event date. Expected a local yyyy-mm-dd string.",
+      "INVALID_DATE",
+    );
+  }
+
+  if (!event.type || !event.type.trim()) {
+    throw new RequiredFieldError("type", "Event type is required.");
+  }
+
+  if (!event.time || !/^\d{2}:\d{2}$/.test(event.time)) {
+    throw new SchemaValidationError(
+      "Invalid event time. Expected HH:mm (24h).",
+      "INVALID_TIME",
+    );
+  }
+
+  if (
+    typeof event.durationMinutes !== "number" ||
+    isNaN(event.durationMinutes) ||
+    event.durationMinutes < 0
+  ) {
+    throw new RequiredFieldError(
+      "durationMinutes",
+      "A valid event duration is required.",
+    );
+  }
+}
+
+/**
  * Validates a batch of songs before creation/import:
  * - Checks internal batch duplicate paths
  * - Checks database duplicate paths

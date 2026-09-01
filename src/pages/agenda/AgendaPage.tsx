@@ -17,11 +17,11 @@ import { MiniCalendar, toIso } from "@/src/components/agenda/MiniCalendar";
 import { useI18n } from "@/src/lib/i18n";
 import { CalendarPlus } from "lucide-react";
 import React, { useMemo, useState } from "react";
-import { useAgendaStorage } from "./useAgendaStorage";
+import { useAgenda } from "./useAgenda";
 
 export const AgendaPage: React.FC = () => {
   const { t } = useI18n();
-  const store = useAgendaStorage();
+  const store = useAgenda();
 
   const [visibleMonth, setVisibleMonth] = useState(() => new Date());
   const [selectedDate, setSelectedDate] = useState(() => toIso(new Date()));
@@ -99,8 +99,8 @@ export const AgendaPage: React.FC = () => {
     setSelectedEventId(null);
   };
 
-  const handleCreateEvent = (value: EventFormValue) => {
-    const id = store.addEvent(value);
+  const handleCreateEvent = async (value: EventFormValue) => {
+    const id = await store.addEvent(value);
     setSelectedDate(value.date);
     setSelectedEventId(id);
     setIsNewEventOpen(false);
