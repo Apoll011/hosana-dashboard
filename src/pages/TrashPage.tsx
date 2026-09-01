@@ -7,6 +7,7 @@ import { Badge, Button, EmptyState, Spinner } from "@/src/components/common";
 import { useI18n } from "@/src/lib/i18n";
 import {
   Calendar,
+  CalendarClock,
   FileMusic,
   Folder as FolderIcon,
   RotateCcw,
@@ -19,6 +20,7 @@ const TYPE_ICONS: Record<string, React.ReactNode> = {
   folder: <FolderIcon className="w-4 h-4 text-amber-500" />,
   song: <FileMusic className="w-4 h-4 text-sky-500" />,
   service: <Calendar className="w-4 h-4 text-emerald-500" />,
+  agenda: <CalendarClock className="w-4 h-4 text-violet-500" />,
 };
 
 function formatDate(iso: string | null, locale: string): string {
@@ -39,7 +41,9 @@ export const TrashPage: React.FC = () => {
       ? t("common.folder")
       : type === "song"
         ? t("common.song")
-        : t("common.service");
+        : type === "service"
+          ? t("common.service")
+          : t("common.agenda");
 
   if (isLoading) {
     return (

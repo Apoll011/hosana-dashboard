@@ -1496,6 +1496,14 @@ export const pt = {
       deleteError: "Erro ao apagar culto: {error}",
       saveError: "Erro ao guardar culto: {error}",
     },
+    agenda: {
+      created: "Evento criado com sucesso!",
+      updated: "Evento atualizado com sucesso!",
+      deleted: "Evento movido para o lixo!",
+      restored: "Evento restaurado com sucesso!",
+      deleteError: "Erro ao apagar evento: {error}",
+      saveError: "Erro ao guardar evento: {error}",
+    },
     search: {
       searching: "A pesquisar...",
       noResults: "Nenhum resultado encontrado.",
