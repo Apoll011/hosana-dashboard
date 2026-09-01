@@ -16,7 +16,9 @@ iconMap.ts                  icon + color lookup for responsibility categories
 components/
   MiniCalendar.tsx           month calendar with dots for days with events
   DayAgendaList.tsx          list of events for the selected day
-  EventDetailPanel.tsx       header card + responsibilities list
+  EventModals.tsx            all modals: create/edit event, add/edit
+                             responsibility, edit reminder
+  ResponsibilitiesPanel.tsx  responsibilities list for the selected event
   ResponsibilityRow.tsx      one responsibility row (icon, avatars, actions)
   AvatarStack.tsx            overlapping avatar circles
   AssigneeTagInput.tsx       member-aware "type a name" chip input with

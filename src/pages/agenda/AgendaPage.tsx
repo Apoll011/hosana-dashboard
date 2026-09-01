@@ -5,7 +5,7 @@
 
 import { DayAgendaList } from "@/src/components/agenda/DayAgendaList";
 import { DetailsSidebar } from "@/src/components/agenda/DetailsSidebar";
-import { EventDetailPanel } from "@/src/components/agenda/EventDetailPanel";
+import { ResponsibilitiesPanel } from "@/src/components/agenda/ResponsibilitiesPanel";
 import {
   AddResponsibilityModal,
   EditAssigneesModal,
@@ -158,11 +158,10 @@ export const AgendaPage: React.FC = () => {
             />
           </div>
 
-          <EventDetailPanel
+          <ResponsibilitiesPanel
             event={selectedEvent}
             responsibilities={responsibilitiesForSelectedEvent}
             categories={categoriesById}
-            onEditEvent={() => setIsEditEventOpen(true)}
             onAddResponsibility={() => setIsAddResponsibilityOpen(true)}
             onEditAssignees={(respId) => setEditingAssigneesFor(respId)}
             onRemoveResponsibility={(respId) => {

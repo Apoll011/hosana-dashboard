@@ -6,7 +6,7 @@
 import { useAuth } from "@/src/contexts/AuthContext";
 import { useAppNavigate } from "@/src/hooks/useAppNavigate";
 import { useServices } from "@/src/hooks/useServices";
-import { TranslateFn, useI18n } from "@/src/lib/i18n";
+import { TranslateFn, TranslationKey, useI18n } from "@/src/lib/i18n";
 import { AgendaEvent } from "@/src/pages/agenda/types";
 import { Bell, ExternalLink, Link2, Pencil } from "lucide-react";
 import React from "react";
@@ -17,6 +17,41 @@ interface DetailsSidebarProps {
   onEdit: () => void;
   onToggleReminder: () => void;
   onEditReminder: () => void;
+}
+
+const WEEKDAY_KEYS: TranslationKey[] = [
+  "agenda.weekdaysFull.sunday",
+  "agenda.weekdaysFull.monday",
+  "agenda.weekdaysFull.tuesday",
+  "agenda.weekdaysFull.wednesday",
+  "agenda.weekdaysFull.thursday",
+  "agenda.weekdaysFull.friday",
+  "agenda.weekdaysFull.saturday",
+];
+const MONTH_KEYS: TranslationKey[] = [
+  "agenda.months.january",
+  "agenda.months.february",
+  "agenda.months.march",
+  "agenda.months.april",
+  "agenda.months.may",
+  "agenda.months.june",
+  "agenda.months.july",
+  "agenda.months.august",
+  "agenda.months.september",
+  "agenda.months.october",
+  "agenda.months.november",
+  "agenda.months.december",
+];
+
+function formatLongDate(iso: string, t: TranslateFn): string {
+  const [y, m, d] = iso.split("-").map(Number);
+  const date = new Date(y, m - 1, d);
+  return t("agenda.dateLong", {
+    weekday: t(WEEKDAY_KEYS[date.getDay()]),
+    day: d,
+    month: t(MONTH_KEYS[m - 1]),
+    year: y,
+  });
 }
 
 function formatShortDate(iso: string, t: TranslateFn): string {
@@ -65,6 +100,40 @@ export const DetailsSidebar: React.FC<DetailsSidebarProps> = ({
         </div>
 
         <div className="space-y-3">
+          <div>
+            <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wide">
+              {t("common.name")}
+            </p>
+            <p className="text-sm font-bold text-slate-900 dark:text-slate-100 mt-0.5 truncate">
+              {event.title}
+            </p>
+          </div>
+          <div>
+            <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wide">
+              {t("common.date")}
+            </p>
+            <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 mt-0.5">
+              {formatLongDate(event.date, t)}
+            </p>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wide">
+                {t("agenda.time")}
+              </p>
+              <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 mt-0.5">
+                {event.time}
+              </p>
+            </div>
+            <div>
+              <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wide">
+                {t("agenda.duration")}
+              </p>
+              <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 mt-0.5">
+                {t("agenda.minutes", { minutes: event.durationMinutes })}
+              </p>
+            </div>
+          </div>
           <div>
             <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wide">
               {t("agenda.type")}
