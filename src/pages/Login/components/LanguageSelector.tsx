@@ -3,11 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { LANGUAGES, type LanguageMeta } from "@/src/i18n/languages";
-import type { Language } from "@/src/i18n/types";
-import { useI18n } from "@/src/i18n";
+import { useI18n } from "@/src/lib/i18n";
+import { LANGUAGES, LanguageMeta } from "@/src/lib/i18n/languages";
+import { Language } from "@/src/lib/i18n/types";
 import { Globe } from "lucide-react";
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export { LANGUAGES as SUPPORTED_LANGUAGES };
 export type { Language };

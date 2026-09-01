@@ -4,13 +4,13 @@
  */
 
 import { AppLink } from "@/src/components/AppLink";
-import { useAppNavigate } from "@/src/hooks/useAppNavigate";
 import { Button, Input } from "@/src/components/common";
+import { useAppNavigate } from "@/src/hooks/useAppNavigate";
+import { useI18n } from "@/src/lib/i18n";
 import { ArrowRight, Lock, Mail } from "lucide-react";
 import React, { useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
-import { useI18n } from "../../i18n";
 import { authClient } from "../../lib/authClient";
 import { posthog } from "../../lib/posthog";
 import LoginLayout from "./Layout";

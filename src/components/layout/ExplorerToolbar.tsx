@@ -3,10 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { useI18n } from "@/src/lib/i18n";
 import { Service } from "@/src/types";
 import { Archive, ArrowUpDown, Filter, LayoutGrid, List } from "lucide-react";
 import React from "react";
-import { useI18n } from "../../i18n";
 import { ViewName } from "../../layouts/view";
 
 interface ExplorerToolbarProps {

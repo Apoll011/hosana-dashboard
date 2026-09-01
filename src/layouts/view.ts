@@ -18,6 +18,7 @@ export type ViewName =
   | "service-editor"
   | "teams"
   | "settings"
+  | "agenda"
   | "trash";
 
 /**
@@ -36,6 +37,7 @@ export function deriveView(pathname: string, slugPrefix: string): ViewName {
   if (path === "/services") return "services";
   if (path.startsWith("/services/")) return "service-editor";
   if (path.includes("/teams")) return "teams";
+  if (path.includes("/agenda")) return "agenda";
   if (path.includes("/settings")) return "settings";
   if (path.includes("/trash")) return "trash";
 

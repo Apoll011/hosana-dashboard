@@ -12,6 +12,7 @@ import React, {
   useMemo,
   useState,
 } from "react";
+import { ResponsibilityCategory } from "@/src/types";
 import { authClient } from "../lib/authClient";
 import { clearPermissionCache } from "../lib/permissions/client";
 import { posthog } from "../lib/posthog";
@@ -51,6 +52,9 @@ type Organization = {
         showNotes?: boolean;
         showServiceDuration?: boolean;
         autoSave?: boolean;
+      };
+      agenda?: {
+        responsibilityCategories?: ResponsibilityCategory[];
       };
       appearance?: {
         accentColor?: string;

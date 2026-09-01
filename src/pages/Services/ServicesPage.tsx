@@ -1,5 +1,3 @@
-import { useAppNavigate } from "@/src/hooks/useAppNavigate";
-import { usePermissionValue } from "@/src/lib/permissions/client";
 import {
   Badge,
   ConfirmDialog,
@@ -7,6 +5,9 @@ import {
   Modal,
   Spinner,
 } from "@/src/components/common";
+import { useAppNavigate } from "@/src/hooks/useAppNavigate";
+import { useI18n } from "@/src/lib/i18n";
+import { usePermissionValue } from "@/src/lib/permissions/client";
 import { Service } from "@/src/types";
 import {
   Archive,
@@ -35,7 +36,6 @@ import { ServiceForm } from "../../components/forms/ServiceForm";
 import { useAuth } from "../../contexts/AuthContext";
 import { useMarqueeSelection } from "../../hooks/useMarqueeSelection";
 import { useServices } from "../../hooks/useServices";
-import { useI18n } from "../../i18n";
 import { posthog } from "../../lib/posthog";
 
 interface ServicesPageProps {
@@ -134,9 +134,11 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
   const archivedServices = useMemo(
     () =>
       showArchived
-        ? ((context.archivedServices as Service[] | null) ??
-          archivedServicesQuery.data ??
-          [])
+        ? (
+            (context.archivedServices as Service[] | null) ??
+            archivedServicesQuery.data ??
+            []
+          ).filter((s) => s.archived)
         : [],
     [showArchived, context.archivedServices, archivedServicesQuery.data],
   );
@@ -410,6 +412,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
     await updateService({
       id: service.id,
       data: {
+        name: service.name,
         archived: nextArchived,
         updatedAt: service.updatedAt,
       },
@@ -434,7 +437,11 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
       if (service) {
         return updateService({
           id,
-          data: { archived: !service.archived, updatedAt: service.updatedAt },
+          data: {
+            name: service.name,
+            archived: !service.archived,
+            updatedAt: service.updatedAt,
+          },
         });
       }
       return Promise.resolve();
@@ -849,7 +856,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
             initialValues={{
               name: editTarget.name,
               date: editTarget.date,
-              notes: editTarget.notes,
+              notes: editTarget.notes || "",
             }}
             onSubmit={handleEditServiceSubmit}
             onCancel={() => setEditTarget(null)}

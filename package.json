@@ -1,6 +1,6 @@
 {
   "name": "@hosanna/studio",
-  "version": "2.13.5",
+  "version": "2.14.0",
   "type": "module",
   "license": "Apache-2.0",
   "scripts": {
@@ -15,7 +15,7 @@
   "dependencies": {
     "@atlaskit/pragmatic-drag-and-drop": "^3.0.0",
     "@atlaskit/pragmatic-drag-and-drop-hitbox": "^2.1.0",
-    "@hosanna/chordpro": "^1.1.0",
+    "@hosanna/chordpro": "^1.1.1",
     "@preact/preset-vite": "^2.10.6",
     "@tailwindcss/vite": "^4.1.14",
     "@tanstack/markdown": "^0.0.13",

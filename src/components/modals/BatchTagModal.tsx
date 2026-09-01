@@ -4,9 +4,9 @@
  */
 
 import { Badge, Button, Input, Modal } from "@/src/components/common";
+import { useI18n } from "@/src/lib/i18n";
 import { Check, Plus, Tag as TagIcon, X } from "lucide-react";
 import React, { useEffect, useState } from "react";
-import { useI18n } from "../../i18n";
 
 interface BatchTagModalProps {
   isOpen: boolean;

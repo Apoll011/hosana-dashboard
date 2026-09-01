@@ -4,12 +4,12 @@
  */
 
 import { AppLink } from "@/src/components/AppLink";
-import { useAppNavigate } from "@/src/hooks/useAppNavigate";
 import { Button, Input } from "@/src/components/common";
+import { useAppNavigate } from "@/src/hooks/useAppNavigate";
+import { useI18n } from "@/src/lib/i18n";
 import { ArrowRight, CheckCircle2, Clock, Lock, XCircle } from "lucide-react";
 import React, { useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { useI18n } from "../../i18n";
 import { authClient } from "../../lib/authClient";
 import LoginLayout from "./Layout";
 import { PasswordStrengthMeter } from "./components/PasswordStrengthMeter";

@@ -4,8 +4,8 @@
  */
 
 import { Button, Input } from "@/src/components/common";
+import { useI18n } from "@/src/lib/i18n";
 import React, { useState } from "react";
-import { useI18n } from "../../i18n";
 
 interface FolderFormProps {
   initialName?: string;

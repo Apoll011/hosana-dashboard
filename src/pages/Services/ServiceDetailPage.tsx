@@ -7,6 +7,7 @@ import { ChordProPreviewSettings } from "@/src/components/ChorproSettings";
 import { Button, Input, Spinner } from "@/src/components/common";
 import { useAppNavigate } from "@/src/hooks/useAppNavigate";
 import { usePreviewSettings } from "@/src/hooks/usePreviewSettings";
+import { TranslateFn, useI18n } from "@/src/lib/i18n";
 import { ServiceElement } from "@/src/types";
 import {
   attachClosestEdge,
@@ -54,7 +55,6 @@ import { useSync } from "../../contexts/SyncContext";
 import { useOrgSettings } from "../../hooks/useOrgSettings";
 import { useService, useServices } from "../../hooks/useServices";
 import { useSong, useSongs } from "../../hooks/useSongs";
-import { TranslateFn, useI18n } from "../../i18n";
 import { AnnouncementModal } from "./modals/Anouncement";
 import { ScriptureModal } from "./modals/Bible";
 import { CustomModal } from "./modals/Custom";
@@ -662,7 +662,11 @@ export const ServiceDetailPage: React.FC = () => {
       try {
         await updateService({
           id: service.id,
-          data: { notes: generalNotes, updatedAt: service.updatedAt },
+          data: {
+            name: service.name,
+            notes: generalNotes,
+            updatedAt: service.updatedAt,
+          },
         });
       } catch {
         // silent — user can still save manually
@@ -762,6 +766,7 @@ export const ServiceDetailPage: React.FC = () => {
       await updateService({
         id: service.id,
         data: {
+          name: service.name,
           elements: elementsRef.current,
           notes: generalNotes,
           updatedAt: service.updatedAt,
@@ -806,7 +811,11 @@ export const ServiceDetailPage: React.FC = () => {
       try {
         await updateService({
           id: service.id,
-          data: { notes: generalNotes, updatedAt: service.updatedAt },
+          data: {
+            name: service.name,
+            notes: generalNotes,
+            updatedAt: service.updatedAt,
+          },
         });
         showToast(t("serviceDetailPage.serviceSavedSuccess"), "success");
       } catch (error) {

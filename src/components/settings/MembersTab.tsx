@@ -3,8 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Can, CanAny } from "@/src/lib/permissions/components";
 import { Button, Input, Modal } from "@/src/components/common";
+import { useI18n } from "@/src/lib/i18n";
+import { Can, CanAny } from "@/src/lib/permissions/components";
+import { getAvatarGradient, getInitials } from "@/src/utils";
 import {
   ChevronRight,
   Loader2,
@@ -18,7 +20,6 @@ import {
 import React, { useCallback, useEffect, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { useSync } from "../../contexts/SyncContext";
-import { useI18n } from "../../i18n";
 import { authClient } from "../../lib/authClient";
 import { MemberProfilePage } from "./MemberProfilePage";
 import { getRoleBadge } from "./settingsUtils";
@@ -433,7 +434,11 @@ export const MembersTab: React.FC<{ active: boolean }> = ({ active }) => {
                   className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 hover:border-m3-primary/50 hover:shadow-md transition-all cursor-pointer flex items-center justify-between group"
                 >
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-10 h-10 rounded-full bg-linear-to-tr from-sky-600 to-indigo-600 text-white font-black text-sm flex items-center justify-center shrink-0 overflow-hidden">
+                    <div
+                      className={`w-10 h-10 rounded-full bg-linear-to-tr ${getAvatarGradient(
+                        member.name,
+                      )} text-white font-black text-sm flex items-center justify-center shrink-0 overflow-hidden`}
+                    >
                       {member.image ? (
                         <img
                           src={member.image}
@@ -441,7 +446,7 @@ export const MembersTab: React.FC<{ active: boolean }> = ({ active }) => {
                           className="w-full h-full object-cover"
                         />
                       ) : (
-                        member.name.charAt(0).toUpperCase()
+                        getInitials(member.name)
                       )}
                     </div>
                     <div className="min-w-0">

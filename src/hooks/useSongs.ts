@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { useI18n } from "@/src/lib/i18n";
 import { GetSongsParams, Song } from "@/src/types";
 import { useCallback, useEffect, useState } from "react";
 import { useSync } from "../contexts/SyncContext";
@@ -14,7 +15,6 @@ import {
   validateSongMove,
   validateSongRules,
 } from "../db";
-import { useI18n } from "../i18n";
 
 function useSongMutations() {
   const { showToast } = useSync();
