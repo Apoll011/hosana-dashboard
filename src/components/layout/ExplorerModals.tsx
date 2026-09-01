@@ -3,26 +3,26 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from "react";
 import { Button, Input, Modal } from "@/src/components/common";
+import { useI18n } from "@/src/lib/i18n";
 import { Folder, Song } from "@/src/types";
 import { ConversionResult } from "@hosanna/chordpro";
 import { AlertTriangle, HardDrive } from "lucide-react";
-import { useI18n } from "../../i18n";
-import { FolderForm } from "../forms/FolderForm";
-import { SongForm } from "../forms/SongForm";
-import { ServiceForm } from "../forms/ServiceForm";
+import React from "react";
 import {
-  MoveFolderTreeItem,
   FolderTreeNode,
   getFolderDescendantIds,
+  MoveFolderTreeItem,
 } from "../explorer";
-import { CifraClubImportModal } from "../modals/CifraModal";
-import { MoveSongModal } from "../modals/MoveSongModal";
-import { BatchMoveModal } from "../modals/BatchMoveModal";
+import { FolderForm } from "../forms/FolderForm";
+import { ServiceForm } from "../forms/ServiceForm";
+import { SongForm } from "../forms/SongForm";
 import { BatchDeleteModal } from "../modals/BatchDeleteModal";
+import { BatchMoveModal } from "../modals/BatchMoveModal";
 import { BatchTagModal } from "../modals/BatchTagModal";
+import { CifraClubImportModal } from "../modals/CifraModal";
 import { CustomizeFolderModal } from "../modals/CustomizeFolderModal";
+import { MoveSongModal } from "../modals/MoveSongModal";
 
 interface ExplorerModalsProps {
   // CifraClub

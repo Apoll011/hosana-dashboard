@@ -1,8 +1,8 @@
+import { Button, Input, Modal } from "@/src/components/common";
 import { useAuth } from "@/src/contexts/AuthContext";
 import { useSync } from "@/src/contexts/SyncContext";
-import { useI18n } from "@/src/i18n";
 import { authClient } from "@/src/lib/authClient";
-import { Button, Input, Modal } from "@/src/components/common";
+import { useI18n } from "@/src/lib/i18n";
 import { AlertTriangle, CheckCircle2, Shield } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import React, { useState } from "react";

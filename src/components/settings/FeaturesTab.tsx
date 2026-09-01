@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { useI18n } from "@/src/lib/i18n";
 import { posthog } from "@/src/lib/posthog";
 import { renderHtml } from "@tanstack/markdown/html";
 import {
@@ -28,7 +29,6 @@ import {
 } from "lucide-react";
 import { EarlyAccessFeature, Message, Ticket } from "posthog-js";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { useI18n } from "../../i18n";
 
 export interface FeaturesTabProps {
   active: boolean;

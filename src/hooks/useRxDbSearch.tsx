@@ -1,21 +1,17 @@
+import { useI18n } from "@/src/lib/i18n";
 import { Calendar, Folder as FolderIcon, Music } from "lucide-react";
-import React, { useEffect, useState } from "react";
-import {
-  CommandAction,
-  FolderItem,
-  ServiceItem,
-  SongItem,
-} from "../command-palette.types";
+import { useEffect, useState } from "react";
+import { CommandAction } from "../command-palette.types";
 import { useCommandPalette } from "../contexts/CommandPaletteContext";
-import { useI18n } from "../i18n";
+import { Folder, Service, Song } from "../types";
 
 interface UseRxDbSearchProps {
   slugPrefix: string;
   navigate: (path: string) => void;
   isDataLoading?: boolean;
-  searchSongsDb: (query: string) => Promise<SongItem[]>;
-  searchFoldersDb: (query: string) => Promise<FolderItem[]>;
-  searchServicesDb: (query: string) => Promise<ServiceItem[]>;
+  searchSongsDb: (query: string) => Promise<Song[]>;
+  searchFoldersDb: (query: string) => Promise<Folder[]>;
+  searchServicesDb: (query: string) => Promise<Service[]>;
   getFolderPathString: (parentId?: string | null) => string;
 }
 
@@ -84,7 +80,7 @@ export function useRxDbSearch({
             id: `song-${s.id}`,
             name: s.title,
             subtitle: s.artist || t("forms.unknownArtist"),
-            badge: s.key ? `Key: ${s.key}` : undefined,
+            badge: undefined,
             keywords: `${s.title} ${s.artist || ""} ${(s.tags || []).join(" ")} musica cantico`,
             section: t("common.songs"),
             icon: <Music className="w-4 h-4 text-sky-500" />,

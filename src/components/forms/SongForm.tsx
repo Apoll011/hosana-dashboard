@@ -4,9 +4,9 @@
  */
 
 import { Button, Input } from "@/src/components/common";
+import { useI18n } from "@/src/lib/i18n";
 import { Folder } from "@/src/types";
 import { useState } from "react";
-import { useI18n } from "../../i18n";
 
 interface SongFormData {
   title: string;

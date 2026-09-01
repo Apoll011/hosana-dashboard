@@ -18,8 +18,8 @@ import {
 import React, { useRef, useState } from "react";
 
 import { useAppNavigate } from "@/src/hooks/useAppNavigate";
+import { useI18n } from "@/src/lib/i18n";
 import { posthog } from "@/src/lib/posthog";
-import { useI18n } from "../../i18n";
 import { authClient } from "../../lib/authClient";
 import { PasswordStrengthMeter } from "./components/PasswordStrengthMeter";
 import { TurnstileWidget } from "./components/TurnstileWidget";

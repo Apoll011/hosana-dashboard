@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import type { TranslationKey } from "@/src/lib/i18n";
 import { Crown, Music, Shield, User, UserCheck, Users } from "lucide-react";
-import type { TranslationKey } from "../../i18n";
 
 type TranslateFn = (
   key: TranslationKey,

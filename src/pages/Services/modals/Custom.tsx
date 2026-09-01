@@ -3,14 +3,14 @@
 // ══════════════════════════════════════════════════════════════════════
 
 import { Button, Modal } from "@/src/components/common";
-import { Plus } from "lucide-react";
-import React, { useEffect, useState } from "react";
-import { useI18n } from "../../../i18n";
 import {
   DurationField,
   durationInputToSeconds,
   secondsToDurationInput,
 } from "@/src/components/DurationField";
+import { useI18n } from "@/src/lib/i18n";
+import { Plus } from "lucide-react";
+import React, { useEffect, useState } from "react";
 
 interface CustomModalProps {
   isOpen: boolean;

@@ -2,14 +2,14 @@ import { configureApiClient } from "@/src/api";
 import { preloadEditor } from "@hosanna/chordpro/editor";
 import { useEffect } from "react";
 import { BrowserRouter, useLocation } from "react-router-dom";
-import { posthog } from "./lib/posthog";
 import { NavigationProgressBar } from "./components/NavigationProgressBar";
 import { AuthProvider } from "./contexts/AuthContext";
 import { CacheHydrationProvider } from "./contexts/CacheHydrationProvider";
 import { NavigationTransitionProvider } from "./contexts/NavigationTransitionContext";
 import { SyncProvider } from "./contexts/SyncContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
-import { I18nProvider } from "./i18n";
+import { I18nProvider } from "./lib/i18n";
+import { posthog } from "./lib/posthog";
 import { AppRoutes } from "./routes/AppRoutes";
 
 function PageviewTracker() {

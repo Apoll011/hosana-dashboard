@@ -152,12 +152,53 @@ export async function getCifra(url: string): Promise<CifraResult> {
   }
 }
 
-export const getInitials = (name: string) => {
-  if (!name) return "?";
-  return name
-    .split(" ")
-    .map((w) => w.charAt(0))
-    .join("")
-    .toUpperCase()
-    .slice(0, 2);
-};
+export function getInitials(name: string): string {
+  const parts = name.trim().split(/\s+/);
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+}
+
+const AVATAR_COLORS = [
+  "from-sky-500 to-cyan-400",
+  "from-violet-500 to-purple-400",
+  "from-amber-500 to-orange-400",
+  "from-emerald-500 to-teal-400",
+  "from-rose-500 to-pink-400",
+  "from-indigo-500 to-blue-400",
+
+  "from-red-500 to-rose-400",
+  "from-fuchsia-500 to-pink-400",
+  "from-purple-500 to-fuchsia-400",
+  "from-blue-600 to-indigo-400",
+  "from-cyan-500 to-blue-400",
+  "from-teal-500 to-emerald-400",
+  "from-green-500 to-lime-400",
+  "from-lime-500 to-green-400",
+  "from-yellow-500 to-amber-400",
+  "from-orange-500 to-red-400",
+
+  "from-slate-500 to-slate-400",
+  "from-zinc-500 to-neutral-400",
+  "from-stone-500 to-orange-300",
+
+  "from-blue-500 to-violet-400",
+  "from-indigo-500 to-purple-400",
+  "from-purple-500 to-pink-400",
+  "from-pink-500 to-rose-400",
+  "from-red-500 to-orange-400",
+  "from-orange-500 to-yellow-400",
+
+  "from-emerald-600 to-cyan-400",
+  "from-teal-600 to-sky-400",
+  "from-cyan-600 to-indigo-400",
+  "from-violet-600 to-fuchsia-400",
+];
+
+export function getAvatarGradient(seed: string): string {
+  let hash = 0;
+  for (let i = 0; i < seed.length; i++) {
+    hash = (hash << 5) - hash + seed.charCodeAt(i);
+    hash |= 0;
+  }
+  return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
+}

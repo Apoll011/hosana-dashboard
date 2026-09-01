@@ -1,5 +1,5 @@
-import { useI18n } from "@/src/i18n";
 import { Button } from "@/src/components/common";
+import { useI18n } from "@/src/lib/i18n";
 import { Archive, Trash2, X } from "lucide-react";
 import React from "react";
 

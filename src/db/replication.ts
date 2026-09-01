@@ -23,7 +23,7 @@ interface Checkpoint {
 }
 
 type SyncableDoc = { id: string; updatedAt: string; _deleted?: boolean };
-type CollectionName = "songs" | "folders" | "services";
+type CollectionName = "songs" | "folders" | "services" | "agendaEvents";
 
 let replicationManagerInstance: ReplicationManager | null = null;
 
@@ -155,6 +155,12 @@ export function setupReplication(db: HosanaDatabase): ReplicationManager {
   let currentStatus: ReplicationSyncState = "synced";
   let activeReplications: RxReplicationState<SyncableDoc, Checkpoint>[] = [];
   const activeStateMap = new Map<CollectionName, boolean>();
+  // Collection name → live replication state, so the agendaEvents push can
+  // nudge the services replication when a push is rejected for FK ordering.
+  const replicationByCollection = new Map<
+    CollectionName,
+    RxReplicationState<SyncableDoc, Checkpoint>
+  >();
   const subscriptions: Subscription[] = [];
   let onlineListener: (() => void) | null = null;
   let offlineListener: (() => void) | null = null;
@@ -232,6 +238,20 @@ export function setupReplication(db: HosanaDatabase): ReplicationManager {
           } catch (err) {
             console.error(`Push error on ${collectionName}:`, err);
             updateStatus(navigator.onLine ? "error" : "offline");
+
+            // §6 of the agendaEvents replication contract: `linkedServiceId`
+            // is a real FK to a `services` row, so an AgendaEvent created
+            // offline alongside its Service may reach the server before the
+            // Service and be rejected. Nudge the services replication so the
+            // referenced rows land first; RxDB retries this failed push with
+            // backoff and it then succeeds.
+            if (collectionName === "agendaEvents") {
+              const servicesRepl = replicationByCollection.get("services");
+              if (servicesRepl) {
+                void servicesRepl.reSync();
+              }
+            }
+
             throw err;
           }
         },
@@ -252,10 +272,16 @@ export function setupReplication(db: HosanaDatabase): ReplicationManager {
   const start = () => {
     if (activeReplications.length > 0) return;
 
+    // `services` is listed first on purpose: AgendaEvent.linkedServiceId is a
+    // real FK to services on the server (§6), so starting the services
+    // replication first gives offline-created linked pairs the best chance of
+    // reaching the server in the right order. agendaEvents pushes also nudge
+    // the services replication on FK rejection (see the push handler above).
     const collectionsToSync: [CollectionName, RxCollection][] = [
+      ["services", db.services],
       ["songs", db.songs],
       ["folders", db.folders],
-      ["services", db.services],
+      ["agendaEvents", db.agendaEvents],
     ];
 
     activeReplications = collectionsToSync.map(([name, collection]) =>
@@ -263,8 +289,9 @@ export function setupReplication(db: HosanaDatabase): ReplicationManager {
     );
 
     collectionsToSync.forEach(([name], idx) => {
-      activeStateMap.set(name, false);
       const repl = activeReplications[idx];
+      replicationByCollection.set(name, repl);
+      activeStateMap.set(name, false);
 
       subscriptions.push(
         repl.active$.subscribe((isActive) => {
@@ -297,6 +324,7 @@ export function setupReplication(db: HosanaDatabase): ReplicationManager {
     activeReplications.forEach((r) => r.cancel());
     activeReplications = [];
     activeStateMap.clear();
+    replicationByCollection.clear();
 
     subscriptions.forEach((s) => s.unsubscribe());
     subscriptions.length = 0;

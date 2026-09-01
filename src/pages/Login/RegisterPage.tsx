@@ -4,10 +4,10 @@
  */
 
 import { Button, Input } from "@/src/components/common";
+import { useI18n } from "@/src/lib/i18n";
 import { ArrowRight, CheckCircle2, Lock, Mail, User } from "lucide-react";
 import React, { useRef, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
-import { useI18n } from "../../i18n";
 import { authClient } from "../../lib/authClient";
 import { posthog } from "../../lib/posthog";
 import LoginLayout from "./Layout";
