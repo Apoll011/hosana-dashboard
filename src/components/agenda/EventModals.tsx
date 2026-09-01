@@ -35,8 +35,6 @@ import { ServiceLinkField } from "./ServiceLinkField";
 /* Shared bits                                                        */
 /* ------------------------------------------------------------------ */
 
-const ACCENT = "#0284c7";
-
 /** Section header with an icon "badge", a title and an optional hint. */
 const SectionHeader: React.FC<{
   icon: React.ReactNode;
@@ -174,7 +172,6 @@ export const EventFormModal: React.FC<EventFormModalProps> = ({
       setTitleTouched(false);
       setConfirmingDelete(false);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
   const titleIsEmpty = form.title.trim().length === 0;
@@ -496,7 +493,6 @@ export const AddResponsibilityModal: React.FC<AddResponsibilityModalProps> = ({
       setCategoryId(available[0]?.id ?? "");
       setAssignees([]);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
   if (!isOpen) return null;
@@ -623,7 +619,6 @@ export const EditAssigneesModal: React.FC<EditAssigneesModalProps> = ({
 
   useEffect(() => {
     if (isOpen) setValue(assignees);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
   if (!isOpen) return null;
