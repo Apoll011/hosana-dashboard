@@ -254,7 +254,9 @@ export const agendaEventSchema: RxJsonSchema<AgendaEventDocType> = {
       maxLength: 100,
     },
     date: {
+      // Local "yyyy-mm-dd" — exactly 10 chars, see the replication contract.
       type: "string",
+      maxLength: 10,
     },
     title: {
       type: "string",
