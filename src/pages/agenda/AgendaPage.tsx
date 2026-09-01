@@ -14,11 +14,13 @@ import {
   EventFormValue,
 } from "@/src/components/agenda/EventModals";
 import { MiniCalendar, toIso } from "@/src/components/agenda/MiniCalendar";
+import { useI18n } from "@/src/i18n";
 import { CalendarPlus } from "lucide-react";
 import React, { useMemo, useState } from "react";
 import { useAgendaStorage } from "./useAgendaStorage";
 
 export const AgendaPage: React.FC = () => {
+  const { t } = useI18n();
   const store = useAgendaStorage();
 
   const [visibleMonth, setVisibleMonth] = useState(() => new Date());
@@ -112,10 +114,10 @@ export const AgendaPage: React.FC = () => {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl font-black text-slate-900 dark:text-slate-100">
-              Agenda
+              {t("common.agenda")}
             </h1>
             <p className="text-slate-500 text-xs sm:text-sm mt-0.5">
-              Planeie e atribua responsabilidades para cada dia.
+              {t("agenda.subtitle")}
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -124,7 +126,7 @@ export const AgendaPage: React.FC = () => {
               className="flex items-center gap-2 px-4 py-2.5 text-xs font-bold rounded-xl bg-[#0284c7] text-white hover:bg-sky-600 shadow-sm transition-colors cursor-pointer"
             >
               <CalendarPlus className="w-4 h-4" />
-              Novo Evento
+              {t("agenda.newEvent")}
             </button>
           </div>
         </div>
@@ -191,8 +193,8 @@ export const AgendaPage: React.FC = () => {
         isOpen={isNewEventOpen}
         onClose={() => setIsNewEventOpen(false)}
         onSubmit={handleCreateEvent}
-        title="Novo Evento"
-        submitLabel="Criar Evento"
+        title={t("agenda.newEvent")}
+        submitLabel={t("agenda.createEvent")}
         initial={{ date: selectedDate }}
       />
 
@@ -211,8 +213,8 @@ export const AgendaPage: React.FC = () => {
             setSelectedEventId(null);
             setIsEditEventOpen(false);
           }}
-          title="Editar Evento"
-          submitLabel="Guardar"
+          title={t("agenda.editEvent")}
+          submitLabel={t("common.save")}
           initial={selectedEvent}
         />
       )}
@@ -226,8 +228,8 @@ export const AgendaPage: React.FC = () => {
             store.updateEvent(selectedEvent.id, value);
             setIsEditDetailsOpen(false);
           }}
-          title="Editar Detalhes"
-          submitLabel="Guardar"
+          title={t("agenda.editDetails")}
+          submitLabel={t("common.save")}
           initial={selectedEvent}
         />
       )}

@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { TranslateFn, useI18n } from "@/src/i18n";
 import { Link2, Search, X } from "lucide-react";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Service } from "@/src/types";
@@ -16,10 +17,14 @@ export function serviceTotalMinutes(service: Service): number {
   return Math.max(1, Math.round(seconds / 60));
 }
 
-function formatShortDate(iso: string): string {
+function formatShortDate(iso: string, t: TranslateFn): string {
   const [y, m, d] = (iso || "").split("T")[0].split("-").map(Number);
   if (!y || !m || !d) return iso || "";
-  return `${String(d).padStart(2, "0")}/${String(m).padStart(2, "0")}/${y}`;
+  return t("agenda.dateShort", {
+    day: String(d).padStart(2, "0"),
+    month: String(m).padStart(2, "0"),
+    year: y,
+  });
 }
 
 interface ServiceLinkFieldProps {
@@ -43,6 +48,7 @@ export const ServiceLinkField: React.FC<ServiceLinkFieldProps> = ({
   value,
   onChange,
 }) => {
+  const { t, tc } = useI18n();
   const [draft, setDraft] = useState("");
   const [highlight, setHighlight] = useState(0);
   const [open, setOpen] = useState(false);
@@ -52,7 +58,8 @@ export const ServiceLinkField: React.FC<ServiceLinkFieldProps> = ({
 
   // Most recent first — you usually want to link the upcoming culto.
   const sorted = useMemo(
-    () => [...services].sort((a, b) => (b.date || "").localeCompare(a.date || "")),
+    () =>
+      [...services].sort((a, b) => (b.date || "").localeCompare(a.date || "")),
     [services],
   );
 
@@ -116,10 +123,10 @@ export const ServiceLinkField: React.FC<ServiceLinkFieldProps> = ({
           onKeyDown={handleKeyDown}
           placeholder={
             isLoading
-              ? "A carregar serviços…"
+              ? t("agenda.loadingServices")
               : linked
-                ? "Alterar serviço ligado…"
-                : "Procurar um serviço para ligar…"
+                ? t("agenda.changeLinkedService")
+                : t("agenda.searchServiceToLink")
           }
           className="w-full h-11 pl-10 pr-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-sm font-semibold placeholder:font-medium placeholder:text-slate-400 focus:outline-none focus:border-[#0284c7]"
         />
@@ -149,7 +156,8 @@ export const ServiceLinkField: React.FC<ServiceLinkFieldProps> = ({
                     {s.name}
                   </span>
                   <span className="block text-[10px] font-semibold text-slate-400">
-                    {formatShortDate(s.date)} · {serviceTotalMinutes(s)} min
+                    {formatShortDate(s.date, t)} ·{" "}
+                    {t("agenda.minutes", { minutes: serviceTotalMinutes(s) })}
                   </span>
                 </span>
               </button>
@@ -160,7 +168,7 @@ export const ServiceLinkField: React.FC<ServiceLinkFieldProps> = ({
 
       {value && !linked && (
         <p className="text-[11px] font-semibold text-amber-600 dark:text-amber-400">
-          O serviço ligado já não existe — escolha outro ou remova a ligação.
+          {t("agenda.linkedServiceMissing")}
         </p>
       )}
 
@@ -174,15 +182,15 @@ export const ServiceLinkField: React.FC<ServiceLinkFieldProps> = ({
               {linked.name}
             </p>
             <p className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">
-              {formatShortDate(linked.date)} · {serviceTotalMinutes(linked)} min
-              · {(linked.elements ?? []).length}{" "}
-              {(linked.elements ?? []).length === 1 ? "elemento" : "elementos"}
+              {formatShortDate(linked.date, t)} ·{" "}
+              {t("agenda.minutes", { minutes: serviceTotalMinutes(linked) })} ·{" "}
+              {tc("agenda.elementsCount", (linked.elements ?? []).length)}
             </p>
           </div>
           <button
             type="button"
             onClick={() => onChange(null)}
-            title="Remover ligação"
+            title={t("agenda.removeLink")}
             className="p-1.5 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors cursor-pointer shrink-0"
           >
             <X className="w-4 h-4" />
@@ -192,7 +200,7 @@ export const ServiceLinkField: React.FC<ServiceLinkFieldProps> = ({
 
       {!isLoading && services.length === 0 && (
         <p className="text-[11px] font-semibold text-slate-400">
-          Ainda não há serviços. Crie um em Serviços para o poder ligar.
+          {t("agenda.noServicesToLink")}
         </p>
       )}
     </div>

@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { useI18n } from "@/src/i18n";
 import { Responsibility } from "@/src/pages/agenda/types";
 import { ResponsibilityCategory } from "@/src/types";
 import { COLOR_MAP, ICON_MAP } from "@/src/utils/iconMap";
@@ -23,6 +24,7 @@ export const ResponsibilityRow: React.FC<ResponsibilityRowProps> = ({
   onEditAssignees,
   onRemove,
 }) => {
+  const { t } = useI18n();
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -48,7 +50,7 @@ export const ResponsibilityRow: React.FC<ResponsibilityRowProps> = ({
           <Icon className="w-4.5 h-4.5" />
         </div>
         <span className="text-[13px] font-bold text-slate-900 dark:text-slate-100 truncate">
-          {category?.label ?? "Responsabilidade"}
+          {category?.label ?? t("agenda.responsibility")}
         </span>
       </div>
 
@@ -56,14 +58,14 @@ export const ResponsibilityRow: React.FC<ResponsibilityRowProps> = ({
         <button
           onClick={onEditAssignees}
           className="cursor-pointer"
-          title="Editar atribuições"
+          title={t("agenda.editAssignments")}
         >
           <AvatarStack assignees={responsibility.assignees} />
         </button>
 
         <button
           className="p-1.5 rounded-lg text-slate-400 hover:text-[#0284c7] hover:bg-m3-hover transition-colors cursor-pointer"
-          title="Comentar"
+          title={t("agenda.comment")}
         >
           <MessageCircle className="w-4 h-4" />
         </button>
@@ -72,7 +74,7 @@ export const ResponsibilityRow: React.FC<ResponsibilityRowProps> = ({
           <button
             onClick={() => setMenuOpen((v) => !v)}
             className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-m3-hover transition-colors cursor-pointer"
-            title="Mais opções"
+            title={t("agenda.moreOptions")}
           >
             <MoreVertical className="w-4 h-4" />
           </button>
@@ -86,7 +88,7 @@ export const ResponsibilityRow: React.FC<ResponsibilityRowProps> = ({
                 className="w-full flex items-center gap-2 px-2.5 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-m3-hover rounded-lg transition-colors cursor-pointer text-left"
               >
                 <UserPlus className="w-3.5 h-3.5 text-[#0284c7]" />
-                Editar atribuições
+                {t("agenda.editAssignments")}
               </button>
               <button
                 onClick={() => {
@@ -96,7 +98,7 @@ export const ResponsibilityRow: React.FC<ResponsibilityRowProps> = ({
                 className="w-full flex items-center gap-2 px-2.5 py-2 text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-lg transition-colors cursor-pointer text-left"
               >
                 <Trash2 className="w-3.5 h-3.5" />
-                Remover responsabilidade
+                {t("agenda.removeResponsibility")}
               </button>
             </div>
           )}

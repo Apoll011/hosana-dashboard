@@ -6,6 +6,7 @@
 import { useAuth } from "@/src/contexts/AuthContext";
 import { useAppNavigate } from "@/src/hooks/useAppNavigate";
 import { useServices } from "@/src/hooks/useServices";
+import { TranslateFn, useI18n } from "@/src/i18n";
 import { AgendaEvent } from "@/src/pages/agenda/types";
 import { Bell, ExternalLink, Link2, Pencil } from "lucide-react";
 import React from "react";
@@ -18,10 +19,14 @@ interface DetailsSidebarProps {
   onEditReminder: () => void;
 }
 
-function formatShortDate(iso: string): string {
+function formatShortDate(iso: string, t: TranslateFn): string {
   const [y, m, d] = (iso || "").split("T")[0].split("-").map(Number);
   if (!y || !m || !d) return iso || "";
-  return `${String(d).padStart(2, "0")}/${String(m).padStart(2, "0")}/${y}`;
+  return t("agenda.dateShort", {
+    day: String(d).padStart(2, "0"),
+    month: String(m).padStart(2, "0"),
+    year: y,
+  });
 }
 
 export const DetailsSidebar: React.FC<DetailsSidebarProps> = ({
@@ -33,6 +38,7 @@ export const DetailsSidebar: React.FC<DetailsSidebarProps> = ({
   const { servicesQuery } = useServices();
   const { organization } = useAuth();
   const { navigate } = useAppNavigate();
+  const { t } = useI18n();
   const slugPrefix = organization?.slug ? `/${organization.slug}` : "";
 
   const linkedService = event?.linkedServiceId
@@ -47,12 +53,12 @@ export const DetailsSidebar: React.FC<DetailsSidebarProps> = ({
       <div className="bg-white dark:bg-slate-900 border border-m3-border rounded-2xl p-5 shadow-xs">
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-[11px] font-black uppercase tracking-widest text-m3-secondary opacity-70">
-            Detalhes
+            {t("common.details")}
           </h3>
           <button
             onClick={onEditDetails}
             className="p-1 rounded-lg text-slate-400 hover:text-[#0284c7] hover:bg-m3-hover transition-colors cursor-pointer"
-            title="Editar detalhes"
+            title={t("agenda.editDetails")}
           >
             <Pencil className="w-3.5 h-3.5" />
           </button>
@@ -61,7 +67,7 @@ export const DetailsSidebar: React.FC<DetailsSidebarProps> = ({
         <div className="space-y-3">
           <div>
             <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wide">
-              Tipo
+              {t("agenda.type")}
             </p>
             <p className="text-sm font-bold text-[#0284c7] mt-0.5">
               {event.type}
@@ -69,7 +75,7 @@ export const DetailsSidebar: React.FC<DetailsSidebarProps> = ({
           </div>
           <div>
             <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wide">
-              Serviço ligado
+              {t("agenda.linkedService")}
             </p>
             {linkedService ? (
               <div className="mt-0.5">
@@ -82,15 +88,17 @@ export const DetailsSidebar: React.FC<DetailsSidebarProps> = ({
                     onClick={() =>
                       navigate(`${slugPrefix}/services/${linkedService.id}`)
                     }
-                    title="Abrir serviço"
+                    title={t("agenda.openService")}
                     className="p-1 rounded-lg text-slate-400 hover:text-[#0284c7] hover:bg-m3-hover transition-colors cursor-pointer shrink-0"
                   >
                     <ExternalLink className="w-3.5 h-3.5" />
                   </button>
                 </div>
                 <p className="text-[11px] font-semibold text-slate-400 mt-0.5">
-                  {formatShortDate(linkedService.date)} ·{" "}
-                  {serviceTotalMinutes(linkedService)} min
+                  {formatShortDate(linkedService.date, t)} ·{" "}
+                  {t("agenda.minutes", {
+                    minutes: serviceTotalMinutes(linkedService),
+                  })}
                 </p>
               </div>
             ) : (
@@ -101,7 +109,7 @@ export const DetailsSidebar: React.FC<DetailsSidebarProps> = ({
           </div>
           <div>
             <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wide">
-              Local
+              {t("agenda.location")}
             </p>
             <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 mt-0.5">
               {event.location || "—"}
@@ -109,10 +117,10 @@ export const DetailsSidebar: React.FC<DetailsSidebarProps> = ({
           </div>
           <div>
             <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wide">
-              Observações
+              {t("agenda.notes")}
             </p>
             <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5 leading-relaxed">
-              {event.notes || "Sem observações."}
+              {event.notes || t("agenda.noNotes")}
             </p>
           </div>
         </div>
@@ -121,13 +129,13 @@ export const DetailsSidebar: React.FC<DetailsSidebarProps> = ({
       <div className="bg-white dark:bg-slate-900 border border-m3-border rounded-2xl p-5 shadow-xs">
         <h3 className="text-[11px] font-black uppercase tracking-widest text-m3-secondary opacity-70 mb-3 flex items-center gap-1.5">
           <Bell className="w-3.5 h-3.5" />
-          Notificações
+          {t("agenda.notifications")}
         </h3>
 
         <div className="flex items-center justify-between gap-2">
           <div className="min-w-0">
             <p className="text-xs font-bold text-slate-900 dark:text-slate-100">
-              Lembrete para os atribuídos
+              {t("agenda.reminderForAssignees")}
             </p>
             <button
               onClick={onEditReminder}

@@ -3,9 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { useI18n } from "@/src/i18n";
+import { Assignee } from "@/src/pages/agenda/types";
 import { getAvatarGradient, getInitials } from "@/src/utils";
 import React from "react";
-import { Assignee } from "../types";
 
 interface AvatarStackProps {
   assignees: Assignee[];
@@ -18,6 +19,7 @@ export const AvatarStack: React.FC<AvatarStackProps> = ({
   max = 3,
   size = "sm",
 }) => {
+  const { t } = useI18n();
   const dim = size === "sm" ? "w-7 h-7 text-[10px]" : "w-9 h-9 text-xs";
   const visible = assignees.slice(0, max);
   const overflow = assignees.length - visible.length;
@@ -25,7 +27,7 @@ export const AvatarStack: React.FC<AvatarStackProps> = ({
   if (assignees.length === 0) {
     return (
       <span className="text-[11px] font-semibold text-slate-400 dark:text-slate-500 italic">
-        Por atribuir
+        {t("agenda.unassigned")}
       </span>
     );
   }
