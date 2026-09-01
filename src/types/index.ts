@@ -104,14 +104,7 @@ export interface Service {
  * General "Responsabilidades" card — not per-user local storage.
  */
 export type ResponsibilityColor =
-  | "amber"
-  | "violet"
-  | "sky"
-  | "rose"
-  | "emerald"
-  | "cyan"
-  | "slate"
-  | "indigo";
+  "amber" | "violet" | "sky" | "rose" | "emerald" | "cyan" | "slate" | "indigo";
 
 /** Icon key — mapped to an actual lucide-react component in `agenda/iconMap.ts`. */
 export type ResponsibilityIconKey =
