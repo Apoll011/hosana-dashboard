@@ -5,6 +5,7 @@
 
 import { Button, Input, Modal } from "@/src/components/common";
 import { useServices } from "@/src/hooks/useServices";
+import { TranslateFn, useI18n } from "@/src/i18n";
 import { Assignee } from "@/src/pages/agenda/types";
 import { ResponsibilityCategory } from "@/src/types";
 import {
@@ -86,13 +87,13 @@ const IconButton: React.FC<
   />
 );
 
-const formatDuration = (minutes: number) => {
-  if (minutes <= 0) return "0 min";
+const formatDuration = (minutes: number, t: TranslateFn) => {
+  if (minutes <= 0) return t("agenda.durationZero");
   const h = Math.floor(minutes / 60);
   const m = minutes % 60;
-  if (h && m) return `${h} h ${m} min`;
-  if (h) return `${h} h`;
-  return `${m} min`;
+  if (h && m) return t("agenda.durationHoursMinutes", { hours: h, minutes: m });
+  if (h) return t("agenda.durationHours", { hours: h });
+  return t("agenda.minutes", { minutes: m });
 };
 
 /* ------------------------------------------------------------------ */
@@ -111,15 +112,6 @@ export interface EventFormValue {
   linkedServiceId: string | null;
 }
 
-const COMMON_EVENT_TYPES = [
-  "Culto Dominical",
-  "Culto de Oração",
-  "Ensaio de Louvor",
-  "Estudo Bíblico",
-  "Reunião de Equipa",
-  "Evento Especial",
-];
-
 const DURATION_PRESETS = [30, 45, 60, 90, 120];
 const NOTES_MAX = 500;
 
@@ -133,9 +125,12 @@ interface EventFormModalProps {
   submitLabel: string;
 }
 
-const emptyEventForm = (initial?: Partial<EventFormValue>): EventFormValue => ({
+const emptyEventForm = (
+  initial: Partial<EventFormValue> | undefined,
+  defaultType: string,
+): EventFormValue => ({
   title: initial?.title ?? "",
-  type: initial?.type ?? "Culto Dominical",
+  type: initial?.type ?? defaultType,
   date: initial?.date ?? new Date().toISOString().slice(0, 10),
   time: initial?.time ?? "10:00",
   durationMinutes: initial?.durationMinutes ?? 90,
@@ -153,19 +148,30 @@ export const EventFormModal: React.FC<EventFormModalProps> = ({
   title,
   submitLabel,
 }) => {
+  const { t } = useI18n();
   const { servicesQuery } = useServices();
   const services = servicesQuery.data ?? [];
   const servicesLoading = servicesQuery.isLoading;
 
+  const eventTypeOptions = [
+    t("agenda.eventTypes.sundayService"),
+    t("agenda.eventTypes.prayerService"),
+    t("agenda.eventTypes.worshipRehearsal"),
+    t("agenda.eventTypes.bibleStudy"),
+    t("agenda.eventTypes.teamMeeting"),
+    t("agenda.eventTypes.specialEvent"),
+  ];
+  const defaultType = eventTypeOptions[0] ?? "";
+
   const [form, setForm] = useState<EventFormValue>(() =>
-    emptyEventForm(initial),
+    emptyEventForm(initial, defaultType),
   );
   const [titleTouched, setTitleTouched] = useState(false);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
-      setForm(emptyEventForm(initial));
+      setForm(emptyEventForm(initial, defaultType));
       setTitleTouched(false);
       setConfirmingDelete(false);
     }
@@ -224,8 +230,8 @@ export const EventFormModal: React.FC<EventFormModalProps> = ({
         <section className="space-y-2.5">
           <SectionHeader
             icon={<Layers className="w-3.5 h-3.5" />}
-            title="Serviço ligado"
-            hint="Preenche automaticamente a data e a duração do evento."
+            title={t("agenda.linkedService")}
+            hint={t("agenda.linkedServiceHint")}
           />
           <ServiceLinkField
             services={services}
@@ -239,12 +245,12 @@ export const EventFormModal: React.FC<EventFormModalProps> = ({
         <section className="space-y-2.5">
           <SectionHeader
             icon={<FileText className="w-3.5 h-3.5" />}
-            title="Informações"
+            title={t("agenda.information")}
           />
           <div>
             <Input
-              label="Título"
-              placeholder="Ex: Culto da Manhã"
+              label={t("agenda.eventTitle")}
+              placeholder={t("agenda.eventTitlePlaceholder")}
               icon={<FileText className="w-4 h-4" />}
               value={form.title}
               onChange={(e) => {
@@ -256,12 +262,12 @@ export const EventFormModal: React.FC<EventFormModalProps> = ({
             />
             {showTitleError && (
               <p className="flex items-center gap-1 text-[11px] font-semibold text-red-500 mt-1.5 ml-1">
-                <Info className="w-3 h-3" /> O título é obrigatório.
+                <Info className="w-3 h-3" /> {t("agenda.eventTitleRequired")}
               </p>
             )}
           </div>
           <div>
-            <FieldLabel>Tipo</FieldLabel>
+            <FieldLabel>{t("agenda.type")}</FieldLabel>
             <div className="relative">
               <Tag className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
               <input
@@ -270,26 +276,28 @@ export const EventFormModal: React.FC<EventFormModalProps> = ({
                 onChange={(e) =>
                   setForm((f) => ({ ...f, type: e.target.value }))
                 }
-                placeholder="Ex: Culto Dominical, Ensaio…"
+                placeholder={t("agenda.typePlaceholder")}
                 className={fieldInputClass}
               />
             </div>
             <datalist id="agenda-event-types">
-              {COMMON_EVENT_TYPES.map((t) => (
-                <option key={t} value={t} />
+              {eventTypeOptions.map((opt) => (
+                <option key={opt} value={opt} />
               ))}
             </datalist>
             <div className="flex flex-wrap gap-1.5 mt-2">
-              {COMMON_EVENT_TYPES.filter((t) => t !== form.type).map((t) => (
-                <button
-                  key={t}
-                  type="button"
-                  onClick={() => setForm((f) => ({ ...f, type: t }))}
-                  className="px-2.5 h-7 rounded-full text-[11px] font-semibold border border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 hover:border-[#0284c7]/50 hover:text-[#0284c7] transition-colors cursor-pointer"
-                >
-                  {t}
-                </button>
-              ))}
+              {eventTypeOptions
+                .filter((opt) => opt !== form.type)
+                .map((opt) => (
+                  <button
+                    key={opt}
+                    type="button"
+                    onClick={() => setForm((f) => ({ ...f, type: opt }))}
+                    className="px-2.5 h-7 rounded-full text-[11px] font-semibold border border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 hover:border-[#0284c7]/50 hover:text-[#0284c7] transition-colors cursor-pointer"
+                  >
+                    {opt}
+                  </button>
+                ))}
             </div>
           </div>
         </section>
@@ -298,12 +306,12 @@ export const EventFormModal: React.FC<EventFormModalProps> = ({
         <section className="space-y-2.5">
           <SectionHeader
             icon={<Calendar className="w-3.5 h-3.5" />}
-            title="Agendamento"
+            title={t("agenda.scheduling")}
           />
           <div className="grid grid-cols-2 gap-3">
             <Input
               type="date"
-              label="Data"
+              label={t("common.date")}
               icon={<Calendar className="w-4 h-4" />}
               value={form.date}
               onChange={(e) => setForm((f) => ({ ...f, date: e.target.value }))}
@@ -311,7 +319,7 @@ export const EventFormModal: React.FC<EventFormModalProps> = ({
             />
             <Input
               type="time"
-              label="Hora"
+              label={t("agenda.time")}
               icon={<Clock className="w-4 h-4" />}
               value={form.time}
               onChange={(e) => setForm((f) => ({ ...f, time: e.target.value }))}
@@ -319,7 +327,7 @@ export const EventFormModal: React.FC<EventFormModalProps> = ({
             />
           </div>
           <div>
-            <FieldLabel>Duração</FieldLabel>
+            <FieldLabel>{t("agenda.duration")}</FieldLabel>
             <div className="flex gap-1.5 flex-wrap mb-2">
               {DURATION_PRESETS.map((m) => (
                 <button
@@ -332,13 +340,13 @@ export const EventFormModal: React.FC<EventFormModalProps> = ({
                       : "bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:border-[#0284c7]/40"
                   }`}
                 >
-                  {m} min
+                  {t("agenda.minutes", { minutes: m })}
                 </button>
               ))}
             </div>
             <div className="flex items-center gap-2">
               <IconButton
-                aria-label="Diminuir duração"
+                aria-label={t("agenda.decreaseDuration")}
                 onClick={() => adjustDuration(-15)}
                 disabled={form.durationMinutes <= 0}
               >
@@ -347,11 +355,11 @@ export const EventFormModal: React.FC<EventFormModalProps> = ({
               <div className="flex-1 h-11 flex items-center justify-center gap-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl">
                 <Clock3 className="w-4 h-4 text-slate-400" />
                 <span className="text-sm font-bold tabular-nums">
-                  {formatDuration(form.durationMinutes)}
+                  {formatDuration(form.durationMinutes, t)}
                 </span>
               </div>
               <IconButton
-                aria-label="Aumentar duração"
+                aria-label={t("agenda.increaseDuration")}
                 onClick={() => adjustDuration(15)}
               >
                 <Plus className="w-4 h-4" />
@@ -364,11 +372,11 @@ export const EventFormModal: React.FC<EventFormModalProps> = ({
         <section className="space-y-2.5">
           <SectionHeader
             icon={<MapPin className="w-3.5 h-3.5" />}
-            title="Detalhes"
+            title={t("common.details")}
           />
           <Input
-            label="Local"
-            placeholder="Ex: Templo Principal"
+            label={t("agenda.location")}
+            placeholder={t("agenda.locationPlaceholder")}
             icon={<MapPin className="w-4 h-4" />}
             value={form.location}
             onChange={(e) =>
@@ -378,7 +386,7 @@ export const EventFormModal: React.FC<EventFormModalProps> = ({
           <div>
             <div className="flex items-center justify-between ml-1 mb-1.5">
               <FieldLabel>
-                <span className="ml-0">Observações</span>
+                <span className="ml-0">{t("agenda.notes")}</span>
               </FieldLabel>
               <span
                 className={`text-[10px] font-bold tabular-nums ${
@@ -396,7 +404,7 @@ export const EventFormModal: React.FC<EventFormModalProps> = ({
               onChange={(e) =>
                 setForm((f) => ({ ...f, notes: e.target.value }))
               }
-              placeholder="Notas de planeamento…"
+              placeholder={t("agenda.notesPlaceholder")}
               className="w-full h-20 p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-medium focus:outline-none focus:border-[#0284c7] transition-colors resize-none"
             />
           </div>
@@ -408,14 +416,14 @@ export const EventFormModal: React.FC<EventFormModalProps> = ({
             confirmingDelete ? (
               <div className="flex items-center gap-2">
                 <span className="text-[11px] font-bold text-red-500 hidden sm:inline">
-                  Eliminar este evento?
+                  {t("agenda.deleteEventConfirm")}
                 </span>
                 <Button
                   variant="outline"
                   type="button"
                   onClick={() => setConfirmingDelete(false)}
                 >
-                  Cancelar
+                  {t("common.cancel")}
                 </Button>
                 <button
                   type="button"
@@ -423,7 +431,7 @@ export const EventFormModal: React.FC<EventFormModalProps> = ({
                   className="h-10 px-4 rounded-xl bg-red-500 hover:bg-red-600 text-white text-sm font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
                 >
                   <Trash2 className="w-4 h-4" />
-                  Confirmar
+                  {t("common.confirm")}
                 </button>
               </div>
             ) : (
@@ -433,7 +441,7 @@ export const EventFormModal: React.FC<EventFormModalProps> = ({
                 onClick={() => setConfirmingDelete(true)}
                 icon={<Trash2 className="w-4 h-4" />}
               >
-                Eliminar
+                {t("agenda.deleteEvent")}
               </Button>
             )
           ) : (
@@ -442,7 +450,7 @@ export const EventFormModal: React.FC<EventFormModalProps> = ({
           {!confirmingDelete && (
             <div className="flex gap-2">
               <Button variant="outline" type="button" onClick={onClose}>
-                Cancelar
+                {t("common.cancel")}
               </Button>
               <Button variant="primary" type="submit">
                 {submitLabel}
@@ -476,6 +484,7 @@ export const AddResponsibilityModal: React.FC<AddResponsibilityModalProps> = ({
   manualSuggestions,
   onSubmit,
 }) => {
+  const { t, tc } = useI18n();
   const available = useMemo(
     () => categories.filter((c) => !existingCategoryIds.includes(c.id)),
     [categories, existingCategoryIds],
@@ -494,7 +503,11 @@ export const AddResponsibilityModal: React.FC<AddResponsibilityModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Adicionar Responsabilidade">
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={t("agenda.addResponsibility")}
+    >
       <form
         onSubmit={(e) => {
           e.preventDefault();
@@ -509,10 +522,10 @@ export const AddResponsibilityModal: React.FC<AddResponsibilityModalProps> = ({
               <Inbox className="w-5 h-5 text-slate-400" />
             </div>
             <p className="text-sm font-bold text-slate-600 dark:text-slate-300">
-              Já foram adicionadas todas as responsabilidades
+              {t("agenda.allResponsibilitiesAdded")}
             </p>
             <p className="text-xs font-medium text-slate-400 max-w-60 leading-relaxed">
-              Pode criar novas categorias em Definições → Servidor.
+              {t("agenda.createCategoriesInSettings")}
             </p>
           </div>
         ) : (
@@ -520,8 +533,8 @@ export const AddResponsibilityModal: React.FC<AddResponsibilityModalProps> = ({
             <section className="space-y-2.5">
               <SectionHeader
                 icon={<ListChecks className="w-3.5 h-3.5" />}
-                title="Categoria"
-                hint="Escolha a área de serviço a atribuir."
+                title={t("agenda.category")}
+                hint={t("agenda.categoryHint")}
               />
               <div className="grid grid-cols-1 gap-1.5 max-h-56 overflow-y-auto pr-1">
                 {available.map((c) => {
@@ -552,13 +565,11 @@ export const AddResponsibilityModal: React.FC<AddResponsibilityModalProps> = ({
             <section className="space-y-2.5">
               <SectionHeader
                 icon={<Users className="w-3.5 h-3.5" />}
-                title="Atribuir a"
+                title={t("agenda.assignTo")}
                 hint={
                   assignees.length > 0
-                    ? `${assignees.length} pessoa${assignees.length > 1 ? "s" : ""} selecionada${
-                        assignees.length > 1 ? "s" : ""
-                      }`
-                    : "Opcional — pode atribuir mais tarde."
+                    ? tc("agenda.selectedAssignees", assignees.length)
+                    : t("agenda.assignOptional")
                 }
               />
               <AssigneeTagInput
@@ -572,14 +583,14 @@ export const AddResponsibilityModal: React.FC<AddResponsibilityModalProps> = ({
 
         <div className="flex justify-end gap-2 pt-2 border-t border-m3-border/40 mt-1">
           <Button variant="outline" type="button" onClick={onClose}>
-            Cancelar
+            {t("common.cancel")}
           </Button>
           <Button
             variant="primary"
             type="submit"
             disabled={available.length === 0}
           >
-            Adicionar
+            {t("agenda.add")}
           </Button>
         </div>
       </form>
@@ -608,6 +619,7 @@ export const EditAssigneesModal: React.FC<EditAssigneesModalProps> = ({
   manualSuggestions,
   onSubmit,
 }) => {
+  const { t, tc } = useI18n();
   const [value, setValue] = useState<Assignee[]>(assignees);
 
   useEffect(() => {
@@ -621,7 +633,7 @@ export const EditAssigneesModal: React.FC<EditAssigneesModalProps> = ({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={`Atribuídos — ${categoryLabel}`}
+      title={t("agenda.assigneesTitle", { category: categoryLabel })}
     >
       <div className="space-y-5 pt-2">
         <SectionHeader
@@ -629,10 +641,8 @@ export const EditAssigneesModal: React.FC<EditAssigneesModalProps> = ({
           title={categoryLabel}
           hint={
             value.length > 0
-              ? `${value.length} pessoa${value.length > 1 ? "s" : ""} atribuída${
-                  value.length > 1 ? "s" : ""
-                }`
-              : "Ainda sem ninguém atribuído."
+              ? tc("agenda.assignedAssignees", value.length)
+              : t("agenda.noAssigneesYet")
           }
         />
         <AssigneeTagInput
@@ -642,14 +652,14 @@ export const EditAssigneesModal: React.FC<EditAssigneesModalProps> = ({
         />
         <div className="flex justify-end gap-2 pt-2 border-t border-m3-border/40">
           <Button variant="outline" type="button" onClick={onClose}>
-            Cancelar
+            {t("common.cancel")}
           </Button>
           <Button
             variant="primary"
             type="button"
             onClick={() => onSubmit(value)}
           >
-            Guardar
+            {t("common.save")}
           </Button>
         </div>
       </div>
@@ -668,22 +678,23 @@ interface EditReminderModalProps {
   onSubmit: (label: string) => void;
 }
 
-const REMINDER_PRESETS = [
-  "No dia do evento",
-  "1 hora antes",
-  "3 horas antes",
-  "1 dia antes",
-  "2 dias antes",
-  "1 semana antes",
-];
-
 export const EditReminderModal: React.FC<EditReminderModalProps> = ({
   isOpen,
   onClose,
   initialLabel,
   onSubmit,
 }) => {
+  const { t } = useI18n();
   const [label, setLabel] = useState(initialLabel);
+
+  const reminderPresets = [
+    t("agenda.reminderPresets.dayOfEvent"),
+    t("agenda.reminderPresets.oneHourBefore"),
+    t("agenda.reminderPresets.threeHoursBefore"),
+    t("agenda.reminderPresets.oneDayBefore"),
+    t("agenda.reminderPresets.twoDaysBefore"),
+    t("agenda.reminderPresets.oneWeekBefore"),
+  ];
 
   useEffect(() => {
     if (isOpen) setLabel(initialLabel);
@@ -694,16 +705,16 @@ export const EditReminderModal: React.FC<EditReminderModalProps> = ({
   const trimmed = label.trim();
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Editar Lembrete">
+    <Modal isOpen={isOpen} onClose={onClose} title={t("agenda.editReminder")}>
       <div className="space-y-5 pt-2">
         <section className="space-y-2.5">
           <SectionHeader
             icon={<BellRing className="w-3.5 h-3.5" />}
-            title="Quando notificar"
-            hint="Escolha uma sugestão ou escreva a sua própria."
+            title={t("agenda.whenToNotify")}
+            hint={t("agenda.reminderHint")}
           />
           <div className="flex flex-wrap gap-1.5">
-            {REMINDER_PRESETS.map((p) => (
+            {reminderPresets.map((p) => (
               <button
                 key={p}
                 type="button"
@@ -724,14 +735,14 @@ export const EditReminderModal: React.FC<EditReminderModalProps> = ({
             <input
               value={label}
               onChange={(e) => setLabel(e.target.value)}
-              placeholder="Ex: 2 dias antes às 18:00"
+              placeholder={t("agenda.reminderPlaceholder")}
               maxLength={80}
               className={`${fieldInputClass} pr-9`}
             />
             {label.length > 0 && (
               <button
                 type="button"
-                aria-label="Limpar lembrete"
+                aria-label={t("agenda.clearReminder")}
                 onClick={() => setLabel("")}
                 className="absolute right-2.5 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
               >
@@ -750,19 +761,21 @@ export const EditReminderModal: React.FC<EditReminderModalProps> = ({
           }`}
         >
           <BellRing className="w-4 h-4 shrink-0" />
-          <span className="truncate">{trimmed || "Sem lembrete definido"}</span>
+          <span className="truncate">
+            {trimmed || t("agenda.noReminderSet")}
+          </span>
         </div>
 
         <div className="flex justify-end gap-2 pt-2 border-t border-m3-border/40">
           <Button variant="outline" type="button" onClick={onClose}>
-            Cancelar
+            {t("common.cancel")}
           </Button>
           <Button
             variant="primary"
             type="button"
             onClick={() => onSubmit(label)}
           >
-            Guardar
+            {t("common.save")}
           </Button>
         </div>
       </div>

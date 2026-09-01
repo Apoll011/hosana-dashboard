@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { TranslateFn, TranslationKey, useI18n } from "@/src/i18n";
 import { AgendaEvent, Responsibility } from "@/src/pages/agenda/types";
 import { ResponsibilityCategory } from "@/src/types";
 import { Calendar, Clock, Pencil, Plus } from "lucide-react";
@@ -19,34 +20,39 @@ interface EventDetailPanelProps {
   onRemoveResponsibility: (responsibilityId: string) => void;
 }
 
-const WEEKDAY_LONG = [
-  "Domingo",
-  "Segunda-feira",
-  "Terça-feira",
-  "Quarta-feira",
-  "Quinta-feira",
-  "Sexta-feira",
-  "Sábado",
+const WEEKDAY_KEYS: TranslationKey[] = [
+  "agenda.weekdaysFull.sunday",
+  "agenda.weekdaysFull.monday",
+  "agenda.weekdaysFull.tuesday",
+  "agenda.weekdaysFull.wednesday",
+  "agenda.weekdaysFull.thursday",
+  "agenda.weekdaysFull.friday",
+  "agenda.weekdaysFull.saturday",
 ];
-const MONTH_LABELS = [
-  "Janeiro",
-  "Fevereiro",
-  "Março",
-  "Abril",
-  "Maio",
-  "Junho",
-  "Julho",
-  "Agosto",
-  "Setembro",
-  "Outubro",
-  "Novembro",
-  "Dezembro",
+const MONTH_KEYS: TranslationKey[] = [
+  "agenda.months.january",
+  "agenda.months.february",
+  "agenda.months.march",
+  "agenda.months.april",
+  "agenda.months.may",
+  "agenda.months.june",
+  "agenda.months.july",
+  "agenda.months.august",
+  "agenda.months.september",
+  "agenda.months.october",
+  "agenda.months.november",
+  "agenda.months.december",
 ];
 
-function formatLongDate(iso: string): string {
+function formatLongDate(iso: string, t: TranslateFn): string {
   const [y, m, d] = iso.split("-").map(Number);
   const date = new Date(y, m - 1, d);
-  return `${WEEKDAY_LONG[date.getDay()]}, ${d} de ${MONTH_LABELS[m - 1]} de ${y}`;
+  return t("agenda.dateLong", {
+    weekday: t(WEEKDAY_KEYS[date.getDay()]),
+    day: d,
+    month: t(MONTH_KEYS[m - 1]),
+    year: y,
+  });
 }
 
 export const EventDetailPanel: React.FC<EventDetailPanelProps> = ({
@@ -58,15 +64,17 @@ export const EventDetailPanel: React.FC<EventDetailPanelProps> = ({
   onEditAssignees,
   onRemoveResponsibility,
 }) => {
+  const { t } = useI18n();
+
   if (!event) {
     return (
       <div className="bg-white dark:bg-slate-900 border border-m3-border rounded-2xl p-10 shadow-xs flex flex-col items-center justify-center text-center h-full">
         <Calendar className="w-10 h-10 text-slate-300 dark:text-slate-700 mb-3" />
         <p className="text-sm font-bold text-slate-500 dark:text-slate-400">
-          Selecione um evento para ver os detalhes
+          {t("agenda.selectEventToSeeDetails")}
         </p>
         <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">
-          Escolha um dia no calendário à esquerda.
+          {t("agenda.pickDayHint")}
         </p>
       </div>
     );
@@ -76,7 +84,7 @@ export const EventDetailPanel: React.FC<EventDetailPanelProps> = ({
     <div className="space-y-4">
       <div className="flex items-center gap-2 text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-wide">
         <Calendar className="w-3.5 h-3.5" />
-        {formatLongDate(event.date)}
+        {formatLongDate(event.date, t)}
       </div>
 
       <div className="bg-white dark:bg-slate-900 border border-m3-border rounded-2xl p-5 shadow-xs flex items-center justify-between gap-4">
@@ -94,13 +102,15 @@ export const EventDetailPanel: React.FC<EventDetailPanelProps> = ({
               {event.type}
             </span>
             <span>•</span>
-            <span>Duração: {event.durationMinutes} min</span>
+            <span>
+              {t("agenda.durationLabel", { minutes: event.durationMinutes })}
+            </span>
           </div>
         </div>
         <button
           onClick={onEditEvent}
           className="p-2 rounded-xl border border-m3-border text-slate-400 hover:text-[#0284c7] hover:border-sky-300 transition-colors cursor-pointer shrink-0"
-          title="Editar evento"
+          title={t("agenda.editEvent")}
         >
           <Pencil className="w-4 h-4" />
         </button>
@@ -109,20 +119,20 @@ export const EventDetailPanel: React.FC<EventDetailPanelProps> = ({
       <div className="bg-white dark:bg-slate-900 border border-m3-border rounded-2xl p-5 shadow-xs">
         <div className="flex items-center justify-between mb-1">
           <h3 className="text-sm font-black text-slate-900 dark:text-slate-100">
-            Responsabilidades
+            {t("agenda.responsibilities")}
           </h3>
           <button
             onClick={onAddResponsibility}
             className="flex items-center gap-1.5 text-xs font-bold text-[#0284c7] bg-sky-50 dark:bg-sky-950/40 hover:bg-sky-100 dark:hover:bg-sky-900/50 px-3 py-1.5 rounded-xl border border-sky-200 dark:border-sky-900/50 transition-colors cursor-pointer"
           >
             <Plus className="w-3.5 h-3.5" />
-            Adicionar Responsabilidade
+            {t("agenda.addResponsibility")}
           </button>
         </div>
 
         {responsibilities.length === 0 ? (
           <p className="text-xs text-slate-400 dark:text-slate-500 py-6 text-center">
-            Ainda não há responsabilidades para este evento.
+            {t("agenda.noResponsibilities")}
           </p>
         ) : (
           <div>
@@ -139,7 +149,7 @@ export const EventDetailPanel: React.FC<EventDetailPanelProps> = ({
         )}
 
         <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-4 pt-3 border-t border-m3-border/40">
-          As pessoas atribuídas que têm a app instalada receberão notificações.
+          {t("agenda.assigneesGetNotified")}
         </p>
       </div>
     </div>

@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { useI18n } from "@/src/i18n";
 import { AgendaEvent } from "@/src/pages/agenda/types";
 import { Users } from "lucide-react";
 import React from "react";
@@ -20,11 +21,13 @@ export const DayAgendaList: React.FC<DayAgendaListProps> = ({
   responsibilityCounts,
   onSelectEvent,
 }) => {
+  const { t } = useI18n();
+
   return (
     <div className="bg-white dark:bg-slate-900 border border-m3-border rounded-2xl p-4 shadow-xs">
       <div className="flex items-center justify-between mb-3">
         <h3 className="text-[11px] font-black uppercase tracking-widest text-m3-secondary opacity-70">
-          Eventos do dia
+          {t("agenda.dayEvents")}
         </h3>
         <span className="text-[11px] font-black text-m3-secondary bg-m3-sidebar/60 rounded-full px-2 py-0.5">
           {events.length}
@@ -33,7 +36,7 @@ export const DayAgendaList: React.FC<DayAgendaListProps> = ({
 
       {events.length === 0 ? (
         <p className="text-xs text-slate-400 dark:text-slate-500 py-4 text-center">
-          Sem eventos para este dia.
+          {t("agenda.noEventsForDay")}
         </p>
       ) : (
         <div className="space-y-2">

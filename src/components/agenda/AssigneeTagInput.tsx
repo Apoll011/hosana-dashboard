@@ -4,6 +4,7 @@
  */
 
 import { useAuth } from "@/src/contexts/AuthContext";
+import { useI18n } from "@/src/i18n";
 import { Assignee } from "@/src/pages/agenda/types";
 import { getAvatarGradient, getInitials } from "@/src/utils";
 import { X } from "lucide-react";
@@ -61,6 +62,7 @@ export const AssigneeTagInput: React.FC<AssigneeTagInputProps> = ({
   manualSuggestions = [],
 }) => {
   const { organization } = useAuth();
+  const { t } = useI18n();
   const [draft, setDraft] = useState("");
   const [highlight, setHighlight] = useState(0);
   const [open, setOpen] = useState(false);
@@ -165,13 +167,13 @@ export const AssigneeTagInput: React.FC<AssigneeTagInputProps> = ({
             {a.name}
             {a.memberId && (
               <span className="text-[9px] font-black uppercase tracking-wide text-sky-600 dark:text-sky-400 bg-sky-50 dark:bg-sky-950/50 border border-sky-200 dark:border-sky-900/60 px-1.5 py-0.5 rounded-full">
-                Membro
+                {t("agenda.memberBadge")}
               </span>
             )}
             <button
               onClick={() => onChange(assignees.filter((x) => x.id !== a.id))}
               className="text-slate-400 hover:text-rose-500 cursor-pointer"
-              title="Remover"
+              title={t("agenda.remove")}
             >
               <X className="w-3 h-3" />
             </button>
@@ -190,7 +192,7 @@ export const AssigneeTagInput: React.FC<AssigneeTagInputProps> = ({
             }}
             onFocus={() => setOpen(true)}
             onKeyDown={handleKeyDown}
-            placeholder="Escreva um nome e prima Enter"
+            placeholder={t("agenda.assigneePlaceholder")}
             className="flex-1 h-10 px-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-semibold focus:outline-none focus:border-[#0284c7]"
           />
           <button
@@ -198,7 +200,7 @@ export const AssigneeTagInput: React.FC<AssigneeTagInputProps> = ({
             onClick={addFromDraft}
             className="px-3 h-10 rounded-xl border border-slate-200 dark:border-slate-800 text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-m3-hover transition-colors cursor-pointer"
           >
-            Adicionar
+            {t("agenda.add")}
           </button>
         </div>
 
@@ -224,7 +226,9 @@ export const AssigneeTagInput: React.FC<AssigneeTagInputProps> = ({
                   {s.name}
                 </span>
                 <span className="text-[9px] font-black uppercase tracking-wide text-slate-400 shrink-0">
-                  {s.memberId ? "Membro" : "Outros eventos"}
+                  {s.memberId
+                    ? t("agenda.memberBadge")
+                    : t("agenda.otherEvents")}
                 </span>
               </button>
             ))}

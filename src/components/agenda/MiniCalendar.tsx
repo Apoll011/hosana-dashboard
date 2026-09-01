@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { TranslationKey, useI18n } from "@/src/i18n";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import React from "react";
 
@@ -16,11 +17,29 @@ interface MiniCalendarProps {
   onGoToday: () => void;
 }
 
-const WEEKDAY_LABELS = ["SEG", "TER", "QUA", "QUI", "SEX", "SÁB", "DOM"];
+const WEEKDAY_KEYS: TranslationKey[] = [
+  "agenda.weekdays.mon",
+  "agenda.weekdays.tue",
+  "agenda.weekdays.wed",
+  "agenda.weekdays.thu",
+  "agenda.weekdays.fri",
+  "agenda.weekdays.sat",
+  "agenda.weekdays.sun",
+];
 
-const MONTH_LABELS = [
-  "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
-  "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro",
+const MONTH_KEYS: TranslationKey[] = [
+  "agenda.months.january",
+  "agenda.months.february",
+  "agenda.months.march",
+  "agenda.months.april",
+  "agenda.months.may",
+  "agenda.months.june",
+  "agenda.months.july",
+  "agenda.months.august",
+  "agenda.months.september",
+  "agenda.months.october",
+  "agenda.months.november",
+  "agenda.months.december",
 ];
 
 function toIso(d: Date): string {
@@ -52,6 +71,7 @@ export const MiniCalendar: React.FC<MiniCalendarProps> = ({
   onChangeMonth,
   onGoToday,
 }) => {
+  const { t } = useI18n();
   const cells = buildMonthGrid(visibleMonth);
   const todayIso = toIso(new Date());
 
@@ -59,20 +79,20 @@ export const MiniCalendar: React.FC<MiniCalendarProps> = ({
     <div className="bg-white dark:bg-slate-900 border border-m3-border rounded-2xl p-4 shadow-xs">
       <div className="flex items-center justify-between mb-3">
         <h3 className="text-sm font-black text-slate-900 dark:text-slate-100">
-          {MONTH_LABELS[visibleMonth.getMonth()]} {visibleMonth.getFullYear()}
+          {t(MONTH_KEYS[visibleMonth.getMonth()])} {visibleMonth.getFullYear()}
         </h3>
         <div className="flex items-center gap-1">
           <button
             onClick={() => onChangeMonth(-1)}
             className="p-1 rounded-lg hover:bg-m3-hover text-m3-secondary hover:text-m3-text transition-colors cursor-pointer"
-            aria-label="Mês anterior"
+            aria-label={t("agenda.previousMonth")}
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
           <button
             onClick={() => onChangeMonth(1)}
             className="p-1 rounded-lg hover:bg-m3-hover text-m3-secondary hover:text-m3-text transition-colors cursor-pointer"
-            aria-label="Mês seguinte"
+            aria-label={t("agenda.nextMonth")}
           >
             <ChevronRight className="w-4 h-4" />
           </button>
@@ -80,25 +100,26 @@ export const MiniCalendar: React.FC<MiniCalendarProps> = ({
             onClick={onGoToday}
             className="ml-1 px-2.5 py-1 text-[11px] font-bold rounded-lg border border-m3-border text-m3-secondary hover:bg-m3-hover hover:text-m3-text transition-colors cursor-pointer"
           >
-            Hoje
+            {t("agenda.today")}
           </button>
         </div>
       </div>
 
       <div className="grid grid-cols-7 gap-1 mb-1">
-        {WEEKDAY_LABELS.map((w) => (
+        {WEEKDAY_KEYS.map((w) => (
           <div
             key={w}
-            className="text-center text-[10px] font-black text-m3-secondary opacity-60 py-1"
+            className="text-center text-[10px] font-black uppercase text-m3-secondary opacity-60 py-1"
           >
-            {w}
+            {t(w)}
           </div>
         ))}
       </div>
 
       <div className="grid grid-cols-7 gap-1">
         {cells.map((date, i) => {
-          if (!date) return <div key={`empty-${i}`} className="aspect-square" />;
+          if (!date)
+            return <div key={`empty-${i}`} className="aspect-square" />;
           const iso = toIso(date);
           const isSelected = iso === selectedDate;
           const isToday = iso === todayIso;
