@@ -323,7 +323,10 @@ export const agendaEventSchema: RxJsonSchema<AgendaEventDocType> = {
                   maxLength: 100,
                 },
                 avatarUrl: {
-                  type: "string",
+                  // Org members without an image report `user.image === null`
+                  // (Better Auth), so null must be accepted here — the server
+                  // stores responsibilities verbatim in jsonb and re-sends it.
+                  type: ["string", "null"],
                 },
               },
               required: ["id", "name"],

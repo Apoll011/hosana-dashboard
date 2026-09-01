@@ -34,8 +34,8 @@ export interface Assignee {
    * this assignee is an org member. Absent for manually-typed assignees.
    */
   memberId?: string;
-  /** Optional avatar image URL. Falls back to initials when absent. */
-  avatarUrl?: string;
+  /** Optional avatar image URL. Falls back to initials when absent/null. */
+  avatarUrl?: string | null;
 }
 
 /**

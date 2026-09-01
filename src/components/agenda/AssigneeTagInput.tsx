@@ -80,7 +80,9 @@ export const AssigneeTagInput: React.FC<AssigneeTagInputProps> = ({
       id: m.id,
       memberId: m.id,
       name: m.user.name,
-      avatarUrl: m.user.image,
+      // `user.image` can be null for members without an avatar — omit the
+      // field instead of storing null (the UI falls back to initials).
+      avatarUrl: m.user.image ?? undefined,
     }));
     const manual = manualSuggestions.filter(
       (a) => !memberNames.has(a.name.trim().toLowerCase()),
