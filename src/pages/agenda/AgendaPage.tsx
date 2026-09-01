@@ -228,9 +228,19 @@ export const AgendaPage: React.FC = () => {
             (r) => r.categoryId,
           )}
           manualSuggestions={store.manualAssignees}
-          onSubmit={(categoryId, assignees) => {
-            store.addResponsibility(selectedEvent.id, categoryId, assignees);
-            setIsAddResponsibilityOpen(false);
+          onSubmit={async (categoryId, assignees) => {
+            try {
+              // Await the save so a failure keeps the modal open (the hook
+              // shows the error toast) instead of closing it silently.
+              await store.addResponsibility(
+                selectedEvent.id,
+                categoryId,
+                assignees,
+              );
+              setIsAddResponsibilityOpen(false);
+            } catch {
+              // error toast already shown by the hook; keep the modal open
+            }
           }}
         />
       )}
@@ -246,13 +256,18 @@ export const AgendaPage: React.FC = () => {
           }
           assignees={editingAssigneesResp.responsibility.assignees}
           manualSuggestions={store.manualAssignees}
-          onSubmit={(assignees) => {
-            store.updateResponsibilityAssignees(
-              editingAssigneesResp.eventId,
-              editingAssigneesResp.responsibility.id,
-              assignees,
-            );
-            setEditingAssigneesFor(null);
+          onSubmit={async (assignees) => {
+            try {
+              // Await the save so a failure keeps the modal open.
+              await store.updateResponsibilityAssignees(
+                editingAssigneesResp.eventId,
+                editingAssigneesResp.responsibility.id,
+                assignees,
+              );
+              setEditingAssigneesFor(null);
+            } catch {
+              // error toast already shown by the hook; keep the modal open
+            }
           }}
         />
       )}
