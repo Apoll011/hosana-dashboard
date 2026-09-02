@@ -3,11 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { stripeClient } from "@better-auth/stripe/client";
 import { createAuthClient } from "better-auth/client";
 import {
   organizationClient,
   twoFactorClient,
 } from "better-auth/client/plugins";
+import { inboxClient } from "better-inbox/client";
 import { ac, roles } from "./permissions";
 
 export const authClient = createAuthClient({
@@ -18,8 +20,12 @@ export const authClient = createAuthClient({
     credentials: "include",
   },
   plugins: [
+    inboxClient(),
     twoFactorClient({
       twoFactorPage: "/two-factor",
+    }),
+    stripeClient({
+      subscription: true,
     }),
     organizationClient({
       ac,
