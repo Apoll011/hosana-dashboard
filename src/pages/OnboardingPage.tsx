@@ -28,6 +28,7 @@ import { useAppNavigate } from "../hooks/useAppNavigate";
 import { authClient } from "../lib/authClient";
 import { posthog } from "../lib/posthog";
 import { LanguageSelector } from "./Login/components/LanguageSelector";
+import { WorkspaceSwitcher } from "./Login/components/WorkspaceSwitcher";
 
 interface UserInvitation {
   id: string;
@@ -294,8 +295,9 @@ export const OnboardingPage: React.FC = () => {
         <div className="absolute inset-0 bg-black/40 dark:bg-black/70 backdrop-blur-[2px] transition-colors duration-500" />
       </div>
 
-      {/* Top-right controls: Language selector + Dark mode toggle */}
+      {/* Top-right controls: Workspace switcher (when > 1 org) + Language selector + Dark mode toggle */}
       <div className="fixed top-4 right-4 z-30 flex items-center gap-2">
+        <WorkspaceSwitcher />
         <LanguageSelector />
         <button
           type="button"
