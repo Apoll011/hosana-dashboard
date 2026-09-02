@@ -15,6 +15,7 @@ import React, {
 } from "react";
 import { authClient } from "../lib/authClient";
 import { clearPermissionCache } from "../lib/permissions/client";
+import { fetchSubscriptionRows } from "../lib/subscriptions";
 import { posthog } from "../lib/posthog";
 
 interface SessionUser {
@@ -312,17 +313,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       // Whether the org has ever set up billing (any subscription record).
       // This gates the onboarding trial step: a brand-new org with no
       // subscription cannot enter the studio until the trial is accepted.
+      // Full subscription details/status live in the `useSubscription()` hook.
       let acceptedTrial: boolean | null = null;
       if (activeOrg) {
         try {
-          const { data: subscriptions } = await authClient.subscription.list({
-            query: {
-              referenceId: activeOrg.id,
-              customerType: "organization",
-            },
-          });
-          acceptedTrial =
-            Array.isArray(subscriptions) && subscriptions.length > 0;
+          const subscriptions = await fetchSubscriptionRows(activeOrg.id);
+          acceptedTrial = subscriptions.length > 0;
         } catch {
           // Unknown — fail open so existing users are never locked out.
           acceptedTrial = null;

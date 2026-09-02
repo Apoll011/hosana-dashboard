@@ -172,6 +172,9 @@ export const es: typeof pt = {
         "Sincronización en la nube, copias de seguridad automáticas y soporte prioritario para su organización.",
       monthly: "Mensual",
       annual: "Anual",
+      // Shown next to the price when the annual option is selected. Based on
+      // the display prices in PLAN_PRICING (12×€12 − €120 = 2 months free).
+      annualSavings: "Ahorra 2 meses frente al plan mensual",
       plan: {
         features: {
           sync: "Sincronización automática entre dispositivos",
@@ -196,6 +199,12 @@ export const es: typeof pt = {
       startTrial: "Iniciar periodo de prueba de 14 días",
       trialNote:
         "Se requiere una tarjeta para comenzar. No se le cobrará nada durante los 14 días de prueba.",
+      // Used when the org already used its free trial (re-subscribing after
+      // cancel): Stripe does not grant a second trial, so don't promise one.
+      subscribe: "Suscribirse ahora",
+      subscribeNote:
+        "La suscripción comienza de inmediato. Puede cancelarla cuando quiera.",
+      promoHint: "¿Tiene un código promocional? Puede aplicarlo al pagar.",
       askOwner:
         "Pida al propietario de la organización que active la suscripción.",
       checkoutError: "No se pudo iniciar el proceso de pago.",
