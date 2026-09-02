@@ -56,6 +56,7 @@ export const pt = {
     expand: "Expandir menu",
     logout: "Sair",
     openSettings: "Definições",
+    switchWorkspace: "Mudar de organização",
   },
 
   addressBar: {
@@ -539,6 +540,13 @@ export const pt = {
     workspace: {
       title: "Perfil da Organização",
       desc: "Gira a identidade institucional, logótipo e cores do seu ministério.",
+      switchOrgTitle: "As Suas Organizações",
+      switchOrgDesc:
+        "Pertence a mais do que uma organização. Mude para gerir outro espaço de trabalho.",
+      currentOrg: "Atual",
+      switchOrg: "Mudar",
+      switchingOrg: "A mudar…",
+      switchOrgError: "Não foi possível mudar de organização: {error}",
       noLogo: "Sem Logótipo",
       change: "Alterar",
       add: "Adicionar",

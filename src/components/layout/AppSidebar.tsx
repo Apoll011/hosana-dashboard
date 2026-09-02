@@ -10,6 +10,8 @@ import { Folder } from "@/src/types";
 import { Organization } from "better-auth/client";
 import {
   Calendar1,
+  Check,
+  ChevronDown,
   ChevronLeft,
   ChevronRight,
   Church,
@@ -22,6 +24,7 @@ import {
 } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import { ViewName } from "../../layouts/view";
+import type { Organization as AuthOrganization } from "../../contexts/AuthContext";
 import { getAvatarGradient, getInitials } from "../../utils";
 import { FolderTreeItemNode, FolderTreeNode } from "../explorer";
 import { getRoleLabel } from "../settings/settingsUtils";
@@ -32,6 +35,9 @@ interface AppSidebarProps {
   isSidebarCollapsed: boolean;
   setIsSidebarCollapsed: (v: boolean) => void;
   organization?: Organization | null;
+  /** Organizations the user belongs to; enables the workspace switcher when > 1. */
+  organizations?: AuthOrganization[];
+  onSwitchOrganization?: (org: AuthOrganization) => void;
   slugPrefix: string;
   view: ViewName;
   currentFolderId: string | null;
@@ -67,6 +73,8 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
   isSidebarCollapsed,
   setIsSidebarCollapsed,
   organization,
+  organizations,
+  onSwitchOrganization,
   slugPrefix,
   view,
   currentFolderId,
@@ -91,7 +99,10 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
   const shortName = organization?.metadata?.shortName || "";
   const isDriveRoot = view === "explorer" && currentFolderId === null;
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [isOrgMenuOpen, setIsOrgMenuOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
+  const orgMenuRef = useRef<HTMLDivElement>(null);
+  const hasMultipleOrgs = (organizations?.length ?? 0) > 1;
 
   const teams_enabled = posthog.isFeatureEnabled("teams-enable") || false;
   const agenda_enabled = posthog.isFeatureEnabled("agenda") || false;
@@ -103,6 +114,12 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
         !userMenuRef.current.contains(event.target as Node)
       ) {
         setIsUserMenuOpen(false);
+      }
+      if (
+        orgMenuRef.current &&
+        !orgMenuRef.current.contains(event.target as Node)
+      ) {
+        setIsOrgMenuOpen(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -130,7 +147,11 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
         role="navigation"
       >
         {/* Integrated Sidebar Header */}
-        <div className="flex items-center mb-4 mt-2 select-none" role="banner">
+        <div
+          className="relative flex items-center mb-4 mt-2 select-none"
+          role="banner"
+          ref={orgMenuRef}
+        >
           <div className="flex items-center gap-3 flex-1 min-w-0">
             {/* Logo container: expands on click when collapsed, hover swaps icon */}
             <button
@@ -181,13 +202,87 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
                   <ChevronLeft className="w-4 h-4" />
                 </button>
               </div>
-              {organization && (
-                <span className="mt-1 text-xs font-medium text-slate-500 dark:text-slate-400 truncate max-w-32.5">
-                  {organization?.metadata?.shortName || organization.slug}
-                </span>
-              )}
+              {organization &&
+                (hasMultipleOrgs ? (
+                  <button
+                    onClick={() => setIsOrgMenuOpen((v) => !v)}
+                    title={t("sidebar.switchWorkspace")}
+                    aria-haspopup="menu"
+                    aria-expanded={isOrgMenuOpen}
+                    className="mt-1 inline-flex max-w-full min-w-0 items-center gap-1 rounded-md text-xs font-medium text-slate-500 dark:text-slate-400 transition-colors hover:text-slate-700 dark:hover:text-slate-200 cursor-pointer focus:outline-hidden focus-visible:ring-2 focus-visible:ring-m3-primary/40"
+                  >
+                    <span className="truncate min-w-0">
+                      {organization?.metadata?.shortName || organization.slug}
+                    </span>
+                    <ChevronDown
+                      className={`w-3 h-3 shrink-0 transition-transform duration-200 ${
+                        isOrgMenuOpen ? "rotate-180" : ""
+                      }`}
+                    />
+                  </button>
+                ) : (
+                  <span className="mt-1 block max-w-32.5 truncate text-xs font-medium text-slate-500 dark:text-slate-400">
+                    {organization?.metadata?.shortName || organization.slug}
+                  </span>
+                ))}
             </div>
           </div>
+
+          {/* Workspace Switcher Popover */}
+          {hasMultipleOrgs && isOrgMenuOpen && (
+            <div
+              className="absolute top-full left-0 right-0 mt-2 z-50 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl p-2 space-y-1 animate-in fade-in slide-in-from-top-2 duration-150"
+              role="menu"
+            >
+              <p className="px-2.5 pt-1.5 pb-1 text-[10px] font-black uppercase tracking-[0.15em] text-slate-400 dark:text-slate-500">
+                {t("sidebar.switchWorkspace")}
+              </p>
+              {organizations?.map((o) => {
+                const isActive = o.id === organization?.id;
+                return (
+                  <button
+                    key={o.id}
+                    role="menuitem"
+                    disabled={isActive}
+                    onClick={() => {
+                      setIsOrgMenuOpen(false);
+                      if (onSwitchOrganization) {
+                        void onSwitchOrganization(o);
+                      }
+                    }}
+                    className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-left transition-colors ${
+                      isActive
+                        ? "bg-m3-primary/10 text-m3-primary cursor-default"
+                        : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
+                    }`}
+                  >
+                    <div className="w-7 h-7 rounded-lg shrink-0 overflow-hidden flex items-center justify-center bg-m3-primary/10 border border-m3-border/60 text-[11px] font-black text-m3-primary">
+                      {o.logo ? (
+                        <img
+                          src={o.logo}
+                          alt=""
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        (o.name?.trim().charAt(0) || "·").toUpperCase()
+                      )}
+                    </div>
+                    <span className="flex-1 min-w-0">
+                      <span className="block text-xs font-semibold truncate">
+                        {o.name}
+                      </span>
+                      <span className="block text-[10px] text-slate-400 truncate">
+                        @{o.slug}
+                      </span>
+                    </span>
+                    {isActive && (
+                      <Check className="w-4 h-4 shrink-0 text-m3-primary" />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         {/* Main Menu Label */}

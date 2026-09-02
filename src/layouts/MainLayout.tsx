@@ -49,7 +49,8 @@ export const MainLayout: React.FC = () => {
   const { navigate } = useAppNavigate();
   const location = useLocation();
   const { t } = useI18n();
-  const { user, logout, organization } = useAuth();
+  const { user, logout, organization, organizations, switchOrganization } =
+    useAuth();
 
   const slugPrefix = organization?.slug ? `/${organization.slug}` : "";
   const view = useMemo(
@@ -71,6 +72,22 @@ export const MainLayout: React.FC = () => {
 
   // Service Worker & Sync
   const { showToast, triggerSyncCheck } = useSync();
+
+  const handleSwitchOrganization = useCallback(
+    async (org: Parameters<typeof switchOrganization>[0]) => {
+      try {
+        await switchOrganization(org);
+      } catch (err) {
+        showToast({
+          type: "error",
+          title: t("settings.workspace.switchOrgError", {
+            error: (err as { message?: string })?.message || "",
+          }),
+        });
+      }
+    },
+    [switchOrganization, showToast, t],
+  );
   const {
     needRefresh: [needRefresh],
     updateServiceWorker,
@@ -1383,6 +1400,8 @@ export const MainLayout: React.FC = () => {
           isSidebarCollapsed={isSidebarCollapsed}
           setIsSidebarCollapsed={setIsSidebarCollapsed}
           organization={organization}
+          organizations={organizations}
+          onSwitchOrganization={handleSwitchOrganization}
           slugPrefix={slugPrefix}
           view={view}
           currentFolderId={currentFolderId}
