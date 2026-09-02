@@ -10,7 +10,8 @@ import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 
 export const ProtectedRoute: React.FC = () => {
-  const { isAuthenticated, isLoading, organization } = useAuth();
+  const { isAuthenticated, isLoading, organization, hasAcceptedTrial } =
+    useAuth();
   const location = useLocation();
   const { t } = useI18n();
 
@@ -32,9 +33,23 @@ export const ProtectedRoute: React.FC = () => {
     return <Navigate to="/onboarding" replace />;
   }
 
-  // If they have a organization but try to access onboarding or root, send them to the app with organization slug
+  // A brand-new organization that has never accepted a trial / set up billing
+  // must finish onboarding before entering the studio. Once a subscription
+  // record exists — even if the trial expired or the payment stopped — the
+  // org counts as having accepted the trial and is allowed in.
   if (
     organization &&
+    hasAcceptedTrial === false &&
+    location.pathname !== "/onboarding"
+  ) {
+    return <Navigate to="/onboarding" replace />;
+  }
+
+  // If they have an organization (and billing is set up) but try to access
+  // onboarding or root, send them to the app with organization slug
+  if (
+    organization &&
+    hasAcceptedTrial !== false &&
     (location.pathname === "/onboarding" || location.pathname === "/")
   ) {
     return <Navigate to={`/${organization.slug}/folders`} replace />;

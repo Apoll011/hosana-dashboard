@@ -148,22 +148,21 @@ export const DetailsSidebar: React.FC<DetailsSidebarProps> = ({
             </p>
             {linkedService ? (
               <div className="mt-0.5">
-                <div className="flex items-center justify-between gap-2">
-                  <span className="text-sm font-bold text-slate-800 dark:text-slate-200 truncate flex items-center gap-1.5 min-w-0">
-                    <Link2 className="w-3.5 h-3.5 text-[#0284c7] shrink-0" />
-                    <span className="truncate">{linkedService.name}</span>
+                <button
+                  onClick={() =>
+                    navigate(`${slugPrefix}/services/${linkedService.id}`)
+                  }
+                  title={t("agenda.openService")}
+                  className="flex items-center text-slate-800 justify-between gap-2 rounded-lg hover:text-[#0284c7] hover:text-bold transition-colors cursor-pointer shrink-0"
+                >
+                  <span className="text-sm font-bold  dark:text-slate-200 truncate min-w-0">
+                    {linkedService.name}
                   </span>
-                  <button
-                    onClick={() =>
-                      navigate(`${slugPrefix}/services/${linkedService.id}`)
-                    }
-                    title={t("agenda.openService")}
-                    className="p-1 rounded-lg text-slate-400 hover:text-[#0284c7] hover:bg-m3-hover transition-colors cursor-pointer shrink-0"
-                  >
-                    <ExternalLink className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-                <p className="text-[11px] font-semibold text-slate-400 mt-0.5">
+
+                  <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
+                </button>
+                <p className="text-[11px] font-semibold text-slate-400 mt-0.5 flex items-center gap-2">
+                  <Link2 className="w-3.5 h-3.5 text-[#0284c7] " />
                   {formatShortDate(linkedService.date, t)} ·{" "}
                   {t("agenda.minutes", {
                     minutes: serviceTotalMinutes(linkedService),

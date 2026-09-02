@@ -3,12 +3,13 @@
 SPDX-License-Identifier: Apache-2.0
 */
 import { Button, Input, Spinner } from "@/src/components/common";
-import { useI18n } from "@/src/lib/i18n";
+import { TranslationKey, useI18n } from "@/src/lib/i18n";
 import {
   AlertCircle,
   ArrowRight,
   Building2,
   Check,
+  CreditCard,
   LogOut,
   MailCheck,
   Moon,
@@ -39,20 +40,36 @@ interface UserInvitation {
   inviterId: string;
 }
 
+// TODO: replace with the real prices configured for the "cloud" plan in
+// Stripe (priceId / annualDiscountPriceId in auth.ts). The Stripe plugin
+// does not expose the price amount to the client, so it's kept here for
+// display purposes only.
+const PLAN_PRICING = {
+  monthly: { amount: "€12", period: "/mês" },
+  annual: { amount: "€120", period: "/ano" },
+};
+
 export const OnboardingPage: React.FC = () => {
-  const { user, logout, refetch } = useAuth();
+  const { user, organization, hasAcceptedTrial, logout, refetch } = useAuth();
   const { darkMode, toggleDarkMode } = useTheme();
   const { navigate } = useAppNavigate();
   const { t } = useI18n();
-  const [mode, setMode] = useState<"choose" | "create" | "join" | "pending">(
-    "choose",
-  );
+  const [mode, setMode] = useState<
+    "choose" | "create" | "join" | "pending" | "trial"
+  >("choose");
   const [orgName, setOrgName] = useState("");
   const [orgSlug, setOrgSlug] = useState("");
   const [searchSlug, setSearchSlug] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [pendingOrgName, setPendingOrgName] = useState("");
+
+  // Newly-created org, kept around just long enough to offer the trial step
+  const [newOrg, setNewOrg] = useState<{ id: string; slug: string } | null>(
+    null,
+  );
+  const [isStartingTrial, setIsStartingTrial] = useState(false);
+  const [annual, setAnnual] = useState(false);
 
   // Invitations state
   const [invitations, setInvitations] = useState<UserInvitation[]>([]);
@@ -90,6 +107,42 @@ export const OnboardingPage: React.FC = () => {
 
     fetchUserInvitations();
   }, []);
+
+  // If the user already has an organization that has never accepted a trial /
+  // set up billing (e.g. they created the org and refreshed, or they cancelled
+  // at Stripe Checkout and got bounced back here), keep showing the trial step.
+  useEffect(() => {
+    if (organization && hasAcceptedTrial === false && !newOrg) {
+      setNewOrg({ id: organization.id, slug: organization.slug });
+      setMode("trial");
+    }
+  }, [organization, hasAcceptedTrial, newOrg]);
+
+  // While the trial step is showing, poll for the subscription to appear —
+  // the Stripe webhook can land after the redirect back. Once it exists,
+  // refresh the session so ProtectedRoute lets the user into the studio.
+  useEffect(() => {
+    if (mode !== "trial" || !newOrg) return;
+    let cancelled = false;
+    const checkSubscription = async () => {
+      try {
+        const { data } = await authClient.subscription.list({
+          query: { referenceId: newOrg.id, customerType: "organization" },
+        });
+        if (!cancelled && Array.isArray(data) && data.length > 0) {
+          await refetch();
+        }
+      } catch {
+        // Transient errors are fine — keep polling.
+      }
+    };
+    checkSubscription();
+    const interval = window.setInterval(checkSubscription, 5000);
+    return () => {
+      cancelled = true;
+      window.clearInterval(interval);
+    };
+  }, [mode, newOrg, refetch]);
 
   const handleAcceptInvitation = async (invitationId: string) => {
     setProcessingInvId(invitationId);
@@ -155,7 +208,7 @@ export const OnboardingPage: React.FC = () => {
     setIsLoading(true);
 
     const slug = orgSlug.trim();
-    const { error } = await authClient.organization.create({
+    const { data, error } = await authClient.organization.create({
       name: orgName.trim(),
       slug: slug,
     });
@@ -174,7 +227,46 @@ export const OnboardingPage: React.FC = () => {
 
     await refetch();
     setIsLoading(false);
-    navigate(`/${slug}/folders`);
+
+    const orgId = (data as { id?: string } | null)?.id;
+    if (orgId) {
+      setNewOrg({ id: orgId, slug });
+      setMode("trial");
+    }
+    // If orgId is somehow missing, the effect above picks the org up from the
+    // auth context (organization + hasAcceptedTrial) and shows the trial step
+    // automatically — the studio stays blocked until billing is set up.
+  };
+
+  const handleStartTrial = async () => {
+    if (!newOrg) return;
+    setIsStartingTrial(true);
+    setErrorMsg("");
+    try {
+      const origin = window.location.origin;
+      posthog.capture("onboarding_trial_started", { annual });
+      const { error } = await authClient.subscription.upgrade({
+        plan: "cloud",
+        referenceId: newOrg.id,
+        customerType: "organization",
+        annual,
+        successUrl: `${origin}/${newOrg.slug}/settings?tab=billing&billing=success`,
+        cancelUrl: `${origin}/${newOrg.slug}/folders`,
+      });
+      if (error) {
+        setErrorMsg(
+          error.message || "Não foi possível iniciar o período gratuito.",
+        );
+        setIsStartingTrial(false);
+      }
+      // On success the browser redirects to Stripe Checkout.
+    } catch (err: unknown) {
+      setErrorMsg(
+        (err as Error)?.message ||
+          "Não foi possível iniciar o período gratuito.",
+      );
+      setIsStartingTrial(false);
+    }
   };
 
   const handleJoin = async (e: React.FormEvent) => {
@@ -290,6 +382,89 @@ export const OnboardingPage: React.FC = () => {
                 <LogOut className="w-4 h-4 mr-2" />
                 {t("sidebar.logout")}
               </Button>
+            </div>
+          )}
+
+          {mode === "trial" && newOrg && (
+            <div className="text-center">
+              <h2 className="text-2xl font-black text-slate-900 dark:text-white mb-2 tracking-tight">
+                {t("onboarding.trial.title")}
+              </h2>
+              <p className="text-slate-500 dark:text-slate-400 text-sm mb-6 max-w-sm mx-auto">
+                {t("onboarding.trial.desc")}
+              </p>
+
+              <div className="bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-700/60 rounded-2xl p-4 mb-6 text-left space-y-2.5">
+                {(
+                  [
+                    "onboarding.trial.features.sync",
+                    "onboarding.trial.features.unlimited",
+                    "onboarding.trial.features.print",
+                    "onboarding.trial.features.backups",
+                  ] as TranslationKey[]
+                ).map((key) => (
+                  <div key={key} className="flex items-center gap-2.5">
+                    <Check className="w-4 h-4 text-m3-primary shrink-0" />
+                    <span className="text-sm text-slate-700 dark:text-slate-300">
+                      {t(key)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Billing interval choice: monthly or annual */}
+              <div className="bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-700/60 rounded-2xl p-3 mb-4">
+                <div className="flex items-center gap-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-full p-1 mb-3">
+                  <button
+                    type="button"
+                    onClick={() => setAnnual(false)}
+                    className={`flex-1 px-3 py-1.5 rounded-full text-xs font-bold transition-colors cursor-pointer ${
+                      !annual
+                        ? "bg-m3-primary text-white"
+                        : "text-slate-500 dark:text-slate-400"
+                    }`}
+                  >
+                    {t("settings.billing.monthly")}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setAnnual(true)}
+                    className={`flex-1 px-3 py-1.5 rounded-full text-xs font-bold transition-colors cursor-pointer ${
+                      annual
+                        ? "bg-m3-primary text-white"
+                        : "text-slate-500 dark:text-slate-400"
+                    }`}
+                  >
+                    {t("settings.billing.annual")}
+                  </button>
+                </div>
+                <div className="flex items-baseline justify-center gap-1">
+                  <span className="text-2xl font-black text-slate-900 dark:text-white">
+                    {annual
+                      ? PLAN_PRICING.annual.amount
+                      : PLAN_PRICING.monthly.amount}
+                  </span>
+                  <span className="text-sm text-slate-500 dark:text-slate-400">
+                    {annual
+                      ? PLAN_PRICING.annual.period
+                      : PLAN_PRICING.monthly.period}
+                  </span>
+                </div>
+              </div>
+
+              <Button
+                variant="primary"
+                className="w-full h-11 rounded-xl bg-m3-primary hover:bg-m3-primary-dark font-bold text-xs uppercase tracking-wider text-white"
+                isLoading={isStartingTrial}
+                disabled={isStartingTrial}
+                icon={<CreditCard className="w-4 h-4" />}
+                onClick={handleStartTrial}
+              >
+                {t("onboarding.trial.startBtn")}
+              </Button>
+              <p className="text-[11px] text-slate-400 mt-2">
+                {t("onboarding.trial.note")}
+              </p>
             </div>
           )}
 
