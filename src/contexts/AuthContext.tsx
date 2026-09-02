@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { ResponsibilityCategory } from "@/src/types";
 import { InvitationStatus } from "better-auth/plugins/organization";
 import React, {
   createContext,
@@ -12,7 +13,6 @@ import React, {
   useMemo,
   useState,
 } from "react";
-import { ResponsibilityCategory } from "@/src/types";
 import { authClient } from "../lib/authClient";
 import { clearPermissionCache } from "../lib/permissions/client";
 import { posthog } from "../lib/posthog";
@@ -124,6 +124,7 @@ const normalizeOrganization = (org: unknown): Organization => {
 interface AuthContextType {
   user: SessionUser | null;
   organization: Organization | null;
+  hasAcceptedTrial: boolean | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   refetch: () => Promise<void>;
@@ -134,6 +135,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const CACHED_USER_KEY = "cached_auth_user";
 const CACHED_ORG_KEY = "cached_auth_org";
+const CACHED_TRIAL_KEY = "cached_auth_trial";
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -154,6 +156,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       return null;
     }
   });
+  const [hasAcceptedTrial, setHasAcceptedTrial] = useState<boolean | null>(
+    () => {
+      try {
+        const stored = localStorage.getItem(CACHED_TRIAL_KEY);
+        return stored === null ? null : stored === "true";
+      } catch {
+        return null;
+      }
+    },
+  );
   // Stale-While-Revalidate: If we have a cached user, start with isLoading = false immediately!
   const [isLoading, setIsLoading] = useState<boolean>(() => {
     try {
@@ -167,9 +179,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const handleClearSession = useCallback(() => {
     setUser(null);
     setOrganization(null);
+    setHasAcceptedTrial(null);
     localStorage.removeItem("active_org_slug");
     localStorage.removeItem(CACHED_USER_KEY);
     localStorage.removeItem(CACHED_ORG_KEY);
+    localStorage.removeItem(CACHED_TRIAL_KEY);
     clearPermissionCache();
 
     setIsLoading(false);
@@ -192,6 +206,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         }
         if (cachedOrgStr) {
           setOrganization(JSON.parse(cachedOrgStr));
+        }
+        const cachedTrialStr = localStorage.getItem(CACHED_TRIAL_KEY);
+        if (cachedTrialStr !== null) {
+          setHasAcceptedTrial(cachedTrialStr === "true");
         }
       } catch (err) {
         console.error("Failed to restore offline cached session:", err);
@@ -269,6 +287,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         clearPermissionCache();
       }
 
+      // Whether the org has ever set up billing (any subscription record).
+      // This gates the onboarding trial step: a brand-new org with no
+      // subscription cannot enter the studio until the trial is accepted.
+      let acceptedTrial: boolean | null = null;
+      if (activeOrg) {
+        try {
+          const { data: subscriptions } = await authClient.subscription.list({
+            query: {
+              referenceId: activeOrg.id,
+              customerType: "organization",
+            },
+          });
+          acceptedTrial =
+            Array.isArray(subscriptions) && subscriptions.length > 0;
+        } catch {
+          // Unknown — fail open so existing users are never locked out.
+          acceptedTrial = null;
+        }
+      }
+      setHasAcceptedTrial(acceptedTrial);
+
       const fullUser = {
         ...sessionUser,
         role: userRole,
@@ -293,6 +332,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           localStorage.setItem(CACHED_ORG_KEY, JSON.stringify(activeOrg));
         } else {
           localStorage.removeItem(CACHED_ORG_KEY);
+        }
+        if (acceptedTrial === null) {
+          localStorage.removeItem(CACHED_TRIAL_KEY);
+        } else {
+          localStorage.setItem(CACHED_TRIAL_KEY, JSON.stringify(acceptedTrial));
         }
       } catch (err) {
         console.warn("Failed to persist session to localStorage:", err);
@@ -379,12 +423,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     () => ({
       user,
       organization,
+      hasAcceptedTrial,
       isAuthenticated: !!user,
       isLoading,
       refetch: fetchSession,
       logout,
     }),
-    [user, organization, isLoading, fetchSession, logout],
+    [user, organization, hasAcceptedTrial, isLoading, fetchSession, logout],
   );
 
   return (

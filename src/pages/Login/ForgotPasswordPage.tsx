@@ -13,9 +13,10 @@ import {
   Mail,
   ShieldCheck,
 } from "lucide-react";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { authClient } from "../../lib/authClient";
 import LoginLayout from "./Layout";
+import { TurnstileWidget } from "./components/TurnstileWidget";
 
 export const ForgotPasswordPage: React.FC = () => {
   const { navigate } = useAppNavigate();
@@ -25,6 +26,8 @@ export const ForgotPasswordPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [sent, setSent] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState("");
+  const captchaRef = useRef<{ reset: () => void }>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,9 +42,15 @@ export const ForgotPasswordPage: React.FC = () => {
       const { error } = await authClient.sendVerificationEmail({
         email: email.trim(),
         callbackURL: `${window.location.origin}/reset-password`,
+        fetchOptions: captchaToken
+          ? {
+              headers: { "x-captcha-response": captchaToken },
+            }
+          : undefined,
       });
       setIsLoading(false);
-
+      captchaRef.current?.reset();
+      setCaptchaToken("");
       if (error) {
         setErrorMsg(error.message || "Erro ao enviar código de recuperação.");
         return;
@@ -53,19 +62,18 @@ export const ForgotPasswordPage: React.FC = () => {
       return;
     }
 
-    const { error } = await (
-      authClient as unknown as {
-        forgetPassword: (opts: {
-          email: string;
-          redirectTo: string;
-        }) => Promise<{ error?: { message?: string } }>;
-      }
-    ).forgetPassword({
+    const { error } = await authClient.requestPasswordReset({
       email: email.trim(),
       redirectTo: `${window.location.origin}/reset-password`,
+      fetchOptions: captchaToken
+        ? {
+            headers: { "x-captcha-response": captchaToken },
+          }
+        : undefined,
     });
     setIsLoading(false);
-
+    captchaRef.current?.reset();
+    setCaptchaToken("");
     if (error) {
       setErrorMsg(error.message || "Erro ao enviar e-mail.");
       return;
@@ -152,6 +160,7 @@ export const ForgotPasswordPage: React.FC = () => {
           icon={<Mail className="w-4 h-4 opacity-40" />}
           className="h-11 rounded-xl border-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white focus:border-m3-primary transition-all text-sm"
         />
+        <TurnstileWidget ref={captchaRef} onVerify={setCaptchaToken} />
 
         <Button
           type="submit"
