@@ -12,7 +12,6 @@ import {
   CreditCard,
   Lock,
   RotateCcw,
-  Sparkles,
 } from "lucide-react";
 import React, { useCallback, useEffect, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
@@ -306,7 +305,6 @@ export const BillingTab: React.FC<BillingTabProps> = ({
               {/* Trial banner */}
               {activeSub.status === "trialing" && activeSub.trialEnd && (
                 <div className="p-4 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-xl flex items-start gap-3">
-                  <Sparkles className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
                   <div className="text-sm text-amber-800 dark:text-amber-300">
                     <strong className="font-bold">
                       {t("settings.billing.trialDaysLeft", {
@@ -461,7 +459,6 @@ export const BillingTab: React.FC<BillingTabProps> = ({
                     variant="primary"
                     className="w-full sm:w-auto"
                     isLoading={pending === "checkout"}
-                    icon={<Sparkles className="w-4 h-4" />}
                     onClick={handleStart}
                   >
                     {t("settings.billing.startTrial")}
