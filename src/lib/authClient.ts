@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { dashClient, sentinelClient } from "@better-auth/infra/client";
 import { stripeClient } from "@better-auth/stripe/client";
 import { createAuthClient } from "better-auth/client";
 import {
@@ -20,6 +21,10 @@ export const authClient = createAuthClient({
     credentials: "include",
   },
   plugins: [
+    dashClient(),
+    sentinelClient({
+      autoSolveChallenge: true,
+    }),
     inboxClient(),
     twoFactorClient({
       twoFactorPage: "/two-factor",
