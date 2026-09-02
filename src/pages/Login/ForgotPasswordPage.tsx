@@ -7,11 +7,11 @@ import { Button, Input } from "@/src/components/common";
 import { useAppNavigate } from "@/src/hooks/useAppNavigate";
 import { useI18n } from "@/src/lib/i18n";
 import {
-    ArrowRight,
-    CheckCircle2,
-    KeyRound,
-    Mail,
-    ShieldCheck,
+  ArrowRight,
+  CheckCircle2,
+  KeyRound,
+  Mail,
+  ShieldCheck,
 } from "lucide-react";
 import React, { useState } from "react";
 import { authClient } from "../../lib/authClient";
@@ -53,8 +53,7 @@ export const ForgotPasswordPage: React.FC = () => {
       return;
     }
 
-    const { error } = await (
-      authClient.requestPasswordReset({
+    const { error } = await authClient.requestPasswordReset({
       email: email.trim(),
       redirectTo: `${window.location.origin}/reset-password`,
     });
