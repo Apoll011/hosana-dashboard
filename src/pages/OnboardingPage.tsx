@@ -3,17 +3,19 @@
 SPDX-License-Identifier: Apache-2.0
 */
 import { Button, Input, Spinner } from "@/src/components/common";
-import { useI18n } from "@/src/lib/i18n";
+import { TranslationKey, useI18n } from "@/src/lib/i18n";
 import {
   AlertCircle,
   ArrowRight,
   Building2,
   Check,
+  CreditCard,
   LogOut,
   MailCheck,
   Moon,
   PlusCircle,
   Search,
+  Sparkles,
   Sun,
   User,
   Users,
@@ -44,15 +46,21 @@ export const OnboardingPage: React.FC = () => {
   const { darkMode, toggleDarkMode } = useTheme();
   const { navigate } = useAppNavigate();
   const { t } = useI18n();
-  const [mode, setMode] = useState<"choose" | "create" | "join" | "pending">(
-    "choose",
-  );
+  const [mode, setMode] = useState<
+    "choose" | "create" | "join" | "pending" | "trial"
+  >("choose");
   const [orgName, setOrgName] = useState("");
   const [orgSlug, setOrgSlug] = useState("");
   const [searchSlug, setSearchSlug] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [pendingOrgName, setPendingOrgName] = useState("");
+
+  // Newly-created org, kept around just long enough to offer the trial step
+  const [newOrg, setNewOrg] = useState<{ id: string; slug: string } | null>(
+    null,
+  );
+  const [isStartingTrial, setIsStartingTrial] = useState(false);
 
   // Invitations state
   const [invitations, setInvitations] = useState<UserInvitation[]>([]);
@@ -155,7 +163,7 @@ export const OnboardingPage: React.FC = () => {
     setIsLoading(true);
 
     const slug = orgSlug.trim();
-    const { error } = await authClient.organization.create({
+    const { data, error } = await authClient.organization.create({
       name: orgName.trim(),
       slug: slug,
     });
@@ -174,7 +182,52 @@ export const OnboardingPage: React.FC = () => {
 
     await refetch();
     setIsLoading(false);
-    navigate(`/${slug}/folders`);
+
+    const orgId = (data as { id?: string } | null)?.id;
+    if (orgId) {
+      setNewOrg({ id: orgId, slug });
+      setMode("trial");
+    } else {
+      // Fallback: if we somehow don't get the org id back, skip straight to
+      // the app — billing can still be set up later from Settings → Billing.
+      navigate(`/${slug}/folders`);
+    }
+  };
+
+  const handleStartTrial = async () => {
+    if (!newOrg) return;
+    setIsStartingTrial(true);
+    setErrorMsg("");
+    try {
+      const origin = window.location.origin;
+      posthog.capture("onboarding_trial_started");
+      const { error } = await authClient.subscription.upgrade({
+        plan: "cloud",
+        referenceId: newOrg.id,
+        customerType: "organization",
+        successUrl: `${origin}/${newOrg.slug}/settings?tab=billing&billing=success`,
+        cancelUrl: `${origin}/${newOrg.slug}/folders`,
+      });
+      if (error) {
+        setErrorMsg(
+          error.message || "Não foi possível iniciar o período gratuito.",
+        );
+        setIsStartingTrial(false);
+      }
+      // On success the browser redirects to Stripe Checkout.
+    } catch (err: unknown) {
+      setErrorMsg(
+        (err as Error)?.message ||
+          "Não foi possível iniciar o período gratuito.",
+      );
+      setIsStartingTrial(false);
+    }
+  };
+
+  const handleSkipTrial = () => {
+    if (!newOrg) return;
+    posthog.capture("onboarding_trial_skipped");
+    navigate(`/${newOrg.slug}/folders`);
   };
 
   const handleJoin = async (e: React.FormEvent) => {
@@ -290,6 +343,61 @@ export const OnboardingPage: React.FC = () => {
                 <LogOut className="w-4 h-4 mr-2" />
                 {t("sidebar.logout")}
               </Button>
+            </div>
+          )}
+
+          {mode === "trial" && newOrg && (
+            <div className="text-center">
+              <div className="w-16 h-16 bg-m3-primary/10 text-m3-primary rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-sm">
+                <Sparkles className="w-8 h-8" />
+              </div>
+              <h2 className="text-2xl font-black text-slate-900 dark:text-white mb-2 tracking-tight">
+                {t("onboarding.trial.title")}
+              </h2>
+              <p className="text-slate-500 dark:text-slate-400 text-sm mb-6 max-w-sm mx-auto">
+                {t("onboarding.trial.desc")}
+              </p>
+
+              <div className="bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-700/60 rounded-2xl p-4 mb-6 text-left space-y-2.5">
+                {(
+                  [
+                    "onboarding.trial.features.sync",
+                    "onboarding.trial.features.unlimited",
+                    "onboarding.trial.features.print",
+                    "onboarding.trial.features.backups",
+                  ] as TranslationKey[]
+                ).map((key) => (
+                  <div key={key} className="flex items-center gap-2.5">
+                    <Check className="w-4 h-4 text-m3-primary shrink-0" />
+                    <span className="text-sm text-slate-700 dark:text-slate-300">
+                      {t(key)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+
+              <Button
+                variant="primary"
+                className="w-full h-11 rounded-xl bg-m3-primary hover:bg-m3-primary-dark font-bold text-xs uppercase tracking-wider text-white"
+                isLoading={isStartingTrial}
+                disabled={isStartingTrial}
+                icon={<CreditCard className="w-4 h-4" />}
+                onClick={handleStartTrial}
+              >
+                {t("onboarding.trial.startBtn")}
+              </Button>
+              <p className="text-[11px] text-slate-400 mt-2 mb-4">
+                {t("onboarding.trial.note")}
+              </p>
+
+              <button
+                type="button"
+                onClick={handleSkipTrial}
+                disabled={isStartingTrial}
+                className="inline-flex items-center text-xs font-semibold text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors cursor-pointer disabled:opacity-50"
+              >
+                {t("onboarding.trial.skipBtn")}
+              </button>
             </div>
           )}
 

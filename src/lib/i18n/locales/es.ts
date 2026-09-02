@@ -29,6 +29,7 @@ export const es: typeof pt = {
     offline: "Sin conexión",
     back: "Volver",
     new: "Nuevo",
+    retry: "Reintentar",
     confirm: "Confirmar",
     song: "Canción",
     songs: "Canciones",
@@ -146,10 +147,59 @@ export const es: typeof pt = {
       account: "Cuenta y Seguridad",
       workspace: "Organización",
       members: "Miembros",
+      billing: "Facturación",
       general: "Servidor",
       app: "Aplicación",
       features: "Funcionalidades y soporte",
       about: "Acerca de",
+    },
+    billing: {
+      title: "Facturación",
+      desc: "Gestione la suscripción de su organización.",
+      readOnly: "Solo lectura",
+      loading: "Cargando facturación...",
+      loadError: "No se pudo cargar la información de facturación.",
+      noAccessTitle: "Sin acceso a facturación",
+      noAccessDesc:
+        "Solo el propietario de la organización puede ver la facturación.",
+      status: {
+        trialing: "Periodo de prueba",
+        active: "Activo",
+      },
+      planName: "Hosanna Cloud",
+      planDesc:
+        "Sincronización en la nube, copias de seguridad automáticas y soporte prioritario para su organización.",
+      monthly: "Mensual",
+      annual: "Anual",
+      plan: {
+        features: {
+          sync: "Sincronización automática entre dispositivos",
+          unlimited: "Canciones y cultos ilimitados",
+          print: "Exportación e impresión de acordes",
+          backups: "Copias de seguridad automáticas",
+          support: "Soporte prioritario",
+        },
+      },
+      trialDaysLeft: "Quedan {days} días de su periodo de prueba",
+      trialEndsOn: "El periodo de prueba termina el {date}.",
+      cancelingTitle: "Suscripción a finalizar",
+      cancelingDesc: "Su suscripción termina el {date} y no se renovará.",
+      restore: "Restaurar suscripción",
+      restoreSuccess: "Suscripción restaurada.",
+      restoreError: "No se pudo restaurar la suscripción.",
+      currentPeriod: "Periodo actual",
+      nextCharge: "Próximo cobro",
+      manage: "Gestionar facturación",
+      manageDesc:
+        "Actualice el método de pago, vea facturas o cancele la suscripción.",
+      startTrial: "Iniciar periodo de prueba de 14 días",
+      trialNote:
+        "Se requiere una tarjeta para comenzar. No se le cobrará nada durante los 14 días de prueba.",
+      askOwner:
+        "Pida al propietario de la organización que active la suscripción.",
+      checkoutError: "No se pudo iniciar el proceso de pago.",
+      portalError: "No se pudo abrir el portal de facturación.",
+      subscribedToast: "¡Suscripción activada!",
     },
     features: {
       earlyAccess: {
@@ -1360,6 +1410,19 @@ export const es: typeof pt = {
     step2Title: "Personalización Rápida",
     step2Desc: "Elija las preferencias iniciales para su equipo.",
     finishBtn: "Finalizar y Comenzar",
+    trial: {
+      title: "Inicie su periodo de prueba",
+      desc: "Pruebe Hosanna Cloud gratis durante 14 días. Cancele cuando quiera.",
+      features: {
+        sync: "Sincronización automática entre dispositivos",
+        unlimited: "Canciones y cultos ilimitados",
+        print: "Exportación e impresión de acordes",
+        backups: "Copias de seguridad automáticas",
+      },
+      startBtn: "Iniciar periodo de prueba de 14 días",
+      note: "Se requiere una tarjeta para comenzar. No se le cobrará nada durante los 14 días de prueba.",
+      skipBtn: "Ahora no, continuar sin suscribirse",
+    },
   },
 
   auth: {
