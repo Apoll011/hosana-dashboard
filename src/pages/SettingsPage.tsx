@@ -78,7 +78,6 @@ export const SettingsPage: React.FC = () => {
       next.delete("billing");
       setSearchParams(next, { replace: true });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Restore Modal State
