@@ -171,6 +171,9 @@ export const en: typeof pt = {
         "Cloud sync, automatic backups, and priority support for your organization.",
       monthly: "Monthly",
       annual: "Annual",
+      // Shown next to the price when the annual option is selected. Based on
+      // the display prices in PLAN_PRICING (12×€12 − €120 = 2 months free).
+      annualSavings: "Save 2 months vs the monthly plan",
       plan: {
         features: {
           sync: "Automatic sync across devices",
@@ -194,6 +197,11 @@ export const en: typeof pt = {
       startTrial: "Start 14-day free trial",
       trialNote:
         "A card is required to start. You won't be charged during the 14-day trial.",
+      // Used when the org already used its free trial (re-subscribing after
+      // cancel): Stripe does not grant a second trial, so don't promise one.
+      subscribe: "Subscribe now",
+      subscribeNote: "Your subscription starts right away. Cancel anytime.",
+      promoHint: "Have a discount code? You can apply it at checkout.",
       askOwner: "Ask the organization owner to set up billing.",
       checkoutError: "Couldn't start checkout.",
       portalError: "Couldn't open the billing portal.",

@@ -25,8 +25,10 @@ import bg from "../assets/images/background.webp";
 import { useAuth } from "../contexts/AuthContext";
 import { useTheme } from "../contexts/ThemeContext";
 import { useAppNavigate } from "../hooks/useAppNavigate";
+import { useSubscription } from "../hooks/useSubscription";
 import { authClient } from "../lib/authClient";
 import { posthog } from "../lib/posthog";
+import { PLAN_PRICING } from "../lib/subscriptions";
 import { LanguageSelector } from "./Login/components/LanguageSelector";
 import { WorkspaceSwitcher } from "./Login/components/WorkspaceSwitcher";
 
@@ -41,20 +43,13 @@ interface UserInvitation {
   inviterId: string;
 }
 
-// TODO: replace with the real prices configured for the "cloud" plan in
-// Stripe (priceId / annualDiscountPriceId in auth.ts). The Stripe plugin
-// does not expose the price amount to the client, so it's kept here for
-// display purposes only.
-const PLAN_PRICING = {
-  monthly: { amount: "€12", period: "/mês" },
-  annual: { amount: "€120", period: "/ano" },
-};
-
 export const OnboardingPage: React.FC = () => {
   const { user, organization, hasAcceptedTrial, logout, refetch } = useAuth();
   const { darkMode, toggleDarkMode } = useTheme();
   const { navigate } = useAppNavigate();
-  const { t } = useI18n();
+  const { t, language } = useI18n();
+  const { hasStarted, pendingAction, refresh, startCheckout } =
+    useSubscription();
   const [mode, setMode] = useState<
     "choose" | "create" | "join" | "pending" | "trial"
   >("choose");
@@ -69,7 +64,6 @@ export const OnboardingPage: React.FC = () => {
   const [newOrg, setNewOrg] = useState<{ id: string; slug: string } | null>(
     null,
   );
-  const [isStartingTrial, setIsStartingTrial] = useState(false);
   const [annual, setAnnual] = useState(false);
 
   // Invitations state
@@ -120,30 +114,23 @@ export const OnboardingPage: React.FC = () => {
   }, [organization, hasAcceptedTrial, newOrg]);
 
   // While the trial step is showing, poll for the subscription to appear —
-  // the Stripe webhook can land after the redirect back. Once it exists,
-  // refresh the session so ProtectedRoute lets the user into the studio.
+  // the Stripe webhook can land after the redirect back. Once the hook sees
+  // a subscription row, refresh the session so ProtectedRoute lets the user
+  // into the studio.
   useEffect(() => {
     if (mode !== "trial" || !newOrg) return;
-    let cancelled = false;
-    const checkSubscription = async () => {
-      try {
-        const { data } = await authClient.subscription.list({
-          query: { referenceId: newOrg.id, customerType: "organization" },
-        });
-        if (!cancelled && Array.isArray(data) && data.length > 0) {
-          await refetch();
-        }
-      } catch {
-        // Transient errors are fine — keep polling.
-      }
-    };
-    checkSubscription();
-    const interval = window.setInterval(checkSubscription, 5000);
-    return () => {
-      cancelled = true;
-      window.clearInterval(interval);
-    };
-  }, [mode, newOrg, refetch]);
+    const interval = window.setInterval(() => {
+      void refresh();
+    }, 5000);
+    void refresh();
+    return () => window.clearInterval(interval);
+  }, [mode, newOrg, refresh]);
+
+  useEffect(() => {
+    if (mode === "trial" && newOrg && hasStarted === true) {
+      void refetch();
+    }
+  }, [mode, newOrg, hasStarted, refetch]);
 
   const handleAcceptInvitation = async (invitationId: string) => {
     setProcessingInvId(invitationId);
@@ -241,33 +228,19 @@ export const OnboardingPage: React.FC = () => {
 
   const handleStartTrial = async () => {
     if (!newOrg) return;
-    setIsStartingTrial(true);
     setErrorMsg("");
-    try {
-      const origin = window.location.origin;
-      posthog.capture("onboarding_trial_started", { annual });
-      const { error } = await authClient.subscription.upgrade({
-        plan: "cloud",
-        referenceId: newOrg.id,
-        customerType: "organization",
-        annual,
-        successUrl: `${origin}/${newOrg.slug}/settings?tab=billing&billing=success`,
-        cancelUrl: `${origin}/${newOrg.slug}/folders`,
-      });
-      if (error) {
-        setErrorMsg(
-          error.message || "Não foi possível iniciar o período gratuito.",
-        );
-        setIsStartingTrial(false);
-      }
-      // On success the browser redirects to Stripe Checkout.
-    } catch (err: unknown) {
-      setErrorMsg(
-        (err as Error)?.message ||
-          "Não foi possível iniciar o período gratuito.",
-      );
-      setIsStartingTrial(false);
+    posthog.capture("onboarding_trial_started", { annual });
+    const origin = window.location.origin;
+    const { error } = await startCheckout({
+      annual,
+      locale: language,
+      successUrl: `${origin}/${newOrg.slug}/settings?tab=billing&billing=success`,
+      cancelUrl: `${origin}/${newOrg.slug}/folders`,
+    });
+    if (error) {
+      setErrorMsg(error);
     }
+    // On success the better-auth client redirects to Stripe Checkout.
   };
 
   const handleJoin = async (e: React.FormEvent) => {
@@ -420,7 +393,8 @@ export const OnboardingPage: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setAnnual(false)}
-                    className={`flex-1 px-3 py-1.5 rounded-full text-xs font-bold transition-colors cursor-pointer ${
+                    disabled={pendingAction === "checkout"}
+                    className={`flex-1 px-3 py-1.5 rounded-full text-xs font-bold transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
                       !annual
                         ? "bg-m3-primary text-white"
                         : "text-slate-500 dark:text-slate-400"
@@ -431,7 +405,8 @@ export const OnboardingPage: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setAnnual(true)}
-                    className={`flex-1 px-3 py-1.5 rounded-full text-xs font-bold transition-colors cursor-pointer ${
+                    disabled={pendingAction === "checkout"}
+                    className={`flex-1 px-3 py-1.5 rounded-full text-xs font-bold transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
                       annual
                         ? "bg-m3-primary text-white"
                         : "text-slate-500 dark:text-slate-400"
@@ -452,13 +427,19 @@ export const OnboardingPage: React.FC = () => {
                       : PLAN_PRICING.monthly.period}
                   </span>
                 </div>
+                {annual && (
+                  <p className="mt-2 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 text-center flex items-center justify-center gap-1">
+                    <Check className="w-3 h-3 shrink-0" />
+                    {t("settings.billing.annualSavings")}
+                  </p>
+                )}
               </div>
 
               <Button
                 variant="primary"
                 className="w-full h-11 rounded-xl bg-m3-primary hover:bg-m3-primary-dark font-bold text-xs uppercase tracking-wider text-white"
-                isLoading={isStartingTrial}
-                disabled={isStartingTrial}
+                isLoading={pendingAction === "checkout"}
+                disabled={pendingAction === "checkout"}
                 icon={<CreditCard className="w-4 h-4" />}
                 onClick={handleStartTrial}
               >
@@ -466,6 +447,9 @@ export const OnboardingPage: React.FC = () => {
               </Button>
               <p className="text-[11px] text-slate-400 mt-2">
                 {t("onboarding.trial.note")}
+              </p>
+              <p className="text-[11px] text-slate-400 mt-1">
+                {t("settings.billing.promoHint")}
               </p>
             </div>
           )}
