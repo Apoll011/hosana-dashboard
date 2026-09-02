@@ -10,6 +10,7 @@ import {
   AlertTriangle,
   AppWindow,
   Building2,
+  CreditCard,
   Info,
   RotateCcw,
   Server,
@@ -17,12 +18,14 @@ import {
   Users,
   Zap,
 } from "lucide-react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useSync } from "../contexts/SyncContext";
 
 import { AboutTab } from "../components/settings/AboutTab";
 import { AccountTab } from "../components/settings/AccountTab";
 import { AppearanceTab } from "../components/settings/AppearanceTab";
+import { BillingTab } from "../components/settings/BillingTab";
 import { FeaturesTab } from "../components/settings/FeaturesTab";
 import { GeneralTab } from "../components/settings/GeneralTab";
 import { MembersTab } from "../components/settings/MembersTab";
@@ -37,16 +40,46 @@ type TabType =
   | "workspace"
   | "account"
   | "members"
+  | "billing"
   | "app"
   | "features"
   | "about";
+
+const VALID_TABS: TabType[] = [
+  "account",
+  "workspace",
+  "members",
+  "billing",
+  "general",
+  "app",
+  "features",
+  "about",
+];
 
 export const SettingsPage: React.FC = () => {
   const { showToast } = useSync();
   const { t } = useI18n();
   const isOnline = useOnline();
+  const [searchParams, setSearchParams] = useSearchParams();
 
-  const [activeTab, setActiveTab] = useState<TabType>("account");
+  const initialTab = searchParams.get("tab");
+  const [activeTab, setActiveTab] = useState<TabType>(
+    VALID_TABS.includes(initialTab as TabType)
+      ? (initialTab as TabType)
+      : "account",
+  );
+
+  // Land back on the Billing tab (and show a toast) after returning from
+  // Stripe Checkout with ?billing=success in the URL.
+  useEffect(() => {
+    if (searchParams.get("billing") === "success") {
+      showToast(t("settings.billing.subscribedToast"), "success");
+      const next = new URLSearchParams(searchParams);
+      next.delete("billing");
+      setSearchParams(next, { replace: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Restore Modal State
   const [pendingRestoreData, setPendingRestoreData] = useState<Record<
@@ -82,6 +115,7 @@ export const SettingsPage: React.FC = () => {
   };
 
   const { granted: canUpdate } = useCan("organization.update");
+  const { granted: canAccessBilling } = useCan("billing.access");
 
   const tabs = [
     {
@@ -104,6 +138,13 @@ export const SettingsPage: React.FC = () => {
       icon: Users,
       requiresNetwork: true,
       show: true,
+    },
+    {
+      id: "billing",
+      label: t("settings.tabs.billing"),
+      icon: CreditCard,
+      requiresNetwork: true,
+      show: canAccessBilling,
     },
     {
       id: "general",
@@ -162,7 +203,12 @@ export const SettingsPage: React.FC = () => {
             return (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id as TabType)}
+                onClick={() => {
+                  setActiveTab(tab.id as TabType);
+                  const next = new URLSearchParams(searchParams);
+                  next.set("tab", tab.id);
+                  setSearchParams(next, { replace: true });
+                }}
                 className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
                   isActive
                     ? "bg-m3-primary text-white shadow-md shadow-m3-primary/20"
@@ -187,7 +233,13 @@ export const SettingsPage: React.FC = () => {
           <div
             className={
               !isOnline &&
-              ["account", "workspace", "members", "general"].includes(activeTab)
+              [
+                "account",
+                "workspace",
+                "members",
+                "billing",
+                "general",
+              ].includes(activeTab)
                 ? "opacity-40 pointer-events-none select-none filter grayscale transition-all"
                 : ""
             }
@@ -201,6 +253,10 @@ export const SettingsPage: React.FC = () => {
               setIsTogglingWs={setIsTogglingWs}
             />
             <MembersTab active={activeTab === "members"} />
+            <BillingTab
+              active={activeTab === "billing"}
+              showToast={showToast}
+            />
             <GeneralTab
               active={activeTab === "general"}
               showToast={showToast}
