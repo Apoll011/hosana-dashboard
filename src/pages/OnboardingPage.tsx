@@ -15,7 +15,6 @@ import {
   Moon,
   PlusCircle,
   Search,
-  Sparkles,
   Sun,
   User,
   Users,
@@ -41,8 +40,17 @@ interface UserInvitation {
   inviterId: string;
 }
 
+// TODO: replace with the real prices configured for the "cloud" plan in
+// Stripe (priceId / annualDiscountPriceId in auth.ts). The Stripe plugin
+// does not expose the price amount to the client, so it's kept here for
+// display purposes only.
+const PLAN_PRICING = {
+  monthly: { amount: "€12", period: "/mês" },
+  annual: { amount: "€120", period: "/ano" },
+};
+
 export const OnboardingPage: React.FC = () => {
-  const { user, logout, refetch } = useAuth();
+  const { user, organization, hasAcceptedTrial, logout, refetch } = useAuth();
   const { darkMode, toggleDarkMode } = useTheme();
   const { navigate } = useAppNavigate();
   const { t } = useI18n();
@@ -61,6 +69,7 @@ export const OnboardingPage: React.FC = () => {
     null,
   );
   const [isStartingTrial, setIsStartingTrial] = useState(false);
+  const [annual, setAnnual] = useState(false);
 
   // Invitations state
   const [invitations, setInvitations] = useState<UserInvitation[]>([]);
@@ -98,6 +107,42 @@ export const OnboardingPage: React.FC = () => {
 
     fetchUserInvitations();
   }, []);
+
+  // If the user already has an organization that has never accepted a trial /
+  // set up billing (e.g. they created the org and refreshed, or they cancelled
+  // at Stripe Checkout and got bounced back here), keep showing the trial step.
+  useEffect(() => {
+    if (organization && hasAcceptedTrial === false && !newOrg) {
+      setNewOrg({ id: organization.id, slug: organization.slug });
+      setMode("trial");
+    }
+  }, [organization, hasAcceptedTrial, newOrg]);
+
+  // While the trial step is showing, poll for the subscription to appear —
+  // the Stripe webhook can land after the redirect back. Once it exists,
+  // refresh the session so ProtectedRoute lets the user into the studio.
+  useEffect(() => {
+    if (mode !== "trial" || !newOrg) return;
+    let cancelled = false;
+    const checkSubscription = async () => {
+      try {
+        const { data } = await authClient.subscription.list({
+          query: { referenceId: newOrg.id, customerType: "organization" },
+        });
+        if (!cancelled && Array.isArray(data) && data.length > 0) {
+          await refetch();
+        }
+      } catch {
+        // Transient errors are fine — keep polling.
+      }
+    };
+    checkSubscription();
+    const interval = window.setInterval(checkSubscription, 5000);
+    return () => {
+      cancelled = true;
+      window.clearInterval(interval);
+    };
+  }, [mode, newOrg, refetch]);
 
   const handleAcceptInvitation = async (invitationId: string) => {
     setProcessingInvId(invitationId);
@@ -187,11 +232,10 @@ export const OnboardingPage: React.FC = () => {
     if (orgId) {
       setNewOrg({ id: orgId, slug });
       setMode("trial");
-    } else {
-      // Fallback: if we somehow don't get the org id back, skip straight to
-      // the app — billing can still be set up later from Settings → Billing.
-      navigate(`/${slug}/folders`);
     }
+    // If orgId is somehow missing, the effect above picks the org up from the
+    // auth context (organization + hasAcceptedTrial) and shows the trial step
+    // automatically — the studio stays blocked until billing is set up.
   };
 
   const handleStartTrial = async () => {
@@ -200,11 +244,12 @@ export const OnboardingPage: React.FC = () => {
     setErrorMsg("");
     try {
       const origin = window.location.origin;
-      posthog.capture("onboarding_trial_started");
+      posthog.capture("onboarding_trial_started", { annual });
       const { error } = await authClient.subscription.upgrade({
         plan: "cloud",
         referenceId: newOrg.id,
         customerType: "organization",
+        annual,
         successUrl: `${origin}/${newOrg.slug}/settings?tab=billing&billing=success`,
         cancelUrl: `${origin}/${newOrg.slug}/folders`,
       });
@@ -222,12 +267,6 @@ export const OnboardingPage: React.FC = () => {
       );
       setIsStartingTrial(false);
     }
-  };
-
-  const handleSkipTrial = () => {
-    if (!newOrg) return;
-    posthog.capture("onboarding_trial_skipped");
-    navigate(`/${newOrg.slug}/folders`);
   };
 
   const handleJoin = async (e: React.FormEvent) => {
@@ -348,9 +387,6 @@ export const OnboardingPage: React.FC = () => {
 
           {mode === "trial" && newOrg && (
             <div className="text-center">
-              <div className="w-16 h-16 bg-m3-primary/10 text-m3-primary rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-sm">
-                <Sparkles className="w-8 h-8" />
-              </div>
               <h2 className="text-2xl font-black text-slate-900 dark:text-white mb-2 tracking-tight">
                 {t("onboarding.trial.title")}
               </h2>
@@ -376,6 +412,46 @@ export const OnboardingPage: React.FC = () => {
                 ))}
               </div>
 
+              {/* Billing interval choice: monthly or annual */}
+              <div className="bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-700/60 rounded-2xl p-3 mb-4">
+                <div className="flex items-center gap-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-full p-1 mb-3">
+                  <button
+                    type="button"
+                    onClick={() => setAnnual(false)}
+                    className={`flex-1 px-3 py-1.5 rounded-full text-xs font-bold transition-colors cursor-pointer ${
+                      !annual
+                        ? "bg-m3-primary text-white"
+                        : "text-slate-500 dark:text-slate-400"
+                    }`}
+                  >
+                    {t("settings.billing.monthly")}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setAnnual(true)}
+                    className={`flex-1 px-3 py-1.5 rounded-full text-xs font-bold transition-colors cursor-pointer ${
+                      annual
+                        ? "bg-m3-primary text-white"
+                        : "text-slate-500 dark:text-slate-400"
+                    }`}
+                  >
+                    {t("settings.billing.annual")}
+                  </button>
+                </div>
+                <div className="flex items-baseline justify-center gap-1">
+                  <span className="text-2xl font-black text-slate-900 dark:text-white">
+                    {annual
+                      ? PLAN_PRICING.annual.amount
+                      : PLAN_PRICING.monthly.amount}
+                  </span>
+                  <span className="text-sm text-slate-500 dark:text-slate-400">
+                    {annual
+                      ? PLAN_PRICING.annual.period
+                      : PLAN_PRICING.monthly.period}
+                  </span>
+                </div>
+              </div>
+
               <Button
                 variant="primary"
                 className="w-full h-11 rounded-xl bg-m3-primary hover:bg-m3-primary-dark font-bold text-xs uppercase tracking-wider text-white"
@@ -386,18 +462,9 @@ export const OnboardingPage: React.FC = () => {
               >
                 {t("onboarding.trial.startBtn")}
               </Button>
-              <p className="text-[11px] text-slate-400 mt-2 mb-4">
+              <p className="text-[11px] text-slate-400 mt-2">
                 {t("onboarding.trial.note")}
               </p>
-
-              <button
-                type="button"
-                onClick={handleSkipTrial}
-                disabled={isStartingTrial}
-                className="inline-flex items-center text-xs font-semibold text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors cursor-pointer disabled:opacity-50"
-              >
-                {t("onboarding.trial.skipBtn")}
-              </button>
             </div>
           )}
 
