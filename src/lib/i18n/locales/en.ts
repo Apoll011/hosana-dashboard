@@ -58,6 +58,7 @@ export const en: typeof pt = {
     expand: "Expand menu",
     logout: "Sign out",
     openSettings: "Settings",
+    switchWorkspace: "Switch workspace",
   },
 
   addressBar: {
@@ -537,6 +538,13 @@ export const en: typeof pt = {
     workspace: {
       title: "Organization Profile",
       desc: "Manage the institutional identity, logo, and colors of your ministry.",
+      switchOrgTitle: "Your Organizations",
+      switchOrgDesc:
+        "You belong to more than one organization. Switch to manage another workspace.",
+      currentOrg: "Current",
+      switchOrg: "Switch",
+      switchingOrg: "Switching…",
+      switchOrgError: "Could not switch workspace: {error}",
       noLogo: "No Logo",
       change: "Change",
       add: "Add",

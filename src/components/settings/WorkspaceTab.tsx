@@ -16,6 +16,7 @@ import {
   Image as ImageIcon,
   ImagePlus,
   Info,
+  Layers,
   Loader2,
   Lock,
   Palette,
@@ -79,7 +80,12 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
   setPendingRestoreData,
   setRestoreStats,
 }) => {
-  const { organization, refetch: refetchAuth } = useAuth();
+  const {
+    organization,
+    organizations,
+    refetch: refetchAuth,
+    switchOrganization,
+  } = useAuth();
   const { t } = useI18n();
   const orgMetadata = (organization?.metadata as OrgMetadataStructure) || {};
 
@@ -89,6 +95,7 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
   const [isDownloading, setIsDownloading] = useState(false);
   const [isCompressing, setIsCompressing] = useState(false);
   const [isSavingOrganization, setIsSavingOrganization] = useState(false);
+  const [switchingOrgId, setSwitchingOrgId] = useState<string | null>(null);
 
   // --- Read-Only / Saved State ---
   const [currentName, setCurrentName] = useState(organization?.name || "");
@@ -267,6 +274,24 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
     setIsEditing(false);
   };
 
+  const handleSwitchWorkspace = async (org: (typeof organizations)[number]) => {
+    if (switchingOrgId) return;
+    setSwitchingOrgId(org.id);
+    try {
+      // On success this hard-navigates to the new workspace.
+      await switchOrganization(org);
+    } catch (err) {
+      showToast(
+        t("settings.workspace.switchOrgError", {
+          error: (err as { message?: string })?.message || "",
+        }),
+        "error",
+      );
+    } finally {
+      setSwitchingOrgId(null);
+    }
+  };
+
   const handleBackup = async () => {
     setIsDownloading(true);
     try {
@@ -311,6 +336,85 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
 
   return (
     <div className="space-y-6 max-w-4xl mx-auto w-full animate-in fade-in slide-in-from-bottom-2 duration-300">
+      {/* ========================================== */}
+      {/* 0. SELETOR DE ORGANIZAÇÃO (quando > 1)     */}
+      {/* ========================================== */}
+      {organizations.length > 1 && (
+        <section className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm overflow-hidden">
+          <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
+            <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+              <Layers className="w-5 h-5 text-m3-primary" />
+              {t("settings.workspace.switchOrgTitle")}
+            </h2>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+              {t("settings.workspace.switchOrgDesc")}
+            </p>
+          </div>
+          <div className="p-6">
+            <ul className="space-y-2.5">
+              {organizations.map((org) => {
+                const isCurrent = org.id === organization?.id;
+                return (
+                  <li
+                    key={org.id}
+                    className={`flex items-center justify-between gap-4 p-3.5 rounded-2xl border transition-colors ${
+                      isCurrent
+                        ? "border-m3-primary/30 bg-m3-primary/[0.04] dark:bg-m3-primary/10"
+                        : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-slate-300 dark:hover:border-slate-700"
+                    }`}
+                  >
+                    <div className="flex items-center gap-3.5 min-w-0">
+                      <div className="w-11 h-11 rounded-xl shrink-0 overflow-hidden flex items-center justify-center bg-m3-primary/10 border border-m3-border/60 text-sm font-black text-m3-primary">
+                        {org.logo ? (
+                          <img
+                            src={org.logo}
+                            alt={org.name || ""}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          (org.name?.trim().charAt(0) || "·").toUpperCase()
+                        )}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-bold text-slate-900 dark:text-slate-100 truncate">
+                          {org.name}
+                        </p>
+                        <p className="text-xs text-slate-400 dark:text-slate-500 font-mono truncate">
+                          @{org.slug}
+                        </p>
+                      </div>
+                    </div>
+
+                    {isCurrent ? (
+                      <span className="shrink-0 inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wide text-emerald-600 dark:text-emerald-400 bg-emerald-100/70 dark:bg-emerald-950/40 px-2.5 py-1 rounded-full">
+                        <Check className="w-3 h-3" />
+                        {t("settings.workspace.currentOrg")}
+                      </span>
+                    ) : (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        disabled={switchingOrgId !== null}
+                        icon={
+                          switchingOrgId === org.id ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                          ) : undefined
+                        }
+                        onClick={() => handleSwitchWorkspace(org)}
+                      >
+                        {switchingOrgId === org.id
+                          ? t("settings.workspace.switchingOrg")
+                          : t("settings.workspace.switchOrg")}
+                      </Button>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        </section>
+      )}
+
       {/* ========================================== */}
       {/* 1. PERFIL E IDENTIDADE DA ORGANIZAÇÃO      */}
       {/* ========================================== */}

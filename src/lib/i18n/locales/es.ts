@@ -58,6 +58,7 @@ export const es: typeof pt = {
     expand: "Expandir menú",
     logout: "Cerrar sesión",
     openSettings: "Configuración",
+    switchWorkspace: "Cambiar de organización",
   },
 
   addressBar: {
@@ -543,6 +544,13 @@ export const es: typeof pt = {
     workspace: {
       title: "Perfil de la Organización",
       desc: "Gestione la identidad institucional, logotipo y colores de su ministerio.",
+      switchOrgTitle: "Tus Organizaciones",
+      switchOrgDesc:
+        "Perteneces a más de una organización. Cambia para gestionar otro espacio de trabajo.",
+      currentOrg: "Actual",
+      switchOrg: "Cambiar",
+      switchingOrg: "Cambiando…",
+      switchOrgError: "No se pudo cambiar de organización: {error}",
       noLogo: "Sin Logotipo",
       change: "Cambiar",
       add: "Añadir",
