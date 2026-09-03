@@ -20,7 +20,6 @@ import {
   Sun,
   User,
   Users,
-  X,
 } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import bg from "../assets/images/background.webp";
