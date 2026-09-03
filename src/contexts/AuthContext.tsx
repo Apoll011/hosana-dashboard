@@ -17,8 +17,9 @@ import { authClient } from "../lib/authClient";
 import { clearPermissionCache } from "../lib/permissions/client";
 import { fetchSubscriptionRows } from "../lib/subscriptions";
 import { posthog } from "../lib/posthog";
+import { syncSettingsFromMetadata } from "../hooks/usePersonalSettings";
 
-interface SessionUser {
+export interface SessionUser {
   id: string;
   name: string;
   email: string;
@@ -27,6 +28,7 @@ interface SessionUser {
   createdAt: Date;
   updatedAt: Date;
   role?: string;
+  metadata?: string | null;
   [key: string]: unknown;
 }
 
@@ -138,7 +140,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const CACHED_USER_KEY = "cached_auth_user";
+export const CACHED_USER_KEY = "cached_auth_user";
 const CACHED_ORG_KEY = "cached_auth_org";
 const CACHED_ORGS_KEY = "cached_auth_orgs";
 const CACHED_TRIAL_KEY = "cached_auth_trial";
@@ -333,6 +335,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
       setOrganization(activeOrg);
       setUser(fullUser);
+      syncSettingsFromMetadata(fullUser.metadata);
 
       // Identify the user in PostHog on every session refresh
       posthog.identify(fullUser.id, {

@@ -4,6 +4,8 @@
  */
 
 import { useCallback, useSyncExternalStore } from "react";
+import { CACHED_USER_KEY, SessionUser } from "../contexts/AuthContext";
+import { authClient } from "../lib/authClient";
 import { PersonalLanguage } from "../lib/i18n/types";
 
 export type PersonalTheme = "light" | "dark" | "system";
@@ -26,7 +28,7 @@ export interface PersonalSettings {
   explorerDensity: ExplorerDensity;
 }
 
-const DEFAULT_SETTINGS: PersonalSettings = {
+export const DEFAULT_SETTINGS: PersonalSettings = {
   showFolderTree: true,
   language: "auto",
   theme: "light",
@@ -50,11 +52,46 @@ const LEGACY_KEYS = {
   explorerDensity: "explorer_density",
 } as const;
 
+function parseSettingsJson(raw: unknown): Partial<PersonalSettings> | null {
+  if (!raw) return null;
+  let parsed: unknown = raw;
+  if (typeof raw === "string") {
+    try {
+      parsed = JSON.parse(raw);
+    } catch {
+      return null;
+    }
+  }
+  if (typeof parsed === "object" && parsed !== null) {
+    return parsed as Partial<PersonalSettings>;
+  }
+  return null;
+}
+
 function loadSettings(): PersonalSettings {
   const settings: PersonalSettings = { ...DEFAULT_SETTINGS };
   try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) Object.assign(settings, JSON.parse(stored));
+    // 1. Try reading from cached auth user metadata
+    let hasMetadata = false;
+    const cachedUserStr = localStorage.getItem(CACHED_USER_KEY);
+    if (cachedUserStr) {
+      try {
+        const cachedUser = JSON.parse(cachedUserStr) as SessionUser;
+        const parsedMetadata = parseSettingsJson(cachedUser?.metadata);
+        if (parsedMetadata) {
+          Object.assign(settings, parsedMetadata);
+          hasMetadata = true;
+        }
+      } catch {
+        // ignore invalid cached user
+      }
+    }
+
+    // 2. If no metadata found, check local storage key
+    if (!hasMetadata) {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) Object.assign(settings, JSON.parse(stored));
+    }
 
     // One-time migration from legacy scattered keys.
     let migrated = false;
@@ -102,13 +139,52 @@ function loadSettings(): PersonalSettings {
 let state: PersonalSettings = loadSettings();
 const listeners = new Set<() => void>();
 
-function setState(updater: (prev: PersonalSettings) => PersonalSettings) {
-  state = updater(state);
+let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+
+async function syncMetadataToServer(settingsToSave: PersonalSettings) {
+  const serialized = JSON.stringify(settingsToSave);
+
+  // Update cached user in localStorage immediately so offline/refresh remains consistent
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    const cachedUserStr = localStorage.getItem(CACHED_USER_KEY);
+    if (cachedUserStr) {
+      const cachedUser = JSON.parse(cachedUserStr) as SessionUser;
+      cachedUser.metadata = serialized;
+      localStorage.setItem(CACHED_USER_KEY, JSON.stringify(cachedUser));
+    }
+  } catch {
+    // ignore storage errors
+  }
+
+  // Persist to better-auth backend
+  try {
+    await (authClient.updateUser as unknown as (params: { metadata: string }) => Promise<unknown>)({
+      metadata: serialized,
+    });
+  } catch (err) {
+    console.warn("Failed to persist personal settings to user metadata:", err);
+  }
+}
+
+function persistSettings(newSettings: PersonalSettings) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(newSettings));
   } catch {
     // localStorage unavailable or full — silently ignore
   }
+
+  if (debounceTimer) {
+    clearTimeout(debounceTimer);
+  }
+
+  debounceTimer = setTimeout(() => {
+    void syncMetadataToServer(newSettings);
+  }, 300);
+}
+
+function setState(updater: (prev: PersonalSettings) => PersonalSettings) {
+  state = updater(state);
+  persistSettings(state);
   listeners.forEach((l) => l());
 }
 
@@ -123,6 +199,25 @@ function getSnapshot() {
   return state;
 }
 
+/**
+ * Updates in-memory store if new metadata arrives (e.g. from session fetch or another tab).
+ */
+export function syncSettingsFromMetadata(metadata: unknown) {
+  const parsed = parseSettingsJson(metadata);
+  if (parsed) {
+    const merged = { ...DEFAULT_SETTINGS, ...parsed };
+    if (JSON.stringify(merged) !== JSON.stringify(state)) {
+      state = merged;
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      } catch {
+        // ignore
+      }
+      listeners.forEach((l) => l());
+    }
+  }
+}
+
 // Sync across open browser tabs/windows
 if (typeof window !== "undefined") {
   window.addEventListener("storage", (e) => {
@@ -132,6 +227,13 @@ if (typeof window !== "undefined") {
         listeners.forEach((l) => l());
       } catch {
         // ignore invalid JSON from another tab
+      }
+    } else if (e.key === CACHED_USER_KEY && e.newValue) {
+      try {
+        const cachedUser = JSON.parse(e.newValue) as SessionUser;
+        syncSettingsFromMetadata(cachedUser?.metadata);
+      } catch {
+        // ignore invalid JSON
       }
     }
   });
