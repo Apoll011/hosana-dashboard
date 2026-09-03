@@ -6,6 +6,7 @@
 import { Badge, Button, Spinner } from "@/src/components/common";
 import { useI18n } from "@/src/lib/i18n";
 import { useCan } from "@/src/lib/permissions/client";
+import { PLAN_PRICING } from "@/src/lib/subscriptions";
 import {
   AlertTriangle,
   Check,
@@ -13,9 +14,9 @@ import {
   Lock,
   RotateCcw,
 } from "lucide-react";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
-import { authClient } from "../../lib/authClient";
+import { useSubscription } from "../../hooks/useSubscription";
 import { posthog } from "../../lib/posthog";
 
 export interface BillingTabProps {
@@ -26,15 +27,6 @@ export interface BillingTabProps {
   ) => void;
 }
 
-// TODO: replace with the real prices configured for the "cloud" plan in
-// Stripe (priceId / annualDiscountPriceId in auth.ts). The Stripe plugin
-// does not expose the price amount to the client, so it's kept here for
-// display purposes only.
-const PLAN_PRICING = {
-  monthly: { amount: "€12", period: "/mês" },
-  annual: { amount: "€120", period: "/ano" },
-};
-
 const PLAN_FEATURE_KEYS = [
   "settings.billing.plan.features.sync",
   "settings.billing.plan.features.unlimited",
@@ -43,68 +35,35 @@ const PLAN_FEATURE_KEYS = [
   "settings.billing.plan.features.support",
 ] as const;
 
-interface SubscriptionRow {
-  id: string;
-  plan: string;
-  status: string;
-  referenceId: string;
-  stripeSubscriptionId?: string | null;
-  periodStart?: string | Date | null;
-  periodEnd?: string | Date | null;
-  cancelAtPeriodEnd?: boolean | null;
-  trialStart?: string | Date | null;
-  trialEnd?: string | Date | null;
-  billingInterval?: string | null;
-}
-
-type RedirectAction = "checkout" | "portal" | "restore" | null;
-
 export const BillingTab: React.FC<BillingTabProps> = ({
   active,
   showToast,
 }) => {
-  const { t } = useI18n();
+  const { t, language } = useI18n();
   const { organization } = useAuth();
   const { granted: canManageBilling, loading: canManageLoading } =
     useCan("billing.manage");
   const { granted: canAccessBilling, loading: canAccessLoading } =
     useCan("billing.access");
 
-  const [subscriptions, setSubscriptions] = useState<SubscriptionRow[] | null>(
-    null,
-  );
-  const [isLoadingSubs, setIsLoadingSubs] = useState(true);
-  const [fetchError, setFetchError] = useState("");
+  const {
+    subscriptions,
+    isLoading,
+    error: fetchError,
+    activeSubscription: activeSub,
+    pendingAction,
+    refresh,
+    startCheckout,
+    openBillingPortal,
+    restore,
+  } = useSubscription();
+
   const [annual, setAnnual] = useState(false);
-  const [pending, setPending] = useState<RedirectAction>(null);
 
-  const orgId = organization?.id;
-
-  const loadSubscriptions = useCallback(async () => {
-    if (!orgId) return;
-    setIsLoadingSubs(true);
-    setFetchError("");
-    try {
-      const { data, error } = await authClient.subscription.list({
-        query: { referenceId: orgId, customerType: "organization" },
-      });
-      if (error) {
-        setFetchError(error.message || t("settings.billing.loadError"));
-      } else {
-        setSubscriptions((data as SubscriptionRow[]) || []);
-      }
-    } catch (err) {
-      setFetchError((err as Error)?.message || t("settings.billing.loadError"));
-    } finally {
-      setIsLoadingSubs(false);
-    }
-  }, [orgId, t]);
-
+  // Keep the data fresh every time the tab is opened.
   useEffect(() => {
-    if (active && orgId) {
-      loadSubscriptions();
-    }
-  }, [active, orgId, loadSubscriptions]);
+    if (active && organization) void refresh();
+  }, [active, organization, refresh]);
 
   if (!active) return null;
 
@@ -130,15 +89,7 @@ export const BillingTab: React.FC<BillingTabProps> = ({
     );
   }
 
-  const activeSub = subscriptions?.find(
-    (s) => s.status === "active" || s.status === "trialing",
-  );
-
-  const origin = window.location.origin;
-  const slug = organization.slug;
-  const successUrl = `${origin}/${slug}/settings?tab=billing&billing=success`;
-  const cancelUrl = `${origin}/${slug}/settings?tab=billing`;
-  const returnUrl = `${origin}/${slug}/settings?tab=billing`;
+  const isLoadingInitial = isLoading && subscriptions === null;
 
   const formatDate = (d?: string | Date | null) => {
     if (!d) return "—";
@@ -156,88 +107,46 @@ export const BillingTab: React.FC<BillingTabProps> = ({
   };
 
   const handleStart = async () => {
-    if (!canManageBilling || !orgId) return;
-    setPending("checkout");
-    try {
-      posthog.capture("billing_checkout_started", { annual });
-      const { error } = await authClient.subscription.upgrade({
-        plan: "cloud",
-        referenceId: orgId,
-        customerType: "organization",
-        annual,
-        successUrl,
-        cancelUrl,
-      });
-      if (error) {
-        showToast?.(
-          error.message || t("settings.billing.checkoutError"),
-          "error",
-        );
-        setPending(null);
-      }
-      // On success the browser is redirected to Stripe Checkout, so there's
-      // nothing else to do here.
-    } catch (err) {
-      showToast?.(
-        (err as Error)?.message || t("settings.billing.checkoutError"),
-        "error",
-      );
-      setPending(null);
+    if (!canManageBilling || !organization) return;
+    posthog.capture("billing_checkout_started", { annual });
+    const { error } = await startCheckout({
+      annual,
+      locale: language,
+      // If checkout is cancelled, keep the owner on the billing tab instead of
+      // bouncing them back to the studio folders.
+      cancelUrl: `${window.location.origin}/${organization.slug}/settings?tab=billing`,
+    });
+    if (error) {
+      showToast?.(error, "error");
     }
+    // On success the browser is redirected to Stripe Checkout.
   };
 
   const handlePortal = async () => {
-    if (!canManageBilling || !orgId) return;
-    setPending("portal");
-    try {
-      const { error } = await authClient.subscription.billingPortal({
-        referenceId: orgId,
-        customerType: "organization",
-        returnUrl,
-      });
-      if (error) {
-        showToast?.(
-          error.message || t("settings.billing.portalError"),
-          "error",
-        );
-        setPending(null);
-      }
-    } catch (err) {
-      showToast?.(
-        (err as Error)?.message || t("settings.billing.portalError"),
-        "error",
-      );
-      setPending(null);
+    if (!canManageBilling) return;
+    const { error } = await openBillingPortal();
+    if (error) {
+      showToast?.(error, "error");
     }
   };
 
   const handleRestore = async () => {
-    if (!canManageBilling || !orgId) return;
-    setPending("restore");
-    try {
-      const { error } = await authClient.subscription.restore({
-        referenceId: orgId,
-        customerType: "organization",
-        subscriptionId: activeSub?.stripeSubscriptionId || undefined,
-      });
-      if (error) {
-        showToast?.(
-          error.message || t("settings.billing.restoreError"),
-          "error",
-        );
-      } else {
-        showToast?.(t("settings.billing.restoreSuccess"), "success");
-        await loadSubscriptions();
-      }
-    } catch (err) {
-      showToast?.(
-        (err as Error)?.message || t("settings.billing.restoreError"),
-        "error",
-      );
-    } finally {
-      setPending(null);
+    if (!canManageBilling) return;
+    const { error } = await restore();
+    if (error) {
+      showToast?.(error, "error");
+    } else {
+      showToast?.(t("settings.billing.restoreSuccess"), "success");
     }
   };
+
+  // Stripe only grants the 14-day free trial once per organization: an org
+  // that subscribed before (even if it later cancelled) is billed right away,
+  // so the "free trial" wording below must not be shown to them.
+  const usedTrial = (subscriptions ?? []).some(
+    (s) =>
+      Boolean(s.trialStart) || Boolean(s.trialEnd) || s.status === "trialing",
+  );
 
   return (
     <div className="space-y-6 max-w-4xl mx-auto w-full animate-in fade-in slide-in-from-bottom-2 duration-300">
@@ -261,17 +170,21 @@ export const BillingTab: React.FC<BillingTabProps> = ({
         </div>
 
         <div className="p-6">
-          {isLoadingSubs ? (
+          {isLoadingInitial ? (
             <div className="flex items-center justify-center py-10">
               <Spinner label={t("settings.billing.loading")} />
             </div>
-          ) : fetchError ? (
+          ) : fetchError && subscriptions === null ? (
             <div className="flex flex-col items-center text-center gap-3 py-6">
               <AlertTriangle className="w-6 h-6 text-rose-500" />
               <p className="text-sm text-rose-600 dark:text-rose-400">
                 {fetchError}
               </p>
-              <Button variant="outline" size="sm" onClick={loadSubscriptions}>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => void refresh()}
+              >
                 {t("common.retry")}
               </Button>
             </div>
@@ -340,8 +253,8 @@ export const BillingTab: React.FC<BillingTabProps> = ({
                     <Button
                       variant="outline"
                       size="sm"
-                      isLoading={pending === "restore"}
-                      onClick={handleRestore}
+                      isLoading={pendingAction === "restore"}
+                      onClick={() => void handleRestore()}
                       icon={<RotateCcw className="w-3.5 h-3.5" />}
                       className="shrink-0"
                     >
@@ -378,9 +291,9 @@ export const BillingTab: React.FC<BillingTabProps> = ({
                 <div className="pt-2">
                   <Button
                     variant="primary"
-                    isLoading={pending === "portal"}
+                    isLoading={pendingAction === "portal"}
                     icon={<CreditCard className="w-4 h-4" />}
-                    onClick={handlePortal}
+                    onClick={() => void handlePortal()}
                   >
                     {t("settings.billing.manage")}
                   </Button>
@@ -406,7 +319,8 @@ export const BillingTab: React.FC<BillingTabProps> = ({
                   <button
                     type="button"
                     onClick={() => setAnnual(false)}
-                    className={`px-3 py-1.5 rounded-full text-xs font-bold transition-colors cursor-pointer ${
+                    disabled={pendingAction === "checkout"}
+                    className={`px-3 py-1.5 rounded-full text-xs font-bold transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
                       !annual
                         ? "bg-m3-primary text-white"
                         : "text-slate-500 dark:text-slate-400"
@@ -417,7 +331,8 @@ export const BillingTab: React.FC<BillingTabProps> = ({
                   <button
                     type="button"
                     onClick={() => setAnnual(true)}
-                    className={`px-3 py-1.5 rounded-full text-xs font-bold transition-colors cursor-pointer ${
+                    disabled={pendingAction === "checkout"}
+                    className={`px-3 py-1.5 rounded-full text-xs font-bold transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
                       annual
                         ? "bg-m3-primary text-white"
                         : "text-slate-500 dark:text-slate-400"
@@ -440,6 +355,12 @@ export const BillingTab: React.FC<BillingTabProps> = ({
                     : PLAN_PRICING.monthly.period}
                 </span>
               </div>
+              {annual && (
+                <p className="mt-1.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                  <Check className="w-3.5 h-3.5 shrink-0" />
+                  {t("settings.billing.annualSavings")}
+                </p>
+              )}
 
               <ul className="mt-4 space-y-2">
                 {PLAN_FEATURE_KEYS.map((key) => (
@@ -458,13 +379,20 @@ export const BillingTab: React.FC<BillingTabProps> = ({
                   <Button
                     variant="primary"
                     className="w-full sm:w-auto"
-                    isLoading={pending === "checkout"}
-                    onClick={handleStart}
+                    isLoading={pendingAction === "checkout"}
+                    onClick={() => void handleStart()}
                   >
-                    {t("settings.billing.startTrial")}
+                    {usedTrial
+                      ? t("settings.billing.subscribe")
+                      : t("settings.billing.startTrial")}
                   </Button>
                   <p className="text-xs text-slate-400 mt-2">
-                    {t("settings.billing.trialNote")}
+                    {usedTrial
+                      ? t("settings.billing.subscribeNote")
+                      : t("settings.billing.trialNote")}
+                  </p>
+                  <p className="text-xs text-slate-400 mt-1">
+                    {t("settings.billing.promoHint")}
                   </p>
                 </div>
               ) : (

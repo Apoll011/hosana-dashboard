@@ -58,6 +58,7 @@ export const es: typeof pt = {
     expand: "Expandir menú",
     logout: "Cerrar sesión",
     openSettings: "Configuración",
+    switchWorkspace: "Cambiar de organización",
   },
 
   addressBar: {
@@ -171,6 +172,9 @@ export const es: typeof pt = {
         "Sincronización en la nube, copias de seguridad automáticas y soporte prioritario para su organización.",
       monthly: "Mensual",
       annual: "Anual",
+      // Shown next to the price when the annual option is selected. Based on
+      // the display prices in PLAN_PRICING (12×€12 − €120 = 2 months free).
+      annualSavings: "Ahorra 2 meses frente al plan mensual",
       plan: {
         features: {
           sync: "Sincronización automática entre dispositivos",
@@ -195,6 +199,12 @@ export const es: typeof pt = {
       startTrial: "Iniciar periodo de prueba de 14 días",
       trialNote:
         "Se requiere una tarjeta para comenzar. No se le cobrará nada durante los 14 días de prueba.",
+      // Used when the org already used its free trial (re-subscribing after
+      // cancel): Stripe does not grant a second trial, so don't promise one.
+      subscribe: "Suscribirse ahora",
+      subscribeNote:
+        "La suscripción comienza de inmediato. Puede cancelarla cuando quiera.",
+      promoHint: "¿Tiene un código promocional? Puede aplicarlo al pagar.",
       askOwner:
         "Pida al propietario de la organización que active la suscripción.",
       checkoutError: "No se pudo iniciar el proceso de pago.",
@@ -389,6 +399,28 @@ export const es: typeof pt = {
     },
     account: {
       user: "Usuario",
+      socialAccounts: {
+        title: "Cuentas Conectadas",
+        desc: "Vincule sus cuentas sociales para iniciar sesión más fácilmente y gestionar métodos de autenticación.",
+        loading: "Cargando cuentas conectadas...",
+        connected: "Conectada",
+        notConnected: "No conectada",
+        connect: "Vincular Cuenta",
+        disconnect: "Desconectar",
+        googleDesc:
+          "Utilice su cuenta de Google para iniciar sesión con un solo clic.",
+        githubDesc: "Utilice su cuenta de GitHub para iniciar sesión.",
+        appleDesc: "Utilice su Apple ID para iniciar sesión.",
+        microsoftDesc: "Utilice su cuenta de Microsoft para iniciar sesión.",
+        discordDesc: "Utilice su cuenta de Discord para iniciar sesión.",
+        providerDesc: "Utilice su cuenta de {name} para iniciar sesión.",
+        unlinkConfirmTitle: "Desconectar Cuenta Social",
+        unlinkConfirmMessage:
+          "¿Está seguro de que desea desconectar su cuenta de {provider}? No podrá iniciar sesión con ella a menos que vuelva a vincularla.",
+        unlinkSuccess: "Cuenta desconectada con éxito.",
+        unlinkError: "Error al desconectar la cuenta: {error}",
+        linkError: "Error al conectar la cuenta: {error}",
+      },
       activeSessions: {
         title: "Sesiones Activas",
         desc: "Dispositivos y navegadores actualmente autenticados en su cuenta.",
@@ -543,6 +575,13 @@ export const es: typeof pt = {
     workspace: {
       title: "Perfil de la Organización",
       desc: "Gestione la identidad institucional, logotipo y colores de su ministerio.",
+      switchOrgTitle: "Tus Organizaciones",
+      switchOrgDesc:
+        "Perteneces a más de una organización. Cambia para gestionar otro espacio de trabajo.",
+      currentOrg: "Actual",
+      switchOrg: "Cambiar",
+      switchingOrg: "Cambiando…",
+      switchOrgError: "No se pudo cambiar de organización: {error}",
       noLogo: "Sin Logotipo",
       change: "Cambiar",
       add: "Añadir",
@@ -1441,6 +1480,9 @@ export const es: typeof pt = {
       registerLink: "Crear una cuenta",
       errorInvalidCredentials: "Correo o contraseña incorrectos.",
       errorGeneric: "Ocurrió un error al iniciar sesión.",
+      orContinueWith: "O continuar con",
+      continueWith: "Continuar con",
+      continueWithGoogle: "Continuar con Google",
     },
     register: {
       title: "Crear Cuenta",

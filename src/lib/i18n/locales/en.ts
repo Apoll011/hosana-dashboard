@@ -58,6 +58,7 @@ export const en: typeof pt = {
     expand: "Expand menu",
     logout: "Sign out",
     openSettings: "Settings",
+    switchWorkspace: "Switch workspace",
   },
 
   addressBar: {
@@ -170,6 +171,9 @@ export const en: typeof pt = {
         "Cloud sync, automatic backups, and priority support for your organization.",
       monthly: "Monthly",
       annual: "Annual",
+      // Shown next to the price when the annual option is selected. Based on
+      // the display prices in PLAN_PRICING (12×€12 − €120 = 2 months free).
+      annualSavings: "Save 2 months vs the monthly plan",
       plan: {
         features: {
           sync: "Automatic sync across devices",
@@ -193,6 +197,11 @@ export const en: typeof pt = {
       startTrial: "Start 14-day free trial",
       trialNote:
         "A card is required to start. You won't be charged during the 14-day trial.",
+      // Used when the org already used its free trial (re-subscribing after
+      // cancel): Stripe does not grant a second trial, so don't promise one.
+      subscribe: "Subscribe now",
+      subscribeNote: "Your subscription starts right away. Cancel anytime.",
+      promoHint: "Have a discount code? You can apply it at checkout.",
       askOwner: "Ask the organization owner to set up billing.",
       checkoutError: "Couldn't start checkout.",
       portalError: "Couldn't open the billing portal.",
@@ -384,6 +393,27 @@ export const en: typeof pt = {
     },
     account: {
       user: "User",
+      socialAccounts: {
+        title: "Connected Accounts",
+        desc: "Link your social accounts for faster sign-in and managing authentication methods.",
+        loading: "Loading connected accounts...",
+        connected: "Connected",
+        notConnected: "Not connected",
+        connect: "Link Account",
+        disconnect: "Disconnect",
+        googleDesc: "Use your Google account for one-click sign in.",
+        githubDesc: "Use your GitHub account to sign in.",
+        appleDesc: "Use your Apple ID to sign in.",
+        microsoftDesc: "Use your Microsoft account to sign in.",
+        discordDesc: "Use your Discord account to sign in.",
+        providerDesc: "Use your {name} account to sign in.",
+        unlinkConfirmTitle: "Disconnect Social Account",
+        unlinkConfirmMessage:
+          "Are you sure you want to disconnect your {provider} account? You will not be able to sign in with it unless you reconnect it.",
+        unlinkSuccess: "Account disconnected successfully.",
+        unlinkError: "Error disconnecting account: {error}",
+        linkError: "Error connecting account: {error}",
+      },
       activeSessions: {
         title: "Active Sessions",
         desc: "Devices and browsers currently authenticated on your account.",
@@ -537,6 +567,13 @@ export const en: typeof pt = {
     workspace: {
       title: "Organization Profile",
       desc: "Manage the institutional identity, logo, and colors of your ministry.",
+      switchOrgTitle: "Your Organizations",
+      switchOrgDesc:
+        "You belong to more than one organization. Switch to manage another workspace.",
+      currentOrg: "Current",
+      switchOrg: "Switch",
+      switchingOrg: "Switching…",
+      switchOrgError: "Could not switch workspace: {error}",
       noLogo: "No Logo",
       change: "Change",
       add: "Add",
@@ -1421,6 +1458,9 @@ export const en: typeof pt = {
       registerLink: "Create an account",
       errorInvalidCredentials: "Invalid email or password.",
       errorGeneric: "An error occurred while signing in.",
+      orContinueWith: "Or continue with",
+      continueWith: "Continue with",
+      continueWithGoogle: "Continue with Google",
     },
     register: {
       title: "Create Account",

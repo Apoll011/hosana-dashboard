@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { i18nClient } from "@better-auth/i18n/client";
 import { dashClient, sentinelClient } from "@better-auth/infra/client";
 import { stripeClient } from "@better-auth/stripe/client";
 import { createAuthClient } from "better-auth/client";
@@ -21,6 +22,7 @@ export const authClient = createAuthClient({
     credentials: "include",
   },
   plugins: [
+    i18nClient(),
     dashClient(),
     sentinelClient({
       autoSolveChallenge: true,

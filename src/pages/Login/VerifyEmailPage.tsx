@@ -18,6 +18,7 @@ import React, { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { authClient } from "../../lib/authClient";
 import LoginLayout from "./Layout";
+import { GoogleTextField } from "./components/GoogleTextField";
 
 type State = "verifying" | "success" | "expired" | "error" | "pending";
 
@@ -71,53 +72,49 @@ export const VerifyEmailPage: React.FC = () => {
   if (state === "pending") {
     return (
       <LoginLayout
+        headerTitle={t("auth.verifyEmail.title")}
+        headerSubtitle="Enviámos um link de verificação. Clique no link para ativar a sua conta."
         optionalLink="/login"
-        optionalMsg={"← " + t("auth.forgotPassword.backToLogin")}
+        optionalMsg={t("auth.forgotPassword.backToLogin")}
       >
-        <div className="py-6 flex flex-col items-center text-center gap-4">
-          <div className="w-16 h-16 bg-sky-100 dark:bg-sky-900/40 rounded-2xl flex items-center justify-center">
-            <MailCheck className="w-8 h-8 text-sky-600 dark:text-sky-400" />
-          </div>
-          <div>
-            <h2 className="text-xl font-black text-slate-900 dark:text-white">
-              {t("auth.verifyEmail.title")}
-            </h2>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 max-w-xs mx-auto">
-              Enviámos um link de verificação. Clique no link para ativar a sua
-              conta.
-            </p>
+        <div className="py-2 flex flex-col items-center text-center gap-5">
+          <div className="w-16 h-16 bg-blue-50 dark:bg-blue-950/40 rounded-full flex items-center justify-center text-blue-600 dark:text-blue-400">
+            <MailCheck className="w-8 h-8" />
           </div>
 
-          <div className="w-full border-t border-slate-100 dark:border-slate-800 pt-4">
-            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-3">
+          <div className="w-full border-t border-slate-100 dark:border-[#303134] pt-5">
+            <p className="text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400 mb-3">
               Não recebeu o e-mail? Reenviar:
             </p>
             {resendSuccess ? (
-              <p className="text-sm font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-2 justify-center">
+              <p className="text-sm font-medium text-emerald-600 dark:text-emerald-400 flex items-center gap-2 justify-center">
                 <CheckCircle2 className="w-4 h-4" />{" "}
                 {t("auth.forgotPassword.emailSentTitle")}
               </p>
             ) : (
-              <form onSubmit={handleResend} className="flex gap-2">
-                <input
-                  type="email"
-                  placeholder="o-seu@email.com"
-                  value={resendEmail}
-                  onChange={(e) => setResendEmail(e.target.value)}
-                  className="flex-1 h-10 px-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-m3-primary"
-                />
+              <form
+                onSubmit={handleResend}
+                className="flex flex-col sm:flex-row gap-2.5"
+              >
+                <div className="flex-1">
+                  <GoogleTextField
+                    type="email"
+                    label={t("auth.forgotPassword.emailLabel")}
+                    value={resendEmail}
+                    onChange={(e) => setResendEmail(e.target.value)}
+                  />
+                </div>
                 <Button
                   type="submit"
-                  variant="primary"
                   isLoading={resendLoading}
-                  className="h-10 px-4 rounded-xl bg-m3-primary hover:bg-m3-primary-dark border-0 text-white text-xs font-bold cursor-pointer"
+                  className="h-[50px] sm:h-[54px] px-5 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm transition-all shadow-none border-0 shrink-0"
                 >
                   <RefreshCw className="w-4 h-4" />
                 </Button>
               </form>
             )}
             {resendError && (
-              <p className="text-xs text-rose-500 dark:text-rose-400 mt-1">
+              <p className="text-xs text-red-600 dark:text-red-400 mt-2">
                 {resendError}
               </p>
             )}
@@ -131,14 +128,13 @@ export const VerifyEmailPage: React.FC = () => {
   if (state === "verifying") {
     return (
       <LoginLayout
+        headerTitle={t("auth.verifyEmail.title")}
+        headerSubtitle={t("auth.verifyEmail.verifying")}
         optionalLink="/login"
-        optionalMsg={"← " + t("auth.forgotPassword.backToLogin")}
+        optionalMsg={t("auth.forgotPassword.backToLogin")}
       >
         <div className="py-12 flex flex-col items-center gap-4">
-          <Loader2 className="w-10 h-10 text-m3-primary animate-spin" />
-          <p className="text-sm font-semibold text-slate-600 dark:text-slate-300">
-            {t("auth.verifyEmail.verifying")}
-          </p>
+          <Loader2 className="w-10 h-10 text-blue-600 animate-spin" />
         </div>
       </LoginLayout>
     );
@@ -148,27 +144,18 @@ export const VerifyEmailPage: React.FC = () => {
   if (state === "success") {
     return (
       <LoginLayout
+        headerTitle={t("auth.verifyEmail.successTitle")}
+        headerSubtitle={t("auth.verifyEmail.successDesc")}
         optionalLink="/login"
-        optionalMsg={t("auth.resetPassword.goToLoginBtn") + " →"}
+        optionalMsg={t("auth.resetPassword.goToLoginBtn")}
       >
-        <div className="py-8 flex flex-col items-center text-center gap-4 animate-in zoom-in-95 duration-500">
-          <div className="relative w-20 h-20">
-            <div className="absolute inset-0 bg-emerald-100 dark:bg-emerald-900/40 rounded-full animate-ping opacity-60" />
-            <div className="relative flex items-center justify-center w-20 h-20 bg-emerald-500 text-white rounded-full shadow-lg shadow-emerald-500/30">
-              <CheckCircle2 className="w-10 h-10" />
-            </div>
-          </div>
-          <div>
-            <h2 className="text-2xl font-black text-slate-900 dark:text-white">
-              {t("auth.verifyEmail.successTitle")}
-            </h2>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mt-2 max-w-xs mx-auto">
-              {t("auth.verifyEmail.successDesc")}
-            </p>
+        <div className="py-4 flex flex-col items-center text-center gap-4 animate-in zoom-in-95 duration-300">
+          <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-950/50 rounded-full flex items-center justify-center text-emerald-600 dark:text-emerald-400 mb-2">
+            <CheckCircle2 className="w-8 h-8" />
           </div>
           <AppLink
             to="/login"
-            className="mt-2 inline-flex items-center gap-2 h-12 px-6 rounded-[20px] bg-m3-primary text-white text-xs font-black uppercase tracking-widest shadow-xl shadow-m3-primary/20 hover:bg-m3-primary-dark transition-all"
+            className="inline-flex items-center justify-center h-10 px-6 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm transition-all"
           >
             {t("auth.login.loginBtn")}
           </AppLink>
@@ -181,49 +168,42 @@ export const VerifyEmailPage: React.FC = () => {
   if (state === "expired") {
     return (
       <LoginLayout
+        headerTitle={t("auth.acceptInvitation.invalidTitle")}
+        headerSubtitle={t("auth.acceptInvitation.invalidDesc")}
         optionalLink="/login"
-        optionalMsg={"← " + t("auth.forgotPassword.backToLogin")}
+        optionalMsg={t("auth.forgotPassword.backToLogin")}
       >
-        <div className="py-8 flex flex-col items-center text-center gap-4 animate-in zoom-in-95 duration-500">
-          <div className="w-20 h-20 bg-amber-100 dark:bg-amber-900/40 rounded-full flex items-center justify-center">
-            <Clock className="w-10 h-10 text-amber-500 dark:text-amber-400" />
+        <div className="py-4 flex flex-col items-center text-center gap-4 animate-in zoom-in-95 duration-300">
+          <div className="w-16 h-16 bg-amber-100 dark:bg-amber-950/50 rounded-full flex items-center justify-center text-amber-600 dark:text-amber-400 mb-2">
+            <Clock className="w-8 h-8" />
           </div>
-          <div>
-            <h2 className="text-xl font-black text-slate-900 dark:text-white">
-              {t("auth.acceptInvitation.invalidTitle")}
-            </h2>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mt-2 max-w-xs mx-auto">
-              {t("auth.acceptInvitation.invalidDesc")}
-            </p>
-          </div>
-          <form onSubmit={handleResend} className="w-full flex gap-2 mt-2">
-            <input
-              type="email"
-              placeholder="o-seu@email.com"
-              value={resendEmail}
-              onChange={(e) => setResendEmail(e.target.value)}
-              className="flex-1 h-10 px-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-m3-primary"
-            />
+          <form
+            onSubmit={handleResend}
+            className="w-full flex flex-col sm:flex-row gap-2.5 mt-2"
+          >
+            <div className="flex-1">
+              <GoogleTextField
+                type="email"
+                label={t("auth.forgotPassword.emailLabel")}
+                value={resendEmail}
+                onChange={(e) => setResendEmail(e.target.value)}
+              />
+            </div>
             <Button
               type="submit"
-              variant="primary"
               isLoading={resendLoading}
-              className="h-10 px-4 rounded-xl bg-m3-primary hover:bg-m3-primary-dark border-0 text-white text-xs font-bold cursor-pointer"
+              className="h-[50px] sm:h-[54px] px-5 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm transition-all shadow-none border-0 shrink-0"
             >
-              {resendLoading ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                <RefreshCw className="w-4 h-4" />
-              )}
+              <RefreshCw className="w-4 h-4" />
             </Button>
           </form>
           {resendSuccess && (
-            <p className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">
+            <p className="text-sm font-medium text-emerald-600 dark:text-emerald-400">
               {t("auth.forgotPassword.emailSentTitle")}
             </p>
           )}
           {resendError && (
-            <p className="text-xs text-rose-500 dark:text-rose-400">
+            <p className="text-xs text-red-600 dark:text-red-400">
               {resendError}
             </p>
           )}
@@ -235,26 +215,20 @@ export const VerifyEmailPage: React.FC = () => {
   // ── Error ───────────────────────────────────────────────────────────────
   return (
     <LoginLayout
+      headerTitle={t("auth.verifyEmail.errorTitle")}
+      headerSubtitle={t("auth.verifyEmail.errorDesc")}
       optionalLink="/login"
-      optionalMsg={"← " + t("auth.forgotPassword.backToLogin")}
+      optionalMsg={t("auth.forgotPassword.backToLogin")}
     >
-      <div className="py-8 flex flex-col items-center text-center gap-4 animate-in zoom-in-95 duration-500">
-        <div className="w-20 h-20 bg-rose-100 dark:bg-rose-900/40 rounded-full flex items-center justify-center">
-          <XCircle className="w-10 h-10 text-rose-500 dark:text-rose-400" />
-        </div>
-        <div>
-          <h2 className="text-xl font-black text-slate-900 dark:text-white">
-            {t("auth.verifyEmail.errorTitle")}
-          </h2>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mt-2 max-w-xs mx-auto">
-            {t("auth.verifyEmail.errorDesc")}
-          </p>
+      <div className="py-4 flex flex-col items-center text-center gap-4 animate-in zoom-in-95 duration-300">
+        <div className="w-16 h-16 bg-red-100 dark:bg-red-950/50 rounded-full flex items-center justify-center text-red-600 dark:text-red-400 mb-2">
+          <XCircle className="w-8 h-8" />
         </div>
         <Link
           to="/login"
-          className="inline-flex items-center gap-2 h-10 px-5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-xs font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 transition-all cursor-pointer"
+          className="inline-flex items-center justify-center h-10 px-6 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm transition-all"
         >
-          {"← " + t("auth.forgotPassword.backToLogin")}
+          {t("auth.forgotPassword.backToLogin")}
         </Link>
       </div>
     </LoginLayout>
