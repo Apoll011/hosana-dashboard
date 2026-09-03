@@ -25,12 +25,7 @@ import {
 import React, { useCallback, useEffect, useState } from "react";
 
 export type SocialProviderId =
-  | "google"
-  | "github"
-  | "apple"
-  | "microsoft"
-  | "discord"
-  | (string & {});
+  "google" | "github" | "apple" | "microsoft" | "discord" | (string & {});
 
 export interface SocialProviderConfig {
   id: SocialProviderId;
@@ -215,9 +210,7 @@ export const SocialAccountsSection: React.FC<SocialAccountsSectionProps> = ({
           className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer disabled:opacity-50"
           title={t("settings.account.activeSessions.refreshTitle")}
         >
-          <RefreshCw
-            className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`}
-          />
+          <RefreshCw className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`} />
         </button>
       </div>
 

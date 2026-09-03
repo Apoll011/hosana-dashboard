@@ -193,7 +193,10 @@ export const RegisterPage: React.FC = () => {
         </div>
       </form>
 
-      <SocialAuthButtons onError={(err) => setErrorMsg(err)} disabled={isLoading} />
+      <SocialAuthButtons
+        onError={(err) => setErrorMsg(err)}
+        disabled={isLoading}
+      />
     </LoginLayout>
   );
 };

@@ -407,14 +407,16 @@ export const es: typeof pt = {
         notConnected: "No conectada",
         connect: "Vincular Cuenta",
         disconnect: "Desconectar",
-        googleDesc: "Utilice su cuenta de Google para iniciar sesión con un solo clic.",
+        googleDesc:
+          "Utilice su cuenta de Google para iniciar sesión con un solo clic.",
         githubDesc: "Utilice su cuenta de GitHub para iniciar sesión.",
         appleDesc: "Utilice su Apple ID para iniciar sesión.",
         microsoftDesc: "Utilice su cuenta de Microsoft para iniciar sesión.",
         discordDesc: "Utilice su cuenta de Discord para iniciar sesión.",
         providerDesc: "Utilice su cuenta de {name} para iniciar sesión.",
         unlinkConfirmTitle: "Desconectar Cuenta Social",
-        unlinkConfirmMessage: "¿Está seguro de que desea desconectar su cuenta de {provider}? No podrá iniciar sesión con ella a menos que vuelva a vincularla.",
+        unlinkConfirmMessage:
+          "¿Está seguro de que desea desconectar su cuenta de {provider}? No podrá iniciar sesión con ella a menos que vuelva a vincularla.",
         unlinkSuccess: "Cuenta desconectada con éxito.",
         unlinkError: "Error al desconectar la cuenta: {error}",
         linkError: "Error al conectar la cuenta: {error}",

@@ -5,8 +5,7 @@
 
 import React, { useId, useState } from "react";
 
-interface GoogleTextFieldProps
-  extends React.InputHTMLAttributes<HTMLInputElement> {
+interface GoogleTextFieldProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label: string;
   error?: string;
   helperText?: string;

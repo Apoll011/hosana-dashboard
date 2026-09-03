@@ -158,7 +158,11 @@ async function syncMetadataToServer(settingsToSave: PersonalSettings) {
 
   // Persist to better-auth backend
   try {
-    await (authClient.updateUser as unknown as (params: { metadata: string }) => Promise<unknown>)({
+    await (
+      authClient.updateUser as unknown as (params: {
+        metadata: string;
+      }) => Promise<unknown>
+    )({
       metadata: serialized,
     });
   } catch (err) {

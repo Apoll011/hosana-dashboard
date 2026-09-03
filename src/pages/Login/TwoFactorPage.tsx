@@ -298,7 +298,10 @@ function OtpInput({
   };
 
   return (
-    <div className="flex gap-2 sm:gap-3 justify-center my-2" onPaste={handlePaste}>
+    <div
+      className="flex gap-2 sm:gap-3 justify-center my-2"
+      onPaste={handlePaste}
+    >
       {Array.from({ length }).map((_, i) => (
         <input
           key={i}
