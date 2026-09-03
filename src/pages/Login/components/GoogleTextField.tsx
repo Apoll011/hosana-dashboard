@@ -52,7 +52,7 @@ export const GoogleTextField = React.forwardRef<
     return (
       <div className="w-full flex flex-col group/field text-left">
         <div
-          className={`relative flex items-center min-h-[50px] sm:min-h-[54px] rounded-[4px] border transition-all duration-200 bg-transparent ${
+          className={`relative flex items-center min-h-12.5 sm:min-h-13.5 rounded-sm border transition-all duration-200 bg-transparent ${
             error
               ? "border-red-600 dark:border-red-400 ring-1 ring-red-600 dark:ring-red-400"
               : isFocused
@@ -109,7 +109,7 @@ export const GoogleTextField = React.forwardRef<
               setIsFocused(false);
               onBlur?.(e);
             }}
-            className={`w-full h-full bg-transparent px-3.5 py-3 sm:py-3.5 text-sm sm:text-[15px] text-slate-900 dark:text-slate-100 rounded-[4px] focus:outline-none placeholder-transparent ${className}`}
+            className={`w-full h-full bg-transparent px-3.5 py-3 sm:py-3.5 text-sm sm:text-[15px] text-slate-900 dark:text-slate-100 rounded-sm focus:outline-none placeholder-transparent ${className}`}
             {...props}
           />
 

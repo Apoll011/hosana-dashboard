@@ -81,19 +81,11 @@ export default function LoginLayout({
       </header>
 
       {/* Main Center Stage */}
-      <main className="flex-1 w-full flex items-center justify-center p-4 sm:p-6 md:p-8 z-10">
+      <main className="flex-1 w-full flex items-center justify-center p-2 sm:p-3 md:p-4 z-10">
         {/* Google-style authentication card container with refined backdrop blur and shadow */}
-        <div className="w-full max-w-md sm:max-w-124 md:max-w-135 bg-white/95 dark:bg-[#1e1f20]/95 backdrop-blur-xl sm:border sm:border-slate-200/80 dark:sm:border-[#303134]/90 rounded-2xl sm:rounded-[28px] shadow-lg shadow-black/5 dark:shadow-black/40 px-6 py-8 sm:p-10 md:p-12 transition-all">
+        <div className="w-full max-w-md sm:max-w-124 md:max-w-135 bg-white/95 dark:bg-[#1e1f20]/95 backdrop-blur-xl sm:border sm:border-slate-200/80 dark:sm:border-[#303134]/90 rounded-2xl sm:rounded-[28px] shadow-lg shadow-black/5 dark:shadow-black/40 px-6 py-4 sm:p-6 md:p-8 transition-all">
           {/* Header Brand & Titles */}
           <div className="flex flex-col items-center text-center mb-7 sm:mb-8 select-none">
-            <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center mb-3 bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/10 shadow-xs">
-              <img
-                src="/favicon.png"
-                alt="Hosanna Studio"
-                className="w-8 h-8 sm:w-9 sm:h-9 object-contain"
-              />
-            </div>
-
             <h1 className="text-2xl sm:text-[26px] font-normal tracking-tight text-slate-900 dark:text-slate-100 font-sans">
               {headerTitle || "Hosanna Studio"}
             </h1>
