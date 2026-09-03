@@ -451,6 +451,17 @@ export const OnboardingPage: React.FC = () => {
               <p className="text-[11px] text-slate-400 mt-1">
                 {t("settings.billing.promoHint")}
               </p>
+
+              <div className="pt-4 text-center">
+                <button
+                  type="button"
+                  onClick={() => logout()}
+                  className="inline-flex items-center text-xs font-semibold text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors gap-1.5 cursor-pointer"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                  <span>{t("sidebar.logout")}</span>
+                </button>
+              </div>
             </div>
           )}
 
