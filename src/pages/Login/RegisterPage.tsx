@@ -6,7 +6,7 @@
 import { AppLink } from "@/src/components/AppLink";
 import { Button } from "@/src/components/common";
 import { useI18n } from "@/src/lib/i18n";
-import { CheckCircle2, Eye, EyeOff } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
 import React, { useRef, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { authClient } from "../../lib/authClient";
