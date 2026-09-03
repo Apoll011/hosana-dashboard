@@ -240,7 +240,9 @@ export const RegisterOrganizationPage: React.FC = () => {
                     )
                   }
                   error={
-                    slugStatus === "taken" ? t("onboarding.slugTaken") : undefined
+                    slugStatus === "taken"
+                      ? t("onboarding.slugTaken")
+                      : undefined
                   }
                   helperText={
                     slugStatus === "checking"

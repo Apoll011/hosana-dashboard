@@ -69,7 +69,11 @@ function addLiqeClause(query: string, clause: string): string {
   if (!trimmed) return clause;
   // If exact clause already present, remove it (toggle)
   if (trimmed.includes(clause)) {
-    return trimmed.replace(clause, "").replace(/\s+AND\s+/g, " AND ").replace(/^\s*AND\s+|\s+AND\s*$/g, "").trim();
+    return trimmed
+      .replace(clause, "")
+      .replace(/\s+AND\s+/g, " AND ")
+      .replace(/^\s*AND\s+|\s+AND\s*$/g, "")
+      .trim();
   }
   return `${trimmed} AND ${clause}`;
 }
@@ -78,7 +82,9 @@ function removeLiqeClause(query: string, prefix: string): string {
   // Remove any existing clause that starts with the given prefix
   return query
     .split(/\s+AND\s+/i)
-    .filter((part) => !part.trim().toLowerCase().startsWith(prefix.toLowerCase()))
+    .filter(
+      (part) => !part.trim().toLowerCase().startsWith(prefix.toLowerCase()),
+    )
     .join(" AND ")
     .trim();
 }
@@ -111,9 +117,7 @@ const FilterSection: React.FC<{
         className="w-full flex items-center justify-between px-4 py-3 text-xs font-bold text-m3-text hover:bg-m3-hover transition-colors cursor-pointer"
       >
         <div className="flex items-center gap-2">
-          <span
-            className={active ? "text-m3-primary" : "text-m3-secondary"}
-          >
+          <span className={active ? "text-m3-primary" : "text-m3-secondary"}>
             {icon}
           </span>
           <span className={active ? "text-m3-primary" : ""}>{label}</span>
@@ -187,19 +191,23 @@ const AdvancedFilterPanel: React.FC<AdvancedFilterPanelProps> = ({
 
   // Active detected values
   const activeTags = useMemo(
-    () => availableTags.filter((tag) => hasClause(draft, `tags:${tag.includes(" ") ? `"${tag}"` : tag}`)),
+    () =>
+      availableTags.filter((tag) =>
+        hasClause(draft, `tags:${tag.includes(" ") ? `"${tag}"` : tag}`),
+      ),
     [draft, availableTags],
   );
   const activeKey = useMemo(() => getClauseValue(draft, "key"), [draft]);
   const activeFolder = useMemo(() => getClauseValue(draft, "folder"), [draft]);
 
-  const toggleTag = useCallback(
-    (tag: string) => {
-      const clause = tag.includes(" ") ? `tags:"${tag}"` : `tags:${tag}`;
-      setDraft((q) => (hasClause(q, clause) ? removeLiqeClause(q, `tags:${tag.includes(" ") ? `"${tag}"` : tag}`) : addLiqeClause(q, clause)));
-    },
-    [],
-  );
+  const toggleTag = useCallback((tag: string) => {
+    const clause = tag.includes(" ") ? `tags:"${tag}"` : `tags:${tag}`;
+    setDraft((q) =>
+      hasClause(q, clause)
+        ? removeLiqeClause(q, `tags:${tag.includes(" ") ? `"${tag}"` : tag}`)
+        : addLiqeClause(q, clause),
+    );
+  }, []);
 
   const toggleKey = useCallback((key: string) => {
     setDraft((q) => {
@@ -215,7 +223,12 @@ const AdvancedFilterPanel: React.FC<AdvancedFilterPanelProps> = ({
       const existing = getClauseValue(q, "folder");
       const cleaned = removeLiqeClause(q, "folder:");
       if (existing === folderName) return cleaned;
-      return addLiqeClause(cleaned, folderName.includes(" ") ? `folder:"${folderName}"` : `folder:${folderName}`);
+      return addLiqeClause(
+        cleaned,
+        folderName.includes(" ")
+          ? `folder:"${folderName}"`
+          : `folder:${folderName}`,
+      );
     });
   }, []);
 
@@ -233,7 +246,10 @@ const AdvancedFilterPanel: React.FC<AdvancedFilterPanelProps> = ({
     !!activeKey,
     !!activeFolder,
     // Count other field clauses in draft
-    draft.trim() && !draft.trim().startsWith("tags:") && !draft.trim().startsWith("key:") && !draft.trim().startsWith("folder:"),
+    draft.trim() &&
+      !draft.trim().startsWith("tags:") &&
+      !draft.trim().startsWith("key:") &&
+      !draft.trim().startsWith("folder:"),
   ].filter(Boolean).length;
 
   return (
@@ -268,7 +284,9 @@ const AdvancedFilterPanel: React.FC<AdvancedFilterPanelProps> = ({
         {currentFolder && (
           <p className="text-[11px] text-m3-secondary px-1">
             {t("explorer.modals.searchScope")}{" "}
-            <span className="font-bold text-m3-primary">{currentFolder.name}</span>
+            <span className="font-bold text-m3-primary">
+              {currentFolder.name}
+            </span>
           </p>
         )}
 
@@ -282,7 +300,9 @@ const AdvancedFilterPanel: React.FC<AdvancedFilterPanelProps> = ({
           >
             <div className="flex flex-wrap gap-1.5 mt-2 max-h-28 overflow-y-auto">
               {availableTags.map((tag) => {
-                const clause = tag.includes(" ") ? `tags:"${tag}"` : `tags:${tag}`;
+                const clause = tag.includes(" ")
+                  ? `tags:"${tag}"`
+                  : `tags:${tag}`;
                 return (
                   <Chip
                     key={tag}
@@ -373,7 +393,9 @@ const AdvancedFilterPanel: React.FC<AdvancedFilterPanelProps> = ({
                   onClick={() =>
                     setDraft((q) => {
                       const base = q.trim();
-                      const prefix = base ? `${base} AND ${field}:` : `${field}:`;
+                      const prefix = base
+                        ? `${base} AND ${field}:`
+                        : `${field}:`;
                       return prefix;
                     })
                   }
@@ -443,12 +465,7 @@ const AdvancedFilterPanel: React.FC<AdvancedFilterPanelProps> = ({
         </button>
 
         <div className="flex items-center gap-2">
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={onClose}
-          >
+          <Button type="button" variant="ghost" size="sm" onClick={onClose}>
             {t("common.cancel")}
           </Button>
           <Button

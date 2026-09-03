@@ -23,7 +23,8 @@ interface QueryExample {
 const EXAMPLES: QueryExample[] = [
   {
     query: "graça",
-    descriptionPt: "Pesquisa por palavra em qualquer campo (insensível a maiúsculas)",
+    descriptionPt:
+      "Pesquisa por palavra em qualquer campo (insensível a maiúsculas)",
     descriptionEn: "Search for word in any field (case-insensitive)",
     category: "basic",
   },
@@ -107,7 +108,8 @@ const EXAMPLES: QueryExample[] = [
   },
   {
     query: "title:A* AND NOT key:D",
-    descriptionPt: "Wildcard (*) para títulos que comecem por 'A', exceto tom D",
+    descriptionPt:
+      "Wildcard (*) para títulos que comecem por 'A', exceto tom D",
     descriptionEn: "Wildcard (*) starting with 'A' excluding key D",
     category: "boolean",
   },
@@ -161,7 +163,10 @@ export const SearchSyntaxModal: React.FC<SearchSyntaxModalProps> = ({
     { id: "all", label: isPt ? "Todos" : "All" },
     { id: "basic", label: isPt ? "Básico" : "Basic" },
     { id: "fields", label: isPt ? "Campos" : "Fields" },
-    { id: "numbers", label: isPt ? "Números e Intervalos" : "Numbers & Ranges" },
+    {
+      id: "numbers",
+      label: isPt ? "Números e Intervalos" : "Numbers & Ranges",
+    },
     { id: "boolean", label: isPt ? "Operadores (AND/OR/NOT)" : "Boolean" },
     { id: "regex", label: "RegEx / Wildcard" },
   ];
@@ -188,7 +193,9 @@ export const SearchSyntaxModal: React.FC<SearchSyntaxModalProps> = ({
             </div>
             <div>
               <h2 className="text-sm font-black uppercase tracking-wider text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                {isPt ? "Pesquisa Avançada (Liqe / Lucene)" : "Advanced Search Syntax (Liqe / Lucene)"}
+                {isPt
+                  ? "Pesquisa Avançada (Liqe / Lucene)"
+                  : "Advanced Search Syntax (Liqe / Lucene)"}
                 <span className="px-2 py-0.5 rounded-full text-[10px] bg-m3-primary/10 text-m3-primary font-bold">
                   LQL
                 </span>
@@ -216,7 +223,9 @@ export const SearchSyntaxModal: React.FC<SearchSyntaxModalProps> = ({
             <Sparkles className="w-5 h-5 text-m3-primary shrink-0 mt-0.5" />
             <div className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
               <p className="font-bold text-slate-900 dark:text-slate-100 mb-1">
-                {isPt ? "Pesquisa rápida em tempo real" : "Real-time fast search"}
+                {isPt
+                  ? "Pesquisa rápida em tempo real"
+                  : "Real-time fast search"}
               </p>
               {isPt
                 ? "Basta escrever termos normais (ex: 'graça') ou consultas com campo (ex: 'artist:Morada AND key:E'). Pode clicar em qualquer exemplo abaixo para o testar de imediato."
@@ -260,7 +269,11 @@ export const SearchSyntaxModal: React.FC<SearchSyntaxModalProps> = ({
                       }
                     }}
                     className="p-2.5 rounded-xl border border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-800/30 hover:border-m3-primary/40 hover:bg-m3-primary/5 transition-all cursor-pointer group flex items-center justify-between gap-3"
-                    title={isPt ? "Clique para usar na pesquisa" : "Click to apply this search"}
+                    title={
+                      isPt
+                        ? "Clique para usar na pesquisa"
+                        : "Click to apply this search"
+                    }
                   >
                     <div className="min-w-0 flex-1">
                       <code className="text-xs font-mono font-bold text-m3-primary dark:text-sky-400 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/80 px-2 py-0.5 rounded-lg inline-block truncate max-w-full">
@@ -282,7 +295,9 @@ export const SearchSyntaxModal: React.FC<SearchSyntaxModalProps> = ({
             <div className="md:col-span-5 space-y-2.5">
               <div className="flex items-center gap-2 text-m3-primary font-bold text-xs uppercase tracking-wider mb-2">
                 <BookOpen className="w-4 h-4" />
-                <span>{isPt ? "Campos Pesquisáveis" : "Searchable Fields"}</span>
+                <span>
+                  {isPt ? "Campos Pesquisáveis" : "Searchable Fields"}
+                </span>
               </div>
 
               <div className="border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden divide-y divide-slate-100 dark:divide-slate-800/60 bg-white dark:bg-slate-900 text-xs">
@@ -305,8 +320,8 @@ export const SearchSyntaxModal: React.FC<SearchSyntaxModalProps> = ({
                 <Lightbulb className="w-4 h-4 shrink-0 mt-0.5" />
                 <span>
                   {isPt
-                    ? "Dica: Valores com espaços devem ser envolvidos em aspas duplas, ex: artist:\"Diante do Trono\"."
-                    : "Tip: Values containing spaces must be quoted, e.g. artist:\"Hillsong Worship\"."}
+                    ? 'Dica: Valores com espaços devem ser envolvidos em aspas duplas, ex: artist:"Diante do Trono".'
+                    : 'Tip: Values containing spaces must be quoted, e.g. artist:"Hillsong Worship".'}
                 </span>
               </div>
             </div>
