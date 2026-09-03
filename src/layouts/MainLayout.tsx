@@ -370,13 +370,8 @@ export const MainLayout: React.FC = () => {
     [allServices, currentServiceId],
   );
 
-  const isSearchingOrFiltering = Boolean(
-    searchQuery.trim() || selectedKey || selectedTag,
-  );
-  const activeFiltersCount =
-    (searchQuery.trim() ? 1 : 0) +
-    (selectedKey ? 1 : 0) +
-    (selectedTag ? 1 : 0);
+  const isSearchingOrFiltering = Boolean(searchQuery.trim());
+  const activeFiltersCount = searchQuery.trim() ? 1 : 0;
 
   // Filtered Folders & Files
   const filteredSubfolders = useMemo(() => {
@@ -1689,22 +1684,9 @@ export const MainLayout: React.FC = () => {
         onBatchTagConfirm={handleBatchTagConfirm}
         isFilterPanelOpen={isFilterPanelOpen}
         setIsFilterPanelOpen={setIsFilterPanelOpen}
-        selectedTag={selectedTag}
-        setSelectedTag={setSelectedTag}
+        currentQuery={searchQuery}
+        onApplyQuery={handleSearchChange}
         availableTags={availableTags}
-        searchFields={searchFields}
-        setSearchFields={setSearchFields}
-        onClearFilters={() => {
-          setSelectedKey("");
-          setSelectedTag("");
-          setSearchQuery("");
-          setSearchFields({
-            title: true,
-            artist: true,
-            content: true,
-            tags: true,
-          });
-        }}
       />
 
       {/* Marquee rubberband drag selection box */}
