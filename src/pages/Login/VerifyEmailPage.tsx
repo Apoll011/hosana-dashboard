@@ -107,7 +107,7 @@ export const VerifyEmailPage: React.FC = () => {
                 <Button
                   type="submit"
                   isLoading={resendLoading}
-                  className="h-[50px] sm:h-[54px] px-5 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm transition-all shadow-none border-0 shrink-0"
+                  className="h-12.5 sm:h-13.5 px-5 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm transition-all shadow-none border-0 shrink-0"
                 >
                   <RefreshCw className="w-4 h-4" />
                 </Button>
@@ -192,7 +192,7 @@ export const VerifyEmailPage: React.FC = () => {
             <Button
               type="submit"
               isLoading={resendLoading}
-              className="h-[50px] sm:h-[54px] px-5 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm transition-all shadow-none border-0 shrink-0"
+              className="h-12.5 sm:h-13.5 px-5 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm transition-all shadow-none border-0 shrink-0"
             >
               <RefreshCw className="w-4 h-4" />
             </Button>

@@ -44,7 +44,7 @@ export default function LoginLayout({
           referrerPolicy="no-referrer"
         />
         {/* Soft gradient wash over the image for perfect contrast and readability */}
-        <div className="absolute inset-0 bg-gradient-to-b from-slate-100/70 via-slate-100/85 to-slate-200/95 dark:from-[#131314]/85 dark:via-[#131314]/92 dark:to-[#131314]/98 transition-colors duration-500" />
+        <div className="absolute inset-0 bg-linear-to-b from-slate-100/70 via-slate-100/85 to-slate-200/95 dark:from-[#131314]/85 dark:via-[#131314]/92 dark:to-[#131314]/98 transition-colors duration-500" />
       </div>
 
       {/* Top action header: Language selector & Theme Toggle */}
@@ -83,7 +83,7 @@ export default function LoginLayout({
       {/* Main Center Stage */}
       <main className="flex-1 w-full flex items-center justify-center p-4 sm:p-6 md:p-8 z-10">
         {/* Google-style authentication card container with refined backdrop blur and shadow */}
-        <div className="w-full max-w-[448px] sm:max-w-[496px] md:max-w-[540px] bg-white/95 dark:bg-[#1e1f20]/95 backdrop-blur-xl sm:border sm:border-slate-200/80 dark:sm:border-[#303134]/90 rounded-2xl sm:rounded-[28px] shadow-lg shadow-black/5 dark:shadow-black/40 px-6 py-8 sm:p-10 md:p-12 transition-all">
+        <div className="w-full max-w-md sm:max-w-124 md:max-w-135 bg-white/95 dark:bg-[#1e1f20]/95 backdrop-blur-xl sm:border sm:border-slate-200/80 dark:sm:border-[#303134]/90 rounded-2xl sm:rounded-[28px] shadow-lg shadow-black/5 dark:shadow-black/40 px-6 py-8 sm:p-10 md:p-12 transition-all">
           {/* Header Brand & Titles */}
           <div className="flex flex-col items-center text-center mb-7 sm:mb-8 select-none">
             <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center mb-3 bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/10 shadow-xs">
@@ -138,7 +138,7 @@ export default function LoginLayout({
       </main>
 
       {/* Footer standard Google style */}
-      <footer className="w-full max-w-[540px] mx-auto px-6 py-4 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-500 dark:text-slate-400 shrink-0 z-10">
+      <footer className="w-full max-w-135 mx-auto px-6 py-4 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-500 dark:text-slate-400 shrink-0 z-10">
         <div className="flex items-center gap-2">
           <span>Hosanna Studio &copy; {new Date().getFullYear()}</span>
         </div>
@@ -151,14 +151,14 @@ export default function LoginLayout({
             Ajuda
           </a>
           <a
-            href="#"
+            href="https://hosanna.live/privacy"
             onClick={(e) => e.preventDefault()}
             className="hover:text-slate-800 dark:hover:text-slate-200 transition-colors"
           >
             Privacidade
           </a>
           <a
-            href="#"
+            href="https://hosanna.live/terms"
             onClick={(e) => e.preventDefault()}
             className="hover:text-slate-800 dark:hover:text-slate-200 transition-colors"
           >
