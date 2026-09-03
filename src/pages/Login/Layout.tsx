@@ -6,6 +6,7 @@
 import { AppLink } from "@/src/components/AppLink";
 import { AlertCircle, CheckCircle2, Moon, Sun } from "lucide-react";
 import React from "react";
+import bg from "../../assets/images/background.webp";
 import { useTheme } from "../../contexts/ThemeContext";
 import { LanguageSelector } from "./components/LanguageSelector";
 
@@ -33,18 +34,30 @@ export default function LoginLayout({
   const { darkMode, toggleDarkMode } = useTheme();
 
   return (
-    <div className="min-h-screen w-full flex flex-col justify-between bg-[#f0f4f9] dark:bg-[#131314] text-slate-900 dark:text-slate-100 transition-colors duration-300 font-sans relative antialiased selection:bg-blue-500/20">
+    <div className="min-h-screen w-full flex flex-col justify-between relative overflow-x-hidden font-sans text-slate-900 dark:text-slate-100 antialiased selection:bg-blue-500/20">
+      {/* Dynamic Ambient Background Image with smooth subtle overlay */}
+      <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+        <img
+          src={bg}
+          alt="Background"
+          className="w-full h-full object-cover scale-105 opacity-35 dark:opacity-25 transition-all duration-700 blur-[3px]"
+          referrerPolicy="no-referrer"
+        />
+        {/* Soft gradient wash over the image for perfect contrast and readability */}
+        <div className="absolute inset-0 bg-gradient-to-b from-slate-100/70 via-slate-100/85 to-slate-200/95 dark:from-[#131314]/85 dark:via-[#131314]/92 dark:to-[#131314]/98 transition-colors duration-500" />
+      </div>
+
       {/* Top action header: Language selector & Theme Toggle */}
       <header className="w-full px-4 sm:px-8 pt-4 pb-2 flex items-center justify-between z-20 shrink-0">
         <div className="flex items-center gap-2">
-          {/* Small brand badge in mobile/header */}
-          <div className="flex items-center gap-2 select-none">
+          {/* Small brand badge */}
+          <div className="flex items-center gap-2 select-none px-3 py-1.5 rounded-full bg-white/70 dark:bg-[#1e1f20]/70 backdrop-blur-md border border-slate-200/60 dark:border-white/10 shadow-xs">
             <img
               src="/favicon.png"
               alt="Hosanna Studio"
-              className="w-6 h-6 object-contain rounded-md"
+              className="w-5 h-5 object-contain rounded-md"
             />
-            <span className="font-semibold text-sm tracking-tight text-slate-700 dark:text-slate-200">
+            <span className="font-semibold text-xs sm:text-sm tracking-tight text-slate-800 dark:text-slate-200">
               Hosanna Studio
             </span>
           </div>
@@ -56,7 +69,7 @@ export default function LoginLayout({
             type="button"
             onClick={toggleDarkMode}
             aria-label="Alternar tema"
-            className="w-9 h-9 flex items-center justify-center rounded-full text-slate-600 dark:text-slate-300 hover:bg-black/5 dark:hover:bg-white/10 active:scale-95 transition-all cursor-pointer"
+            className="w-9 h-9 flex items-center justify-center rounded-full bg-white/70 dark:bg-[#1e1f20]/70 backdrop-blur-md border border-slate-200/60 dark:border-white/10 text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-white/15 active:scale-95 transition-all shadow-xs cursor-pointer"
           >
             {darkMode ? (
               <Sun className="w-4 h-4 text-amber-300" />
@@ -69,8 +82,8 @@ export default function LoginLayout({
 
       {/* Main Center Stage */}
       <main className="flex-1 w-full flex items-center justify-center p-4 sm:p-6 md:p-8 z-10">
-        {/* Google-style authentication card container */}
-        <div className="w-full max-w-[448px] sm:max-w-[496px] md:max-w-[540px] bg-white dark:bg-[#1e1f20] sm:border sm:border-slate-200 dark:sm:border-[#303134] rounded-2xl sm:rounded-[28px] shadow-sm sm:shadow-md px-6 py-8 sm:p-10 md:p-12 transition-all">
+        {/* Google-style authentication card container with refined backdrop blur and shadow */}
+        <div className="w-full max-w-[448px] sm:max-w-[496px] md:max-w-[540px] bg-white/95 dark:bg-[#1e1f20]/95 backdrop-blur-xl sm:border sm:border-slate-200/80 dark:sm:border-[#303134]/90 rounded-2xl sm:rounded-[28px] shadow-lg shadow-black/5 dark:shadow-black/40 px-6 py-8 sm:p-10 md:p-12 transition-all">
           {/* Header Brand & Titles */}
           <div className="flex flex-col items-center text-center mb-7 sm:mb-8 select-none">
             <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center mb-3 bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/10 shadow-xs">
@@ -125,7 +138,7 @@ export default function LoginLayout({
       </main>
 
       {/* Footer standard Google style */}
-      <footer className="w-full max-w-[540px] mx-auto px-6 py-4 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-500 dark:text-slate-400 shrink-0">
+      <footer className="w-full max-w-[540px] mx-auto px-6 py-4 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-500 dark:text-slate-400 shrink-0 z-10">
         <div className="flex items-center gap-2">
           <span>Hosanna Studio &copy; {new Date().getFullYear()}</span>
         </div>
