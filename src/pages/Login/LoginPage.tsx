@@ -14,6 +14,7 @@ import { useAuth } from "../../contexts/AuthContext";
 import { authClient } from "../../lib/authClient";
 import { posthog } from "../../lib/posthog";
 import LoginLayout from "./Layout";
+import { SocialAuthButtons } from "./components/SocialAuthButtons";
 import { TurnstileWidget } from "./components/TurnstileWidget";
 
 export const LoginPage: React.FC = () => {
@@ -148,6 +149,8 @@ export const LoginPage: React.FC = () => {
           <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
         </Button>
       </form>
+
+      <SocialAuthButtons onError={(err) => setErrorMsg(err)} disabled={isLoading} />
     </LoginLayout>
   );
 };
