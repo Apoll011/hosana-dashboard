@@ -17,12 +17,7 @@ import { Loader2 } from "lucide-react";
 import React, { useState } from "react";
 
 export type SocialProviderId =
-  | "google"
-  | "github"
-  | "apple"
-  | "microsoft"
-  | "discord"
-  | (string & {});
+  "google" | "github" | "apple" | "microsoft" | "discord" | (string & {});
 
 export interface SocialProviderOption {
   id: SocialProviderId;
@@ -105,8 +100,7 @@ export const SocialAuthButtons: React.FC<SocialAuthButtonsProps> = ({
         callbackURL: fullCallbackUrl,
       });
     } catch (err: unknown) {
-      const message =
-        (err as Error)?.message || t("auth.login.errorGeneric");
+      const message = (err as Error)?.message || t("auth.login.errorGeneric");
       onError?.(message);
       setLoadingProvider(null);
     }
@@ -119,7 +113,7 @@ export const SocialAuthButtons: React.FC<SocialAuthButtonsProps> = ({
           <div className="absolute inset-0 flex items-center">
             <div className="w-full border-t border-slate-200 dark:border-slate-700/80" />
           </div>
-          <div className="relative px-3 bg-white dark:bg-slate-900 text-[11px] uppercase tracking-wider font-bold text-slate-400 dark:text-slate-500">
+          <div className="relative px-3 text-[11px] uppercase tracking-wider font-bold text-slate-400 dark:text-slate-500">
             {t("auth.login.orContinueWith")}
           </div>
         </div>
