@@ -11,6 +11,7 @@ import {
   ArrowRight,
   Building2,
   Check,
+  CheckCircle2,
   CreditCard,
   LogOut,
   MailCheck,
@@ -20,6 +21,7 @@ import {
   Sun,
   User,
   Users,
+  XCircle,
 } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import bg from "../assets/images/background.webp";
@@ -57,10 +59,40 @@ export const OnboardingPage: React.FC = () => {
   >("choose");
   const [orgName, setOrgName] = useState("");
   const [orgSlug, setOrgSlug] = useState("");
+  const [slugStatus, setSlugStatus] = useState<
+    "idle" | "checking" | "available" | "taken"
+  >("idle");
   const [searchSlug, setSearchSlug] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [pendingOrgName, setPendingOrgName] = useState("");
+
+  // Check slug availability with debounce
+  useEffect(() => {
+    const trimmed = orgSlug.trim();
+    if (!trimmed) {
+      setSlugStatus("idle");
+      return;
+    }
+
+    setSlugStatus("checking");
+    const timer = setTimeout(async () => {
+      try {
+        const { error } = await authClient.organization.checkSlug({
+          slug: trimmed,
+        });
+        if (error) {
+          setSlugStatus("taken");
+        } else {
+          setSlugStatus("available");
+        }
+      } catch {
+        setSlugStatus("idle");
+      }
+    }, 400);
+
+    return () => clearTimeout(timer);
+  }, [orgSlug]);
 
   // Newly-created org, kept around just long enough to offer the trial step
   const [newOrg, setNewOrg] = useState<{ id: string; slug: string } | null>(
@@ -628,7 +660,25 @@ export const OnboardingPage: React.FC = () => {
                   setOrgSlug(e.target.value.toLowerCase().replace(/\s+/g, "-"))
                 }
                 required
-                helperText="hosanna.app/slug"
+                error={
+                  slugStatus === "taken" ? t("onboarding.slugTaken") : undefined
+                }
+                helperText={
+                  slugStatus === "checking"
+                    ? t("onboarding.checkingSlug")
+                    : slugStatus === "available"
+                      ? t("onboarding.slugAvailable")
+                      : "hosanna.app/slug"
+                }
+                trailingIcon={
+                  slugStatus === "checking" ? (
+                    <Spinner size="sm" />
+                  ) : slugStatus === "available" ? (
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                  ) : slugStatus === "taken" ? (
+                    <XCircle className="w-4 h-4 text-red-600 dark:text-red-400" />
+                  ) : undefined
+                }
               />
 
               <div className="flex items-center justify-between gap-3 pt-3">
@@ -643,7 +693,12 @@ export const OnboardingPage: React.FC = () => {
 
                 <Button
                   type="submit"
-                  disabled={isLoading || !orgName || !orgSlug}
+                  disabled={
+                    isLoading ||
+                    !orgName.trim() ||
+                    !orgSlug.trim() ||
+                    slugStatus !== "available"
+                  }
                   isLoading={isLoading}
                   className="h-10 sm:h-11 px-6 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm transition-all shadow-none border-0"
                 >
