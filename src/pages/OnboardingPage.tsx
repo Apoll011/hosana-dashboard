@@ -17,10 +17,8 @@ import {
   MailCheck,
   Moon,
   PlusCircle,
-  Search,
   Sun,
   User,
-  Users,
   XCircle,
 } from "lucide-react";
 import React, { useEffect, useState } from "react";
@@ -54,9 +52,9 @@ export const OnboardingPage: React.FC = () => {
   const { t, language } = useI18n();
   const { hasStarted, pendingAction, refresh, startCheckout } =
     useSubscription();
-  const [mode, setMode] = useState<
-    "choose" | "create" | "join" | "pending" | "trial"
-  >("choose");
+  const [mode, setMode] = useState<"choose" | "create" | "pending" | "trial">(
+    "choose",
+  );
   const [orgName, setOrgName] = useState("");
   const [orgSlug, setOrgSlug] = useState("");
   const [slugStatus, setSlugStatus] = useState<
@@ -270,21 +268,8 @@ export const OnboardingPage: React.FC = () => {
     }
   };
 
-  const handleJoin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setErrorMsg("");
-    setIsLoading(true);
-
-    setTimeout(() => {
-      setIsLoading(false);
-      setPendingOrgName(searchSlug);
-      setMode("pending");
-    }, 1000);
-  };
-
   const getHeaderTitle = () => {
     if (mode === "create") return t("onboarding.createOrgTab");
-    if (mode === "join") return t("onboarding.joinOrgTab");
     if (mode === "pending") return "Aprovação Pendente";
     if (mode === "trial") return t("onboarding.trial.title");
     return "Hosanna Studio";
@@ -292,7 +277,6 @@ export const OnboardingPage: React.FC = () => {
 
   const getHeaderSubtitle = () => {
     if (mode === "create") return t("onboarding.step1Desc");
-    if (mode === "join") return t("onboarding.joinInviteDesc");
     if (mode === "trial") return t("onboarding.trial.desc");
     if (mode === "choose") return t("onboarding.step1Desc");
     return undefined;
@@ -308,7 +292,7 @@ export const OnboardingPage: React.FC = () => {
           className="w-full h-full object-cover scale-105 opacity-35 dark:opacity-25 transition-all duration-700 blur-[3px]"
           referrerPolicy="no-referrer"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-slate-100/70 via-slate-100/85 to-slate-200/95 dark:from-[#131314]/85 dark:via-[#131314]/92 dark:to-[#131314]/98 transition-colors duration-500" />
+        <div className="absolute inset-0 bg-linear-to-b from-slate-100/70 via-slate-100/85 to-slate-200/95 dark:from-[#131314]/85 dark:via-[#131314]/92 dark:to-[#131314]/98 transition-colors duration-500" />
       </div>
 
       {/* Top action header */}
@@ -608,25 +592,6 @@ export const OnboardingPage: React.FC = () => {
                   </div>
                   <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 group-hover:translate-x-0.5 transition-all" />
                 </button>
-
-                <button
-                  type="button"
-                  onClick={() => setMode("join")}
-                  className="w-full flex items-center p-4 border border-slate-200 dark:border-slate-700/80 hover:border-blue-600 dark:hover:border-blue-400 rounded-xl transition-all group text-left bg-transparent hover:bg-slate-50 dark:hover:bg-white/5 cursor-pointer"
-                >
-                  <div className="w-10 h-10 bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-400 rounded-full flex items-center justify-center mr-3.5 group-hover:scale-105 transition-transform">
-                    <Users className="w-5 h-5" />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="font-medium text-slate-900 dark:text-white text-sm">
-                      {t("onboarding.joinOrgTab")}
-                    </h3>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">
-                      {t("onboarding.joinInviteDesc")}
-                    </p>
-                  </div>
-                  <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 group-hover:translate-x-0.5 transition-all" />
-                </button>
               </div>
 
               <div className="pt-2 text-center">
@@ -703,41 +668,6 @@ export const OnboardingPage: React.FC = () => {
                   className="h-10 sm:h-11 px-6 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm transition-all shadow-none border-0"
                 >
                   {t("onboarding.createOrgBtn")}
-                </Button>
-              </div>
-            </form>
-          )}
-
-          {/* Mode: Join */}
-          {mode === "join" && (
-            <form onSubmit={handleJoin} className="space-y-4">
-              <GoogleTextField
-                label={t("onboarding.slugLabel")}
-                placeholder={t("onboarding.slugPlaceholder")}
-                value={searchSlug}
-                onChange={(e) => setSearchSlug(e.target.value)}
-                leadingIcon={<Search className="w-4 h-4" />}
-                required
-                autoFocus
-              />
-
-              <div className="flex items-center justify-between gap-3 pt-3">
-                <button
-                  type="button"
-                  onClick={() => setMode("choose")}
-                  className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 py-2 cursor-pointer"
-                >
-                  <ArrowLeft className="w-4 h-4" />
-                  <span>{t("common.back")}</span>
-                </button>
-
-                <Button
-                  type="submit"
-                  disabled={isLoading || !searchSlug}
-                  isLoading={isLoading}
-                  className="h-10 sm:h-11 px-6 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm transition-all shadow-none border-0"
-                >
-                  {t("onboarding.checkInvitesBtn")}
                 </Button>
               </div>
             </form>
