@@ -107,13 +107,13 @@ export const SocialAuthButtons: React.FC<SocialAuthButtonsProps> = ({
   };
 
   return (
-    <div className="space-y-3 w-full">
+    <div className="w-full mt-6">
       {showDivider && (
-        <div className="relative flex items-center justify-center my-4">
+        <div className="relative flex items-center justify-center my-5">
           <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-slate-200 dark:border-slate-700/80" />
+            <div className="w-full border-t border-slate-200 dark:border-[#303134]" />
           </div>
-          <div className="relative px-3 text-[11px] uppercase tracking-wider font-bold text-slate-400 dark:text-slate-500">
+          <div className="relative px-3 bg-white dark:bg-[#1e1f20] text-xs uppercase tracking-wider font-medium text-slate-500 dark:text-slate-400">
             {t("auth.login.orContinueWith")}
           </div>
         </div>
@@ -130,12 +130,12 @@ export const SocialAuthButtons: React.FC<SocialAuthButtonsProps> = ({
               type="button"
               disabled={disabled || loadingProvider !== null}
               onClick={() => handleSocialSignIn(provider.id)}
-              className="w-full h-12 px-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-750 text-slate-700 dark:text-slate-200 font-semibold text-sm transition-all shadow-xs hover:shadow-md flex items-center justify-center gap-3 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed hover:border-slate-300 dark:hover:border-slate-600"
+              className="w-full h-10 sm:h-11 px-4 rounded-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-[#1e1f20] hover:bg-slate-50 dark:hover:bg-white/5 text-slate-700 dark:text-slate-200 font-medium text-sm transition-all flex items-center justify-center gap-3 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed hover:border-slate-400 dark:hover:border-slate-600 active:bg-slate-100 dark:active:bg-white/10"
             >
               {isLoading ? (
-                <Loader2 className="w-5 h-5 animate-spin text-slate-500" />
+                <Loader2 className="w-4 h-4 animate-spin text-slate-500" />
               ) : (
-                <Icon className="w-5 h-5 shrink-0" />
+                <Icon className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
               )}
               <span>
                 {provider.id === "google"
