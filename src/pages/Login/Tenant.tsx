@@ -3,38 +3,23 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Button, Input } from "@/src/components/common";
-import {
-  ArrowLeft,
-  ArrowRight,
-  Building2,
-  CheckCircle2,
-  Link as LinkIcon,
-  Lock,
-  Mail,
-  ShieldCheck,
-  User,
-} from "lucide-react";
-import React, { useRef, useState } from "react";
-
+import { AppLink } from "@/src/components/AppLink";
+import { Button } from "@/src/components/common";
 import { useAppNavigate } from "@/src/hooks/useAppNavigate";
 import { useI18n } from "@/src/lib/i18n";
 import { posthog } from "@/src/lib/posthog";
+import { ArrowLeft, CheckCircle2 } from "lucide-react";
+import React, { useRef, useState } from "react";
 import { authClient } from "../../lib/authClient";
+import LoginLayout from "./Layout";
+import { GoogleTextField } from "./components/GoogleTextField";
 import { PasswordStrengthMeter } from "./components/PasswordStrengthMeter";
 import { TurnstileWidget } from "./components/TurnstileWidget";
-import LoginLayout from "./Layout";
 
 export const RegisterOrganizationPage: React.FC = () => {
   const { navigate } = useAppNavigate();
   const { t } = useI18n();
-  let beta_release;
-
-  if (posthog.isFeatureEnabled("beta-release")) {
-    beta_release = true;
-  } else {
-    beta_release = false;
-  }
+  const beta_release = Boolean(posthog.isFeatureEnabled("beta-release"));
 
   // Step state
   const [step, setStep] = useState(1);
@@ -46,6 +31,7 @@ export const RegisterOrganizationPage: React.FC = () => {
   const [adminEmail, setAdminEmail] = useState("");
   const [adminPassword, setAdminPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [captchaToken, setCaptchaToken] = useState("");
   const captchaRef = useRef<{ reset: () => void }>(null);
@@ -131,7 +117,6 @@ export const RegisterOrganizationPage: React.FC = () => {
     }
   };
 
-  // Allow pressing Enter to go to next step
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
       e.preventDefault();
@@ -144,287 +129,208 @@ export const RegisterOrganizationPage: React.FC = () => {
   if (!beta_release) {
     return (
       <LoginLayout
+        headerTitle={t("auth.tenant.title")}
+        headerSubtitle={t("auth.tenant.beta")}
         optionalLink="/login"
         optionalMsg={t("auth.login.title")}
-        errorMsg={""}
-        titleMb={2}
       >
-        <div className="py-14 px-6 flex flex-col items-center justify-center text-center animate-in zoom-in-95 duration-500">
-          <h2 className="text-2xl font-black tracking-tight text-slate-900 dark:text-white mb-3">
-            {t("auth.tenant.title")}
-          </h2>
-          <p className="text-sm leading-6 text-slate-500 dark:text-slate-400">
-            {t("auth.tenant.beta")}
-          </p>
+        <div className="py-6 flex flex-col items-center justify-center text-center">
+          <AppLink
+            to="/login"
+            className="inline-flex items-center justify-center h-10 px-6 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm transition-all"
+          >
+            {t("auth.login.title")}
+          </AppLink>
         </div>
       </LoginLayout>
     );
   }
 
+  const getStepSubtitle = () => {
+    if (step === 1) return t("onboarding.step1Desc");
+    if (step === 2) return t("auth.register.subtitle");
+    return t("auth.resetPassword.subtitle");
+  };
+
   return (
     <LoginLayout
-      optionalLink="/login"
-      optionalMsg={
-        t("auth.register.hasAccount") + " " + t("auth.register.loginLink")
-      }
+      headerTitle={t("onboarding.createOrgTab")}
+      headerSubtitle={getStepSubtitle()}
       errorMsg={errorMsg}
-      titleMb={2}
     >
       {isSuccess ? (
-        <div className="py-12 flex flex-col items-center justify-center text-center animate-in zoom-in-95 duration-500">
-          <div className="relative w-24 h-24 mb-6">
-            <div className="absolute inset-0 bg-emerald-100 dark:bg-emerald-900/40 rounded-full animate-ping opacity-75" />
-            <div className="relative flex items-center justify-center w-24 h-24 bg-emerald-500 text-white rounded-full shadow-lg shadow-emerald-500/30">
-              <CheckCircle2 className="w-12 h-12 animate-in zoom-in duration-300 delay-150" />
-            </div>
+        <div className="py-8 flex flex-col items-center justify-center text-center animate-in zoom-in-95 duration-300">
+          <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-950/50 rounded-full flex items-center justify-center text-emerald-600 dark:text-emerald-400 mb-4">
+            <CheckCircle2 className="w-8 h-8" />
           </div>
-          <h2 className="text-2xl font-black text-slate-900 dark:text-white mb-2">
-            {t("auth.resetPassword.successTitle")}
-          </h2>
-          <p className="text-slate-500 dark:text-slate-400 font-medium">
+          <p className="text-slate-600 dark:text-slate-400 text-sm">
             {t("auth.resetPassword.successDesc")}
           </p>
         </div>
       ) : (
         <>
-          <div className="text-center mb-4">
-            <h2 className="font-display font-black text-2xl sm:text-3xl tracking-tight text-slate-900 dark:text-white">
-              {t("onboarding.createOrgTab")}
-            </h2>
-          </div>
-
-          {/* Step Progress Bar with Labels */}
+          {/* Step Progress Bar with Google Material Stepper design */}
           <div className="mb-6">
-            <div className="flex items-center justify-between mb-2">
-              {[
-                { num: 1, label: t("settings.workspace.title") },
-                { num: 2, label: t("settings.roles.admin") },
-                { num: 3, label: t("settings.tabs.account") },
-              ].map((s) => (
-                <div
-                  key={s.num}
-                  className={`flex items-center gap-1.5 text-xs font-bold transition-colors ${
-                    step >= s.num
-                      ? "text-m3-primary dark:text-m3-primary-light"
-                      : "text-slate-400 dark:text-slate-500"
-                  }`}
-                >
-                  <span
-                    className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black transition-all ${
-                      step >= s.num
-                        ? "bg-m3-primary text-white shadow-sm"
-                        : "bg-slate-200 dark:bg-slate-800 text-slate-500 dark:text-slate-400"
-                    }`}
-                  >
-                    {s.num}
-                  </span>
-                  <span className="hidden sm:inline">{s.label}</span>
-                </div>
-              ))}
+            <div className="flex items-center justify-between mb-2 text-xs font-medium text-slate-500 dark:text-slate-400">
+              <span>Passo {step} de 3</span>
+              <span>
+                {step === 1
+                  ? t("settings.workspace.title")
+                  : step === 2
+                    ? t("settings.roles.admin")
+                    : t("settings.tabs.account")}
+              </span>
             </div>
-            <div className="flex items-center justify-between gap-2">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="flex-1 flex flex-col gap-2">
-                  <div
-                    className={`h-1.5 rounded-full transition-all duration-500 ${
-                      step >= i
-                        ? "bg-m3-primary shadow-[0_0_10px_rgba(var(--m3-primary-rgb),0.4)]"
-                        : "bg-slate-200 dark:bg-slate-800"
-                    }`}
-                  />
-                </div>
-              ))}
+            <div className="w-full bg-slate-100 dark:bg-white/10 h-1 rounded-full overflow-hidden">
+              <div
+                className="bg-blue-600 h-full transition-all duration-300 rounded-full"
+                style={{ width: `${(step / 3) * 100}%` }}
+              />
             </div>
           </div>
 
-          {/* Form Steps */}
-          <form onKeyDown={handleKeyDown} className="relative min-h-55">
-            {/* STEP 1: Church Info */}
+          <form onKeyDown={handleKeyDown} className="space-y-4">
             {step === 1 && (
-              <div className="space-y-4 animate-in slide-in-from-right-4 fade-in duration-300">
-                <div className="mb-2">
-                  <h3 className="text-lg font-bold text-slate-800 dark:text-slate-200">
-                    {t("onboarding.orgNameLabel")}
-                  </h3>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">
-                    {t("onboarding.step1Desc")}
-                  </p>
-                </div>
-                <Input
-                  type="text"
+              <div className="space-y-4 animate-in fade-in duration-200">
+                <GoogleTextField
                   label={t("onboarding.orgNameLabel")}
-                  placeholder={t("onboarding.orgNamePlaceholder")}
                   value={orgName}
                   onChange={(e) => setOrgName(e.target.value)}
-                  icon={<Building2 className="w-4 h-4 opacity-40" />}
                   autoFocus
-                  className="h-12 rounded-xl border-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white focus:border-m3-primary text-sm transition-colors"
                 />
-                <Input
-                  type="text"
+                <GoogleTextField
                   label={t("onboarding.slugLabel")}
-                  placeholder={t("onboarding.slugPlaceholder")}
                   value={orgSlug}
                   onChange={(e) =>
-                    setOrgSlug(
-                      e.target.value.toLowerCase().replace(/\s+/g, "-"),
-                    )
+                    setOrgSlug(e.target.value.toLowerCase().replace(/\s+/g, "-"))
                   }
-                  icon={<LinkIcon className="w-4 h-4 opacity-40" />}
-                  className="h-12 rounded-xl border-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white focus:border-m3-primary text-sm transition-colors"
+                  helperText="hosanna.app/slug"
                 />
               </div>
             )}
 
-            {/* STEP 2: Admin Info */}
             {step === 2 && (
-              <div className="space-y-4 animate-in slide-in-from-right-4 fade-in duration-300">
-                <div className="mb-2">
-                  <h3 className="text-lg font-bold text-slate-800 dark:text-slate-200">
-                    {t("settings.roles.admin")}
-                  </h3>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">
-                    {t("auth.register.subtitle")}
-                  </p>
-                </div>
-                <Input
-                  type="text"
+              <div className="space-y-4 animate-in fade-in duration-200">
+                <GoogleTextField
                   label={t("auth.register.nameLabel")}
-                  placeholder={t("auth.register.namePlaceholder")}
                   value={adminName}
                   onChange={(e) => setAdminName(e.target.value)}
-                  icon={<User className="w-4 h-4 opacity-40" />}
+                  autoComplete="name"
                   autoFocus
-                  className="h-12 rounded-xl border-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white focus:border-m3-primary text-sm transition-colors"
                 />
-                <Input
+                <GoogleTextField
                   type="email"
                   label={t("auth.register.emailLabel")}
-                  placeholder={t("auth.register.emailPlaceholder")}
                   value={adminEmail}
                   onChange={(e) => setAdminEmail(e.target.value)}
-                  icon={<Mail className="w-4 h-4 opacity-40" />}
-                  className="h-12 rounded-xl border-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white focus:border-m3-primary text-sm transition-colors"
+                  autoComplete="email"
                 />
               </div>
             )}
 
-            {/* STEP 3: Security & Terms */}
             {step === 3 && (
-              <div className="space-y-4 animate-in slide-in-from-right-4 fade-in duration-300">
-                <div className="mb-2">
-                  <h3 className="text-lg font-bold text-slate-800 dark:text-slate-200">
-                    {t("settings.account.profile.password")}
-                  </h3>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">
-                    {t("auth.resetPassword.subtitle")}
-                  </p>
+              <div className="space-y-4 animate-in fade-in duration-200">
+                <GoogleTextField
+                  type={showPassword ? "text" : "password"}
+                  label={t("auth.register.passwordLabel")}
+                  value={adminPassword}
+                  onChange={(e) => setAdminPassword(e.target.value)}
+                  autoComplete="new-password"
+                  autoFocus
+                />
+
+                <GoogleTextField
+                  type={showPassword ? "text" : "password"}
+                  label={t("auth.register.confirmPasswordLabel")}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  autoComplete="new-password"
+                  error={
+                    passwordMismatch ? t("auth.register.passwordMismatch") : undefined
+                  }
+                />
+
+                <div className="flex items-center justify-between px-0.5">
+                  <label className="flex items-center gap-2 cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={showPassword}
+                      onChange={(e) => setShowPassword(e.target.checked)}
+                      className="w-4 h-4 rounded-[4px] border-slate-300 dark:border-slate-600 text-blue-600 focus:ring-blue-500 dark:bg-[#1e1f20] cursor-pointer"
+                    />
+                    <span className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">
+                      Mostrar palavra-passe
+                    </span>
+                  </label>
                 </div>
 
-                <div className="space-y-1">
-                  <Input
-                    type="password"
-                    label={t("auth.register.passwordLabel")}
-                    placeholder="••••••••••"
-                    value={adminPassword}
-                    onChange={(e) => setAdminPassword(e.target.value)}
-                    icon={<Lock className="w-4 h-4 opacity-40" />}
-                    autoFocus
-                    className="h-12 rounded-xl border-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white focus:border-m3-primary text-sm transition-colors"
-                  />
-                  {adminPassword.length > 0 && (
-                    <PasswordStrengthMeter password={adminPassword} />
-                  )}
-                </div>
-
-                <div className="space-y-1">
-                  <Input
-                    type="password"
-                    label={t("auth.register.confirmPasswordLabel")}
-                    placeholder="••••••••••"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    icon={<Lock className="w-4 h-4 opacity-40" />}
-                    className={`h-12 rounded-xl dark:bg-slate-800 dark:text-white text-sm transition-colors ${
-                      passwordMismatch
-                        ? "border-rose-400 focus:border-rose-500"
-                        : "border-slate-200 dark:border-slate-700 focus:border-m3-primary"
-                    }`}
-                  />
-                  {passwordMismatch && (
-                    <p className="text-xs font-semibold text-rose-500 dark:text-rose-400 pl-1 animate-in fade-in">
-                      {t("auth.register.passwordMismatch")}
-                    </p>
-                  )}
-                </div>
+                {adminPassword.length > 0 && (
+                  <PasswordStrengthMeter password={adminPassword} />
+                )}
 
                 <TurnstileWidget ref={captchaRef} onVerify={setCaptchaToken} />
 
-                <div className="flex items-start gap-3 p-3 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-100 dark:border-slate-700/60">
+                <div className="flex items-start gap-2.5 pt-1">
                   <input
                     type="checkbox"
-                    id="terms"
+                    id="org-terms"
                     checked={agreedToTerms}
                     onChange={(e) => setAgreedToTerms(e.target.checked)}
-                    className="mt-0.5 w-4 h-4 rounded border-slate-300 dark:border-slate-700 text-m3-primary focus:ring-m3-primary dark:bg-slate-800 cursor-pointer transition-all"
+                    className="mt-0.5 w-4 h-4 rounded-[4px] border-slate-300 dark:border-slate-600 text-blue-600 focus:ring-blue-500 dark:bg-[#1e1f20] cursor-pointer"
                   />
                   <label
-                    htmlFor="terms"
-                    className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed cursor-pointer select-none"
+                    htmlFor="org-terms"
+                    className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-snug cursor-pointer select-none"
                   >
-                    Concordo com os Termos de Serviço e a Política de
-                    Privacidade.
+                    Concordo com os Termos de Serviço e a Política de Privacidade.
                   </label>
                 </div>
               </div>
             )}
+
+            {/* Navigation Buttons */}
+            <div className="flex items-center justify-between gap-3 pt-4">
+              {step > 1 ? (
+                <button
+                  type="button"
+                  onClick={handleBack}
+                  disabled={isLoading}
+                  className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 py-2 cursor-pointer"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  <span>Voltar</span>
+                </button>
+              ) : (
+                <AppLink
+                  to="/login"
+                  className="text-xs sm:text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline py-2"
+                >
+                  {t("auth.register.loginLink")}
+                </AppLink>
+              )}
+
+              {step < 3 ? (
+                <Button
+                  type="button"
+                  onClick={handleNext}
+                  disabled={step === 1 ? !isStep1Valid : !isStep2Valid}
+                  className="h-10 sm:h-11 px-6 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm transition-all shadow-none border-0"
+                >
+                  {t("settings.twoFactor.continue")}
+                </Button>
+              ) : (
+                <Button
+                  type="button"
+                  onClick={handleCreateSubmit}
+                  isLoading={isLoading}
+                  disabled={!isStep3Valid || isLoading}
+                  className="h-10 sm:h-11 px-6 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm transition-all shadow-none border-0"
+                >
+                  {t("onboarding.createOrgBtn")}
+                </Button>
+              )}
+            </div>
           </form>
-
-          {/* Navigation Buttons */}
-          <div className="flex items-center gap-3 mt-8">
-            {step > 1 && (
-              <Button
-                type="button"
-                onClick={handleBack}
-                variant="outline"
-                className="h-12 px-5 rounded-xl border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all font-semibold cursor-pointer"
-                disabled={isLoading}
-              >
-                <ArrowLeft className="w-4 h-4" />
-              </Button>
-            )}
-
-            {step < 3 ? (
-              <Button
-                type="button"
-                onClick={handleNext}
-                variant="primary"
-                disabled={step === 1 ? !isStep1Valid : !isStep2Valid}
-                className="flex-1 h-12 bg-m3-primary hover:bg-m3-primary-dark border-0 font-bold text-sm text-white rounded-xl transition-all shadow-lg shadow-m3-primary/20 hover:shadow-m3-primary/40 flex items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-              >
-                <span>{t("settings.twoFactor.continue")}</span>
-                <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-              </Button>
-            ) : (
-              <Button
-                type="button"
-                onClick={handleCreateSubmit}
-                variant="primary"
-                isLoading={isLoading}
-                disabled={!isStep3Valid || isLoading}
-                className="flex-1 h-12 bg-emerald-600 hover:bg-emerald-700 border-0 font-bold text-sm text-white rounded-xl transition-all shadow-lg shadow-emerald-600/20 hover:shadow-emerald-600/40 flex items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-              >
-                {isLoading ? (
-                  <span>{t("settings.workspace.saving")}</span>
-                ) : (
-                  <>
-                    <span>{t("onboarding.createOrgBtn")}</span>
-                    <ShieldCheck className="w-4 h-4" />
-                  </>
-                )}
-              </Button>
-            )}
-          </div>
         </>
       )}
     </LoginLayout>

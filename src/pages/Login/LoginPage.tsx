@@ -4,16 +4,17 @@
  */
 
 import { AppLink } from "@/src/components/AppLink";
-import { Button, Input } from "@/src/components/common";
+import { Button } from "@/src/components/common";
 import { useAppNavigate } from "@/src/hooks/useAppNavigate";
 import { useI18n } from "@/src/lib/i18n";
-import { ArrowRight, Lock, Mail } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 import React, { useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import { authClient } from "../../lib/authClient";
 import { posthog } from "../../lib/posthog";
 import LoginLayout from "./Layout";
+import { GoogleTextField } from "./components/GoogleTextField";
 import { SocialAuthButtons } from "./components/SocialAuthButtons";
 import { TurnstileWidget } from "./components/TurnstileWidget";
 
@@ -27,6 +28,7 @@ export const LoginPage: React.FC = () => {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [captchaToken, setCaptchaToken] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
@@ -90,64 +92,85 @@ export const LoginPage: React.FC = () => {
 
   return (
     <LoginLayout
+      headerTitle={t("auth.login.title")}
+      headerSubtitle={t("auth.login.subtitle")}
       errorMsg={errorMsg}
       redirectMessage={redirectMessage}
-      optionalLink="/register"
-      optionalMsg={t("auth.login.registerLink")}
     >
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="space-y-3">
-          <Input
-            type="email"
-            label={t("auth.login.emailLabel")}
-            placeholder={t("auth.login.emailPlaceholder")}
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            icon={<Mail className="w-4 h-4 opacity-40" />}
-            className="h-11 rounded-xl border-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white focus:border-m3-primary transition-all text-sm"
-          />
-          <Input
-            type="password"
+        <GoogleTextField
+          type="email"
+          label={t("auth.login.emailLabel")}
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          autoComplete="email"
+          autoFocus
+        />
+
+        <div className="space-y-1.5">
+          <GoogleTextField
+            type={showPassword ? "text" : "password"}
             label={t("auth.login.passwordLabel")}
-            placeholder={t("auth.login.passwordPlaceholder")}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            icon={<Lock className="w-4 h-4 opacity-40" />}
-            className="h-11 rounded-xl border-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white focus:border-m3-primary transition-all text-sm"
+            autoComplete="current-password"
+            trailingIcon={
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="p-1 rounded-full text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 transition-colors"
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? (
+                  <EyeOff className="w-5 h-5" />
+                ) : (
+                  <Eye className="w-5 h-5" />
+                )}
+              </button>
+            }
           />
-          <label className="flex items-center gap-2 cursor-pointer select-none">
-            <input
-              type="checkbox"
-              checked={rememberMe}
-              onChange={(e) => setRememberMe(e.target.checked)}
-              className="w-4 h-4 rounded border-slate-300 dark:border-slate-700 text-m3-primary focus:ring-m3-primary dark:bg-slate-800 cursor-pointer"
-            />
-            <span className="text-sm text-slate-600 dark:text-slate-300">
-              {t("auth.login.rememberMe")}
-            </span>
-          </label>
-        </div>
 
-        <div className="flex justify-end">
-          <AppLink
-            to="/forgot-password"
-            className="text-xs font-semibold text-m3-primary dark:text-m3-primary-light hover:underline"
-          >
-            {t("auth.login.forgotPasswordLink")}
-          </AppLink>
+          <div className="flex items-center justify-between pt-1">
+            <label className="flex items-center gap-2 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                className="w-4 h-4 rounded-[4px] border-slate-300 dark:border-slate-600 text-blue-600 focus:ring-blue-500 dark:bg-[#1e1f20] cursor-pointer"
+              />
+              <span className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">
+                {t("auth.login.rememberMe")}
+              </span>
+            </label>
+
+            <AppLink
+              to="/forgot-password"
+              className="text-xs sm:text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline"
+            >
+              {t("auth.login.forgotPasswordLink")}
+            </AppLink>
+          </div>
         </div>
 
         <TurnstileWidget ref={captchaRef} onVerify={setCaptchaToken} />
 
-        <Button
-          type="submit"
-          variant="primary"
-          className="w-full h-14 bg-m3-primary hover:bg-m3-primary-dark border-0 font-black uppercase tracking-widest text-[10px] text-white mt-2 rounded-[20px] transition-all shadow-xl shadow-m3-primary/20 hover:shadow-m3-primary/40 flex items-center justify-center gap-2 group cursor-pointer"
-          isLoading={isLoading}
-        >
-          <span>{t("auth.login.loginBtn")}</span>
-          <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-        </Button>
+        {/* Action bar: Create Account on the left, Sign In on the right */}
+        <div className="flex items-center justify-between gap-3 pt-2">
+          <AppLink
+            to="/register"
+            className="text-xs sm:text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline py-2"
+          >
+            {t("auth.login.registerLink")}
+          </AppLink>
+
+          <Button
+            type="submit"
+            isLoading={isLoading}
+            className="h-10 sm:h-11 px-6 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm transition-all shadow-none hover:shadow-xs active:scale-[0.98] border-0"
+          >
+            {t("auth.login.loginBtn")}
+          </Button>
+        </div>
       </form>
 
       <SocialAuthButtons onError={(err) => setErrorMsg(err)} disabled={isLoading} />

@@ -4,14 +4,15 @@
  */
 
 import { AppLink } from "@/src/components/AppLink";
-import { Button, Input } from "@/src/components/common";
+import { Button } from "@/src/components/common";
 import { useAppNavigate } from "@/src/hooks/useAppNavigate";
 import { useI18n } from "@/src/lib/i18n";
-import { ArrowRight, CheckCircle2, Clock, Lock, XCircle } from "lucide-react";
+import { CheckCircle2, Clock, XCircle } from "lucide-react";
 import React, { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { authClient } from "../../lib/authClient";
 import LoginLayout from "./Layout";
+import { GoogleTextField } from "./components/GoogleTextField";
 import { PasswordStrengthMeter } from "./components/PasswordStrengthMeter";
 
 type State = "form" | "success" | "expired" | "error";
@@ -24,6 +25,7 @@ export const ResetPasswordPage: React.FC = () => {
 
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [state, setState] = useState<State>("form");
@@ -34,24 +36,18 @@ export const ResetPasswordPage: React.FC = () => {
   if (!token) {
     return (
       <LoginLayout
-        optionalLink="/login"
-        optionalMsg={"← " + t("auth.forgotPassword.backToLogin")}
+        headerTitle={t("auth.acceptInvitation.invalidTitle")}
+        headerSubtitle={t("auth.verifyEmail.errorDesc")}
+        optionalLink="/forgot-password"
+        optionalMsg={t("auth.forgotPassword.sendLinkBtn")}
       >
-        <div className="py-8 flex flex-col items-center text-center gap-4">
-          <div className="w-20 h-20 bg-rose-100 dark:bg-rose-900/40 rounded-full flex items-center justify-center">
-            <XCircle className="w-10 h-10 text-rose-500 dark:text-rose-400" />
-          </div>
-          <div>
-            <h2 className="text-xl font-black text-slate-900 dark:text-white">
-              {t("auth.acceptInvitation.invalidTitle")}
-            </h2>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mt-2 max-w-xs mx-auto">
-              {t("auth.verifyEmail.errorDesc")}
-            </p>
+        <div className="py-4 flex flex-col items-center text-center gap-4">
+          <div className="w-16 h-16 bg-red-100 dark:bg-red-950/50 rounded-full flex items-center justify-center text-red-600 dark:text-red-400">
+            <XCircle className="w-8 h-8" />
           </div>
           <AppLink
             to="/forgot-password"
-            className="inline-flex items-center gap-2 h-10 px-5 rounded-xl bg-m3-primary text-white text-xs font-bold hover:bg-m3-primary-dark transition-all"
+            className="inline-flex items-center justify-center h-10 px-6 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm transition-all"
           >
             {t("auth.forgotPassword.sendLinkBtn")}
           </AppLink>
@@ -102,55 +98,44 @@ export const ResetPasswordPage: React.FC = () => {
     );
   };
 
-  // ── Success ─────────────────────────────────────────────────────────────
   if (state === "success") {
     return (
       <LoginLayout
+        headerTitle={t("auth.resetPassword.successTitle")}
+        headerSubtitle={t("auth.resetPassword.successDesc")}
         optionalLink="/login"
-        optionalMsg={t("auth.resetPassword.goToLoginBtn") + " →"}
+        optionalMsg={t("auth.resetPassword.goToLoginBtn")}
       >
-        <div className="py-8 flex flex-col items-center text-center gap-4 animate-in zoom-in-95 duration-500">
-          <div className="relative w-20 h-20">
-            <div className="absolute inset-0 bg-emerald-100 dark:bg-emerald-900/40 rounded-full animate-ping opacity-60" />
-            <div className="relative flex items-center justify-center w-20 h-20 bg-emerald-500 text-white rounded-full shadow-lg shadow-emerald-500/30">
-              <CheckCircle2 className="w-10 h-10" />
-            </div>
+        <div className="py-4 flex flex-col items-center text-center gap-4 animate-in zoom-in-95 duration-300">
+          <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-950/50 rounded-full flex items-center justify-center text-emerald-600 dark:text-emerald-400 mb-2">
+            <CheckCircle2 className="w-8 h-8" />
           </div>
-          <div>
-            <h2 className="text-2xl font-black text-slate-900 dark:text-white">
-              {t("auth.resetPassword.successTitle")}
-            </h2>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mt-2">
-              {t("auth.resetPassword.successDesc")}
-            </p>
-          </div>
+          <AppLink
+            to="/login"
+            className="inline-flex items-center justify-center h-10 px-6 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm transition-all"
+          >
+            {t("auth.resetPassword.goToLoginBtn")}
+          </AppLink>
         </div>
       </LoginLayout>
     );
   }
 
-  // ── Expired ─────────────────────────────────────────────────────────────
   if (state === "expired") {
     return (
       <LoginLayout
-        optionalLink="/login"
-        optionalMsg={"← " + t("auth.forgotPassword.backToLogin")}
+        headerTitle={t("auth.acceptInvitation.invalidTitle")}
+        headerSubtitle={t("auth.acceptInvitation.invalidDesc")}
+        optionalLink="/forgot-password"
+        optionalMsg={t("auth.forgotPassword.sendLinkBtn")}
       >
-        <div className="py-8 flex flex-col items-center text-center gap-4 animate-in zoom-in-95 duration-500">
-          <div className="w-20 h-20 bg-amber-100 dark:bg-amber-900/40 rounded-full flex items-center justify-center">
-            <Clock className="w-10 h-10 text-amber-500 dark:text-amber-400" />
-          </div>
-          <div>
-            <h2 className="text-xl font-black text-slate-900 dark:text-white">
-              {t("auth.acceptInvitation.invalidTitle")}
-            </h2>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mt-2 max-w-xs mx-auto">
-              {t("auth.acceptInvitation.invalidDesc")}
-            </p>
+        <div className="py-4 flex flex-col items-center text-center gap-4 animate-in zoom-in-95 duration-300">
+          <div className="w-16 h-16 bg-amber-100 dark:bg-amber-950/50 rounded-full flex items-center justify-center text-amber-600 dark:text-amber-400">
+            <Clock className="w-8 h-8" />
           </div>
           <AppLink
             to="/forgot-password"
-            className="inline-flex items-center gap-2 h-10 px-5 rounded-xl bg-m3-primary text-white text-xs font-bold hover:bg-m3-primary-dark transition-all"
+            className="inline-flex items-center justify-center h-10 px-6 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm transition-all"
           >
             {t("auth.forgotPassword.sendLinkBtn")}
           </AppLink>
@@ -159,69 +144,65 @@ export const ResetPasswordPage: React.FC = () => {
     );
   }
 
-  // ── Form ────────────────────────────────────────────────────────────────
   return (
     <LoginLayout
-      optionalLink="/login"
-      optionalMsg={"← " + t("auth.forgotPassword.backToLogin")}
+      headerTitle={t("auth.resetPassword.title")}
+      headerSubtitle={t("auth.resetPassword.subtitle")}
       errorMsg={errorMsg}
     >
-      <div className="flex flex-col items-center mb-5">
-        <div className="w-14 h-14 bg-m3-primary/10 dark:bg-m3-primary/20 rounded-2xl flex items-center justify-center mb-3">
-          <Lock className="w-7 h-7 text-m3-primary dark:text-m3-primary-light" />
-        </div>
-        <h2 className="font-display font-black text-xl text-slate-900 dark:text-white">
-          {t("auth.resetPassword.title")}
-        </h2>
-        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 text-center max-w-xs">
-          {t("auth.resetPassword.subtitle")}
-        </p>
-      </div>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <GoogleTextField
+          type={showPassword ? "text" : "password"}
+          label={t("auth.resetPassword.newPasswordLabel")}
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          autoComplete="new-password"
+          autoFocus
+        />
 
-      <form onSubmit={handleSubmit} className="space-y-3.5">
-        <div className="space-y-1">
-          <Input
-            type="password"
-            label={t("auth.resetPassword.newPasswordLabel")}
-            placeholder="••••••••"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            icon={<Lock className="w-4 h-4 opacity-40" />}
-            className="h-11 rounded-xl border-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white focus:border-m3-primary transition-all text-sm"
-          />
-          {password.length > 0 && <PasswordStrengthMeter password={password} />}
-        </div>
+        <GoogleTextField
+          type={showPassword ? "text" : "password"}
+          label={t("auth.resetPassword.confirmPasswordLabel")}
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+          autoComplete="new-password"
+          error={
+            passwordMismatch ? t("auth.register.passwordMismatch") : undefined
+          }
+        />
 
-        <div className="space-y-1">
-          <Input
-            type="password"
-            label={t("auth.resetPassword.confirmPasswordLabel")}
-            placeholder="••••••••"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            icon={<Lock className="w-4 h-4 opacity-40" />}
-            className={`h-11 rounded-xl dark:bg-slate-800 dark:text-white transition-all text-sm ${
-              passwordMismatch
-                ? "border-rose-400 focus:border-rose-500"
-                : "border-slate-200 dark:border-slate-700 focus:border-m3-primary"
-            }`}
-          />
-          {passwordMismatch && (
-            <p className="text-xs font-semibold text-rose-500 dark:text-rose-400 pl-1 animate-in fade-in">
-              {t("auth.register.passwordMismatch")}
-            </p>
-          )}
+        <div className="flex items-center justify-between px-0.5">
+          <label className="flex items-center gap-2 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={showPassword}
+              onChange={(e) => setShowPassword(e.target.checked)}
+              className="w-4 h-4 rounded-[4px] border-slate-300 dark:border-slate-600 text-blue-600 focus:ring-blue-500 dark:bg-[#1e1f20] cursor-pointer"
+            />
+            <span className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">
+              Mostrar palavra-passe
+            </span>
+          </label>
         </div>
 
-        <Button
-          type="submit"
-          variant="primary"
-          isLoading={isLoading}
-          className="w-full h-14 bg-m3-primary hover:bg-m3-primary-dark border-0 font-black uppercase tracking-widest text-[10px] text-white mt-2 rounded-[20px] transition-all shadow-xl shadow-m3-primary/20 hover:shadow-m3-primary/40 flex items-center justify-center gap-2 group cursor-pointer"
-        >
-          <span>{t("auth.resetPassword.resetBtn")}</span>
-          <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-        </Button>
+        {password.length > 0 && <PasswordStrengthMeter password={password} />}
+
+        <div className="flex items-center justify-between gap-3 pt-2">
+          <AppLink
+            to="/login"
+            className="text-xs sm:text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline py-2"
+          >
+            {t("auth.forgotPassword.backToLogin")}
+          </AppLink>
+
+          <Button
+            type="submit"
+            isLoading={isLoading}
+            className="h-10 sm:h-11 px-6 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm transition-all shadow-none hover:shadow-xs active:scale-[0.98] border-0"
+          >
+            {t("auth.resetPassword.resetBtn")}
+          </Button>
+        </div>
       </form>
     </LoginLayout>
   );

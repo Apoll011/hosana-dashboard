@@ -6,7 +6,7 @@
 import { Button, Spinner } from "@/src/components/common";
 import { useAppNavigate } from "@/src/hooks/useAppNavigate";
 import { useI18n } from "@/src/lib/i18n";
-import { Building2, Check, ShieldAlert, X } from "lucide-react";
+import { Building2, ShieldAlert } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
@@ -46,12 +46,10 @@ export const AcceptInvitationPage: React.FC = () => {
       return;
     }
 
-    // Wait until auth state is settled before redirecting
     if (isAuthLoading) {
       return;
     }
 
-    // If the user is not logged in, save the invitation token and redirect to register
     if (!user) {
       localStorage.setItem("pending_invitation_id", invitationId);
       navigate("/register", { replace: true });
@@ -104,9 +102,7 @@ export const AcceptInvitationPage: React.FC = () => {
         return;
       }
 
-      // Clear pending invitation from storage
       localStorage.removeItem("pending_invitation_id");
-
       setSuccessMsg(t("auth.acceptInvitation.successDesc"));
 
       await refetch();
@@ -150,9 +146,7 @@ export const AcceptInvitationPage: React.FC = () => {
         return;
       }
 
-      // Clear pending invitation from storage
       localStorage.removeItem("pending_invitation_id");
-
       setSuccessMsg(t("settings.members.inviteCancelled", { email: "" }));
       setTimeout(() => {
         if (user) {
@@ -170,7 +164,12 @@ export const AcceptInvitationPage: React.FC = () => {
   };
 
   return (
-    <LoginLayout errorMsg={errorMsg} redirectMessage={successMsg}>
+    <LoginLayout
+      headerTitle={t("auth.acceptInvitation.title")}
+      headerSubtitle={invitation ? `${t("auth.acceptInvitation.invitedTo")}` : undefined}
+      errorMsg={errorMsg}
+      redirectMessage={successMsg}
+    >
       <div className="py-2 text-center">
         {isFetching ? (
           <div className="flex flex-col items-center justify-center py-8 space-y-3">
@@ -181,47 +180,37 @@ export const AcceptInvitationPage: React.FC = () => {
           </div>
         ) : invitation ? (
           <div className="space-y-6">
-            <div className="w-16 h-16 bg-m3-primary/10 text-m3-primary dark:bg-m3-primary/20 rounded-2xl flex items-center justify-center mx-auto shadow-inner">
-              <Building2 className="w-8 h-8" />
+            <div className="w-14 h-14 bg-blue-50 text-blue-600 dark:bg-blue-950/50 dark:text-blue-400 rounded-full flex items-center justify-center mx-auto">
+              <Building2 className="w-7 h-7" />
             </div>
 
-            <div>
-              <h2 className="text-xl font-black text-slate-900 dark:text-white tracking-tight">
-                {t("auth.acceptInvitation.title")}
-              </h2>
-              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-                {t("auth.acceptInvitation.invitedTo")}:
-              </p>
-              <div className="mt-3 p-4 bg-slate-50 dark:bg-slate-800/80 rounded-2xl border border-slate-100 dark:border-slate-700/60">
-                <span className="text-lg font-bold text-slate-900 dark:text-white block">
-                  {invitation.organizationName ||
-                    invitation.organizationId ||
-                    "Organização Hosanna"}
-                </span>
-                <span className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 block capitalize">
-                  {t("settings.account.profile.role")}:{" "}
-                  <strong className="text-m3-primary">{invitation.role}</strong>
-                </span>
-              </div>
+            <div className="p-4 bg-slate-50 dark:bg-white/5 rounded-xl border border-slate-200/80 dark:border-white/10 text-left">
+              <span className="text-base sm:text-lg font-medium text-slate-900 dark:text-white block">
+                {invitation.organizationName ||
+                  invitation.organizationId ||
+                  "Organização Hosanna"}
+              </span>
+              <span className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1 block">
+                {t("settings.account.profile.role")}:{" "}
+                <strong className="text-blue-600 dark:text-blue-400 font-semibold">{invitation.role}</strong>
+              </span>
             </div>
 
             {invitation.status !== "pending" && (
-              <div className="p-3 bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-300 text-xs rounded-xl border border-amber-200 dark:border-amber-800">
+              <div className="p-3 bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-300 text-xs rounded-lg border border-amber-200 dark:border-amber-800">
                 Estado: <strong>{invitation.status}</strong>.
               </div>
             )}
 
-            <div className="grid grid-cols-2 gap-3 pt-2">
-              <Button
-                variant="outline"
+            <div className="flex items-center justify-between gap-3 pt-2">
+              <button
+                type="button"
                 onClick={handleReject}
-                isLoading={actionLoading === "reject"}
                 disabled={actionLoading !== null}
-                className="h-12 rounded-xl border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/30 dark:hover:text-red-400 hover:border-red-200 transition-all font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer"
+                className="text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:underline py-2 disabled:opacity-50 cursor-pointer"
               >
-                <X className="w-4 h-4" />
-                <span>{t("auth.acceptInvitation.rejectBtn")}</span>
-              </Button>
+                {t("auth.acceptInvitation.rejectBtn")}
+              </button>
 
               <Button
                 variant="primary"
@@ -230,16 +219,15 @@ export const AcceptInvitationPage: React.FC = () => {
                 disabled={
                   actionLoading !== null || invitation.status !== "pending"
                 }
-                className="h-12 rounded-xl bg-m3-primary hover:bg-m3-primary-dark text-white font-bold text-xs uppercase tracking-wider transition-all shadow-lg shadow-m3-primary/20 flex items-center justify-center gap-2 cursor-pointer"
+                className="h-10 sm:h-11 px-6 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm transition-all shadow-none border-0"
               >
-                <Check className="w-4 h-4" />
                 <span>{t("auth.acceptInvitation.acceptBtn")}</span>
               </Button>
             </div>
           </div>
         ) : (
           <div className="py-6 space-y-4 text-center">
-            <div className="w-14 h-14 bg-red-50 text-red-500 dark:bg-red-950/30 rounded-2xl flex items-center justify-center mx-auto">
+            <div className="w-14 h-14 bg-red-50 text-red-500 dark:bg-red-950/30 rounded-full flex items-center justify-center mx-auto">
               <ShieldAlert className="w-7 h-7" />
             </div>
             <p className="text-sm text-slate-600 dark:text-slate-300">

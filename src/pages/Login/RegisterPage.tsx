@@ -3,14 +3,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Button, Input } from "@/src/components/common";
+import { AppLink } from "@/src/components/AppLink";
+import { Button } from "@/src/components/common";
 import { useI18n } from "@/src/lib/i18n";
-import { ArrowRight, CheckCircle2, Lock, Mail, User } from "lucide-react";
+import { CheckCircle2, Eye, EyeOff } from "lucide-react";
 import React, { useRef, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { authClient } from "../../lib/authClient";
 import { posthog } from "../../lib/posthog";
 import LoginLayout from "./Layout";
+import { GoogleTextField } from "./components/GoogleTextField";
 import { PasswordStrengthMeter } from "./components/PasswordStrengthMeter";
 import { SocialAuthButtons } from "./components/SocialAuthButtons";
 import { TurnstileWidget } from "./components/TurnstileWidget";
@@ -23,6 +25,7 @@ export const RegisterPage: React.FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [captchaToken, setCaptchaToken] = useState("");
   const captchaRef = useRef<{ reset: () => void }>(null);
 
@@ -41,7 +44,7 @@ export const RegisterPage: React.FC = () => {
       setErrorMsg(
         t("settings.account.profile.invalidImage")
           ? "Por favor preencha todos os campos."
-          : "",
+          : "Preencha todos os campos.",
       );
       return;
     }
@@ -86,20 +89,22 @@ export const RegisterPage: React.FC = () => {
 
   if (successState) {
     return (
-      <LoginLayout optionalLink="/login" optionalMsg={t("auth.login.title")}>
-        <div className="py-8 flex flex-col items-center text-center animate-in zoom-in-95 duration-500">
-          <div className="relative w-20 h-20 mb-5">
-            <div className="absolute inset-0 bg-emerald-100 dark:bg-emerald-900/40 rounded-full animate-ping opacity-60" />
-            <div className="relative flex items-center justify-center w-20 h-20 bg-emerald-500 text-white rounded-full shadow-lg shadow-emerald-500/30">
-              <CheckCircle2 className="w-10 h-10" />
-            </div>
+      <LoginLayout
+        headerTitle={t("auth.register.successTitle")}
+        headerSubtitle={t("auth.register.successDesc")}
+        optionalLink="/login"
+        optionalMsg={t("auth.register.loginLink")}
+      >
+        <div className="py-4 flex flex-col items-center text-center animate-in zoom-in-95 duration-300">
+          <div className="w-16 h-16 mb-4 flex items-center justify-center bg-emerald-100 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 rounded-full">
+            <CheckCircle2 className="w-8 h-8" />
           </div>
-          <h2 className="text-2xl font-black text-slate-900 dark:text-white mb-2">
-            {t("auth.register.successTitle")}
-          </h2>
-          <p className="text-slate-500 dark:text-slate-400 text-sm font-medium max-w-xs">
-            {t("auth.register.successDesc")}
-          </p>
+          <AppLink
+            to="/login"
+            className="inline-flex items-center justify-center h-10 px-6 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm transition-all"
+          >
+            {t("auth.register.loginLink")}
+          </AppLink>
         </div>
       </LoginLayout>
     );
@@ -107,78 +112,85 @@ export const RegisterPage: React.FC = () => {
 
   return (
     <LoginLayout
-      optionalLink="/login"
-      optionalMsg={
-        t("auth.register.hasAccount") + " " + t("auth.register.loginLink")
-      }
+      headerTitle={t("auth.register.title")}
+      headerSubtitle={t("auth.register.subtitle")}
       errorMsg={errorMsg}
-      compactBranding
     >
-      <form onSubmit={handleSubmit} className="space-y-3.5">
-        <Input
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <GoogleTextField
           label={t("auth.register.nameLabel")}
-          placeholder={t("auth.register.namePlaceholder")}
           value={name}
           onChange={(e) => setName(e.target.value)}
-          icon={<User className="w-4 h-4 opacity-40" />}
-          className="h-11 rounded-xl border-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white focus:border-m3-primary transition-all text-sm"
+          autoComplete="name"
+          autoFocus
         />
 
-        <Input
+        <GoogleTextField
           type="email"
           label={t("auth.register.emailLabel")}
-          placeholder={t("auth.register.emailPlaceholder")}
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          icon={<Mail className="w-4 h-4 opacity-40" />}
-          className="h-11 rounded-xl border-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white focus:border-m3-primary transition-all text-sm"
+          autoComplete="email"
         />
 
-        <div className="space-y-1">
-          <Input
-            type="password"
+        {/* Password inputs: 2-column on larger screens, single column on small */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+          <GoogleTextField
+            type={showPassword ? "text" : "password"}
             label={t("auth.register.passwordLabel")}
-            placeholder={t("auth.register.passwordPlaceholder")}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            icon={<Lock className="w-4 h-4 opacity-40" />}
-            className="h-11 rounded-xl border-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white focus:border-m3-primary transition-all text-sm"
+            autoComplete="new-password"
           />
-          {password.length > 0 && <PasswordStrengthMeter password={password} />}
-        </div>
 
-        <div className="space-y-1">
-          <Input
-            type="password"
+          <GoogleTextField
+            type={showPassword ? "text" : "password"}
             label={t("auth.register.confirmPasswordLabel")}
-            placeholder="••••••••"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
-            icon={<Lock className="w-4 h-4 opacity-40" />}
-            className={`h-11 rounded-xl dark:bg-slate-800 dark:text-white transition-all text-sm ${
-              passwordMismatch
-                ? "border-rose-400 focus:border-rose-500"
-                : "border-slate-200 dark:border-slate-700 focus:border-m3-primary"
-            }`}
+            autoComplete="new-password"
+            error={
+              passwordMismatch ? t("auth.register.passwordMismatch") : undefined
+            }
           />
-          {passwordMismatch && (
-            <p className="text-xs font-semibold text-rose-500 dark:text-rose-400 pl-1 animate-in fade-in">
-              {t("auth.register.passwordMismatch")}
-            </p>
-          )}
         </div>
+
+        {/* Show password toggle checkbox */}
+        <div className="flex items-center justify-between px-0.5">
+          <label className="flex items-center gap-2 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={showPassword}
+              onChange={(e) => setShowPassword(e.target.checked)}
+              className="w-4 h-4 rounded-[4px] border-slate-300 dark:border-slate-600 text-blue-600 focus:ring-blue-500 dark:bg-[#1e1f20] cursor-pointer"
+            />
+            <span className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">
+              Mostrar palavra-passe
+            </span>
+          </label>
+        </div>
+
+        {password.length > 0 && <PasswordStrengthMeter password={password} />}
 
         <TurnstileWidget ref={captchaRef} onVerify={setCaptchaToken} />
 
-        <Button
-          type="submit"
-          variant="primary"
-          className="w-full h-14 bg-m3-primary hover:bg-m3-primary-dark border-0 font-black uppercase tracking-widest text-[10px] text-white mt-2 rounded-[20px] transition-all shadow-xl shadow-m3-primary/20 hover:shadow-m3-primary/40 flex items-center justify-center gap-2 group cursor-pointer"
-          isLoading={isLoading}
-        >
-          <span>{t("auth.register.registerBtn")}</span>
-          <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-        </Button>
+        {/* Actions bar: Sign In instead on left, Next/Submit button on right */}
+        <div className="flex items-center justify-between gap-3 pt-2">
+          <AppLink
+            to="/login"
+            className="text-xs sm:text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline py-2"
+          >
+            {t("auth.register.loginLink")}
+          </AppLink>
+
+          <Button
+            type="submit"
+            isLoading={isLoading}
+            className="h-10 sm:h-11 px-6 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm transition-all shadow-none hover:shadow-xs active:scale-[0.98] border-0"
+          >
+            {t("auth.register.registerBtn")}
+          </Button>
+        </div>
       </form>
 
       <SocialAuthButtons onError={(err) => setErrorMsg(err)} disabled={isLoading} />

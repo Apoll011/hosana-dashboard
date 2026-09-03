@@ -3,21 +3,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { AppLink } from "@/src/components/AppLink";
 import { Button } from "@/src/components/common";
 import { useAppNavigate } from "@/src/hooks/useAppNavigate";
 import { useI18n } from "@/src/lib/i18n";
-import {
-  ArrowRight,
-  KeyRound,
-  MailCheck,
-  RefreshCw,
-  Shield,
-  Smartphone,
-} from "lucide-react";
+import { KeyRound, MailCheck, RefreshCw, Smartphone } from "lucide-react";
 import React, { useRef, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { authClient } from "../../lib/authClient";
 import LoginLayout from "./Layout";
+import { GoogleTextField } from "./components/GoogleTextField";
 
 type TwoFactorMethod = "totp" | "otp" | "backup";
 
@@ -119,87 +114,74 @@ export const TwoFactorPage: React.FC = () => {
     }
   };
 
+  const getSubtitle = () => {
+    if (method === "totp") return t("auth.twoFactor.subtitle");
+    if (method === "otp") return "Introduza o código enviado para o seu e-mail";
+    return t("auth.twoFactor.useBackupCode");
+  };
+
   return (
     <LoginLayout
+      headerTitle={t("auth.twoFactor.title")}
+      headerSubtitle={getSubtitle()}
       errorMsg={errorMsg}
-      optionalLink="/login"
-      optionalMsg={"← " + t("auth.forgotPassword.backToLogin")}
     >
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="flex flex-col items-center mb-1 text-center">
-          <div className="w-12 h-12 bg-m3-primary/10 dark:bg-m3-primary/20 rounded-2xl flex items-center justify-center mb-2 text-m3-primary dark:text-m3-primary-light">
-            <Shield className="w-6 h-6" />
-          </div>
-          <h2 className="font-display font-bold text-lg text-slate-900 dark:text-white">
-            {t("auth.twoFactor.title")}
-          </h2>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-xs leading-relaxed">
-            {method === "totp" && t("auth.twoFactor.subtitle")}
-            {method === "otp" && "Introduza o código enviado para o seu e-mail"}
-            {method === "backup" && t("auth.twoFactor.useBackupCode")}
-          </p>
-        </div>
-
+      <form onSubmit={handleSubmit} className="space-y-5">
         {/* Method selector tabs */}
-        <div className="grid grid-cols-3 gap-1 bg-slate-100 dark:bg-slate-800/80 p-1 rounded-xl border border-slate-200/50 dark:border-slate-700/50">
+        <div className="flex rounded-lg bg-slate-100 dark:bg-white/5 p-1 border border-slate-200/80 dark:border-white/10">
           <button
             type="button"
             onClick={() => handleSwitchMethod("totp")}
-            className={`flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+            className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-md text-xs sm:text-sm font-medium transition-all cursor-pointer ${
               method === "totp"
-                ? "bg-white dark:bg-slate-900 text-m3-primary dark:text-m3-primary-light shadow-sm"
+                ? "bg-white dark:bg-[#1e1f20] text-blue-600 dark:text-blue-400 shadow-xs"
                 : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
             }`}
           >
-            <Smartphone className="w-3.5 h-3.5" />
+            <Smartphone className="w-4 h-4" />
             <span>App</span>
           </button>
           <button
             type="button"
             onClick={() => handleSwitchMethod("otp")}
-            className={`flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+            className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-md text-xs sm:text-sm font-medium transition-all cursor-pointer ${
               method === "otp"
-                ? "bg-white dark:bg-slate-900 text-m3-primary dark:text-m3-primary-light shadow-sm"
+                ? "bg-white dark:bg-[#1e1f20] text-blue-600 dark:text-blue-400 shadow-xs"
                 : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
             }`}
           >
-            <MailCheck className="w-3.5 h-3.5" />
+            <MailCheck className="w-4 h-4" />
             <span>E-mail</span>
           </button>
           <button
             type="button"
             onClick={() => handleSwitchMethod("backup")}
-            className={`flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+            className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-md text-xs sm:text-sm font-medium transition-all cursor-pointer ${
               method === "backup"
-                ? "bg-white dark:bg-slate-900 text-m3-primary dark:text-m3-primary-light shadow-sm"
+                ? "bg-white dark:bg-[#1e1f20] text-blue-600 dark:text-blue-400 shadow-xs"
                 : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
             }`}
           >
-            <KeyRound className="w-3.5 h-3.5" />
+            <KeyRound className="w-4 h-4" />
             <span>{t("auth.twoFactor.backupCodeLabel")}</span>
           </button>
         </div>
 
         {otpSentMsg && method === "otp" && (
-          <div className="p-2.5 rounded-xl bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-medium text-center animate-in fade-in">
+          <div className="p-3 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 text-xs sm:text-sm font-medium text-center border border-emerald-200 dark:border-emerald-800/60 animate-in fade-in">
             {otpSentMsg}
           </div>
         )}
 
         {/* Input section */}
         {method === "backup" ? (
-          <div className="space-y-2">
-            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
-              {t("auth.twoFactor.backupCodeLabel")}
-            </label>
-            <input
-              type="text"
-              placeholder={t("auth.twoFactor.backupCodePlaceholder")}
-              value={backupCode}
-              onChange={(e) => setBackupCode(e.target.value.trim())}
-              className="w-full h-12 px-4 text-center font-mono tracking-widest text-base uppercase rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:border-m3-primary focus:bg-white dark:focus:bg-slate-900 focus:outline-none transition-all"
-            />
-          </div>
+          <GoogleTextField
+            label={t("auth.twoFactor.backupCodeLabel")}
+            placeholder={t("auth.twoFactor.backupCodePlaceholder")}
+            value={backupCode}
+            onChange={(e) => setBackupCode(e.target.value.trim())}
+            autoFocus
+          />
         ) : (
           <OtpInput value={code} onChange={setCode} />
         )}
@@ -210,7 +192,7 @@ export const TwoFactorPage: React.FC = () => {
               type="button"
               onClick={handleSendOtp}
               disabled={isSendingOtp}
-              className="inline-flex items-center gap-1.5 text-xs font-bold text-m3-primary hover:underline dark:text-m3-primary-light disabled:opacity-50 cursor-pointer"
+              className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline disabled:opacity-50 cursor-pointer"
             >
               <RefreshCw
                 className={`w-3.5 h-3.5 ${isSendingOtp ? "animate-spin" : ""}`}
@@ -220,27 +202,34 @@ export const TwoFactorPage: React.FC = () => {
           </div>
         )}
 
-        <div className="flex items-center justify-center pt-1">
-          <label className="flex items-center gap-2 cursor-pointer select-none text-xs text-slate-600 dark:text-slate-400">
+        <div className="flex items-center justify-start pt-1">
+          <label className="flex items-center gap-2 cursor-pointer select-none text-xs sm:text-sm text-slate-600 dark:text-slate-400">
             <input
               type="checkbox"
               checked={trustDevice}
               onChange={(e) => setTrustDevice(e.target.checked)}
-              className="w-4 h-4 rounded border-slate-300 dark:border-slate-700 text-m3-primary focus:ring-m3-primary dark:bg-slate-800 cursor-pointer"
+              className="w-4 h-4 rounded-[4px] border-slate-300 dark:border-slate-600 text-blue-600 focus:ring-blue-500 dark:bg-[#1e1f20] cursor-pointer"
             />
             <span>{t("auth.login.rememberMe")}</span>
           </label>
         </div>
 
-        <Button
-          type="submit"
-          variant="primary"
-          isLoading={isLoading}
-          className="w-full h-14 bg-m3-primary hover:bg-m3-primary-dark border-0 font-black uppercase tracking-widest text-[10px] text-white rounded-[20px] transition-all shadow-xl shadow-m3-primary/20 hover:shadow-m3-primary/40 flex items-center justify-center gap-2 cursor-pointer"
-        >
-          <span>{t("auth.twoFactor.verifyBtn")}</span>
-          <ArrowRight className="w-4 h-4" />
-        </Button>
+        <div className="flex items-center justify-between gap-3 pt-2">
+          <AppLink
+            to="/login"
+            className="text-xs sm:text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline py-2"
+          >
+            {t("auth.forgotPassword.backToLogin")}
+          </AppLink>
+
+          <Button
+            type="submit"
+            isLoading={isLoading}
+            className="h-10 sm:h-11 px-6 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm transition-all shadow-none hover:shadow-xs active:scale-[0.98] border-0"
+          >
+            {t("auth.twoFactor.verifyBtn")}
+          </Button>
+        </div>
       </form>
     </LoginLayout>
   );
@@ -309,7 +298,7 @@ function OtpInput({
   };
 
   return (
-    <div className="flex gap-2 justify-center" onPaste={handlePaste}>
+    <div className="flex gap-2 sm:gap-3 justify-center my-2" onPaste={handlePaste}>
       {Array.from({ length }).map((_, i) => (
         <input
           key={i}
@@ -324,7 +313,7 @@ function OtpInput({
           onChange={(e) => handleChange(i, e)}
           onKeyDown={(e) => handleKey(i, e)}
           onFocus={(e) => e.target.select()}
-          className="w-11 h-14 text-center text-xl font-black rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:border-m3-primary dark:focus:border-m3-primary-light focus:bg-white dark:focus:bg-slate-900 focus:outline-none transition-all shadow-sm"
+          className="w-10 sm:w-12 h-12 sm:h-14 text-center text-lg sm:text-xl font-medium rounded-[4px] border border-slate-300 dark:border-slate-700 bg-transparent text-slate-900 dark:text-white focus:border-blue-600 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-600 dark:focus:ring-blue-400 focus:outline-none transition-all"
         />
       ))}
     </div>
