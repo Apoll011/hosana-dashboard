@@ -284,12 +284,6 @@ export const MainLayout: React.FC = () => {
   );
   const { searchableSongs } = useSearchableSongs(allFolders);
 
-  const songByIdMap = useMemo(() => {
-    const map = new Map<string, Song>();
-    allSongs.forEach((s) => map.set(s.id, s));
-    return map;
-  }, [allSongs]);
-
   const totalSongs = songsQuery.data?.total || 0;
   const totalServices =
     servicesQuery.data?.filter((s) => !s.archived).length || 0;

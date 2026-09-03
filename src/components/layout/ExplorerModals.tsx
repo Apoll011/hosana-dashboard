@@ -241,17 +241,6 @@ const AdvancedFilterPanel: React.FC<AdvancedFilterPanelProps> = ({
     setDraft("");
   }, []);
 
-  const activeCount = [
-    activeTags.length > 0,
-    !!activeKey,
-    !!activeFolder,
-    // Count other field clauses in draft
-    draft.trim() &&
-      !draft.trim().startsWith("tags:") &&
-      !draft.trim().startsWith("key:") &&
-      !draft.trim().startsWith("folder:"),
-  ].filter(Boolean).length;
-
   return (
     <Modal
       isOpen={isOpen}
