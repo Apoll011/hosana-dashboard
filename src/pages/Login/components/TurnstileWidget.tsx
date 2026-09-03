@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, {
+import {
   forwardRef,
   useEffect,
   useImperativeHandle,
@@ -118,7 +118,7 @@ export const TurnstileWidget = forwardRef<
       className={`transition-all duration-300 flex justify-center w-full overflow-hidden ${
         requiresInteraction
           ? "my-3 max-h-24 opacity-100"
-          : "max-h-0 opacity-0 pointer-events-none -my-0"
+          : "max-h-0 opacity-0 pointer-events-none my-0"
       }`}
       aria-hidden={!requiresInteraction}
     >
