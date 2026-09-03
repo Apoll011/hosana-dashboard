@@ -46,6 +46,7 @@ export interface ParsedSong extends Song {
 }
 
 export interface SerchableSong {
+  id: string;
   title: string;
   subtitle?: string;
   artist: string;
@@ -67,6 +68,8 @@ export interface SerchableSong {
   duration?: number;
   youtube?: string;
 }
+
+export type SearchableSong = SerchableSong;
 
 export interface SongsResponse {
   songs: Song[];
