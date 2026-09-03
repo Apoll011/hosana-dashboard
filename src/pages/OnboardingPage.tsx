@@ -18,7 +18,6 @@ import {
   Moon,
   PlusCircle,
   Sun,
-  User,
   XCircle,
 } from "lucide-react";
 import React, { useEffect, useState } from "react";
@@ -52,18 +51,14 @@ export const OnboardingPage: React.FC = () => {
   const { t, language } = useI18n();
   const { hasStarted, pendingAction, refresh, startCheckout } =
     useSubscription();
-  const [mode, setMode] = useState<"choose" | "create" | "pending" | "trial">(
-    "choose",
-  );
+  const [mode, setMode] = useState<"choose" | "create" | "trial">("choose");
   const [orgName, setOrgName] = useState("");
   const [orgSlug, setOrgSlug] = useState("");
   const [slugStatus, setSlugStatus] = useState<
     "idle" | "checking" | "available" | "taken"
   >("idle");
-  const [searchSlug, setSearchSlug] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
-  const [pendingOrgName, setPendingOrgName] = useState("");
 
   // Check slug availability with debounce
   useEffect(() => {
@@ -270,7 +265,6 @@ export const OnboardingPage: React.FC = () => {
 
   const getHeaderTitle = () => {
     if (mode === "create") return t("onboarding.createOrgTab");
-    if (mode === "pending") return "Aprovação Pendente";
     if (mode === "trial") return t("onboarding.trial.title");
     return "Hosanna Studio";
   };
@@ -348,52 +342,6 @@ export const OnboardingPage: React.FC = () => {
             <div className="mb-5 p-3 rounded-lg bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800/60 text-red-800 dark:text-red-300 text-xs sm:text-sm font-medium flex items-start gap-2.5 animate-in fade-in duration-200">
               <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-red-600 dark:text-red-400" />
               <span className="flex-1 leading-snug">{errorMsg}</span>
-            </div>
-          )}
-
-          {/* Mode: Pending */}
-          {mode === "pending" && (
-            <div className="text-center space-y-5">
-              <div className="w-16 h-16 bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 rounded-full flex items-center justify-center mx-auto shadow-xs">
-                <MailCheck className="w-8 h-8" />
-              </div>
-              <p className="text-slate-600 dark:text-slate-400 text-sm sm:text-[15px]">
-                O seu pedido para aderir à organização{" "}
-                <strong className="text-slate-900 dark:text-white">
-                  {pendingOrgName}
-                </strong>{" "}
-                aguarda aprovação de um administrador.
-              </p>
-
-              <div className="bg-slate-50 dark:bg-white/5 border border-slate-200/80 dark:border-white/10 rounded-xl p-4 text-left space-y-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-300 font-medium">
-                    <User className="w-5 h-5" />
-                  </div>
-                  <div className="overflow-hidden">
-                    <p className="text-sm font-medium text-slate-900 dark:text-white truncate">
-                      {user?.name}
-                    </p>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
-                      {user?.email}
-                    </p>
-                  </div>
-                </div>
-                <div className="text-xs text-amber-700 dark:text-amber-400 font-medium bg-amber-50 dark:bg-amber-950/40 rounded-md py-1 px-2.5 inline-block">
-                  Estado: Em análise
-                </div>
-              </div>
-
-              <div className="pt-2">
-                <Button
-                  variant="outline"
-                  className="w-full h-10 sm:h-11 rounded-full border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5 font-medium text-sm"
-                  onClick={() => logout()}
-                >
-                  <LogOut className="w-4 h-4 mr-2" />
-                  {t("sidebar.logout")}
-                </Button>
-              </div>
             </div>
           )}
 

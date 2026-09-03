@@ -118,18 +118,6 @@ export const SongsPage: React.FC<SongsPageProps> = ({
     selectedKey ?? (context.selectedKey as string | null) ?? "";
   const actualSelectedTag =
     selectedTag ?? (context.selectedTag as string | null) ?? "";
-  const actualSearchFields = externalSearchFields ??
-    (context.searchFields as {
-      title: boolean;
-      artist: boolean;
-      content: boolean;
-      tags: boolean;
-    } | null) ?? {
-      title: true,
-      artist: true,
-      content: true,
-      tags: true,
-    };
 
   // Search, Filtering, Pagination, Sorting State
   const [internalSearchQuery, setInternalSearchQuery] = useState("");
