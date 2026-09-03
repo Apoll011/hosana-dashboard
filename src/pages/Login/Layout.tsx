@@ -1,3 +1,8 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { AppLink } from "@/src/components/AppLink";
 import { AlertCircle, CheckCircle2, Moon, Sun } from "lucide-react";
 import React from "react";
@@ -7,6 +12,8 @@ import { LanguageSelector } from "./components/LanguageSelector";
 
 interface LoginLayoutProps {
   children: React.ReactNode;
+  headerTitle?: string;
+  headerSubtitle?: string;
   redirectMessage?: string;
   errorMsg?: string;
   optionalLink?: string;
@@ -17,102 +24,148 @@ interface LoginLayoutProps {
 
 export default function LoginLayout({
   children,
+  headerTitle,
+  headerSubtitle,
   redirectMessage,
   errorMsg,
   optionalLink,
   optionalMsg,
-  titleMb = 6,
-  compactBranding = false,
 }: LoginLayoutProps) {
   const { darkMode, toggleDarkMode } = useTheme();
-  const mbClass = titleMb === 2 ? "mb-2" : titleMb === 4 ? "mb-3" : "mb-4";
 
   return (
-    <div className="min-h-screen w-full flex flex-col items-center justify-center p-3 sm:p-6 md:p-8 relative overflow-y-auto font-sans bg-slate-50 dark:bg-slate-950 transition-colors duration-500">
-      {/* Background Image */}
-      <div className="fixed inset-0 z-0 pointer-events-none">
+    <div className="min-h-screen w-full flex flex-col justify-between relative overflow-x-hidden font-sans text-slate-900 dark:text-slate-100 antialiased selection:bg-blue-500/20">
+      {/* Dynamic Ambient Background Image with smooth subtle overlay */}
+      <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
         <img
           src={bg}
           alt="Background"
-          className="w-full h-full object-cover dark:opacity-40 transition-opacity duration-500"
+          className="w-full h-full object-cover scale-105 opacity-35 dark:opacity-25 transition-all duration-700 blur-[3px]"
           referrerPolicy="no-referrer"
         />
-        <div className="absolute inset-0 bg-black/40 dark:bg-black/70 backdrop-blur-[2px] transition-colors duration-500" />
+        {/* Soft gradient wash over the image for perfect contrast and readability */}
+        <div className="absolute inset-0 bg-gradient-to-b from-slate-100/70 via-slate-100/85 to-slate-200/95 dark:from-[#131314]/85 dark:via-[#131314]/92 dark:to-[#131314]/98 transition-colors duration-500" />
       </div>
 
-      {/* Top-right controls: Language selector + Dark mode toggle */}
-      <div className="fixed top-4 right-4 z-30 flex items-center gap-2">
-        <LanguageSelector />
-        <button
-          type="button"
-          onClick={toggleDarkMode}
-          aria-label="Alternar tema"
-          className="p-2.5 rounded-full bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border border-slate-200/80 dark:border-slate-800 text-slate-700 dark:text-slate-200 hover:scale-110 active:scale-95 shadow-lg transition-all duration-200"
-        >
-          {darkMode ? (
-            <Sun className="w-5 h-5 text-amber-400" />
-          ) : (
-            <Moon className="w-5 h-5 text-slate-700" />
-          )}
-        </button>
-      </div>
-
-      <div className="relative max-w-md sm:max-w-lg w-full bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-slate-200/80 dark:border-slate-800/80 rounded-3xl sm:rounded-4xl shadow-2xl shadow-black/30 p-5 sm:p-7 transition-all duration-300 z-20 my-auto max-h-[92vh] flex flex-col overflow-y-auto scrollbar-thin">
-        {/* Branding */}
-        <div
-          className={`flex flex-col items-center text-center ${mbClass} select-none shrink-0`}
-        >
-          <div
-            className={`
-              ${compactBranding ? "w-12 h-12 rounded-xl mb-1.5" : "w-14 h-14 sm:w-16 sm:h-16 rounded-[18px] mb-2 sm:mb-3"}
-              flex items-center justify-center
-              border border-slate-100 dark:border-slate-800 shadow-sm
-              transition-transform
-              hover:scale-105 hover:rotate-2
-            `}
-          >
+      {/* Top action header: Language selector & Theme Toggle */}
+      <header className="w-full px-4 sm:px-8 pt-4 pb-2 flex items-center justify-between z-20 shrink-0">
+        <div className="flex items-center gap-2">
+          {/* Small brand badge */}
+          <div className="flex items-center gap-2 select-none px-3 py-1.5 rounded-full bg-white/70 dark:bg-[#1e1f20]/70 backdrop-blur-md border border-slate-200/60 dark:border-white/10 shadow-xs">
             <img
               src="/favicon.png"
               alt="Hosanna Studio"
-              className={`${compactBranding ? "w-12 h-12 rounded-xl" : "w-14 h-14 sm:w-16 sm:h-16 rounded-[18px]"} object-contain`}
+              className="w-5 h-5 object-contain rounded-md"
             />
+            <span className="font-semibold text-xs sm:text-sm tracking-tight text-slate-800 dark:text-slate-200">
+              Hosanna Studio
+            </span>
           </div>
-          <h1
-            className={`font-display font-black tracking-tighter text-slate-900 dark:text-white ${compactBranding ? "text-lg sm:text-xl" : "text-xl sm:text-2xl"}`}
-          >
-            Hosanna Studio
-          </h1>
         </div>
 
-        {redirectMessage && (
-          <div className="mb-3 p-2.5 rounded-xl bg-emerald-500/10 dark:bg-emerald-500/20 border border-emerald-500/20 dark:border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-xs font-semibold flex items-center gap-2 animate-in fade-in slide-in-from-top-2 shrink-0">
-            <CheckCircle2 className="w-4 h-4 shrink-0" />
-            <span>{redirectMessage}</span>
-          </div>
-        )}
-
-        {errorMsg && (
-          <div
-            className={`mb-3 p-3 rounded-xl border text-xs font-semibold flex items-start gap-2.5 animate-in fade-in slide-in-from-top-2 bg-rose-500/10 dark:bg-rose-500/20 border-rose-500/20 dark:border-rose-500/30 text-rose-600 dark:text-rose-400 shrink-0`}
+        <div className="flex items-center gap-2">
+          <LanguageSelector />
+          <button
+            type="button"
+            onClick={toggleDarkMode}
+            aria-label="Alternar tema"
+            className="w-9 h-9 flex items-center justify-center rounded-full bg-white/70 dark:bg-[#1e1f20]/70 backdrop-blur-md border border-slate-200/60 dark:border-white/10 text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-white/15 active:scale-95 transition-all shadow-xs cursor-pointer"
           >
-            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
-            <span>{errorMsg}</span>
-          </div>
-        )}
+            {darkMode ? (
+              <Sun className="w-4 h-4 text-amber-300" />
+            ) : (
+              <Moon className="w-4 h-4 text-slate-600" />
+            )}
+          </button>
+        </div>
+      </header>
 
-        <div className="flex-1 overflow-y-auto px-0.5">{children}</div>
+      {/* Main Center Stage */}
+      <main className="flex-1 w-full flex items-center justify-center p-4 sm:p-6 md:p-8 z-10">
+        {/* Google-style authentication card container with refined backdrop blur and shadow */}
+        <div className="w-full max-w-[448px] sm:max-w-[496px] md:max-w-[540px] bg-white/95 dark:bg-[#1e1f20]/95 backdrop-blur-xl sm:border sm:border-slate-200/80 dark:sm:border-[#303134]/90 rounded-2xl sm:rounded-[28px] shadow-lg shadow-black/5 dark:shadow-black/40 px-6 py-8 sm:p-10 md:p-12 transition-all">
+          {/* Header Brand & Titles */}
+          <div className="flex flex-col items-center text-center mb-7 sm:mb-8 select-none">
+            <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center mb-3 bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/10 shadow-xs">
+              <img
+                src="/favicon.png"
+                alt="Hosanna Studio"
+                className="w-8 h-8 sm:w-9 sm:h-9 object-contain"
+              />
+            </div>
 
-        {optionalLink && optionalMsg && (
-          <div className="mt-4 pt-2 text-center shrink-0">
-            <AppLink
-              to={optionalLink}
-              className="inline-flex items-center gap-1.5 text-xs font-bold text-m3-primary hover:underline dark:text-m3-primary-light"
-            >
-              <span>{optionalMsg}</span>
-            </AppLink>
+            <h1 className="text-2xl sm:text-[26px] font-normal tracking-tight text-slate-900 dark:text-slate-100 font-sans">
+              {headerTitle || "Hosanna Studio"}
+            </h1>
+
+            {headerSubtitle && (
+              <p className="mt-1.5 text-sm sm:text-[15px] text-slate-600 dark:text-slate-400 font-normal max-w-sm">
+                {headerSubtitle}
+              </p>
+            )}
           </div>
-        )}
-      </div>
+
+          {/* Feedback messages */}
+          {redirectMessage && (
+            <div className="mb-5 p-3 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 text-emerald-800 dark:text-emerald-300 text-xs sm:text-sm font-medium flex items-center gap-2.5 animate-in fade-in duration-200">
+              <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
+              <span>{redirectMessage}</span>
+            </div>
+          )}
+
+          {errorMsg && (
+            <div className="mb-5 p-3 rounded-lg bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800/60 text-red-800 dark:text-red-300 text-xs sm:text-sm font-medium flex items-start gap-2.5 animate-in fade-in duration-200">
+              <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-red-600 dark:text-red-400" />
+              <span className="flex-1 leading-snug">{errorMsg}</span>
+            </div>
+          )}
+
+          {/* Main Form/Content Body */}
+          <div className="w-full">{children}</div>
+
+          {/* Bottom helper link if specified */}
+          {optionalLink && optionalMsg && (
+            <div className="mt-8 pt-4 border-t border-slate-100 dark:border-[#303134] text-center">
+              <AppLink
+                to={optionalLink}
+                className="text-xs sm:text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 hover:underline transition-colors"
+              >
+                <span>{optionalMsg}</span>
+              </AppLink>
+            </div>
+          )}
+        </div>
+      </main>
+
+      {/* Footer standard Google style */}
+      <footer className="w-full max-w-[540px] mx-auto px-6 py-4 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-500 dark:text-slate-400 shrink-0 z-10">
+        <div className="flex items-center gap-2">
+          <span>Hosanna Studio &copy; {new Date().getFullYear()}</span>
+        </div>
+        <div className="flex items-center gap-4 sm:gap-6">
+          <a
+            href="#"
+            onClick={(e) => e.preventDefault()}
+            className="hover:text-slate-800 dark:hover:text-slate-200 transition-colors"
+          >
+            Ajuda
+          </a>
+          <a
+            href="#"
+            onClick={(e) => e.preventDefault()}
+            className="hover:text-slate-800 dark:hover:text-slate-200 transition-colors"
+          >
+            Privacidade
+          </a>
+          <a
+            href="#"
+            onClick={(e) => e.preventDefault()}
+            className="hover:text-slate-800 dark:hover:text-slate-200 transition-colors"
+          >
+            Termos
+          </a>
+        </div>
+      </footer>
     </div>
   );
 }

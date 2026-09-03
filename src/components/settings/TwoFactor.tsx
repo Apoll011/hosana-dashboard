@@ -40,7 +40,7 @@ export const TwoFactorSection: React.FC = () => {
           }),
           "error",
         );
-      } else if (data && "totpURI" in data) {
+      } else if (data?.method === "totp") {
         setTotpURI((data as { totpURI: string }).totpURI);
         setBackupCodes((data as { backupCodes?: string[] }).backupCodes || []);
         setStep("setup");

@@ -21,6 +21,7 @@ import { useSync } from "../../contexts/SyncContext";
 import { authClient } from "../../lib/authClient";
 import { ActiveSessionsSection } from "./ActiveSession";
 import { compressImage, getRoleBadge } from "./settingsUtils";
+import { SocialAccountsSection } from "./SocialAccounts";
 import { TwoFactorSection } from "./TwoFactor";
 
 export const AccountTab: React.FC<{ active: boolean }> = ({ active }) => {
@@ -418,6 +419,9 @@ export const AccountTab: React.FC<{ active: boolean }> = ({ active }) => {
           </p>
         )}
       </div>
+
+      {/* Social Accounts Section */}
+      <SocialAccountsSection />
 
       {/* Two-Factor Authentication Section */}
       <TwoFactorSection />

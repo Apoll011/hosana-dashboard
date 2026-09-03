@@ -8,6 +8,7 @@ import React, {
   useEffect,
   useImperativeHandle,
   useRef,
+  useState,
 } from "react";
 import { useTheme } from "../../../contexts/ThemeContext";
 
@@ -41,6 +42,10 @@ export const TurnstileWidget = forwardRef<
   const containerRef = useRef<HTMLDivElement>(null);
   const widgetIdRef = useRef<string | null>(null);
   const { darkMode } = useTheme();
+  // Initially false so the widget takes 0 height and is invisible.
+  // When Cloudflare requires user interaction, 'before-interactive-callback' triggers
+  // and we reveal the widget.
+  const [requiresInteraction, setRequiresInteraction] = useState(false);
 
   const renderWidget = () => {
     if (!containerRef.current || !window.turnstile) return;
@@ -51,7 +56,19 @@ export const TurnstileWidget = forwardRef<
     widgetIdRef.current = window.turnstile.render(containerRef.current, {
       sitekey: TURNSTILE_SITE_KEY,
       theme: darkMode ? "dark" : "light",
-      callback: onVerify,
+      size: "flexible",
+      callback: (token: string) => {
+        setRequiresInteraction(false);
+        onVerify(token);
+      },
+      "before-interactive-callback": () => {
+        // Turnstile requires interactive challenge / user input
+        setRequiresInteraction(true);
+      },
+      "after-interactive-callback": () => {
+        // Interactive challenge finished
+        setRequiresInteraction(false);
+      },
       "expired-callback": () => {
         onExpire?.();
       },
@@ -89,6 +106,7 @@ export const TurnstileWidget = forwardRef<
 
   useImperativeHandle(ref, () => ({
     reset: () => {
+      setRequiresInteraction(false);
       if (widgetIdRef.current && window.turnstile) {
         window.turnstile.reset(widgetIdRef.current);
       }
@@ -96,8 +114,15 @@ export const TurnstileWidget = forwardRef<
   }));
 
   return (
-    <div className="flex justify-center my-2">
-      <div ref={containerRef} />
+    <div
+      className={`transition-all duration-300 flex justify-center w-full overflow-hidden ${
+        requiresInteraction
+          ? "my-3 max-h-24 opacity-100"
+          : "max-h-0 opacity-0 pointer-events-none -my-0"
+      }`}
+      aria-hidden={!requiresInteraction}
+    >
+      <div ref={containerRef} className="w-full flex justify-center" />
     </div>
   );
 });

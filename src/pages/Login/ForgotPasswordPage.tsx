@@ -3,19 +3,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Button, Input } from "@/src/components/common";
+import { AppLink } from "@/src/components/AppLink";
+import { Button } from "@/src/components/common";
 import { useAppNavigate } from "@/src/hooks/useAppNavigate";
 import { useI18n } from "@/src/lib/i18n";
-import {
-  ArrowRight,
-  CheckCircle2,
-  KeyRound,
-  Mail,
-  ShieldCheck,
-} from "lucide-react";
+import { CheckCircle2, Mail, ShieldCheck } from "lucide-react";
 import React, { useRef, useState } from "react";
 import { authClient } from "../../lib/authClient";
 import LoginLayout from "./Layout";
+import { GoogleTextField } from "./components/GoogleTextField";
 import { TurnstileWidget } from "./components/TurnstileWidget";
 
 export const ForgotPasswordPage: React.FC = () => {
@@ -84,21 +80,21 @@ export const ForgotPasswordPage: React.FC = () => {
   if (sent) {
     return (
       <LoginLayout
+        headerTitle={t("auth.forgotPassword.emailSentTitle")}
+        headerSubtitle={t("auth.forgotPassword.emailSentDesc")}
         optionalLink="/login"
-        optionalMsg={"← " + t("auth.forgotPassword.backToLogin")}
+        optionalMsg={t("auth.forgotPassword.backToLogin")}
       >
-        <div className="py-8 flex flex-col items-center text-center gap-4 animate-in zoom-in-95 duration-500">
-          <div className="w-20 h-20 bg-emerald-100 dark:bg-emerald-900/40 rounded-full flex items-center justify-center">
-            <CheckCircle2 className="w-10 h-10 text-emerald-500 dark:text-emerald-400" />
+        <div className="py-4 flex flex-col items-center text-center animate-in zoom-in-95 duration-300">
+          <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-950/50 rounded-full flex items-center justify-center text-emerald-600 dark:text-emerald-400 mb-6">
+            <CheckCircle2 className="w-8 h-8" />
           </div>
-          <div>
-            <h2 className="text-xl font-black text-slate-900 dark:text-white">
-              {t("auth.forgotPassword.emailSentTitle")}
-            </h2>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mt-2 max-w-xs mx-auto leading-relaxed">
-              {t("auth.forgotPassword.emailSentDesc")}
-            </p>
-          </div>
+          <AppLink
+            to="/login"
+            className="inline-flex items-center justify-center h-10 px-6 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm transition-all"
+          >
+            {t("auth.forgotPassword.backToLogin")}
+          </AppLink>
         </div>
       </LoginLayout>
     );
@@ -106,71 +102,66 @@ export const ForgotPasswordPage: React.FC = () => {
 
   return (
     <LoginLayout
-      optionalLink="/login"
-      optionalMsg={"← " + t("auth.forgotPassword.backToLogin")}
+      headerTitle={t("auth.forgotPassword.title")}
+      headerSubtitle={t("auth.forgotPassword.subtitle")}
       errorMsg={errorMsg}
     >
-      <div className="flex flex-col items-center mb-4">
-        <div className="w-14 h-14 bg-m3-primary/10 dark:bg-m3-primary/20 rounded-2xl flex items-center justify-center mb-3">
-          <KeyRound className="w-7 h-7 text-m3-primary dark:text-m3-primary-light" />
-        </div>
-        <h2 className="font-display font-black text-xl text-slate-900 dark:text-white">
-          {t("auth.forgotPassword.title")}
-        </h2>
-        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 text-center max-w-xs">
-          {t("auth.forgotPassword.subtitle")}
-        </p>
-      </div>
-
-      {/* Mode Switcher */}
-      <div className="flex rounded-xl bg-slate-100 dark:bg-slate-800/80 p-1 mb-4 border border-slate-200/60 dark:border-slate-700/60">
+      {/* Mode switcher tabs styled like Google material chips */}
+      <div className="flex rounded-lg bg-slate-100 dark:bg-white/5 p-1 mb-5 border border-slate-200/80 dark:border-white/10">
         <button
           type="button"
           onClick={() => setMode("link")}
-          className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+          className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-md text-xs sm:text-sm font-medium transition-all cursor-pointer ${
             mode === "link"
-              ? "bg-white dark:bg-slate-900 text-m3-primary dark:text-m3-primary-light shadow-sm"
+              ? "bg-white dark:bg-[#1e1f20] text-blue-600 dark:text-blue-400 shadow-xs"
               : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
           }`}
         >
-          <Mail className="w-3.5 h-3.5" />
-          <span>Link</span>
+          <Mail className="w-4 h-4" />
+          <span>Email link</span>
         </button>
         <button
           type="button"
           onClick={() => setMode("code")}
-          className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+          className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-md text-xs sm:text-sm font-medium transition-all cursor-pointer ${
             mode === "code"
-              ? "bg-white dark:bg-slate-900 text-m3-primary dark:text-m3-primary-light shadow-sm"
+              ? "bg-white dark:bg-[#1e1f20] text-blue-600 dark:text-blue-400 shadow-xs"
               : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
           }`}
         >
-          <ShieldCheck className="w-3.5 h-3.5" />
-          <span>OTP</span>
+          <ShieldCheck className="w-4 h-4" />
+          <span>Código OTP</span>
         </button>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        <Input
+        <GoogleTextField
           type="email"
           label={t("auth.forgotPassword.emailLabel")}
-          placeholder="admin@hosanna.org"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          icon={<Mail className="w-4 h-4 opacity-40" />}
-          className="h-11 rounded-xl border-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white focus:border-m3-primary transition-all text-sm"
+          autoComplete="email"
+          autoFocus
         />
+
         <TurnstileWidget ref={captchaRef} onVerify={setCaptchaToken} />
 
-        <Button
-          type="submit"
-          variant="primary"
-          isLoading={isLoading}
-          className="w-full h-14 bg-m3-primary hover:bg-m3-primary-dark border-0 font-black uppercase tracking-widest text-[10px] text-white rounded-[20px] transition-all shadow-xl shadow-m3-primary/20 hover:shadow-m3-primary/40 flex items-center justify-center gap-2 group cursor-pointer"
-        >
-          <span>{t("auth.forgotPassword.sendLinkBtn")}</span>
-          <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-        </Button>
+        <div className="flex items-center justify-between gap-3 pt-2">
+          <AppLink
+            to="/login"
+            className="text-xs sm:text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline py-2"
+          >
+            {t("auth.forgotPassword.backToLogin")}
+          </AppLink>
+
+          <Button
+            type="submit"
+            isLoading={isLoading}
+            className="h-10 sm:h-11 px-6 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm transition-all shadow-none hover:shadow-xs active:scale-[0.98] border-0"
+          >
+            {t("auth.forgotPassword.sendLinkBtn")}
+          </Button>
+        </div>
       </form>
     </LoginLayout>
   );
