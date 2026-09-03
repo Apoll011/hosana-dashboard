@@ -1441,6 +1441,9 @@ export const es: typeof pt = {
     orgNamePlaceholder: "Ej: Iglesia Hosanna Madrid",
     slugLabel: "Identificador (URL)",
     slugPlaceholder: "iglesia-hosanna-madrid",
+    slugTaken: "Este identificador ya está en uso.",
+    slugAvailable: "Identificador disponible.",
+    checkingSlug: "Comprobando disponibilidad...",
     createOrgBtn: "Crear y Continuar",
     creatingOrgBtn: "Creando organización...",
     joinInviteDesc:
