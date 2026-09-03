@@ -408,7 +408,8 @@ export const en: typeof pt = {
         discordDesc: "Use your Discord account to sign in.",
         providerDesc: "Use your {name} account to sign in.",
         unlinkConfirmTitle: "Disconnect Social Account",
-        unlinkConfirmMessage: "Are you sure you want to disconnect your {provider} account? You will not be able to sign in with it unless you reconnect it.",
+        unlinkConfirmMessage:
+          "Are you sure you want to disconnect your {provider} account? You will not be able to sign in with it unless you reconnect it.",
         unlinkSuccess: "Account disconnected successfully.",
         unlinkError: "Error disconnecting account: {error}",
         linkError: "Error connecting account: {error}",

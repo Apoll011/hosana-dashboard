@@ -92,7 +92,10 @@ export const VerifyEmailPage: React.FC = () => {
                 {t("auth.forgotPassword.emailSentTitle")}
               </p>
             ) : (
-              <form onSubmit={handleResend} className="flex flex-col sm:flex-row gap-2.5">
+              <form
+                onSubmit={handleResend}
+                className="flex flex-col sm:flex-row gap-2.5"
+              >
                 <div className="flex-1">
                   <GoogleTextField
                     type="email"
@@ -174,7 +177,10 @@ export const VerifyEmailPage: React.FC = () => {
           <div className="w-16 h-16 bg-amber-100 dark:bg-amber-950/50 rounded-full flex items-center justify-center text-amber-600 dark:text-amber-400 mb-2">
             <Clock className="w-8 h-8" />
           </div>
-          <form onSubmit={handleResend} className="w-full flex flex-col sm:flex-row gap-2.5 mt-2">
+          <form
+            onSubmit={handleResend}
+            className="w-full flex flex-col sm:flex-row gap-2.5 mt-2"
+          >
             <div className="flex-1">
               <GoogleTextField
                 type="email"

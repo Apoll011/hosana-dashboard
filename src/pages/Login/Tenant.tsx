@@ -202,7 +202,9 @@ export const RegisterOrganizationPage: React.FC = () => {
                   label={t("onboarding.slugLabel")}
                   value={orgSlug}
                   onChange={(e) =>
-                    setOrgSlug(e.target.value.toLowerCase().replace(/\s+/g, "-"))
+                    setOrgSlug(
+                      e.target.value.toLowerCase().replace(/\s+/g, "-"),
+                    )
                   }
                   helperText="hosanna.app/slug"
                 />
@@ -246,7 +248,9 @@ export const RegisterOrganizationPage: React.FC = () => {
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   autoComplete="new-password"
                   error={
-                    passwordMismatch ? t("auth.register.passwordMismatch") : undefined
+                    passwordMismatch
+                      ? t("auth.register.passwordMismatch")
+                      : undefined
                   }
                 />
 
@@ -282,7 +286,8 @@ export const RegisterOrganizationPage: React.FC = () => {
                     htmlFor="org-terms"
                     className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-snug cursor-pointer select-none"
                   >
-                    Concordo com os Termos de Serviço e a Política de Privacidade.
+                    Concordo com os Termos de Serviço e a Política de
+                    Privacidade.
                   </label>
                 </div>
               </div>

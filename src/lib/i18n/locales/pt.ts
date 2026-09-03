@@ -403,14 +403,16 @@ export const pt = {
         notConnected: "Não associada",
         connect: "Associar Conta",
         disconnect: "Desassociar",
-        googleDesc: "Utilize a sua conta Google para iniciar sessão com um clique.",
+        googleDesc:
+          "Utilize a sua conta Google para iniciar sessão com um clique.",
         githubDesc: "Utilize a sua conta GitHub para iniciar sessão.",
         appleDesc: "Utilize o seu Apple ID para iniciar sessão.",
         microsoftDesc: "Utilize a sua conta Microsoft para iniciar sessão.",
         discordDesc: "Utilize a sua conta Discord para iniciar sessão.",
         providerDesc: "Utilize a sua conta {name} para iniciar sessão.",
         unlinkConfirmTitle: "Desassociar Conta Social",
-        unlinkConfirmMessage: "Tem a certeza que pretende desassociar a sua conta {provider}? Não poderá iniciar sessão com ela a menos que volte a associar.",
+        unlinkConfirmMessage:
+          "Tem a certeza que pretende desassociar a sua conta {provider}? Não poderá iniciar sessão com ela a menos que volte a associar.",
         unlinkSuccess: "Conta desassociada com sucesso.",
         unlinkError: "Erro ao desassociar conta: {error}",
         linkError: "Erro ao associar conta: {error}",

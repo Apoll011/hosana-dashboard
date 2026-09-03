@@ -173,7 +173,10 @@ export const LoginPage: React.FC = () => {
         </div>
       </form>
 
-      <SocialAuthButtons onError={(err) => setErrorMsg(err)} disabled={isLoading} />
+      <SocialAuthButtons
+        onError={(err) => setErrorMsg(err)}
+        disabled={isLoading}
+      />
     </LoginLayout>
   );
 };

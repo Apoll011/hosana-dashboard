@@ -166,7 +166,9 @@ export const AcceptInvitationPage: React.FC = () => {
   return (
     <LoginLayout
       headerTitle={t("auth.acceptInvitation.title")}
-      headerSubtitle={invitation ? `${t("auth.acceptInvitation.invitedTo")}` : undefined}
+      headerSubtitle={
+        invitation ? `${t("auth.acceptInvitation.invitedTo")}` : undefined
+      }
       errorMsg={errorMsg}
       redirectMessage={successMsg}
     >
@@ -192,7 +194,9 @@ export const AcceptInvitationPage: React.FC = () => {
               </span>
               <span className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1 block">
                 {t("settings.account.profile.role")}:{" "}
-                <strong className="text-blue-600 dark:text-blue-400 font-semibold">{invitation.role}</strong>
+                <strong className="text-blue-600 dark:text-blue-400 font-semibold">
+                  {invitation.role}
+                </strong>
               </span>
             </div>
 
