@@ -3,8 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { parseSong } from "@/src/api/songs";
 import { useI18n } from "@/src/lib/i18n";
-import { GetSongsParams, Song } from "@/src/types";
+import { Folder, GetSongsParams, SearchableSong, Song } from "@/src/types";
+import { parsedSongToSearchableSong } from "@/src/utils";
 import { useCallback, useEffect, useState } from "react";
 import { useSync } from "../contexts/SyncContext";
 import {
@@ -594,5 +596,79 @@ export function useSong(id: string | null) {
     isError: false,
     error: null,
     refetch: async () => {},
+  };
+}
+
+let cachedSearchableSongs: SearchableSong[] | null = null;
+let lastSearchableRawHash: string = "";
+
+/**
+ * Retrieves all songs converted into SerchableSong (SearchableSong) format,
+ * reactive to RxDB database changes with memoized conversion for blazing fast performance.
+ */
+export function useSearchableSongs(folders: Folder[] = []) {
+  const [searchableSongs, setSearchableSongs] = useState<SearchableSong[]>(
+    () => cachedSearchableSongs ?? [],
+  );
+  const [isLoading, setIsLoading] = useState(
+    () => cachedSearchableSongs === null,
+  );
+
+  useEffect(() => {
+    let isSubscribed = true;
+    let rxSub: { unsubscribe: () => void } | null = null;
+
+    async function subscribe() {
+      try {
+        const db = await getDatabase();
+        if (!isSubscribed) return;
+
+        const query = db.songs.find({
+          selector: {
+            isDeleted: { $ne: true },
+          },
+        });
+
+        rxSub = query.$.subscribe((docs) => {
+          if (!isSubscribed) return;
+          const rawItems = docs.map((d) => d.toJSON() as Song);
+
+          // Fast check if items changed based on IDs and update timestamps
+          const currentHash = rawItems
+            .map((s) => `${s.id}:${s.updatedAt}`)
+            .join("|");
+          if (cachedSearchableSongs && currentHash === lastSearchableRawHash) {
+            setSearchableSongs(cachedSearchableSongs);
+            setIsLoading(false);
+            return;
+          }
+
+          const converted = rawItems.map((song) => {
+            const parsed = parseSong(song, folders);
+            return parsedSongToSearchableSong(parsed);
+          });
+
+          cachedSearchableSongs = converted;
+          lastSearchableRawHash = currentHash;
+          setSearchableSongs(converted);
+          setIsLoading(false);
+        });
+      } catch (err) {
+        console.error("Failed to query searchable songs from RxDB", err);
+        setIsLoading(false);
+      }
+    }
+
+    void subscribe();
+
+    return () => {
+      isSubscribed = false;
+      if (rxSub) rxSub.unsubscribe();
+    };
+  }, [folders]);
+
+  return {
+    searchableSongs,
+    isLoading,
   };
 }

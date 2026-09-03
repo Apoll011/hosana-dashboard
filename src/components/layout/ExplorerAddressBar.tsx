@@ -15,6 +15,7 @@ import {
   FolderOpen,
   FolderPlus,
   HardDrive,
+  HelpCircle,
   Menu,
   Music,
   Plus,
@@ -29,6 +30,7 @@ import { ViewName } from "../../layouts/view";
 import { authClient } from "../../lib/authClient";
 import { Can, CanAny } from "../../lib/permissions/components";
 import { InboxButton, InboxFetchClient } from "../Inbox";
+import { SearchSyntaxModal } from "../modals/SearchSyntaxModal";
 import { SyncStatusBadge } from "../SyncStatusBadge";
 
 interface ExplorerAddressBarProps {
@@ -79,6 +81,7 @@ export const ExplorerAddressBar: React.FC<ExplorerAddressBarProps> = ({
   const { t, locale } = useI18n();
   const isDriveRoot = view === "explorer" && currentFolderId === null;
   const [isPlusMenuOpen, setIsPlusMenuOpen] = useState(false);
+  const [isSearchHelpOpen, setIsSearchHelpOpen] = useState(false);
   const plusMenuRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -326,16 +329,49 @@ export const ExplorerAddressBar: React.FC<ExplorerAddressBarProps> = ({
                 }
               }}
               icon={<Search className="w-4 h-4 text-m3-secondary" />}
-              className="py-2.5 text-sm pr-9 rounded-2xl"
+              className={`py-2.5 text-sm rounded-2xl ${
+                view === "services"
+                  ? searchQuery
+                    ? "pr-9"
+                    : ""
+                  : searchQuery
+                    ? "pr-16"
+                    : "pr-9"
+              }`}
             />
-            {searchQuery && (
-              <button
-                onClick={() => onSearchChange("")}
-                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-m3-secondary hover:text-m3-text hover:bg-m3-hover rounded-lg cursor-pointer transition-all"
-                title={t("addressBar.clearSearch")}
-              >
-                <X className="w-3.5 h-3.5" />
-              </button>
+            <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-0.5">
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => onSearchChange("")}
+                  className="p-1 text-m3-secondary hover:text-m3-text hover:bg-m3-hover rounded-lg cursor-pointer transition-all"
+                  title={t("addressBar.clearSearch")}
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
+              {(view === "explorer" || view === "songs") && (
+                <button
+                  type="button"
+                  onClick={() => setIsSearchHelpOpen(true)}
+                  className="p-1 text-m3-secondary hover:text-m3-primary hover:bg-m3-primary/10 rounded-lg cursor-pointer transition-all"
+                  title={
+                    locale === "pt"
+                      ? "Guia de sintaxe de pesquisa (Liqe / Lucene)"
+                      : "Search syntax guide (Liqe / Lucene)"
+                  }
+                >
+                  <HelpCircle className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+
+            {(view === "explorer" || view === "songs") && (
+              <SearchSyntaxModal
+                isOpen={isSearchHelpOpen}
+                onClose={() => setIsSearchHelpOpen(false)}
+                onApplyExample={(q) => onSearchChange(q)}
+              />
             )}
           </div>
         )}

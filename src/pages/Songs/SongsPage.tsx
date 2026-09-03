@@ -30,6 +30,7 @@ import {
   Filter,
   FolderInput,
   FolderTree,
+  HelpCircle,
   Music,
   Plus,
   Search,
@@ -50,12 +51,14 @@ import { BatchDeleteModal } from "../../components/modals/BatchDeleteModal";
 import { BatchMoveModal } from "../../components/modals/BatchMoveModal";
 import { BatchTagModal } from "../../components/modals/BatchTagModal";
 import { MoveSongModal } from "../../components/modals/MoveSongModal";
+import { SearchSyntaxModal } from "../../components/modals/SearchSyntaxModal";
 import { useAuth } from "../../contexts/AuthContext";
 import { useSync } from "../../contexts/SyncContext";
 import { useFolders } from "../../hooks/useFolders";
 import { usePersonalSettings } from "../../hooks/usePersonalSettings";
-import { useAllSongs } from "../../hooks/useSongs";
+import { useAllSongs, useSearchableSongs } from "../../hooks/useSongs";
 import { posthog } from "../../lib/posthog";
+import { filterSearchableSongsWithLiqe } from "../../utils";
 
 interface SongsPageProps {
   hideHeader?: boolean;
@@ -189,14 +192,6 @@ export const SongsPage: React.FC<SongsPageProps> = ({
     useAllSongs();
   const { foldersQuery } = useFolders();
 
-  // Modals state
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [moveTarget, setMoveTarget] = useState<Song | null>(null);
-  const [deleteTarget, setDeleteTarget] = useState<Song | null>(null);
-  const [isBatchMoveOpen, setIsBatchMoveOpen] = useState(false);
-  const [isBatchDeleteOpen, setIsBatchDeleteOpen] = useState(false);
-  const [isBatchTagOpen, setIsBatchTagOpen] = useState(false);
-
   const folders = useMemo(
     () =>
       Array.isArray(foldersQuery.data?.folders)
@@ -204,6 +199,17 @@ export const SongsPage: React.FC<SongsPageProps> = ({
         : [],
     [foldersQuery.data?.folders],
   );
+
+  const { searchableSongs } = useSearchableSongs(folders);
+
+  // Modals state
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isSearchHelpOpen, setIsSearchHelpOpen] = useState(false);
+  const [moveTarget, setMoveTarget] = useState<Song | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Song | null>(null);
+  const [isBatchMoveOpen, setIsBatchMoveOpen] = useState(false);
+  const [isBatchDeleteOpen, setIsBatchDeleteOpen] = useState(false);
+  const [isBatchTagOpen, setIsBatchTagOpen] = useState(false);
 
   const allSongs: Song[] = useMemo(
     () => (Array.isArray(songsQuery.data?.songs) ? songsQuery.data.songs : []),
@@ -217,24 +223,17 @@ export const SongsPage: React.FC<SongsPageProps> = ({
     return map;
   }, [folders]);
 
-  // Client-side filtering & sorting with high performance memoization
+  // Client-side filtering & sorting with high performance memoization (Liqe powered)
   const filteredSongs = useMemo(() => {
     let result = allSongs;
 
     if (finalSearchQuery.trim()) {
-      const q = finalSearchQuery.toLowerCase();
-      result = result.filter((song) => {
-        const inTitle =
-          actualSearchFields.title && song.title?.toLowerCase().includes(q);
-        const inArtist =
-          actualSearchFields.artist && song.artist?.toLowerCase().includes(q);
-        const inContent =
-          actualSearchFields.content && song.content?.toLowerCase().includes(q);
-        const inTags =
-          actualSearchFields.tags &&
-          song.tags?.some((t) => t.toLowerCase().includes(q));
-        return inTitle || inArtist || inContent || inTags;
-      });
+      const liqeMatches = filterSearchableSongsWithLiqe(
+        searchableSongs,
+        finalSearchQuery,
+      );
+      const matchedIds = new Set(liqeMatches.map((s) => s.id));
+      result = result.filter((song) => matchedIds.has(song.id));
     }
 
     if (selectedFolder) {
@@ -282,11 +281,11 @@ export const SongsPage: React.FC<SongsPageProps> = ({
     return result;
   }, [
     allSongs,
+    searchableSongs,
     finalSearchQuery,
     selectedFolder,
     actualSelectedKey,
     actualSelectedTag,
-    actualSearchFields,
     finalSortBy,
     finalSortOrder,
   ]);
@@ -571,7 +570,7 @@ export const SongsPage: React.FC<SongsPageProps> = ({
       {/* Standalone Toolbar (search, folder filter, sort, viewmode & density) */}
       {!actualHideHeader && (
         <div className="flex flex-wrap items-center justify-between gap-3 p-3 sm:p-4 bg-m3-sidebar/30 border border-m3-border rounded-3xl shadow-xs transition-all">
-          <div className="flex-1 min-w-56 max-w-md">
+          <div className="flex-1 min-w-56 max-w-md relative">
             <Input
               placeholder={t("songsPage.searchPlaceholder")}
               value={finalSearchQuery}
@@ -580,8 +579,35 @@ export const SongsPage: React.FC<SongsPageProps> = ({
                 setPage(1);
               }}
               icon={<Search className="w-4 h-4 text-m3-secondary" />}
-              className="py-2 text-xs rounded-xl"
+              className="py-2 text-xs rounded-xl pr-16"
             />
+            <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-0.5">
+              {finalSearchQuery && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setInternalSearchQuery("");
+                    setPage(1);
+                  }}
+                  className="p-1 text-m3-secondary hover:text-m3-text hover:bg-m3-hover rounded-lg cursor-pointer transition-all"
+                  title={t("addressBar.clearSearch")}
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => setIsSearchHelpOpen(true)}
+                className="p-1 text-m3-secondary hover:text-m3-primary hover:bg-m3-primary/10 rounded-lg cursor-pointer transition-all"
+                title={
+                  locale === "pt"
+                    ? "Guia de sintaxe de pesquisa (Liqe / Lucene)"
+                    : "Search syntax guide (Liqe / Lucene)"
+                }
+              >
+                <HelpCircle className="w-4 h-4" />
+              </button>
+            </div>
           </div>
 
           <div className="flex items-center gap-2 flex-wrap">
@@ -1197,6 +1223,16 @@ export const SongsPage: React.FC<SongsPageProps> = ({
         title={t("songsPage.deleteTitle")}
         message={t("songsPage.deleteMessage", { name: deleteTarget?.title })}
         confirmText={t("songsPage.deleteConfirm")}
+      />
+
+      {/* SEARCH SYNTAX MODAL */}
+      <SearchSyntaxModal
+        isOpen={isSearchHelpOpen}
+        onClose={() => setIsSearchHelpOpen(false)}
+        onApplyExample={(q) => {
+          setInternalSearchQuery(q);
+          setPage(1);
+        }}
       />
     </div>
   );

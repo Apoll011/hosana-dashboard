@@ -39,9 +39,10 @@ import { useAppNavigate } from "../hooks/useAppNavigate";
 import { useFolders } from "../hooks/useFolders";
 import { usePersonalSettings } from "../hooks/usePersonalSettings";
 import { useServices } from "../hooks/useServices";
-import { useSongs } from "../hooks/useSongs";
+import { useSearchableSongs, useSongs } from "../hooks/useSongs";
 import { useTrash } from "../hooks/useTrash";
 import { songImportRegistry } from "../lib/import";
+import { filterSearchableSongsWithLiqe } from "../utils";
 import { ProviderImportResult } from "../utils/import";
 import { deriveView } from "./view";
 
@@ -281,6 +282,14 @@ export const MainLayout: React.FC = () => {
     () => songsQuery.data?.songs || [],
     [songsQuery.data?.songs],
   );
+  const { searchableSongs } = useSearchableSongs(allFolders);
+
+  const songByIdMap = useMemo(() => {
+    const map = new Map<string, Song>();
+    allSongs.forEach((s) => map.set(s.id, s));
+    return map;
+  }, [allSongs]);
+
   const totalSongs = songsQuery.data?.total || 0;
   const totalServices =
     servicesQuery.data?.filter((s) => !s.archived).length || 0;
@@ -426,7 +435,15 @@ export const MainLayout: React.FC = () => {
         return s.folderId === currentFolderId;
       });
     } else {
-      const q = searchQuery.toLowerCase().trim();
+      // 1. If searching with a query, filter with Liqe across SearchableSong dataset
+      let matchedSongIds: Set<string> | null = null;
+      if (searchQuery.trim()) {
+        const liqeMatches = filterSearchableSongsWithLiqe(
+          searchableSongs,
+          searchQuery,
+        );
+        matchedSongIds = new Set(liqeMatches.map((s) => s.id));
+      }
 
       list = allSongs.filter((s) => {
         if (currentFolderId !== null) {
@@ -438,26 +455,8 @@ export const MainLayout: React.FC = () => {
         if (selectedTag && (!s.tags || !s.tags.includes(selectedTag)))
           return false;
 
-        if (q) {
-          let matches = false;
-          if (searchFields.title && s.title.toLowerCase().includes(q))
-            matches = true;
-          if (searchFields.artist && s.artist?.toLowerCase().includes(q))
-            matches = true;
-          if (searchFields.content && s.content?.toLowerCase().includes(q))
-            matches = true;
-          if (
-            searchFields.tags &&
-            s.tags?.some((t) => t.toLowerCase().includes(q))
-          )
-            matches = true;
-
-          const folderName = allFolders
-            .find((f) => f.id === s.folderId)
-            ?.name.toLowerCase();
-          if (folderName && folderName.includes(q)) matches = true;
-
-          if (!matches) return false;
+        if (matchedSongIds !== null && !matchedSongIds.has(s.id)) {
+          return false;
         }
 
         return true;
@@ -482,16 +481,14 @@ export const MainLayout: React.FC = () => {
     });
   }, [
     allSongs,
+    searchableSongs,
     currentFolderId,
     descendantFolderIds,
     isSearchingOrFiltering,
     searchQuery,
-    selectedKey,
     selectedTag,
-    searchFields,
     sortBy,
     sortOrder,
-    allFolders,
   ]);
 
   // Selection State
