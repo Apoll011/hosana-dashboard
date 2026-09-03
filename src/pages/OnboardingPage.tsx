@@ -45,7 +45,7 @@ interface UserInvitation {
 }
 
 export const OnboardingPage: React.FC = () => {
-  const { user, organization, hasAcceptedTrial, logout, refetch } = useAuth();
+  const { organization, hasAcceptedTrial, logout, refetch } = useAuth();
   const { darkMode, toggleDarkMode } = useTheme();
   const { navigate } = useAppNavigate();
   const { t, language } = useI18n();
