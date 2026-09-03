@@ -27,6 +27,9 @@ export interface ParsedSong extends Song {
     subtitle?: string;
     artist?: string;
     composer?: string;
+    lyricist?: string;
+    translator?: string;
+    year?: string;
     copyright?: string;
     album?: string;
     key?: string;
@@ -40,6 +43,29 @@ export interface ParsedSong extends Song {
     duration?: string;
     [key: string]: string | undefined;
   };
+}
+
+export interface SerchableSong {
+  title: string;
+  subtitle?: string;
+  artist: string;
+  content: string;
+  composer?: string;
+  year?: number;
+  lyricist?: string;
+  song_number?: number;
+  path: string; // e.g., "Hymns/Amazing Grace.pro" or "Amazing Grace.pro"
+  tags: string[];
+  folder: string; // e.g. "Worship" or "" (root)
+  album?: string;
+  key?: string;
+  originalKey?: string;
+  tempo?: number;
+  time?: string;
+  capo?: string;
+  ccli?: string;
+  duration?: number;
+  youtube?: string;
 }
 
 export interface SongsResponse {
