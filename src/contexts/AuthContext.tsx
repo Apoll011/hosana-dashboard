@@ -13,11 +13,13 @@ import React, {
   useMemo,
   useState,
 } from "react";
+import { DEMO_ORGANIZATION, DEMO_USER } from "../demo/demoAuth";
+import { disableDemoMode, isDemoMode } from "../demo/index";
+import { syncSettingsFromMetadata } from "../hooks/usePersonalSettings";
 import { authClient } from "../lib/authClient";
 import { clearPermissionCache } from "../lib/permissions/client";
-import { fetchSubscriptionRows } from "../lib/subscriptions";
 import { posthog } from "../lib/posthog";
-import { syncSettingsFromMetadata } from "../hooks/usePersonalSettings";
+import { fetchSubscriptionRows } from "../lib/subscriptions";
 
 export interface SessionUser {
   id: string;
@@ -148,6 +150,71 @@ const CACHED_TRIAL_KEY = "cached_auth_trial";
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
+  // Stale-While-Revalidate: If we have a cached user, start with isLoading = false immediately!
+  const [isLoading, setIsLoading] = useState<boolean>(() => {
+    try {
+      const stored = localStorage.getItem(CACHED_USER_KEY);
+      return !stored;
+    } catch {
+      return true;
+    }
+  });
+
+  // ------------------------------------------------------------------
+  // Demo mode — return mock session immediately, no server calls.
+  // ------------------------------------------------------------------
+  if (isDemoMode()) {
+    setIsLoading(false);
+    const demoLogout = async () => {
+      setIsLoading(true);
+      disableDemoMode();
+      localStorage.clear();
+
+      // Clear all IndexedDB databases
+      if (typeof indexedDB !== "undefined" && indexedDB.databases) {
+        try {
+          const databases = await indexedDB.databases();
+          await Promise.all(
+            databases.map(
+              (db) =>
+                new Promise<void>((resolve) => {
+                  if (!db.name) {
+                    resolve();
+                    return;
+                  }
+                  const req = indexedDB.deleteDatabase(db.name);
+                  req.onsuccess = () => resolve();
+                  req.onerror = () => resolve();
+                  req.onblocked = () => resolve();
+                }),
+            ),
+          );
+        } catch {
+          // indexedDB.databases() may not be available in all browsers; ignore errors
+        }
+      }
+      window.location.assign("/login");
+    };
+    const demoNoOp = async () => {};
+    const demoDemoValue: AuthContextType = {
+      user: DEMO_USER,
+      organization: DEMO_ORGANIZATION,
+      organizations: [DEMO_ORGANIZATION],
+      hasAcceptedTrial: true,
+      isAuthenticated: true,
+      isLoading: isLoading,
+      refetch: demoNoOp,
+      switchOrganization: demoNoOp as (org: Organization) => Promise<void>,
+      logout: demoLogout,
+    };
+    return (
+      <AuthContext.Provider value={demoDemoValue}>
+        {children}
+      </AuthContext.Provider>
+    );
+  }
+  // ------------------------------------------------------------------
+
   const [user, setUser] = useState<SessionUser | null>(() => {
     try {
       const stored = localStorage.getItem(CACHED_USER_KEY);
@@ -182,15 +249,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       }
     },
   );
-  // Stale-While-Revalidate: If we have a cached user, start with isLoading = false immediately!
-  const [isLoading, setIsLoading] = useState<boolean>(() => {
-    try {
-      const stored = localStorage.getItem(CACHED_USER_KEY);
-      return !stored;
-    } catch {
-      return true;
-    }
-  });
 
   const handleClearSession = useCallback(() => {
     setUser(null);
