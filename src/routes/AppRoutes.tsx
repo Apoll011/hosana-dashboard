@@ -20,8 +20,6 @@ import { isDemoMode } from "../demo/index";
 import { MainLayout } from "../layouts/MainLayout";
 import { usePreloadPermissions } from "../lib/permissions/client";
 import { CaptchaPage } from "../pages/CaptchaPage";
-import { DemoPage } from "../pages/DemoPage";
-import { OnboardingPage } from "../pages/OnboardingPage";
 import { ProtectedRoute } from "./ProtectedRoute";
 
 const PageLoader = () => {
@@ -33,12 +31,14 @@ const PageLoader = () => {
   );
 };
 
-import { AgendaPage } from "../pages/AgendaPage";
 import {
   AcceptInvitationPage,
+  AgendaPage,
+  DemoPage,
   FoldersPage,
   ForgotPasswordPage,
   LoginPage,
+  OnboardingPage,
   RegisterOrganizationPage,
   RegisterPage,
   ResetPasswordPage,
