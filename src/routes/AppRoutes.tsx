@@ -16,10 +16,10 @@ import {
   useParams,
 } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import { isDemoMode } from "../demo/index";
 import { MainLayout } from "../layouts/MainLayout";
 import { usePreloadPermissions } from "../lib/permissions/client";
 import { CaptchaPage } from "../pages/CaptchaPage";
-import { OnboardingPage } from "../pages/OnboardingPage";
 import { ProtectedRoute } from "./ProtectedRoute";
 
 const PageLoader = () => {
@@ -31,12 +31,14 @@ const PageLoader = () => {
   );
 };
 
-import { AgendaPage } from "../pages/AgendaPage";
 import {
   AcceptInvitationPage,
+  AgendaPage,
+  DemoPage,
   FoldersPage,
   ForgotPasswordPage,
   LoginPage,
+  OnboardingPage,
   RegisterOrganizationPage,
   RegisterPage,
   ResetPasswordPage,
@@ -113,6 +115,9 @@ const OrganizationGuard = () => {
   const location = useLocation();
   const { organization, isLoading } = useAuth();
 
+  // Demo mode — the org slug is always "demo"; allow through without redirect.
+  if (isDemoMode()) return <Outlet />;
+
   if (isLoading) return <PageLoader />;
 
   if (!organization) {
@@ -156,6 +161,9 @@ export const AppRoutes: React.FC = () => {
           <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="/accept-invitation" element={<AcceptInvitationPage />} />
           <Route path="/captcha" element={<CaptchaPage />} />
+
+          {/* Demo mode entry point — no auth required */}
+          <Route path="/demo" element={<DemoPage />} />
 
           <Route element={<ProtectedRoute />}>
             <Route path="/onboarding" element={<OnboardingPage />} />

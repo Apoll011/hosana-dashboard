@@ -92,6 +92,17 @@ export const AcceptInvitationPage = lazyImport(() =>
     default: m.AcceptInvitationPage,
   })),
 );
+export const AgendaPage = lazyImport(() =>
+  import("../pages/AgendaPage").then((m) => ({ default: m.AgendaPage })),
+);
+export const DemoPage = lazyImport(() =>
+  import("../pages/DemoPage").then((m) => ({ default: m.DemoPage })),
+);
+export const OnboardingPage = lazyImport(() =>
+  import("../pages/OnboardingPage").then((m) => ({
+    default: m.OnboardingPage,
+  })),
+);
 export const FoldersPage = lazyImport(() =>
   import("../pages/FoldersPage").then((m) => ({ default: m.FoldersPage })),
 );
@@ -160,6 +171,12 @@ export const routePreloaders: Array<{
   {
     pattern: /\/accept-invitation(\/|\?|#|$)/,
     preload: () => AcceptInvitationPage.preload(),
+  },
+  { pattern: /\/agenda(\/|\?|#|$)/, preload: () => DemoPage.preload() },
+  { pattern: /\/demo(\/|\?|#|$)/, preload: () => DemoPage.preload() },
+  {
+    pattern: /\/onboarding(\/|\?|#|$)/,
+    preload: () => OnboardingPage.preload(),
   },
 ];
 

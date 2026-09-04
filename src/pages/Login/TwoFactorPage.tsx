@@ -208,7 +208,7 @@ export const TwoFactorPage: React.FC = () => {
               type="checkbox"
               checked={trustDevice}
               onChange={(e) => setTrustDevice(e.target.checked)}
-              className="w-4 h-4 rounded-[4px] border-slate-300 dark:border-slate-600 text-blue-600 focus:ring-blue-500 dark:bg-[#1e1f20] cursor-pointer"
+              className="w-4 h-4 rounded-sm border-slate-300 dark:border-slate-600 text-blue-600 focus:ring-blue-500 dark:bg-[#1e1f20] cursor-pointer"
             />
             <span>{t("auth.login.rememberMe")}</span>
           </label>
@@ -316,7 +316,7 @@ function OtpInput({
           onChange={(e) => handleChange(i, e)}
           onKeyDown={(e) => handleKey(i, e)}
           onFocus={(e) => e.target.select()}
-          className="w-10 sm:w-12 h-12 sm:h-14 text-center text-lg sm:text-xl font-medium rounded-[4px] border border-slate-300 dark:border-slate-700 bg-transparent text-slate-900 dark:text-white focus:border-blue-600 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-600 dark:focus:ring-blue-400 focus:outline-none transition-all"
+          className="w-10 sm:w-12 h-12 sm:h-14 text-center text-lg sm:text-xl font-medium rounded-sm border border-slate-300 dark:border-slate-700 bg-transparent text-slate-900 dark:text-white focus:border-blue-600 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-600 dark:focus:ring-blue-400 focus:outline-none transition-all"
         />
       ))}
     </div>

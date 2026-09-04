@@ -7,8 +7,19 @@ import { Button, Input, Modal } from "@/src/components/common";
 import { useI18n } from "@/src/lib/i18n";
 import { Folder, Song } from "@/src/types";
 import { ConversionResult } from "@hosanna/chordpro";
-import { AlertTriangle, HardDrive } from "lucide-react";
-import React from "react";
+import {
+  AlertTriangle,
+  ChevronDown,
+  ChevronRight,
+  HardDrive,
+  Music,
+  RotateCcw,
+  Search,
+  Sliders,
+  Tag,
+  X,
+} from "lucide-react";
+import React, { useCallback, useMemo, useState } from "react";
 import {
   FolderTreeNode,
   getFolderDescendantIds,
@@ -24,6 +35,443 @@ import { CifraClubImportModal } from "../modals/CifraModal";
 import { CustomizeFolderModal } from "../modals/CustomizeFolderModal";
 import { MoveSongModal } from "../modals/MoveSongModal";
 
+// ─── Musical keys ───────────────────────────────────────────────────────────
+const MUSICAL_KEYS = [
+  "C",
+  "C#",
+  "Db",
+  "D",
+  "D#",
+  "Eb",
+  "E",
+  "F",
+  "F#",
+  "Gb",
+  "G",
+  "G#",
+  "Ab",
+  "A",
+  "A#",
+  "Bb",
+  "B",
+  "Am",
+  "Bm",
+  "Cm",
+  "Dm",
+  "Em",
+  "Fm",
+  "Gm",
+];
+
+// ─── Helper: parse existing Liqe query and remove/toggle a clause ────────────
+function addLiqeClause(query: string, clause: string): string {
+  const trimmed = query.trim();
+  if (!trimmed) return clause;
+  // If exact clause already present, remove it (toggle)
+  if (trimmed.includes(clause)) {
+    return trimmed
+      .replace(clause, "")
+      .replace(/\s+AND\s+/g, " AND ")
+      .replace(/^\s*AND\s+|\s+AND\s*$/g, "")
+      .trim();
+  }
+  return `${trimmed} AND ${clause}`;
+}
+
+function removeLiqeClause(query: string, prefix: string): string {
+  // Remove any existing clause that starts with the given prefix
+  return query
+    .split(/\s+AND\s+/i)
+    .filter(
+      (part) => !part.trim().toLowerCase().startsWith(prefix.toLowerCase()),
+    )
+    .join(" AND ")
+    .trim();
+}
+
+function hasClause(query: string, clause: string): boolean {
+  return query.includes(clause);
+}
+
+function getClauseValue(query: string, field: string): string | null {
+  const regex = new RegExp(`\\b${field}:([^\\s]+|"[^"]*")`, "i");
+  const match = query.match(regex);
+  return match ? match[1].replace(/"/g, "") : null;
+}
+
+// ─── FilterSection: collapsible group ───────────────────────────────────────
+const FilterSection: React.FC<{
+  icon: React.ReactNode;
+  label: string;
+  active?: boolean;
+  defaultOpen?: boolean;
+  children: React.ReactNode;
+}> = ({ icon, label, active, defaultOpen = false, children }) => {
+  const [open, setOpen] = useState(defaultOpen);
+
+  return (
+    <div className="border border-m3-border rounded-2xl overflow-hidden bg-m3-card/40">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="w-full flex items-center justify-between px-4 py-3 text-xs font-bold text-m3-text hover:bg-m3-hover transition-colors cursor-pointer"
+      >
+        <div className="flex items-center gap-2">
+          <span className={active ? "text-m3-primary" : "text-m3-secondary"}>
+            {icon}
+          </span>
+          <span className={active ? "text-m3-primary" : ""}>{label}</span>
+          {active && (
+            <span className="w-2 h-2 rounded-full bg-m3-primary inline-block" />
+          )}
+        </div>
+        {open ? (
+          <ChevronDown className="w-3.5 h-3.5 text-m3-secondary" />
+        ) : (
+          <ChevronRight className="w-3.5 h-3.5 text-m3-secondary" />
+        )}
+      </button>
+      {open && (
+        <div className="px-4 pb-4 pt-1 border-t border-m3-border/50">
+          {children}
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ─── Chip button ─────────────────────────────────────────────────────────────
+const Chip: React.FC<{
+  label: string;
+  selected?: boolean;
+  onClick: () => void;
+}> = ({ label, selected, onClick }) => (
+  <button
+    type="button"
+    onClick={onClick}
+    className={`px-2.5 py-1 rounded-full text-[11px] font-semibold cursor-pointer border transition-all ${
+      selected
+        ? "bg-m3-primary text-white border-m3-primary shadow-sm shadow-m3-primary/30"
+        : "bg-m3-card text-m3-secondary border-m3-border hover:border-m3-primary/50 hover:text-m3-primary"
+    }`}
+  >
+    {label}
+  </button>
+);
+
+// ─── Advanced Filter Panel ───────────────────────────────────────────────────
+interface AdvancedFilterPanelProps {
+  isOpen: boolean;
+  onClose: () => void;
+  currentQuery: string;
+  onApplyQuery: (query: string) => void;
+  availableTags: string[];
+  availableFolders: Folder[];
+  currentFolder?: Folder;
+}
+
+const AdvancedFilterPanel: React.FC<AdvancedFilterPanelProps> = ({
+  isOpen,
+  onClose,
+  currentQuery,
+  onApplyQuery,
+  availableTags,
+  availableFolders,
+  currentFolder,
+}) => {
+  const { t } = useI18n();
+
+  // Local draft state — only committed on "Apply"
+  const [draft, setDraft] = useState(currentQuery);
+
+  // Sync draft when modal opens with latest query
+  React.useEffect(() => {
+    if (isOpen) setDraft(currentQuery);
+  }, [isOpen, currentQuery]);
+
+  // Active detected values
+  const activeTags = useMemo(
+    () =>
+      availableTags.filter((tag) =>
+        hasClause(draft, `tags:${tag.includes(" ") ? `"${tag}"` : tag}`),
+      ),
+    [draft, availableTags],
+  );
+  const activeKey = useMemo(() => getClauseValue(draft, "key"), [draft]);
+  const activeFolder = useMemo(() => getClauseValue(draft, "folder"), [draft]);
+
+  const toggleTag = useCallback((tag: string) => {
+    const clause = tag.includes(" ") ? `tags:"${tag}"` : `tags:${tag}`;
+    setDraft((q) =>
+      hasClause(q, clause)
+        ? removeLiqeClause(q, `tags:${tag.includes(" ") ? `"${tag}"` : tag}`)
+        : addLiqeClause(q, clause),
+    );
+  }, []);
+
+  const toggleKey = useCallback((key: string) => {
+    setDraft((q) => {
+      const existing = getClauseValue(q, "key");
+      const cleaned = removeLiqeClause(q, "key:");
+      if (existing === key) return cleaned; // deselect
+      return addLiqeClause(cleaned, `key:${key}`);
+    });
+  }, []);
+
+  const toggleFolder = useCallback((folderName: string) => {
+    setDraft((q) => {
+      const existing = getClauseValue(q, "folder");
+      const cleaned = removeLiqeClause(q, "folder:");
+      if (existing === folderName) return cleaned;
+      return addLiqeClause(
+        cleaned,
+        folderName.includes(" ")
+          ? `folder:"${folderName}"`
+          : `folder:${folderName}`,
+      );
+    });
+  }, []);
+
+  const handleApply = useCallback(() => {
+    onApplyQuery(draft);
+    onClose();
+  }, [draft, onApplyQuery, onClose]);
+
+  const handleClear = useCallback(() => {
+    setDraft("");
+  }, []);
+
+  return (
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={t("explorer.modals.filterTitle")}
+    >
+      <div className="space-y-3 py-2 max-h-[70vh] overflow-y-auto">
+        {/* Live query preview */}
+        <div className="flex items-center gap-2 p-3 bg-m3-sidebar/40 border border-m3-border rounded-2xl">
+          <Search className="w-3.5 h-3.5 text-m3-secondary shrink-0" />
+          <input
+            type="text"
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            placeholder="Liqe query preview — edit freely…"
+            className="flex-1 bg-transparent text-xs text-m3-text placeholder:text-m3-secondary/60 outline-none font-mono"
+            spellCheck={false}
+          />
+          {draft && (
+            <button
+              type="button"
+              onClick={() => setDraft("")}
+              className="text-m3-secondary hover:text-m3-text transition-colors cursor-pointer"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </div>
+
+        {currentFolder && (
+          <p className="text-[11px] text-m3-secondary px-1">
+            {t("explorer.modals.searchScope")}{" "}
+            <span className="font-bold text-m3-primary">
+              {currentFolder.name}
+            </span>
+          </p>
+        )}
+
+        {/* ── Tags ──────────────────────────────────────────────────── */}
+        {availableTags.length > 0 && (
+          <FilterSection
+            icon={<Tag className="w-3.5 h-3.5" />}
+            label={t("explorer.modals.categoryTag")}
+            active={activeTags.length > 0}
+            defaultOpen={activeTags.length > 0}
+          >
+            <div className="flex flex-wrap gap-1.5 mt-2 max-h-28 overflow-y-auto">
+              {availableTags.map((tag) => {
+                const clause = tag.includes(" ")
+                  ? `tags:"${tag}"`
+                  : `tags:${tag}`;
+                return (
+                  <Chip
+                    key={tag}
+                    label={tag}
+                    selected={hasClause(draft, clause)}
+                    onClick={() => toggleTag(tag)}
+                  />
+                );
+              })}
+            </div>
+          </FilterSection>
+        )}
+
+        {/* ── Musical Key ───────────────────────────────────────────── */}
+        <FilterSection
+          icon={<Music className="w-3.5 h-3.5" />}
+          label="Tonalidade / Key"
+          active={!!activeKey}
+          defaultOpen={!!activeKey}
+        >
+          <div className="flex flex-wrap gap-1.5 mt-2">
+            {MUSICAL_KEYS.map((key) => (
+              <Chip
+                key={key}
+                label={key}
+                selected={activeKey === key}
+                onClick={() => toggleKey(key)}
+              />
+            ))}
+          </div>
+        </FilterSection>
+
+        {/* ── Folder ────────────────────────────────────────────────── */}
+        {availableFolders.length > 0 && (
+          <FilterSection
+            icon={<HardDrive className="w-3.5 h-3.5" />}
+            label="Pasta / Folder"
+            active={!!activeFolder}
+            defaultOpen={!!activeFolder}
+          >
+            <div className="flex flex-wrap gap-1.5 mt-2 max-h-32 overflow-y-auto">
+              {availableFolders.map((folder) => (
+                <Chip
+                  key={folder.id}
+                  label={folder.name}
+                  selected={activeFolder === folder.name}
+                  onClick={() => toggleFolder(folder.name)}
+                />
+              ))}
+            </div>
+          </FilterSection>
+        )}
+
+        {/* ── Quick field selectors ─────────────────────────────────── */}
+        <FilterSection
+          icon={<Search className="w-3.5 h-3.5" />}
+          label="Pesquisa por campo / Field search"
+          active={
+            hasClause(draft, "title:") ||
+            hasClause(draft, "artist:") ||
+            hasClause(draft, "content:") ||
+            hasClause(draft, "tempo:") ||
+            hasClause(draft, "year:")
+          }
+        >
+          <div className="mt-2 space-y-2">
+            <p className="text-[11px] text-m3-secondary leading-relaxed">
+              Clique num campo para adicionar um prefixo de pesquisa ao query.{" "}
+              <br />
+              Edite o valor diretamente no campo de query acima.
+            </p>
+            <div className="flex flex-wrap gap-1.5">
+              {(
+                [
+                  ["title", "Título"],
+                  ["artist", "Artista"],
+                  ["content", "Letra / Conteúdo"],
+                  ["year", "Ano"],
+                  ["tempo", "Tempo (BPM)"],
+                  ["album", "Álbum"],
+                  ["composer", "Compositor"],
+                  ["ccli", "CCLI"],
+                ] as const
+              ).map(([field, label]) => (
+                <button
+                  key={field}
+                  type="button"
+                  onClick={() =>
+                    setDraft((q) => {
+                      const base = q.trim();
+                      const prefix = base
+                        ? `${base} AND ${field}:`
+                        : `${field}:`;
+                      return prefix;
+                    })
+                  }
+                  className="px-2.5 py-1 rounded-full text-[11px] font-semibold cursor-pointer border transition-all bg-m3-card text-m3-secondary border-m3-border hover:border-m3-primary/50 hover:text-m3-primary"
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+        </FilterSection>
+
+        {/* ── Range helpers ─────────────────────────────────────────── */}
+        <FilterSection
+          icon={<Sliders className="w-3.5 h-3.5" />}
+          label="Intervalos / Ranges"
+          active={
+            hasClause(draft, "year:[") ||
+            hasClause(draft, "tempo:[") ||
+            hasClause(draft, "duration:[")
+          }
+        >
+          <div className="mt-2 space-y-2">
+            <p className="text-[11px] text-m3-secondary">
+              Presets rápidos — clicar adiciona o intervalo ao query.
+            </p>
+            <div className="flex flex-wrap gap-1.5">
+              {(
+                [
+                  ["Clássicos (< 1980)", "year:[* TO 1979]"],
+                  ["Anos 80–90", "year:[1980 TO 1999]"],
+                  ["Anos 2000+", "year:[2000 TO *]"],
+                  ["Lento (< 80 BPM)", "tempo:[* TO 79]"],
+                  ["Moderado (80–120)", "tempo:[80 TO 120]"],
+                  ["Rápido (> 120)", "tempo:[121 TO *]"],
+                  ["Curto (< 3 min)", "duration:[* TO 179]"],
+                  ["Longo (> 5 min)", "duration:[300 TO *]"],
+                ] as const
+              ).map(([label, clause]) => (
+                <button
+                  key={clause}
+                  type="button"
+                  onClick={() => setDraft((q) => addLiqeClause(q, clause))}
+                  className={`px-2.5 py-1 rounded-full text-[11px] font-semibold cursor-pointer border transition-all ${
+                    hasClause(draft, clause)
+                      ? "bg-m3-primary text-white border-m3-primary"
+                      : "bg-m3-card text-m3-secondary border-m3-border hover:border-m3-primary/50 hover:text-m3-primary"
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+        </FilterSection>
+      </div>
+
+      {/* Footer */}
+      <div className="flex items-center justify-between pt-4 mt-2 border-t border-m3-border">
+        <button
+          type="button"
+          onClick={handleClear}
+          className="flex items-center gap-1.5 text-xs font-semibold text-m3-secondary hover:text-m3-text transition-colors cursor-pointer"
+        >
+          <RotateCcw className="w-3.5 h-3.5" />
+          {t("explorer.modals.clearFilters")}
+        </button>
+
+        <div className="flex items-center gap-2">
+          <Button type="button" variant="ghost" size="sm" onClick={onClose}>
+            {t("common.cancel")}
+          </Button>
+          <Button
+            type="button"
+            variant="primary"
+            size="sm"
+            onClick={handleApply}
+          >
+            {t("explorer.modals.applyFilters")}
+          </Button>
+        </div>
+      </div>
+    </Modal>
+  );
+};
+
+// ─── Props ───────────────────────────────────────────────────────────────────
 interface ExplorerModalsProps {
   // CifraClub
   isCifraImportOpen: boolean;
@@ -123,27 +571,12 @@ interface ExplorerModalsProps {
     mode: "append" | "replace" | "remove",
   ) => Promise<void>;
 
-  // Advanced Filter Modal
+  // Advanced Filter Modal — now Liqe-based
   isFilterPanelOpen: boolean;
   setIsFilterPanelOpen: (v: boolean) => void;
-  selectedTag: string;
-  setSelectedTag: (t: string) => void;
+  currentQuery: string;
+  onApplyQuery: (query: string) => void;
   availableTags: string[];
-  searchFields: {
-    title: boolean;
-    artist: boolean;
-    content: boolean;
-    tags: boolean;
-  };
-  setSearchFields: React.Dispatch<
-    React.SetStateAction<{
-      title: boolean;
-      artist: boolean;
-      content: boolean;
-      tags: boolean;
-    }>
-  >;
-  onClearFilters: () => void;
 }
 
 export const ExplorerModals: React.FC<ExplorerModalsProps> = ({
@@ -205,12 +638,9 @@ export const ExplorerModals: React.FC<ExplorerModalsProps> = ({
   onBatchTagConfirm,
   isFilterPanelOpen,
   setIsFilterPanelOpen,
-  selectedTag,
-  setSelectedTag,
+  currentQuery,
+  onApplyQuery,
   availableTags,
-  searchFields,
-  setSearchFields,
-  onClearFilters,
 }) => {
   const { t } = useI18n();
 
@@ -580,145 +1010,16 @@ export const ExplorerModals: React.FC<ExplorerModalsProps> = ({
         onConfirm={onBatchTagConfirm}
       />
 
-      {/* ADVANCED FILTER POPUP MODAL */}
-      <Modal
+      {/* ADVANCED FILTER MODAL — Liqe query builder */}
+      <AdvancedFilterPanel
         isOpen={isFilterPanelOpen}
         onClose={() => setIsFilterPanelOpen(false)}
-        title={t("explorer.modals.filterTitle")}
-      >
-        <div className="space-y-5 py-2">
-          <p className="text-xs text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800/60 p-2.5 rounded-xl border border-slate-200 dark:border-slate-700">
-            {t("explorer.modals.searchScope")}{" "}
-            <span className="font-bold text-[#0284c7]">
-              {currentFolder
-                ? t("explorer.modals.scopeFolder", {
-                    folder: currentFolder.name,
-                  })
-                : t("explorer.modals.scopeRoot")}
-            </span>
-          </p>
-
-          {/* Tag / Category Filter */}
-          <div className="space-y-2">
-            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
-              {t("explorer.modals.categoryTag")}
-            </label>
-            <div className="flex flex-wrap gap-1.5 max-h-28 overflow-y-auto p-1.5 border border-slate-200 dark:border-slate-800 rounded-xl bg-slate-50/50 dark:bg-slate-900/50">
-              <button
-                type="button"
-                onClick={() => setSelectedTag("")}
-                className={`px-2.5 py-1 rounded-lg text-xs font-semibold cursor-pointer border transition-colors ${
-                  selectedTag === ""
-                    ? "bg-[#0284c7] text-white border-[#0284c7]"
-                    : "bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700"
-                }`}
-              >
-                {t("explorer.modals.allCategories")}
-              </button>
-              {availableTags.map((tag) => (
-                <button
-                  type="button"
-                  key={tag}
-                  onClick={() => setSelectedTag(tag)}
-                  className={`px-2.5 py-1 rounded-lg text-xs font-semibold cursor-pointer border transition-colors ${
-                    selectedTag === tag
-                      ? "bg-[#0284c7] text-white border-[#0284c7]"
-                      : "bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700"
-                  }`}
-                >
-                  {tag}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Search Fields Toggles */}
-          <div className="space-y-2">
-            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
-              {t("explorer.modals.searchFields")}
-            </label>
-            <div className="grid grid-cols-2 gap-2 text-xs p-3 border border-slate-200 dark:border-slate-800 rounded-xl bg-slate-50/50 dark:bg-slate-900/50">
-              <label className="flex items-center gap-2 cursor-pointer font-medium text-slate-700 dark:text-slate-300">
-                <input
-                  type="checkbox"
-                  checked={searchFields.title}
-                  onChange={(e) =>
-                    setSearchFields((prev) => ({
-                      ...prev,
-                      title: e.target.checked,
-                    }))
-                  }
-                  className="w-4 h-4 text-[#0284c7] rounded focus:ring-[#0284c7]"
-                />
-                <span>{t("explorer.modals.fieldTitle")}</span>
-              </label>
-              <label className="flex items-center gap-2 cursor-pointer font-medium text-slate-700 dark:text-slate-300">
-                <input
-                  type="checkbox"
-                  checked={searchFields.artist}
-                  onChange={(e) =>
-                    setSearchFields((prev) => ({
-                      ...prev,
-                      artist: e.target.checked,
-                    }))
-                  }
-                  className="w-4 h-4 text-[#0284c7] rounded focus:ring-[#0284c7]"
-                />
-                <span>{t("explorer.modals.fieldArtist")}</span>
-              </label>
-              <label className="flex items-center gap-2 cursor-pointer font-medium text-slate-700 dark:text-slate-300">
-                <input
-                  type="checkbox"
-                  checked={searchFields.content}
-                  onChange={(e) =>
-                    setSearchFields((prev) => ({
-                      ...prev,
-                      content: e.target.checked,
-                    }))
-                  }
-                  className="w-4 h-4 text-[#0284c7] rounded focus:ring-[#0284c7]"
-                />
-                <span>{t("explorer.modals.fieldContent")}</span>
-              </label>
-              <label className="flex items-center gap-2 cursor-pointer font-medium text-slate-700 dark:text-slate-300">
-                <input
-                  type="checkbox"
-                  checked={searchFields.tags}
-                  onChange={(e) =>
-                    setSearchFields((prev) => ({
-                      ...prev,
-                      tags: e.target.checked,
-                    }))
-                  }
-                  className="w-4 h-4 text-[#0284c7] rounded focus:ring-[#0284c7]"
-                />
-                <span>{t("explorer.modals.fieldTags")}</span>
-              </label>
-            </div>
-          </div>
-
-          {/* Footer buttons */}
-          <div className="flex items-center justify-between pt-4 border-t border-slate-200 dark:border-slate-800">
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={onClearFilters}
-            >
-              {t("explorer.modals.clearFilters")}
-            </Button>
-
-            <Button
-              type="button"
-              variant="primary"
-              size="sm"
-              onClick={() => setIsFilterPanelOpen(false)}
-            >
-              {t("explorer.modals.applyFilters")}
-            </Button>
-          </div>
-        </div>
-      </Modal>
+        currentQuery={currentQuery}
+        onApplyQuery={onApplyQuery}
+        availableTags={availableTags}
+        availableFolders={allFolders}
+        currentFolder={currentFolder}
+      />
     </>
   );
 };

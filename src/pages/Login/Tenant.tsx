@@ -4,12 +4,12 @@
  */
 
 import { AppLink } from "@/src/components/AppLink";
-import { Button } from "@/src/components/common";
+import { Button, Spinner } from "@/src/components/common";
 import { useAppNavigate } from "@/src/hooks/useAppNavigate";
 import { useI18n } from "@/src/lib/i18n";
 import { posthog } from "@/src/lib/posthog";
-import { ArrowLeft, CheckCircle2 } from "lucide-react";
-import React, { useRef, useState } from "react";
+import { ArrowLeft, CheckCircle2, XCircle } from "lucide-react";
+import React, { useEffect, useRef, useState } from "react";
 import { authClient } from "../../lib/authClient";
 import LoginLayout from "./Layout";
 import { GoogleTextField } from "./components/GoogleTextField";
@@ -27,6 +27,9 @@ export const RegisterOrganizationPage: React.FC = () => {
   // Form State
   const [orgName, setOrgName] = useState("");
   const [orgSlug, setOrgSlug] = useState("");
+  const [slugStatus, setSlugStatus] = useState<
+    "idle" | "checking" | "available" | "taken"
+  >("idle");
   const [adminName, setAdminName] = useState("");
   const [adminEmail, setAdminEmail] = useState("");
   const [adminPassword, setAdminPassword] = useState("");
@@ -44,8 +47,38 @@ export const RegisterOrganizationPage: React.FC = () => {
   const passwordMismatch =
     confirmPassword.length > 0 && adminPassword !== confirmPassword;
 
+  // Check slug availability with debounce
+  useEffect(() => {
+    const trimmed = orgSlug.trim();
+    if (!trimmed) {
+      setSlugStatus("idle");
+      return;
+    }
+
+    setSlugStatus("checking");
+    const timer = setTimeout(async () => {
+      try {
+        const { error } = await authClient.organization.checkSlug({
+          slug: trimmed,
+        });
+        if (error) {
+          setSlugStatus("taken");
+        } else {
+          setSlugStatus("available");
+        }
+      } catch {
+        setSlugStatus("idle");
+      }
+    }, 400);
+
+    return () => clearTimeout(timer);
+  }, [orgSlug]);
+
   // Validation per step
-  const isStep1Valid = orgName.trim() !== "" && orgSlug.trim() !== "";
+  const isStep1Valid =
+    orgName.trim() !== "" &&
+    orgSlug.trim() !== "" &&
+    slugStatus === "available";
   const isStep2Valid = adminName.trim() !== "" && adminEmail.trim() !== "";
   const isStep3Valid =
     adminPassword.trim() !== "" &&
@@ -206,7 +239,27 @@ export const RegisterOrganizationPage: React.FC = () => {
                       e.target.value.toLowerCase().replace(/\s+/g, "-"),
                     )
                   }
-                  helperText="hosanna.app/slug"
+                  error={
+                    slugStatus === "taken"
+                      ? t("onboarding.slugTaken")
+                      : undefined
+                  }
+                  helperText={
+                    slugStatus === "checking"
+                      ? t("onboarding.checkingSlug")
+                      : slugStatus === "available"
+                        ? t("onboarding.slugAvailable")
+                        : "hosanna.app/slug"
+                  }
+                  trailingIcon={
+                    slugStatus === "checking" ? (
+                      <Spinner size="sm" />
+                    ) : slugStatus === "available" ? (
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                    ) : slugStatus === "taken" ? (
+                      <XCircle className="w-4 h-4 text-red-600 dark:text-red-400" />
+                    ) : undefined
+                  }
                 />
               </div>
             )}
@@ -260,7 +313,7 @@ export const RegisterOrganizationPage: React.FC = () => {
                       type="checkbox"
                       checked={showPassword}
                       onChange={(e) => setShowPassword(e.target.checked)}
-                      className="w-4 h-4 rounded-[4px] border-slate-300 dark:border-slate-600 text-blue-600 focus:ring-blue-500 dark:bg-[#1e1f20] cursor-pointer"
+                      className="w-4 h-4 rounded-sm border-slate-300 dark:border-slate-600 text-blue-600 focus:ring-blue-500 dark:bg-[#1e1f20] cursor-pointer"
                     />
                     <span className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">
                       Mostrar palavra-passe
@@ -280,7 +333,7 @@ export const RegisterOrganizationPage: React.FC = () => {
                     id="org-terms"
                     checked={agreedToTerms}
                     onChange={(e) => setAgreedToTerms(e.target.checked)}
-                    className="mt-0.5 w-4 h-4 rounded-[4px] border-slate-300 dark:border-slate-600 text-blue-600 focus:ring-blue-500 dark:bg-[#1e1f20] cursor-pointer"
+                    className="mt-0.5 w-4 h-4 rounded-sm border-slate-300 dark:border-slate-600 text-blue-600 focus:ring-blue-500 dark:bg-[#1e1f20] cursor-pointer"
                   />
                   <label
                     htmlFor="org-terms"

@@ -8,12 +8,16 @@ import { useI18n } from "@/src/lib/i18n";
 import React from "react";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import { isDemoMode } from "../demo/index";
 
 export const ProtectedRoute: React.FC = () => {
   const { isAuthenticated, isLoading, organization, hasAcceptedTrial } =
     useAuth();
   const location = useLocation();
   const { t } = useI18n();
+
+  // Demo mode — auth is mocked, allow through unconditionally.
+  if (isDemoMode()) return <Outlet />;
 
   if (isLoading) {
     return (

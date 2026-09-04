@@ -162,7 +162,7 @@ export const RegisterPage: React.FC = () => {
               type="checkbox"
               checked={showPassword}
               onChange={(e) => setShowPassword(e.target.checked)}
-              className="w-4 h-4 rounded-[4px] border-slate-300 dark:border-slate-600 text-blue-600 focus:ring-blue-500 dark:bg-[#1e1f20] cursor-pointer"
+              className="w-4 h-4 rounded-sm border-slate-300 dark:border-slate-600 text-blue-600 focus:ring-blue-500 dark:bg-[#1e1f20] cursor-pointer"
             />
             <span className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">
               Mostrar palavra-passe
