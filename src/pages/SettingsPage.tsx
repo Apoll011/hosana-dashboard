@@ -33,6 +33,7 @@ import { WorkspaceTab } from "../components/settings/WorkspaceTab";
 import { useCan } from "../lib/permissions/client";
 
 import { CloudOff } from "lucide-react";
+import { isDemoMode } from "../demo";
 import { useOnline } from "../hooks/useOnline";
 
 type TabType =
@@ -143,7 +144,7 @@ export const SettingsPage: React.FC = () => {
       label: t("settings.tabs.billing"),
       icon: CreditCard,
       requiresNetwork: true,
-      show: canAccessBilling,
+      show: canAccessBilling && !isDemoMode(),
     },
     {
       id: "general",
