@@ -41,11 +41,11 @@ export async function seedDemoDatabase(
         /* already exists — ignore */
       }),
     ),
-    ...agendaEvents.map((doc) =>
-      db.agendaEvents.upsert(doc).catch(() => {
+    ...agendaEvents.map((doc) => {
+      return db.agendaEvents.upsert(doc).catch(() => {
         /* already exists — ignore */
-      }),
-    ),
+      });
+    }),
   ]);
 
   markDemoSeeded();
