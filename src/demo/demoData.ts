@@ -1005,27 +1005,27 @@ export function generateDemoData(locale: string): DemoData {
   const makeResponsibilities = (eventIdx: number) => {
     const sets: Array<{ categoryId: string; names: string[] }[]> = [
       [
-        { categoryId: "cat-worship", names: ["Maria Santos"] },
-        { categoryId: "cat-preaching", names: ["Demo User"] },
-        { categoryId: "cat-sound", names: ["João Silva"] },
+        { categoryId: "leader", names: ["Maria Santos"] },
+        { categoryId: "preacher", names: ["Demo User"] },
+        { categoryId: "sound", names: ["João Silva"] },
       ],
       [
-        { categoryId: "cat-worship", names: ["Maria Santos", "Demo User"] },
-        { categoryId: "cat-projection", names: ["João Silva"] },
+        { categoryId: "leader", names: ["Maria Santos", "Demo User"] },
+        { categoryId: "projection", names: ["João Silva"] },
       ],
       [
-        { categoryId: "cat-sound", names: ["João Silva"] },
-        { categoryId: "cat-projection", names: ["Maria Santos"] },
-        { categoryId: "cat-reception", names: ["Demo User"] },
+        { categoryId: "sound", names: ["João Silva"] },
+        { categoryId: "projection", names: ["Maria Santos"] },
+        { categoryId: "welcome", names: ["Demo User"] },
       ],
       [
-        { categoryId: "cat-worship", names: ["Demo User"] },
-        { categoryId: "cat-reception", names: ["João Silva", "Maria Santos"] },
+        { categoryId: "leader", names: ["Demo User"] },
+        { categoryId: "welcome", names: ["João Silva", "Maria Santos"] },
       ],
       [
-        { categoryId: "cat-preaching", names: ["Demo User"] },
-        { categoryId: "cat-sound", names: ["João Silva"] },
-        { categoryId: "cat-worship", names: ["Maria Santos"] },
+        { categoryId: "preacher", names: ["Demo User"] },
+        { categoryId: "sound", names: ["João Silva"] },
+        { categoryId: "leader", names: ["Maria Santos"] },
       ],
     ];
     return (sets[eventIdx % sets.length] ?? []).map((r) => ({

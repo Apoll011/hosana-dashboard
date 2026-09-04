@@ -41,11 +41,31 @@ export const DEMO_ORGANIZATION: Organization = {
       },
       agenda: {
         responsibilityCategories: [
-          { id: "cat-worship", label: "Louvor", icon: "music", color: "violet" },
-          { id: "cat-preaching", label: "Pregação", icon: "mic", color: "amber" },
-          { id: "cat-sound", label: "Som", icon: "volume", color: "sky" },
-          { id: "cat-projection", label: "Projeção", icon: "monitor", color: "emerald" },
-          { id: "cat-reception", label: "Recepção", icon: "heart", color: "rose" },
+          {
+            id: "leader",
+            label: "Louvor",
+            icon: "music",
+            color: "violet",
+          },
+          {
+            id: "preacher",
+            label: "Pregação",
+            icon: "mic",
+            color: "amber",
+          },
+          { id: "sound", label: "Som", icon: "volume", color: "sky" },
+          {
+            id: "projection",
+            label: "Projeção",
+            icon: "monitor",
+            color: "emerald",
+          },
+          {
+            id: "welcome",
+            label: "Recepção",
+            icon: "heart",
+            color: "rose",
+          },
         ],
       },
       appearance: {
