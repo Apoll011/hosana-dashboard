@@ -67,12 +67,12 @@ const LOCALE_DATA = {
       {
         title: "Digno És",
         artist: "Hosanna! Music",
-        tags: ["louvor", "adoração"],
+        tags: ["louvor", "adoração", "destaque"],
       },
       {
         title: "Grande é o Senhor",
         artist: "Igreja Universal",
-        tags: ["hino", "clássico"],
+        tags: ["hino", "clássico", "destaque"],
       },
       {
         title: "Santo Espírito",
@@ -184,12 +184,12 @@ const LOCALE_DATA = {
       {
         title: "Worthy is the Lamb",
         artist: "Hillsong",
-        tags: ["worship", "praise"],
+        tags: ["worship", "praise", "featured"],
       },
       {
         title: "Great is Thy Faithfulness",
         artist: "Traditional",
-        tags: ["hymn", "classic"],
+        tags: ["hymn", "classic", "featured"],
       },
       {
         title: "Holy Spirit",
@@ -297,12 +297,12 @@ const LOCALE_DATA = {
       {
         title: "Digno Eres",
         artist: "Hosanna! Music",
-        tags: ["alabanza", "adoración"],
+        tags: ["alabanza", "adoración", "destacada"],
       },
       {
         title: "Grande es tu Fidelidad",
         artist: "Tradicional",
-        tags: ["himno", "clásico"],
+        tags: ["himno", "clásico", "destacada"],
       },
       {
         title: "Espíritu Santo",
@@ -418,7 +418,7 @@ function resolveLocale(locale: string): SupportedLocale {
 }
 
 // ---------------------------------------------------------------------------
-// ChordPro song content generator
+// ChordPro song content generator (plain songs)
 // ---------------------------------------------------------------------------
 
 const SAMPLE_CHORD_PROGRESSIONS = [
@@ -451,6 +451,361 @@ function makeSongContent(title: string, artist: string, idx: number): string {
     "{end_of_chorus}",
   ].join("\n");
 }
+
+// ---------------------------------------------------------------------------
+// ChordPro "showcase" songs — hand-authored per locale so the demo library
+// actually demonstrates the parser's richer features: multiple sections,
+// repeats, comments/comment boxes, an instrumental chord grid, a tab
+// section, and an alternate arrangement via {start_of_version}/{end_of_version}.
+// These replace the generated content for song index 0 in each locale.
+// ---------------------------------------------------------------------------
+
+const SHOWCASE_SONG_CONTENT: Record<SupportedLocale, string> = {
+  pt: `{title: Digno És}
+{artist: Hosanna! Music}
+{key: G}
+{original_key: F}
+{capo: 1}
+{tempo: 72}
+{time: 4/4}
+{duration: 4:35}
+{ccli: 1234567}
+{youtube: https://youtube.com/watch?v=demo}
+
+{c: Intro suave, apenas piano}
+
+{start_of_verse: Verso 1}
+[G]Tu és digno, [C]Senhor e [D]Rei
+[Em]Toda honra [C]a Ti [D]pertence
+[G]Reinas para [C]sempre, [D]eternamente
+[Em]Nada se com[C]para ao Teu [D]amor
+{end_of_verse}
+
+{start_of_verse: Verso 2}
+[G]Vim adorar-[C]Te, de [D]coração
+[Em]Render[C]-me diante do Teu [D]trono
+[G]Tua presença [C]enche este [D]lugar
+[Em]Glória e [C]louvor ao Teu [D]nome
+{end_of_verse}
+
+{start_of_chorus: Refrão}
+[C]Digno és, [G]digno és
+[D]O Cordeiro que foi [Em]morto
+[C]Digno és, [G]digno és
+[D]De receber [G]toda honra
+{end_of_chorus}
+{repeat: 2}
+
+{start_of_bridge: Ponte}
+[Em]Santo, [C]santo, [G]santo é o [D]Senhor
+[Em]Digno, [C]digno, [G]digno é o [D]Senhor
+{end_of_bridge}
+{repeat: 3}
+
+{c: Instrumental — banda entra em conjunto}
+
+{start_of_grid: Grade instrumental}
+|: [G]  [C]  |  [D]  [Em] :|
+{end_of_grid}
+
+{start_of_tab: Introdução (violão)}
+e|--------0-------0------|
+B|------1-------1--------|
+G|----0-------0----------|
+D|--2-------2------------|
+A|-----------------------|
+E|-3---------------------|
+{end_of_tab}
+
+{cb: Nota de regência: reduzir dinâmica na última repetição do refrão}
+
+{start_of_version: Acústica}
+{tempo: 64}
+{capo: 3}
+
+{start_of_verse: Verso 1}
+[G]Tu és digno, [C]Senhor e [D]Rei
+[Em]Toda honra [C]a Ti [D]pertence
+{end_of_verse}
+
+{start_of_chorus: Refrão}
+[C]Digno és, [G]digno és
+[D]O Cordeiro que foi [Em]morto
+{end_of_chorus}
+{end_of_version}
+`,
+
+  en: `{title: Worthy is the Lamb}
+{artist: Hillsong}
+{key: G}
+{original_key: F}
+{capo: 1}
+{tempo: 72}
+{time: 4/4}
+{duration: 4:35}
+{ccli: 1234567}
+{youtube: https://youtube.com/watch?v=demo}
+
+{c: Soft intro, piano only}
+
+{start_of_verse: Verse 1}
+[G]You are worthy, [C]Lord and [D]King
+[Em]Every honor [C]belongs to [D]You
+[G]You reign for[C]ever, [D]eternally
+[Em]Nothing com[C]pares to Your [D]love
+{end_of_verse}
+
+{start_of_verse: Verse 2}
+[G]I have come to [C]worship [D]You
+[Em]Falling [C]down before Your [D]throne
+[G]Your presence [C]fills this [D]place
+[Em]Glory and [C]praise to Your [D]name
+{end_of_verse}
+
+{start_of_chorus: Chorus}
+[C]Worthy is, [G]worthy is
+[D]The Lamb who once was [Em]slain
+[C]Worthy is, [G]worthy is
+[D]To receive [G]all the honor
+{end_of_chorus}
+{repeat: 2}
+
+{start_of_bridge: Bridge}
+[Em]Holy, [C]holy, [G]holy is the [D]Lord
+[Em]Worthy, [C]worthy, [G]worthy is the [D]Lord
+{end_of_bridge}
+{repeat: 3}
+
+{c: Instrumental — full band comes in}
+
+{start_of_grid: Instrumental grid}
+|: [G]  [C]  |  [D]  [Em] :|
+{end_of_grid}
+
+{start_of_tab: Intro (acoustic guitar)}
+e|--------0-------0------|
+B|------1-------1--------|
+G|----0-------0----------|
+D|--2-------2------------|
+A|-----------------------|
+E|-3---------------------|
+{end_of_tab}
+
+{cb: Conductor's note: pull back dynamics on the final chorus repeat}
+
+{start_of_version: Acoustic}
+{tempo: 64}
+{capo: 3}
+
+{start_of_verse: Verse 1}
+[G]You are worthy, [C]Lord and [D]King
+[Em]Every honor [C]belongs to [D]You
+{end_of_verse}
+
+{start_of_chorus: Chorus}
+[C]Worthy is, [G]worthy is
+[D]The Lamb who once was [Em]slain
+{end_of_chorus}
+{end_of_version}
+`,
+
+  es: `{title: Digno Eres}
+{artist: Hosanna! Music}
+{key: G}
+{original_key: F}
+{capo: 1}
+{tempo: 72}
+{time: 4/4}
+{duration: 4:35}
+{ccli: 1234567}
+{youtube: https://youtube.com/watch?v=demo}
+
+{c: Intro suave, solo piano}
+
+{start_of_verse: Verso 1}
+[G]Tú eres digno, [C]Señor y [D]Rey
+[Em]Todo honor [C]te per[D]tenece
+[G]Reinas para [C]siempre, [D]eternamente
+[Em]Nada se com[C]para a Tu [D]amor
+{end_of_verse}
+
+{start_of_verse: Verso 2}
+[G]Vengo a adorar[C]te, de [D]corazón
+[Em]Postrán[C]dome ante Tu [D]trono
+[G]Tu presencia [C]llena este [D]lugar
+[Em]Gloria y [C]alabanza a Tu [D]nombre
+{end_of_verse}
+
+{start_of_chorus: Coro}
+[C]Digno eres, [G]digno eres
+[D]El Cordero que fue [Em]inmolado
+[C]Digno eres, [G]digno eres
+[D]De recibir [G]todo el honor
+{end_of_chorus}
+{repeat: 2}
+
+{start_of_bridge: Puente}
+[Em]Santo, [C]santo, [G]santo es el [D]Señor
+[Em]Digno, [C]digno, [G]digno es el [D]Señor
+{end_of_bridge}
+{repeat: 3}
+
+{c: Instrumental — entra la banda completa}
+
+{start_of_grid: Grilla instrumental}
+|: [G]  [C]  |  [D]  [Em] :|
+{end_of_grid}
+
+{start_of_tab: Introducción (guitarra acústica)}
+e|--------0-------0------|
+B|------1-------1--------|
+G|----0-------0----------|
+D|--2-------2------------|
+A|-----------------------|
+E|-3---------------------|
+{end_of_tab}
+
+{cb: Nota de dirección: bajar la dinámica en la última repetición del coro}
+
+{start_of_version: Acústica}
+{tempo: 64}
+{capo: 3}
+
+{start_of_verse: Verso 1}
+[G]Tú eres digno, [C]Señor y [D]Rey
+[Em]Todo honor [C]te per[D]tenece
+{end_of_verse}
+
+{start_of_chorus: Coro}
+[C]Digno eres, [G]digno eres
+[D]El Cordero que fue [Em]inmolado
+{end_of_chorus}
+{end_of_version}
+`,
+};
+
+/**
+ * Second, lighter showcase — a classic hymn arranged with a capo, a
+ * fingerstyle tab intro, and a comment, but no version/grid. Gives the
+ * library a second "not just plain verse/chorus" example without
+ * repeating the exact same feature set as the flagship showcase song.
+ */
+const HYMN_SHOWCASE_CONTENT: Record<SupportedLocale, string> = {
+  pt: `{title: Grande é o Senhor}
+{artist: Igreja Universal}
+{key: D}
+{capo: 2}
+{tempo: 80}
+{time: 3/4}
+{duration: 3:50}
+{ccli: 7654321}
+
+{c: Tocar com dedilhado suave}
+
+{start_of_tab: Dedilhado}
+e|----0-----0-----0------|
+B|--1-----1-----1--------|
+G|0-----0-----0----------|
+D|-----------------------|
+A|-----------------------|
+E|3----------------------|
+{end_of_tab}
+
+{start_of_verse: Verso 1}
+[D]Grande é o [G]Senhor e [D]digno de [A]louvor
+[D]Na cidade [G]do nosso [A]Deus, [D]no Seu monte [A]santo
+{end_of_verse}
+
+{start_of_chorus: Refrão}
+[G]Grande é o [D]Senhor, [A]grande é o [D]Senhor
+[G]Digno é de [D]toda a [A]honra e [D]glória
+{end_of_chorus}
+{repeat: 2}
+
+{cb: Terminar em ritardando na última repetição}
+`,
+
+  en: `{title: Great is Thy Faithfulness}
+{artist: Traditional}
+{key: D}
+{capo: 2}
+{tempo: 80}
+{time: 3/4}
+{duration: 3:50}
+{ccli: 7654321}
+
+{c: Play with a gentle fingerstyle pattern}
+
+{start_of_tab: Fingerstyle intro}
+e|----0-----0-----0------|
+B|--1-----1-----1--------|
+G|0-----0-----0----------|
+D|-----------------------|
+A|-----------------------|
+E|3----------------------|
+{end_of_tab}
+
+{start_of_verse: Verse 1}
+[D]Great is the [G]Lord and [D]worthy of [A]praise
+[D]In the city [G]of our [A]God, [D]on His holy [A]mountain
+{end_of_verse}
+
+{start_of_chorus: Chorus}
+[G]Great is the [D]Lord, [A]great is the [D]Lord
+[G]Worthy of [D]all the [A]honor and [D]glory
+{end_of_chorus}
+{repeat: 2}
+
+{cb: End with a ritardando on the final repeat}
+`,
+
+  es: `{title: Grande es tu Fidelidad}
+{artist: Tradicional}
+{key: D}
+{capo: 2}
+{tempo: 80}
+{time: 3/4}
+{duration: 3:50}
+{ccli: 7654321}
+
+{c: Tocar con arpegio suave}
+
+{start_of_tab: Introducción con arpegio}
+e|----0-----0-----0------|
+B|--1-----1-----1--------|
+G|0-----0-----0----------|
+D|-----------------------|
+A|-----------------------|
+E|3----------------------|
+{end_of_tab}
+
+{start_of_verse: Verso 1}
+[D]Grande es el [G]Señor y [D]digno de [A]alabanza
+[D]En la ciudad [G]de nuestro [A]Dios, [D]en Su monte [A]santo
+{end_of_verse}
+
+{start_of_chorus: Coro}
+[G]Grande es el [D]Señor, [A]grande es el [D]Señor
+[G]Digno es de [D]todo el [A]honor y [D]gloria
+{end_of_chorus}
+{repeat: 2}
+
+{cb: Terminar con un ritardando en la última repetición}
+`,
+};
+
+// ---------------------------------------------------------------------------
+// Agenda responsibilities — map demo member *names* to their actual
+// OrganizationMember ids (from mock-auth's DEMO_ORGANIZATION.members) so
+// that anything keying off `memberId` (avatars, profile links, filters)
+// resolves correctly instead of pointing at nonexistent "demo-member-N" ids.
+// ---------------------------------------------------------------------------
+
+const DEMO_MEMBER_ID_BY_NAME: Record<string, string> = {
+  "Demo User": "demo-member-id",
+  "Maria Santos": "demo-member-2",
+  "João Silva": "demo-member-3",
+};
 
 // ---------------------------------------------------------------------------
 // Main generator
@@ -489,25 +844,45 @@ export function generateDemoData(locale: string): DemoData {
   }));
 
   // -------------------------------------------------------------------------
-  // Songs — spread across folders
+  // Songs — spread across folders. Index 0 and 1 use hand-authored
+  // "showcase" ChordPro content so the demo library actually exercises
+  // verses/chorus/bridge, repeats, comments, an instrumental grid, tab
+  // sections, capo/original-key/ccli/youtube/duration metadata, and an
+  // alternate arrangement via {start_of_version}. Every other song keeps
+  // the lightweight generated content.
   // -------------------------------------------------------------------------
   const songIds = L.songs.map(() => crypto.randomUUID());
-  const folderAssignment = [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 2, 2, 3];
-  const songs: SongDocType[] = L.songs.map((s, i) => ({
-    id: songIds[i],
-    title: s.title,
-    artist: s.artist,
-    content: makeSongContent(s.title, s.artist, i),
-    folderId: folderIds[folderAssignment[i] ?? 0],
-    path: `${L.folders[folderAssignment[i] ?? 0]}/${s.title.replace(/\s/g, "_")}.chopro`,
-    tags: s.tags as string[],
-    song_number: i + 1,
-    createdAt: nowIso,
-    updatedAt: nowIso,
-    _deleted: false,
-    isDeleted: false,
-    purgeAt: null,
-  }));
+  const folderAssignment = [null, null, 0, 0, 0, 1, 1, 1, 1, 1, 1, 2, 2, 3];
+  const songs: SongDocType[] = L.songs.map((s, i) => {
+    let content: string;
+    if (i === 0) {
+      content = SHOWCASE_SONG_CONTENT[loc];
+    } else if (i === 1) {
+      content = HYMN_SHOWCASE_CONTENT[loc];
+    } else {
+      content = makeSongContent(s.title, s.artist, i);
+    }
+
+    return {
+      id: songIds[i],
+      title: s.title,
+      artist: s.artist,
+      content,
+      folderId:
+        folderAssignment[i] === null ? null : folderIds[folderAssignment[i]],
+      path:
+        folderAssignment[i] === null
+          ? `${s.title.replace(/\s/g, "_")}.chopro`
+          : `${L.folders[folderAssignment[i]]}/${s.title.replace(/\s/g, "_")}.chopro`,
+      tags: s.tags as string[],
+      song_number: i + 1,
+      createdAt: nowIso,
+      updatedAt: nowIso,
+      _deleted: false,
+      isDeleted: false,
+      purgeAt: null,
+    };
+  });
 
   // -------------------------------------------------------------------------
   // Services — relative to today's Sundays
@@ -634,10 +1009,14 @@ export function generateDemoData(locale: string): DemoData {
         { categoryId: "cat-preaching", names: ["Demo User"] },
         { categoryId: "cat-sound", names: ["João Silva"] },
       ],
-      [{ categoryId: "cat-worship", names: ["Maria Santos", "Demo User"] }],
+      [
+        { categoryId: "cat-worship", names: ["Maria Santos", "Demo User"] },
+        { categoryId: "cat-projection", names: ["João Silva"] },
+      ],
       [
         { categoryId: "cat-sound", names: ["João Silva"] },
         { categoryId: "cat-projection", names: ["Maria Santos"] },
+        { categoryId: "cat-reception", names: ["Demo User"] },
       ],
       [
         { categoryId: "cat-worship", names: ["Demo User"] },
@@ -646,6 +1025,7 @@ export function generateDemoData(locale: string): DemoData {
       [
         { categoryId: "cat-preaching", names: ["Demo User"] },
         { categoryId: "cat-sound", names: ["João Silva"] },
+        { categoryId: "cat-worship", names: ["Maria Santos"] },
       ],
     ];
     return (sets[eventIdx % sets.length] ?? []).map((r) => ({
@@ -654,7 +1034,7 @@ export function generateDemoData(locale: string): DemoData {
       assignees: r.names.map((name, i) => ({
         id: `assignee-${eventIdx}-${i}`,
         name,
-        memberId: `demo-member-${i + 1}`,
+        memberId: DEMO_MEMBER_ID_BY_NAME[name] ?? `demo-member-${i + 1}`,
         avatarUrl: null,
       })),
     }));
