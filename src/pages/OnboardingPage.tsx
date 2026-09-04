@@ -11,15 +11,14 @@ import {
   ArrowRight,
   Building2,
   Check,
+  CheckCircle2,
   CreditCard,
   LogOut,
   MailCheck,
   Moon,
   PlusCircle,
-  Search,
   Sun,
-  User,
-  Users,
+  XCircle,
 } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import bg from "../assets/images/background.webp";
@@ -46,21 +45,47 @@ interface UserInvitation {
 }
 
 export const OnboardingPage: React.FC = () => {
-  const { user, organization, hasAcceptedTrial, logout, refetch } = useAuth();
+  const { organization, hasAcceptedTrial, logout, refetch } = useAuth();
   const { darkMode, toggleDarkMode } = useTheme();
   const { navigate } = useAppNavigate();
   const { t, language } = useI18n();
   const { hasStarted, pendingAction, refresh, startCheckout } =
     useSubscription();
-  const [mode, setMode] = useState<
-    "choose" | "create" | "join" | "pending" | "trial"
-  >("choose");
+  const [mode, setMode] = useState<"choose" | "create" | "trial">("choose");
   const [orgName, setOrgName] = useState("");
   const [orgSlug, setOrgSlug] = useState("");
-  const [searchSlug, setSearchSlug] = useState("");
+  const [slugStatus, setSlugStatus] = useState<
+    "idle" | "checking" | "available" | "taken"
+  >("idle");
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
-  const [pendingOrgName, setPendingOrgName] = useState("");
+
+  // Check slug availability with debounce
+  useEffect(() => {
+    const trimmed = orgSlug.trim();
+    if (!trimmed) {
+      setSlugStatus("idle");
+      return;
+    }
+
+    setSlugStatus("checking");
+    const timer = setTimeout(async () => {
+      try {
+        const { error } = await authClient.organization.checkSlug({
+          slug: trimmed,
+        });
+        if (error) {
+          setSlugStatus("taken");
+        } else {
+          setSlugStatus("available");
+        }
+      } catch {
+        setSlugStatus("idle");
+      }
+    }, 400);
+
+    return () => clearTimeout(timer);
+  }, [orgSlug]);
 
   // Newly-created org, kept around just long enough to offer the trial step
   const [newOrg, setNewOrg] = useState<{ id: string; slug: string } | null>(
@@ -238,29 +263,14 @@ export const OnboardingPage: React.FC = () => {
     }
   };
 
-  const handleJoin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setErrorMsg("");
-    setIsLoading(true);
-
-    setTimeout(() => {
-      setIsLoading(false);
-      setPendingOrgName(searchSlug);
-      setMode("pending");
-    }, 1000);
-  };
-
   const getHeaderTitle = () => {
     if (mode === "create") return t("onboarding.createOrgTab");
-    if (mode === "join") return t("onboarding.joinOrgTab");
-    if (mode === "pending") return "Aprovação Pendente";
     if (mode === "trial") return t("onboarding.trial.title");
     return "Hosanna Studio";
   };
 
   const getHeaderSubtitle = () => {
     if (mode === "create") return t("onboarding.step1Desc");
-    if (mode === "join") return t("onboarding.joinInviteDesc");
     if (mode === "trial") return t("onboarding.trial.desc");
     if (mode === "choose") return t("onboarding.step1Desc");
     return undefined;
@@ -276,7 +286,7 @@ export const OnboardingPage: React.FC = () => {
           className="w-full h-full object-cover scale-105 opacity-35 dark:opacity-25 transition-all duration-700 blur-[3px]"
           referrerPolicy="no-referrer"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-slate-100/70 via-slate-100/85 to-slate-200/95 dark:from-[#131314]/85 dark:via-[#131314]/92 dark:to-[#131314]/98 transition-colors duration-500" />
+        <div className="absolute inset-0 bg-linear-to-b from-slate-100/70 via-slate-100/85 to-slate-200/95 dark:from-[#131314]/85 dark:via-[#131314]/92 dark:to-[#131314]/98 transition-colors duration-500" />
       </div>
 
       {/* Top action header */}
@@ -313,18 +323,10 @@ export const OnboardingPage: React.FC = () => {
       </header>
 
       {/* Main Center Stage */}
-      <main className="flex-1 w-full flex items-center justify-center p-4 sm:p-6 md:p-8 z-10">
-        <div className="w-full max-w-[448px] sm:max-w-[496px] md:max-w-[540px] bg-white/95 dark:bg-[#1e1f20]/95 backdrop-blur-xl sm:border sm:border-slate-200/80 dark:sm:border-[#303134]/90 rounded-2xl sm:rounded-[28px] shadow-lg shadow-black/5 dark:shadow-black/40 px-6 py-8 sm:p-10 md:p-12 transition-all">
+      <main className="flex-1 w-full flex items-center justify-center p-2 sm:p-3 md:p-4 z-10">
+        <div className="w-full max-w-md sm:max-w-124 md:max-w-135 bg-white/95 dark:bg-[#1e1f20]/95 backdrop-blur-xl sm:border sm:border-slate-200/80 dark:sm:border-[#303134]/90 rounded-2xl sm:rounded-[28px] shadow-lg shadow-black/5 dark:shadow-black/40 px-6 py-4 sm:p-6 md:p-8 transition-all">
           {/* Header Brand & Titles */}
           <div className="flex flex-col items-center text-center mb-7 sm:mb-8 select-none">
-            <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center mb-3 bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/10 shadow-xs">
-              <img
-                src="/favicon.png"
-                alt="Hosanna Studio"
-                className="w-8 h-8 sm:w-9 sm:h-9 object-contain"
-              />
-            </div>
-
             <h1 className="text-2xl sm:text-[26px] font-normal tracking-tight text-slate-900 dark:text-slate-100 font-sans">
               {getHeaderTitle()}
             </h1>
@@ -340,52 +342,6 @@ export const OnboardingPage: React.FC = () => {
             <div className="mb-5 p-3 rounded-lg bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800/60 text-red-800 dark:text-red-300 text-xs sm:text-sm font-medium flex items-start gap-2.5 animate-in fade-in duration-200">
               <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-red-600 dark:text-red-400" />
               <span className="flex-1 leading-snug">{errorMsg}</span>
-            </div>
-          )}
-
-          {/* Mode: Pending */}
-          {mode === "pending" && (
-            <div className="text-center space-y-5">
-              <div className="w-16 h-16 bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 rounded-full flex items-center justify-center mx-auto shadow-xs">
-                <MailCheck className="w-8 h-8" />
-              </div>
-              <p className="text-slate-600 dark:text-slate-400 text-sm sm:text-[15px]">
-                O seu pedido para aderir à organização{" "}
-                <strong className="text-slate-900 dark:text-white">
-                  {pendingOrgName}
-                </strong>{" "}
-                aguarda aprovação de um administrador.
-              </p>
-
-              <div className="bg-slate-50 dark:bg-white/5 border border-slate-200/80 dark:border-white/10 rounded-xl p-4 text-left space-y-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-300 font-medium">
-                    <User className="w-5 h-5" />
-                  </div>
-                  <div className="overflow-hidden">
-                    <p className="text-sm font-medium text-slate-900 dark:text-white truncate">
-                      {user?.name}
-                    </p>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
-                      {user?.email}
-                    </p>
-                  </div>
-                </div>
-                <div className="text-xs text-amber-700 dark:text-amber-400 font-medium bg-amber-50 dark:bg-amber-950/40 rounded-md py-1 px-2.5 inline-block">
-                  Estado: Em análise
-                </div>
-              </div>
-
-              <div className="pt-2">
-                <Button
-                  variant="outline"
-                  className="w-full h-10 sm:h-11 rounded-full border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5 font-medium text-sm"
-                  onClick={() => logout()}
-                >
-                  <LogOut className="w-4 h-4 mr-2" />
-                  {t("sidebar.logout")}
-                </Button>
-              </div>
             </div>
           )}
 
@@ -584,25 +540,6 @@ export const OnboardingPage: React.FC = () => {
                   </div>
                   <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 group-hover:translate-x-0.5 transition-all" />
                 </button>
-
-                <button
-                  type="button"
-                  onClick={() => setMode("join")}
-                  className="w-full flex items-center p-4 border border-slate-200 dark:border-slate-700/80 hover:border-blue-600 dark:hover:border-blue-400 rounded-xl transition-all group text-left bg-transparent hover:bg-slate-50 dark:hover:bg-white/5 cursor-pointer"
-                >
-                  <div className="w-10 h-10 bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-400 rounded-full flex items-center justify-center mr-3.5 group-hover:scale-105 transition-transform">
-                    <Users className="w-5 h-5" />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="font-medium text-slate-900 dark:text-white text-sm">
-                      {t("onboarding.joinOrgTab")}
-                    </h3>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">
-                      {t("onboarding.joinInviteDesc")}
-                    </p>
-                  </div>
-                  <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 group-hover:translate-x-0.5 transition-all" />
-                </button>
               </div>
 
               <div className="pt-2 text-center">
@@ -636,7 +573,25 @@ export const OnboardingPage: React.FC = () => {
                   setOrgSlug(e.target.value.toLowerCase().replace(/\s+/g, "-"))
                 }
                 required
-                helperText="hosanna.app/slug"
+                error={
+                  slugStatus === "taken" ? t("onboarding.slugTaken") : undefined
+                }
+                helperText={
+                  slugStatus === "checking"
+                    ? t("onboarding.checkingSlug")
+                    : slugStatus === "available"
+                      ? t("onboarding.slugAvailable")
+                      : "hosanna.app/slug"
+                }
+                trailingIcon={
+                  slugStatus === "checking" ? (
+                    <Spinner size="sm" />
+                  ) : slugStatus === "available" ? (
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                  ) : slugStatus === "taken" ? (
+                    <XCircle className="w-4 h-4 text-red-600 dark:text-red-400" />
+                  ) : undefined
+                }
               />
 
               <div className="flex items-center justify-between gap-3 pt-3">
@@ -651,7 +606,12 @@ export const OnboardingPage: React.FC = () => {
 
                 <Button
                   type="submit"
-                  disabled={isLoading || !orgName || !orgSlug}
+                  disabled={
+                    isLoading ||
+                    !orgName.trim() ||
+                    !orgSlug.trim() ||
+                    slugStatus !== "available"
+                  }
                   isLoading={isLoading}
                   className="h-10 sm:h-11 px-6 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm transition-all shadow-none border-0"
                 >
@@ -660,46 +620,11 @@ export const OnboardingPage: React.FC = () => {
               </div>
             </form>
           )}
-
-          {/* Mode: Join */}
-          {mode === "join" && (
-            <form onSubmit={handleJoin} className="space-y-4">
-              <GoogleTextField
-                label={t("onboarding.slugLabel")}
-                placeholder={t("onboarding.slugPlaceholder")}
-                value={searchSlug}
-                onChange={(e) => setSearchSlug(e.target.value)}
-                leadingIcon={<Search className="w-4 h-4" />}
-                required
-                autoFocus
-              />
-
-              <div className="flex items-center justify-between gap-3 pt-3">
-                <button
-                  type="button"
-                  onClick={() => setMode("choose")}
-                  className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 py-2 cursor-pointer"
-                >
-                  <ArrowLeft className="w-4 h-4" />
-                  <span>{t("common.back")}</span>
-                </button>
-
-                <Button
-                  type="submit"
-                  disabled={isLoading || !searchSlug}
-                  isLoading={isLoading}
-                  className="h-10 sm:h-11 px-6 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm transition-all shadow-none border-0"
-                >
-                  {t("onboarding.checkInvitesBtn")}
-                </Button>
-              </div>
-            </form>
-          )}
         </div>
       </main>
 
       {/* Footer */}
-      <footer className="w-full max-w-[540px] mx-auto px-6 py-4 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-500 dark:text-slate-400 shrink-0 z-10">
+      <footer className="w-full max-w-135 mx-auto px-6 py-4 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-500 dark:text-slate-400 shrink-0 z-10">
         <div className="flex items-center gap-2">
           <span>Hosanna Studio &copy; {new Date().getFullYear()}</span>
         </div>

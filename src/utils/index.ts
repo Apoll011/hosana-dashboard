@@ -4,7 +4,8 @@
  */
 
 import { getApiClient } from "@/src/api";
-import { Song } from "@/src/types";
+import { ParsedSong, SearchableSong, Song } from "@/src/types";
+import { filter as liqeFilter, parse as liqeParse } from "liqe";
 import { CifraResult, FolderNode } from "../types";
 
 // ---------------------------------------------------------------------------
@@ -201,4 +202,131 @@ export function getAvatarGradient(seed: string): string {
     hash |= 0;
   }
   return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
+}
+
+/**
+ * Converts duration strings like "3:45", "03:45", "1:02:15", or "225" into seconds as a number.
+ */
+export function parseDurationToSeconds(
+  durationStr: string | undefined,
+): number | undefined {
+  if (!durationStr) return undefined;
+  const trimmed = durationStr.trim();
+  if (!trimmed) return undefined;
+
+  // If already purely digits, treat as seconds
+  if (/^\d+$/.test(trimmed)) {
+    return parseInt(trimmed, 10);
+  }
+
+  // Handle mm:ss or hh:mm:ss
+  const parts = trimmed.split(":").map((p) => parseInt(p, 10));
+  if (parts.some(isNaN)) return undefined;
+
+  if (parts.length === 2) {
+    const [minutes, seconds] = parts;
+    return minutes * 60 + seconds;
+  }
+  if (parts.length === 3) {
+    const [hours, minutes, seconds] = parts;
+    return hours * 3600 + minutes * 60 + seconds;
+  }
+
+  return undefined;
+}
+
+/**
+ * Converts a ParsedSong into a SerchableSong (SearchableSong) representation
+ * optimized for in-memory Lucene/Liqe searching.
+ */
+export function parsedSongToSearchableSong(
+  parsedSong: ParsedSong,
+): SearchableSong {
+  const meta = parsedSong.metadata || {};
+
+  // Year parsing
+  let yearNum: number | undefined;
+  if (meta.year) {
+    const parsedYear = parseInt(meta.year, 10);
+    if (!isNaN(parsedYear)) {
+      yearNum = parsedYear;
+    }
+  }
+
+  // Tempo parsing
+  let tempoNum: number | undefined;
+  if (meta.tempo) {
+    const parsedTempo = parseInt(meta.tempo, 10);
+    if (!isNaN(parsedTempo)) {
+      tempoNum = parsedTempo;
+    }
+  }
+
+  // Song number parsing
+  let songNum: number | undefined;
+  if (parsedSong.song_number !== null && parsedSong.song_number !== undefined) {
+    songNum = parsedSong.song_number;
+  } else if (meta.songNumber) {
+    const parsed = parseInt(meta.songNumber, 10);
+    if (!isNaN(parsed)) {
+      songNum = parsed;
+    }
+  }
+
+  // Duration in seconds
+  const durationNum = parseDurationToSeconds(meta.duration);
+
+  return {
+    id: parsedSong.id,
+    title: parsedSong.title || meta.title || "",
+    subtitle: meta.subtitle || undefined,
+    artist: parsedSong.artist || meta.artist || "",
+    content: parsedSong.content || "",
+    composer: meta.composer || undefined,
+    year: yearNum,
+    lyricist: meta.lyricist || undefined,
+    song_number: songNum,
+    path: parsedSong.path || "",
+    tags: Array.isArray(parsedSong.tags) ? parsedSong.tags : [],
+    folder: parsedSong.folder || "",
+    album: meta.album || undefined,
+    key: meta.key || undefined,
+    originalKey: meta.originalKey || undefined,
+    tempo: tempoNum,
+    time: meta.time || undefined,
+    capo: meta.capo || undefined,
+    ccli: meta.ccli || undefined,
+    duration: durationNum,
+    youtube: meta.youtube || undefined,
+  };
+}
+
+/**
+ * Parses and executes a Liqe query against a collection of SearchableSongs.
+ * Falls back gracefully to standard substring search if the user input is an incomplete
+ * or invalid Liqe query string.
+ */
+export function filterSearchableSongsWithLiqe(
+  searchableSongs: readonly SearchableSong[],
+  rawQuery: string,
+): SearchableSong[] {
+  const trimmed = rawQuery.trim();
+  if (!trimmed) return [...searchableSongs];
+
+  try {
+    const ast = liqeParse(trimmed);
+    return liqeFilter(ast, searchableSongs) as SearchableSong[];
+  } catch {
+    const lower = trimmed.toLowerCase();
+    return searchableSongs.filter((song) => {
+      return (
+        song.title.toLowerCase().includes(lower) ||
+        song.artist.toLowerCase().includes(lower) ||
+        song.content.toLowerCase().includes(lower) ||
+        song.folder.toLowerCase().includes(lower) ||
+        song.tags.some((t) => t.toLowerCase().includes(lower)) ||
+        (song.key && song.key.toLowerCase().includes(lower))
+      );
+    });
+  }
 }

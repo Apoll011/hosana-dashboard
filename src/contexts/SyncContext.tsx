@@ -14,6 +14,7 @@ import React, {
 import { getDatabase, ReplicationManager, setupReplication } from "../db";
 import { SyncStatus } from "../types";
 import { useAuth } from "./AuthContext";
+import { isDemoMode } from "../demo/index";
 
 export interface ToastAction {
   label: string;
@@ -112,6 +113,12 @@ export const SyncProvider: React.FC<{ children: React.ReactNode }> = ({
         const db = await getDatabase();
         if (!isMounted) return;
 
+        // In demo mode, skip replication entirely — the DB is local-only.
+        if (isDemoMode()) {
+          setSyncStatus("local_only");
+          return;
+        }
+
         const repl = setupReplication(db);
         replicationManagerRef.current = repl;
 
@@ -140,6 +147,8 @@ export const SyncProvider: React.FC<{ children: React.ReactNode }> = ({
   }, [isAuthenticated]);
 
   const triggerSyncCheck = useCallback(async () => {
+    // No-op in demo mode — no server to sync with.
+    if (isDemoMode()) return;
     if (replicationManagerRef.current) {
       await replicationManagerRef.current.replicateNow();
     }

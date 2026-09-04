@@ -1419,6 +1419,9 @@ export const en: typeof pt = {
     orgNamePlaceholder: "e.g. Hosanna Church London",
     slugLabel: "Slug / Identifier (URL)",
     slugPlaceholder: "hosanna-church-london",
+    slugTaken: "This identifier is already in use.",
+    slugAvailable: "Identifier is available.",
+    checkingSlug: "Checking availability...",
     createOrgBtn: "Create & Continue",
     creatingOrgBtn: "Creating organization...",
     joinInviteDesc:

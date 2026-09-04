@@ -1435,6 +1435,9 @@ export const pt = {
     orgNamePlaceholder: "Ex: Igreja Hosanna Lisboa",
     slugLabel: "Identificador (URL)",
     slugPlaceholder: "igreja-hosanna-lisboa",
+    slugTaken: "Este identificador já está em uso.",
+    slugAvailable: "Identificador disponível.",
+    checkingSlug: "A verificar disponibilidade...",
     createOrgBtn: "Criar e Continuar",
     creatingOrgBtn: "A criar organização...",
     joinInviteDesc:
