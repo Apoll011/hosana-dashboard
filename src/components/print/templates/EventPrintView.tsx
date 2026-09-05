@@ -228,4 +228,3 @@ export const EventPrintView: React.FC<EventPrintViewProps> = ({
     </div>
   );
 };
-

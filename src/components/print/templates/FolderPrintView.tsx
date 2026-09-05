@@ -55,7 +55,9 @@ export const FolderPrintView: React.FC<FolderPrintViewProps> = ({
             churchShortName={churchShortName}
             accentColor={accentColor}
             title={folder.name}
-            subtitle={t("print.folder.songbookSubtitle", { count: String(songs.length) })}
+            subtitle={t("print.folder.songbookSubtitle", {
+              count: String(songs.length),
+            })}
             metaBadge={t("print.folder.badge")}
             options={options}
           />
@@ -87,10 +89,14 @@ export const FolderPrintView: React.FC<FolderPrintViewProps> = ({
                         : "border-slate-200 text-slate-500 font-semibold"
                     }`}
                   >
-                    <th className="py-2 px-2 w-12 text-center">{t("print.folder.numberCol")}</th>
+                    <th className="py-2 px-2 w-12 text-center">
+                      {t("print.folder.numberCol")}
+                    </th>
                     <th className="py-2 px-2">{t("print.folder.titleCol")}</th>
                     <th className="py-2 px-2">{t("print.folder.artistCol")}</th>
-                    <th className="py-2 px-2 w-20 text-center">{t("print.folder.keyCol")}</th>
+                    <th className="py-2 px-2 w-20 text-center">
+                      {t("print.folder.keyCol")}
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -152,4 +158,3 @@ export const FolderPrintView: React.FC<FolderPrintViewProps> = ({
     </div>
   );
 };
-

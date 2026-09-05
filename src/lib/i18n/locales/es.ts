@@ -1638,22 +1638,28 @@ export const es: typeof pt = {
     increaseFont: "Aumentar texto",
     settingsCard: {
       title: "Plantillas e Impresión",
-      description: "Configure la plantilla predeterminada de la organización para imprimir cánticos, carpetas, órdenes de culto y agendas.",
+      description:
+        "Configure la plantilla predeterminada de la organización para imprimir cánticos, carpetas, órdenes de culto y agendas.",
       testModel: "Probar Plantilla",
       visualFamily: "Familia de Plantillas Visual",
       layoutPresets: "Ajustes de Diseño y Datos",
       printChordsDefault: "Imprimir Acordes por Defecto",
-      printChordsDefaultDesc: "Cuando está activo, los cánticos se imprimen con acordes. Desactive para solo letras.",
+      printChordsDefaultDesc:
+        "Cuando está activo, los cánticos se imprimen con acordes. Desactive para solo letras.",
       twoColumnLayout: "Diseño en 2 Columnas",
-      twoColumnLayoutDesc: "Divide los versos en dos columnas verticales para aprovechar mejor el ancho del papel.",
+      twoColumnLayoutDesc:
+        "Divide los versos en dos columnas verticales para aprovechar mejor el ancho del papel.",
       churchHeader: "Encabezado con Identidad de la Iglesia",
-      churchHeaderDesc: "Muestra el nombre y logotipo oficial de la organización en la parte superior de todas las hojas impresas.",
+      churchHeaderDesc:
+        "Muestra el nombre y logotipo oficial de la organización en la parte superior de todas las hojas impresas.",
       pageBreak: "Salto de Página por Cántico / Elemento",
-      pageBreakDesc: "Garantiza que cada cántico o momento de culto comience en una nueva hoja de papel.",
+      pageBreakDesc:
+        "Garantiza que cada cántico o momento de culto comience en una nueva hoja de papel.",
       defaultFontSize: "Tamaño de Fuente por Defecto",
       defaultFontSizeDesc: "Ideal para lectura en atril (12–16)",
       customFooter: "Nota al Pie (Opcional)",
-      customFooterPlaceholder: "Ej: CCLI #12345 • Prohibida la reproducción no autorizada",
+      customFooterPlaceholder:
+        "Ej: CCLI #12345 • Prohibida la reproducción no autorizada",
       types: {
         classic: "Himnario / Serif",
         contemporary: "Escenario / Alto Contraste",
@@ -1665,22 +1671,26 @@ export const es: typeof pt = {
       modern: {
         name: "Moderno Minimalista",
         badge: "Moderno",
-        description: "Tipografía moderna y limpia, etiquetas en píldora y divisores sutiles.",
+        description:
+          "Tipografía moderna y limpia, etiquetas en píldora y divisores sutiles.",
       },
       classic: {
         name: "Clásico Litúrgico",
         badge: "Clásico",
-        description: "Estilo tradicional con serifa, líneas dobles y presentación solemne.",
+        description:
+          "Estilo tradicional con serifa, líneas dobles y presentación solemne.",
       },
       contemporary: {
         name: "Contemporáneo Escenario",
         badge: "Escenario",
-        description: "Alto contraste con cajas de tono y tempo bien visibles en el atril.",
+        description:
+          "Alto contraste con cajas de tono y tempo bien visibles en el atril.",
       },
       compact: {
         name: "Compacto Económico",
         badge: "Económico",
-        description: "Disposición condensada en 2 columnas para ahorrar papel en los boletines.",
+        description:
+          "Disposición condensada en 2 columnas para ahorrar papel en los boletines.",
       },
     },
     folder: {

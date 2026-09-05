@@ -87,12 +87,18 @@ export const ServicePrintView: React.FC<ServicePrintViewProps> = ({
 
   const getElementTypeLabel = (type: ServiceElement["type"]) => {
     switch (type) {
-      case "welcome": return t("print.service.types.welcome");
-      case "scripture": return t("print.service.types.scripture");
-      case "song": return t("print.service.types.song");
-      case "message": return t("print.service.types.message");
-      case "announcement": return t("print.service.types.announcement");
-      default: return t("print.service.types.moment");
+      case "welcome":
+        return t("print.service.types.welcome");
+      case "scripture":
+        return t("print.service.types.scripture");
+      case "song":
+        return t("print.service.types.song");
+      case "message":
+        return t("print.service.types.message");
+      case "announcement":
+        return t("print.service.types.announcement");
+      default:
+        return t("print.service.types.moment");
     }
   };
 
@@ -164,7 +170,9 @@ export const ServicePrintView: React.FC<ServicePrintViewProps> = ({
               </h2>
               {totalDurationSeconds > 0 && (
                 <span className="text-xs text-slate-500 font-medium">
-                  {t("print.service.estimatedDuration", { duration: formatDuration(totalDurationSeconds) })}
+                  {t("print.service.estimatedDuration", {
+                    duration: formatDuration(totalDurationSeconds),
+                  })}
                 </span>
               )}
             </div>
@@ -183,11 +191,21 @@ export const ServicePrintView: React.FC<ServicePrintViewProps> = ({
                         : "border-slate-200 text-slate-500 font-semibold"
                     }`}
                   >
-                    <th className="py-2 px-2 w-10 text-center">{t("print.service.numberCol")}</th>
-                    <th className="py-2 px-2 w-28">{t("print.service.momentCol")}</th>
-                    <th className="py-2 px-2">{t("print.service.titleDescCol")}</th>
-                    <th className="py-2 px-2">{t("print.service.passageNotesCol")}</th>
-                    <th className="py-2 px-2 w-20 text-right">{t("print.service.durationCol")}</th>
+                    <th className="py-2 px-2 w-10 text-center">
+                      {t("print.service.numberCol")}
+                    </th>
+                    <th className="py-2 px-2 w-28">
+                      {t("print.service.momentCol")}
+                    </th>
+                    <th className="py-2 px-2">
+                      {t("print.service.titleDescCol")}
+                    </th>
+                    <th className="py-2 px-2">
+                      {t("print.service.passageNotesCol")}
+                    </th>
+                    <th className="py-2 px-2 w-20 text-right">
+                      {t("print.service.durationCol")}
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -250,7 +268,10 @@ export const ServicePrintView: React.FC<ServicePrintViewProps> = ({
                             {el.notes}
                           </span>
                         )}
-                        {!el.passage && !el.notes && el.type !== "scripture" && "—"}
+                        {!el.passage &&
+                          !el.notes &&
+                          el.type !== "scripture" &&
+                          "—"}
                       </td>
                       <td className="py-2.5 px-2 text-right font-mono text-slate-600">
                         {formatDuration(el.duration)}
@@ -282,4 +303,3 @@ export const ServicePrintView: React.FC<ServicePrintViewProps> = ({
     </div>
   );
 };
-
