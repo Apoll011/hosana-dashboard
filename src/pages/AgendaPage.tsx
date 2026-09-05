@@ -15,13 +15,17 @@ import {
 import { MiniCalendar, toIso } from "@/src/components/agenda/MiniCalendar";
 import { ResponsibilitiesPanel } from "@/src/components/agenda/ResponsibilitiesPanel";
 import { useI18n } from "@/src/lib/i18n";
-import { CalendarPlus } from "lucide-react";
+import { AlertTriangle, CalendarPlus, Printer } from "lucide-react";
 import React, { useMemo, useState } from "react";
+import { Modal } from "../components/common";
+import { Button } from "../components/common/Button";
+import { usePrint } from "../contexts/PrintContext";
 import { useAgenda } from "../hooks/useAgenda";
 
 export const AgendaPage: React.FC = () => {
   const { t } = useI18n();
   const store = useAgenda();
+  const { printEvent, printEvents } = usePrint();
 
   const [visibleMonth, setVisibleMonth] = useState(() => new Date());
   const [selectedDate, setSelectedDate] = useState(() => toIso(new Date()));
@@ -34,6 +38,8 @@ export const AgendaPage: React.FC = () => {
   const [editingAssigneesFor, setEditingAssigneesFor] = useState<string | null>(
     null,
   );
+
+  const [isDeleteModalOpen, setIsDeleteModal] = useState<boolean>(false);
 
   const markedDates = useMemo(
     () => new Set(store.events.map((ev) => ev.date)),
@@ -120,9 +126,55 @@ export const AgendaPage: React.FC = () => {
             </p>
           </div>
           <div className="flex items-center gap-2">
+            {selectedEvent ? (
+              <button
+                onClick={() => {
+                  printEvent(selectedEvent, store.categories);
+                }}
+                className="flex items-center gap-2 px-3.5 py-2.5 text-xs font-bold rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 shadow-sm transition-colors cursor-pointer"
+                title={t("print.buttons.printEventTitle")}
+              >
+                <Printer className="w-4 h-4 text-sky-500" />
+                <span className="hidden sm:inline">
+                  {t("print.buttons.printEvent")}
+                </span>
+              </button>
+            ) : eventsForSelectedDate.length > 0 ? (
+              <button
+                onClick={() => {
+                  printEvents(
+                    eventsForSelectedDate,
+                    store.categories,
+                    `Agenda de ${selectedDate}`,
+                  );
+                }}
+                className="flex items-center gap-2 px-3.5 py-2.5 text-xs font-bold rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 shadow-sm transition-colors cursor-pointer"
+                title={t("print.buttons.printDayTitle")}
+              >
+                <Printer className="w-4 h-4 text-sky-500" />
+                <span className="hidden sm:inline">
+                  {t("print.buttons.printDay", {
+                    count: eventsForSelectedDate.length,
+                  })}
+                </span>
+              </button>
+            ) : null}
+
+            {selectedEvent && (
+              <button
+                onClick={() => {
+                  setIsDeleteModal(true);
+                }}
+                className="flex items-center gap-2 px-4 py-2.5 text-xs font-bold rounded-xl bg-red-500 text-white hover:bg-red-600 shadow-sm transition-colors cursor-pointer"
+              >
+                <CalendarPlus className="w-4 h-4" />
+                {t("agenda.deleteEvent")}
+              </button>
+            )}
+
             <button
               onClick={() => setIsNewEventOpen(true)}
-              className="flex items-center gap-2 px-4 py-2.5 text-xs font-bold rounded-xl bg-[#0284c7] text-white hover:bg-sky-600 shadow-sm transition-colors cursor-pointer"
+              className="flex items-center gap-2 px-4 py-2.5 text-xs font-bold rounded-xl bg-sky-500 text-white hover:bg-sky-600 shadow-sm transition-colors cursor-pointer"
             >
               <CalendarPlus className="w-4 h-4" />
               {t("agenda.newEvent")}
@@ -287,6 +339,37 @@ export const AgendaPage: React.FC = () => {
             setIsReminderOpen(false);
           }}
         />
+      )}
+
+      {selectedEvent && (
+        <Modal
+          isOpen={isDeleteModalOpen}
+          onClose={() => setIsDeleteModal(false)}
+          title={t("agenda.deleteEventConfirm")}
+        >
+          <div className="flex flex-col gap-4">
+            <div className="p-3 bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900 rounded-xl flex items-start gap-2.5 text-xs text-rose-800 dark:text-rose-300">
+              <AlertTriangle className="w-4 h-4 shrink-0 text-rose-500 mt-0.5" />
+              <span>{t("agenda.deleteEventConfirm")}</span>
+            </div>
+
+            <div className="flex items-center justify-end gap-3 mt-2 pt-4 border-t border-slate-100 dark:border-slate-800">
+              <Button variant="ghost" onClick={() => setIsDeleteModal(false)}>
+                {t("common.cancel")}
+              </Button>
+              <Button
+                variant="danger"
+                onClick={() => {
+                  store.deleteEvent(selectedEvent.id);
+                  setSelectedEventId(null);
+                  setIsDeleteModal(false);
+                }}
+              >
+                {t("agenda.deleteEvent")}
+              </Button>
+            </div>
+          </div>
+        </Modal>
       )}
     </div>
   );

@@ -140,9 +140,7 @@ body {
 
   /* Full screen width for printed page content */
   .print-page {
-    position: absolute;
-    left: 0;
-    top: 0;
+    position: static;
     width: 100% !important;
     margin: 0 !important;
     padding: 0 !important;

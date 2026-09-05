@@ -29,7 +29,13 @@ import {
 } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
+import { usePrint } from "../../contexts/PrintContext";
+import {
+  DEFAULT_ORG_SETTINGS,
+  OrgPrintSettings,
+} from "../../hooks/useOrgSettings";
 import { authClient } from "../../lib/authClient";
+import { PrintingSettingsCard } from "./PrintingSettingsCard";
 import { compressImage } from "./settingsUtils";
 
 export interface WorkspaceTabProps {
@@ -114,6 +120,38 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
     showBranding: orgMetadata.settings?.appearance?.showBranding ?? true,
   });
 
+  const { printSong } = usePrint();
+  const rawPrintSettings =
+    (orgMetadata.settings?.print as Partial<OrgPrintSettings>) || {};
+  const [currentPrintSettings, setCurrentPrintSettings] =
+    useState<OrgPrintSettings>({
+      templateFamily:
+        rawPrintSettings.templateFamily ||
+        DEFAULT_ORG_SETTINGS.print.templateFamily,
+      showChords:
+        rawPrintSettings.showChords ?? DEFAULT_ORG_SETTINGS.print.showChords,
+      twoColumnLayout:
+        rawPrintSettings.twoColumnLayout ??
+        DEFAULT_ORG_SETTINGS.print.twoColumnLayout,
+      fontSize:
+        rawPrintSettings.fontSize ?? DEFAULT_ORG_SETTINGS.print.fontSize,
+      showChurchHeader:
+        rawPrintSettings.showChurchHeader ??
+        DEFAULT_ORG_SETTINGS.print.showChurchHeader,
+      showChurchLogo:
+        rawPrintSettings.showChurchLogo ??
+        DEFAULT_ORG_SETTINGS.print.showChurchLogo,
+      showMetadata:
+        rawPrintSettings.showMetadata ??
+        DEFAULT_ORG_SETTINGS.print.showMetadata,
+      pageBreakBetweenItems:
+        rawPrintSettings.pageBreakBetweenItems ??
+        DEFAULT_ORG_SETTINGS.print.pageBreakBetweenItems,
+      customFooter:
+        rawPrintSettings.customFooter ??
+        DEFAULT_ORG_SETTINGS.print.customFooter,
+    });
+
   // --- Draft State (Edit Mode) ---
   const [isEditing, setIsEditing] = useState(false);
   const [draftName, setDraftName] = useState(currentName);
@@ -124,6 +162,8 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
   const [draftShortName, setDraftShortName] = useState(currentShortName);
   const [draftAppearance, setDraftAppearance] =
     useState<OrgAppearance>(currentAppearance);
+  const [draftPrintSettings, setDraftPrintSettings] =
+    useState<OrgPrintSettings>(currentPrintSettings);
 
   // --- Permissions ---
   const { granted: canManageOrg, loading: canLoading } = useCan(
@@ -143,12 +183,37 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
           meta.settings?.appearance?.accentColor || DEFAULT_ACCENT_COLOR,
         showBranding: meta.settings?.appearance?.showBranding ?? true,
       };
+      const rawPrint =
+        (meta.settings?.print as Partial<OrgPrintSettings>) || {};
+      const parsedPrint: OrgPrintSettings = {
+        templateFamily:
+          rawPrint.templateFamily || DEFAULT_ORG_SETTINGS.print.templateFamily,
+        showChords:
+          rawPrint.showChords ?? DEFAULT_ORG_SETTINGS.print.showChords,
+        twoColumnLayout:
+          rawPrint.twoColumnLayout ??
+          DEFAULT_ORG_SETTINGS.print.twoColumnLayout,
+        fontSize: rawPrint.fontSize ?? DEFAULT_ORG_SETTINGS.print.fontSize,
+        showChurchHeader:
+          rawPrint.showChurchHeader ??
+          DEFAULT_ORG_SETTINGS.print.showChurchHeader,
+        showChurchLogo:
+          rawPrint.showChurchLogo ?? DEFAULT_ORG_SETTINGS.print.showChurchLogo,
+        showMetadata:
+          rawPrint.showMetadata ?? DEFAULT_ORG_SETTINGS.print.showMetadata,
+        pageBreakBetweenItems:
+          rawPrint.pageBreakBetweenItems ??
+          DEFAULT_ORG_SETTINGS.print.pageBreakBetweenItems,
+        customFooter:
+          rawPrint.customFooter ?? DEFAULT_ORG_SETTINGS.print.customFooter,
+      };
 
       setCurrentName(name);
       setCurrentLogo(logo);
       setCurrentDescription(desc);
       setCurrentShortName(short);
       setCurrentAppearance(appearance);
+      setCurrentPrintSettings(parsedPrint);
 
       if (!isEditing) {
         setDraftName(name);
@@ -156,6 +221,7 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
         setDraftDescription(desc);
         setDraftShortName(short);
         setDraftAppearance(appearance);
+        setDraftPrintSettings(parsedPrint);
       }
     }
   }, [organization, isEditing]);
@@ -204,6 +270,7 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
       desc: currentDescription,
       short: currentShortName,
       appearance: currentAppearance,
+      print: currentPrintSettings,
     };
 
     // Optimistic UI updates
@@ -212,6 +279,7 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
     setCurrentDescription(draftDescription.trim());
     setCurrentShortName(draftShortName.trim());
     setCurrentAppearance(draftAppearance);
+    setCurrentPrintSettings(draftPrintSettings);
     setIsEditing(false);
 
     try {
@@ -226,6 +294,7 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
             accentColor: draftAppearance.accentColor || DEFAULT_ACCENT_COLOR,
             showBranding: draftAppearance.showBranding,
           },
+          print: draftPrintSettings,
         },
       };
 
@@ -246,12 +315,14 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
       setCurrentDescription(prev.desc);
       setCurrentShortName(prev.short);
       setCurrentAppearance(prev.appearance);
+      setCurrentPrintSettings(prev.print);
 
       setDraftName(prev.name);
       setDraftLogo(prev.logo);
       setDraftDescription(prev.desc);
       setDraftShortName(prev.short);
       setDraftAppearance(prev.appearance);
+      setDraftPrintSettings(prev.print);
       setIsEditing(true);
 
       showToast(
@@ -271,7 +342,24 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
     setDraftDescription(currentDescription);
     setDraftShortName(currentShortName);
     setDraftAppearance(currentAppearance);
+    setDraftPrintSettings(currentPrintSettings);
     setIsEditing(false);
+  };
+
+  const handleTestPrint = () => {
+    const activeOpts = isEditing ? draftPrintSettings : currentPrintSettings;
+    printSong(
+      {
+        id: "sample-song-demo",
+        title: "Quão Grande és Tu",
+        artist: "Carl Boberg",
+        content: `{title: Quão Grande és Tu}\n{artist: Carl Boberg}\n{key: G}\n{tempo: 72}\n{time: 4/4}\n{capo: 0}\n{ccli: 4672}\n\n{c: Verso 1}\n[G]Senhor meu Deus, quando eu mara[C]vilhado\n[G]Fico a pensar nas [D]obras de Tuas [G]mãos\n[G]O céu azul de estrelas pon[C]tilhado\n[G]Mostrando a glória [D]do Teu grande a[G]mor\n\n{c: Coro}\n[D]Então minha alma [G]canta a Ti, Se[C]nhor\nQuão grande és [G]Tu! Quão grande és [D]Tu!\n[D]Então minha alma [G]canta a Ti, Se[C]nhor\nQuão grande és [G]Tu! [D]Quão grande és [G]Tu!\n\n{c: Verso 2}\n[G]Quando eu contemplo a cruz daquela es[C]trada\n[G]Onde Jesus por [D]mim ali mor[G]reu\n[G]Meu coração se rende à graça a[C]mada\n[G]E a redenção que [D]o Pai me conce[G]deu`,
+        path: "Hinos/Quão Grande és Tu.pro",
+        tags: ["Hinos", "Louvor"],
+        updatedAt: new Date().toISOString(),
+      },
+      activeOpts,
+    );
   };
 
   const handleSwitchWorkspace = async (org: (typeof organizations)[number]) => {
@@ -708,6 +796,15 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
                 </div>
               )}
             </div>
+
+            {/* Secção 3: Modelos & Impressão */}
+            <PrintingSettingsCard
+              isEditing={isEditing}
+              settings={isEditing ? draftPrintSettings : currentPrintSettings}
+              onUpdate={setDraftPrintSettings}
+              canManageOrg={canManageOrg}
+              onTestPrint={handleTestPrint}
+            />
           </div>
 
           {/* Card Footer (Actions) */}
