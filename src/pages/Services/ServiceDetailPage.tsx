@@ -6,9 +6,11 @@
 import { ChordProPreviewSettings } from "@/src/components/ChorproSettings";
 import { Button, Input, Spinner } from "@/src/components/common";
 import { useAppNavigate } from "@/src/hooks/useAppNavigate";
+import { useFolders } from "@/src/hooks/useFolders";
 import { usePreviewSettings } from "@/src/hooks/usePreviewSettings";
 import { TranslateFn, useI18n } from "@/src/lib/i18n";
-import { ServiceElement } from "@/src/types";
+import { ServiceElement, Song } from "@/src/types";
+import { filterSearchableSongsWithLiqe } from "@/src/utils";
 import {
   attachClosestEdge,
   extractClosestEdge,
@@ -42,6 +44,7 @@ import {
   PanelRight,
   PanelRightClose,
   Plus,
+  Printer,
   Save,
   Search,
   Settings2,
@@ -49,12 +52,19 @@ import {
   Trash2,
   X,
 } from "lucide-react";
-import React, { useDeferredValue, useEffect, useRef, useState } from "react";
+import React, {
+  useDeferredValue,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useParams } from "react-router-dom";
+import { usePrint } from "../../contexts/PrintContext";
 import { useSync } from "../../contexts/SyncContext";
 import { useOrgSettings } from "../../hooks/useOrgSettings";
 import { useService, useServices } from "../../hooks/useServices";
-import { useSong, useSongs } from "../../hooks/useSongs";
+import { useSearchableSongs, useSong, useSongs } from "../../hooks/useSongs";
 import { AnnouncementModal } from "./modals/Anouncement";
 import { ScriptureModal } from "./modals/Bible";
 import { CustomModal } from "./modals/Custom";
@@ -611,9 +621,11 @@ export const ServiceDetailPage: React.FC = () => {
 
   const { data: service, isLoading, isError } = useService(id || null);
   const { updateElements, updateService } = useServices();
-  const { songsQuery } = useSongs({ limit: 1000 });
+  const { songsQuery } = useSongs();
+  const { foldersQuery } = useFolders();
   const { showToast, syncStatus } = useSync();
   const { settings: orgSettings } = useOrgSettings();
+  const { printService } = usePrint();
 
   const [elements, setElements] = useState<ServiceElement[]>([]);
   const elementsRef = useRef<ServiceElement[]>([]);
@@ -635,6 +647,18 @@ export const ServiceDetailPage: React.FC = () => {
   const [editingElement, setEditingElement] = useState<ServiceElement | null>(
     null,
   );
+
+  const allFolders = useMemo(
+    () => foldersQuery.data?.folders || [],
+    [foldersQuery.data?.folders],
+  );
+
+  const allSongs = useMemo(
+    () => songsQuery.data?.songs || [],
+    [songsQuery.data?.songs],
+  );
+
+  const { searchableSongs } = useSearchableSongs(allFolders);
 
   const [isEditingGeneralNotes, setIsEditingGeneralNotes] = useState(false);
 
@@ -700,11 +724,35 @@ export const ServiceDetailPage: React.FC = () => {
     0,
   );
 
-  const filteredLibrarySongs = allAvailableSongs.filter(
-    (s) =>
-      s.title.toLowerCase().includes(librarySearch.toLowerCase()) ||
-      (s.artist || "").toLowerCase().includes(librarySearch.toLowerCase()),
-  );
+  const filteredLibrarySongs = useMemo(() => {
+    let list: Song[];
+
+    let matchedSongIds: Set<string> | null = null;
+    if (librarySearch.trim()) {
+      const liqeMatches = filterSearchableSongsWithLiqe(
+        searchableSongs,
+        librarySearch,
+      );
+      matchedSongIds = new Set(liqeMatches.map((s) => s.id));
+    }
+
+    list = allSongs.filter((s) => {
+      if (matchedSongIds !== null && !matchedSongIds.has(s.id)) {
+        return false;
+      }
+
+      return true;
+    });
+
+    return [...list].sort((a, b) => {
+      let valA = (a.title || "").toLowerCase();
+      let valB = (b.title || "").toLowerCase();
+
+      if (valA < valB) return -1;
+      if (valA > valB) return 1;
+      return 0;
+    });
+  }, [searchableSongs, allSongs, librarySearch]);
 
   const syncStatusMeta = {
     synced: { dot: "bg-emerald-500", label: t("misc.syncStatus.synced") },
@@ -1102,6 +1150,20 @@ export const ServiceDetailPage: React.FC = () => {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              if (service) {
+                printService(service, songsQuery.data?.songs || []);
+              }
+            }}
+            icon={<Printer className="w-3.5 h-3.5 text-sky-500" />}
+            title={t("print.buttons.printService")}
+          >
+            <span className="hidden sm:inline">{t("common.print")}</span>
+          </Button>
+
           {!orgSettings.services.autoSave && (
             <Button
               variant="primary"

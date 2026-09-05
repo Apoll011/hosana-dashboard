@@ -71,26 +71,24 @@ function parseSettingsJson(raw: unknown): Partial<PersonalSettings> | null {
 function loadSettings(): PersonalSettings {
   const settings: PersonalSettings = { ...DEFAULT_SETTINGS };
   try {
-    // 1. Try reading from cached auth user metadata
-    let hasMetadata = false;
+    // 1. Read the local snapshot first because it is written synchronously.
+    const stored = localStorage.getItem(STORAGE_KEY);
+    const parsedStored = parseSettingsJson(stored);
+    if (parsedStored) Object.assign(settings, parsedStored);
+
+    // 2. Fall back to cached auth metadata when no local snapshot exists.
+    const hasLocalSettings = Boolean(parsedStored);
     const cachedUserStr = localStorage.getItem(CACHED_USER_KEY);
-    if (cachedUserStr) {
+    if (cachedUserStr && !hasLocalSettings) {
       try {
         const cachedUser = JSON.parse(cachedUserStr) as SessionUser;
         const parsedMetadata = parseSettingsJson(cachedUser?.metadata);
         if (parsedMetadata) {
           Object.assign(settings, parsedMetadata);
-          hasMetadata = true;
         }
       } catch {
         // ignore invalid cached user
       }
-    }
-
-    // 2. If no metadata found, check local storage key
-    if (!hasMetadata) {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) Object.assign(settings, JSON.parse(stored));
     }
 
     // One-time migration from legacy scattered keys.

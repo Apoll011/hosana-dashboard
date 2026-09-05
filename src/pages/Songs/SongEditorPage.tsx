@@ -23,6 +23,7 @@ import {
   HelpCircle,
   LayoutTemplate,
   PanelRight,
+  Printer,
   Save,
   Settings,
   Settings2,
@@ -37,6 +38,7 @@ import React, {
 import { useParams } from "react-router-dom";
 import { HelpModal } from "../../components/modals/HelpModal";
 import { useAuth } from "../../contexts/AuthContext";
+import { usePrint } from "../../contexts/PrintContext";
 import { useSong, useSongs } from "../../hooks/useSongs";
 import { posthog } from "../../lib/posthog";
 
@@ -53,6 +55,7 @@ export const SongEditorPage: React.FC = () => {
 
   const { data: song, isLoading, isError, error } = useSong(id || null);
   const { updateSong, isUpdating } = useSongs();
+  const { printSong } = usePrint();
 
   const [content, setContent] = useState("");
 
@@ -237,6 +240,27 @@ export const SongEditorPage: React.FC = () => {
               <HelpCircle className="w-4 h-4" />
             </button>
             <HelpModal isOpen={showHelp} onClose={() => setShowHelp(false)} />
+
+            <Button
+              variant="outline"
+              size="sm"
+              icon={<Printer className="w-4 h-4 text-sky-500" />}
+              onClick={() => {
+                if (song) {
+                  printSong(
+                    { ...song, content },
+                    {
+                      showChords: settings.showChords,
+                      fontSize: settings.fontSize,
+                    },
+                  );
+                }
+              }}
+              title={t("print.buttons.printSong")}
+              className="rounded-xl font-bold text-xs h-8"
+            >
+              <span className="hidden sm:inline">{t("common.print")}</span>
+            </Button>
 
             <Button
               variant="primary"

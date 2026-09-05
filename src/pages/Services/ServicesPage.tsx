@@ -15,6 +15,7 @@ import {
   Calendar,
   Copy,
   Edit2,
+  Printer,
   Trash2,
   X,
 } from "lucide-react";
@@ -26,6 +27,7 @@ import React, {
   useState,
 } from "react";
 import { useOutletContext } from "react-router-dom";
+import { usePrint } from "../../contexts/PrintContext";
 import {
   BatchActionFloatingBar,
   MarqueeSelectionBox,
@@ -71,6 +73,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
 
   const { servicesQuery, createService, updateService, deleteService } =
     useServices();
+  const { printService, printServices } = usePrint();
 
   // Effective sort (from MainLayout context)
   const effectiveSortBy: ServiceSortBy =
@@ -697,6 +700,14 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
       <BatchActionFloatingBar
         selectedCount={selectedServiceIds.size}
         itemLabel={t("common.services")}
+        onPrint={() => {
+          const selected = allServices.filter((s) =>
+            selectedServiceIds.has(s.id),
+          );
+          if (selected.length > 0) {
+            printServices(selected.map((s) => ({ service: s })));
+          }
+        }}
         onArchive={() => setIsBatchArchiveOpen(true)}
         onDelete={() => setIsBatchDeleteOpen(true)}
         onCancel={() => {
@@ -719,6 +730,25 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
                 <span>{t("servicesPage.multiSelect")}</span>
                 <Badge variant="sky">{selectedServiceIds.size}</Badge>
               </div>
+              <button
+                onClick={() => {
+                  const selected = allServices.filter((s) =>
+                    selectedServiceIds.has(s.id),
+                  );
+                  if (selected.length > 0) {
+                    printServices(selected.map((s) => ({ service: s })));
+                  }
+                  setContextMenu(null);
+                }}
+                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left cursor-pointer"
+              >
+                <Printer className="w-4 h-4 text-sky-500" />
+                <span>
+                  {t("print.buttons.printCount", {
+                    count: selectedServiceIds.size,
+                  })}
+                </span>
+              </button>
               <button
                 onClick={() => {
                   setIsBatchArchiveOpen(true);
@@ -796,6 +826,19 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
               >
                 <Copy className="w-4 h-4 text-emerald-500" />
                 <span>{t("servicesPage.duplicate")}</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  if (contextMenu.service) {
+                    printService(contextMenu.service);
+                  }
+                  setContextMenu(null);
+                }}
+                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left cursor-pointer"
+              >
+                <Printer className="w-4 h-4 text-sky-500" />
+                <span>{t("print.buttons.printServiceShort")}</span>
               </button>
 
               <button
