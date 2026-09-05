@@ -7,6 +7,7 @@ import { Button } from "@/src/components/common";
 import { TEMPLATE_FAMILIES } from "@/src/components/print/templateFamilies";
 import { PrintTemplateFamily } from "@/src/components/print/types";
 import { OrgPrintSettings } from "@/src/hooks/useOrgSettings";
+import { useI18n } from "@/src/lib/i18n";
 import {
   Check,
   Columns,
@@ -16,7 +17,6 @@ import {
   Music,
   Plus,
   Printer,
-  Sparkles,
 } from "lucide-react";
 import React from "react";
 
@@ -43,6 +43,7 @@ export const PrintingSettingsCard: React.FC<PrintingSettingsCardProps> = ({
   canManageOrg,
   onTestPrint,
 }) => {
+  const { t } = useI18n();
   const currentFamily =
     TEMPLATE_FAMILIES.find((f) => f.id === settings.templateFamily) ||
     TEMPLATE_FAMILIES[0];
@@ -54,11 +55,10 @@ export const PrintingSettingsCard: React.FC<PrintingSettingsCardProps> = ({
         <div>
           <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
             <Printer className="w-5 h-5 text-sky-500" />
-            <span>Modelos & Impressão</span>
+            <span>{t("print.settingsCard.title")}</span>
           </h3>
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-            Configure o modelo padrão da organização para impressão de cânticos,
-            pastas, planos de culto e escalas.
+            {t("print.settingsCard.description")}
           </p>
         </div>
 
@@ -69,7 +69,7 @@ export const PrintingSettingsCard: React.FC<PrintingSettingsCardProps> = ({
           icon={<Eye className="w-4 h-4 text-sky-500" />}
           onClick={onTestPrint}
         >
-          Testar Modelo
+          {t("print.settingsCard.testModel")}
         </Button>
       </div>
 
@@ -78,8 +78,7 @@ export const PrintingSettingsCard: React.FC<PrintingSettingsCardProps> = ({
         {/* 1. SELEÇÃO DA FAMÍLIA DE MODELOS */}
         <div>
           <label className="text-xs font-bold text-slate-900 dark:text-slate-100 uppercase tracking-wider block mb-3 flex items-center gap-1.5">
-            <Sparkles className="w-4 h-4 text-amber-500" />
-            <span>Família de Modelos Visual</span>
+            <span>{t("print.settingsCard.visualFamily")}</span>
           </label>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
@@ -126,12 +125,12 @@ export const PrintingSettingsCard: React.FC<PrintingSettingsCardProps> = ({
                     <FileText className="w-3.5 h-3.5" />
                     <span>
                       {family.id === "classic"
-                        ? "Hinário / Serif"
+                        ? t("print.settingsCard.types.classic")
                         : family.id === "contemporary"
-                          ? "Palco / Alto Contraste"
+                          ? t("print.settingsCard.types.contemporary")
                           : family.id === "compact"
-                            ? "2 Colunas / Eco"
-                            : "Minimal / Sans"}
+                            ? t("print.settingsCard.types.compact")
+                            : t("print.settingsCard.types.modern")}
                     </span>
                   </div>
                 </div>
@@ -143,7 +142,7 @@ export const PrintingSettingsCard: React.FC<PrintingSettingsCardProps> = ({
         {/* 2. OPÇÕES E CUSTOMIZAÇÃO */}
         <div className="pt-4 border-t border-slate-100 dark:border-slate-800">
           <label className="text-xs font-bold text-slate-900 dark:text-slate-100 uppercase tracking-wider block mb-3">
-            Predefinições de Layout & Dados
+            {t("print.settingsCard.layoutPresets")}
           </label>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -170,11 +169,10 @@ export const PrintingSettingsCard: React.FC<PrintingSettingsCardProps> = ({
               <div className="text-xs">
                 <span className="font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
                   <Music className="w-3.5 h-3.5 text-slate-400" />
-                  Imprimir Cifras por Padrão
+                  {t("print.settingsCard.printChordsDefault")}
                 </span>
                 <p className="text-slate-500 dark:text-slate-400 mt-0.5">
-                  Quando ativo, os cânticos são impressos com cifras e acordes.
-                  Desative para apenas letras.
+                  {t("print.settingsCard.printChordsDefaultDesc")}
                 </p>
               </div>
             </label>
@@ -202,11 +200,10 @@ export const PrintingSettingsCard: React.FC<PrintingSettingsCardProps> = ({
               <div className="text-xs">
                 <span className="font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
                   <Columns className="w-3.5 h-3.5 text-slate-400" />
-                  Disposição em 2 Colunas
+                  {t("print.settingsCard.twoColumnLayout")}
                 </span>
                 <p className="text-slate-500 dark:text-slate-400 mt-0.5">
-                  Divide os versos em duas colunas verticais para aproveitar
-                  melhor a largura do papel.
+                  {t("print.settingsCard.twoColumnLayoutDesc")}
                 </p>
               </div>
             </label>
@@ -233,11 +230,10 @@ export const PrintingSettingsCard: React.FC<PrintingSettingsCardProps> = ({
               />
               <div className="text-xs">
                 <span className="font-bold text-slate-900 dark:text-slate-100">
-                  Cabeçalho com Identidade da Igreja
+                  {t("print.settingsCard.churchHeader")}
                 </span>
                 <p className="text-slate-500 dark:text-slate-400 mt-0.5">
-                  Exibe o nome e o logótipo oficial da organização no topo de
-                  todas as folhas impressas.
+                  {t("print.settingsCard.churchHeaderDesc")}
                 </p>
               </div>
             </label>
@@ -264,11 +260,10 @@ export const PrintingSettingsCard: React.FC<PrintingSettingsCardProps> = ({
               />
               <div className="text-xs">
                 <span className="font-bold text-slate-900 dark:text-slate-100">
-                  Quebra de Página por Cântico / Item
+                  {t("print.settingsCard.pageBreak")}
                 </span>
                 <p className="text-slate-500 dark:text-slate-400 mt-0.5">
-                  Garante que cada cântico ou momento de culto comece numa nova
-                  folha de papel.
+                  {t("print.settingsCard.pageBreakDesc")}
                 </p>
               </div>
             </label>
@@ -280,10 +275,10 @@ export const PrintingSettingsCard: React.FC<PrintingSettingsCardProps> = ({
             <div className="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 flex items-center justify-between">
               <div>
                 <span className="text-xs font-bold text-slate-900 dark:text-slate-100 block">
-                  Tamanho de Letra Padrão
+                  {t("print.settingsCard.defaultFontSize")}
                 </span>
                 <span className="text-[11px] text-slate-500 dark:text-slate-400">
-                  Ideal para leitura em estantes (12–16)
+                  {t("print.settingsCard.defaultFontSizeDesc")}
                 </span>
               </div>
               <div className="flex items-center gap-1.5 border border-slate-200 dark:border-slate-700 rounded-lg p-1">
@@ -326,12 +321,12 @@ export const PrintingSettingsCard: React.FC<PrintingSettingsCardProps> = ({
             {/* Rodapé Personalizado */}
             <div className="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 flex flex-col justify-center">
               <span className="text-xs font-bold text-slate-900 dark:text-slate-100 block mb-1">
-                Nota de Rodapé (Opcional)
+                {t("print.settingsCard.customFooter")}
               </span>
               <input
                 type="text"
                 disabled={!isEditing || !canManageOrg}
-                placeholder="Ex: CCLI #12345 • Proibida reprodução não autorizada"
+                placeholder={t("print.settingsCard.customFooterPlaceholder")}
                 value={settings.customFooter}
                 onChange={(e) =>
                   onUpdate((prev) => ({
