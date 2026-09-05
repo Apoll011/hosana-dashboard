@@ -1,12 +1,13 @@
 import { Button } from "@/src/components/common";
 import { useI18n } from "@/src/lib/i18n";
-import { Archive, Trash2, X } from "lucide-react";
+import { Archive, Printer, Trash2, X } from "lucide-react";
 import React from "react";
 
 interface BatchActionFloatingBarProps {
   selectedCount: number;
   itemLabel?: string;
   onArchive?: () => void;
+  onPrint?: () => void;
   onDelete: () => void;
   onCancel: () => void;
 }
@@ -15,6 +16,7 @@ export const BatchActionFloatingBar: React.FC<BatchActionFloatingBarProps> = ({
   selectedCount,
   itemLabel = "cultos",
   onArchive,
+  onPrint,
   onDelete,
   onCancel,
 }) => {
@@ -26,6 +28,17 @@ export const BatchActionFloatingBar: React.FC<BatchActionFloatingBarProps> = ({
         {selectedCount} {itemLabel} selecionados
       </span>
       <div className="h-6 w-px bg-white/20 dark:bg-slate-900/20" />
+      {onPrint && (
+        <Button
+          size="sm"
+          variant="ghost"
+          icon={<Printer className="w-4 h-4" />}
+          onClick={onPrint}
+          className="text-sky-400! hover:bg-sky-500/10!"
+        >
+          {t("common.print")}
+        </Button>
+      )}
       {onArchive && (
         <Button
           size="sm"

@@ -15,15 +15,17 @@ import {
 import { MiniCalendar, toIso } from "@/src/components/agenda/MiniCalendar";
 import { ResponsibilitiesPanel } from "@/src/components/agenda/ResponsibilitiesPanel";
 import { useI18n } from "@/src/lib/i18n";
-import { AlertTriangle, CalendarPlus } from "lucide-react";
+import { AlertTriangle, CalendarPlus, Printer } from "lucide-react";
 import React, { useMemo, useState } from "react";
 import { Modal } from "../components/common";
 import { Button } from "../components/common/Button";
+import { usePrint } from "../contexts/PrintContext";
 import { useAgenda } from "../hooks/useAgenda";
 
 export const AgendaPage: React.FC = () => {
   const { t } = useI18n();
   const store = useAgenda();
+  const { printEvent, printEvents } = usePrint();
 
   const [visibleMonth, setVisibleMonth] = useState(() => new Date());
   const [selectedDate, setSelectedDate] = useState(() => toIso(new Date()));
@@ -124,6 +126,40 @@ export const AgendaPage: React.FC = () => {
             </p>
           </div>
           <div className="flex items-center gap-2">
+            {selectedEvent ? (
+              <button
+                onClick={() => {
+                  printEvent(selectedEvent, store.categories);
+                }}
+                className="flex items-center gap-2 px-3.5 py-2.5 text-xs font-bold rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 shadow-sm transition-colors cursor-pointer"
+                title={t("print.buttons.printEventTitle")}
+              >
+                <Printer className="w-4 h-4 text-sky-500" />
+                <span className="hidden sm:inline">
+                  {t("print.buttons.printEvent")}
+                </span>
+              </button>
+            ) : eventsForSelectedDate.length > 0 ? (
+              <button
+                onClick={() => {
+                  printEvents(
+                    eventsForSelectedDate,
+                    store.categories,
+                    `Agenda de ${selectedDate}`,
+                  );
+                }}
+                className="flex items-center gap-2 px-3.5 py-2.5 text-xs font-bold rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 shadow-sm transition-colors cursor-pointer"
+                title={t("print.buttons.printDayTitle")}
+              >
+                <Printer className="w-4 h-4 text-sky-500" />
+                <span className="hidden sm:inline">
+                  {t("print.buttons.printDay", {
+                    count: eventsForSelectedDate.length,
+                  })}
+                </span>
+              </button>
+            ) : null}
+
             {selectedEvent && (
               <button
                 onClick={() => {

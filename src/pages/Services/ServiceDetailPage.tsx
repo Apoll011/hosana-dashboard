@@ -44,6 +44,7 @@ import {
   PanelRight,
   PanelRightClose,
   Plus,
+  Printer,
   Save,
   Search,
   Settings2,
@@ -59,6 +60,7 @@ import React, {
   useState,
 } from "react";
 import { useParams } from "react-router-dom";
+import { usePrint } from "../../contexts/PrintContext";
 import { useSync } from "../../contexts/SyncContext";
 import { useOrgSettings } from "../../hooks/useOrgSettings";
 import { useService, useServices } from "../../hooks/useServices";
@@ -623,6 +625,7 @@ export const ServiceDetailPage: React.FC = () => {
   const { foldersQuery } = useFolders();
   const { showToast, syncStatus } = useSync();
   const { settings: orgSettings } = useOrgSettings();
+  const { printService } = usePrint();
 
   const [elements, setElements] = useState<ServiceElement[]>([]);
   const elementsRef = useRef<ServiceElement[]>([]);
@@ -1147,6 +1150,20 @@ export const ServiceDetailPage: React.FC = () => {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              if (service) {
+                printService(service, songsQuery.data?.songs || []);
+              }
+            }}
+            icon={<Printer className="w-3.5 h-3.5 text-sky-500" />}
+            title={t("print.buttons.printService")}
+          >
+            <span className="hidden sm:inline">{t("common.print")}</span>
+          </Button>
+
           {!orgSettings.services.autoSave && (
             <Button
               variant="primary"
