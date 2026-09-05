@@ -67,12 +67,6 @@ interface SongsPageProps {
   sortOrder?: "asc" | "desc";
   selectedKey?: string;
   selectedTag?: string;
-  searchFields?: {
-    title: boolean;
-    artist: boolean;
-    content: boolean;
-    tags: boolean;
-  };
 }
 
 export const SongsPage: React.FC<SongsPageProps> = ({
@@ -82,7 +76,6 @@ export const SongsPage: React.FC<SongsPageProps> = ({
   sortOrder: externalSortOrder,
   selectedKey,
   selectedTag,
-  searchFields: externalSearchFields,
 }) => {
   const { navigate } = useAppNavigate();
   const { t, tc, locale } = useI18n();
@@ -1209,7 +1202,9 @@ export const SongsPage: React.FC<SongsPageProps> = ({
         onClose={() => setDeleteTarget(null)}
         onConfirm={handleDeleteConfirm}
         title={t("songsPage.deleteTitle")}
-        message={t("songsPage.deleteMessage", { name: deleteTarget?.title })}
+        message={t("songsPage.deleteMessage", {
+          name: deleteTarget?.title ?? "",
+        })}
         confirmText={t("songsPage.deleteConfirm")}
       />
 

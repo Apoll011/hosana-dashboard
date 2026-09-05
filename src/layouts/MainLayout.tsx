@@ -203,12 +203,7 @@ export const MainLayout: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedKey, setSelectedKey] = useState<string>("");
   const [selectedTag, setSelectedTag] = useState<string>("");
-  const [searchFields, setSearchFields] = useState({
-    title: true,
-    artist: true,
-    content: true,
-    tags: true,
-  });
+
   const [sortBy, setSortBy] = useState<"title" | "artist" | "updatedAt">(
     "title",
   );
@@ -1504,7 +1499,6 @@ export const MainLayout: React.FC = () => {
                   hideHeader: true,
                   selectedKey,
                   selectedTag,
-                  searchFields,
                   containerRef,
                   handleWorkspaceMouseDown,
                   handleCanvasContextMenu,
