@@ -1632,22 +1632,28 @@ export const pt = {
     increaseFont: "Aumentar texto",
     settingsCard: {
       title: "Modelos & Impressão",
-      description: "Configure o modelo padrão da organização para impressão de cânticos, pastas, planos de culto e escalas.",
+      description:
+        "Configure o modelo padrão da organização para impressão de cânticos, pastas, planos de culto e escalas.",
       testModel: "Testar Modelo",
       visualFamily: "Família de Modelos Visual",
       layoutPresets: "Predefinições de Layout & Dados",
       printChordsDefault: "Imprimir Cifras por Padrão",
-      printChordsDefaultDesc: "Quando ativo, os cânticos são impressos com cifras e acordes. Desative para apenas letras.",
+      printChordsDefaultDesc:
+        "Quando ativo, os cânticos são impressos com cifras e acordes. Desative para apenas letras.",
       twoColumnLayout: "Disposição em 2 Colunas",
-      twoColumnLayoutDesc: "Divide os versos em duas colunas verticais para aproveitar melhor a largura do papel.",
+      twoColumnLayoutDesc:
+        "Divide os versos em duas colunas verticais para aproveitar melhor a largura do papel.",
       churchHeader: "Cabeçalho com Identidade da Igreja",
-      churchHeaderDesc: "Exibe o nome e o logótipo oficial da organização no topo de todas as folhas impressas.",
+      churchHeaderDesc:
+        "Exibe o nome e o logótipo oficial da organização no topo de todas as folhas impressas.",
       pageBreak: "Quebra de Página por Cântico / Item",
-      pageBreakDesc: "Garante que cada cântico ou momento de culto comece numa nova folha de papel.",
+      pageBreakDesc:
+        "Garante que cada cântico ou momento de culto comece numa nova folha de papel.",
       defaultFontSize: "Tamanho de Letra Padrão",
       defaultFontSizeDesc: "Ideal para leitura em estantes (12–16)",
       customFooter: "Nota de Rodapé (Opcional)",
-      customFooterPlaceholder: "Ex: CCLI #12345 • Proibida reprodução não autorizada",
+      customFooterPlaceholder:
+        "Ex: CCLI #12345 • Proibida reprodução não autorizada",
       types: {
         classic: "Hinário / Serif",
         contemporary: "Palco / Alto Contraste",
@@ -1659,22 +1665,26 @@ export const pt = {
       modern: {
         name: "Moderno Minimalista",
         badge: "Moderno",
-        description: "Tipografia moderna e limpa, etiquetas em pílula e divisores subtis.",
+        description:
+          "Tipografia moderna e limpa, etiquetas em pílula e divisores subtis.",
       },
       classic: {
         name: "Clássico Litúrgico",
         badge: "Clássico",
-        description: "Estilo tradicional com serifa, linhas duplas e apresentação solene.",
+        description:
+          "Estilo tradicional com serifa, linhas duplas e apresentação solene.",
       },
       contemporary: {
         name: "Contemporâneo Palco",
         badge: "Palco",
-        description: "Alto contraste com caixas de tom e andamento bem visíveis na estante.",
+        description:
+          "Alto contraste com caixas de tom e andamento bem visíveis na estante.",
       },
       compact: {
         name: "Compacto Económico",
         badge: "Económico",
-        description: "Disposição condensada em 2 colunas para poupar papel nos boletins.",
+        description:
+          "Disposição condensada em 2 colunas para poupar papel nos boletins.",
       },
     },
     folder: {

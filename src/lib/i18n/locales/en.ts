@@ -1615,22 +1615,28 @@ export const en: typeof pt = {
     increaseFont: "Increase text",
     settingsCard: {
       title: "Templates & Printing",
-      description: "Configure the organization's default template for printing songs, folders, service plans, and rosters.",
+      description:
+        "Configure the organization's default template for printing songs, folders, service plans, and rosters.",
       testModel: "Test Template",
       visualFamily: "Visual Template Family",
       layoutPresets: "Layout & Data Presets",
       printChordsDefault: "Print Chords by Default",
-      printChordsDefaultDesc: "When enabled, songs are printed with chords. Disable for lyrics only.",
+      printChordsDefaultDesc:
+        "When enabled, songs are printed with chords. Disable for lyrics only.",
       twoColumnLayout: "2-Column Layout",
-      twoColumnLayoutDesc: "Splits verses into two columns to optimize paper width.",
+      twoColumnLayoutDesc:
+        "Splits verses into two columns to optimize paper width.",
       churchHeader: "Church Identity Header",
-      churchHeaderDesc: "Displays the organization name and official logo at the top of all printed sheets.",
+      churchHeaderDesc:
+        "Displays the organization name and official logo at the top of all printed sheets.",
       pageBreak: "Page Break per Song / Item",
-      pageBreakDesc: "Ensures each song or service moment begins on a new sheet of paper.",
+      pageBreakDesc:
+        "Ensures each song or service moment begins on a new sheet of paper.",
       defaultFontSize: "Default Font Size",
       defaultFontSizeDesc: "Ideal for music stand reading (12–16)",
       customFooter: "Footer Note (Optional)",
-      customFooterPlaceholder: "E.g.: CCLI #12345 • Unauthorized duplication prohibited",
+      customFooterPlaceholder:
+        "E.g.: CCLI #12345 • Unauthorized duplication prohibited",
       types: {
         classic: "Hymnal / Serif",
         contemporary: "Stage / High Contrast",
@@ -1642,22 +1648,26 @@ export const en: typeof pt = {
       modern: {
         name: "Modern Minimal",
         badge: "Modern",
-        description: "Clean sans-serif typography, elegant pill badges, and refined dividers.",
+        description:
+          "Clean sans-serif typography, elegant pill badges, and refined dividers.",
       },
       classic: {
         name: "Classic Liturgical",
         badge: "Classic",
-        description: "Stately serif typography, double hairline dividers, and formal hymn structure.",
+        description:
+          "Stately serif typography, double hairline dividers, and formal hymn structure.",
       },
       contemporary: {
         name: "Contemporary Stage",
         badge: "Stage",
-        description: "High-contrast bold headers, large key and tempo indicators for musicians on stage.",
+        description:
+          "High-contrast bold headers, large key and tempo indicators for musicians on stage.",
       },
       compact: {
         name: "Compact Eco",
         badge: "Eco",
-        description: "Space-saving density, multi-column optimization to minimize paper usage.",
+        description:
+          "Space-saving density, multi-column optimization to minimize paper usage.",
       },
     },
     folder: {

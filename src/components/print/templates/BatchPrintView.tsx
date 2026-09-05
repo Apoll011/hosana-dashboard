@@ -58,7 +58,9 @@ export const BatchPrintView: React.FC<BatchPrintViewProps> = ({
               churchShortName={churchShortName}
               accentColor={accentColor}
               title={title}
-              subtitle={t("print.batch.coverSubtitle", { count: String(items.length) })}
+              subtitle={t("print.batch.coverSubtitle", {
+                count: String(items.length),
+              })}
               metaBadge={t("print.batch.badge")}
               options={options}
             />
@@ -182,4 +184,3 @@ export const BatchPrintView: React.FC<BatchPrintViewProps> = ({
     </div>
   );
 };
-

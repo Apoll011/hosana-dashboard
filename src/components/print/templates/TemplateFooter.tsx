@@ -46,7 +46,10 @@ export const TemplateFooter: React.FC<TemplateFooterProps> = ({
         {customFooter ? (
           <span>{customFooter}</span>
         ) : (
-          <span>{churchName ? `${churchName} • ` : ""}{defaultBrand}</span>
+          <span>
+            {churchName ? `${churchName} • ` : ""}
+            {defaultBrand}
+          </span>
         )}
         {ccli && <span>CCLI: {ccli}</span>}
         {copyright && <span>© {copyright}</span>}
