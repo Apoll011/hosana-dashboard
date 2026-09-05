@@ -6,7 +6,7 @@
 import { Button } from "@/src/components/common";
 import { useAuth } from "@/src/contexts/AuthContext";
 import { useI18n } from "@/src/lib/i18n";
-import { Columns, Minus, Plus, Printer, Sparkles, X } from "lucide-react";
+import { Columns, Minus, Plus, Printer, X } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import { triggerPrint } from "./printEngine";
 import { TEMPLATE_FAMILIES } from "./templateFamilies";
@@ -228,7 +228,6 @@ export const PrintModal: React.FC<PrintModalProps> = ({
           {/* Template Family Selector */}
           <div className="flex items-center gap-2">
             <span className="font-semibold text-slate-500 uppercase text-[10px] tracking-wider flex items-center gap-1">
-              <Sparkles className="w-3.5 h-3.5 text-amber-500" />
               {t("print.template")}
             </span>
             <div className="inline-flex bg-slate-100 dark:bg-slate-800 p-1 rounded-xl">
