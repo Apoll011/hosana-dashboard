@@ -421,7 +421,6 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
   const displayShowBranding = isEditing
     ? draftAppearance.showBranding
     : currentAppearance.showBranding;
-  const displayShortName = isEditing ? draftShortName : currentShortName;
 
   return (
     <div className="space-y-6 max-w-4xl mx-auto w-full animate-in fade-in slide-in-from-bottom-2 duration-300">
@@ -803,12 +802,6 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
               isEditing={isEditing}
               settings={isEditing ? draftPrintSettings : currentPrintSettings}
               onUpdate={setDraftPrintSettings}
-              accentColor={displayAccentColor}
-              churchName={
-                displayShortName || (isEditing ? draftName : currentName)
-              }
-              churchLogo={displayLogo}
-              churchShortName={displayShortName}
               canManageOrg={canManageOrg}
               onTestPrint={handleTestPrint}
             />

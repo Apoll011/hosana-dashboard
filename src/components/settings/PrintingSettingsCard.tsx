@@ -24,10 +24,6 @@ interface PrintingSettingsCardProps {
   isEditing: boolean;
   settings: OrgPrintSettings;
   onUpdate: (updater: (prev: OrgPrintSettings) => OrgPrintSettings) => void;
-  accentColor?: string;
-  churchName?: string;
-  churchLogo?: string | null;
-  churchShortName?: string;
   canManageOrg: boolean;
   onTestPrint: () => void;
 }
@@ -36,17 +32,10 @@ export const PrintingSettingsCard: React.FC<PrintingSettingsCardProps> = ({
   isEditing,
   settings,
   onUpdate,
-  accentColor = "#0284c7",
-  churchName,
-  churchLogo,
-  churchShortName,
   canManageOrg,
   onTestPrint,
 }) => {
   const { t } = useI18n();
-  const currentFamily =
-    TEMPLATE_FAMILIES.find((f) => f.id === settings.templateFamily) ||
-    TEMPLATE_FAMILIES[0];
 
   return (
     <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm overflow-hidden transition-all mt-6">
