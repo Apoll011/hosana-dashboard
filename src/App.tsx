@@ -6,6 +6,7 @@ import { NavigationProgressBar } from "./components/NavigationProgressBar";
 import { AuthProvider } from "./contexts/AuthContext";
 import { CacheHydrationProvider } from "./contexts/CacheHydrationProvider";
 import { NavigationTransitionProvider } from "./contexts/NavigationTransitionContext";
+import { PrintProvider } from "./contexts/PrintContext";
 import { SyncProvider } from "./contexts/SyncContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { I18nProvider } from "./lib/i18n";
@@ -40,13 +41,15 @@ export default function App() {
         <ThemeProvider>
           <SyncProvider>
             <CacheHydrationProvider>
-              <BrowserRouter>
-                <NavigationTransitionProvider>
-                  <PageviewTracker />
-                  <NavigationProgressBar />
-                  <AppRoutes />
-                </NavigationTransitionProvider>
-              </BrowserRouter>
+              <PrintProvider>
+                <BrowserRouter>
+                  <NavigationTransitionProvider>
+                    <PageviewTracker />
+                    <NavigationProgressBar />
+                    <AppRoutes />
+                  </NavigationTransitionProvider>
+                </BrowserRouter>
+              </PrintProvider>
             </CacheHydrationProvider>
           </SyncProvider>
         </ThemeProvider>

@@ -32,6 +32,7 @@ import {
 } from "../components/layout";
 import { ToastContainer } from "../components/Toast";
 import { useAuth } from "../contexts/AuthContext";
+import { usePrint } from "../contexts/PrintContext";
 import { useSync } from "../contexts/SyncContext";
 import { getDatabase, purgeExpiredTrash } from "../db";
 import { useAgenda } from "../hooks/useAgenda";
@@ -70,6 +71,8 @@ export const MainLayout: React.FC = () => {
   );
 
   const { events } = useAgenda();
+  const { printSong, printSongs, printFolder, printFolders, printBatch } =
+    usePrint();
 
   // Service Worker & Sync
   const { showToast, triggerSyncCheck } = useSync();
@@ -1563,6 +1566,33 @@ export const MainLayout: React.FC = () => {
       <BatchActionFloatingBar
         selectedCount={totalSelectedCount}
         itemLabel={t("layout.items")}
+        onPrint={() => {
+          const sList = allSongs.filter((s) => selectedSongIds.has(s.id));
+          const fList = allFolders
+            .filter((f) => selectedFolderIds.has(f.id))
+            .map((f) => ({
+              folder: f,
+              songs: allSongs.filter((s) => s.folderId === f.id),
+            }));
+
+          if (sList.length > 0 && fList.length === 0) {
+            printSongs(sList);
+          } else if (fList.length > 0 && sList.length === 0) {
+            printFolders(fList);
+          } else {
+            printBatch([
+              ...fList.map((f) => ({
+                type: "folder" as const,
+                data: f.folder,
+                songs: f.songs,
+              })),
+              ...sList.map((s) => ({
+                type: "song" as const,
+                data: s,
+              })),
+            ]);
+          }
+        }}
         onDelete={() => setIsBatchDeleteOpen(true)}
         onCancel={clearSelection}
       />
@@ -1605,6 +1635,30 @@ export const MainLayout: React.FC = () => {
           setIsBatchTagOpen(true);
         }}
         onDeleteSong={setDeleteSongTarget}
+        onPrintSong={(songId) => {
+          const s = allSongs.find((x) => x.id === songId);
+          if (s) printSong(s);
+        }}
+        onPrintFolder={(folderId) => {
+          const f = allFolders.find((x) => x.id === folderId);
+          if (f) {
+            const fSongs = allSongs.filter((s) => s.folderId === folderId);
+            printFolder(f, fSongs);
+          }
+        }}
+        onPrintSongs={() => {
+          const sList = allSongs.filter((s) => selectedSongIds.has(s.id));
+          if (sList.length) printSongs(sList);
+        }}
+        onPrintFolders={() => {
+          const fList = allFolders
+            .filter((f) => selectedFolderIds.has(f.id))
+            .map((f) => ({
+              folder: f,
+              songs: allSongs.filter((s) => s.folderId === f.id),
+            }));
+          if (fList.length) printFolders(fList);
+        }}
       />
 
       <ExplorerModals
