@@ -112,3 +112,36 @@ export function notifyLocalChange(collection: string): void {
     for (const fn of Array.from(set)) fn();
   }
 }
+
+/**
+ * Fired with the *pre-write* document immediately before a local put overwrites
+ * it. Replication uses this to seed assumedMasterState / field-diff baselines
+ * after a page refresh when the persisted server-state cache has no entry yet.
+ */
+type BaselineListener = (previousDoc: Record<string, unknown>) => void;
+const pushBaselineListeners = new Map<string, Set<BaselineListener>>();
+
+export function subscribePushBaseline(
+  collection: string,
+  fn: BaselineListener,
+): () => void {
+  let set = pushBaselineListeners.get(collection);
+  if (!set) {
+    set = new Set();
+    pushBaselineListeners.set(collection, set);
+  }
+  set.add(fn);
+  return () => {
+    set!.delete(fn);
+    if (set!.size === 0) pushBaselineListeners.delete(collection);
+  };
+}
+
+export function notifyPushBaseline(
+  collection: string,
+  previousDoc: Record<string, unknown>,
+): void {
+  const set = pushBaselineListeners.get(collection);
+  if (!set) return;
+  for (const fn of Array.from(set)) fn(previousDoc);
+}

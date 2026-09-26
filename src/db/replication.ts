@@ -34,6 +34,9 @@
  *    checkpoint IDB. They are the source of assumedMasterState.updatedAt and
  *    the baseline for newDocumentState field diffs.
  *  - Updated after every successful push AND every pull.
+ *  - After a page refresh the IDB copy is hydrated; if an id is still missing,
+ *    the pre-write local snapshot (captured on patch/upsert) seeds the baseline
+ *    so the next push stays partial instead of full+null assumed.
  *
  * IDB-wipe resilience:
  *  - On startup we detect whether IDB appears empty after being previously
@@ -44,7 +47,10 @@
 
 import { getApiClient } from "@/src/api";
 import type { HosanaDatabase } from "./database";
-import { subscribeLocalChange } from "./engine/bus";
+import {
+  subscribeLocalChange,
+  subscribePushBaseline,
+} from "./engine/bus";
 import { HosanaCollection } from "./engine/collection";
 import { idbGet, idbPut, openIDB } from "./engine/idb";
 
@@ -310,12 +316,16 @@ async function pushWithConflictRetry<T extends SyncableDoc>(
 
       // Compare full assumed snapshot (not the wire delta) so partial
       // payloads don't break spurious-conflict detection.
+      // Also retry when assumed was missing (cold cache after refresh):
+      // re-apply local changes onto the server doc as the new baseline.
+      const missingAssumed = change.fullAssumed == null;
       const canRetry =
         attempt < CONFLICT_RETRY_LIMIT &&
-        isSpuriousConflict(
-          change.fullAssumed as T | undefined,
-          serverDoc,
-        );
+        (missingAssumed ||
+          isSpuriousConflict(
+            change.fullAssumed as T | undefined,
+            serverDoc,
+          ));
 
       if (canRetry) {
         retryChanges.push({
@@ -493,6 +503,33 @@ async function persistServerCache(
   } catch {
     _cpDb = null;
   }
+}
+
+/**
+ * Seed the in-memory push baseline from a pre-write local snapshot when we
+ * don't yet have a last-known server state for this id (common after refresh
+ * before the first successful sync of the session). Only fills gaps — never
+ * overwrites a snapshot from pull/push/IDB hydrate.
+ */
+function rememberPushBaseline(
+  collectionName: CollectionName,
+  previousDoc: Record<string, unknown>,
+  localFields: ReadonlySet<string>,
+): void {
+  const id = previousDoc.id;
+  if (typeof id !== "string" || !id) return;
+
+  const cache = getServerCache(collectionName);
+  if (cache.has(id)) return;
+
+  const stripped = stripNonReplicatedFields(
+    {
+      ...previousDoc,
+      _deleted: !!previousDoc._deleted,
+    } as SyncableDoc & { _deleted: boolean } & Record<string, unknown>,
+    localFields,
+  );
+  cache.set(id, stripped);
 }
 
 // ─── Per-collection replication ───────────────────────────────────────────────
@@ -744,6 +781,25 @@ export function setupReplication(db: HosanaDatabase): ReplicationManager {
   const SAVE_DEBOUNCE_MS = 800;
   let saveDebounceTimer: ReturnType<typeof setTimeout> | null = null;
   const unsubscribeLocalChanges: Array<() => void> = [];
+  const unsubscribePushBaselines: Array<() => void> = [];
+
+  // Capture pre-write baselines for the lifetime of this manager (including
+  // before start()), so an edit after refresh still gets a partial push.
+  // Also kick off IDB hydrate so persisted server snapshots win over local
+  // pre-images when available.
+  for (const name of ALL_COLLECTION_NAMES) {
+    void hydrateServerCache(name);
+    const collection = db[name] as unknown as AnyCollection;
+    unsubscribePushBaselines.push(
+      subscribePushBaseline(name, (previousDoc) => {
+        rememberPushBaseline(
+          name,
+          previousDoc,
+          collection.getLocalFieldNames(),
+        );
+      }),
+    );
+  }
 
   const scheduleSyncOnSave = () => {
     if (!running) return;
@@ -928,6 +984,9 @@ export function setupReplication(db: HosanaDatabase): ReplicationManager {
     queuedForceFullPull = false;
     while (unsubscribeLocalChanges.length) {
       unsubscribeLocalChanges.pop()!();
+    }
+    while (unsubscribePushBaselines.length) {
+      unsubscribePushBaselines.pop()!();
     }
   };
 
