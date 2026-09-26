@@ -141,6 +141,23 @@ export function idbDelete(
   });
 }
 
+/** Atomically delete multiple records in a single readwrite transaction. */
+export function idbBulkDelete(
+  db: IDBDatabase,
+  store: string,
+  keys: string[],
+): Promise<void> {
+  if (keys.length === 0) return Promise.resolve();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(store, "readwrite");
+    const os = tx.objectStore(store);
+    for (const key of keys) os.delete(key);
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+    tx.onabort = () => reject(tx.error);
+  });
+}
+
 /** Clear all records from a store. */
 export function idbClear(db: IDBDatabase, store: string): Promise<void> {
   return new Promise((resolve, reject) => {

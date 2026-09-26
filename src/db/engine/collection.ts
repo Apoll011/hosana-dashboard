@@ -26,7 +26,13 @@
  * IndexedDB is used only for persistence.
  */
 
-import { idbBulkPut, idbClear, idbDelete, idbGetAll, idbPut } from "./idb";
+import {
+  idbBulkDelete,
+  idbBulkPut,
+  idbClear,
+  idbGetAll,
+  idbPut,
+} from "./idb";
 import {
   notify,
   notifyCollection,
@@ -121,14 +127,12 @@ function makeDoc<T extends AnyDoc>(
   };
 
   doc.remove = async function (this: HosanaDoc<T>): Promise<void> {
-    const id = this._raw.id;
-    // Remove from memory
-    this._collection._storeDelete(id);
-    // Remove from IDB
-    await idbDelete(this._collection._db, this._collection._storeName, id);
-    notify(this._collection._storeName, id);
-    // Trigger replication push so the tombstone reaches the server
-    notifyLocalChange(this._collection._storeName);
+    // Keep a local tombstone until replication successfully pushes `_deleted: true`
+    // to the server. Hard-removing here would drop the delete and never sync it.
+    const tombstone = { ...this._raw, _deleted: true } as T;
+    await this._collection._put(tombstone);
+    Object.assign(this, { _deleted: true });
+    (this as { _raw: T })._raw = this._collection.getRaw(this._raw.id) ?? tombstone;
   };
 
   return doc;
@@ -202,9 +206,14 @@ export class HosanaCollection<T extends AnyDoc> {
 
   // ── Internal ──────────────────────────────────────────────────────────────
 
-  /** @internal Used by doc.remove() */
+  /** @internal Used by doc.remove() / replication */
   _storeDelete(id: string): void {
     this._store.delete(id);
+  }
+
+  /** @internal Local-only field names (never pushed to the server). */
+  getLocalFieldNames(): ReadonlySet<string> {
+    return this._localFields;
   }
 
   /**
@@ -233,20 +242,30 @@ export class HosanaCollection<T extends AnyDoc> {
     if (origin === "local") notifyLocalChange(this._storeName);
   }
 
-  /** @internal Put a batch; single IDB transaction. Always treated as local. */
-  async _putBatch(docs: T[]): Promise<void> {
-    const stamped = docs.map((d) =>
-      "updatedAt" in d
-        ? ({ ...d, updatedAt: new Date().toISOString() } as T)
-        : d,
-    );
+  /**
+   * @internal Put a batch; single IDB transaction.
+   * `origin` defaults to "local" (bulkInsert). Replication uses "remote".
+   */
+  async _putBatch(
+    docs: T[],
+    origin: "local" | "remote" = "local",
+  ): Promise<void> {
+    if (docs.length === 0) return;
+    const stamped =
+      origin === "local"
+        ? docs.map((d) =>
+            "updatedAt" in d
+              ? ({ ...d, updatedAt: new Date().toISOString() } as T)
+              : d,
+          )
+        : docs;
     const enriched = stamped.map((d) => this._applyComputedFields(d));
     for (const d of enriched) {
       this._store.set(d.id, d);
     }
     await idbBulkPut(this._db, this._storeName, enriched);
     notifyCollection(this._storeName);
-    notifyLocalChange(this._storeName);
+    if (origin === "local") notifyLocalChange(this._storeName);
   }
 
   /**
@@ -255,25 +274,45 @@ export class HosanaCollection<T extends AnyDoc> {
    * Computed fields are always recalculated.
    */
   async _mergeFromServer(serverDoc: T): Promise<void> {
+    await this._put(this._mergeLocalFields(serverDoc), "remote");
+  }
+
+  /**
+   * @internal Batch-merge server docs in a single IDB transaction.
+   * Much faster than N individual `_mergeFromServer` calls during pull.
+   */
+  async _mergeBatchFromServer(serverDocs: T[]): Promise<void> {
+    if (serverDocs.length === 0) return;
+    const merged = serverDocs.map((d) => this._mergeLocalFields(d));
+    await this._putBatch(merged, "remote");
+  }
+
+  /**
+   * @internal Hard-remove ids from memory + IDB after a tombstone was
+   * acknowledged (local push success or server pull of `_deleted: true`).
+   */
+  async _purgeIds(ids: string[]): Promise<void> {
+    if (ids.length === 0) return;
+    for (const id of ids) this._store.delete(id);
+    await idbBulkDelete(this._db, this._storeName, ids);
+    notifyCollection(this._storeName);
+  }
+
+  /** Preserve non-null local-only fields across a server merge. */
+  private _mergeLocalFields(serverDoc: T): T {
+    if (this._localFields.size === 0) return serverDoc;
     const existing = this._store.get(serverDoc.id);
-    let merged: T = serverDoc;
-    if (this._localFields.size > 0) {
-      const overrides: Partial<T> = {};
-      for (const lf of this._localFields) {
-        const existingVal = existing
-          ? (existing as Record<string, unknown>)[lf]
-          : undefined;
-        // Preserve existing local value only if it's non-null/undefined
-        if (existingVal != null) {
-          (overrides as Record<string, unknown>)[lf] = existingVal;
-        }
-        // If missing/null, _applyComputedFields will (re)compute it inside _put.
-      }
-      if (Object.keys(overrides).length > 0) {
-        merged = { ...serverDoc, ...overrides };
+    if (!existing) return serverDoc;
+    const overrides: Partial<T> = {};
+    for (const lf of this._localFields) {
+      const existingVal = (existing as Record<string, unknown>)[lf];
+      if (existingVal != null) {
+        (overrides as Record<string, unknown>)[lf] = existingVal;
       }
     }
-    await this._put(merged, "remote");
+    return Object.keys(overrides).length > 0
+      ? ({ ...serverDoc, ...overrides } as T)
+      : serverDoc;
   }
 
   private _applyComputedFields(doc: T): T {

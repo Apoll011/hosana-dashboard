@@ -8,8 +8,8 @@ export function getPurgeAt(): string {
 
 /**
  * Hard-removes trashed records whose purgeAt has expired.
- * doc.remove() sets the replication tombstone, which then
- * replicates the permanent deletion to the server.
+ * doc.remove() writes a local `_deleted` tombstone; replication pushes it
+ * to the server, then purges the local row once the push succeeds.
  */
 export async function purgeExpiredTrash(db: HosanaDatabase): Promise<void> {
   const nowIso = new Date().toISOString();
