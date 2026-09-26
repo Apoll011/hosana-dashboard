@@ -4,6 +4,7 @@
  */
 
 import { DayAgendaList } from "@/src/components/agenda/DayAgendaList";
+import { DeleteEventModal } from "@/src/components/agenda/DeleteEventModal";
 import { DetailsSidebar } from "@/src/components/agenda/DetailsSidebar";
 import {
   AddResponsibilityModal,
@@ -14,15 +15,19 @@ import {
 import { MiniCalendar, toIso } from "@/src/components/agenda/MiniCalendar";
 import { RemoveAssignmentModal } from "@/src/components/agenda/RemoveAssignmentModal";
 import { ResponsibilitiesPanel } from "@/src/components/agenda/ResponsibilitiesPanel";
+import { useAuth } from "@/src/contexts/AuthContext";
 import { useAgendaNotifications } from "@/src/hooks/useAgendaNotifications";
 import { useI18n } from "@/src/lib/i18n";
-import type { Assignee } from "@/src/types";
-import { assigneeKey, groupAssignees } from "@/src/utils/agendaNotify";
-import { AlertTriangle, CalendarPlus, Printer } from "lucide-react";
-import React, { useEffect, useMemo, useState } from "react";
+import type { AgendaEvent, Assignee } from "@/src/types";
+import { formatLongDate } from "@/src/utils/agendaDate";
+import {
+  assigneeKey,
+  collectEventMembers,
+  groupAssignees,
+} from "@/src/utils/agendaNotify";
+import { CalendarPlus, Printer, Trash2 } from "lucide-react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Modal } from "../components/common";
-import { Button } from "../components/common/Button";
 import { usePrint } from "../contexts/PrintContext";
 import { useAgenda } from "../hooks/useAgenda";
 
@@ -39,6 +44,7 @@ type PendingRemoval =
 
 export const AgendaPage: React.FC = () => {
   const { t } = useI18n();
+  const { organization } = useAuth();
   const store = useAgenda();
   const { printEvent, printEvents } = usePrint();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -57,8 +63,9 @@ export const AgendaPage: React.FC = () => {
   const [editingAssigneesFor, setEditingAssigneesFor] = useState<string | null>(
     null,
   );
-
-  const [isDeleteModalOpen, setIsDeleteModal] = useState<boolean>(false);
+  /** Snapshot kept open while delete + optional notify finish. */
+  const [pendingDeleteEvent, setPendingDeleteEvent] =
+    useState<AgendaEvent | null>(null);
 
   // Open create modal when navigated here with ?create=1 (e.g. from command palette)
   useEffect(() => {
@@ -122,12 +129,33 @@ export const AgendaPage: React.FC = () => {
     return map;
   }, [store.categories]);
 
+  const reachableMemberIds = useMemo(() => {
+    const set = new Set<string>();
+    for (const member of organization?.members ?? []) {
+      if (member.userId) set.add(member.id);
+    }
+    return set;
+  }, [organization?.members]);
+
+  const isReachable = useCallback(
+    (memberId: string) => reachableMemberIds.has(memberId),
+    [reachableMemberIds],
+  );
+
   // Studio-side notification flows (assignments / date / location).
   const notifications = useAgendaNotifications({
     event: selectedEvent,
     store,
     categoriesById,
   });
+
+  const deleteAffectedCount = useMemo(
+    () =>
+      pendingDeleteEvent
+        ? collectEventMembers(pendingDeleteEvent, isReachable).length
+        : 0,
+    [pendingDeleteEvent, isReachable],
+  );
 
   // What the pending removal dialog is about to delete (null → hidden).
   const removalInfo = useMemo(() => {
@@ -169,7 +197,7 @@ export const AgendaPage: React.FC = () => {
     try {
       if (pendingRemoval.kind === "responsibility") {
         const affected = responsibility
-          ? groupAssignees(responsibility.assignees, label)
+          ? groupAssignees(responsibility.assignees, label, isReachable)
           : [];
         // Remove first — never leave an assignment behind after promising a
         // cancellation notice.
@@ -178,7 +206,11 @@ export const AgendaPage: React.FC = () => {
           await notifications.notifyRemoval(affected);
         }
       } else {
-        const affected = groupAssignees(pendingRemoval.removed, label);
+        const affected = groupAssignees(
+          pendingRemoval.removed,
+          label,
+          isReachable,
+        );
         await store.updateResponsibilityAssignees(
           eventId,
           respId,
@@ -193,6 +225,27 @@ export const AgendaPage: React.FC = () => {
     } finally {
       setIsRemoving(false);
       setPendingRemoval(null);
+    }
+  };
+
+  const handleConfirmDeleteEvent = async (notifyUsers: boolean) => {
+    if (!pendingDeleteEvent) return;
+    const snapshot = pendingDeleteEvent;
+    const groups = collectEventMembers(snapshot, isReachable).map(
+      (memberId) => ({ memberId, labels: [] as string[] }),
+    );
+
+    try {
+      // Capture recipients first, then delete — the cancel notice needs the
+      // event snapshot after the row is gone from the store.
+      await store.deleteEvent(snapshot.id);
+      if (notifyUsers && groups.length > 0) {
+        await notifications.notifyEventCancelled(snapshot, groups);
+      }
+      setSelectedEventId(null);
+      setPendingDeleteEvent(null);
+    } catch {
+      // error toast already shown by the store
     }
   };
 
@@ -232,9 +285,10 @@ export const AgendaPage: React.FC = () => {
               {t("agenda.subtitle")}
             </p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap justify-end">
             {selectedEvent ? (
               <button
+                type="button"
                 onClick={() => {
                   printEvent(selectedEvent, store.categories);
                 }}
@@ -248,11 +302,14 @@ export const AgendaPage: React.FC = () => {
               </button>
             ) : eventsForSelectedDate.length > 0 ? (
               <button
+                type="button"
                 onClick={() => {
                   printEvents(
                     eventsForSelectedDate,
                     store.categories,
-                    `Agenda de ${selectedDate}`,
+                    t("agenda.printDayAgenda", {
+                      date: formatLongDate(selectedDate, t),
+                    }),
                   );
                 }}
                 className="flex items-center gap-2 px-3.5 py-2.5 text-xs font-bold rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 shadow-sm transition-colors cursor-pointer"
@@ -269,17 +326,17 @@ export const AgendaPage: React.FC = () => {
 
             {selectedEvent && (
               <button
-                onClick={() => {
-                  setIsDeleteModal(true);
-                }}
-                className="flex items-center gap-2 px-4 py-2.5 text-xs font-bold rounded-xl bg-red-500 text-white hover:bg-red-600 shadow-sm transition-colors cursor-pointer"
+                type="button"
+                onClick={() => setPendingDeleteEvent(selectedEvent)}
+                className="flex items-center gap-2 px-4 py-2.5 text-xs font-bold rounded-xl border border-rose-200 dark:border-rose-900/60 bg-white dark:bg-slate-800 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 shadow-sm transition-colors cursor-pointer"
               >
-                <CalendarPlus className="w-4 h-4" />
+                <Trash2 className="w-4 h-4" />
                 {t("agenda.deleteEvent")}
               </button>
             )}
 
             <button
+              type="button"
               onClick={() => setIsNewEventOpen(true)}
               className="flex items-center gap-2 px-4 py-2.5 text-xs font-bold rounded-xl bg-sky-500 text-white hover:bg-sky-600 shadow-sm transition-colors cursor-pointer"
             >
@@ -389,9 +446,8 @@ export const AgendaPage: React.FC = () => {
             setIsEditEventOpen(false);
           }}
           onDelete={() => {
-            store.deleteEvent(selectedEvent.id);
-            setSelectedEventId(null);
             setIsEditEventOpen(false);
+            setPendingDeleteEvent(selectedEvent);
           }}
           title={t("agenda.editEvent")}
           submitLabel={t("common.save")}
@@ -483,35 +539,16 @@ export const AgendaPage: React.FC = () => {
         />
       )}
 
-      {selectedEvent && (
-        <Modal
-          isOpen={isDeleteModalOpen}
-          onClose={() => setIsDeleteModal(false)}
-          title={t("agenda.deleteEventConfirm")}
-        >
-          <div className="flex flex-col gap-4">
-            <div className="p-3 bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900 rounded-xl flex items-start gap-2.5 text-xs text-rose-800 dark:text-rose-300">
-              <AlertTriangle className="w-4 h-4 shrink-0 text-rose-500 mt-0.5" />
-              <span>{t("agenda.deleteEventConfirm")}</span>
-            </div>
-
-            <div className="flex items-center justify-end gap-3 mt-2 pt-4 border-t border-slate-100 dark:border-slate-800">
-              <Button variant="ghost" onClick={() => setIsDeleteModal(false)}>
-                {t("common.cancel")}
-              </Button>
-              <Button
-                variant="danger"
-                onClick={() => {
-                  store.deleteEvent(selectedEvent.id);
-                  setSelectedEventId(null);
-                  setIsDeleteModal(false);
-                }}
-              >
-                {t("agenda.deleteEvent")}
-              </Button>
-            </div>
-          </div>
-        </Modal>
+      {pendingDeleteEvent && (
+        <DeleteEventModal
+          isOpen
+          onClose={() => setPendingDeleteEvent(null)}
+          eventTitle={pendingDeleteEvent.title}
+          affectedCount={deleteAffectedCount}
+          canNotify={notifications.canNotify}
+          isBusy={store.isDeleting || notifications.isNotifying}
+          onConfirm={handleConfirmDeleteEvent}
+        />
       )}
     </div>
   );

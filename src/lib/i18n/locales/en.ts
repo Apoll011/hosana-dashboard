@@ -987,9 +987,12 @@ export const en: typeof pt = {
       atTime: "at {time}",
       assignmentTitle: "Assigned to {event}",
       assignmentBody: "Date: {date}\n\nResponsibilities:\n{list}",
-      removalTitle: "Responsibilities updated",
+      removalTitle: "Responsibilities for {event} updated",
       removalBody:
         "Your responsibilities for {event} have been updated.\n\nDate: {date}\n\nRemoved:\n{list}",
+      eventCancelledTitle: "{event} has been cancelled",
+      eventCancelledBody:
+        "The event \"{event}\" scheduled for {date} has been cancelled.",
       dateTitle: "The date of {event} has changed",
       dateBody: "New date:\n{date}",
       locationTitle: "The location of {event} has changed",
@@ -1004,6 +1007,12 @@ export const en: typeof pt = {
       removeSummary: "Removing",
       notifyRemovalLabel: "Notify the user about the cancellation",
       notifyRemovalHint: "Off by default — no notification is sent.",
+      notifyDeleteLabel: "Notify all assigned users",
+      notifyDeleteHint: {
+        one: "1 assigned user will be notified that the event was cancelled.",
+        other:
+          "{count} assigned users will be notified that the event was cancelled.",
+      },
     },
     editAssignments: "Edit assignments",
     comment: "Comment",
@@ -1037,7 +1046,10 @@ export const en: typeof pt = {
     locationPlaceholder: "e.g. Main Temple",
     notesPlaceholder: "Planning notes…",
     deleteEventConfirm: "Delete this event?",
+    deleteEventConfirmBody:
+      "This will permanently remove the event and all of its responsibilities.",
     deleteEvent: "Delete",
+    printDayAgenda: "Agenda — {date}",
     decreaseDuration: "Decrease duration",
     increaseDuration: "Increase duration",
     eventTypes: {

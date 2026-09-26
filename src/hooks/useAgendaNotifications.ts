@@ -386,6 +386,7 @@ export function useAgendaNotifications(options: {
           title: t("agenda.notify.removalTitle", { event: event.title }),
           buildBody: (labels) =>
             t("agenda.notify.removalBody", {
+              event: event.title,
               date: formatEventDate(event),
               list: bulletList(labels),
             }),
@@ -423,6 +424,61 @@ export function useAgendaNotifications(options: {
     ],
   );
 
+  /* ── 4. Event cancellation (explicit toggle in the delete flow) ──────── */
+
+  const notifyEventCancelled = useCallback(
+    async (
+      targetEvent: AgendaEvent,
+      groups: AssignmentGroup[],
+    ): Promise<boolean> => {
+      if (isNotifying) return false;
+      if (!canNotify) {
+        showToast(t("agenda.notify.noPermission"), "error");
+        return false;
+      }
+      if (groups.length === 0) {
+        showToast(t("agenda.notify.noRecipients"), "info");
+        return false;
+      }
+
+      setIsNotifying(true);
+      try {
+        const outcome = await deliver({
+          type: "event_cancelled",
+          targetEvent,
+          groups,
+          title: t("agenda.notify.eventCancelledTitle", {
+            event: targetEvent.title,
+          }),
+          buildBody: () =>
+            t("agenda.notify.eventCancelledBody", {
+              event: targetEvent.title,
+              date: formatEventDate(targetEvent),
+            }),
+        });
+
+        if (!outcome) {
+          showToast(t("agenda.notify.noRecipients"), "info");
+          return false;
+        }
+
+        report(outcome.result);
+        return outcome.result.sent > 0;
+      } catch (err) {
+        showToast(
+          t("agenda.notify.sendError", {
+            error: (err as Error).message || "",
+          }),
+          "error",
+        );
+        return false;
+      } finally {
+        setIsNotifying(false);
+      }
+    },
+    [isNotifying, canNotify, deliver, formatEventDate, report, showToast, t],
+  );
+
   return {
     canNotify,
     isNotifying,
@@ -433,5 +489,6 @@ export function useAgendaNotifications(options: {
     notifyAssignments,
     notifyUpdate,
     notifyRemoval,
+    notifyEventCancelled,
   };
 }
