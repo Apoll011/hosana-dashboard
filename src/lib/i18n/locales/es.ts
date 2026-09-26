@@ -2043,6 +2043,12 @@ export const es: typeof pt = {
       affectedCount: "{count} canción(es) afectada(s)",
       allHealthyTitle: "La biblioteca está en excelente estado",
       allHealthyDesc: "Ninguna canción tiene criterios pendientes.",
+      autoFix: "Corregir",
+      autoFixAll: "Corregir todos",
+      autoFixableCount: "{count} corregible(s)",
+      autoFixSuccess: "{count} canción(es) corregida(s) automáticamente.",
+      autoFixNone: "Nada que corregir automáticamente.",
+      autoFixError: "Error al aplicar correcciones automáticas.",
       criteria: {
         errors: "Errores de análisis ChordPro",
         sections: "Sin secciones de verso",

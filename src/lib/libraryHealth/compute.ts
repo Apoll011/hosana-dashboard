@@ -4,7 +4,11 @@
  */
 
 import type { SongScore } from "@hosanna/chordpro";
-import type { Song } from "../types";
+import type { Song } from "../../types";
+import {
+  getAutoFixForCriterion,
+  listAutoFixes,
+} from "./autoFixes/registry";
 
 export type ScoreMissingCriterion = SongScore["missing"][number];
 
@@ -26,11 +30,14 @@ export interface LibraryHealthIssueSong {
   title: string;
   artist: string;
   score: number;
+  /** True when a registered auto-fix can resolve this criterion for the song. */
+  autoFixable: boolean;
 }
 
 export interface LibraryHealthCategory {
   criterion: ScoreMissingCriterion;
   songs: LibraryHealthIssueSong[];
+  autoFixableCount: number;
 }
 
 export interface LibraryHealthSummary {
@@ -52,9 +59,23 @@ function songMissing(song: Song): ScoreMissingCriterion[] {
   return song.score.missing;
 }
 
+function toIssueSong(
+  song: Song,
+  criterion: ScoreMissingCriterion,
+): LibraryHealthIssueSong {
+  return {
+    id: song.id,
+    title: song.title || "Untitled",
+    artist: song.artist || "",
+    score: songScoreValue(song),
+    autoFixable: getAutoFixForCriterion(criterion)?.canFix(song) ?? false,
+  };
+}
+
 /**
  * Aggregate library quality from the existing per-song score system.
- * Reactive callers should pass the latest songs from `useAllSongs()`.
+ * Also surfaces songs that auto-fixes can improve even when the score
+ * already treats the criterion as satisfied (e.g. detected key without `{key:}`).
  */
 export function computeLibraryHealth(songs: Song[]): LibraryHealthSummary {
   const songCount = songs.length;
@@ -76,11 +97,11 @@ export function computeLibraryHealth(songs: Song[]): LibraryHealthSummary {
 
   const byCriterion = new Map<
     ScoreMissingCriterion,
-    LibraryHealthIssueSong[]
+    Map<string, LibraryHealthIssueSong>
   >();
 
   for (const criterion of SCORE_CRITERIA) {
-    byCriterion.set(criterion, []);
+    byCriterion.set(criterion, new Map());
   }
 
   let issueCount = 0;
@@ -90,27 +111,42 @@ export function computeLibraryHealth(songs: Song[]): LibraryHealthSummary {
     const missing = songMissing(song);
     if (missing.length === 0) {
       healthyCount += 1;
-      continue;
+    } else {
+      issueCount += 1;
     }
-    issueCount += 1;
-    const entry: LibraryHealthIssueSong = {
-      id: song.id,
-      title: song.title || "Untitled",
-      artist: song.artist || "",
-      score: songScoreValue(song),
-    };
+
     for (const criterion of missing) {
-      byCriterion.get(criterion)?.push(entry);
+      byCriterion.get(criterion)?.set(song.id, toIssueSong(song, criterion));
+    }
+  }
+
+  // Surface latent auto-fix opportunities (e.g. fill `{key:}` from analyze()).
+  for (const fixer of listAutoFixes()) {
+    const bucket = byCriterion.get(fixer.criterion);
+    if (!bucket) continue;
+    for (const song of songs) {
+      if (bucket.has(song.id)) continue;
+      if (!fixer.canFix(song)) continue;
+      bucket.set(song.id, toIssueSong(song, fixer.criterion));
     }
   }
 
   const categories: LibraryHealthCategory[] = SCORE_CRITERIA.map(
-    (criterion) => ({
-      criterion,
-      songs: (byCriterion.get(criterion) ?? []).sort(
-        (a, b) => a.score - b.score || a.title.localeCompare(b.title),
-      ),
-    }),
+    (criterion) => {
+      const songsInCategory = [
+        ...(byCriterion.get(criterion)?.values() ?? []),
+      ].sort(
+        (a, b) =>
+          Number(b.autoFixable) - Number(a.autoFixable) ||
+          a.score - b.score ||
+          a.title.localeCompare(b.title),
+      );
+      return {
+        criterion,
+        songs: songsInCategory,
+        autoFixableCount: songsInCategory.filter((s) => s.autoFixable).length,
+      };
+    },
   ).filter((c) => c.songs.length > 0);
 
   return {

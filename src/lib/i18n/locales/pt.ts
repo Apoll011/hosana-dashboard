@@ -2035,6 +2035,12 @@ export const pt = {
       affectedCount: "{count} cântico(s) afetado(s)",
       allHealthyTitle: "Biblioteca em excelente estado",
       allHealthyDesc: "Nenhum cântico com critérios em falta.",
+      autoFix: "Corrigir",
+      autoFixAll: "Corrigir todos",
+      autoFixableCount: "{count} corrigível(eis)",
+      autoFixSuccess: "{count} cântico(s) corrigido(s) automaticamente.",
+      autoFixNone: "Nada para corrigir automaticamente.",
+      autoFixError: "Falha ao aplicar correções automáticas.",
       criteria: {
         errors: "Erros de análise ChordPro",
         sections: "Sem secções de verso",
