@@ -51,6 +51,7 @@ export type CreateNotificationResult = {
 export type NotificationType =
   | "assignment_created"
   | "assignment_removed"
+  | "event_cancelled"
   | "service_date_changed"
   | "service_location_changed"
   | "service_updated";

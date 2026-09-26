@@ -5,8 +5,9 @@
 
 import { Button, Modal } from "@/src/components/common";
 import { useI18n } from "@/src/lib/i18n";
-import { BellOff, Trash2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import React, { useEffect, useState } from "react";
+import { NotifyToggle } from "./NotifyToggle";
 
 interface RemoveAssignmentModalProps {
   isOpen: boolean;
@@ -24,11 +25,8 @@ interface RemoveAssignmentModalProps {
 
 /**
  * Delete-confirmation flow for assignment removals, with the optional
- *
- *   "Notificar o utilizador sobre o cancelamento"
- *
- * toggle. OFF (default) → the assignment is simply removed; ON → a single
- * aggregated `assignment_removed` notification goes out after the removal.
+ * "notify about the cancellation" toggle. OFF (default) → assignment removed
+ * only; ON → a single aggregated `assignment_removed` notification goes out.
  */
 export const RemoveAssignmentModal: React.FC<RemoveAssignmentModalProps> = ({
   isOpen,
@@ -67,37 +65,13 @@ export const RemoveAssignmentModal: React.FC<RemoveAssignmentModalProps> = ({
           </div>
         )}
 
-        {/* Optional cancellation notice — OFF by default. */}
-        <button
-          type="button"
-          onClick={() => setNotify((v) => !v)}
-          className="w-full flex items-center justify-between gap-3 p-3 rounded-xl border border-slate-200 dark:border-slate-800 hover:border-[#0284c7]/40 transition-colors text-left cursor-pointer"
-        >
-          <span className="flex items-start gap-2 min-w-0">
-            <BellOff className="w-4 h-4 shrink-0 mt-0.5 text-slate-400" />
-            <span className="min-w-0">
-              <span className="block text-xs font-bold text-slate-800 dark:text-slate-200">
-                {t("agenda.notify.notifyRemovalLabel")}
-              </span>
-              <span className="block text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">
-                {t("agenda.notify.notifyRemovalHint")}
-              </span>
-            </span>
-          </span>
-          <span
-            role="switch"
-            aria-checked={notify}
-            className={`w-10 h-6 rounded-full relative shrink-0 transition-colors ${
-              notify ? "bg-[#0284c7]" : "bg-slate-200 dark:bg-slate-700"
-            }`}
-          >
-            <span
-              className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform ${
-                notify ? "-translate-x-0.5" : "-translate-x-4.5"
-              }`}
-            />
-          </span>
-        </button>
+        <NotifyToggle
+          checked={notify}
+          onChange={setNotify}
+          label={t("agenda.notify.notifyRemovalLabel")}
+          hint={t("agenda.notify.notifyRemovalHint")}
+          disabled={isBusy}
+        />
 
         <div className="flex justify-end gap-2 pt-2 border-t border-m3-border/40">
           <Button variant="outline" onClick={onClose} disabled={isBusy}>

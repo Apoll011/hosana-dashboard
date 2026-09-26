@@ -1001,9 +1001,12 @@ export const es: typeof pt = {
       atTime: "a las {time}",
       assignmentTitle: "Se le ha asignado {event}",
       assignmentBody: "Fecha: {date}\n\nResponsabilidades:\n{list}",
-      removalTitle: "Responsabilidades actualizadas",
+      removalTitle: "Responsabilidades de {event} actualizadas",
       removalBody:
         "Sus responsabilidades en {event} han sido actualizadas.\n\nFecha: {date}\n\nEliminado:\n{list}",
+      eventCancelledTitle: "{event} ha sido cancelado",
+      eventCancelledBody:
+        "El evento \"{event}\" programado para {date} ha sido cancelado.",
       dateTitle: "La fecha de {event} ha cambiado",
       dateBody: "Nueva fecha:\n{date}",
       locationTitle: "La ubicación de {event} ha cambiado",
@@ -1019,6 +1022,12 @@ export const es: typeof pt = {
       notifyRemovalLabel: "Notificar al usuario sobre la cancelación",
       notifyRemovalHint:
         "Desactivado por omisión: no se envía ninguna notificación.",
+      notifyDeleteLabel: "Notificar a todos los usuarios asignados",
+      notifyDeleteHint: {
+        one: "Se notificará a 1 usuario asignado de que el evento fue cancelado.",
+        other:
+          "Se notificará a {count} usuarios asignados de que el evento fue cancelado.",
+      },
     },
     editAssignments: "Editar asignaciones",
     comment: "Comentar",
@@ -1052,7 +1061,10 @@ export const es: typeof pt = {
     locationPlaceholder: "Ej: Templo Principal",
     notesPlaceholder: "Notas de planificación…",
     deleteEventConfirm: "¿Eliminar este evento?",
+    deleteEventConfirmBody:
+      "Esto eliminará permanentemente el evento y todas sus responsabilidades.",
     deleteEvent: "Eliminar",
+    printDayAgenda: "Agenda — {date}",
     decreaseDuration: "Disminuir duración",
     increaseDuration: "Aumentar duración",
     eventTypes: {

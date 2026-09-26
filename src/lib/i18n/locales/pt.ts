@@ -996,9 +996,12 @@ export const pt = {
       atTime: "às {time}",
       assignmentTitle: "Foi atribuído a {event}",
       assignmentBody: "Data: {date}\n\nResponsabilidades:\n{list}",
-      removalTitle: "Responsabilidades atualizadas",
+      removalTitle: "Responsabilidades de {event} atualizadas",
       removalBody:
         "As suas responsabilidades em {event} foram atualizadas.\n\nData: {date}\n\nRemovido:\n{list}",
+      eventCancelledTitle: "{event} foi cancelado",
+      eventCancelledBody:
+        "O evento \"{event}\" agendado para {date} foi cancelado.",
       dateTitle: "A data de {event} mudou",
       dateBody: "Nova data:\n{date}",
       locationTitle: "O local de {event} mudou",
@@ -1013,6 +1016,12 @@ export const pt = {
       removeSummary: "A remover",
       notifyRemovalLabel: "Notificar o utilizador sobre o cancelamento",
       notifyRemovalHint: "Por omissão não é enviada nenhuma notificação.",
+      notifyDeleteLabel: "Notificar todos os utilizadores atribuídos",
+      notifyDeleteHint: {
+        one: "1 utilizador atribuído será notificado de que o evento foi cancelado.",
+        other:
+          "{count} utilizadores atribuídos serão notificados de que o evento foi cancelado.",
+      },
     },
     editAssignments: "Editar atribuições",
     comment: "Comentar",
@@ -1046,7 +1055,10 @@ export const pt = {
     locationPlaceholder: "Ex: Templo Principal",
     notesPlaceholder: "Notas de planeamento…",
     deleteEventConfirm: "Eliminar este evento?",
+    deleteEventConfirmBody:
+      "Isto remove permanentemente o evento e todas as suas responsabilidades.",
     deleteEvent: "Eliminar",
+    printDayAgenda: "Agenda — {date}",
     decreaseDuration: "Diminuir duração",
     increaseDuration: "Aumentar duração",
     eventTypes: {
