@@ -168,64 +168,79 @@ function stripNonReplicatedFields<T extends SyncableDoc>(
   return out as T;
 }
 
+type WirePartial<T> = { id: string; updatedAt: string } & Partial<T>;
+
+function isVolatileKey(key: string): boolean {
+  return (VOLATILE_FIELDS as readonly string[]).includes(key);
+}
+
 /**
- * Compute the set of fields that differ between `current` and `previous`.
- * Always includes `id` and `updatedAt` so the server can identify the doc
- * and perform conflict detection. If there is no previous state (new doc)
- * we return the full document.
+ * Fields that differ between `current` and `previous`, always including
+ * `id` + `updatedAt`. Creates (no previous) send the full document.
+ * `valueOf` selects which side's value to put in the delta (new vs assumed).
  */
 function diffFields<T extends SyncableDoc>(
   current: T & { _deleted: boolean },
   previous: (T & { _deleted: boolean }) | null,
-): { id: string; updatedAt: string; _deleted: boolean } & Partial<T> {
+  valueOf: "current" | "previous",
+): WirePartial<T> & { _deleted?: boolean } {
   if (!previous) {
-    return { ...current };
+    // New doc — server needs the full create payload (minus volatile keys).
+    const full: Record<string, unknown> = { ...current };
+    for (const field of VOLATILE_FIELDS) delete full[field];
+    return full as WirePartial<T> & { _deleted?: boolean };
   }
 
+  const source = valueOf === "current" ? current : previous;
   const delta: Record<string, unknown> = {
-    id: current.id,
-    updatedAt: current.updatedAt,
-    _deleted: current._deleted,
+    id: source.id,
+    updatedAt: source.updatedAt,
   };
 
-  for (const key of Object.keys(current) as (keyof T)[]) {
-    if (key === "id" || key === "updatedAt" || key === "_deleted") continue;
-    if (!deepEqual(current[key], previous[key])) {
-      delta[key as string] = current[key];
+  const keys = new Set([
+    ...Object.keys(current),
+    ...Object.keys(previous),
+  ]);
+
+  for (const key of keys) {
+    if (key === "id" || key === "updatedAt" || isVolatileKey(key)) continue;
+    if (
+      !deepEqual(
+        (current as Record<string, unknown>)[key],
+        (previous as Record<string, unknown>)[key],
+      )
+    ) {
+      delta[key] = (source as Record<string, unknown>)[key];
     }
   }
 
-  return delta as {
-    id: string;
-    updatedAt: string;
-    _deleted: boolean;
-  } & Partial<T>;
+  return delta as WirePartial<T> & { _deleted?: boolean };
+}
+
+/** Wire row for POST /push — only id, updatedAt, and changed fields. */
+interface ChangeRow<T> {
+  newDocumentState: WirePartial<T> & { _deleted?: boolean };
+  assumedMasterState: WirePartial<T> | null;
 }
 
 /**
- * Build the assumedMasterState payload for a change row.
- * Volatile fields are omitted.
+ * Local pending change. Full docs stay in memory for conflict retry;
+ * only a compact delta is serialized to the wire.
  */
-function buildAssumedMasterPayload<T extends SyncableDoc>(
-  assumed: (T & { _deleted: boolean }) | null,
-): ({ id: string; updatedAt: string } & Partial<T>) | null {
-  if (!assumed) return null;
-  const out: Record<string, unknown> = {};
-  for (const key of Object.keys(assumed) as (keyof typeof assumed)[]) {
-    if (VOLATILE_FIELDS.includes(key as (typeof VOLATILE_FIELDS)[number]))
-      continue;
-    out[key as string] = assumed[key];
-  }
-  return out as { id: string; updatedAt: string } & Partial<T>;
+interface PendingChange<T extends SyncableDoc> {
+  fullNew: T & { _deleted: boolean };
+  fullAssumed: (T & { _deleted: boolean }) | null;
 }
 
-interface ChangeRow<T> {
-  newDocumentState: {
-    id: string;
-    updatedAt: string;
-    _deleted: boolean;
-  } & Partial<T>;
-  assumedMasterState: ({ id: string; updatedAt: string } & Partial<T>) | null;
+function toChangeRow<T extends SyncableDoc>(
+  change: PendingChange<T>,
+): ChangeRow<T> {
+  return {
+    newDocumentState: diffFields(change.fullNew, change.fullAssumed, "current"),
+    assumedMasterState: change.fullAssumed
+      ? diffFields(change.fullNew, change.fullAssumed, "previous")
+      : null,
+  };
 }
 
 function chunkArray<T>(arr: T[], size: number): T[][] {
@@ -240,17 +255,18 @@ function chunkArray<T>(arr: T[], size: number): T[][] {
 async function pushWithConflictRetry<T extends SyncableDoc>(
   client: ReturnType<typeof getApiClient>,
   collectionName: CollectionName,
-  changeRows: ChangeRow<T>[],
+  changes: PendingChange<T>[],
 ): Promise<(T & { _deleted: boolean })[]> {
-  let pending = changeRows;
+  let pending = changes;
   const realConflicts: (T & { _deleted: boolean })[] = [];
 
   for (let attempt = 0; attempt <= CONFLICT_RETRY_LIMIT; attempt++) {
+    const changeRows: ChangeRow<T>[] = pending.map(toChangeRow);
     const res = await client.request<{ conflicts?: T[] } | T[]>(
       `/replication/${collectionName}/push`,
       {
         method: "POST",
-        body: JSON.stringify({ changeRows: pending }),
+        body: JSON.stringify({ changeRows }),
       },
     );
 
@@ -264,31 +280,33 @@ async function pushWithConflictRetry<T extends SyncableDoc>(
     if (conflicts.length === 0) break;
 
     const conflictsById = new Map(conflicts.map((c) => [c.id, c]));
-    const retryRows: ChangeRow<T>[] = [];
+    const retryChanges: PendingChange<T>[] = [];
 
-    for (const row of pending) {
-      const serverDoc = conflictsById.get(row.newDocumentState.id);
+    for (const change of pending) {
+      const serverDoc = conflictsById.get(change.fullNew.id);
       if (!serverDoc) continue;
 
+      // Compare full assumed snapshot (not the wire delta) so partial
+      // payloads don't break spurious-conflict detection.
       const canRetry =
         attempt < CONFLICT_RETRY_LIMIT &&
-        isSpuriousConflict(row.assumedMasterState as T | undefined, serverDoc);
+        isSpuriousConflict(
+          change.fullAssumed as T | undefined,
+          serverDoc,
+        );
 
       if (canRetry) {
-        retryRows.push({
-          newDocumentState: diffFields(
-            row.newDocumentState as T & { _deleted: boolean },
-            serverDoc,
-          ),
-          assumedMasterState: buildAssumedMasterPayload<T>(serverDoc),
+        retryChanges.push({
+          fullNew: change.fullNew,
+          fullAssumed: serverDoc,
         });
       } else {
         realConflicts.push(serverDoc);
       }
     }
 
-    if (retryRows.length === 0) break;
-    pending = retryRows;
+    if (retryChanges.length === 0) break;
+    pending = retryChanges;
   }
 
   return realConflicts;
@@ -530,7 +548,7 @@ async function replicateCollection<
   if (toPush.length > 0 && !shouldAbort()) {
     const pushedFull = new Map<string, T & { _deleted: boolean }>();
 
-    const changeRows: ChangeRow<T>[] = toPush.map((doc) => {
+    const pendingChanges: PendingChange<T>[] = toPush.map((doc) => {
       const stripped = stripNonReplicatedFields(doc, localFields);
       // Soft-delete (`isDeleted`) is a normal replicated field.
       // Only the explicit `_deleted` flag is the hard-delete tombstone.
@@ -546,14 +564,14 @@ async function replicateCollection<
         null;
 
       return {
-        newDocumentState: diffFields(newState, cached),
-        assumedMasterState: buildAssumedMasterPayload<T>(cached),
+        fullNew: newState,
+        fullAssumed: cached,
       };
     });
 
     const realConflicts: (T & { _deleted: boolean })[] = [];
 
-    for (const batch of chunkArray(changeRows, PUSH_BATCH)) {
+    for (const batch of chunkArray(pendingChanges, PUSH_BATCH)) {
       if (shouldAbort()) return;
       const conflicts = await pushWithConflictRetry<T>(
         client,
