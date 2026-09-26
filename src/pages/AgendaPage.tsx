@@ -18,6 +18,8 @@ import { ResponsibilitiesPanel } from "@/src/components/agenda/ResponsibilitiesP
 import { useAuth } from "@/src/contexts/AuthContext";
 import { useAgendaNotifications } from "@/src/hooks/useAgendaNotifications";
 import { useI18n } from "@/src/lib/i18n";
+import { useCan } from "@/src/lib/permissions/client";
+import { Can } from "@/src/lib/permissions/components";
 import type { AgendaEvent, Assignee } from "@/src/types";
 import { formatLongDate } from "@/src/utils/agendaDate";
 import {
@@ -48,6 +50,9 @@ export const AgendaPage: React.FC = () => {
   const store = useAgenda();
   const { printEvent, printEvents } = usePrint();
   const [searchParams, setSearchParams] = useSearchParams();
+  const { granted: canCreateAgenda } = useCan("agenda.create");
+  const { granted: canUpdateAgenda } = useCan("agenda.update");
+  const { granted: canDeleteAgenda } = useCan("agenda.delete");
 
   const [visibleMonth, setVisibleMonth] = useState(() => new Date());
   const [selectedDate, setSelectedDate] = useState(() => toIso(new Date()));
@@ -69,7 +74,7 @@ export const AgendaPage: React.FC = () => {
 
   // Open create modal when navigated here with ?create=1 (e.g. from command palette)
   useEffect(() => {
-    if (searchParams.get("create") === "1") {
+    if (searchParams.get("create") === "1" && canCreateAgenda) {
       setIsNewEventOpen(true);
       setSearchParams(
         (prev) => {
@@ -79,7 +84,7 @@ export const AgendaPage: React.FC = () => {
         { replace: true },
       );
     }
-  }, [searchParams, setSearchParams]);
+  }, [searchParams, setSearchParams, canCreateAgenda]);
 
   const markedDates = useMemo(
     () => new Set(store.events.map((ev) => ev.date)),
@@ -325,24 +330,28 @@ export const AgendaPage: React.FC = () => {
             ) : null}
 
             {selectedEvent && (
-              <button
-                type="button"
-                onClick={() => setPendingDeleteEvent(selectedEvent)}
-                className="flex items-center gap-2 px-4 py-2.5 text-xs font-bold rounded-xl border border-rose-200 dark:border-rose-900/60 bg-white dark:bg-slate-800 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 shadow-sm transition-colors cursor-pointer"
-              >
-                <Trash2 className="w-4 h-4" />
-                {t("agenda.deleteEvent")}
-              </button>
+              <Can permission="agenda.delete">
+                <button
+                  type="button"
+                  onClick={() => setPendingDeleteEvent(selectedEvent)}
+                  className="flex items-center gap-2 px-4 py-2.5 text-xs font-bold rounded-xl border border-rose-200 dark:border-rose-900/60 bg-white dark:bg-slate-800 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 shadow-sm transition-colors cursor-pointer"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  {t("agenda.deleteEvent")}
+                </button>
+              </Can>
             )}
 
-            <button
-              type="button"
-              onClick={() => setIsNewEventOpen(true)}
-              className="flex items-center gap-2 px-4 py-2.5 text-xs font-bold rounded-xl bg-sky-500 text-white hover:bg-sky-600 shadow-sm transition-colors cursor-pointer"
-            >
-              <CalendarPlus className="w-4 h-4" />
-              {t("agenda.newEvent")}
-            </button>
+            <Can permission="agenda.create">
+              <button
+                type="button"
+                onClick={() => setIsNewEventOpen(true)}
+                className="flex items-center gap-2 px-4 py-2.5 text-xs font-bold rounded-xl bg-sky-500 text-white hover:bg-sky-600 shadow-sm transition-colors cursor-pointer"
+              >
+                <CalendarPlus className="w-4 h-4" />
+                {t("agenda.newEvent")}
+              </button>
+            </Can>
           </div>
         </div>
 
@@ -378,6 +387,7 @@ export const AgendaPage: React.FC = () => {
             event={selectedEvent}
             responsibilities={responsibilitiesForSelectedEvent}
             categories={categoriesById}
+            canUpdate={canUpdateAgenda}
             onAddResponsibility={() => setIsAddResponsibilityOpen(true)}
             onEditAssignees={(respId) => setEditingAssigneesFor(respId)}
             onRemoveResponsibility={(respId) => {
@@ -394,6 +404,7 @@ export const AgendaPage: React.FC = () => {
           <DetailsSidebar
             event={selectedEvent}
             onEdit={() => setIsEditEventOpen(true)}
+            canUpdate={canUpdateAgenda}
             canNotify={notifications.canNotify}
             unnotifiedCount={notifications.unnotifiedCount}
             pendingDate={notifications.pendingDate}
@@ -445,10 +456,14 @@ export const AgendaPage: React.FC = () => {
             setSelectedDate(value.date);
             setIsEditEventOpen(false);
           }}
-          onDelete={() => {
-            setIsEditEventOpen(false);
-            setPendingDeleteEvent(selectedEvent);
-          }}
+          onDelete={
+            canDeleteAgenda
+              ? () => {
+                  setIsEditEventOpen(false);
+                  setPendingDeleteEvent(selectedEvent);
+                }
+              : undefined
+          }
           title={t("agenda.editEvent")}
           submitLabel={t("common.save")}
           initial={selectedEvent as EventFormValue}

@@ -29,6 +29,7 @@ import { ViewName } from "../../layouts/view";
 import { getAvatarGradient, getInitials } from "../../utils";
 import { getRoleLabel } from "../../utils/settingsUtils";
 import { FolderTreeItemNode, FolderTreeNode } from "../explorer";
+import { Can, AnyRoleGate } from "../../lib/permissions/components";
 
 interface AppSidebarProps {
   isSidebarOpen: boolean;
@@ -394,56 +395,58 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
         </button>
 
         {collections_enabled && (
-          <button
-            onClick={() => {
-              navigate(`${slugPrefix}/collections`);
-              if (window.innerWidth < 768) setIsSidebarOpen(false);
-            }}
-            title={isSidebarCollapsed ? "Coleções" : undefined}
-            className={`w-full flex items-center justify-between px-3.5 py-3 text-[13px] font-bold rounded-2xl transition-all cursor-pointer group ${
-              view === "collections" || view === "collection-detail"
-                ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 shadow-sm"
-                : "text-m3-secondary hover:bg-m3-hover hover:text-m3-text"
-            }`}
-          >
-            <div className="flex items-center gap-3 min-w-0 flex-1">
-              <div className="w-5 h-5 flex items-center justify-center shrink-0">
-                <LibraryBig
-                  className={`w-4.5 h-4.5 ${
-                    view === "collections" || view === "collection-detail"
-                      ? "text-amber-500"
-                      : "text-m3-secondary"
-                  }`}
-                />
-              </div>
-              <span
-                className={`truncate transition-all duration-300 ease-in-out overflow-hidden whitespace-nowrap ${
-                  isSidebarCollapsed
-                    ? "opacity-0 max-w-0 -translate-x-2 pointer-events-none"
-                    : "opacity-100 max-w-35 translate-x-0"
-                }`}
-              >
-                {t("common.collections")}
-              </span>
-            </div>
-            <div
-              className={`transition-all duration-300 ease-in-out overflow-hidden shrink-0 ${
-                isSidebarCollapsed
-                  ? "opacity-0 max-w-0 scale-75 pointer-events-none"
-                  : "opacity-100 max-w-15 scale-100"
+          <Can permission="collection.access">
+            <button
+              onClick={() => {
+                navigate(`${slugPrefix}/collections`);
+                if (window.innerWidth < 768) setIsSidebarOpen(false);
+              }}
+              title={isSidebarCollapsed ? "Coleções" : undefined}
+              className={`w-full flex items-center justify-between px-3.5 py-3 text-[13px] font-bold rounded-2xl transition-all cursor-pointer group ${
+                view === "collections" || view === "collection-detail"
+                  ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 shadow-sm"
+                  : "text-m3-secondary hover:bg-m3-hover hover:text-m3-text"
               }`}
             >
-              <Badge
-                variant={
-                  view === "collections" || view === "collection-detail"
-                    ? "sky"
-                    : "slate"
-                }
+              <div className="flex items-center gap-3 min-w-0 flex-1">
+                <div className="w-5 h-5 flex items-center justify-center shrink-0">
+                  <LibraryBig
+                    className={`w-4.5 h-4.5 ${
+                      view === "collections" || view === "collection-detail"
+                        ? "text-amber-500"
+                        : "text-m3-secondary"
+                    }`}
+                  />
+                </div>
+                <span
+                  className={`truncate transition-all duration-300 ease-in-out overflow-hidden whitespace-nowrap ${
+                    isSidebarCollapsed
+                      ? "opacity-0 max-w-0 -translate-x-2 pointer-events-none"
+                      : "opacity-100 max-w-35 translate-x-0"
+                  }`}
+                >
+                  {t("common.collections")}
+                </span>
+              </div>
+              <div
+                className={`transition-all duration-300 ease-in-out overflow-hidden shrink-0 ${
+                  isSidebarCollapsed
+                    ? "opacity-0 max-w-0 scale-75 pointer-events-none"
+                    : "opacity-100 max-w-15 scale-100"
+                }`}
               >
-                {totalCollections}
-              </Badge>
-            </div>
-          </button>
+                <Badge
+                  variant={
+                    view === "collections" || view === "collection-detail"
+                      ? "sky"
+                      : "slate"
+                  }
+                >
+                  {totalCollections}
+                </Badge>
+              </div>
+            </button>
+          </Can>
         )}
 
         {/* Services Item */}
@@ -525,48 +528,50 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
         )}
 
         {agenda_enabled && (
-          <button
-            onClick={() => {
-              navigate(`${slugPrefix}/agenda`);
-              if (window.innerWidth < 768) setIsSidebarOpen(false);
-            }}
-            title={isSidebarCollapsed ? t("common.agenda") : undefined}
-            className={`w-full flex items-center justify-between px-3.5 py-3 text-[13px] font-bold rounded-2xl transition-all cursor-pointer group ${
-              view === "agenda"
-                ? "bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/20 shadow-sm"
-                : "text-m3-secondary hover:bg-m3-hover hover:text-m3-text"
-            }`}
-          >
-            <div className="flex items-center gap-3 min-w-0 flex-1">
-              <div className="w-5 h-5 flex items-center justify-center shrink-0">
-                <Calendar1
-                  className={`w-4.5 h-4.5 ${
-                    view === "agenda" ? "text-orange-500" : "text-m3-secondary"
-                  }`}
-                />
-              </div>
-              <span
-                className={`truncate transition-all duration-300 ease-in-out overflow-hidden whitespace-nowrap ${
-                  isSidebarCollapsed
-                    ? "opacity-0 max-w-0 -translate-x-2 pointer-events-none"
-                    : "opacity-100 max-w-35 translate-x-0"
-                }`}
-              >
-                {t("common.agenda")}
-              </span>
-            </div>
-            <div
-              className={`transition-all duration-300 ease-in-out overflow-hidden shrink-0 ${
-                isSidebarCollapsed
-                  ? "opacity-0 max-w-0 scale-75 pointer-events-none"
-                  : "opacity-100 max-w-15 scale-100"
+          <Can permission="agenda.access">
+            <button
+              onClick={() => {
+                navigate(`${slugPrefix}/agenda`);
+                if (window.innerWidth < 768) setIsSidebarOpen(false);
+              }}
+              title={isSidebarCollapsed ? t("common.agenda") : undefined}
+              className={`w-full flex items-center justify-between px-3.5 py-3 text-[13px] font-bold rounded-2xl transition-all cursor-pointer group ${
+                view === "agenda"
+                  ? "bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/20 shadow-sm"
+                  : "text-m3-secondary hover:bg-m3-hover hover:text-m3-text"
               }`}
             >
-              <Badge variant={view === "services" ? "sky" : "slate"}>
-                {eventCount}
-              </Badge>
-            </div>
-          </button>
+              <div className="flex items-center gap-3 min-w-0 flex-1">
+                <div className="w-5 h-5 flex items-center justify-center shrink-0">
+                  <Calendar1
+                    className={`w-4.5 h-4.5 ${
+                      view === "agenda" ? "text-orange-500" : "text-m3-secondary"
+                    }`}
+                  />
+                </div>
+                <span
+                  className={`truncate transition-all duration-300 ease-in-out overflow-hidden whitespace-nowrap ${
+                    isSidebarCollapsed
+                      ? "opacity-0 max-w-0 -translate-x-2 pointer-events-none"
+                      : "opacity-100 max-w-35 translate-x-0"
+                  }`}
+                >
+                  {t("common.agenda")}
+                </span>
+              </div>
+              <div
+                className={`transition-all duration-300 ease-in-out overflow-hidden shrink-0 ${
+                  isSidebarCollapsed
+                    ? "opacity-0 max-w-0 scale-75 pointer-events-none"
+                    : "opacity-100 max-w-15 scale-100"
+                }`}
+              >
+                <Badge variant={view === "agenda" ? "sky" : "slate"}>
+                  {eventCount}
+                </Badge>
+              </div>
+            </button>
+          </Can>
         )}
 
         {/* Folder Tree */}
@@ -603,49 +608,51 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
 
         {(!showFolderTree || isSidebarCollapsed) && <div className="flex-1" />}
 
-        {/* Trash Item */}
-        <button
-          onClick={() => {
-            navigate(`${slugPrefix}/trash`);
-            if (window.innerWidth < 768) setIsSidebarOpen(false);
-          }}
-          title={isSidebarCollapsed ? t("sidebar.trash") : undefined}
-          className={`w-full flex items-center justify-between px-3.5 py-3 text-[13px] font-bold rounded-2xl transition-all cursor-pointer group ${
-            view === "trash"
-              ? "bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 shadow-sm"
-              : "text-m3-secondary hover:bg-m3-hover hover:text-m3-text"
-          }`}
-        >
-          <div className="flex items-center gap-3 min-w-0 flex-1">
-            <div className="w-5 h-5 flex items-center justify-center shrink-0">
-              <Trash2
-                className={`w-4.5 h-4.5 ${
-                  view === "trash" ? "text-rose-500" : "text-m3-secondary"
-                }`}
-              />
-            </div>
-            <span
-              className={`truncate transition-all duration-300 ease-in-out overflow-hidden whitespace-nowrap ${
-                isSidebarCollapsed
-                  ? "opacity-0 max-w-0 -translate-x-2 pointer-events-none"
-                  : "opacity-100 max-w-35 translate-x-0"
-              }`}
-            >
-              {t("sidebar.trash")}
-            </span>
-          </div>
-          <div
-            className={`transition-all duration-300 ease-in-out overflow-hidden shrink-0 ${
-              isSidebarCollapsed
-                ? "opacity-0 max-w-0 scale-75 pointer-events-none"
-                : "opacity-100 max-w-15 scale-100"
+        {/* Trash Item — admin / owner only */}
+        <AnyRoleGate roles={["owner", "admin"]}>
+          <button
+            onClick={() => {
+              navigate(`${slugPrefix}/trash`);
+              if (window.innerWidth < 768) setIsSidebarOpen(false);
+            }}
+            title={isSidebarCollapsed ? t("sidebar.trash") : undefined}
+            className={`w-full flex items-center justify-between px-3.5 py-3 text-[13px] font-bold rounded-2xl transition-all cursor-pointer group ${
+              view === "trash"
+                ? "bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 shadow-sm"
+                : "text-m3-secondary hover:bg-m3-hover hover:text-m3-text"
             }`}
           >
-            <Badge variant={view === "trash" ? "rose" : "slate"}>
-              {trashCount}
-            </Badge>
-          </div>
-        </button>
+            <div className="flex items-center gap-3 min-w-0 flex-1">
+              <div className="w-5 h-5 flex items-center justify-center shrink-0">
+                <Trash2
+                  className={`w-4.5 h-4.5 ${
+                    view === "trash" ? "text-rose-500" : "text-m3-secondary"
+                  }`}
+                />
+              </div>
+              <span
+                className={`truncate transition-all duration-300 ease-in-out overflow-hidden whitespace-nowrap ${
+                  isSidebarCollapsed
+                    ? "opacity-0 max-w-0 -translate-x-2 pointer-events-none"
+                    : "opacity-100 max-w-35 translate-x-0"
+                }`}
+              >
+                {t("sidebar.trash")}
+              </span>
+            </div>
+            <div
+              className={`transition-all duration-300 ease-in-out overflow-hidden shrink-0 ${
+                isSidebarCollapsed
+                  ? "opacity-0 max-w-0 scale-75 pointer-events-none"
+                  : "opacity-100 max-w-15 scale-100"
+              }`}
+            >
+              <Badge variant={view === "trash" ? "rose" : "slate"}>
+                {trashCount}
+              </Badge>
+            </div>
+          </button>
+        </AnyRoleGate>
 
         {/* User profile footer with smooth transitions */}
         {user && (

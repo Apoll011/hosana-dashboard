@@ -11,6 +11,8 @@ import { useAppNavigate } from "@/src/hooks/useAppNavigate";
 import { useCollection, useCollections } from "@/src/hooks/useCollections";
 import { useAllSongs } from "@/src/hooks/useSongs";
 import { useI18n } from "@/src/lib/i18n";
+import { useCan } from "@/src/lib/permissions/client";
+import { Can } from "@/src/lib/permissions/components";
 import { Song } from "@/src/types";
 import {
   getFolderColorStyle,
@@ -56,6 +58,8 @@ export const CollectionDetailPage: React.FC = () => {
     removeSongsFromCollection,
     printCollection,
   } = useCollections();
+
+  const { granted: canUpdateCollection } = useCan("collection.update");
 
   const { songsQuery } = useAllSongs();
   const allSongs = useMemo(
@@ -265,23 +269,27 @@ export const CollectionDetailPage: React.FC = () => {
           ref={headerMenuRef}
           className="absolute top-4 right-4 z-10 flex items-center gap-2"
         >
-          <button
-            type="button"
-            onClick={() => void printCollection(collection, songsInCollection)}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-2xl bg-white/15 hover:bg-white/28 backdrop-blur-sm text-white text-xs font-semibold transition-all cursor-pointer shadow-md border border-white/10"
-            title={t("print.buttons.printCollection")}
-          >
-            <Printer className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">{t("common.print")}</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => setIsAddSongsModalOpen(true)}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-2xl bg-white/15 hover:bg-white/28 backdrop-blur-sm text-white text-xs font-semibold transition-all cursor-pointer shadow-md border border-white/10"
-          >
-            <Plus className="w-3.5 h-3.5" />
-            {t("collectionsPage.addSongs")}
-          </button>
+          <Can permission="export.pdf">
+            <button
+              type="button"
+              onClick={() => void printCollection(collection, songsInCollection)}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-2xl bg-white/15 hover:bg-white/28 backdrop-blur-sm text-white text-xs font-semibold transition-all cursor-pointer shadow-md border border-white/10"
+              title={t("print.buttons.printCollection")}
+            >
+              <Printer className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">{t("common.print")}</span>
+            </button>
+          </Can>
+          <Can permission="collection.update">
+            <button
+              type="button"
+              onClick={() => setIsAddSongsModalOpen(true)}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-2xl bg-white/15 hover:bg-white/28 backdrop-blur-sm text-white text-xs font-semibold transition-all cursor-pointer shadow-md border border-white/10"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              {t("collectionsPage.addSongs")}
+            </button>
+          </Can>
           <div className="relative">
             <button
               type="button"
@@ -293,51 +301,59 @@ export const CollectionDetailPage: React.FC = () => {
             </button>
             {isHeaderMenuOpen && (
               <div className="absolute right-0 top-full mt-2 w-52 bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-700/80 rounded-2xl shadow-2xl z-30 p-1.5 space-y-0.5 animate-in fade-in slide-in-from-top-2 duration-150">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsHeaderMenuOpen(false);
-                    void printCollection(collection, songsInCollection);
-                  }}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors cursor-pointer text-left"
-                >
-                  <Printer className="w-3.5 h-3.5 text-slate-500" />
-                  {t("print.buttons.printCollection")}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsHeaderMenuOpen(false);
-                    setIsEditModalOpen(true);
-                  }}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors cursor-pointer text-left"
-                >
-                  <Edit2 className="w-3.5 h-3.5 text-sky-500" />
-                  {t("collectionsPage.editCollection")}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsHeaderMenuOpen(false);
-                    setIsAddSongsModalOpen(true);
-                  }}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors cursor-pointer text-left"
-                >
-                  <Plus className="w-3.5 h-3.5 text-emerald-500" />
-                  {t("collectionsPage.addSongs")}
-                </button>
-                <div className="my-1 h-px bg-slate-100 dark:bg-slate-800 mx-1" />
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsHeaderMenuOpen(false);
-                    setIsDeleteDialogOpen(true);
-                  }}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-xl transition-colors cursor-pointer text-left"
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                  {t("collectionsPage.deleteTitle")}
-                </button>
+                <Can permission="export.pdf">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsHeaderMenuOpen(false);
+                      void printCollection(collection, songsInCollection);
+                    }}
+                    className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors cursor-pointer text-left"
+                  >
+                    <Printer className="w-3.5 h-3.5 text-slate-500" />
+                    {t("print.buttons.printCollection")}
+                  </button>
+                </Can>
+                <Can permission="collection.update">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsHeaderMenuOpen(false);
+                      setIsEditModalOpen(true);
+                    }}
+                    className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors cursor-pointer text-left"
+                  >
+                    <Edit2 className="w-3.5 h-3.5 text-sky-500" />
+                    {t("collectionsPage.editCollection")}
+                  </button>
+                </Can>
+                <Can permission="collection.update">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsHeaderMenuOpen(false);
+                      setIsAddSongsModalOpen(true);
+                    }}
+                    className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors cursor-pointer text-left"
+                  >
+                    <Plus className="w-3.5 h-3.5 text-emerald-500" />
+                    {t("collectionsPage.addSongs")}
+                  </button>
+                </Can>
+                <Can permission="collection.delete">
+                  <div className="my-1 h-px bg-slate-100 dark:bg-slate-800 mx-1" />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsHeaderMenuOpen(false);
+                      setIsDeleteDialogOpen(true);
+                    }}
+                    className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-xl transition-colors cursor-pointer text-left"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    {t("collectionsPage.deleteTitle")}
+                  </button>
+                </Can>
               </div>
             )}
           </div>
@@ -349,11 +365,15 @@ export const CollectionDetailPage: React.FC = () => {
           /* Empty / No-results state */
           <div
             className={`mt-4 rounded-3xl border-2 border-dashed flex flex-col items-center justify-center gap-4 py-16 px-8 text-center transition-all ${
-              !isFiltering
+              !isFiltering && canUpdateCollection
                 ? "border-slate-200 dark:border-slate-700/70 hover:border-m3-primary/40 hover:bg-slate-50/80 dark:hover:bg-slate-800/20 cursor-pointer group"
                 : "border-slate-200 dark:border-slate-700/50"
             }`}
-            onClick={() => !isFiltering && setIsAddSongsModalOpen(true)}
+            onClick={() =>
+              !isFiltering &&
+              canUpdateCollection &&
+              setIsAddSongsModalOpen(true)
+            }
           >
             <div className="w-14 h-14 rounded-2xl bg-slate-100 dark:bg-slate-800 group-hover:bg-m3-primary/10 flex items-center justify-center transition-colors">
               <Music2 className="w-7 h-7 text-slate-400 dark:text-slate-500 group-hover:text-m3-primary transition-colors" />
@@ -373,17 +393,19 @@ export const CollectionDetailPage: React.FC = () => {
               </p>
             </div>
             {!isFiltering && (
-              <Button
-                variant="primary"
-                size="sm"
-                icon={<Plus className="w-4 h-4" />}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setIsAddSongsModalOpen(true);
-                }}
-              >
-                {t("collectionsPage.addSongs")}
-              </Button>
+              <Can permission="collection.update">
+                <Button
+                  variant="primary"
+                  size="sm"
+                  icon={<Plus className="w-4 h-4" />}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsAddSongsModalOpen(true);
+                  }}
+                >
+                  {t("collectionsPage.addSongs")}
+                </Button>
+              </Can>
             )}
           </div>
         ) : (
@@ -491,14 +513,16 @@ export const CollectionDetailPage: React.FC = () => {
                         </button>
                       )}
                       {isHovered && !isMenuOpen && (
-                        <button
-                          type="button"
-                          onClick={() => setSongToRemove(song)}
-                          className="p-1.5 text-m3-secondary hover:text-rose-500 hover:bg-rose-500/10 rounded-xl cursor-pointer transition-all"
-                          title={t("collectionsPage.removeFromCollection")}
-                        >
-                          <X className="w-3.5 h-3.5" />
-                        </button>
+                        <Can permission="collection.update">
+                          <button
+                            type="button"
+                            onClick={() => setSongToRemove(song)}
+                            className="p-1.5 text-m3-secondary hover:text-rose-500 hover:bg-rose-500/10 rounded-xl cursor-pointer transition-all"
+                            title={t("collectionsPage.removeFromCollection")}
+                          >
+                            <X className="w-3.5 h-3.5" />
+                          </button>
+                        </Can>
                       )}
 
                       {/* Three-dot menu */}
@@ -548,17 +572,19 @@ export const CollectionDetailPage: React.FC = () => {
                               </div>
                             )}
                             <div className="h-px bg-slate-100 dark:bg-slate-800 mx-1" />
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setActiveSongMenuId(null);
-                                setSongToRemove(song);
-                              }}
-                              className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-xl transition-colors cursor-pointer text-left"
-                            >
-                              <X className="w-3.5 h-3.5" />
-                              {t("collectionsPage.removeFromCollection")}
-                            </button>
+                            <Can permission="collection.update">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setActiveSongMenuId(null);
+                                  setSongToRemove(song);
+                                }}
+                                className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-xl transition-colors cursor-pointer text-left"
+                              >
+                                <X className="w-3.5 h-3.5" />
+                                {t("collectionsPage.removeFromCollection")}
+                              </button>
+                            </Can>
                           </div>
                         )}
                       </div>
