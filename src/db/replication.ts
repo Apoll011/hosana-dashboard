@@ -7,8 +7,13 @@
  *
  * Replication strategy:
  *  1. Push FIRST: POST /replication/<collection>/push with locally
- *     changed/deleted docs since last checkpoint. Sends only changed fields
- *     in both newDocumentState and assumedMasterState (id + updatedAt + delta).
+ *     changed/deleted docs since last checkpoint.
+ *       - newDocumentState: id + updatedAt + only changed fields (partial
+ *         update; creates still send the full doc when no server baseline).
+ *       - assumedMasterState: { id, updatedAt } from the last known server
+ *         snapshot (server conflict-checks only on updatedAt). Null when the
+ *         client has never seen this id on the server (insert). The server
+ *         rejects updates of existing rows without assumedMasterState.
  *     Soft-delete (`isDeleted`) is a normal field — NOT the `_deleted` tombstone.
  *  2. Pull: POST /replication/<collection>/pull with the last checkpoint.
  *     Documents are merged into the local store using `_mergeBatchFromServer()`,
@@ -25,8 +30,9 @@
  *    but localStorage has a value, it is migrated to IDB.
  *
  * Server-state cache:
- *  - Diff baselines are kept in memory and dual-written to the checkpoint IDB
- *    so assumedMasterState survives reloads (avoids null-baseline conflict storms).
+ *  - Last-pulled/pushed snapshots are kept in memory and dual-written to the
+ *    checkpoint IDB. They are the source of assumedMasterState.updatedAt and
+ *    the baseline for newDocumentState field diffs.
  *  - Updated after every successful push AND every pull.
  *
  * IDB-wipe resilience:
@@ -175,26 +181,26 @@ function isVolatileKey(key: string): boolean {
 }
 
 /**
- * Fields that differ between `current` and `previous`, always including
- * `id` + `updatedAt`. Creates (no previous) send the full document.
- * `valueOf` selects which side's value to put in the delta (new vs assumed).
+ * Build newDocumentState for the wire.
+ * Always includes `id` + `updatedAt`. With a known server baseline, only
+ * changed fields are included (server applies partial updates). Creates
+ * (no baseline) send the full document — assumedMasterState will be null and
+ * the server treats that as an insert.
  */
-function diffFields<T extends SyncableDoc>(
+function diffNewDocumentState<T extends SyncableDoc>(
   current: T & { _deleted: boolean },
   previous: (T & { _deleted: boolean }) | null,
-  valueOf: "current" | "previous",
 ): WirePartial<T> & { _deleted?: boolean } {
   if (!previous) {
-    // New doc — server needs the full create payload (minus volatile keys).
+    // New doc / unknown server state — full create payload (minus volatile).
     const full: Record<string, unknown> = { ...current };
     for (const field of VOLATILE_FIELDS) delete full[field];
     return full as WirePartial<T> & { _deleted?: boolean };
   }
 
-  const source = valueOf === "current" ? current : previous;
   const delta: Record<string, unknown> = {
-    id: source.id,
-    updatedAt: source.updatedAt,
+    id: current.id,
+    updatedAt: current.updatedAt,
   };
 
   const keys = new Set([
@@ -210,25 +216,38 @@ function diffFields<T extends SyncableDoc>(
         (previous as Record<string, unknown>)[key],
       )
     ) {
-      delta[key] = (source as Record<string, unknown>)[key];
+      delta[key] = (current as Record<string, unknown>)[key];
     }
   }
 
   return delta as WirePartial<T> & { _deleted?: boolean };
 }
 
-/** Wire row for POST /push — only id, updatedAt, and changed fields. */
+/**
+ * assumedMasterState on the wire: only id + updatedAt from the last known
+ * server snapshot. The server conflict-checks exclusively on updatedAt
+ * (`hasConflict` / optimistic `updateMany` where clause) — other assumed
+ * fields are ignored.
+ */
+function toAssumedMasterState(
+  assumed: SyncableDoc & { _deleted?: boolean },
+): { id: string; updatedAt: string } {
+  return { id: assumed.id, updatedAt: assumed.updatedAt };
+}
+
+/** Wire row for POST /push. */
 interface ChangeRow<T> {
   newDocumentState: WirePartial<T> & { _deleted?: boolean };
-  assumedMasterState: WirePartial<T> | null;
+  assumedMasterState: { id: string; updatedAt: string } | null;
 }
 
 /**
- * Local pending change. Full docs stay in memory for conflict retry;
- * only a compact delta is serialized to the wire.
+ * Local pending change. Full docs stay in memory for conflict retry /
+ * spurious-conflict checks; only a compact delta is serialized to the wire.
  */
 interface PendingChange<T extends SyncableDoc> {
   fullNew: T & { _deleted: boolean };
+  /** Last known server snapshot for this id, or null if never synced. */
   fullAssumed: (T & { _deleted: boolean }) | null;
 }
 
@@ -236,9 +255,12 @@ function toChangeRow<T extends SyncableDoc>(
   change: PendingChange<T>,
 ): ChangeRow<T> {
   return {
-    newDocumentState: diffFields(change.fullNew, change.fullAssumed, "current"),
+    newDocumentState: diffNewDocumentState(
+      change.fullNew,
+      change.fullAssumed,
+    ),
     assumedMasterState: change.fullAssumed
-      ? diffFields(change.fullNew, change.fullAssumed, "previous")
+      ? toAssumedMasterState(change.fullAssumed)
       : null,
   };
 }
