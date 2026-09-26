@@ -37,6 +37,7 @@ import {
   notify,
   notifyCollection,
   notifyLocalChange,
+  notifyPushBaseline,
   subscribe as busSubscribe,
 } from "./bus";
 
@@ -231,6 +232,17 @@ export class HosanaCollection<T extends AnyDoc> {
    *    pull-triggered write can't loop back into another push/pull cycle.
    */
   async _put(doc: T, origin: "local" | "remote" = "local"): Promise<void> {
+    // Capture pre-write snapshot before we overwrite — replication needs it
+    // as the push baseline when the server-state cache is cold after a refresh.
+    if (origin === "local") {
+      const previous = this._store.get(doc.id);
+      if (previous) {
+        notifyPushBaseline(
+          this._storeName,
+          previous as unknown as Record<string, unknown>,
+        );
+      }
+    }
     const stamped: T =
       origin === "local" && "updatedAt" in doc
         ? ({ ...doc, updatedAt: new Date().toISOString() } as T)
@@ -251,6 +263,17 @@ export class HosanaCollection<T extends AnyDoc> {
     origin: "local" | "remote" = "local",
   ): Promise<void> {
     if (docs.length === 0) return;
+    if (origin === "local") {
+      for (const doc of docs) {
+        const previous = this._store.get(doc.id);
+        if (previous) {
+          notifyPushBaseline(
+            this._storeName,
+            previous as unknown as Record<string, unknown>,
+          );
+        }
+      }
+    }
     const stamped =
       origin === "local"
         ? docs.map((d) =>
