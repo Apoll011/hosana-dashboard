@@ -11,6 +11,7 @@ export const es: typeof pt = {
     services: "Cultos",
     collections: "Colecciones",
     settings: "Configuración",
+    analytics: "Analíticas",
     teams: "Equipos",
     agenda: "Agenda",
     trash: "Papelera",
@@ -60,6 +61,7 @@ export const es: typeof pt = {
     expand: "Expandir menú",
     logout: "Cerrar sesión",
     openSettings: "Configuración",
+    openAnalytics: "Analíticas",
     switchWorkspace: "Cambiar de organización",
   },
 
@@ -121,6 +123,7 @@ export const es: typeof pt = {
     navSongs: "Ir a Biblioteca de Canciones",
     navServices: "Ir a Cultos / Planes",
     navSettings: "Ir a Configuración del Sistema",
+    navAnalytics: "Ir a Analíticas",
     navAgenda: "Ir a Agenda",
     createSong: "Crear Nueva Canción",
     importCifra: "Importar Canción de CifraClub",
@@ -391,6 +394,24 @@ export const es: typeof pt = {
       showChords: "Mostrar Acordes por Defecto",
       showChordsDesc:
         "Activa automáticamente la línea de acordes (ChordPro) al abrir el visor de canciones, ensayo y modo de proyección para músicos.",
+      songScoreTitle: "Puntuación de Canciones",
+      songScoreDesc:
+        "Muestra un indicador de calidad en cada tarjeta de canción del explorador.",
+      songScoreBadge: "Explorador",
+      showSongScore: "Mostrar puntuación de la canción",
+      showSongScoreDesc:
+        "Muestra una puntuación de completitud en cada tarjeta de canción del explorador.",
+      songScoreStyle: "Estilo de visualización",
+      scoreLayout: {
+        ring: "Anillo",
+        ringDesc: "Arco circular alrededor del icono de la canción",
+        bar: "Barra",
+        barDesc: "Barra de progreso fina debajo del título",
+        dots: "Puntos",
+        dotsDesc: "Fila de cinco indicadores",
+        badge: "Insignia",
+        badgeDesc: "Píldora de color con la puntuación",
+      },
     },
     toast: {
       themeChanged: "Tema cambiado a {theme}.",
@@ -2000,6 +2021,40 @@ export const es: typeof pt = {
       printDayTitle: "Imprimir Agenda del Día",
       printCount: "Imprimir ({count})",
       printServiceShort: "Imprimir Culto",
+    },
+  },
+
+  analytics: {
+    title: "Analíticas",
+    desc: "Visión general de la calidad y mantenimiento de la biblioteca.",
+    tabs: {
+      libraryHealth: "Salud de la Biblioteca",
+    },
+    libraryHealth: {
+      title: "Salud de la Biblioteca",
+      desc: "Visión global de la calidad de las canciones según el sistema de puntuación.",
+      healthLabel: "Salud",
+      statSongs: "Canciones",
+      statHealthy: "Completas",
+      statIssues: "Con problemas",
+      issuesTitle: "Problemas por categoría",
+      issuesDesc:
+        "Haz clic en un problema para abrir la canción afectada. La lista se actualiza tras editar.",
+      affectedCount: "{count} canción(es) afectada(s)",
+      allHealthyTitle: "La biblioteca está en excelente estado",
+      allHealthyDesc: "Ninguna canción tiene criterios pendientes.",
+      criteria: {
+        errors: "Errores de análisis ChordPro",
+        sections: "Sin secciones de verso",
+        chords: "Sin acordes",
+        title: "Título faltante",
+        artist: "Artista faltante",
+        key: "Tonalidad faltante",
+        tempo: "Tempo faltante",
+        songNumber: "Número de canción faltante",
+        youtube: "Enlace de YouTube faltante",
+        duration: "Duración faltante",
+      },
     },
   },
 };

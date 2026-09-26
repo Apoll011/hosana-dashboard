@@ -9,6 +9,7 @@ export const owner = ac.newRole({
   agenda: ["create", "access", "update", "delete"],
   settings: ["manage"],
   export: ["pdf"],
+  library: ["health"],
   billing: ["manage", "access"],
   backup: ["export", "import"],
   notification: ["sent"],
@@ -22,6 +23,7 @@ export const admin = ac.newRole({
   collection: ["create", "update", "access", "delete"],
   agenda: ["create", "access", "update", "delete"],
   settings: ["manage"],
+  library: ["health"],
   export: ["pdf"],
   backup: ["export"],
   notification: ["sent"],
@@ -36,6 +38,7 @@ export const teamLeader = ac.newRole({
   agenda: ["create", "access", "update"],
   invitation: ["create"],
   team: ["create", "update"],
+  library: ["health"],
   notification: ["sent"],
   export: ["pdf"],
 });
@@ -45,6 +48,7 @@ export const editor = ac.newRole({
   service: ["create", "access", "update"],
   folder: ["create", "update", "access"],
   collection: ["create", "update", "access"],
+  library: ["health"],
   agenda: ["create", "access", "update"],
   export: ["pdf"],
 });

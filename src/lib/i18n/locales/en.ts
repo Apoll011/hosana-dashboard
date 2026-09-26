@@ -11,6 +11,7 @@ export const en: typeof pt = {
     services: "Services",
     collections: "Collections",
     settings: "Settings",
+    analytics: "Analytics",
     teams: "Teams",
     agenda: "Agenda",
     trash: "Trash",
@@ -60,6 +61,7 @@ export const en: typeof pt = {
     expand: "Expand menu",
     logout: "Sign out",
     openSettings: "Settings",
+    openAnalytics: "Analytics",
     switchWorkspace: "Switch workspace",
   },
 
@@ -121,6 +123,7 @@ export const en: typeof pt = {
     navSongs: "Go to Song Library",
     navServices: "Go to Services / Plans",
     navSettings: "Go to System Settings",
+    navAnalytics: "Go to Analytics",
     navAgenda: "Go to Agenda",
     createSong: "Create New Song",
     importCifra: "Import Song from CifraClub",
@@ -382,6 +385,24 @@ export const en: typeof pt = {
       showChords: "Show Chords by Default",
       showChordsDesc:
         "Automatically enables the chord line (ChordPro) when opening song viewer, rehearsal, and projection mode for musicians.",
+      songScoreTitle: "Song Score",
+      songScoreDesc:
+        "Show a quality score indicator on each song card in the explorer.",
+      songScoreBadge: "Explorer",
+      showSongScore: "Show song score",
+      showSongScoreDesc:
+        "Display a completeness score on each song card in the explorer.",
+      songScoreStyle: "Visualization style",
+      scoreLayout: {
+        ring: "Ring",
+        ringDesc: "Circular arc around the song icon",
+        bar: "Bar",
+        barDesc: "Thin progress bar below the title",
+        dots: "Dots",
+        dotsDesc: "Row of five pip indicators",
+        badge: "Badge",
+        badgeDesc: "Coloured pill chip with the score",
+      },
     },
     toast: {
       themeChanged: "Theme changed to {theme}.",
@@ -1971,6 +1992,40 @@ export const en: typeof pt = {
       printDayTitle: "Print Day Agenda",
       printCount: "Print ({count})",
       printServiceShort: "Print Service",
+    },
+  },
+
+  analytics: {
+    title: "Analytics",
+    desc: "Overview of library quality and maintenance.",
+    tabs: {
+      libraryHealth: "Library Health",
+    },
+    libraryHealth: {
+      title: "Library Health",
+      desc: "Global overview of song quality using the existing score system.",
+      healthLabel: "Health",
+      statSongs: "Songs",
+      statHealthy: "Complete",
+      statIssues: "With issues",
+      issuesTitle: "Issues by category",
+      issuesDesc:
+        "Click an issue to open the affected song. The list updates after edits.",
+      affectedCount: "{count} song(s) affected",
+      allHealthyTitle: "Library looks great",
+      allHealthyDesc: "No songs are missing score criteria.",
+      criteria: {
+        errors: "ChordPro parse errors",
+        sections: "Missing verse sections",
+        chords: "Missing chords",
+        title: "Missing title",
+        artist: "Missing artist",
+        key: "Missing key",
+        tempo: "Missing tempo",
+        songNumber: "Missing song number",
+        youtube: "Missing YouTube link",
+        duration: "Missing duration",
+      },
     },
   },
 };

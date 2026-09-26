@@ -10,6 +10,7 @@ export const statement = {
   collection: ["create", "update", "access", "delete"],
   agenda: ["create", "access", "update", "delete"],
   settings: ["manage"],
+  library: ["health"],
   export: ["pdf"],
   backup: ["import", "export"],
   notification: ["sent"],
