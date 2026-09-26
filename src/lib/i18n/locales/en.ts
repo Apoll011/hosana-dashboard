@@ -2014,6 +2014,12 @@ export const en: typeof pt = {
       affectedCount: "{count} song(s) affected",
       allHealthyTitle: "Library looks great",
       allHealthyDesc: "No songs are missing score criteria.",
+      autoFix: "Fix",
+      autoFixAll: "Fix all",
+      autoFixableCount: "{count} auto-fixable",
+      autoFixSuccess: "Automatically fixed {count} song(s).",
+      autoFixNone: "Nothing to auto-fix.",
+      autoFixError: "Failed to apply automatic fixes.",
       criteria: {
         errors: "ChordPro parse errors",
         sections: "Missing verse sections",

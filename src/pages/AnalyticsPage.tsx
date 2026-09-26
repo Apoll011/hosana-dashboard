@@ -55,15 +55,6 @@ export const AnalyticsPage: React.FC = () => {
   return (
     <div className="h-full w-full overflow-y-auto bg-slate-50/50 dark:bg-m3-bg text-slate-900 dark:text-slate-100 p-4 sm:p-6 lg:p-8">
       <div className="max-w-5xl mx-auto space-y-6">
-        <div>
-          <h1 className="text-xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">
-            {t("analytics.title")}
-          </h1>
-          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-            {t("analytics.desc")}
-          </p>
-        </div>
-
         <div className="flex items-center gap-1 overflow-x-auto pb-2 scrollbar-none border-b border-slate-200 dark:border-slate-800">
           {tabs.map((tab) => {
             const Icon = tab.icon;

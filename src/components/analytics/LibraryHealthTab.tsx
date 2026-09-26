@@ -3,15 +3,18 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Spinner } from "@/src/components/common";
+import { Button, Spinner } from "@/src/components/common";
 import { SongScoreVisualizer } from "@/src/components/explorer/SongScoreVisualizer";
+import { useSync } from "@/src/contexts/SyncContext";
 import { useAppNavigate } from "@/src/hooks/useAppNavigate";
 import { useAllSongs } from "@/src/hooks/useSongs";
 import { useI18n } from "@/src/lib/i18n";
 import {
+  applyLibraryHealthAutoFixes,
   computeLibraryHealth,
   type ScoreMissingCriterion,
 } from "@/src/lib/libraryHealth";
+import { useCan } from "@/src/lib/permissions/client";
 import {
   AlertTriangle,
   CheckCircle2,
@@ -19,6 +22,7 @@ import {
   ChevronRight,
   HeartPulse,
   Music2,
+  WandSparkles,
 } from "lucide-react";
 import React, { useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
@@ -38,10 +42,12 @@ export const LibraryHealthTab: React.FC<LibraryHealthTabProps> = ({
   active,
 }) => {
   const { t } = useI18n();
+  const { showToast } = useSync();
   const { navigate } = useAppNavigate();
   const { slug } = useParams<{ slug: string }>();
   const slugPrefix = slug ? `/${slug}` : "";
   const { songsQuery } = useAllSongs();
+  const { granted: canUpdateSong } = useCan("song.update");
   const songs = songsQuery.data?.songs ?? [];
   const isLoading = songsQuery.isLoading;
 
@@ -49,6 +55,7 @@ export const LibraryHealthTab: React.FC<LibraryHealthTabProps> = ({
   const [expanded, setExpanded] = useState<Set<ScoreMissingCriterion>>(
     () => new Set(),
   );
+  const [fixingKey, setFixingKey] = useState<string | null>(null);
 
   if (!active) return null;
 
@@ -63,6 +70,34 @@ export const LibraryHealthTab: React.FC<LibraryHealthTabProps> = ({
 
   const openSong = (songId: string) => {
     navigate(`${slugPrefix}/songs/${songId}`);
+  };
+
+  const runAutoFix = async (
+    key: string,
+    opts: {
+      criterion: ScoreMissingCriterion;
+      songIds?: string[];
+    },
+  ) => {
+    if (!canUpdateSong || fixingKey) return;
+    setFixingKey(key);
+    try {
+      const result = await applyLibraryHealthAutoFixes(songs, opts);
+      if (result.fixed > 0) {
+        showToast(
+          t("analytics.libraryHealth.autoFixSuccess", {
+            count: result.fixed,
+          }),
+          "success",
+        );
+      } else {
+        showToast(t("analytics.libraryHealth.autoFixNone"), "info");
+      }
+    } catch {
+      showToast(t("analytics.libraryHealth.autoFixError"), "error");
+    } finally {
+      setFixingKey(null);
+    }
   };
 
   const healthColor =
@@ -127,7 +162,9 @@ export const LibraryHealthTab: React.FC<LibraryHealthTabProps> = ({
                 />
               </svg>
               <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className={`text-3xl font-extrabold tabular-nums ${healthColor}`}>
+                <span
+                  className={`text-3xl font-extrabold tabular-nums ${healthColor}`}
+                >
                   {summary.healthPercentage}%
                 </span>
                 <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
@@ -194,66 +231,127 @@ export const LibraryHealthTab: React.FC<LibraryHealthTabProps> = ({
           ) : (
             summary.categories.map((category) => {
               const isOpen = expanded.has(category.criterion);
+              const categoryFixKey = `cat:${category.criterion}`;
+              const showFixAll =
+                canUpdateSong && category.autoFixableCount > 0;
+
               return (
                 <div key={category.criterion}>
-                  <button
-                    type="button"
-                    onClick={() => toggleCategory(category.criterion)}
-                    className="w-full flex items-center justify-between gap-3 px-6 py-4 text-left hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors cursor-pointer"
-                  >
-                    <div className="flex items-center gap-3 min-w-0">
-                      {isOpen ? (
-                        <ChevronDown className="w-4 h-4 text-slate-400 shrink-0" />
-                      ) : (
-                        <ChevronRight className="w-4 h-4 text-slate-400 shrink-0" />
-                      )}
-                      <div className="min-w-0">
-                        <span className="block text-sm font-bold text-slate-900 dark:text-slate-100">
-                          {criterionLabel(t, category.criterion)}
-                        </span>
-                        <span className="block text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                          {t("analytics.libraryHealth.affectedCount", {
-                            count: category.songs.length,
-                          })}
-                        </span>
+                  <div className="flex items-center gap-2 px-3 sm:px-4">
+                    <button
+                      type="button"
+                      onClick={() => toggleCategory(category.criterion)}
+                      className="flex-1 flex items-center justify-between gap-3 px-3 py-4 text-left hover:bg-slate-50/80 dark:hover:bg-slate-800/40 rounded-xl transition-colors cursor-pointer min-w-0"
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        {isOpen ? (
+                          <ChevronDown className="w-4 h-4 text-slate-400 shrink-0" />
+                        ) : (
+                          <ChevronRight className="w-4 h-4 text-slate-400 shrink-0" />
+                        )}
+                        <div className="min-w-0">
+                          <span className="block text-sm font-bold text-slate-900 dark:text-slate-100">
+                            {criterionLabel(t, category.criterion)}
+                          </span>
+                          <span className="block text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                            {t("analytics.libraryHealth.affectedCount", {
+                              count: category.songs.length,
+                            })}
+                            {category.autoFixableCount > 0 && (
+                              <>
+                                {" · "}
+                                {t("analytics.libraryHealth.autoFixableCount", {
+                                  count: category.autoFixableCount,
+                                })}
+                              </>
+                            )}
+                          </span>
+                        </div>
                       </div>
-                    </div>
-                    <span className="text-xs font-bold tabular-nums px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-700 dark:text-amber-300 shrink-0">
-                      {category.songs.length}
-                    </span>
-                  </button>
+                      <span className="text-xs font-bold tabular-nums px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-700 dark:text-amber-300 shrink-0">
+                        {category.songs.length}
+                      </span>
+                    </button>
+
+                    {showFixAll && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        isLoading={fixingKey === categoryFixKey}
+                        disabled={Boolean(fixingKey)}
+                        icon={<WandSparkles className="w-3.5 h-3.5" />}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          void runAutoFix(categoryFixKey, {
+                            criterion: category.criterion,
+                            songIds: category.songs
+                              .filter((s) => s.autoFixable)
+                              .map((s) => s.id),
+                          });
+                        }}
+                      >
+                        {t("analytics.libraryHealth.autoFixAll")}
+                      </Button>
+                    )}
+                  </div>
 
                   {isOpen && (
                     <ul className="pb-3 px-3 sm:px-6 space-y-1">
-                      {category.songs.map((song) => (
-                        <li key={`${category.criterion}-${song.id}`}>
-                          <button
-                            type="button"
-                            onClick={() => openSong(song.id)}
-                            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left hover:bg-m3-primary/5 border border-transparent hover:border-m3-primary/20 transition-all cursor-pointer group"
-                          >
-                            <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 group-hover:bg-m3-primary/10">
-                              <Music2 className="w-4 h-4 text-slate-400 group-hover:text-m3-primary" />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <span className="block text-sm font-bold text-slate-900 dark:text-slate-100 truncate">
-                                {song.title}
-                              </span>
-                              {song.artist && (
-                                <span className="block text-xs text-slate-500 dark:text-slate-400 truncate">
-                                  {song.artist}
-                                </span>
+                      {category.songs.map((song) => {
+                        const songFixKey = `song:${category.criterion}:${song.id}`;
+                        return (
+                          <li key={`${category.criterion}-${song.id}`}>
+                            <div className="flex items-center gap-1">
+                              <button
+                                type="button"
+                                onClick={() => openSong(song.id)}
+                                className="flex-1 flex items-center gap-3 px-3 py-2.5 rounded-xl text-left hover:bg-m3-primary/5 border border-transparent hover:border-m3-primary/20 transition-all cursor-pointer group min-w-0"
+                              >
+                                <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 group-hover:bg-m3-primary/10">
+                                  <Music2 className="w-4 h-4 text-slate-400 group-hover:text-m3-primary" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <span className="block text-sm font-bold text-slate-900 dark:text-slate-100 truncate">
+                                    {song.title}
+                                  </span>
+                                  {song.artist && (
+                                    <span className="block text-xs text-slate-500 dark:text-slate-400 truncate">
+                                      {song.artist}
+                                    </span>
+                                  )}
+                                </div>
+                                <SongScoreVisualizer
+                                  score={song.score}
+                                  layout="badge"
+                                  compact
+                                />
+                                <ChevronRight className="w-4 h-4 text-slate-300 dark:text-slate-600 group-hover:text-m3-primary shrink-0" />
+                              </button>
+
+                              {canUpdateSong && song.autoFixable && (
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  isLoading={fixingKey === songFixKey}
+                                  disabled={Boolean(fixingKey)}
+                                  icon={<WandSparkles className="w-3.5 h-3.5" />}
+                                  title={t("analytics.libraryHealth.autoFix")}
+                                  onClick={() =>
+                                    void runAutoFix(songFixKey, {
+                                      criterion: category.criterion,
+                                      songIds: [song.id],
+                                    })
+                                  }
+                                >
+                                  {t("analytics.libraryHealth.autoFix")}
+                                </Button>
                               )}
                             </div>
-                            <SongScoreVisualizer
-                              score={song.score}
-                              layout="badge"
-                              compact
-                            />
-                            <ChevronRight className="w-4 h-4 text-slate-300 dark:text-slate-600 group-hover:text-m3-primary shrink-0" />
-                          </button>
-                        </li>
-                      ))}
+                          </li>
+                        );
+                      })}
                     </ul>
                   )}
                 </div>
