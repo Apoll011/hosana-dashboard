@@ -14,6 +14,7 @@ interface ResponsibilitiesPanelProps {
   event: AgendaEvent | undefined;
   responsibilities: Responsibility[];
   categories: Record<string, ResponsibilityCategory>;
+  canUpdate?: boolean;
   onAddResponsibility: () => void;
   onEditAssignees: (responsibilityId: string) => void;
   onRemoveResponsibility: (responsibilityId: string) => void;
@@ -23,6 +24,7 @@ export const ResponsibilitiesPanel: React.FC<ResponsibilitiesPanelProps> = ({
   event,
   responsibilities,
   categories,
+  canUpdate = true,
   onAddResponsibility,
   onEditAssignees,
   onRemoveResponsibility,
@@ -50,13 +52,15 @@ export const ResponsibilitiesPanel: React.FC<ResponsibilitiesPanelProps> = ({
           <h3 className="text-sm font-black text-slate-900 dark:text-slate-100">
             {t("agenda.responsibilities")}
           </h3>
-          <button
-            onClick={onAddResponsibility}
-            className="flex items-center gap-1.5 text-xs font-bold text-[#0284c7] bg-sky-50 dark:bg-sky-950/40 hover:bg-sky-100 dark:hover:bg-sky-900/50 px-3 py-1.5 rounded-xl border border-sky-200 dark:border-sky-900/50 transition-colors cursor-pointer"
-          >
-            <Plus className="w-3.5 h-3.5" />
-            {t("agenda.addResponsibility")}
-          </button>
+          {canUpdate && (
+            <button
+              onClick={onAddResponsibility}
+              className="flex items-center gap-1.5 text-xs font-bold text-[#0284c7] bg-sky-50 dark:bg-sky-950/40 hover:bg-sky-100 dark:hover:bg-sky-900/50 px-3 py-1.5 rounded-xl border border-sky-200 dark:border-sky-900/50 transition-colors cursor-pointer"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              {t("agenda.addResponsibility")}
+            </button>
+          )}
         </div>
 
         {responsibilities.length === 0 ? (
@@ -70,6 +74,7 @@ export const ResponsibilitiesPanel: React.FC<ResponsibilitiesPanelProps> = ({
                 key={r.id}
                 responsibility={r}
                 category={categories[r.categoryId]}
+                canUpdate={canUpdate}
                 onEditAssignees={() => onEditAssignees(r.id)}
                 onRemove={() => onRemoveResponsibility(r.id)}
               />

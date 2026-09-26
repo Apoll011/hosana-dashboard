@@ -1,4 +1,5 @@
 import { useI18n } from "@/src/lib/i18n";
+import { useCan } from "@/src/lib/permissions/client";
 import { Folder, Service, Song } from "@/src/types";
 import {
   Calendar,
@@ -104,6 +105,7 @@ export function HosannaCommandPalette(props: HosannaCommandPaletteProps) {
   } = props;
 
   const { t } = useI18n();
+  const { granted: canCreateAgenda } = useCan("agenda.create");
 
   const staticActions = useMemo<CommandAction[]>(() => {
     const actions: CommandAction[] = [
@@ -194,7 +196,10 @@ export function HosannaCommandPalette(props: HosannaCommandPaletteProps) {
         icon: <FolderPlus className="w-4 h-4 text-amber-500" />,
         perform: () => openModal("create-folder"),
       },
-      {
+    ];
+
+    if (canCreateAgenda) {
+      actions.push({
         id: "action-create-agenda",
         name: t("commandPalette.createAgenda"),
         shortcut: ["c", "a"],
@@ -202,7 +207,10 @@ export function HosannaCommandPalette(props: HosannaCommandPaletteProps) {
         section: t("commandPalette.sections.quickActions"),
         icon: <CalendarPlus className="w-4 h-4 text-violet-500" />,
         perform: () => openModal("create-event"),
-      },
+      });
+    }
+
+    actions.push(
       {
         id: "action-upload-files",
         name: t("commandPalette.uploadFiles"),
@@ -245,7 +253,7 @@ export function HosannaCommandPalette(props: HosannaCommandPaletteProps) {
         icon: <LogOut className="w-4 h-4 text-rose-500" />,
         perform: () => logout(),
       },
-    ];
+    );
 
     if (view === "explorer") {
       actions.push(
@@ -330,6 +338,7 @@ export function HosannaCommandPalette(props: HosannaCommandPaletteProps) {
     currentSong,
     currentService,
     isSidebarCollapsed,
+    canCreateAgenda,
     navigate,
     logout,
     setCurrentFolderId,

@@ -160,7 +160,7 @@ export const CollectionsPage: React.FC = () => {
 
           {!searchQuery && (
             <div className="flex flex-col items-center gap-3 mt-6">
-              <Can permission="song.create">
+              <Can permission="collection.create">
                 <Button
                   variant="primary"
                   size="sm"
@@ -242,42 +242,48 @@ export const CollectionsPage: React.FC = () => {
                         {/* Dropdown Menu */}
                         {isMenuOpen && (
                           <div className="absolute right-0 top-full mt-1 w-40 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl z-20 p-1.5 space-y-1 animate-in fade-in slide-in-from-top-2 duration-150">
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setOpenMenuId(null);
-                                setEditingCollection(collection);
-                              }}
-                              className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors cursor-pointer text-left"
-                            >
-                              <Edit2 className="w-3.5 h-3.5 text-sky-500" />
-                              {t("collectionsPage.edit")}
-                            </button>
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setOpenMenuId(null);
-                                void printCollection(collection);
-                              }}
-                              className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors cursor-pointer text-left"
-                            >
-                              <Printer className="w-3.5 h-3.5 text-slate-500" />
-                              {t("print.buttons.printCollection")}
-                            </button>
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setOpenMenuId(null);
-                                setDeletingCollection(collection);
-                              }}
-                              className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-xl transition-colors cursor-pointer text-left"
-                            >
-                              <Trash2 className="w-3.5 h-3.5 text-rose-500" />
-                              {t("collectionsPage.delete")}
-                            </button>
+                            <Can permission="collection.update">
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setOpenMenuId(null);
+                                  setEditingCollection(collection);
+                                }}
+                                className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors cursor-pointer text-left"
+                              >
+                                <Edit2 className="w-3.5 h-3.5 text-sky-500" />
+                                {t("collectionsPage.edit")}
+                              </button>
+                            </Can>
+                            <Can permission="export.pdf">
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setOpenMenuId(null);
+                                  void printCollection(collection);
+                                }}
+                                className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors cursor-pointer text-left"
+                              >
+                                <Printer className="w-3.5 h-3.5 text-slate-500" />
+                                {t("print.buttons.printCollection")}
+                              </button>
+                            </Can>
+                            <Can permission="collection.delete">
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setOpenMenuId(null);
+                                  setDeletingCollection(collection);
+                                }}
+                                className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-xl transition-colors cursor-pointer text-left"
+                              >
+                                <Trash2 className="w-3.5 h-3.5 text-rose-500" />
+                                {t("collectionsPage.delete")}
+                              </button>
+                            </Can>
                           </div>
                         )}
                       </div>

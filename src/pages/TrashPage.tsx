@@ -4,13 +4,17 @@
  */
 
 import { Badge, Button, EmptyState, Spinner } from "@/src/components/common";
+import { useAuth } from "@/src/contexts/AuthContext";
+import { useAppNavigate } from "@/src/hooks/useAppNavigate";
 import { useI18n } from "@/src/lib/i18n";
+import { useAnyRole } from "@/src/lib/permissions/client";
 import {
   Calendar,
   CalendarClock,
   FileMusic,
   Folder as FolderIcon,
   RotateCcw,
+  ShieldAlert,
   Trash2,
 } from "lucide-react";
 import React from "react";
@@ -35,6 +39,13 @@ function formatDate(iso: string | null, locale: string): string {
 export const TrashPage: React.FC = () => {
   const { items, isLoading, restoreItem, isRestoring } = useTrash();
   const { t, locale } = useI18n();
+  const { organization } = useAuth();
+  const { navigate } = useAppNavigate();
+  const slugPrefix = organization?.slug ? `/${organization.slug}` : "";
+  const { matched: canManageTrash, loading: roleLoading } = useAnyRole(
+    "owner",
+    "admin",
+  );
 
   const typeLabel = (type: string): string =>
     type === "folder"
@@ -45,10 +56,26 @@ export const TrashPage: React.FC = () => {
           ? t("common.service")
           : t("common.agenda");
 
-  if (isLoading) {
+  if (roleLoading || isLoading) {
     return (
       <div className="h-full flex items-center justify-center p-12">
         <Spinner label={t("trashPage.loading")} />
+      </div>
+    );
+  }
+
+  if (!canManageTrash) {
+    return (
+      <div className="flex-1 flex flex-col w-full mx-auto p-4 sm:p-8 max-w-7xl">
+        <EmptyState
+          icon={
+            <ShieldAlert className="w-12 h-12 text-m3-primary opacity-40" />
+          }
+          title={t("routes.unauthorized.title")}
+          description={t("routes.unauthorized.desc")}
+          actionLabel={t("routes.unauthorized.goHomeBtn")}
+          onAction={() => navigate(`${slugPrefix}/folders`)}
+        />
       </div>
     );
   }

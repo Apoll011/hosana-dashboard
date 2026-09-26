@@ -419,6 +419,8 @@ export const ExplorerAddressBar: React.FC<ExplorerAddressBarProps> = ({
             "folder.create",
             "song.import",
             "service.create",
+            "collection.create",
+            "agenda.create",
           ]}
         >
           <div className="relative shrink-0 ml-1" ref={plusMenuRef}>
@@ -491,31 +493,35 @@ export const ExplorerAddressBar: React.FC<ExplorerAddressBarProps> = ({
                   </button>
                 </Can>
                 {collections_enabled && (
+                  <Can permission="collection.create">
+                    <button
+                      onClick={() => {
+                        setIsPlusMenuOpen(false);
+                        onOpenModal("create-collection");
+                      }}
+                      className="w-full flex items-center gap-4 px-4 py-3 text-xs font-bold text-m3-text hover:bg-m3-hover rounded-2xl transition-all cursor-pointer text-left group"
+                    >
+                      <div className="w-8 h-8 rounded-xl bg-m3-primary/10 text-m3-primary flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                        <LibraryBig className="w-4 h-4" />
+                      </div>
+                      {t("addressBar.newCollection")}
+                    </button>
+                  </Can>
+                )}
+                <Can permission="agenda.create">
                   <button
                     onClick={() => {
                       setIsPlusMenuOpen(false);
-                      onOpenModal("create-collection");
+                      onOpenModal("create-event");
                     }}
                     className="w-full flex items-center gap-4 px-4 py-3 text-xs font-bold text-m3-text hover:bg-m3-hover rounded-2xl transition-all cursor-pointer text-left group"
                   >
-                    <div className="w-8 h-8 rounded-xl bg-m3-primary/10 text-m3-primary flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-                      <LibraryBig className="w-4 h-4" />
+                    <div className="w-8 h-8 rounded-xl bg-amber-500/10 text-m3-primary flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                      <CalendarPlus className="w-4 h-4 text-amber-500" />
                     </div>
-                    {t("addressBar.newCollection")}
+                    {t("agenda.newEvent")}
                   </button>
-                )}
-                <button
-                  onClick={() => {
-                    setIsPlusMenuOpen(false);
-                    onOpenModal("create-event");
-                  }}
-                  className="w-full flex items-center gap-4 px-4 py-3 text-xs font-bold text-m3-text hover:bg-m3-hover rounded-2xl transition-all cursor-pointer text-left group"
-                >
-                  <div className="w-8 h-8 rounded-xl bg-amber-500/10 text-m3-primary flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-                    <CalendarPlus className="w-4 h-4 text-amber-500" />
-                  </div>
-                  {t("agenda.newEvent")}
-                </button>
+                </Can>
               </div>
             )}
           </div>

@@ -17,6 +17,8 @@ import { serviceTotalMinutes } from "./ServiceLinkField";
 interface DetailsSidebarProps {
   event: AgendaEvent | undefined;
   onEdit: () => void;
+  /** Whether the user may edit the event (`agenda.update`). */
+  canUpdate?: boolean;
   /** Whether the user may send notifications (`notification.sent`). */
   canNotify: boolean;
   /** Users still awaiting an assignment notification (already grouped). */
@@ -31,6 +33,7 @@ interface DetailsSidebarProps {
 export const DetailsSidebar: React.FC<DetailsSidebarProps> = ({
   event,
   onEdit,
+  canUpdate = true,
   canNotify,
   unnotifiedCount,
   pendingDate,
@@ -59,13 +62,15 @@ export const DetailsSidebar: React.FC<DetailsSidebarProps> = ({
           <h3 className="text-[11px] font-black uppercase tracking-widest text-m3-secondary opacity-70">
             {t("common.details")}
           </h3>
-          <button
-            onClick={onEdit}
-            className="p-1 rounded-lg text-slate-400 hover:text-[#0284c7] hover:bg-m3-hover transition-colors cursor-pointer"
-            title={t("agenda.editEvent")}
-          >
-            <Pencil className="w-3.5 h-3.5" />
-          </button>
+          {canUpdate && (
+            <button
+              onClick={onEdit}
+              className="p-1 rounded-lg text-slate-400 hover:text-[#0284c7] hover:bg-m3-hover transition-colors cursor-pointer"
+              title={t("agenda.editEvent")}
+            >
+              <Pencil className="w-3.5 h-3.5" />
+            </button>
+          )}
         </div>
 
         <div className="space-y-3">
