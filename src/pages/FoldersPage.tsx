@@ -14,6 +14,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { useAppNavigate } from "../hooks/useAppNavigate";
 import { usePersonalSettings } from "../hooks/usePersonalSettings";
 import { Can, CanAll } from "../lib/permissions/components";
+import { useCan } from "../lib/permissions/client";
 
 interface FolderExplorerContext {
   filteredSubfolders: Folder[];
@@ -115,7 +116,10 @@ export const FoldersPage: React.FC = () => {
   const context = useOutletContext<FolderExplorerContext>() ?? DEFAULT_CONTEXT;
   const { organization } = useAuth();
   const { settings: personalSettings } = usePersonalSettings();
+  const { granted: canViewLibraryHealth } = useCan("library.health");
   const slugPrefix = organization?.slug ? `/${organization.slug}` : "";
+  const showSongScore =
+    canViewLibraryHealth && personalSettings.showSongScore;
 
   const {
     filteredSubfolders,
@@ -286,7 +290,7 @@ export const FoldersPage: React.FC = () => {
               isSearchingOrFiltering={isSearchingOrFiltering}
               getFolderPathString={getFolderPathString}
               density={density}
-              showSongScore={personalSettings.showSongScore}
+              showSongScore={showSongScore}
               songScoreLayout={personalSettings.songScoreLayout}
               onClick={(e) => handleItemClick(e, song.id, "song")}
               onDoubleClick={() => navigate(`${slugPrefix}/songs/${song.id}`)}
@@ -316,7 +320,7 @@ export const FoldersPage: React.FC = () => {
                   <th className={isCompact ? "py-2.5 px-4" : "py-3.5 px-6"}>
                     {t("common.details")}
                   </th>
-                  {personalSettings.showSongScore && (
+                  {showSongScore && (
                     <th className={isCompact ? "py-2.5 px-4" : "py-3.5 px-6"}>
                       Score
                     </th>
@@ -365,7 +369,7 @@ export const FoldersPage: React.FC = () => {
                     isSearchingOrFiltering={isSearchingOrFiltering}
                     getFolderPathString={getFolderPathString}
                     density={density}
-                    showSongScore={personalSettings.showSongScore}
+                    showSongScore={showSongScore}
                     songScoreLayout={personalSettings.songScoreLayout}
                     onClick={(e) => handleItemClick(e, song.id, "song")}
                     onDoubleClick={() =>

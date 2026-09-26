@@ -20,6 +20,7 @@ export type ViewName =
   | "collection-detail"
   | "teams"
   | "settings"
+  | "analytics"
   | "agenda"
   | "trash";
 
@@ -43,6 +44,7 @@ export function deriveView(pathname: string, slugPrefix: string): ViewName {
   if (path.includes("/teams")) return "teams";
   if (path.includes("/agenda")) return "agenda";
   if (path.includes("/settings")) return "settings";
+  if (path.includes("/analytics")) return "analytics";
   if (path.includes("/trash")) return "trash";
 
   // `/folders` and every unmatched route fall back to the explorer view.

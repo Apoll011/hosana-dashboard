@@ -34,6 +34,7 @@ const PageLoader = () => {
 import {
   AcceptInvitationPage,
   AgendaPage,
+  AnalyticsPage,
   CollectionDetailPage,
   CollectionsPage,
   DemoPage,
@@ -188,6 +189,7 @@ export const AppRoutes: React.FC = () => {
                 <Route path="agenda" element={<AgendaPage />} />
                 <Route path="trash" element={<TrashPage />} />
                 <Route path="settings" element={<SettingsPage />} />
+                <Route path="analytics" element={<AnalyticsPage />} />
               </Route>
             </Route>
           </Route>

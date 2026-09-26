@@ -18,6 +18,7 @@ import {
   Music,
   Plus,
   Printer,
+  BarChart3,
   Settings,
   Trash2,
   Upload,
@@ -106,6 +107,7 @@ export function HosannaCommandPalette(props: HosannaCommandPaletteProps) {
 
   const { t } = useI18n();
   const { granted: canCreateAgenda } = useCan("agenda.create");
+  const { granted: canViewLibraryHealth } = useCan("library.health");
 
   const staticActions = useMemo<CommandAction[]>(() => {
     const actions: CommandAction[] = [
@@ -149,6 +151,20 @@ export function HosannaCommandPalette(props: HosannaCommandPaletteProps) {
         icon: <Settings className="w-4 h-4 text-slate-500" />,
         perform: () => navigate(`${slugPrefix}/settings`),
       },
+      ...(canViewLibraryHealth
+        ? [
+            {
+              id: "nav-analytics",
+              name: t("commandPalette.navAnalytics"),
+              shortcut: ["g", "y"],
+              keywords:
+                "analises analytics library health qualidade saude biblioteca",
+              section: t("commandPalette.sections.navigation"),
+              icon: <BarChart3 className="w-4 h-4 text-amber-500" />,
+              perform: () => navigate(`${slugPrefix}/analytics`),
+            } satisfies CommandAction,
+          ]
+        : []),
       {
         id: "nav-agenda",
         name: t("commandPalette.navAgenda"),
@@ -339,6 +355,7 @@ export function HosannaCommandPalette(props: HosannaCommandPaletteProps) {
     currentService,
     isSidebarCollapsed,
     canCreateAgenda,
+    canViewLibraryHealth,
     navigate,
     logout,
     setCurrentFolderId,

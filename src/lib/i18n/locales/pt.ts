@@ -9,6 +9,7 @@ export const pt = {
     services: "Cultos",
     collections: "Coleções",
     settings: "Definições",
+    analytics: "Análises",
     teams: "Equipas",
     agenda: "Agenda",
     trash: "Lixeira",
@@ -58,6 +59,7 @@ export const pt = {
     expand: "Expandir menu",
     logout: "Sair",
     openSettings: "Definições",
+    openAnalytics: "Análises",
     switchWorkspace: "Mudar de organização",
   },
 
@@ -119,6 +121,7 @@ export const pt = {
     navSongs: "Ir para Biblioteca de Cânticos",
     navServices: "Ir para Cultos / Planos",
     navSettings: "Ir para Definições do Sistema",
+    navAnalytics: "Ir para Análises",
     navAgenda: "Ir para Agenda",
     createSong: "Criar Novo Cântico",
     importCifra: "Importar Cântico do CifraClub",
@@ -387,6 +390,24 @@ export const pt = {
       showChords: "Exibir Acordes por Predefinição",
       showChordsDesc:
         "Ativa automaticamente a linha de acordes (ChordPro) ao abrir o visualizador de cânticos, ensaio e modo de projeção para músicos.",
+      songScoreTitle: "Pontuação dos Cânticos",
+      songScoreDesc:
+        "Mostra um indicador de qualidade em cada cartão de cântico no explorador.",
+      songScoreBadge: "Explorador",
+      showSongScore: "Mostrar pontuação do cântico",
+      showSongScoreDesc:
+        "Apresenta uma pontuação de completude em cada cartão de cântico no explorador.",
+      songScoreStyle: "Estilo de visualização",
+      scoreLayout: {
+        ring: "Anel",
+        ringDesc: "Arco circular à volta do ícone do cântico",
+        bar: "Barra",
+        barDesc: "Barra de progresso fina abaixo do título",
+        dots: "Pontos",
+        dotsDesc: "Fila de cinco indicadores",
+        badge: "Distintivo",
+        badgeDesc: "Pílula colorida com a pontuação",
+      },
     },
     toast: {
       themeChanged: "Tema alterado para {theme}.",
@@ -1992,6 +2013,40 @@ export const pt = {
       printDayTitle: "Imprimir Agenda do Dia",
       printCount: "Imprimir ({count})",
       printServiceShort: "Imprimir Culto",
+    },
+  },
+
+  analytics: {
+    title: "Análises",
+    desc: "Visão geral da qualidade e manutenção da biblioteca.",
+    tabs: {
+      libraryHealth: "Saúde da Biblioteca",
+    },
+    libraryHealth: {
+      title: "Saúde da Biblioteca",
+      desc: "Visão global da qualidade dos cânticos com base no sistema de pontuação.",
+      healthLabel: "Saúde",
+      statSongs: "Cânticos",
+      statHealthy: "Completos",
+      statIssues: "Com problemas",
+      issuesTitle: "Problemas por categoria",
+      issuesDesc:
+        "Clique num problema para abrir o cântico afetado. A lista atualiza-se após edições.",
+      affectedCount: "{count} cântico(s) afetado(s)",
+      allHealthyTitle: "Biblioteca em excelente estado",
+      allHealthyDesc: "Nenhum cântico com critérios em falta.",
+      criteria: {
+        errors: "Erros de análise ChordPro",
+        sections: "Sem secções de verso",
+        chords: "Sem acordes",
+        title: "Título em falta",
+        artist: "Artista em falta",
+        key: "Tom em falta",
+        tempo: "Andamento em falta",
+        songNumber: "Número do cântico em falta",
+        youtube: "Ligação YouTube em falta",
+        duration: "Duração em falta",
+      },
     },
   },
 };

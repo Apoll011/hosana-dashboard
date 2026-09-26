@@ -20,6 +20,7 @@ import {
   LogOut,
   Music,
   Settings,
+  BarChart3,
   Trash2,
   Users,
 } from "lucide-react";
@@ -30,6 +31,7 @@ import { getAvatarGradient, getInitials } from "../../utils";
 import { getRoleLabel } from "../../utils/settingsUtils";
 import { FolderTreeItemNode, FolderTreeNode } from "../explorer";
 import { Can, AnyRoleGate } from "../../lib/permissions/components";
+import { useCan } from "../../lib/permissions/client";
 
 interface AppSidebarProps {
   isSidebarOpen: boolean;
@@ -100,6 +102,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
   logout,
 }) => {
   const { t } = useI18n();
+  const { granted: canViewLibraryHealth } = useCan("library.health");
   const shortName = organization?.metadata?.shortName || "";
   const isDriveRoot = view === "explorer" && currentFolderId === null;
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
@@ -720,6 +723,19 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
                   <Settings className="w-4 h-4 text-sky-600" />
                   {t("sidebar.openSettings")}
                 </button>
+                {canViewLibraryHealth && (
+                  <button
+                    onClick={() => {
+                      setIsUserMenuOpen(false);
+                      navigate(`${slugPrefix}/analytics`);
+                      if (window.innerWidth < 768) setIsSidebarOpen(false);
+                    }}
+                    className="w-full flex items-center gap-3 px-3 py-2 text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors cursor-pointer text-left"
+                  >
+                    <BarChart3 className="w-4 h-4 text-amber-500" />
+                    {t("sidebar.openAnalytics")}
+                  </button>
+                )}
                 <div className="my-1 border-t border-slate-100 dark:border-slate-800" />
                 <button
                   onClick={() => {
