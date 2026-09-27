@@ -151,7 +151,7 @@ export const UsageOverviewTab: React.FC<UsageOverviewTabProps> = ({
   const { servicesQuery } = useServices(true);
   const { events, isLoading: eventsLoading } = useAgenda();
   const { collections, isLoading: collectionsLoading } = useCollections();
-  const { folders, isLoading: foldersLoading } = useFolders();
+  const { foldersQuery } = useFolders();
 
   const [trashItems, setTrashItems] = useState(0);
   const [sizeSources, setSizeSources] = useState<unknown[]>([]);
@@ -163,6 +163,8 @@ export const UsageOverviewTab: React.FC<UsageOverviewTabProps> = ({
 
   const songs = songsQuery.data?.songs ?? [];
   const services = servicesQuery.data ?? [];
+  const folders = foldersQuery.data?.folders ?? [];
+  const foldersLoading = foldersQuery.isLoading;
   const members = organization?.members ?? [];
   const pendingInvitations = (organization?.invitations ?? []).filter(
     (inv) => inv.status === "pending",
