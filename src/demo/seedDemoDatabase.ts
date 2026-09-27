@@ -25,9 +25,15 @@ export async function seedDemoDatabase(
   const { folders, songs, collections, services, agendaEvents } =
     generateDemoData(locale);
 
-  const upsertDoc = <T extends { id: string }>(
-    collection: { upsert: (doc: T) => Promise<unknown> },
-    doc: T,
+  // Engine collections require `T & Record<string, unknown>`; domain types
+  // (Folder/Song/…) are structurally compatible at runtime.
+  type Upsertable = { id: string } & Record<string, unknown>;
+  const asUpsertable = <T extends { id: string }>(doc: T): Upsertable =>
+    doc as unknown as Upsertable;
+
+  const upsertDoc = (
+    collection: { upsert: (doc: Upsertable) => Promise<unknown> },
+    doc: Upsertable,
   ) =>
     collection.upsert(doc).catch(() => {
       /* already exists — ignore */
@@ -35,11 +41,13 @@ export async function seedDemoDatabase(
 
   // Bulk-insert each collection, skipping docs that already exist.
   await Promise.all([
-    ...folders.map((doc) => upsertDoc(db.folders, doc)),
-    ...songs.map((doc) => upsertDoc(db.songs, doc)),
-    ...collections.map((doc) => upsertDoc(db.collections, doc)),
-    ...services.map((doc) => upsertDoc(db.services, doc)),
-    ...agendaEvents.map((doc) => upsertDoc(db.agendaEvents, doc)),
+    ...folders.map((doc) => upsertDoc(db.folders, asUpsertable(doc))),
+    ...songs.map((doc) => upsertDoc(db.songs, asUpsertable(doc))),
+    ...collections.map((doc) => upsertDoc(db.collections, asUpsertable(doc))),
+    ...services.map((doc) => upsertDoc(db.services, asUpsertable(doc))),
+    ...agendaEvents.map((doc) =>
+      upsertDoc(db.agendaEvents, asUpsertable(doc)),
+    ),
   ]);
 
   markDemoSeeded();
