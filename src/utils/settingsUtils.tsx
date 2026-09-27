@@ -27,6 +27,8 @@ export const getRoleLabel = (role: string, t?: TranslateFn) => {
       return t ? t("settings.roles.musician") : "Músico";
     case "guest":
       return t ? t("settings.roles.guest") : "Convidado";
+    case "member":
+      return t ? t("settings.roles.member") : "Membro";
     default:
       return role || (t ? t("settings.roles.member") : "Membro");
   }

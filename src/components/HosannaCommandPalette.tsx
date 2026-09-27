@@ -158,10 +158,10 @@ export function HosannaCommandPalette(props: HosannaCommandPaletteProps) {
               name: t("commandPalette.navAnalytics"),
               shortcut: ["g", "y"],
               keywords:
-                "analises analytics library health qualidade saude biblioteca",
+                "analises analytics library health qualidade saude biblioteca usage uso plan plano setlist frequencia frequency last played",
               section: t("commandPalette.sections.navigation"),
               icon: <BarChart3 className="w-4 h-4 text-amber-500" />,
-              perform: () => navigate(`${slugPrefix}/analytics`),
+              perform: () => navigate(`${slugPrefix}/analytics?tab=usage`),
             } satisfies CommandAction,
           ]
         : []),
