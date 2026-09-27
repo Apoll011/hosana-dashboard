@@ -48,6 +48,11 @@
 import { getApiClient } from "@/src/api";
 import type { HosanaDatabase } from "./database";
 import {
+  getCheckpointDbName,
+  getCheckpointLsPrefix,
+  getEpochLsKey,
+} from "./dbNames";
+import {
   subscribeLocalChange,
   subscribePushBaseline,
 } from "./engine/bus";
@@ -346,26 +351,25 @@ async function pushWithConflictRetry<T extends SyncableDoc>(
 
 // ─── Checkpoint + server-cache persistence (dual-write: IDB + localStorage) ──
 
-const CP_KEY = "hosana_repl_checkpoint";
-const EPOCH_KEY = "hosana_repl_epoch";
-
 let _cpDb: IDBDatabase | null = null;
-const CP_IDB_NAME = "hosana_checkpoints";
+let _cpDbName: string | null = null;
 const CP_IDB_VERSION = 2;
 const CP_STORE = "checkpoints";
 const CACHE_STORE = "server_state";
 
 async function getCheckpointDb(): Promise<IDBDatabase> {
-  if (_cpDb) {
+  const wantedName = getCheckpointDbName();
+  if (_cpDb && _cpDbName === wantedName) {
     try {
       // Touch a store name list — throws if the connection was closed.
       void _cpDb.objectStoreNames.length;
       return _cpDb;
     } catch {
       _cpDb = null;
+      _cpDbName = null;
     }
   }
-  _cpDb = await openIDB(CP_IDB_NAME, CP_IDB_VERSION, (db, oldVersion) => {
+  _cpDb = await openIDB(wantedName, CP_IDB_VERSION, (db, oldVersion) => {
     if (oldVersion < 1) {
       db.createObjectStore(CP_STORE, { keyPath: "collection" });
     }
@@ -373,8 +377,10 @@ async function getCheckpointDb(): Promise<IDBDatabase> {
       db.createObjectStore(CACHE_STORE, { keyPath: "collection" });
     }
   });
+  _cpDbName = wantedName;
   _cpDb.onclose = () => {
     _cpDb = null;
+    _cpDbName = null;
   };
   return _cpDb;
 }
@@ -392,10 +398,13 @@ async function loadCheckpoint(
     if (row?.cp) return row.cp;
   } catch {
     _cpDb = null;
+    _cpDbName = null;
   }
 
   try {
-    const raw = localStorage.getItem(`${CP_KEY}_${collectionName}`);
+    const raw = localStorage.getItem(
+      `${getCheckpointLsPrefix()}_${collectionName}`,
+    );
     if (raw) {
       const cp = JSON.parse(raw) as Checkpoint;
       void saveCheckpoint(collectionName, cp);
@@ -417,10 +426,14 @@ async function saveCheckpoint(
     await idbPut(db, CP_STORE, { collection: collectionName, cp });
   } catch {
     _cpDb = null;
+    _cpDbName = null;
   }
 
   try {
-    localStorage.setItem(`${CP_KEY}_${collectionName}`, JSON.stringify(cp));
+    localStorage.setItem(
+      `${getCheckpointLsPrefix()}_${collectionName}`,
+      JSON.stringify(cp),
+    );
   } catch {
     // Storage quota exceeded — non-fatal
   }
@@ -436,7 +449,7 @@ async function saveCheckpoint(
 function markPopulationEpoch(): void {
   try {
     if (getPopulationEpoch() > 0) return;
-    localStorage.setItem(EPOCH_KEY, "1");
+    localStorage.setItem(getEpochLsKey(), "1");
   } catch {
     // non-fatal
   }
@@ -444,7 +457,7 @@ function markPopulationEpoch(): void {
 
 function getPopulationEpoch(): number {
   try {
-    return parseInt(localStorage.getItem(EPOCH_KEY) ?? "0", 10) || 0;
+    return parseInt(localStorage.getItem(getEpochLsKey()) ?? "0", 10) || 0;
   } catch {
     return 0;
   }
@@ -760,6 +773,8 @@ export function resetReplication(): void {
   }
   serverStateCache.clear();
   serverCacheHydrated.clear();
+  _cpDb = null;
+  _cpDbName = null;
 }
 
 export function setupReplication(db: HosanaDatabase): ReplicationManager {

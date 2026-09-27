@@ -10,6 +10,7 @@
  */
 
 import { parseChordPro } from "@hosanna/chordpro";
+import { getMainDbName } from "./dbNames";
 import { HosanaCollection } from "./engine/collection";
 import { idbGetAll, openIDB } from "./engine/idb";
 import type {
@@ -26,7 +27,7 @@ import type {
 // Old stores are left intact — no migrations needed per the spec.
 // Note: Checkpoints are stored in a SEPARATE dedicated IDB ("hosana_checkpoints")
 // so they survive even if the main data IDB is wiped. No version bump needed.
-const DB_NAME = "hosana_idb";
+// Demo/onboarding uses `hosana_idb_demo` via getMainDbName().
 const DB_VERSION = 2;
 
 // ─── Store names ─────────────────────────────────────────────────────────────
@@ -238,7 +239,7 @@ export function resetDatabase(): void {
 }
 
 async function _open(): Promise<HosanaDatabase> {
-  const idb = await openIDB(DB_NAME, DB_VERSION, (db, oldVersion) => {
+  const idb = await openIDB(getMainDbName(), DB_VERSION, (db, oldVersion) => {
     if (oldVersion < 1) {
       const songsStore = db.createObjectStore(STORE_SONGS, { keyPath: "id" });
       songsStore.createIndex("updatedAt", "updatedAt");
