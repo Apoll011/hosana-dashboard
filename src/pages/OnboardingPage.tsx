@@ -255,7 +255,7 @@ export const OnboardingPage: React.FC = () => {
     const { error } = await startCheckout({
       annual,
       locale: language,
-      successUrl: `${origin}/${newOrg.slug}/settings?tab=billing&billing=success`,
+      successUrl: `${origin}/${newOrg.slug}/organization?tab=billing&billing=success`,
       cancelUrl: `${origin}/${newOrg.slug}/folders`,
     });
     if (error) {

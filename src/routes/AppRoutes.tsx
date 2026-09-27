@@ -47,6 +47,7 @@ import {
   ResetPasswordPage,
   ServiceDetailPage,
   ServicesPage,
+  OrganizationPage,
   SettingsPage,
   SongEditorPage,
   SongsPage,
@@ -189,6 +190,7 @@ export const AppRoutes: React.FC = () => {
                 <Route path="agenda" element={<AgendaPage />} />
                 <Route path="trash" element={<TrashPage />} />
                 <Route path="settings" element={<SettingsPage />} />
+                <Route path="organization" element={<OrganizationPage />} />
                 <Route path="analytics" element={<AnalyticsPage />} />
               </Route>
             </Route>

@@ -21,6 +21,7 @@ import { useSync } from "../../contexts/SyncContext";
 import { authClient } from "../../lib/authClient";
 import { compressImage, getRoleBadge } from "../../utils/settingsUtils";
 import { ActiveSessionsSection } from "./ActiveSession";
+import { LoginHistorySection } from "./LoginHistorySection";
 import { SocialAccountsSection } from "./SocialAccounts";
 import { TwoFactorSection } from "./TwoFactor";
 
@@ -428,6 +429,9 @@ export const AccountTab: React.FC<{ active: boolean }> = ({ active }) => {
 
       {/* Active Sessions Section */}
       <ActiveSessionsSection />
+
+      {/* Login History */}
+      <LoginHistorySection scope="self" active={active} />
 
       {/* Account Info */}
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs">
