@@ -11,6 +11,7 @@ import React, { useRef, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { clearDemoData, isDemoMode } from "../../demo/index";
 import { authClient } from "../../lib/authClient";
+import { initializeNewUserTourSettings } from "../../lib/tour";
 import { posthog } from "../../lib/posthog";
 import LoginLayout from "./Layout";
 import { GoogleTextField } from "./components/GoogleTextField";
@@ -95,6 +96,7 @@ export const RegisterPage: React.FC = () => {
     }
 
     posthog.capture("user_registered");
+    await initializeNewUserTourSettings();
     await refetch();
     setSuccessState(true);
   };

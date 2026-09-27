@@ -362,7 +362,7 @@ export const ExplorerAddressBar: React.FC<ExplorerAddressBarProps> = ({
           view === "services" ||
           view === "collections" ||
           view === "collection-detail") && (
-          <div className="relative w-full sm:w-64 min-w-0">
+          <div data-tour="toolbar-search" className="relative w-full sm:w-64 min-w-0">
             <Input
               placeholder={
                 view === "services"
@@ -445,7 +445,11 @@ export const ExplorerAddressBar: React.FC<ExplorerAddressBarProps> = ({
             "agenda.create",
           ]}
         >
-          <div className="relative shrink-0 ml-1" ref={plusMenuRef}>
+          <div
+            data-tour="toolbar-create"
+            className="relative shrink-0 ml-1"
+            ref={plusMenuRef}
+          >
             <button
               onClick={() => setIsPlusMenuOpen(!isPlusMenuOpen)}
               className="w-10 h-10 rounded-2xl bg-m3-primary text-white flex items-center justify-center border border-m3-primary font-black text-lg shadow-xl shadow-m3-primary/20 hover:bg-m3-primary-dark hover:scale-105 active:scale-95 transition-all cursor-pointer"

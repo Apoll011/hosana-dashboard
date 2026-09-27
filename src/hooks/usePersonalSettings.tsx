@@ -29,6 +29,17 @@ export interface PersonalSettings {
   explorerDensity: ExplorerDensity;
   showSongScore: boolean;
   songScoreLayout: SongScoreLayout;
+  /**
+   * Product tour state.
+   * - `null` — legacy user (flag never written) → offer “missed tour” once
+   * - `false` — new user / not completed → auto-start when eligible
+   * - `true` — finished the product tour
+   */
+  productTourCompleted: boolean | null;
+  /** ISO timestamp when the user dismissed/skipped the product tour offer. */
+  productTourDismissedAt: string | null;
+  /** Interactive (sandbox) onboarding completed. */
+  interactiveOnboardingCompleted: boolean;
 }
 
 export const DEFAULT_SETTINGS: PersonalSettings = {
@@ -41,7 +52,36 @@ export const DEFAULT_SETTINGS: PersonalSettings = {
   explorerDensity: "comfortable",
   showSongScore: true,
   songScoreLayout: "ring",
+  productTourCompleted: null,
+  productTourDismissedAt: null,
+  interactiveOnboardingCompleted: false,
 };
+
+/** New accounts start with an explicit pending tour (not the legacy `null`). */
+export const NEW_USER_TOUR_SETTINGS: Pick<
+  PersonalSettings,
+  | "productTourCompleted"
+  | "productTourDismissedAt"
+  | "interactiveOnboardingCompleted"
+> = {
+  productTourCompleted: false,
+  productTourDismissedAt: null,
+  interactiveOnboardingCompleted: false,
+};
+
+export function shouldAutoStartProductTour(
+  settings: PersonalSettings,
+): boolean {
+  return (
+    settings.productTourCompleted === false && !settings.productTourDismissedAt
+  );
+}
+
+export function shouldOfferMissedProductTour(
+  settings: PersonalSettings,
+): boolean {
+  return settings.productTourCompleted === null;
+}
 
 const STORAGE_KEY = "personal-settings";
 

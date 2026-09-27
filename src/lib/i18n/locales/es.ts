@@ -767,6 +767,80 @@ export const es: typeof pt = {
       viewRepo: "Ver Repositorio",
       supportedFormats: "Formatos de Importación Compatibles",
       thirdPartyLicenses: "Licencias de Bibliotecas de Terceros ({count})",
+      productTourTitle: "Tour del producto",
+      productTourDesc:
+        "Repasa lo esencial de la interfaz adaptado a tu rol en la organización.",
+      productTourRelaunch: "Iniciar tour",
+    },
+  },
+
+  tour: {
+    product: {
+      missedTitle: "Tour del producto disponible",
+      missedDesc:
+        "Hay un tour guiado de las funciones esenciales. ¿Quieres verlo ahora?",
+      missedAction: "Iniciar tour",
+      unavailableTitle: "Tour no disponible",
+      unavailableDesc:
+        "No se pudo iniciar el tour en esta pantalla. Vuelve a Drive e inténtalo de nuevo.",
+      controls: {
+        next: "Siguiente",
+        previous: "Anterior",
+        done: "Listo",
+        close: "Cerrar",
+        progress: "{{current}} de {{total}}",
+        tryInteractive: "Tour interactivo",
+      },
+      welcome: {
+        title: "Bienvenido a Hosanna Studio",
+        description:
+          "Este tour rápido destaca lo esencial para tu rol. Puedes saltarlo cuando quieras y relanzarlo en Ajustes → Acerca de.",
+      },
+      drive: {
+        title: "Drive",
+        description:
+          "Aquí vive la biblioteca de la organización: carpetas y canciones, como un explorador de archivos.",
+      },
+      library: {
+        title: "Biblioteca",
+        description:
+          "Ve todas las canciones en un solo lugar, sin importar la carpeta.",
+      },
+      collections: {
+        title: "Colecciones",
+        description:
+          "Agrupa canciones en listas reutilizables para ensayos o temas.",
+      },
+      services: {
+        title: "Servicios",
+        description:
+          "Arma el orden de alabanza con canciones, notas y momentos del servicio.",
+      },
+      agenda: {
+        title: "Agenda",
+        description:
+          "Planifica eventos y vincúlalos a servicios cuando lo necesites.",
+      },
+      search: {
+        title: "Búsqueda",
+        description:
+          "Encuentra rápido carpetas, canciones y servicios. Hay sintaxis avanzada en el icono de ayuda.",
+      },
+      create: {
+        title: "Crear",
+        description:
+          "Usa el botón + para crear canciones, carpetas, servicios y más, según tus permisos.",
+      },
+      settings: {
+        title: "Cuenta y ajustes",
+        description:
+          "Accede a preferencias personales, organización y más desde tu perfil.",
+      },
+      finish: {
+        title: "Listo para empezar",
+        description:
+          "Puedes relanzar este tour en Ajustes → Acerca de. Para practicar con datos de demostración, prueba el tour interactivo.",
+      },
     },
   },
 

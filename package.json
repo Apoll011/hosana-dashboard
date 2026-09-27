@@ -26,6 +26,7 @@
     "better-auth": "^1.7.2",
     "better-inbox": "^0.1.2",
     "dotenv": "^17.2.3",
+    "driver.js": "^1.8.0",
     "liqe": "^3.8.7",
     "lucide-react": "^0.546.0",
     "posthog-js": "^1.421.2",

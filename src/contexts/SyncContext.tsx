@@ -31,6 +31,8 @@ export interface ToastMessage {
   description?: string;
   action?: ToastAction;
   duration?: number;
+  /** Fired when the toast is removed (X, action, or auto-dismiss). */
+  onDismiss?: () => void;
 }
 
 interface ShowToastOptions {
@@ -39,6 +41,7 @@ interface ShowToastOptions {
   description?: string;
   action?: ToastAction;
   duration?: number;
+  onDismiss?: () => void;
 }
 
 interface SyncContextType {
@@ -76,7 +79,17 @@ export const SyncProvider: React.FC<{ children: React.ReactNode }> = ({
       clearTimeout(timer);
       toastTimersRef.current.delete(id);
     }
-    setToasts((prev) => prev.filter((t) => t.id !== id));
+    setToasts((prev) => {
+      const leaving = prev.find((t) => t.id === id);
+      if (leaving?.onDismiss) {
+        try {
+          leaving.onDismiss();
+        } catch {
+          // ignore consumer errors
+        }
+      }
+      return prev.filter((t) => t.id !== id);
+    });
   }, []);
 
   const showToast = useCallback(
@@ -97,6 +110,7 @@ export const SyncProvider: React.FC<{ children: React.ReactNode }> = ({
           description: textOrOptions.description,
           action: textOrOptions.action,
           duration: textOrOptions.duration,
+          onDismiss: textOrOptions.onDismiss,
         };
       }
 
