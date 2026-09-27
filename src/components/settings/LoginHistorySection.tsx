@@ -54,7 +54,15 @@ export interface LoginHistorySectionProps {
   /** Optional override for section chrome (title/desc). */
   titleKey?: TranslationKey;
   descKey?: TranslationKey;
+  /** Hide the card title/description (keep refresh). */
+  hideHeader?: boolean;
 }
+
+type OrgMemberRef = {
+  userId: string;
+  name: string;
+  email: string;
+};
 
 function readString(
   data: Record<string, unknown> | undefined,
@@ -92,11 +100,96 @@ function eventIp(log: DashAuditLog): string | null {
   );
 }
 
+function sortByNewest(a: DashAuditLog, b: DashAuditLog): number {
+  return (
+    new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  );
+}
+
+function enrichEvent(
+  log: DashAuditLog,
+  member?: OrgMemberRef,
+): DashAuditLog {
+  if (!member) return log;
+  return {
+    ...log,
+    eventData: {
+      ...log.eventData,
+      userId: member.userId,
+      name: member.name || readString(log.eventData, "name"),
+      email: member.email || readString(log.eventData, "email", "identifier"),
+    },
+  };
+}
+
+function listOrgMembers(
+  organization: ReturnType<typeof useAuth>["organization"],
+): OrgMemberRef[] {
+  const members = organization?.members ?? [];
+  const out: OrgMemberRef[] = [];
+  for (const m of members) {
+    const userId = m.userId || m.user?.id;
+    if (!userId) continue;
+    out.push({
+      userId,
+      name: m.user?.name || "",
+      email: m.user?.email || "",
+    });
+  }
+  return out;
+}
+
+/**
+ * Workspace login activity: sign-in events are user-scoped (not org-scoped),
+ * so `getAllAuditLogs({ organizationId })` often returns nothing for
+ * `user_signed_in`. Owners/admins can query each member via `userId` instead.
+ */
+async function fetchOrganizationLoginEvents(
+  members: OrgMemberRef[],
+  limitPerMember: number,
+): Promise<{ events: DashAuditLog[]; error: string | null }> {
+  if (members.length === 0) {
+    return { events: [], error: null };
+  }
+
+  const settled = await Promise.all(
+    members.map(async (member) => {
+      const result = await authClient.dash.getAllAuditLogs({
+        userId: member.userId,
+        eventType: "user_signed_in",
+        limit: limitPerMember,
+        offset: 0,
+      });
+      if (result.error) {
+        return {
+          events: [] as DashAuditLog[],
+          error: result.error.message || null,
+        };
+      }
+      const events = (result.data?.events ?? [])
+        .filter((e) => LOGIN_EVENT_TYPES.has(e.eventType))
+        .map((e) => enrichEvent(e, member));
+      return { events, error: null as string | null };
+    }),
+  );
+
+  const errors = settled.map((s) => s.error).filter(Boolean);
+  const events = settled.flatMap((s) => s.events).sort(sortByNewest);
+
+  // If every member request failed, surface the first error.
+  if (events.length === 0 && errors.length === members.length) {
+    return { events: [], error: errors[0] };
+  }
+
+  return { events, error: null };
+}
+
 export const LoginHistorySection: React.FC<LoginHistorySectionProps> = ({
   scope,
   active = true,
   titleKey,
   descKey,
+  hideHeader = false,
 }) => {
   const { t, locale } = useI18n();
   const { organization } = useAuth();
@@ -112,21 +205,26 @@ export const LoginHistorySection: React.FC<LoginHistorySectionProps> = ({
       setIsLoading(true);
       setError(null);
       try {
+        if (scope === "organization") {
+          const members = listOrgMembers(organization);
+          const { events: orgEvents, error: orgError } =
+            await fetchOrganizationLoginEvents(members, 50);
+          if (orgError) {
+            throw new Error(orgError || t("loginHistory.loadError"));
+          }
+          setEvents(orgEvents);
+          setTotal(orgEvents.length);
+          setOffset(0);
+          return;
+        }
+
         const session = await authClient.getSession({ query: {} });
-        const query = {
+        const result = await authClient.dash.getAuditLogs({
           session: session.data,
           eventType: "user_signed_in",
           limit,
           offset: nextOffset,
-        };
-
-        const result =
-          scope === "organization"
-            ? await authClient.dash.getAllAuditLogs({
-                ...query,
-                organizationId: organization?.id,
-              })
-            : await authClient.dash.getAuditLogs(query);
+        });
 
         if (result.error) {
           throw new Error(
@@ -148,14 +246,14 @@ export const LoginHistorySection: React.FC<LoginHistorySectionProps> = ({
         setIsLoading(false);
       }
     },
-    [organization?.id, scope, t],
+    [organization, scope, t],
   );
 
   useEffect(() => {
     if (!active) return;
     if (scope === "organization" && !organization?.id) return;
     void fetchLogs(0, false);
-  }, [active, scope, organization?.id, fetchLogs]);
+  }, [active, scope, organization?.id, organization?.members, fetchLogs]);
 
   const formatWhen = (iso: string) => {
     const date = new Date(iso);
@@ -177,20 +275,25 @@ export const LoginHistorySection: React.FC<LoginHistorySectionProps> = ({
         : "loginHistory.personalDesc"),
   );
 
-  const hasMore = (events?.length ?? 0) < total && !isLoading;
+  const hasMore =
+    scope === "self" && (events?.length ?? 0) < total && !isLoading;
 
   return (
     <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs">
       <div className="flex items-center justify-between mb-4 gap-3">
-        <div className="min-w-0">
-          <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-            <History className="w-4 h-4 text-slate-400" />
-            {resolvedTitle}
-          </h3>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-            {resolvedDesc}
-          </p>
-        </div>
+        {!hideHeader ? (
+          <div className="min-w-0">
+            <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+              <History className="w-4 h-4 text-slate-400" />
+              {resolvedTitle}
+            </h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+              {resolvedDesc}
+            </p>
+          </div>
+        ) : (
+          <div />
+        )}
         <button
           type="button"
           onClick={() => void fetchLogs(0, false)}

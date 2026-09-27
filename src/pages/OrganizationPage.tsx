@@ -190,7 +190,9 @@ export const OrganizationPage: React.FC = () => {
               <span className="font-bold block">
                 {t("organization.offlineTitle")}
               </span>
-              <span className="opacity-90">{t("organization.offlineDesc")}</span>
+              <span className="opacity-90">
+                {t("organization.offlineDesc")}
+              </span>
             </div>
           </div>
         )}
@@ -259,15 +261,7 @@ export const OrganizationPage: React.FC = () => {
               showToast={showToast}
             />
             {activeTab === "loginActivity" && canViewLoginActivity && (
-              <div className="space-y-4 max-w-4xl mx-auto w-full">
-                <div>
-                  <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">
-                    {t("organization.loginActivity.title")}
-                  </h2>
-                  <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                    {t("organization.loginActivity.desc")}
-                  </p>
-                </div>
+              <div className="max-w-4xl mx-auto w-full">
                 <LoginHistorySection
                   scope="organization"
                   active={activeTab === "loginActivity"}
