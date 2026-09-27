@@ -32,6 +32,7 @@ import {
   ExplorerModals,
   ExplorerToolbar,
 } from "../components/layout";
+import { ProductTourController } from "../components/tour/ProductTourController";
 import { ToastContainer } from "../components/Toast";
 import { useAuth } from "../contexts/AuthContext";
 import { usePrint } from "../contexts/PrintContext";
@@ -1615,6 +1616,7 @@ export const MainLayout: React.FC = () => {
       </div>
 
       <ToastContainer />
+      <ProductTourController />
 
       <BatchActionFloatingBar
         selectedCount={totalSelectedCount}

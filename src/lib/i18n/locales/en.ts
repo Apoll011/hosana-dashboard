@@ -755,6 +755,80 @@ export const en: typeof pt = {
       viewRepo: "View Repository",
       supportedFormats: "Supported Import Formats",
       thirdPartyLicenses: "Third-Party Library Licenses ({count})",
+      productTourTitle: "Product tour",
+      productTourDesc:
+        "Review the essentials of the interface tailored to your role in the organization.",
+      productTourRelaunch: "Start tour",
+    },
+  },
+
+  tour: {
+    product: {
+      missedTitle: "Product tour available",
+      missedDesc:
+        "There’s a guided tour of the essential features. Would you like to see it now?",
+      missedAction: "Start tour",
+      unavailableTitle: "Tour unavailable",
+      unavailableDesc:
+        "Couldn’t start the tour on this screen. Go back to Drive and try again.",
+      controls: {
+        next: "Next",
+        previous: "Back",
+        done: "Done",
+        close: "Close",
+        progress: "{{current}} of {{total}}",
+        tryInteractive: "Interactive tour",
+      },
+      welcome: {
+        title: "Welcome to Hosanna Studio",
+        description:
+          "This short tour highlights what’s essential for your role. You can skip anytime and relaunch from Settings → About.",
+      },
+      drive: {
+        title: "Drive",
+        description:
+          "This is your organization’s library — folders and songs, like a file explorer.",
+      },
+      library: {
+        title: "Library",
+        description:
+          "See every song in one place, regardless of which folder it’s in.",
+      },
+      collections: {
+        title: "Collections",
+        description:
+          "Group songs into reusable lists for rehearsals or themes.",
+      },
+      services: {
+        title: "Services",
+        description:
+          "Build your order of worship with songs, notes, and service moments.",
+      },
+      agenda: {
+        title: "Agenda",
+        description:
+          "Plan events and link them to services when you need to.",
+      },
+      search: {
+        title: "Search",
+        description:
+          "Quickly find folders, songs, and services. Advanced syntax is in the help icon.",
+      },
+      create: {
+        title: "Create",
+        description:
+          "Use the + button to create songs, folders, services, and more — based on your permissions.",
+      },
+      settings: {
+        title: "Account & settings",
+        description:
+          "Open personal preferences, organization settings, and more from your profile.",
+      },
+      finish: {
+        title: "You’re ready to go",
+        description:
+          "Relaunch this tour anytime from Settings → About. To practice with demo data, try the interactive tour.",
+      },
     },
   },
 

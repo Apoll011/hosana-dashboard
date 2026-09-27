@@ -763,6 +763,80 @@ export const pt = {
       viewRepo: "Ver Repositório",
       supportedFormats: "Formatos de Importação Suportados",
       thirdPartyLicenses: "Licenças de Bibliotecas de Terceiros ({count})",
+      productTourTitle: "Tour do produto",
+      productTourDesc:
+        "Reveja os essenciais da interface adaptados ao seu papel na organização.",
+      productTourRelaunch: "Iniciar tour",
+    },
+  },
+
+  tour: {
+    product: {
+      missedTitle: "Tour do produto disponível",
+      missedDesc:
+        "Há um tour guiado das funcionalidades essenciais. Quer vê-lo agora?",
+      missedAction: "Iniciar tour",
+      unavailableTitle: "Tour indisponível",
+      unavailableDesc:
+        "Não foi possível iniciar o tour neste ecrã. Volte à Drive e tente novamente.",
+      controls: {
+        next: "Seguinte",
+        previous: "Anterior",
+        done: "Concluir",
+        close: "Fechar",
+        progress: "{{current}} de {{total}}",
+        tryInteractive: "Tour interativo",
+      },
+      welcome: {
+        title: "Bem-vindo ao Hosanna Studio",
+        description:
+          "Este tour rápido destaca o essencial para o seu papel. Pode saltar a qualquer momento e relançar em Definições → Sobre.",
+      },
+      drive: {
+        title: "Drive",
+        description:
+          "Aqui vive a biblioteca da organização — pastas e cânticos, como um explorador de ficheiros.",
+      },
+      library: {
+        title: "Biblioteca",
+        description:
+          "Veja todos os cânticos num só sítio, independentemente da pasta.",
+      },
+      collections: {
+        title: "Coleções",
+        description:
+          "Agrupe cânticos em listas reutilizáveis para ensaios ou temas.",
+      },
+      services: {
+        title: "Cultos / Serviços",
+        description:
+          "Monte a ordem de louvor com cânticos, notas e momentos do culto.",
+      },
+      agenda: {
+        title: "Agenda",
+        description:
+          "Planeie eventos e ligue-os a serviços quando precisar.",
+      },
+      search: {
+        title: "Pesquisa",
+        description:
+          "Encontre rapidamente pastas, cânticos e serviços. Há sintaxe avançada no ícone de ajuda.",
+      },
+      create: {
+        title: "Criar",
+        description:
+          "Use o botão + para criar cânticos, pastas, serviços e mais — conforme as suas permissões.",
+      },
+      settings: {
+        title: "Conta e definições",
+        description:
+          "Aceda às preferências pessoais, organização e outras opções a partir do seu perfil.",
+      },
+      finish: {
+        title: "Pronto para começar",
+        description:
+          "Pode relançar este tour em Definições → Sobre. Para praticar com dados de demonstração, experimente o tour interativo.",
+      },
     },
   },
 

@@ -146,6 +146,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
       )}
 
       <aside
+        data-tour="sidebar"
         className={`${
           isSidebarOpen
             ? "flex absolute inset-y-0 left-0 z-50 bg-m3-sidebar shadow-2xl"
@@ -307,6 +308,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
 
         {/* Drive Item */}
         <button
+          data-tour="nav-drive"
           onClick={() => {
             onSelectFolder(null);
             navigate(`${slugPrefix}/folders`);
@@ -356,6 +358,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
 
         {/* Library Item */}
         <button
+          data-tour="nav-library"
           onClick={() => {
             navigate(`${slugPrefix}/songs`);
             if (window.innerWidth < 768) setIsSidebarOpen(false);
@@ -401,6 +404,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
         {collections_enabled && (
           <Can permission="collection.access">
             <button
+              data-tour="nav-collections"
               onClick={() => {
                 navigate(`${slugPrefix}/collections`);
                 if (window.innerWidth < 768) setIsSidebarOpen(false);
@@ -455,6 +459,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
 
         {/* Services Item */}
         <button
+          data-tour="nav-services"
           onClick={() => {
             navigate(`${slugPrefix}/services`);
             if (window.innerWidth < 768) setIsSidebarOpen(false);
@@ -534,6 +539,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
         {agenda_enabled && (
           <Can permission="agenda.access">
             <button
+              data-tour="nav-agenda"
               onClick={() => {
                 navigate(`${slugPrefix}/agenda`);
                 if (window.innerWidth < 768) setIsSidebarOpen(false);
@@ -665,6 +671,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
             ref={userMenuRef}
           >
             <button
+              data-tour="nav-user-menu"
               onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
               title={isSidebarCollapsed ? user.name : undefined}
               className="w-full flex items-center justify-between p-2 rounded-xl hover:bg-slate-200/60 dark:hover:bg-slate-800 transition-colors cursor-pointer"

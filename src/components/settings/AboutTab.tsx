@@ -5,9 +5,12 @@
 
 import { useI18n } from "@/src/lib/i18n";
 import { songImportRegistry } from "@/src/lib/import";
+import { useActiveRole } from "@/src/lib/permissions/client";
+import { startProductTour } from "@/src/lib/tour";
 import {
   ChevronDown,
   ChevronUp,
+  Compass,
   FileText,
   FileUp,
   Github,
@@ -20,7 +23,9 @@ import { useAuth } from "../../contexts/AuthContext";
 export const AboutTab: React.FC<{ active: boolean }> = ({ active }) => {
   const { organization } = useAuth();
   const { t } = useI18n();
+  const { role } = useActiveRole();
   const [showLicenses, setShowLicenses] = useState(false);
+  const canRelaunchTour = role !== "guest";
 
   if (!active) return null;
   const productionDependencies = [
@@ -144,6 +149,30 @@ export const AboutTab: React.FC<{ active: boolean }> = ({ active }) => {
             {t("settings.about.viewRepo")}
           </a>
         </div>
+
+        {canRelaunchTour && (
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-sky-50/50 dark:bg-sky-950/20 border border-sky-200/60 dark:border-sky-900/40 rounded-xl gap-3">
+            <div className="flex items-start gap-2.5 min-w-0">
+              <Compass className="w-4 h-4 text-sky-600 dark:text-sky-400 shrink-0 mt-0.5" />
+              <div>
+                <p className="text-xs font-semibold text-sky-900 dark:text-sky-200">
+                  {t("settings.about.productTourTitle")}
+                </p>
+                <p className="text-[11px] text-sky-800/80 dark:text-sky-300/80 mt-0.5 leading-relaxed">
+                  {t("settings.about.productTourDesc")}
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => startProductTour()}
+              className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-sky-700 dark:text-sky-300 bg-white dark:bg-slate-800 border border-sky-200 dark:border-slate-700 rounded-lg hover:bg-sky-50 dark:hover:bg-slate-700/55 transition-colors shrink-0 cursor-pointer"
+            >
+              <Compass className="w-3.5 h-3.5" />
+              {t("settings.about.productTourRelaunch")}
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Import Formats */}

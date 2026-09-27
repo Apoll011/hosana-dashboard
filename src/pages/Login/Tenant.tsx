@@ -11,6 +11,7 @@ import { posthog } from "@/src/lib/posthog";
 import { ArrowLeft, CheckCircle2, XCircle } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import { authClient } from "../../lib/authClient";
+import { initializeNewUserTourSettings } from "../../lib/tour";
 import LoginLayout from "./Layout";
 import { GoogleTextField } from "./components/GoogleTextField";
 import { PasswordStrengthMeter } from "./components/PasswordStrengthMeter";
@@ -122,6 +123,8 @@ export const RegisterOrganizationPage: React.FC = () => {
 
       if (signUpError)
         throw new Error(signUpError.message || "Falha ao criar conta.");
+
+      await initializeNewUserTourSettings();
 
       // 2. Create the organization
       const { error: orgError } = await authClient.organization.create({
