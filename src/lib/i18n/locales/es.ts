@@ -11,6 +11,7 @@ export const es: typeof pt = {
     services: "Cultos",
     collections: "Colecciones",
     settings: "Configuración",
+    organization: "Organización",
     analytics: "Analíticas",
     teams: "Equipos",
     agenda: "Agenda",
@@ -61,6 +62,7 @@ export const es: typeof pt = {
     expand: "Expandir menú",
     logout: "Cerrar sesión",
     openSettings: "Configuración",
+    openOrganization: "Organización",
     openAnalytics: "Analíticas",
     switchWorkspace: "Cambiar de organización",
   },
@@ -123,6 +125,7 @@ export const es: typeof pt = {
     navSongs: "Ir a Biblioteca de Canciones",
     navServices: "Ir a Cultos / Planes",
     navSettings: "Ir a Configuración del Sistema",
+    navOrganization: "Ir a Organización",
     navAnalytics: "Ir a Analíticas",
     navAgenda: "Ir a Agenda",
     createSong: "Crear Nueva Canción",
@@ -2152,6 +2155,52 @@ export const es: typeof pt = {
         youtube: "Enlace de YouTube faltante",
         duration: "Duración faltante",
       },
+    },
+  },
+
+  loginHistory: {
+    title: "Historial de inicio de sesión",
+    personalDesc:
+      "Inicios de sesión recientes en tu cuenta, con dispositivo y ubicación cuando estén disponibles.",
+    orgDesc:
+      "Actividad de inicio de sesión de todos los miembros de esta organización.",
+    loading: "Cargando historial...",
+    loadError: "No se pudo cargar el historial de inicio de sesión.",
+    empty: "Aún no hay registros de inicio de sesión.",
+    loadMore: "Cargar más",
+    unknownLocation: "Ubicación desconocida",
+    meta: "IP: {ip} · {location}",
+    events: {
+      signedIn: "Inicio de sesión",
+      signedOut: "Cierre de sesión",
+      sessionCreated: "Sesión creada",
+      sessionRevoked: "Sesión revocada",
+      sessionsRevokedAll: "Todas las sesiones revocadas",
+      other: "Evento de autenticación",
+    },
+  },
+
+  organization: {
+    offlineTitle: "Sin conexión",
+    offlineDesc:
+      "La configuración de la organización necesita conexión a internet.",
+    tabs: {
+      workspace: "Espacio de trabajo",
+      members: "Miembros",
+      notifications: "Notificaciones",
+      billing: "Facturación",
+      general: "Servidor",
+      loginActivity: "Actividad de login",
+    },
+    loginActivity: {
+      title: "Actividad de login",
+      desc: "Historial de inicios de sesión de toda la organización (solo propietarios y administradores).",
+      listTitle: "Inicios de sesión de la organización",
+      listDesc:
+        "Eventos recientes de autenticación de los miembros de este espacio de trabajo.",
+      noAccessTitle: "Sin acceso",
+      noAccessDesc:
+        "Solo los propietarios y administradores pueden ver la actividad de login de la organización.",
     },
   },
 };

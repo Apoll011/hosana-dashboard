@@ -114,7 +114,7 @@ export const BillingTab: React.FC<BillingTabProps> = ({
       locale: language,
       // If checkout is cancelled, keep the owner on the billing tab instead of
       // bouncing them back to the studio folders.
-      cancelUrl: `${window.location.origin}/${organization.slug}/settings?tab=billing`,
+      cancelUrl: `${window.location.origin}/${organization.slug}/organization?tab=billing`,
     });
     if (error) {
       showToast?.(error, "error");

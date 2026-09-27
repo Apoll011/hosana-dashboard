@@ -169,7 +169,7 @@ export function useSubscription(): SubscriptionApi {
           locale,
           successUrl:
             successUrl ??
-            `${window.location.origin}/${slug}/settings?tab=billing&billing=success`,
+            `${window.location.origin}/${slug}/organization?tab=billing&billing=success`,
           cancelUrl: cancelUrl ?? `${window.location.origin}/${slug}/folders`,
         });
         if (apiError) {
@@ -203,7 +203,7 @@ export function useSubscription(): SubscriptionApi {
             customerType: "organization",
             returnUrl:
               options.returnUrl ??
-              `${window.location.origin}/${slug}/settings?tab=billing`,
+              `${window.location.origin}/${slug}/organization?tab=billing`,
           },
         );
         if (apiError) {

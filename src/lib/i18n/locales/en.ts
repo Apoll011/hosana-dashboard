@@ -11,6 +11,7 @@ export const en: typeof pt = {
     services: "Services",
     collections: "Collections",
     settings: "Settings",
+    organization: "Organization",
     analytics: "Analytics",
     teams: "Teams",
     agenda: "Agenda",
@@ -61,6 +62,7 @@ export const en: typeof pt = {
     expand: "Expand menu",
     logout: "Sign out",
     openSettings: "Settings",
+    openOrganization: "Organization",
     openAnalytics: "Analytics",
     switchWorkspace: "Switch workspace",
   },
@@ -123,6 +125,7 @@ export const en: typeof pt = {
     navSongs: "Go to Song Library",
     navServices: "Go to Services / Plans",
     navSettings: "Go to System Settings",
+    navOrganization: "Go to Organization",
     navAnalytics: "Go to Analytics",
     navAgenda: "Go to Agenda",
     createSong: "Create New Song",
@@ -2121,6 +2124,49 @@ export const en: typeof pt = {
         youtube: "Missing YouTube link",
         duration: "Missing duration",
       },
+    },
+  },
+
+  loginHistory: {
+    title: "Login history",
+    personalDesc:
+      "Recent sign-ins on your account, with device and location when available.",
+    orgDesc: "Sign-in activity for every member of this organization.",
+    loading: "Loading history...",
+    loadError: "Couldn't load login history.",
+    empty: "No login events yet.",
+    loadMore: "Load more",
+    unknownLocation: "Unknown location",
+    meta: "IP: {ip} · {location}",
+    events: {
+      signedIn: "Signed in",
+      signedOut: "Signed out",
+      sessionCreated: "Session created",
+      sessionRevoked: "Session revoked",
+      sessionsRevokedAll: "All sessions revoked",
+      other: "Auth event",
+    },
+  },
+
+  organization: {
+    offlineTitle: "You're offline",
+    offlineDesc: "Organization settings need an internet connection.",
+    tabs: {
+      workspace: "Workspace",
+      members: "Members",
+      notifications: "Notifications",
+      billing: "Billing",
+      general: "Server",
+      loginActivity: "Login activity",
+    },
+    loginActivity: {
+      title: "Login activity",
+      desc: "Organization-wide sign-in history (owners and admins only).",
+      listTitle: "Organization sign-ins",
+      listDesc: "Recent authentication events from members of this workspace.",
+      noAccessTitle: "No access",
+      noAccessDesc:
+        "Only owners and admins can view organization login activity.",
     },
   },
 };

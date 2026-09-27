@@ -127,6 +127,11 @@ export const ServiceDetailPage = lazyImport(() =>
 export const SettingsPage = lazyImport(() =>
   import("../pages/SettingsPage").then((m) => ({ default: m.SettingsPage })),
 );
+export const OrganizationPage = lazyImport(() =>
+  import("../pages/OrganizationPage").then((m) => ({
+    default: m.OrganizationPage,
+  })),
+);
 export const AnalyticsPage = lazyImport(() =>
   import("../pages/AnalyticsPage").then((m) => ({ default: m.AnalyticsPage })),
 );
@@ -167,6 +172,10 @@ export const routePreloaders: Array<{
   { pattern: /\/teams(\/|\?|#|$)/, preload: () => TeamsPage.preload() },
   { pattern: /\/trash(\/|\?|#|$)/, preload: () => TrashPage.preload() },
   { pattern: /\/settings(\/|\?|#|$)/, preload: () => SettingsPage.preload() },
+  {
+    pattern: /\/organization(\/|\?|#|$)/,
+    preload: () => OrganizationPage.preload(),
+  },
   {
     pattern: /\/analytics(\/|\?|#|$)/,
     preload: () => AnalyticsPage.preload(),

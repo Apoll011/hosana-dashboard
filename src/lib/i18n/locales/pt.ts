@@ -9,6 +9,7 @@ export const pt = {
     services: "Cultos",
     collections: "Coleções",
     settings: "Definições",
+    organization: "Organização",
     analytics: "Análises",
     teams: "Equipas",
     agenda: "Agenda",
@@ -59,6 +60,7 @@ export const pt = {
     expand: "Expandir menu",
     logout: "Sair",
     openSettings: "Definições",
+    openOrganization: "Organização",
     openAnalytics: "Análises",
     switchWorkspace: "Mudar de organização",
   },
@@ -121,6 +123,7 @@ export const pt = {
     navSongs: "Ir para Biblioteca de Cânticos",
     navServices: "Ir para Cultos / Planos",
     navSettings: "Ir para Definições do Sistema",
+    navOrganization: "Ir para Organização",
     navAnalytics: "Ir para Análises",
     navAgenda: "Ir para Agenda",
     createSong: "Criar Novo Cântico",
@@ -2144,6 +2147,52 @@ export const pt = {
         youtube: "Ligação YouTube em falta",
         duration: "Duração em falta",
       },
+    },
+  },
+
+  loginHistory: {
+    title: "Histórico de início de sessão",
+    personalDesc:
+      "Inícios de sessão recentes na sua conta, com dispositivo e localização quando disponíveis.",
+    orgDesc:
+      "Atividade de início de sessão de todos os membros desta organização.",
+    loading: "A carregar histórico...",
+    loadError: "Não foi possível carregar o histórico de início de sessão.",
+    empty: "Ainda não há registos de início de sessão.",
+    loadMore: "Carregar mais",
+    unknownLocation: "Localização desconhecida",
+    meta: "IP: {ip} · {location}",
+    events: {
+      signedIn: "Início de sessão",
+      signedOut: "Terminar sessão",
+      sessionCreated: "Sessão criada",
+      sessionRevoked: "Sessão revogada",
+      sessionsRevokedAll: "Todas as sessões revogadas",
+      other: "Evento de autenticação",
+    },
+  },
+
+  organization: {
+    offlineTitle: "Está offline",
+    offlineDesc:
+      "As definições da organização precisam de ligação à internet.",
+    tabs: {
+      workspace: "Espaço de trabalho",
+      members: "Membros",
+      notifications: "Notificações",
+      billing: "Faturação",
+      general: "Servidor",
+      loginActivity: "Atividade de login",
+    },
+    loginActivity: {
+      title: "Atividade de login",
+      desc: "Histórico de inícios de sessão em toda a organização (apenas proprietários e administradores).",
+      listTitle: "Inícios de sessão da organização",
+      listDesc:
+        "Eventos recentes de autenticação dos membros deste espaço de trabalho.",
+      noAccessTitle: "Sem acesso",
+      noAccessDesc:
+        "Apenas proprietários e administradores podem ver a atividade de login da organização.",
     },
   },
 };

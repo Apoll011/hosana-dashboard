@@ -26,6 +26,7 @@ import {
   Search,
   Settings,
   BarChart3,
+  Building2,
   Trash2Icon,
   Users,
   X,
@@ -274,6 +275,16 @@ export const ExplorerAddressBar: React.FC<ExplorerAddressBarProps> = ({
               <div className="flex items-center gap-2 font-black text-m3-primary shrink-0 tracking-wide">
                 <Settings className="w-4 h-4" />
                 <span>{t("common.settings")}</span>
+              </div>
+            </>
+          )}
+
+          {view === "organization" && (
+            <>
+              <ChevronRight className="w-3.5 h-3.5 text-m3-secondary/40 shrink-0" />
+              <div className="flex items-center gap-2 font-black text-m3-primary shrink-0 tracking-wide">
+                <Building2 className="w-4 h-4" />
+                <span>{t("common.organization")}</span>
               </div>
             </>
           )}
