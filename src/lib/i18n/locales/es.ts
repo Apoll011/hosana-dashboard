@@ -896,17 +896,27 @@ export const es: typeof pt = {
         editor: {
           title: "Editor ChordPro",
           description:
-            "Escribe cifra y letra con directivas como {title}, {artist} y acordes [G].",
+            "Este es el editor. En líneas vacías puedes usar atajos que el editor completa solo — como snippets inteligentes.",
+        },
+        snippets: {
+          title: "TAB completa directivas",
+          description:
+            "En una línea vacía escribe a (o artist) y pulsa TAB: el editor rellena {artist: …}. El texto queda seleccionado: escribe encima y pulsa TAB otra vez para el siguiente campo. Prueba también t (title) o ! para una plantilla completa.",
+        },
+        chords: {
+          title: "Acordes con [ ]",
+          description:
+            "Escribe acordes entre corchetes, p. ej. [G] o [Am], encima de la letra. La vista previa los formatea.",
         },
         preview: {
           title: "Vista previa",
           description:
-            "La vista previa se actualiza al editar: ideal para ensayar e imprimir.",
+            "Mira el resultado a la derecha mientras editas: ideal para ensayar e imprimir.",
         },
         save: {
           title: "Guardar cambios",
           description:
-            "Edita un poco el contenido y guarda (o espera el auto-guardado) para continuar.",
+            "Practica un snippet o un acorde y guarda (Ctrl+S o el botón) para continuar.",
         },
       },
       collections: {
@@ -918,6 +928,36 @@ export const es: typeof pt = {
           title: "Crear una colección",
           description:
             "Crea una colección (p. ej. “Navidad”) para agrupar canciones reutilizables.",
+        },
+        backToDrive: {
+          title: "Volver a Drive",
+          description:
+            "Ahora vuelve a Drive: usaremos los mismos atajos que un explorador de archivos.",
+        },
+        selection: {
+          title: "Seleccionar como en el explorador",
+          description:
+            "Haz clic en un elemento para seleccionarlo. Ctrl+clic (⌘ en Mac) añade más; Shift+clic selecciona un rango. También puedes arrastrar en el espacio vacío de Drive para dibujar una selección (marquee) sobre varios elementos. Prueba a seleccionar algo.",
+        },
+        openFolder: {
+          title: "Abrir una carpeta",
+          description:
+            "Haz doble clic en una carpeta (o selecciónala y pulsa Enter) para entrar.",
+        },
+        selectAll: {
+          title: "Seleccionar todo",
+          description:
+            "Dentro de la carpeta, pulsa Ctrl+A (⌘+A en Mac) para seleccionar todos los elementos.",
+        },
+        contextMenu: {
+          title: "Menú contextual",
+          description:
+            "Con la selección activa, haz clic derecho en uno de los elementos seleccionados.",
+        },
+        addSongs: {
+          title: "Añadir a la colección",
+          description:
+            "En el menú, elige “Añadir a la Colección” y confirma la colección que creaste.",
         },
       },
       services: {

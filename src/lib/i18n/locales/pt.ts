@@ -892,17 +892,27 @@ export const pt = {
         editor: {
           title: "Editor ChordPro",
           description:
-            "Escreva cifra e letra com diretivas como {title}, {artist} e acordes [G].",
+            "Este é o editor. Em linhas vazias pode usar atalhos que o editor completa por si — como num snippet inteligente.",
+        },
+        snippets: {
+          title: "TAB completa diretivas",
+          description:
+            "Numa linha vazia escreva a (ou artist) e prima TAB — o editor preenche {artist: …}. O texto fica selecionado: escreva por cima e prima TAB outra vez para o campo seguinte. Experimente também t (title) ou ! para um molde completo.",
+        },
+        chords: {
+          title: "Acordes com [ ]",
+          description:
+            "Escreva acordes entre parênteses retos, por exemplo [G] ou [Am], mesmo por cima da letra. A pré-visualização mostra-os formatados.",
         },
         preview: {
           title: "Pré-visualização",
           description:
-            "A pré-visualização atualiza enquanto edita — ideal para ensaiar e imprimir.",
+            "Veja o resultado à direita enquanto edita — ideal para ensaiar e imprimir.",
         },
         save: {
           title: "Guardar alterações",
           description:
-            "Edite um pouco o conteúdo e guarde (ou aguarde o auto-save) para continuar.",
+            "Pratique um snippet ou um acorde, depois guarde (Ctrl+S ou o botão) para continuar.",
         },
       },
       collections: {
@@ -914,6 +924,36 @@ export const pt = {
           title: "Criar uma coleção",
           description:
             "Crie uma coleção (ex.: “Natal”) para agrupar cânticos reutilizáveis.",
+        },
+        backToDrive: {
+          title: "Voltar à Drive",
+          description:
+            "Agora volte à Drive — vamos usar os mesmos atalhos de um explorador de ficheiros.",
+        },
+        selection: {
+          title: "Selecionar como no explorador",
+          description:
+            "Clique num item para o selecionar. Ctrl+clique (⌘ no Mac) adiciona mais; Shift+clique seleciona um intervalo. Também pode arrastar na área vazia da Drive para desenhar uma seleção (marquee) sobre vários itens. Experimente selecionar algo.",
+        },
+        openFolder: {
+          title: "Abrir uma pasta",
+          description:
+            "Faça duplo clique numa pasta (ou selecione e Enter) para entrar nela.",
+        },
+        selectAll: {
+          title: "Selecionar tudo",
+          description:
+            "Dentro da pasta, prima Ctrl+A (⌘+A no Mac) para selecionar todos os itens.",
+        },
+        contextMenu: {
+          title: "Menu de contexto",
+          description:
+            "Com a seleção ativa, clique com o botão direito num dos itens selecionados.",
+        },
+        addSongs: {
+          title: "Adicionar à coleção",
+          description:
+            "No menu, escolha “Adicionar à coleção” e confirme a coleção que criou.",
         },
       },
       services: {

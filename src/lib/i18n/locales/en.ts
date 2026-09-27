@@ -884,17 +884,27 @@ export const en: typeof pt = {
         editor: {
           title: "ChordPro editor",
           description:
-            "Write chords and lyrics with directives like {title}, {artist}, and [G] chords.",
+            "This is the editor. On empty lines you can use shortcuts the editor expands for you — like smart snippets.",
+        },
+        snippets: {
+          title: "TAB completes directives",
+          description:
+            "On an empty line type a (or artist) and press TAB — the editor fills {artist: …}. The placeholder is selected: type over it, then TAB again for the next field. Also try t (title) or ! for a full template.",
+        },
+        chords: {
+          title: "Chords with [ ]",
+          description:
+            "Write chords in square brackets, e.g. [G] or [Am], right above the lyrics. The preview formats them for you.",
         },
         preview: {
           title: "Preview",
           description:
-            "The preview updates as you edit — great for rehearsal and printing.",
+            "Watch the result on the right as you edit — great for rehearsal and printing.",
         },
         save: {
           title: "Save your changes",
           description:
-            "Edit the content a bit and save (or wait for autosave) to continue.",
+            "Try a snippet or a chord, then save (Ctrl+S or the button) to continue.",
         },
       },
       collections: {
@@ -906,6 +916,36 @@ export const en: typeof pt = {
           title: "Create a collection",
           description:
             "Create a collection (e.g. “Christmas”) to group reusable songs.",
+        },
+        backToDrive: {
+          title: "Back to Drive",
+          description:
+            "Now go back to Drive — we’ll use the same shortcuts as a file explorer.",
+        },
+        selection: {
+          title: "Select like a file explorer",
+          description:
+            "Click an item to select it. Ctrl+click (⌘ on Mac) adds more; Shift+click selects a range. You can also drag on empty space in Drive to draw a marquee over multiple items. Try selecting something.",
+        },
+        openFolder: {
+          title: "Open a folder",
+          description:
+            "Double-click a folder (or select it and press Enter) to open it.",
+        },
+        selectAll: {
+          title: "Select all",
+          description:
+            "Inside the folder, press Ctrl+A (⌘+A on Mac) to select every item.",
+        },
+        contextMenu: {
+          title: "Context menu",
+          description:
+            "With the selection active, right-click one of the selected items.",
+        },
+        addSongs: {
+          title: "Add to collection",
+          description:
+            "In the menu, choose “Add to Collection” and pick the collection you created.",
         },
       },
       services: {

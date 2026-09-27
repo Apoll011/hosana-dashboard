@@ -172,6 +172,7 @@ export const MainLayout: React.FC = () => {
   const handleSelectFolder = useCallback(
     (folderId: string | null) => {
       setCurrentFolderId(folderId);
+      if (folderId) emitOnboardingEvent("folder-opened");
       if (view !== "explorer") {
         navigate(`${slugPrefix}/folders`);
       }
@@ -554,6 +555,7 @@ export const MainLayout: React.FC = () => {
   const selectAllInCurrentView = useCallback(() => {
     setSelectedFolderIds(new Set(filteredSubfolders.map((f) => f.id)));
     setSelectedSongIds(new Set(filteredFiles.map((s) => s.id)));
+    emitOnboardingEvent("select-all");
   }, [filteredSubfolders, filteredFiles]);
 
   useEffect(() => {
@@ -563,6 +565,7 @@ export const MainLayout: React.FC = () => {
   const handleItemClick = useCallback(
     (e: React.MouseEvent, id: string, type: "folder" | "song") => {
       e.stopPropagation();
+      emitOnboardingEvent("items-selected");
 
       if (e.ctrlKey || e.metaKey) {
         if (type === "folder") toggleFolderSelect(id);
@@ -622,6 +625,7 @@ export const MainLayout: React.FC = () => {
   } | null>(null);
   const isMouseDownRef = useRef(false);
   const startPosRef = useRef<{ x: number; y: number } | null>(null);
+  const marqueeActiveRef = useRef(false);
   const initialSelectionRef = useRef<{
     folders: Set<string>;
     songs: Set<string>;
@@ -643,6 +647,7 @@ export const MainLayout: React.FC = () => {
 
       isMouseDownRef.current = true;
       startPosRef.current = { x: e.clientX, y: e.clientY };
+      marqueeActiveRef.current = false;
 
       if (!isAdditive) {
         clearSelection();
@@ -677,6 +682,7 @@ export const MainLayout: React.FC = () => {
       const height = Math.abs(currentY - startY);
 
       if (width > 4 || height > 4) {
+        marqueeActiveRef.current = true;
         setSelectionBox({ x: left, y: top, width, height });
 
         const itemEls =
@@ -710,9 +716,12 @@ export const MainLayout: React.FC = () => {
 
     const handleMouseUp = () => {
       if (isMouseDownRef.current) {
+        const usedMarquee = marqueeActiveRef.current;
         isMouseDownRef.current = false;
         startPosRef.current = null;
+        marqueeActiveRef.current = false;
         setSelectionBox(null);
+        if (usedMarquee) emitOnboardingEvent("items-selected");
       }
     };
 
@@ -821,6 +830,7 @@ export const MainLayout: React.FC = () => {
       await addSongsToCollection(collectionId, songIdsToAdd);
       setAddToCollectionTarget(null);
       closeModal();
+      emitOnboardingEvent("songs-added-to-collection");
     },
     [addToCollectionTarget, selectedSongIds, addSongsToCollection, closeModal],
   );
@@ -882,6 +892,7 @@ export const MainLayout: React.FC = () => {
       const y = Math.min(e.clientY, window.innerHeight - 280);
 
       setContextMenu({ x, y, type, item });
+      emitOnboardingEvent("context-menu-opened");
     },
     [selectedFolderIds, selectedSongIds, toggleFolderSelect, toggleSongSelect],
   );
