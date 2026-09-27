@@ -32,9 +32,11 @@ import {
   ExplorerModals,
   ExplorerToolbar,
 } from "../components/layout";
+import { InteractiveOnboardingController } from "../components/tour/InteractiveOnboardingController";
 import { ProductTourController } from "../components/tour/ProductTourController";
 import { ToastContainer } from "../components/Toast";
 import { useAuth } from "../contexts/AuthContext";
+import { emitOnboardingEvent } from "../lib/tour";
 import { usePrint } from "../contexts/PrintContext";
 import { useSync } from "../contexts/SyncContext";
 import { getDatabase, purgeExpiredTrash } from "../db";
@@ -792,6 +794,7 @@ export const MainLayout: React.FC = () => {
     }) => {
       await createCollection(data);
       closeModal();
+      emitOnboardingEvent("collection-created");
     },
     [createCollection, closeModal],
   );
@@ -801,6 +804,7 @@ export const MainLayout: React.FC = () => {
       try {
         await addEvent(value);
         closeModal();
+        emitOnboardingEvent("event-created");
       } catch {
         // Handled by useAgenda
       }
@@ -980,6 +984,7 @@ export const MainLayout: React.FC = () => {
     try {
       await createFolder({ name, parentId: currentFolderId });
       closeModal();
+      emitOnboardingEvent("folder-created");
     } catch {
       // Toast notification is already handled by useFolders
     }
@@ -1023,6 +1028,7 @@ export const MainLayout: React.FC = () => {
         updatedAt: moveFolderTarget.updatedAt!,
       });
       setMoveFolderTarget(null);
+      emitOnboardingEvent("folder-moved");
     } catch {
       // Toast notification is already handled by useFolders
     }
@@ -1062,6 +1068,7 @@ export const MainLayout: React.FC = () => {
         tags: data.tags,
       });
       closeModal();
+      emitOnboardingEvent("song-created");
       navigate(`${slugPrefix}/songs/${song.id}`);
     } catch {
       // Error toast is already displayed by useSongMutations
@@ -1102,6 +1109,7 @@ export const MainLayout: React.FC = () => {
         elements: [],
       });
       closeModal();
+      emitOnboardingEvent("service-created");
       navigate(`${slugPrefix}/services/${newService.id}`);
     } catch {
       // Error toast is already displayed by useServices
@@ -1617,6 +1625,7 @@ export const MainLayout: React.FC = () => {
 
       <ToastContainer />
       <ProductTourController />
+      <InteractiveOnboardingController />
 
       <BatchActionFloatingBar
         selectedCount={totalSelectedCount}

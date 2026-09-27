@@ -1133,7 +1133,10 @@ export const ServiceDetailPage: React.FC = () => {
     );
 
   return (
-    <div className="flex-1 flex flex-col h-full overflow-hidden bg-m3-sidebar/10">
+    <div
+      data-tour="service-builder"
+      className="flex-1 flex flex-col h-full overflow-hidden bg-m3-sidebar/10"
+    >
       {/* ── Top Header ────────────────────────────────────────────── */}
       <div className="h-14 bg-m3-sidebar border-b border-m3-border flex items-center justify-between px-4 shrink-0 gap-4">
         <div className="flex items-center gap-3">
