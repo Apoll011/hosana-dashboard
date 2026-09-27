@@ -13,7 +13,7 @@ import React, {
   useMemo,
   useState,
 } from "react";
-import { DEMO_ORGANIZATION, DEMO_USER } from "../demo/demoAuth";
+import { getDemoOrganization, getDemoUser } from "../demo/demoAuth";
 import { clearDemoData, isDemoMode } from "../demo/index";
 import { syncSettingsFromMetadata } from "../hooks/usePersonalSettings";
 import { authClient } from "../lib/authClient";
@@ -172,10 +172,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       window.location.assign("/login");
     };
     const demoNoOp = async () => {};
+    const demoOrg = getDemoOrganization();
     const demoDemoValue: AuthContextType = {
-      user: DEMO_USER,
-      organization: DEMO_ORGANIZATION,
-      organizations: [DEMO_ORGANIZATION],
+      user: getDemoUser(),
+      organization: demoOrg,
+      organizations: [demoOrg],
       hasAcceptedTrial: true,
       isAuthenticated: true,
       isLoading: isLoading,

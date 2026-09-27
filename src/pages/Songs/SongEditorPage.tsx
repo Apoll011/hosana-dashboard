@@ -10,6 +10,7 @@ import { useAppNavigate } from "@/src/hooks/useAppNavigate";
 import { useEditorSettings } from "@/src/hooks/useEditorSettings";
 import { usePreviewSettings } from "@/src/hooks/usePreviewSettings";
 import { useI18n } from "@/src/lib/i18n";
+import { emitOnboardingEvent } from "@/src/lib/tour";
 import { useCan } from "@/src/lib/permissions/client";
 import { Can } from "@/src/lib/permissions/components";
 import { Song } from "@/src/types";
@@ -143,6 +144,7 @@ export const SongEditorPage: React.FC = () => {
         await updateSong({ id: song.id, data: updates });
         posthog.capture("song_saved", { layout_mode: layoutMode });
         setHasUnsavedChanges(false);
+        emitOnboardingEvent("song-saved");
       } catch {
         // Error toast is already displayed by useSongMutations
       } finally {
@@ -273,6 +275,7 @@ export const SongEditorPage: React.FC = () => {
             </Button>
 
             <Button
+              data-tour="song-save"
               variant="primary"
               size="sm"
               icon={<Save className="w-4 h-4" />}
@@ -289,6 +292,7 @@ export const SongEditorPage: React.FC = () => {
       <div className="flex-1 flex flex-col md:flex-row overflow-hidden relative">
         {/* Editor pane — always mounted so layout-mode switches animate smoothly */}
         <div
+          data-tour="song-editor"
           className={[
             "flex flex-col overflow-hidden relative bg-m3-card min-w-0",
             "transition-all duration-300 ease-in-out",
@@ -353,6 +357,7 @@ export const SongEditorPage: React.FC = () => {
 
         {/* Preview pane — always mounted so layout-mode switches animate smoothly */}
         <div
+          data-tour="song-preview"
           className={[
             "flex flex-col overflow-hidden relative bg-m3-card min-w-0",
             "transition-all duration-300 ease-in-out",

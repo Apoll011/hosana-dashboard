@@ -6,7 +6,10 @@
 import { useI18n } from "@/src/lib/i18n";
 import { songImportRegistry } from "@/src/lib/import";
 import { useActiveRole } from "@/src/lib/permissions/client";
-import { startProductTour } from "@/src/lib/tour";
+import {
+  startInteractiveOnboarding,
+  startProductTour,
+} from "@/src/lib/tour";
 import {
   ChevronDown,
   ChevronUp,
@@ -163,14 +166,23 @@ export const AboutTab: React.FC<{ active: boolean }> = ({ active }) => {
                 </p>
               </div>
             </div>
-            <button
-              type="button"
-              onClick={() => startProductTour()}
-              className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-sky-700 dark:text-sky-300 bg-white dark:bg-slate-800 border border-sky-200 dark:border-slate-700 rounded-lg hover:bg-sky-50 dark:hover:bg-slate-700/55 transition-colors shrink-0 cursor-pointer"
-            >
-              <Compass className="w-3.5 h-3.5" />
-              {t("settings.about.productTourRelaunch")}
-            </button>
+            <div className="flex items-center gap-2 shrink-0">
+              <button
+                type="button"
+                onClick={() => startProductTour()}
+                className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-sky-700 dark:text-sky-300 bg-white dark:bg-slate-800 border border-sky-200 dark:border-slate-700 rounded-lg hover:bg-sky-50 dark:hover:bg-slate-700/55 transition-colors cursor-pointer"
+              >
+                <Compass className="w-3.5 h-3.5" />
+                {t("settings.about.productTourRelaunch")}
+              </button>
+              <button
+                type="button"
+                onClick={() => startInteractiveOnboarding()}
+                className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-violet-700 dark:text-violet-300 bg-white dark:bg-slate-800 border border-violet-200 dark:border-slate-700 rounded-lg hover:bg-violet-50 dark:hover:bg-slate-700/55 transition-colors cursor-pointer"
+              >
+                {t("settings.about.interactiveTourRelaunch")}
+              </button>
+            </div>
           </div>
         )}
       </div>

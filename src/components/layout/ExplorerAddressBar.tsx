@@ -35,6 +35,7 @@ import { ActiveModal } from "./ExplorerModals";
 import React, { useEffect, useRef, useState } from "react";
 import { ViewName } from "../../layouts/view";
 import { authClient } from "../../lib/authClient";
+import { emitOnboardingEvent } from "../../lib/tour";
 import { Can, CanAny } from "../../lib/permissions/components";
 import { InboxButton, InboxFetchClient } from "../Inbox";
 import { SearchSyntaxModal } from "../modals/SearchSyntaxModal";
@@ -451,7 +452,11 @@ export const ExplorerAddressBar: React.FC<ExplorerAddressBarProps> = ({
             ref={plusMenuRef}
           >
             <button
-              onClick={() => setIsPlusMenuOpen(!isPlusMenuOpen)}
+              onClick={() => {
+                const next = !isPlusMenuOpen;
+                setIsPlusMenuOpen(next);
+                if (next) emitOnboardingEvent("create-menu-opened");
+              }}
               className="w-10 h-10 rounded-2xl bg-m3-primary text-white flex items-center justify-center border border-m3-primary font-black text-lg shadow-xl shadow-m3-primary/20 hover:bg-m3-primary-dark hover:scale-105 active:scale-95 transition-all cursor-pointer"
               title={t("addressBar.create")}
             >

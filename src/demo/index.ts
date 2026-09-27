@@ -31,9 +31,19 @@ import { disableDemoMode } from "./flags";
  * singletons, and clears demo session flags.
  *
  * Never deletes the production `hosana_idb` / `hosana_checkpoints` databases.
+ *
  */
 export async function clearDemoData(): Promise<void> {
   disableDemoMode();
+
+  try {
+    const { disableInteractiveOnboardingSession } = await import(
+      "../lib/tour/interactive/session"
+    );
+    disableInteractiveOnboardingSession();
+  } catch {
+    // ignore
+  }
 
   try {
     const { resetDatabase } = await import("../db/database");

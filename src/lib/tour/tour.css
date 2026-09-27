@@ -78,3 +78,13 @@
 .dark .hosana-driver-popover .driver-popover-description {
   color: #94a3b8;
 }
+
+/* Interactive onboarding: let clicks reach modals/menus under the overlay */
+.driver-overlay:has(+ .hosana-interactive-tour),
+body:has(.hosana-interactive-tour) .driver-overlay {
+  pointer-events: none !important;
+}
+
+body:has(.hosana-interactive-tour) .hosana-driver-popover {
+  pointer-events: auto;
+}

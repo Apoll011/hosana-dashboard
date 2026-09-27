@@ -767,6 +767,7 @@ export const pt = {
       productTourDesc:
         "Reveja os essenciais da interface adaptados ao seu papel na organização.",
       productTourRelaunch: "Iniciar tour",
+      interactiveTourRelaunch: "Tour interativo",
     },
   },
 
@@ -836,6 +837,123 @@ export const pt = {
         title: "Pronto para começar",
         description:
           "Pode relançar este tour em Definições → Sobre. Para praticar com dados de demonstração, experimente o tour interativo.",
+      },
+    },
+    interactive: {
+      controls: {
+        next: "Seguinte",
+        skipStep: "Saltar passo",
+        skipTour: "Sair do tour",
+        waiting: "Faça a ação indicada (ou salte este passo).",
+        done: "Concluir",
+        progress: "{{current}} de {{total}}",
+      },
+      intro: {
+        welcome: {
+          title: "Tour interativo",
+          description:
+            "Este é um ambiente de demonstração isolado. Vamos praticar as ações reais — o tour espera por si em cada passo.",
+        },
+        sandbox: {
+          title: "Dados seguros",
+          description:
+            "Nada aqui é sincronizado com a sua organização real. Explore à vontade.",
+        },
+      },
+      folders: {
+        createBtn: {
+          title: "Abrir o menu Criar",
+          description: "Clique no botão + para ver o que pode criar.",
+        },
+        create: {
+          title: "Criar uma pasta",
+          description:
+            "Crie uma pasta nova (ex.: “Ensaios”). O tour avança quando a pasta existir.",
+        },
+        drive: {
+          title: "A Drive",
+          description:
+            "As pastas organizam a biblioteca. Pode arrastar cânticos entre pastas mais tarde.",
+        },
+      },
+      songs: {
+        create: {
+          title: "Criar um cântico",
+          description:
+            "Use + → Novo cântico. Será aberto no editor ChordPro.",
+        },
+        open: {
+          title: "Abrir um cântico",
+          description:
+            "Abra qualquer cântico na biblioteca ou na Drive para continuar.",
+        },
+      },
+      chordpro: {
+        editor: {
+          title: "Editor ChordPro",
+          description:
+            "Escreva cifra e letra com diretivas como {title}, {artist} e acordes [G].",
+        },
+        preview: {
+          title: "Pré-visualização",
+          description:
+            "A pré-visualização atualiza enquanto edita — ideal para ensaiar e imprimir.",
+        },
+        save: {
+          title: "Guardar alterações",
+          description:
+            "Edite um pouco o conteúdo e guarde (ou aguarde o auto-save) para continuar.",
+        },
+      },
+      collections: {
+        nav: {
+          title: "Coleções",
+          description: "Abra Coleções na barra lateral.",
+        },
+        create: {
+          title: "Criar uma coleção",
+          description:
+            "Crie uma coleção (ex.: “Natal”) para agrupar cânticos reutilizáveis.",
+        },
+      },
+      services: {
+        nav: {
+          title: "Cultos / Serviços",
+          description: "Abra Serviços na barra lateral.",
+        },
+        create: {
+          title: "Criar um serviço",
+          description:
+            "Crie um serviço novo. Depois vamos montar a ordem de louvor.",
+        },
+        builder: {
+          title: "Construtor do culto",
+          description:
+            "Abra um serviço para ver o construtor — canções, anúncios, escrituras e mais.",
+        },
+        elements: {
+          title: "Elementos do culto",
+          description:
+            "Adicione cânticos e reordene elementos. Esta é a ferramenta principal para a equipa de louvor.",
+        },
+      },
+      agenda: {
+        nav: {
+          title: "Agenda",
+          description: "Abra a Agenda na barra lateral.",
+        },
+        create: {
+          title: "Criar um evento",
+          description:
+            "Crie um evento e, se quiser, ligue-o a um serviço.",
+        },
+      },
+      finish: {
+        done: {
+          title: "Tour concluído",
+          description:
+            "Excelente! Pode fechar este separador e voltar à sua organização — ou continuar a explorar a demo.",
+        },
       },
     },
   },

@@ -759,6 +759,7 @@ export const en: typeof pt = {
       productTourDesc:
         "Review the essentials of the interface tailored to your role in the organization.",
       productTourRelaunch: "Start tour",
+      interactiveTourRelaunch: "Interactive tour",
     },
   },
 
@@ -828,6 +829,123 @@ export const en: typeof pt = {
         title: "You’re ready to go",
         description:
           "Relaunch this tour anytime from Settings → About. To practice with demo data, try the interactive tour.",
+      },
+    },
+    interactive: {
+      controls: {
+        next: "Next",
+        skipStep: "Skip step",
+        skipTour: "Exit tour",
+        waiting: "Do the action described (or skip this step).",
+        done: "Done",
+        progress: "{{current}} of {{total}}",
+      },
+      intro: {
+        welcome: {
+          title: "Interactive tour",
+          description:
+            "This is an isolated demo environment. You’ll practice real actions — the tour waits for you on each step.",
+        },
+        sandbox: {
+          title: "Safe sandbox data",
+          description:
+            "Nothing here syncs to your real organization. Explore freely.",
+        },
+      },
+      folders: {
+        createBtn: {
+          title: "Open the Create menu",
+          description: "Click the + button to see what you can create.",
+        },
+        create: {
+          title: "Create a folder",
+          description:
+            "Create a new folder (e.g. “Rehearsals”). The tour continues once it exists.",
+        },
+        drive: {
+          title: "Drive",
+          description:
+            "Folders organize your library. You can drag songs between folders later.",
+        },
+      },
+      songs: {
+        create: {
+          title: "Create a song",
+          description:
+            "Use + → New song. It will open in the ChordPro editor.",
+        },
+        open: {
+          title: "Open a song",
+          description:
+            "Open any song from the library or Drive to continue.",
+        },
+      },
+      chordpro: {
+        editor: {
+          title: "ChordPro editor",
+          description:
+            "Write chords and lyrics with directives like {title}, {artist}, and [G] chords.",
+        },
+        preview: {
+          title: "Preview",
+          description:
+            "The preview updates as you edit — great for rehearsal and printing.",
+        },
+        save: {
+          title: "Save your changes",
+          description:
+            "Edit the content a bit and save (or wait for autosave) to continue.",
+        },
+      },
+      collections: {
+        nav: {
+          title: "Collections",
+          description: "Open Collections in the sidebar.",
+        },
+        create: {
+          title: "Create a collection",
+          description:
+            "Create a collection (e.g. “Christmas”) to group reusable songs.",
+        },
+      },
+      services: {
+        nav: {
+          title: "Services",
+          description: "Open Services in the sidebar.",
+        },
+        create: {
+          title: "Create a service",
+          description:
+            "Create a new service. Next we’ll build the order of worship.",
+        },
+        builder: {
+          title: "Service builder",
+          description:
+            "Open a service to see the builder — songs, announcements, scripture, and more.",
+        },
+        elements: {
+          title: "Service elements",
+          description:
+            "Add songs and reorder elements. This is the main tool for the worship team.",
+        },
+      },
+      agenda: {
+        nav: {
+          title: "Agenda",
+          description: "Open Agenda in the sidebar.",
+        },
+        create: {
+          title: "Create an event",
+          description:
+            "Create an event and optionally link it to a service.",
+        },
+      },
+      finish: {
+        done: {
+          title: "Tour complete",
+          description:
+            "Great work! You can close this tab and return to your organization — or keep exploring the demo.",
+        },
       },
     },
   },

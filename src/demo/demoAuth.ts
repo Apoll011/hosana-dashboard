@@ -6,6 +6,7 @@
  */
 
 import type { Organization, SessionUser } from "../contexts/AuthContext";
+import { getInteractiveOnboardingRole } from "../lib/tour/interactive/session";
 
 export const DEMO_USER: SessionUser = {
   id: "demo-user-id",
@@ -17,6 +18,25 @@ export const DEMO_USER: SessionUser = {
   role: "owner",
   image: undefined,
 };
+
+/** Demo session user — role follows interactive onboarding when set. */
+export function getDemoUser(): SessionUser {
+  return {
+    ...DEMO_USER,
+    role: getInteractiveOnboardingRole(),
+  };
+}
+
+/** Demo organization with the active member role aligned to onboarding. */
+export function getDemoOrganization(): Organization {
+  const role = getInteractiveOnboardingRole();
+  return {
+    ...DEMO_ORGANIZATION,
+    members: DEMO_ORGANIZATION.members.map((member, index) =>
+      index === 0 ? { ...member, role } : member,
+    ),
+  };
+}
 
 export const DEMO_ORGANIZATION: Organization = {
   id: "demo-org-id",

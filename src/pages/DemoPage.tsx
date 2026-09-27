@@ -4,6 +4,7 @@
  */
 
 import { Spinner } from "@/src/components/common";
+import { captureOnboardingQueryParams } from "@/src/lib/tour";
 import React, { useEffect, useRef, useState } from "react";
 import { getDatabase } from "../db";
 import { clearDemoData, enableDemoMode, DEMO_ORG_SLUG } from "../demo/index";
@@ -30,6 +31,9 @@ export const DemoPage: React.FC = () => {
       try {
         // Wipe any previous demo session (stale IDB + singletons) before starting fresh.
         await clearDemoData();
+
+        // Re-apply onboarding intent from the URL after the wipe.
+        captureOnboardingQueryParams(window.location.search);
 
         // Activate demo mode before doing anything else so that the
         // re-booted app can detect it immediately.

@@ -23,3 +23,4 @@ export type {
   TourBlockId,
   TourFeatureFlags,
 } from "./types";
+export * from "./interactive";
