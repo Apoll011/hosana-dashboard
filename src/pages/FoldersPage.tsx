@@ -163,6 +163,7 @@ export const FoldersPage: React.FC = () => {
   return (
     <div
       ref={containerRef}
+      data-tour="explorer-canvas"
       onMouseDown={handleWorkspaceMouseDown}
       onContextMenu={handleCanvasContextMenu}
       onDragOver={handleDragOver}
