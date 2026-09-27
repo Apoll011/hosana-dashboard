@@ -4,15 +4,17 @@
  */
 
 import { LibraryHealthTab } from "@/src/components/analytics/LibraryHealthTab";
+import { SetlistInsightsTab } from "@/src/components/analytics/SetlistInsightsTab";
+import { UsageOverviewTab } from "@/src/components/analytics/UsageOverviewTab";
 import { useI18n } from "@/src/lib/i18n";
 import { useCan } from "@/src/lib/permissions/client";
-import { HeartPulse } from "lucide-react";
+import { Gauge, HeartPulse, ListMusic } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { Navigate, useParams, useSearchParams } from "react-router-dom";
 
-type TabType = "libraryHealth";
+type TabType = "usage" | "setlist" | "libraryHealth";
 
-const VALID_TABS: TabType[] = ["libraryHealth"];
+const VALID_TABS: TabType[] = ["usage", "setlist", "libraryHealth"];
 
 export const AnalyticsPage: React.FC = () => {
   const { t } = useI18n();
@@ -25,7 +27,7 @@ export const AnalyticsPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabType>(
     VALID_TABS.includes(initialTab as TabType)
       ? (initialTab as TabType)
-      : "libraryHealth",
+      : "usage",
   );
 
   useEffect(() => {
@@ -44,6 +46,18 @@ export const AnalyticsPage: React.FC = () => {
   }
 
   const tabs = [
+    {
+      id: "usage" as const,
+      label: t("analytics.tabs.usage"),
+      icon: Gauge,
+      show: true,
+    },
+    {
+      id: "setlist" as const,
+      label: t("analytics.tabs.setlist"),
+      icon: ListMusic,
+      show: true,
+    },
     {
       id: "libraryHealth" as const,
       label: t("analytics.tabs.libraryHealth"),
@@ -85,6 +99,8 @@ export const AnalyticsPage: React.FC = () => {
         </div>
 
         <div className="pt-2 pb-12">
+          <UsageOverviewTab active={activeTab === "usage"} />
+          <SetlistInsightsTab active={activeTab === "setlist"} />
           <LibraryHealthTab active={activeTab === "libraryHealth"} />
         </div>
       </div>
