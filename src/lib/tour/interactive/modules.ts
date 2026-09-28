@@ -31,6 +31,11 @@ export interface InteractiveStepDef {
   retargetSide?: "top" | "right" | "bottom" | "left";
   /** Optional route hint shown in the popover (not auto-navigated). */
   hintRoute?: string;
+  /**
+   * If the target element is not in the DOM when we reach this step, skip it
+   * (e.g. create-menu after the user skipped “open the + menu”).
+   */
+  skipIfElementMissing?: boolean;
 }
 
 export interface InteractiveModuleDef {
@@ -86,6 +91,7 @@ export const INTERACTIVE_MODULES: InteractiveModuleDef[] = [
         align: "start",
         requireAll: ["folder.create"],
         waitFor: "folder-created",
+        skipIfElementMissing: true,
         retargetOn: "create-folder-modal-opened",
         retargetElement: "[data-tour='create-folder-modal']",
         retargetSide: "bottom",
@@ -123,6 +129,7 @@ export const INTERACTIVE_MODULES: InteractiveModuleDef[] = [
         align: "start",
         requireAll: ["song.create"],
         waitFor: "song-created",
+        skipIfElementMissing: true,
         retargetOn: "create-song-modal-opened",
         retargetElement: "[data-tour='create-song-modal']",
         retargetSide: "bottom",
@@ -224,6 +231,7 @@ export const INTERACTIVE_MODULES: InteractiveModuleDef[] = [
         align: "start",
         requireAll: ["collection.create"],
         waitFor: "collection-created",
+        skipIfElementMissing: true,
         retargetOn: "create-collection-modal-opened",
         retargetElement: "[data-tour='create-collection-modal']",
         retargetSide: "bottom",
@@ -277,10 +285,11 @@ export const INTERACTIVE_MODULES: InteractiveModuleDef[] = [
         id: "collections.addSongs",
         titleKey: "tour.interactive.collections.addSongs.title",
         descriptionKey: "tour.interactive.collections.addSongs.description",
-        element: "[data-tour='explorer-canvas']",
-        side: "top",
-        align: "center",
+        element: "[data-tour='explorer-context-menu']",
+        side: "left",
+        align: "start",
         waitFor: "songs-added-to-collection",
+        skipIfElementMissing: true,
       },
     ],
   },
@@ -316,6 +325,7 @@ export const INTERACTIVE_MODULES: InteractiveModuleDef[] = [
         align: "start",
         requireAll: ["service.create"],
         waitFor: "service-created",
+        skipIfElementMissing: true,
         retargetOn: "create-service-modal-opened",
         retargetElement: "[data-tour='create-service-modal']",
         retargetSide: "bottom",
@@ -329,6 +339,7 @@ export const INTERACTIVE_MODULES: InteractiveModuleDef[] = [
         align: "start",
         requireAny: ["service.update", "service.create"],
         waitFor: "service-opened",
+        skipIfElementMissing: true,
       },
       {
         id: "services.elements",
@@ -338,6 +349,7 @@ export const INTERACTIVE_MODULES: InteractiveModuleDef[] = [
         side: "top",
         align: "center",
         requireAny: ["service.update", "service.create"],
+        skipIfElementMissing: true,
       },
     ],
   },
@@ -374,6 +386,7 @@ export const INTERACTIVE_MODULES: InteractiveModuleDef[] = [
         align: "start",
         requireAll: ["agenda.create"],
         waitFor: "event-created",
+        skipIfElementMissing: true,
         retargetOn: "create-event-modal-opened",
         retargetElement: "[data-tour='create-event-modal']",
         retargetSide: "bottom",

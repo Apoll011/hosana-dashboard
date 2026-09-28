@@ -891,7 +891,10 @@ export const MainLayout: React.FC = () => {
       const y = Math.min(e.clientY, window.innerHeight - 280);
 
       setContextMenu({ x, y, type, item });
-      emitOnboardingEvent("context-menu-opened");
+      // Emit after React commits the menu DOM so the tour can attach to it.
+      requestAnimationFrame(() => {
+        emitOnboardingEvent("context-menu-opened");
+      });
     },
     [selectedFolderIds, selectedSongIds, toggleFolderSelect, toggleSongSelect],
   );
@@ -913,7 +916,20 @@ export const MainLayout: React.FC = () => {
 
   // Keyboard Shortcuts
   useEffect(() => {
-    const handleCloseMenu = () => setContextMenu(null);
+    const handleCloseMenu = (e: MouseEvent) => {
+      const target = e.target as HTMLElement | null;
+      // Keep the menu open when interacting with it or the tour popover —
+      // otherwise tour re-paints / skip clicks dismiss the menu and clear the
+      // path to "Add to collection".
+      if (
+        target?.closest?.(
+          "[data-tour='explorer-context-menu'], .hosana-interactive-tour, .driver-popover",
+        )
+      ) {
+        return;
+      }
+      setContextMenu(null);
+    };
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
