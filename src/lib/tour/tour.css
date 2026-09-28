@@ -155,6 +155,13 @@ body:has(.hosana-interactive-tour) .hosana-driver-popover * {
   z-index: 70;
 }
 
+/* Keep the + button above the dim overlay and clickable during the tour */
+body:has(.hosana-interactive-tour) [data-tour="toolbar-create"] {
+  position: relative;
+  z-index: 55;
+  pointer-events: auto !important;
+}
+
 /* Create / form modals must stay above the dim overlay and remain clickable */
 body:has(.hosana-interactive-tour) [data-tour="create-folder-modal"],
 body:has(.hosana-interactive-tour) [data-tour="create-song-modal"],
