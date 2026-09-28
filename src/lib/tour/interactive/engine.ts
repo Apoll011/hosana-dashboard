@@ -304,9 +304,8 @@ export async function runInteractiveOnboarding(
     },
   });
 
-  // After skipping a gate step (open +, open song, context menu), immediately
-  // skip follow-up steps that need that UI (create-menu / editor / etc.).
-  let skipMissingFollowups = false;
+  // Sections marked when the user skips a gate step (nav / open song / + menu).
+  const skippedSections = new Set<string>();
 
   for (let i = 0; i < allSteps.length; i++) {
     if (signal.aborted || dismissed || completed) break;
@@ -317,13 +316,10 @@ export async function runInteractiveOnboarding(
     setActiveOnboardingWaitFor(step.waitFor ?? null);
     unlockInteractiveChrome();
 
-    // Cascade: user skipped a prerequisite → skip steps that need its UI.
-    if (skipMissingFollowups && step.skipIfElementMissing) {
+    // Cascade-skip: gate steps mark sections; matching follow-ups are skipped.
+    if (step.section && skippedSections.has(step.section)) {
       setActiveOnboardingWaitFor(null);
       continue;
-    }
-    if (skipMissingFollowups && !step.skipIfElementMissing) {
-      skipMissingFollowups = false;
     }
 
     // Page-specific targets (editor, create-menu, …): skip fast if absent.
@@ -381,15 +377,11 @@ export async function runInteractiveOnboarding(
     const skipStep = () => {
       if (left || myToken !== paintToken) return;
       actionDone = true;
-      // Gate steps whose follow-ups need a specific surface to exist.
-      if (
-        step.waitFor === "create-menu-opened" ||
-        step.waitFor === "context-menu-opened" ||
-        step.waitFor === "song-opened" ||
-        step.waitFor === "service-opened"
-      ) {
-        skipMissingFollowups = true;
-        // Hide now — follow-ups will be skipped with no paint in between.
+      if (step.skipsSections?.length) {
+        for (const section of step.skipsSections) {
+          skippedSections.add(section);
+        }
+        // Hide now — follow-ups in those sections will be skipped with no paint.
         hideTourPopovers();
       }
       leaveStep();

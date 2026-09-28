@@ -36,6 +36,17 @@ export interface InteractiveStepDef {
    * (e.g. create-menu after the user skipped “open the + menu”).
    */
   skipIfElementMissing?: boolean;
+  /**
+   * Logical section id. Steps sharing a section are cascade-skipped together
+   * when a gate step lists that id in `skipsSections`.
+   */
+  section?: string;
+  /**
+   * When the user skips THIS step, mark these sections so later steps that
+   * belong to them are skipped (e.g. skip Collections nav → skip create
+   * collection, but keep the Drive explorer section).
+   */
+  skipsSections?: string[];
 }
 
 export interface InteractiveModuleDef {
@@ -81,6 +92,7 @@ export const INTERACTIVE_MODULES: InteractiveModuleDef[] = [
         align: "start",
         requireAny: ["folder.create"],
         waitFor: "create-menu-opened",
+        skipsSections: ["folders-create"],
       },
       {
         id: "folders.create",
@@ -91,6 +103,7 @@ export const INTERACTIVE_MODULES: InteractiveModuleDef[] = [
         align: "start",
         requireAll: ["folder.create"],
         waitFor: "folder-created",
+        section: "folders-create",
         skipIfElementMissing: true,
         retargetOn: "create-folder-modal-opened",
         retargetElement: "[data-tour='create-folder-modal']",
@@ -119,6 +132,7 @@ export const INTERACTIVE_MODULES: InteractiveModuleDef[] = [
         align: "start",
         requireAll: ["song.create"],
         waitFor: "create-menu-opened",
+        skipsSections: ["songs-create"],
       },
       {
         id: "songs.create",
@@ -129,6 +143,7 @@ export const INTERACTIVE_MODULES: InteractiveModuleDef[] = [
         align: "start",
         requireAll: ["song.create"],
         waitFor: "song-created",
+        section: "songs-create",
         skipIfElementMissing: true,
         retargetOn: "create-song-modal-opened",
         retargetElement: "[data-tour='create-song-modal']",
@@ -142,6 +157,8 @@ export const INTERACTIVE_MODULES: InteractiveModuleDef[] = [
         side: "right",
         align: "start",
         waitFor: "song-opened",
+        // Skipping “open a song” skips the whole ChordPro editor block.
+        skipsSections: ["chordpro"],
         retargetOn: "navigated-songs",
         retargetElement: "[data-tour='songs-list']",
         retargetSide: "top",
@@ -159,6 +176,7 @@ export const INTERACTIVE_MODULES: InteractiveModuleDef[] = [
         element: "[data-tour='song-editor']",
         side: "left",
         align: "start",
+        section: "chordpro",
         skipIfElementMissing: true,
       },
       {
@@ -169,6 +187,7 @@ export const INTERACTIVE_MODULES: InteractiveModuleDef[] = [
         side: "left",
         align: "start",
         requireAll: ["song.update"],
+        section: "chordpro",
         skipIfElementMissing: true,
       },
       {
@@ -179,6 +198,7 @@ export const INTERACTIVE_MODULES: InteractiveModuleDef[] = [
         side: "left",
         align: "start",
         requireAll: ["song.update"],
+        section: "chordpro",
         skipIfElementMissing: true,
       },
       {
@@ -188,6 +208,7 @@ export const INTERACTIVE_MODULES: InteractiveModuleDef[] = [
         element: "[data-tour='song-preview']",
         side: "left",
         align: "start",
+        section: "chordpro",
         skipIfElementMissing: true,
       },
       {
@@ -199,6 +220,7 @@ export const INTERACTIVE_MODULES: InteractiveModuleDef[] = [
         align: "end",
         requireAll: ["song.update"],
         waitFor: "song-saved",
+        section: "chordpro",
         skipIfElementMissing: true,
       },
     ],
@@ -216,6 +238,8 @@ export const INTERACTIVE_MODULES: InteractiveModuleDef[] = [
         side: "right",
         align: "start",
         waitFor: "navigated-collections",
+        // Skip create-collection flow only — Drive explorer tour still runs.
+        skipsSections: ["collections-setup"],
       },
       {
         id: "collections.createBtn",
@@ -226,6 +250,8 @@ export const INTERACTIVE_MODULES: InteractiveModuleDef[] = [
         align: "start",
         requireAll: ["collection.create"],
         waitFor: "create-menu-opened",
+        section: "collections-setup",
+        skipsSections: ["collections-setup"],
       },
       {
         id: "collections.create",
@@ -236,11 +262,13 @@ export const INTERACTIVE_MODULES: InteractiveModuleDef[] = [
         align: "start",
         requireAll: ["collection.create"],
         waitFor: "collection-created",
+        section: "collections-setup",
         skipIfElementMissing: true,
         retargetOn: "create-collection-modal-opened",
         retargetElement: "[data-tour='create-collection-modal']",
         retargetSide: "bottom",
       },
+      // --- Drive file-explorer tour (kept even if Collections page is skipped) ---
       {
         id: "collections.backToDrive",
         titleKey: "tour.interactive.collections.backToDrive.title",
@@ -249,6 +277,7 @@ export const INTERACTIVE_MODULES: InteractiveModuleDef[] = [
         side: "right",
         align: "start",
         waitFor: "navigated-folders",
+        section: "explorer",
       },
       {
         id: "collections.selection",
@@ -258,6 +287,7 @@ export const INTERACTIVE_MODULES: InteractiveModuleDef[] = [
         side: "top",
         align: "center",
         waitFor: "items-selected",
+        section: "explorer",
       },
       {
         id: "collections.openFolder",
@@ -267,6 +297,7 @@ export const INTERACTIVE_MODULES: InteractiveModuleDef[] = [
         side: "top",
         align: "center",
         waitFor: "folder-opened",
+        section: "explorer",
       },
       {
         id: "collections.selectAll",
@@ -276,6 +307,7 @@ export const INTERACTIVE_MODULES: InteractiveModuleDef[] = [
         side: "top",
         align: "center",
         waitFor: "select-all",
+        section: "explorer",
       },
       {
         id: "collections.contextMenu",
@@ -285,6 +317,8 @@ export const INTERACTIVE_MODULES: InteractiveModuleDef[] = [
         side: "top",
         align: "center",
         waitFor: "context-menu-opened",
+        section: "explorer",
+        skipsSections: ["explorer-add"],
       },
       {
         id: "collections.addSongs",
@@ -294,6 +328,7 @@ export const INTERACTIVE_MODULES: InteractiveModuleDef[] = [
         side: "left",
         align: "start",
         waitFor: "songs-added-to-collection",
+        section: "explorer-add",
         skipIfElementMissing: true,
         retargetOn: "add-to-collection-modal-opened",
         retargetElement: "[data-tour='add-to-collection-modal']",
@@ -313,6 +348,7 @@ export const INTERACTIVE_MODULES: InteractiveModuleDef[] = [
         side: "right",
         align: "start",
         waitFor: "navigated-services",
+        skipsSections: ["services", "services-create", "services-builder"],
       },
       {
         id: "services.createBtn",
@@ -323,6 +359,8 @@ export const INTERACTIVE_MODULES: InteractiveModuleDef[] = [
         align: "start",
         requireAll: ["service.create"],
         waitFor: "create-menu-opened",
+        section: "services",
+        skipsSections: ["services-create"],
       },
       {
         id: "services.create",
@@ -333,6 +371,7 @@ export const INTERACTIVE_MODULES: InteractiveModuleDef[] = [
         align: "start",
         requireAll: ["service.create"],
         waitFor: "service-created",
+        section: "services-create",
         skipIfElementMissing: true,
         retargetOn: "create-service-modal-opened",
         retargetElement: "[data-tour='create-service-modal']",
@@ -347,7 +386,9 @@ export const INTERACTIVE_MODULES: InteractiveModuleDef[] = [
         align: "start",
         requireAny: ["service.update", "service.create"],
         waitFor: "service-opened",
+        section: "services",
         skipIfElementMissing: true,
+        skipsSections: ["services-builder"],
       },
       {
         id: "services.elements",
@@ -357,6 +398,7 @@ export const INTERACTIVE_MODULES: InteractiveModuleDef[] = [
         side: "top",
         align: "center",
         requireAny: ["service.update", "service.create"],
+        section: "services-builder",
         skipIfElementMissing: true,
       },
     ],
@@ -374,6 +416,7 @@ export const INTERACTIVE_MODULES: InteractiveModuleDef[] = [
         side: "right",
         align: "start",
         waitFor: "navigated-agenda",
+        skipsSections: ["agenda", "agenda-create"],
       },
       {
         id: "agenda.createBtn",
@@ -384,6 +427,8 @@ export const INTERACTIVE_MODULES: InteractiveModuleDef[] = [
         align: "start",
         requireAll: ["agenda.create"],
         waitFor: "create-menu-opened",
+        section: "agenda",
+        skipsSections: ["agenda-create"],
       },
       {
         id: "agenda.create",
@@ -394,6 +439,7 @@ export const INTERACTIVE_MODULES: InteractiveModuleDef[] = [
         align: "start",
         requireAll: ["agenda.create"],
         waitFor: "event-created",
+        section: "agenda-create",
         skipIfElementMissing: true,
         retargetOn: "create-event-modal-opened",
         retargetElement: "[data-tour='create-event-modal']",
