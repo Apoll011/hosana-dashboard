@@ -872,7 +872,7 @@ export const es: typeof pt = {
         create: {
           title: "Crear una carpeta",
           description:
-            "Crea una carpeta nueva (p. ej. “Ensayos”). El tour avanza cuando exista.",
+            "Crea una carpeta nueva — elige “Nueva carpeta” en el menú (p. ej. “Ensayos”). El tour avanza cuando exista.",
         },
         drive: {
           title: "Drive",
@@ -884,12 +884,12 @@ export const es: typeof pt = {
         create: {
           title: "Crear una canción",
           description:
-            "Usa + → Nueva canción. Se abrirá en el editor ChordPro.",
+            "Usa + → Nueva canción. Luego el tour te pedirá abrirla en el editor.",
         },
         open: {
           title: "Abrir una canción",
           description:
-            "Abre cualquier canción de la biblioteca o Drive para continuar.",
+            "Abre la canción que acabas de crear (doble clic en Drive o en la Biblioteca) para continuar en el editor.",
         },
       },
       chordpro: {
@@ -968,12 +968,12 @@ export const es: typeof pt = {
         create: {
           title: "Crear un servicio",
           description:
-            "Crea un servicio nuevo. Luego armaremos el orden de alabanza.",
+            "Crea un servicio nuevo. Luego el tour te pedirá abrirlo y armar el orden de alabanza.",
         },
         builder: {
           title: "Constructor del culto",
           description:
-            "Abre un servicio para ver el constructor: canciones, anuncios, escritura y más.",
+            "Abre el servicio (doble clic) para ver el constructor: canciones, anuncios, escritura y más.",
         },
         elements: {
           title: "Elementos del culto",

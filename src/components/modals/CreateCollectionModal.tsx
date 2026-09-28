@@ -163,6 +163,7 @@ export const CreateCollectionModal: React.FC<CreateCollectionModalProps> = ({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
+      dataTour="create-collection-modal"
       title={
         collection
           ? locale === "pt"

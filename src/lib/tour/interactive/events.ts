@@ -21,7 +21,12 @@ export type OnboardingEventName =
   | "navigated-folders"
   | "navigated-collections"
   | "navigated-services"
-  | "navigated-agenda";
+  | "navigated-agenda"
+  | "create-folder-modal-opened"
+  | "create-song-modal-opened"
+  | "create-collection-modal-opened"
+  | "create-service-modal-opened"
+  | "create-event-modal-opened";
 
 type Listener = (detail?: unknown) => void;
 

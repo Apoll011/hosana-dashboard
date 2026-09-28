@@ -210,7 +210,13 @@ export const EventFormModal: React.FC<EventFormModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={title} maxWidth="xl">
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={title}
+      maxWidth="xl"
+      dataTour="create-event-modal"
+    >
       <form
         onSubmit={(e) => {
           e.preventDefault();

@@ -859,7 +859,7 @@ export const en: typeof pt = {
         create: {
           title: "Create a folder",
           description:
-            "Create a new folder (e.g. “Rehearsals”). The tour continues once it exists.",
+            "Create a new folder — pick “New Folder” in the menu (e.g. “Rehearsals”). The tour continues once it exists.",
         },
         drive: {
           title: "Drive",
@@ -870,11 +870,13 @@ export const en: typeof pt = {
       songs: {
         create: {
           title: "Create a song",
-          description: "Use + → New song. It will open in the ChordPro editor.",
+          description:
+            "Use + → New song. Next the tour will ask you to open it in the editor.",
         },
         open: {
           title: "Open a song",
-          description: "Open any song from the library or Drive to continue.",
+          description:
+            "Open the song you just created (double-click in Drive or the Library) to continue in the editor.",
         },
       },
       chordpro: {
@@ -953,12 +955,12 @@ export const en: typeof pt = {
         create: {
           title: "Create a service",
           description:
-            "Create a new service. Next we’ll build the order of worship.",
+            "Create a new service. Next the tour will ask you to open it and build the order of worship.",
         },
         builder: {
           title: "Service builder",
           description:
-            "Open a service to see the builder — songs, announcements, scripture, and more.",
+            "Open the service (double-click) to see the builder — songs, announcements, scripture, and more.",
         },
         elements: {
           title: "Service elements",

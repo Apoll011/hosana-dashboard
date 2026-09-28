@@ -1,15 +1,19 @@
 /**
  * Interactive onboarding runner — permission-composed modules with
- * wait-for-action steps (Next disabled until the user acts or skips).
+ * wait-for-action steps. The spotlight is visual only: the rest of the UI
+ * (and tour buttons) must stay fully clickable.
  */
 
 import type { TranslationKey } from "@/src/lib/i18n";
-import { driver, type Driver } from "driver.js";
+import { driver, type Driver, type PopoverDOM } from "driver.js";
 import "driver.js/dist/driver.css";
 import "../tour.css";
 import type { AppRole } from "../../permissions/roles";
 import { roleHasAnyPermission, roleHasPermission } from "../permissions";
-import { waitForOnboardingEvent } from "./events";
+import {
+  onOnboardingEvent,
+  waitForOnboardingEvent,
+} from "./events";
 import { INTERACTIVE_MODULES, type InteractiveStepDef } from "./modules";
 
 export interface InteractiveRunOptions {
@@ -47,6 +51,25 @@ export function destroyInteractiveOnboarding(): void {
     }
     activeDriver = null;
   }
+}
+
+/**
+ * Driver.js paints a full-screen SVG overlay at z-index ~1e9 and installs
+ * capture listeners. For wait-for-action tours we only want a visual cue —
+ * never a click shield.
+ */
+function unlockInteractiveChrome(): void {
+  document.querySelectorAll<HTMLElement>(".driver-overlay").forEach((el) => {
+    el.style.setProperty("pointer-events", "none", "important");
+    el.style.setProperty("z-index", "30", "important");
+  });
+  document
+    .querySelectorAll<HTMLElement>(".hosana-interactive-tour")
+    .forEach((el) => {
+      el.style.setProperty("pointer-events", "auto", "important");
+      // Above app chrome / create menu, beside (not under) modals visually
+      el.style.setProperty("z-index", "60", "important");
+    });
 }
 
 function stepAllowed(
@@ -120,11 +143,10 @@ export async function runInteractiveOnboarding(
   activeDriver = driver({
     animate: true,
     allowClose: true,
-    // Light overlay — users must interact with modals/menus outside the spotlight
-    overlayColor: "rgba(15, 23, 42, 0.25)",
-    overlayOpacity: 0.35,
+    overlayColor: "rgba(15, 23, 42, 0.2)",
+    overlayOpacity: 0.25,
     overlayClickBehavior: () => {
-      // Keep tour open; actions happen elsewhere in the UI
+      // no-op — never close / never block
     },
     disableActiveInteraction: false,
     stagePadding: 8,
@@ -134,6 +156,16 @@ export async function runInteractiveOnboarding(
     prevBtnText: options.labels.skipTour,
     doneBtnText: options.labels.done,
     progressText: options.labels.progress,
+    onHighlightStarted: () => {
+      // Unlock as early as possible (overlay may already exist)
+      queueMicrotask(unlockInteractiveChrome);
+    },
+    onHighlighted: () => {
+      unlockInteractiveChrome();
+      // Driver sometimes re-applies styles after paint
+      window.setTimeout(unlockInteractiveChrome, 0);
+      window.setTimeout(unlockInteractiveChrome, 50);
+    },
     onDestroyStarted: () => {
       if (!activeDriver) return;
       if (!completed && !dismissed) {
@@ -153,11 +185,6 @@ export async function runInteractiveOnboarding(
       await new Promise((r) => setTimeout(r, 450));
     }
 
-    const element =
-      step.element && document.querySelector(step.element)
-        ? step.element
-        : undefined;
-
     let actionDone = !step.waitFor;
     let advanceResolver: (() => void) | null = null;
     const advancePromise = new Promise<void>((resolve) => {
@@ -170,119 +197,157 @@ export async function runInteractiveOnboarding(
     };
 
     let keyCleanup: (() => void) | null = null;
+    let retargetCleanup: (() => void) | null = null;
 
-    activeDriver.highlight({
-      element,
-      disableActiveInteraction: false,
-      popover: {
-        title: options.t(step.titleKey),
-        description: `${options.t(step.descriptionKey)}${
-          step.waitFor ? `\n\n${options.labels.waiting}` : ""
-        }`,
-        side: step.side,
-        align: step.align,
-        // IMPORTANT: footer is hidden unless next/previous is included
-        showButtons: ["next", "previous", "close"],
-        showProgress: true,
-        progressText: options.labels.progress
-          .replace("{{current}}", String(i + 1))
-          .replace("{{total}}", String(allSteps.length)),
-        nextBtnText: isLast ? options.labels.done : options.labels.next,
-        prevBtnText: step.waitFor
-          ? options.labels.skipStep
-          : options.labels.skipTour,
-        onNextClick: () => {
-          if (step.waitFor && !actionDone) return;
-          requestAdvance();
-        },
-        onPrevClick: () => {
-          if (step.waitFor) {
-            // Skip this step
-            actionDone = true;
-            requestAdvance();
-            return;
-          }
-          // Exit tour
-          finish("dismissed");
-          requestAdvance();
-        },
-        onCloseClick: () => {
-          finish("dismissed");
-          requestAdvance();
-        },
-        onPopoverRender: (popover) => {
-          // Ensure footer is visible (driver hides it when only close is shown)
-          popover.footer.style.display = "flex";
-          popover.nextButton.style.display = "block";
-          popover.previousButton.style.display = "block";
+    const paintStep = (opts: {
+      element?: string;
+      side?: InteractiveStepDef["side"];
+      align?: InteractiveStepDef["align"];
+    }) => {
+      if (!activeDriver) return;
 
-          if (step.waitFor && !actionDone) {
-            popover.nextButton.disabled = true;
-            popover.nextButton.classList.add("driver-popover-btn-disabled");
-            popover.nextButton.style.opacity = "0.45";
-            popover.nextButton.style.cursor = "not-allowed";
-          } else {
-            popover.nextButton.disabled = false;
-            popover.nextButton.classList.remove("driver-popover-btn-disabled");
-            popover.nextButton.style.opacity = "1";
-            popover.nextButton.style.cursor = "pointer";
-          }
+      const el =
+        opts.element && document.querySelector(opts.element)
+          ? opts.element
+          : undefined;
 
-          // For wait steps, also offer "exit tour" as a third control
-          if (step.waitFor) {
-            let exitBtn = popover.footerButtons.querySelector(
-              "[data-tour-exit]",
-            ) as HTMLButtonElement | null;
-            if (!exitBtn) {
-              exitBtn = document.createElement("button");
-              exitBtn.type = "button";
-              exitBtn.dataset.tourExit = "true";
-              exitBtn.className =
-                "driver-popover-prev-btn driver-popover-footer-btn";
-              exitBtn.textContent = options.labels.skipTour;
-              exitBtn.addEventListener("click", (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                finish("dismissed");
-                requestAdvance();
-              });
-              popover.footerButtons.insertBefore(
-                exitBtn,
-                popover.previousButton,
-              );
-            }
-          }
-
-          const enableNext = () => {
-            actionDone = true;
-            popover.nextButton.disabled = false;
-            popover.nextButton.classList.remove("driver-popover-btn-disabled");
-            popover.nextButton.style.opacity = "1";
-            popover.nextButton.style.cursor = "pointer";
-            if (popover.description) {
-              popover.description.innerText = options.t(step.descriptionKey);
-            }
-            window.setTimeout(() => requestAdvance(), 400);
-          };
-
-          (popover.wrapper as unknown as { __enableNext?: () => void }).__enableNext =
-            enableNext;
-
-          const onKey = (e: KeyboardEvent) => {
-            if (e.key !== "Enter") return;
+      activeDriver.highlight({
+        element: el,
+        disableActiveInteraction: false,
+        popover: {
+          title: options.t(step.titleKey),
+          description: `${options.t(step.descriptionKey)}${
+            step.waitFor ? `\n\n${options.labels.waiting}` : ""
+          }`,
+          side: opts.side ?? step.side ?? "left",
+          align: opts.align ?? step.align ?? "start",
+          showButtons: ["next", "previous", "close"],
+          showProgress: true,
+          progressText: options.labels.progress
+            .replace("{{current}}", String(i + 1))
+            .replace("{{total}}", String(allSteps.length)),
+          nextBtnText: isLast ? options.labels.done : options.labels.next,
+          prevBtnText: step.waitFor
+            ? options.labels.skipStep
+            : options.labels.skipTour,
+          onNextClick: () => {
             if (step.waitFor && !actionDone) return;
-            const tag = (e.target as HTMLElement)?.tagName;
-            if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") {
+            requestAdvance();
+          },
+          onPrevClick: () => {
+            if (step.waitFor) {
+              actionDone = true;
+              requestAdvance();
               return;
             }
-            e.preventDefault();
+            finish("dismissed");
             requestAdvance();
-          };
-          window.addEventListener("keydown", onKey);
-          keyCleanup = () => window.removeEventListener("keydown", onKey);
+          },
+          onCloseClick: () => {
+            finish("dismissed");
+            requestAdvance();
+          },
+          onPopoverRender: (popover: PopoverDOM) => {
+            unlockInteractiveChrome();
+
+            popover.footer.style.display = "flex";
+            popover.nextButton.style.display = "block";
+            popover.previousButton.style.display = "block";
+
+            if (step.waitFor && !actionDone) {
+              popover.nextButton.disabled = true;
+              popover.nextButton.classList.add("driver-popover-btn-disabled");
+              popover.nextButton.style.opacity = "0.45";
+              popover.nextButton.style.cursor = "not-allowed";
+            } else {
+              popover.nextButton.disabled = false;
+              popover.nextButton.classList.remove("driver-popover-btn-disabled");
+              popover.nextButton.style.opacity = "1";
+              popover.nextButton.style.cursor = "pointer";
+            }
+
+            if (step.waitFor) {
+              let exitBtn = popover.footerButtons.querySelector(
+                "[data-tour-exit]",
+              ) as HTMLButtonElement | null;
+              if (!exitBtn) {
+                exitBtn = document.createElement("button");
+                exitBtn.type = "button";
+                exitBtn.dataset.tourExit = "true";
+                exitBtn.className =
+                  "driver-popover-prev-btn driver-popover-footer-btn";
+                exitBtn.textContent = options.labels.skipTour;
+                exitBtn.addEventListener("click", (e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  finish("dismissed");
+                  requestAdvance();
+                });
+                popover.footerButtons.insertBefore(
+                  exitBtn,
+                  popover.previousButton,
+                );
+              }
+            }
+
+            const enableNext = () => {
+              actionDone = true;
+              popover.nextButton.disabled = false;
+              popover.nextButton.classList.remove("driver-popover-btn-disabled");
+              popover.nextButton.style.opacity = "1";
+              popover.nextButton.style.cursor = "pointer";
+              if (popover.description) {
+                popover.description.innerText = options.t(step.descriptionKey);
+              }
+              window.setTimeout(() => requestAdvance(), 400);
+            };
+
+            (
+              popover.wrapper as unknown as { __enableNext?: () => void }
+            ).__enableNext = enableNext;
+
+            keyCleanup?.();
+            const onKey = (e: KeyboardEvent) => {
+              if (e.key !== "Enter") return;
+              if (step.waitFor && !actionDone) return;
+              const tag = (e.target as HTMLElement)?.tagName;
+              if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") {
+                return;
+              }
+              e.preventDefault();
+              requestAdvance();
+            };
+            window.addEventListener("keydown", onKey);
+            keyCleanup = () => window.removeEventListener("keydown", onKey);
+
+            unlockInteractiveChrome();
+          },
         },
-      },
+      });
+
+      unlockInteractiveChrome();
+    };
+
+    paintStep({
+      element: step.element,
+      side: step.side,
+      align: step.align,
     });
+
+    if (step.retargetOn && step.retargetElement) {
+      retargetCleanup = onOnboardingEvent(step.retargetOn, () => {
+        // Wait a frame for the modal to mount
+        window.requestAnimationFrame(() => {
+          window.setTimeout(() => {
+            paintStep({
+              element: step.retargetElement,
+              side: step.retargetSide ?? "left",
+              align: "start",
+            });
+          }, 50);
+        });
+      });
+    }
 
     if (step.waitFor) {
       void waitForOnboardingEvent(step.waitFor, signal)
@@ -299,6 +364,7 @@ export async function runInteractiveOnboarding(
 
     await advancePromise;
     keyCleanup?.();
+    retargetCleanup?.();
 
     if (dismissed) break;
     if (isLast && !dismissed) {

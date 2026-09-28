@@ -466,7 +466,10 @@ export const ExplorerAddressBar: React.FC<ExplorerAddressBarProps> = ({
               <Plus className="w-5 h-5" />
             </button>
             {isPlusMenuOpen && (
-              <div className="absolute right-0 top-full mt-3 w-64 bg-m3-card border border-m3-border rounded-3xl shadow-2xl z-50 p-2 space-y-1 animate-in fade-in slide-in-from-top-2 duration-200">
+              <div
+                data-tour="create-menu"
+                className="absolute right-0 top-full mt-3 w-64 bg-m3-card border border-m3-border rounded-3xl shadow-2xl z-50 p-2 space-y-1 animate-in fade-in slide-in-from-top-2 duration-200"
+              >
                 <div className="px-4 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-m3-secondary opacity-60">
                   {t("addressBar.createNew")}
                 </div>

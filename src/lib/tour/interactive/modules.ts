@@ -19,6 +19,13 @@ export interface InteractiveStepDef {
   when?: (ctx: { collectionsEnabled: boolean; agendaEnabled: boolean }) => boolean;
   /** If set, Next stays disabled until this event fires (or user skips step). */
   waitFor?: OnboardingEventName;
+  /**
+   * While waiting, re-highlight this selector when `retargetOn` fires
+   * (e.g. create menu → create-folder modal).
+   */
+  retargetOn?: OnboardingEventName;
+  retargetElement?: string;
+  retargetSide?: "top" | "right" | "bottom" | "left";
   /** Optional route hint shown in the popover (not auto-navigated). */
   hintRoute?: string;
 }
@@ -62,8 +69,8 @@ export const INTERACTIVE_MODULES: InteractiveModuleDef[] = [
         titleKey: "tour.interactive.folders.createBtn.title",
         descriptionKey: "tour.interactive.folders.createBtn.description",
         element: "[data-tour='toolbar-create']",
-        side: "bottom",
-        align: "end",
+        side: "left",
+        align: "start",
         requireAny: ["folder.create"],
         waitFor: "create-menu-opened",
       },
@@ -71,11 +78,14 @@ export const INTERACTIVE_MODULES: InteractiveModuleDef[] = [
         id: "folders.create",
         titleKey: "tour.interactive.folders.create.title",
         descriptionKey: "tour.interactive.folders.create.description",
-        element: "[data-tour='toolbar-create']",
-        side: "bottom",
-        align: "end",
+        element: "[data-tour='create-menu']",
+        side: "left",
+        align: "start",
         requireAll: ["folder.create"],
         waitFor: "folder-created",
+        retargetOn: "create-folder-modal-opened",
+        retargetElement: "[data-tour='create-folder-modal']",
+        retargetSide: "bottom",
       },
       {
         id: "folders.drive",
@@ -92,14 +102,27 @@ export const INTERACTIVE_MODULES: InteractiveModuleDef[] = [
     requireAll: ["song.access"],
     steps: [
       {
+        id: "songs.createBtn",
+        titleKey: "tour.interactive.folders.createBtn.title",
+        descriptionKey: "tour.interactive.folders.createBtn.description",
+        element: "[data-tour='toolbar-create']",
+        side: "left",
+        align: "start",
+        requireAll: ["song.create"],
+        waitFor: "create-menu-opened",
+      },
+      {
         id: "songs.create",
         titleKey: "tour.interactive.songs.create.title",
         descriptionKey: "tour.interactive.songs.create.description",
-        element: "[data-tour='toolbar-create']",
-        side: "bottom",
-        align: "end",
+        element: "[data-tour='create-menu']",
+        side: "left",
+        align: "start",
         requireAll: ["song.create"],
         waitFor: "song-created",
+        retargetOn: "create-song-modal-opened",
+        retargetElement: "[data-tour='create-song-modal']",
+        retargetSide: "bottom",
       },
       {
         id: "songs.open",
@@ -177,14 +200,27 @@ export const INTERACTIVE_MODULES: InteractiveModuleDef[] = [
         waitFor: "navigated-collections",
       },
       {
+        id: "collections.createBtn",
+        titleKey: "tour.interactive.folders.createBtn.title",
+        descriptionKey: "tour.interactive.folders.createBtn.description",
+        element: "[data-tour='toolbar-create']",
+        side: "left",
+        align: "start",
+        requireAll: ["collection.create"],
+        waitFor: "create-menu-opened",
+      },
+      {
         id: "collections.create",
         titleKey: "tour.interactive.collections.create.title",
         descriptionKey: "tour.interactive.collections.create.description",
-        element: "[data-tour='toolbar-create']",
-        side: "bottom",
-        align: "end",
+        element: "[data-tour='create-menu']",
+        side: "left",
+        align: "start",
         requireAll: ["collection.create"],
         waitFor: "collection-created",
+        retargetOn: "create-collection-modal-opened",
+        retargetElement: "[data-tour='create-collection-modal']",
+        retargetSide: "bottom",
       },
       {
         id: "collections.backToDrive",
@@ -256,14 +292,27 @@ export const INTERACTIVE_MODULES: InteractiveModuleDef[] = [
         waitFor: "navigated-services",
       },
       {
+        id: "services.createBtn",
+        titleKey: "tour.interactive.folders.createBtn.title",
+        descriptionKey: "tour.interactive.folders.createBtn.description",
+        element: "[data-tour='toolbar-create']",
+        side: "left",
+        align: "start",
+        requireAll: ["service.create"],
+        waitFor: "create-menu-opened",
+      },
+      {
         id: "services.create",
         titleKey: "tour.interactive.services.create.title",
         descriptionKey: "tour.interactive.services.create.description",
-        element: "[data-tour='toolbar-create']",
-        side: "bottom",
-        align: "end",
+        element: "[data-tour='create-menu']",
+        side: "left",
+        align: "start",
         requireAll: ["service.create"],
         waitFor: "service-created",
+        retargetOn: "create-service-modal-opened",
+        retargetElement: "[data-tour='create-service-modal']",
+        retargetSide: "bottom",
       },
       {
         id: "services.builder",
@@ -301,14 +350,27 @@ export const INTERACTIVE_MODULES: InteractiveModuleDef[] = [
         waitFor: "navigated-agenda",
       },
       {
+        id: "agenda.createBtn",
+        titleKey: "tour.interactive.folders.createBtn.title",
+        descriptionKey: "tour.interactive.folders.createBtn.description",
+        element: "[data-tour='toolbar-create']",
+        side: "left",
+        align: "start",
+        requireAll: ["agenda.create"],
+        waitFor: "create-menu-opened",
+      },
+      {
         id: "agenda.create",
         titleKey: "tour.interactive.agenda.create.title",
         descriptionKey: "tour.interactive.agenda.create.description",
-        element: "[data-tour='toolbar-create']",
-        side: "bottom",
-        align: "end",
+        element: "[data-tour='create-menu']",
+        side: "left",
+        align: "start",
         requireAll: ["agenda.create"],
         waitFor: "event-created",
+        retargetOn: "create-event-modal-opened",
+        retargetElement: "[data-tour='create-event-modal']",
+        retargetSide: "bottom",
       },
     ],
   },

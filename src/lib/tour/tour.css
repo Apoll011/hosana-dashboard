@@ -8,13 +8,14 @@
   box-shadow:
     0 20px 40px -16px rgb(15 23 42 / 0.25),
     0 0 0 1px rgb(15 23 42 / 0.04);
-  max-width: 320px;
+  max-width: 340px;
 }
 
 .hosana-driver-popover .driver-popover-title {
   font-size: 0.95rem;
   font-weight: 700;
   letter-spacing: -0.01em;
+  padding-right: 1.5rem;
 }
 
 .hosana-driver-popover .driver-popover-description {
@@ -30,14 +31,35 @@
   color: var(--color-m3-secondary, #64748b);
 }
 
+.hosana-driver-popover .driver-popover-footer {
+  display: flex !important;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.65rem;
+  margin-top: 0.85rem;
+  text-align: left;
+}
+
+.hosana-driver-popover .driver-popover-navigation-btns {
+  display: flex !important;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: flex-end;
+  width: 100%;
+  margin: 0 !important;
+}
+
 .hosana-driver-popover .driver-popover-prev-btn,
 .hosana-driver-popover .driver-popover-next-btn,
-.hosana-driver-popover .hosana-tour-interactive-btn {
+.hosana-driver-popover .hosana-tour-interactive-btn,
+.hosana-driver-popover .driver-popover-footer-btn {
   border-radius: 0.75rem;
   font-size: 0.75rem;
   font-weight: 700;
-  padding: 0.45rem 0.85rem;
+  padding: 0.5rem 0.9rem;
   text-shadow: none;
+  margin: 0 !important;
+  white-space: nowrap;
 }
 
 .hosana-driver-popover .driver-popover-next-btn {
@@ -60,13 +82,17 @@
 .hosana-driver-popover .hosana-tour-interactive-btn {
   background: transparent;
   color: var(--color-m3-primary, #0ea5e9);
-  border: 1px solid color-mix(in srgb, var(--color-m3-primary, #0ea5e9) 40%, transparent);
+  border: 1px solid
+    color-mix(in srgb, var(--color-m3-primary, #0ea5e9) 40%, transparent);
   cursor: pointer;
-  margin-left: 0.35rem;
 }
 
 .hosana-driver-popover .hosana-tour-interactive-btn:hover {
-  background: color-mix(in srgb, var(--color-m3-primary, #0ea5e9) 10%, transparent);
+  background: color-mix(
+    in srgb,
+    var(--color-m3-primary, #0ea5e9) 10%,
+    transparent
+  );
 }
 
 .dark .hosana-driver-popover.driver-popover {
@@ -79,22 +105,44 @@
   color: #94a3b8;
 }
 
-/* Interactive onboarding: let clicks reach modals/menus under the overlay,
-   but keep the coachmark itself fully clickable. */
-body:has(.hosana-interactive-tour) .driver-overlay {
-  pointer-events: none !important;
+.dark .hosana-driver-popover .driver-popover-prev-btn {
+  border-color: #334155;
+  color: #94a3b8;
 }
 
-body:has(.hosana-interactive-tour) .hosana-driver-popover,
+/*
+ * Interactive onboarding: spotlight is visual-only.
+ * JS also forces these after every highlight (driver reinlines styles).
+ */
+body:has(.hosana-interactive-tour) .driver-overlay,
+.driver-overlay {
+  /* only when interactive class present — see JS unlock for hard guarantee */
+}
+
+body:has(.hosana-interactive-tour) .driver-overlay {
+  pointer-events: none !important;
+  z-index: 30 !important;
+}
+
+body:has(.hosana-interactive-tour) .hosana-driver-popover.hosana-interactive-tour {
+  pointer-events: auto !important;
+  z-index: 60 !important;
+}
+
 body:has(.hosana-interactive-tour) .hosana-driver-popover * {
   pointer-events: auto !important;
 }
 
-body:has(.hosana-interactive-tour) .hosana-driver-popover {
-  z-index: 100002 !important;
+[data-tour="create-menu"] {
+  z-index: 70;
 }
 
-body:has(.hosana-interactive-tour) .driver-popover-footer button {
-  pointer-events: auto !important;
-  cursor: pointer;
+/* Create / form modals must stay above the dim overlay and remain clickable */
+body:has(.hosana-interactive-tour) [data-tour="create-folder-modal"],
+body:has(.hosana-interactive-tour) [data-tour="create-song-modal"],
+body:has(.hosana-interactive-tour) [data-tour="create-service-modal"],
+body:has(.hosana-interactive-tour) [data-tour="create-collection-modal"],
+body:has(.hosana-interactive-tour) [data-tour="create-event-modal"] {
+  position: relative;
+  z-index: 55;
 }
