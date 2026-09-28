@@ -304,7 +304,8 @@ export async function runInteractiveOnboarding(
     },
   });
 
-  // After skipping “open + menu”, immediately skip dependent create-menu steps.
+  // After skipping a gate step (open +, open song, context menu), immediately
+  // skip follow-up steps that need that UI (create-menu / editor / etc.).
   let skipMissingFollowups = false;
 
   for (let i = 0; i < allSteps.length; i++) {
@@ -316,7 +317,7 @@ export async function runInteractiveOnboarding(
     setActiveOnboardingWaitFor(step.waitFor ?? null);
     unlockInteractiveChrome();
 
-    // Cascade: user skipped opening the + menu → skip steps that need it.
+    // Cascade: user skipped a prerequisite → skip steps that need its UI.
     if (skipMissingFollowups && step.skipIfElementMissing) {
       setActiveOnboardingWaitFor(null);
       continue;
@@ -325,7 +326,7 @@ export async function runInteractiveOnboarding(
       skipMissingFollowups = false;
     }
 
-    // Missing create-menu / context-menu / builder: skip immediately (no long wait).
+    // Page-specific targets (editor, create-menu, …): skip fast if absent.
     if (step.skipIfElementMissing && step.element) {
       if (!document.querySelector(step.element)) {
         const foundLate = await waitForSelector(step.element, 250, signal);
@@ -337,6 +338,7 @@ export async function runInteractiveOnboarding(
           myToken !== paintToken
         ) {
           setActiveOnboardingWaitFor(null);
+          unlockInteractiveChrome();
           continue;
         }
       }
@@ -345,10 +347,12 @@ export async function runInteractiveOnboarding(
       if (signal.aborted || dismissed || completed || myToken !== paintToken) {
         break;
       }
-      // Still missing: keep going with a centered popover, but unlock UI so
-      // Skip works and the user can still click the real + button.
+      // Never paint a locking floating card on the wrong page (e.g. ChordPro
+      // tip while still on Library after skipping “open a song”).
       if (!found) {
+        setActiveOnboardingWaitFor(null);
         unlockInteractiveChrome();
+        continue;
       }
     }
 
@@ -367,7 +371,8 @@ export async function runInteractiveOnboarding(
         paintToken += 1;
       }
       repaintActiveStep = null;
-      hideTourPopovers();
+      // Don't hide yet — next paint replaces the card. Hiding here made the
+      // tour vanish for seconds while waiting for the next selector.
       unlockInteractiveChrome();
       advanceResolver?.();
       advanceResolver = null;
@@ -376,11 +381,16 @@ export async function runInteractiveOnboarding(
     const skipStep = () => {
       if (left || myToken !== paintToken) return;
       actionDone = true;
-      if (step.waitFor === "create-menu-opened") {
+      // Gate steps whose follow-ups need a specific surface to exist.
+      if (
+        step.waitFor === "create-menu-opened" ||
+        step.waitFor === "context-menu-opened" ||
+        step.waitFor === "song-opened" ||
+        step.waitFor === "service-opened"
+      ) {
         skipMissingFollowups = true;
-      }
-      if (step.waitFor === "context-menu-opened") {
-        skipMissingFollowups = true;
+        // Hide now — follow-ups will be skipped with no paint in between.
+        hideTourPopovers();
       }
       leaveStep();
     };

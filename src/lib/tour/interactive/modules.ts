@@ -159,6 +159,7 @@ export const INTERACTIVE_MODULES: InteractiveModuleDef[] = [
         element: "[data-tour='song-editor']",
         side: "left",
         align: "start",
+        skipIfElementMissing: true,
       },
       {
         id: "chordpro.snippets",
@@ -168,6 +169,7 @@ export const INTERACTIVE_MODULES: InteractiveModuleDef[] = [
         side: "left",
         align: "start",
         requireAll: ["song.update"],
+        skipIfElementMissing: true,
       },
       {
         id: "chordpro.chords",
@@ -177,6 +179,7 @@ export const INTERACTIVE_MODULES: InteractiveModuleDef[] = [
         side: "left",
         align: "start",
         requireAll: ["song.update"],
+        skipIfElementMissing: true,
       },
       {
         id: "chordpro.preview",
@@ -185,6 +188,7 @@ export const INTERACTIVE_MODULES: InteractiveModuleDef[] = [
         element: "[data-tour='song-preview']",
         side: "left",
         align: "start",
+        skipIfElementMissing: true,
       },
       {
         id: "chordpro.save",
@@ -195,6 +199,7 @@ export const INTERACTIVE_MODULES: InteractiveModuleDef[] = [
         align: "end",
         requireAll: ["song.update"],
         waitFor: "song-saved",
+        skipIfElementMissing: true,
       },
     ],
   },
