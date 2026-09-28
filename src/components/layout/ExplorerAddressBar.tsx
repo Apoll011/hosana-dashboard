@@ -7,6 +7,8 @@ import { useI18n } from "@/src/lib/i18n";
 import { posthog } from "@/src/lib/posthog";
 import { Folder, Service, Song } from "@/src/types";
 import {
+  BarChart3,
+  Building2,
   Calendar,
   Calendar1,
   CalendarPlus,
@@ -25,21 +27,19 @@ import {
   Plus,
   Search,
   Settings,
-  BarChart3,
-  Building2,
   Trash2Icon,
   Users,
   X,
 } from "lucide-react";
-import { ActiveModal } from "./ExplorerModals";
 import React, { useEffect, useRef, useState } from "react";
 import { ViewName } from "../../layouts/view";
 import { authClient } from "../../lib/authClient";
-import { emitOnboardingEvent } from "../../lib/tour";
 import { Can, CanAny } from "../../lib/permissions/components";
+import { emitOnboardingEvent } from "../../lib/tour";
 import { InboxButton, InboxFetchClient } from "../Inbox";
 import { SearchSyntaxModal } from "../modals/SearchSyntaxModal";
 import { SyncStatusBadge } from "../SyncStatusBadge";
+import { ActiveModal } from "./ExplorerModals";
 
 interface ExplorerAddressBarProps {
   view: ViewName;
@@ -98,7 +98,7 @@ export const ExplorerAddressBar: React.FC<ExplorerAddressBarProps> = ({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const collections_enabled = posthog.isFeatureEnabled("collection") || false;
+  const collections_enabled = posthog.isFeatureEnabled("collection") || true;
 
   return (
     <div className="relative p-3 sm:p-4 bg-m3-sidebar/40 border-b border-m3-border/50 flex flex-col md:flex-row items-center justify-between gap-3 sm:gap-4">
@@ -363,7 +363,10 @@ export const ExplorerAddressBar: React.FC<ExplorerAddressBarProps> = ({
           view === "services" ||
           view === "collections" ||
           view === "collection-detail") && (
-          <div data-tour="toolbar-search" className="relative w-full sm:w-64 min-w-0">
+          <div
+            data-tour="toolbar-search"
+            className="relative w-full sm:w-64 min-w-0"
+          >
             <Input
               placeholder={
                 view === "services"

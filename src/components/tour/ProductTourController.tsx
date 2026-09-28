@@ -79,7 +79,7 @@ export const ProductTourController: React.FC = () => {
 
       requestAnimationFrame(() => {
         const collectionsEnabled =
-          posthog.isFeatureEnabled("collection") || false;
+          posthog.isFeatureEnabled("collection") || true;
         const agendaEnabled = posthog.isFeatureEnabled("agenda") ?? true;
 
         const started = runProductTour({

@@ -79,12 +79,22 @@
   color: #94a3b8;
 }
 
-/* Interactive onboarding: let clicks reach modals/menus under the overlay */
-.driver-overlay:has(+ .hosana-interactive-tour),
+/* Interactive onboarding: let clicks reach modals/menus under the overlay,
+   but keep the coachmark itself fully clickable. */
 body:has(.hosana-interactive-tour) .driver-overlay {
   pointer-events: none !important;
 }
 
+body:has(.hosana-interactive-tour) .hosana-driver-popover,
+body:has(.hosana-interactive-tour) .hosana-driver-popover * {
+  pointer-events: auto !important;
+}
+
 body:has(.hosana-interactive-tour) .hosana-driver-popover {
-  pointer-events: auto;
+  z-index: 100002 !important;
+}
+
+body:has(.hosana-interactive-tour) .driver-popover-footer button {
+  pointer-events: auto !important;
+  cursor: pointer;
 }

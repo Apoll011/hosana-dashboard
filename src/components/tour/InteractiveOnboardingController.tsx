@@ -56,7 +56,7 @@ export const InteractiveOnboardingController: React.FC = () => {
     const timer = window.setTimeout(() => {
       void runInteractiveOnboarding({
         role,
-        collectionsEnabled: posthog.isFeatureEnabled("collection") || false,
+        collectionsEnabled: posthog.isFeatureEnabled("collection") || true,
         agendaEnabled: posthog.isFeatureEnabled("agenda") ?? true,
         t,
         labels: {

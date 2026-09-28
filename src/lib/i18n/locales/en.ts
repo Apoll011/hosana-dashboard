@@ -807,8 +807,7 @@ export const en: typeof pt = {
       },
       agenda: {
         title: "Agenda",
-        description:
-          "Plan events and link them to services when you need to.",
+        description: "Plan events and link them to services when you need to.",
       },
       search: {
         title: "Search",
@@ -844,12 +843,12 @@ export const en: typeof pt = {
         welcome: {
           title: "Interactive tour",
           description:
-            "This is an isolated demo environment. You’ll practice real actions — the tour waits for you on each step.",
+            "This is an isolated demo environment. Some steps wait for you to act; others just need Next. Click Next to begin.",
         },
         sandbox: {
           title: "Safe sandbox data",
           description:
-            "Nothing here syncs to your real organization. Explore freely.",
+            "Nothing here syncs to your real organization. Explore freely. Click Next to continue.",
         },
       },
       folders: {
@@ -871,13 +870,11 @@ export const en: typeof pt = {
       songs: {
         create: {
           title: "Create a song",
-          description:
-            "Use + → New song. It will open in the ChordPro editor.",
+          description: "Use + → New song. It will open in the ChordPro editor.",
         },
         open: {
           title: "Open a song",
-          description:
-            "Open any song from the library or Drive to continue.",
+          description: "Open any song from the library or Drive to continue.",
         },
       },
       chordpro: {
@@ -976,8 +973,7 @@ export const en: typeof pt = {
         },
         create: {
           title: "Create an event",
-          description:
-            "Create an event and optionally link it to a service.",
+          description: "Create an event and optionally link it to a service.",
         },
       },
       finish: {
@@ -1248,7 +1244,7 @@ export const en: typeof pt = {
         "Your responsibilities for {event} have been updated.\n\nDate: {date}\n\nRemoved:\n{list}",
       eventCancelledTitle: "{event} has been cancelled",
       eventCancelledBody:
-        "The event \"{event}\" scheduled for {date} has been cancelled.",
+        'The event "{event}" scheduled for {date} has been cancelled.',
       dateTitle: "The date of {event} has changed",
       dateBody: "New date:\n{date}",
       locationTitle: "The location of {event} has changed",
@@ -2272,7 +2268,8 @@ export const en: typeof pt = {
         collections: "Collections",
         uniqueTags: "Unique tags",
         estimatedData: "Estimated data size",
-        estimatedDataHint: "Approximate size of synced documents on this device",
+        estimatedDataHint:
+          "Approximate size of synced documents on this device",
         members: "Members",
         pendingInvites: "Pending invitations",
         roleCount: "{role}",
@@ -2318,9 +2315,11 @@ export const en: typeof pt = {
         recent: "Recently played",
         recentDesc: "Used in a service within the last 14 days.",
         overdue: "Ready for a return",
-        overdueDesc: "Played before, but resting 28+ days — good variety picks.",
+        overdueDesc:
+          "Played before, but resting 28+ days — good variety picks.",
         never: "Never played",
-        neverDesc: "Songs in the library that have not appeared in a service yet.",
+        neverDesc:
+          "Songs in the library that have not appeared in a service yet.",
         rarely: "Least played",
         rarelyDesc: "Lowest frequency songs — good picks for variety.",
       },
