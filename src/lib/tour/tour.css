@@ -160,7 +160,8 @@ body:has(.hosana-interactive-tour) [data-tour="create-folder-modal"],
 body:has(.hosana-interactive-tour) [data-tour="create-song-modal"],
 body:has(.hosana-interactive-tour) [data-tour="create-service-modal"],
 body:has(.hosana-interactive-tour) [data-tour="create-collection-modal"],
-body:has(.hosana-interactive-tour) [data-tour="create-event-modal"] {
+body:has(.hosana-interactive-tour) [data-tour="create-event-modal"],
+body:has(.hosana-interactive-tour) [data-tour="add-to-collection-modal"] {
   position: relative;
   z-index: 55;
 }
