@@ -5,10 +5,7 @@
 
 export type { LibraryHealthAutoFix } from "./types";
 export { applyLibraryHealthAutoFixes } from "./apply";
-export type {
-  ApplyAutoFixesOptions,
-  ApplyAutoFixesResult,
-} from "./apply";
+export type { ApplyAutoFixesOptions, ApplyAutoFixesResult } from "./apply";
 export {
   getAutoFixForCriterion,
   listAutoFixes,

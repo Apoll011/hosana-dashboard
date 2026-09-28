@@ -26,13 +26,7 @@
  * IndexedDB is used only for persistence.
  */
 
-import {
-  idbBulkDelete,
-  idbBulkPut,
-  idbClear,
-  idbGetAll,
-  idbPut,
-} from "./idb";
+import { idbBulkDelete, idbBulkPut, idbClear, idbGetAll, idbPut } from "./idb";
 import {
   notify,
   notifyCollection,
@@ -133,7 +127,8 @@ function makeDoc<T extends AnyDoc>(
     const tombstone = { ...this._raw, _deleted: true } as T;
     await this._collection._put(tombstone);
     Object.assign(this, { _deleted: true });
-    (this as { _raw: T })._raw = this._collection.getRaw(this._raw.id) ?? tombstone;
+    (this as { _raw: T })._raw =
+      this._collection.getRaw(this._raw.id) ?? tombstone;
   };
 
   return doc;

@@ -815,8 +815,7 @@ export const pt = {
       },
       agenda: {
         title: "Agenda",
-        description:
-          "Planeie eventos e ligue-os a serviços quando precisar.",
+        description: "Planeie eventos e ligue-os a serviços quando precisar.",
       },
       search: {
         title: "Pesquisa",
@@ -984,8 +983,7 @@ export const pt = {
         },
         create: {
           title: "Criar um evento",
-          description:
-            "Crie um evento e, se quiser, ligue-o a um serviço.",
+          description: "Crie um evento e, se quiser, ligue-o a um serviço.",
         },
       },
       finish: {
@@ -1257,7 +1255,7 @@ export const pt = {
         "As suas responsabilidades em {event} foram atualizadas.\n\nData: {date}\n\nRemovido:\n{list}",
       eventCancelledTitle: "{event} foi cancelado",
       eventCancelledBody:
-        "O evento \"{event}\" agendado para {date} foi cancelado.",
+        'O evento "{event}" agendado para {date} foi cancelado.',
       dateTitle: "A data de {event} mudou",
       dateBody: "Nova data:\n{date}",
       locationTitle: "O local de {event} mudou",
@@ -2336,7 +2334,8 @@ export const pt = {
       },
       sections: {
         mostPlayed: "Mais tocados",
-        mostPlayedDesc: "Cânticos que aparecem com mais frequência nos setlists.",
+        mostPlayedDesc:
+          "Cânticos que aparecem com mais frequência nos setlists.",
         recent: "Recentes",
         recentDesc: "Usados num culto nos últimos 14 dias.",
         overdue: "Prontos a regressar",
@@ -2406,8 +2405,7 @@ export const pt = {
 
   organization: {
     offlineTitle: "Está offline",
-    offlineDesc:
-      "As definições da organização precisam de ligação à internet.",
+    offlineDesc: "As definições da organização precisam de ligação à internet.",
     tabs: {
       workspace: "Espaço de trabalho",
       members: "Membros",

@@ -232,8 +232,7 @@ export const LibraryHealthTab: React.FC<LibraryHealthTabProps> = ({
             summary.categories.map((category) => {
               const isOpen = expanded.has(category.criterion);
               const categoryFixKey = `cat:${category.criterion}`;
-              const showFixAll =
-                canUpdateSong && category.autoFixableCount > 0;
+              const showFixAll = canUpdateSong && category.autoFixableCount > 0;
 
               return (
                 <div key={category.criterion}>
@@ -336,7 +335,9 @@ export const LibraryHealthTab: React.FC<LibraryHealthTabProps> = ({
                                   size="sm"
                                   isLoading={fixingKey === songFixKey}
                                   disabled={Boolean(fixingKey)}
-                                  icon={<WandSparkles className="w-3.5 h-3.5" />}
+                                  icon={
+                                    <WandSparkles className="w-3.5 h-3.5" />
+                                  }
                                   title={t("analytics.libraryHealth.autoFix")}
                                   onClick={() =>
                                     void runAutoFix(songFixKey, {

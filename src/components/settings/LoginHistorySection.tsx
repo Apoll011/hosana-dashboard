@@ -101,15 +101,10 @@ function eventIp(log: DashAuditLog): string | null {
 }
 
 function sortByNewest(a: DashAuditLog, b: DashAuditLog): number {
-  return (
-    new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-  );
+  return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
 }
 
-function enrichEvent(
-  log: DashAuditLog,
-  member?: OrgMemberRef,
-): DashAuditLog {
+function enrichEvent(log: DashAuditLog, member?: OrgMemberRef): DashAuditLog {
   if (!member) return log;
   return {
     ...log,
@@ -227,9 +222,7 @@ export const LoginHistorySection: React.FC<LoginHistorySectionProps> = ({
         });
 
         if (result.error) {
-          throw new Error(
-            result.error.message || t("loginHistory.loadError"),
-          );
+          throw new Error(result.error.message || t("loginHistory.loadError"));
         }
 
         const raw = result.data?.events ?? [];

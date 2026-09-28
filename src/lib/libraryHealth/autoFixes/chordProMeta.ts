@@ -20,7 +20,10 @@ export function injectChordProDirective(
   const directive = `{${name}: ${value}}`;
   const lines = content.split("\n");
   let insertAt = 0;
-  while (insertAt < lines.length && /^\s*(\{[^}]*\}|\s*)$/.test(lines[insertAt])) {
+  while (
+    insertAt < lines.length &&
+    /^\s*(\{[^}]*\}|\s*)$/.test(lines[insertAt])
+  ) {
     if (/^\s*\{[^}]*\}/.test(lines[insertAt])) insertAt += 1;
     else break;
   }

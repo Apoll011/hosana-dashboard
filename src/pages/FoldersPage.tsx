@@ -118,8 +118,7 @@ export const FoldersPage: React.FC = () => {
   const { settings: personalSettings } = usePersonalSettings();
   const { granted: canViewLibraryHealth } = useCan("library.health");
   const slugPrefix = organization?.slug ? `/${organization.slug}` : "";
-  const showSongScore =
-    canViewLibraryHealth && personalSettings.showSongScore;
+  const showSongScore = canViewLibraryHealth && personalSettings.showSongScore;
 
   const {
     filteredSubfolders,

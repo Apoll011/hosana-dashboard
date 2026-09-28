@@ -272,7 +272,9 @@ export const CollectionDetailPage: React.FC = () => {
           <Can permission="export.pdf">
             <button
               type="button"
-              onClick={() => void printCollection(collection, songsInCollection)}
+              onClick={() =>
+                void printCollection(collection, songsInCollection)
+              }
               className="flex items-center gap-1.5 px-3 py-2 rounded-2xl bg-white/15 hover:bg-white/28 backdrop-blur-sm text-white text-xs font-semibold transition-all cursor-pointer shadow-md border border-white/10"
               title={t("print.buttons.printCollection")}
             >
