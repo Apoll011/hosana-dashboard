@@ -19,7 +19,8 @@ import {
   Tag,
   X,
 } from "lucide-react";
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { emitOnboardingEvent } from "@/src/lib/tour";
 import {
   FolderTreeNode,
   getFolderDescendantIds,
@@ -662,6 +663,20 @@ export const ExplorerModals: React.FC<ExplorerModalsProps> = ({
 }) => {
   const { t } = useI18n();
 
+  useEffect(() => {
+    if (activeModal === "create-folder") {
+      emitOnboardingEvent("create-folder-modal-opened");
+    } else if (activeModal === "create-song") {
+      emitOnboardingEvent("create-song-modal-opened");
+    } else if (activeModal === "create-service") {
+      emitOnboardingEvent("create-service-modal-opened");
+    } else if (activeModal === "create-collection") {
+      emitOnboardingEvent("create-collection-modal-opened");
+    } else if (activeModal === "create-event") {
+      emitOnboardingEvent("create-event-modal-opened");
+    }
+  }, [activeModal]);
+
   return (
     <>
       <CifraClubImportModal
@@ -674,6 +689,7 @@ export const ExplorerModals: React.FC<ExplorerModalsProps> = ({
       <Modal
         isOpen={activeModal === "create-song"}
         onClose={onCloseModal}
+        dataTour="create-song-modal"
         title={
           currentFolder
             ? t("explorer.modals.createSongInFolder", {
@@ -694,6 +710,7 @@ export const ExplorerModals: React.FC<ExplorerModalsProps> = ({
       <Modal
         isOpen={activeModal === "create-service"}
         onClose={onCloseModal}
+        dataTour="create-service-modal"
         title={t("explorer.modals.createServiceTitle")}
       >
         <ServiceForm onSubmit={onCreateServiceSubmit} onCancel={onCloseModal} />
@@ -714,6 +731,7 @@ export const ExplorerModals: React.FC<ExplorerModalsProps> = ({
       <Modal
         isOpen={activeModal === "create-folder"}
         onClose={onCloseModal}
+        dataTour="create-folder-modal"
         title={
           currentFolder
             ? t("explorer.modals.createFolderInFolder", {

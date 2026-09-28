@@ -12,6 +12,8 @@ interface ModalProps {
   title: string;
   children: React.ReactNode;
   maxWidth?: "sm" | "md" | "lg" | "xl" | "2xl";
+  /** Optional tour anchor, e.g. create-folder-modal */
+  dataTour?: string;
 }
 
 export const Modal: React.FC<ModalProps> = ({
@@ -20,6 +22,7 @@ export const Modal: React.FC<ModalProps> = ({
   title,
   children,
   maxWidth = "md",
+  dataTour,
 }) => {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -48,6 +51,7 @@ export const Modal: React.FC<ModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-m3-bg/80 backdrop-blur-md transition-all duration-300">
       <div
+        data-tour={dataTour}
         className={`w-full ${maxWidthClasses[maxWidth]} bg-m3-card border border-m3-border rounded-[32px] shadow-2xl shadow-black/20 overflow-hidden flex flex-col max-h-[90vh] animate-in fade-in zoom-in-95 duration-200`}
       >
         {/* Modal Header */}

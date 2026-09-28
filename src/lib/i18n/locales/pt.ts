@@ -868,7 +868,7 @@ export const pt = {
         create: {
           title: "Criar uma pasta",
           description:
-            "Crie uma pasta nova (ex.: “Ensaios”). O tour avança quando a pasta existir.",
+            "Crie uma pasta nova — escolha “Nova Pasta” no menu (ex.: “Ensaios”). O tour avança quando a pasta existir.",
         },
         drive: {
           title: "A Drive",
@@ -880,12 +880,12 @@ export const pt = {
         create: {
           title: "Criar um cântico",
           description:
-            "Use + → Novo cântico. Será aberto no editor ChordPro.",
+            "Use + → Novo cântico. Depois o tour pede-lhe para o abrir no editor.",
         },
         open: {
           title: "Abrir um cântico",
           description:
-            "Abra qualquer cântico na biblioteca ou na Drive para continuar.",
+            "Abra o cântico que acabou de criar (duplo clique na Drive ou na Biblioteca) para continuar no editor.",
         },
       },
       chordpro: {
@@ -964,12 +964,12 @@ export const pt = {
         create: {
           title: "Criar um serviço",
           description:
-            "Crie um serviço novo. Depois vamos montar a ordem de louvor.",
+            "Crie um serviço novo. Depois o tour pede-lhe para o abrir e montar a ordem de louvor.",
         },
         builder: {
           title: "Construtor do culto",
           description:
-            "Abra um serviço para ver o construtor — canções, anúncios, escrituras e mais.",
+            "Abra o serviço (duplo clique) para ver o construtor — canções, anúncios, escrituras e mais.",
         },
         elements: {
           title: "Elementos do culto",
