@@ -64,9 +64,7 @@ export interface HosannaCommandPaletteProps {
   isDataLoading?: boolean;
 }
 
-function InnerPalette(
-  props: HosannaCommandPaletteProps & { staticActions: CommandAction[] },
-) {
+function InnerPalette(props: HosannaCommandPaletteProps) {
   const { isSearching } = useRxDbSearch({
     slugPrefix: props.slugPrefix,
     navigate: props.navigate,
@@ -77,12 +75,7 @@ function InnerPalette(
     getFolderPathString: props.getFolderPathString,
   });
 
-  return (
-    <CommandPaletteModal
-      staticActions={props.staticActions}
-      isSearchingDb={isSearching}
-    />
-  );
+  return <CommandPaletteModal isSearchingDb={isSearching} />;
 }
 
 export function HosannaCommandPalette(props: HosannaCommandPaletteProps) {
@@ -384,7 +377,7 @@ export function HosannaCommandPalette(props: HosannaCommandPaletteProps) {
 
   return (
     <CommandPaletteProvider staticActions={staticActions}>
-      <InnerPalette {...props} staticActions={staticActions} />
+      <InnerPalette {...props} />
       {props.children}
     </CommandPaletteProvider>
   );

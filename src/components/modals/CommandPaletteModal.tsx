@@ -38,12 +38,10 @@ function HighlightText({ text, query }: { text: string; query: string }) {
 }
 
 interface CommandPaletteModalProps {
-  staticActions: CommandAction[];
   isSearchingDb?: boolean;
 }
 
 export function CommandPaletteModal({
-  staticActions,
   isSearchingDb,
 }: CommandPaletteModalProps) {
   const {
