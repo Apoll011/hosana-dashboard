@@ -27,7 +27,8 @@ export type OnboardingEventName =
   | "create-song-modal-opened"
   | "create-collection-modal-opened"
   | "create-service-modal-opened"
-  | "create-event-modal-opened";
+  | "create-event-modal-opened"
+  | "add-to-collection-modal-opened";
 
 type Listener = (detail?: unknown) => void;
 

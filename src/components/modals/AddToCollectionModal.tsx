@@ -5,6 +5,7 @@
 
 import { Button, Input, Modal } from "@/src/components/common";
 import { useI18n } from "@/src/lib/i18n";
+import { emitOnboardingEvent } from "@/src/lib/tour";
 import { Collection } from "@/src/types";
 import {
   getFolderColorStyle,
@@ -44,6 +45,10 @@ export const AddToCollectionModal: React.FC<AddToCollectionModalProps> = ({
       setSelectedCollectionId(null);
       setSearchQuery("");
       setIsSubmitting(false);
+      // After paint so the tour can attach to [data-tour='add-to-collection-modal'].
+      requestAnimationFrame(() => {
+        emitOnboardingEvent("add-to-collection-modal-opened");
+      });
     }
   }, [isOpen]);
 
@@ -73,6 +78,7 @@ export const AddToCollectionModal: React.FC<AddToCollectionModalProps> = ({
       isOpen={isOpen}
       onClose={onClose}
       title={t("collectionsPage.addToCollection")}
+      dataTour="add-to-collection-modal"
     >
       <div className="flex flex-col gap-4 max-h-[75vh]">
         {songTitle ? (
