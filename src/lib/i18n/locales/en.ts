@@ -876,7 +876,7 @@ export const en: typeof pt = {
         open: {
           title: "Open a song",
           description:
-            "Open the song you just created (double-click in Drive or the Library) to continue in the editor.",
+            "Go to Library, then open the song you created (double-click a row). You can also double-click it in Drive.",
         },
       },
       chordpro: {

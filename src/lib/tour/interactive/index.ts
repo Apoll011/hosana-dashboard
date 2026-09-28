@@ -8,6 +8,7 @@ export {
   buildInteractiveSteps,
   destroyInteractiveOnboarding,
   isInteractiveOnboardingRunning,
+  refreshInteractiveOnboarding,
   runInteractiveOnboarding,
   type InteractiveRunOptions,
 } from "./engine";
@@ -19,3 +20,8 @@ export {
   getInteractiveOnboardingRole,
   isInteractiveOnboardingSession,
 } from "./session";
+export {
+  getActiveOnboardingWaitFor,
+  setActiveOnboardingWaitFor,
+  shouldBlockOnboardingNavigation,
+} from "./navigationPolicy";

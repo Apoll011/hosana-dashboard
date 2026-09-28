@@ -374,6 +374,7 @@ export const SongsPage: React.FC<SongsPageProps> = ({
   return (
     <div
       ref={containerRef}
+      data-tour="songs-list"
       onMouseDown={handleWorkspaceMouseDown}
       className="flex-1 flex flex-col w-full mx-auto space-y-4 animate-in fade-in duration-300 overflow-y-auto h-full relative select-none p-4 sm:p-8 max-w-7xl"
     >

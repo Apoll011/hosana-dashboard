@@ -32,11 +32,10 @@ import {
   ExplorerModals,
   ExplorerToolbar,
 } from "../components/layout";
-import { InteractiveOnboardingController } from "../components/tour/InteractiveOnboardingController";
 import { ProductTourController } from "../components/tour/ProductTourController";
 import { ToastContainer } from "../components/Toast";
 import { useAuth } from "../contexts/AuthContext";
-import { emitOnboardingEvent } from "../lib/tour";
+import { emitOnboardingEvent, getActiveOnboardingWaitFor } from "../lib/tour";
 import { usePrint } from "../contexts/PrintContext";
 import { useSync } from "../contexts/SyncContext";
 import { getDatabase, purgeExpiredTrash } from "../db";
@@ -1080,7 +1079,11 @@ export const MainLayout: React.FC = () => {
       });
       closeModal();
       emitOnboardingEvent("song-created");
-      navigate(`${slugPrefix}/songs/${song.id}`);
+      // Stay on the current page while the tour teaches "open a song".
+      // All other navigations (Library, Drive, Agenda, …) stay unrestricted.
+      if (getActiveOnboardingWaitFor() !== "song-created") {
+        navigate(`${slugPrefix}/songs/${song.id}`);
+      }
     } catch {
       // Error toast is already displayed by useSongMutations
     }
@@ -1101,7 +1104,10 @@ export const MainLayout: React.FC = () => {
       });
       await Promise.all([songsQuery.refetch(), foldersQuery.refetch()]);
       closeModal();
-      navigate(`${slugPrefix}/songs/${song.id}`);
+      emitOnboardingEvent("song-created");
+      if (getActiveOnboardingWaitFor() !== "song-created") {
+        navigate(`${slugPrefix}/songs/${song.id}`);
+      }
     } catch {
       // Error toast is already displayed by useSongMutations
     }
@@ -1636,7 +1642,6 @@ export const MainLayout: React.FC = () => {
 
       <ToastContainer />
       <ProductTourController />
-      <InteractiveOnboardingController />
 
       <BatchActionFloatingBar
         selectedCount={totalSelectedCount}

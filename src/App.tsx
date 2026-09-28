@@ -3,6 +3,7 @@ import { preloadEditor } from "@hosanna/chordpro/editor";
 import { useEffect } from "react";
 import { BrowserRouter, useLocation } from "react-router-dom";
 import { NavigationProgressBar } from "./components/NavigationProgressBar";
+import { InteractiveOnboardingController } from "./components/tour/InteractiveOnboardingController";
 import { AuthProvider } from "./contexts/AuthContext";
 import { CacheHydrationProvider } from "./contexts/CacheHydrationProvider";
 import { NavigationTransitionProvider } from "./contexts/NavigationTransitionContext";
@@ -49,6 +50,7 @@ export default function App() {
                   <NavigationTransitionProvider>
                     <PageviewTracker />
                     <NavigationProgressBar />
+                    <InteractiveOnboardingController />
                     <AppRoutes />
                   </NavigationTransitionProvider>
                 </BrowserRouter>

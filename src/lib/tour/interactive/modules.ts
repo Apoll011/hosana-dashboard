@@ -16,7 +16,10 @@ export interface InteractiveStepDef {
   align?: "start" | "center" | "end";
   requireAll?: PermissionString[];
   requireAny?: PermissionString[];
-  when?: (ctx: { collectionsEnabled: boolean; agendaEnabled: boolean }) => boolean;
+  when?: (ctx: {
+    collectionsEnabled: boolean;
+    agendaEnabled: boolean;
+  }) => boolean;
   /** If set, Next stays disabled until this event fires (or user skips step). */
   waitFor?: OnboardingEventName;
   /**
@@ -132,6 +135,9 @@ export const INTERACTIVE_MODULES: InteractiveModuleDef[] = [
         side: "right",
         align: "start",
         waitFor: "song-opened",
+        retargetOn: "navigated-songs",
+        retargetElement: "[data-tour='songs-list']",
+        retargetSide: "top",
       },
     ],
   },

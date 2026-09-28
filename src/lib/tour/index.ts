@@ -6,10 +6,7 @@ export {
 } from "./api";
 export { PRODUCT_TOUR_BLOCKS } from "./blocks";
 export { initializeNewUserTourSettings } from "./initNewUserTour";
-export {
-  roleHasAnyPermission,
-  roleHasPermission,
-} from "./permissions";
+export { roleHasAnyPermission, roleHasPermission } from "./permissions";
 export {
   buildProductTourSteps,
   destroyProductTour,

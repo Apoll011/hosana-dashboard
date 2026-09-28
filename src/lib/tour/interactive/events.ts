@@ -19,6 +19,7 @@ export type OnboardingEventName =
   | "service-opened"
   | "event-created"
   | "navigated-folders"
+  | "navigated-songs"
   | "navigated-collections"
   | "navigated-services"
   | "navigated-agenda"
