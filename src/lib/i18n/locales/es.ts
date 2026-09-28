@@ -856,12 +856,12 @@ export const es: typeof pt = {
         welcome: {
           title: "Tour interactivo",
           description:
-            "Este es un entorno de demostración aislado. Practicarás acciones reales: el tour espera en cada paso.",
+            "Este es un entorno de demostración aislado. En algunos pasos el tour espera una acción; en otros solo hay que pulsar Siguiente. Pulsa Siguiente para empezar.",
         },
         sandbox: {
           title: "Datos seguros",
           description:
-            "Nada de aquí se sincroniza con tu organización real. Explora con libertad.",
+            "Nada de aquí se sincroniza con tu organización real. Explora con libertad. Pulsa Siguiente para continuar.",
         },
       },
       folders: {
@@ -988,8 +988,7 @@ export const es: typeof pt = {
         },
         create: {
           title: "Crear un evento",
-          description:
-            "Crea un evento y, si quieres, vincúlalo a un servicio.",
+          description: "Crea un evento y, si quieres, vincúlalo a un servicio.",
         },
       },
       finish: {
@@ -1262,7 +1261,7 @@ export const es: typeof pt = {
         "Sus responsabilidades en {event} han sido actualizadas.\n\nFecha: {date}\n\nEliminado:\n{list}",
       eventCancelledTitle: "{event} ha sido cancelado",
       eventCancelledBody:
-        "El evento \"{event}\" programado para {date} ha sido cancelado.",
+        'El evento "{event}" programado para {date} ha sido cancelado.',
       dateTitle: "La fecha de {event} ha cambiado",
       dateBody: "Nueva fecha:\n{date}",
       locationTitle: "La ubicación de {event} ha cambiado",
@@ -2344,14 +2343,16 @@ export const es: typeof pt = {
       },
       sections: {
         mostPlayed: "Más tocadas",
-        mostPlayedDesc: "Canciones que aparecen con más frecuencia en tus setlists.",
+        mostPlayedDesc:
+          "Canciones que aparecen con más frecuencia en tus setlists.",
         recent: "Recientes",
         recentDesc: "Usadas en un culto en los últimos 14 días.",
         overdue: "Listas para volver",
         overdueDesc:
           "Ya tocadas, pero en descanso 28+ días — buenas para variar.",
         never: "Nunca tocadas",
-        neverDesc: "Canciones de la biblioteca que aún no han aparecido en un culto.",
+        neverDesc:
+          "Canciones de la biblioteca que aún no han aparecido en un culto.",
         rarely: "Menos tocadas",
         rarelyDesc: "Canciones con menor frecuencia — buenas para variar.",
       },

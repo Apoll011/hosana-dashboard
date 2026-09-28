@@ -852,12 +852,12 @@ export const pt = {
         welcome: {
           title: "Tour interativo",
           description:
-            "Este é um ambiente de demonstração isolado. Vamos praticar as ações reais — o tour espera por si em cada passo.",
+            "Este é um ambiente de demonstração isolado. Em alguns passos o tour espera que faça uma ação; nos outros basta clicar em Seguinte. Clique em Seguinte para começar.",
         },
         sandbox: {
           title: "Dados seguros",
           description:
-            "Nada aqui é sincronizado com a sua organização real. Explore à vontade.",
+            "Nada aqui é sincronizado com a sua organização real. Explore à vontade. Clique em Seguinte para continuar.",
         },
       },
       folders: {

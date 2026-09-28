@@ -9,6 +9,8 @@ import { posthog } from "@/src/lib/posthog";
 import { Folder } from "@/src/types";
 import { Organization } from "better-auth/client";
 import {
+  BarChart3,
+  Building2,
   Calendar1,
   Check,
   ChevronDown,
@@ -20,19 +22,17 @@ import {
   LogOut,
   Music,
   Settings,
-  BarChart3,
-  Building2,
   Trash2,
   Users,
 } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import type { Organization as AuthOrganization } from "../../contexts/AuthContext";
 import { ViewName } from "../../layouts/view";
+import { useCan } from "../../lib/permissions/client";
+import { AnyRoleGate, Can } from "../../lib/permissions/components";
 import { getAvatarGradient, getInitials } from "../../utils";
 import { getRoleLabel } from "../../utils/settingsUtils";
 import { FolderTreeItemNode, FolderTreeNode } from "../explorer";
-import { Can, AnyRoleGate } from "../../lib/permissions/components";
-import { useCan } from "../../lib/permissions/client";
 
 interface AppSidebarProps {
   isSidebarOpen: boolean;
@@ -114,7 +114,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
 
   const teams_enabled = posthog.isFeatureEnabled("teams-enabled") || false;
   const agenda_enabled = posthog.isFeatureEnabled("agenda") || true;
-  const collections_enabled = posthog.isFeatureEnabled("collection") || false;
+  const collections_enabled = posthog.isFeatureEnabled("collection") || true;
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -555,7 +555,9 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
                 <div className="w-5 h-5 flex items-center justify-center shrink-0">
                   <Calendar1
                     className={`w-4.5 h-4.5 ${
-                      view === "agenda" ? "text-orange-500" : "text-m3-secondary"
+                      view === "agenda"
+                        ? "text-orange-500"
+                        : "text-m3-secondary"
                     }`}
                   />
                 </div>

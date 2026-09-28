@@ -40,7 +40,11 @@ export function destroyInteractiveOnboarding(): void {
   runAbort?.abort();
   runAbort = null;
   if (activeDriver) {
-    activeDriver.destroy();
+    try {
+      activeDriver.destroy();
+    } catch {
+      // ignore
+    }
     activeDriver = null;
   }
 }
@@ -126,6 +130,10 @@ export async function runInteractiveOnboarding(
     stagePadding: 8,
     stageRadius: 12,
     popoverClass: "hosana-driver-popover hosana-interactive-tour",
+    nextBtnText: options.labels.next,
+    prevBtnText: options.labels.skipTour,
+    doneBtnText: options.labels.done,
+    progressText: options.labels.progress,
     onDestroyStarted: () => {
       if (!activeDriver) return;
       if (!completed && !dismissed) {
@@ -161,7 +169,7 @@ export async function runInteractiveOnboarding(
       advanceResolver = null;
     };
 
-    let enableNext: (() => void) | null = null;
+    let keyCleanup: (() => void) | null = null;
 
     activeDriver.highlight({
       element,
@@ -173,66 +181,105 @@ export async function runInteractiveOnboarding(
         }`,
         side: step.side,
         align: step.align,
-        showButtons: ["close"],
+        // IMPORTANT: footer is hidden unless next/previous is included
+        showButtons: ["next", "previous", "close"],
+        showProgress: true,
         progressText: options.labels.progress
           .replace("{{current}}", String(i + 1))
           .replace("{{total}}", String(allSteps.length)),
-        onPopoverRender: (popover) => {
-          popover.footerButtons.innerHTML = "";
-
-          const skipTourBtn = document.createElement("button");
-          skipTourBtn.type = "button";
-          skipTourBtn.className = "driver-popover-prev-btn";
-          skipTourBtn.textContent = options.labels.skipTour;
-          skipTourBtn.addEventListener("click", (e) => {
-            e.preventDefault();
-            finish("dismissed");
-            requestAdvance();
-          });
-          popover.footerButtons.appendChild(skipTourBtn);
-
+        nextBtnText: isLast ? options.labels.done : options.labels.next,
+        prevBtnText: step.waitFor
+          ? options.labels.skipStep
+          : options.labels.skipTour,
+        onNextClick: () => {
+          if (step.waitFor && !actionDone) return;
+          requestAdvance();
+        },
+        onPrevClick: () => {
           if (step.waitFor) {
-            const skipStepBtn = document.createElement("button");
-            skipStepBtn.type = "button";
-            skipStepBtn.className = "driver-popover-prev-btn";
-            skipStepBtn.textContent = options.labels.skipStep;
-            skipStepBtn.addEventListener("click", (e) => {
-              e.preventDefault();
-              actionDone = true;
-              requestAdvance();
-            });
-            popover.footerButtons.appendChild(skipStepBtn);
-          }
-
-          const nextBtn = document.createElement("button");
-          nextBtn.type = "button";
-          nextBtn.className = "driver-popover-next-btn";
-          nextBtn.textContent = isLast
-            ? options.labels.done
-            : options.labels.next;
-          nextBtn.disabled = Boolean(step.waitFor && !actionDone);
-          if (nextBtn.disabled) {
-            nextBtn.style.opacity = "0.45";
-            nextBtn.style.cursor = "not-allowed";
-          }
-          nextBtn.addEventListener("click", (e) => {
-            e.preventDefault();
-            if (nextBtn.disabled) return;
-            requestAdvance();
-          });
-          popover.footerButtons.appendChild(nextBtn);
-
-          enableNext = () => {
-            if (actionDone && nextBtn.disabled === false) return;
+            // Skip this step
             actionDone = true;
-            nextBtn.disabled = false;
-            nextBtn.style.opacity = "1";
-            nextBtn.style.cursor = "pointer";
+            requestAdvance();
+            return;
+          }
+          // Exit tour
+          finish("dismissed");
+          requestAdvance();
+        },
+        onCloseClick: () => {
+          finish("dismissed");
+          requestAdvance();
+        },
+        onPopoverRender: (popover) => {
+          // Ensure footer is visible (driver hides it when only close is shown)
+          popover.footer.style.display = "flex";
+          popover.nextButton.style.display = "block";
+          popover.previousButton.style.display = "block";
+
+          if (step.waitFor && !actionDone) {
+            popover.nextButton.disabled = true;
+            popover.nextButton.classList.add("driver-popover-btn-disabled");
+            popover.nextButton.style.opacity = "0.45";
+            popover.nextButton.style.cursor = "not-allowed";
+          } else {
+            popover.nextButton.disabled = false;
+            popover.nextButton.classList.remove("driver-popover-btn-disabled");
+            popover.nextButton.style.opacity = "1";
+            popover.nextButton.style.cursor = "pointer";
+          }
+
+          // For wait steps, also offer "exit tour" as a third control
+          if (step.waitFor) {
+            let exitBtn = popover.footerButtons.querySelector(
+              "[data-tour-exit]",
+            ) as HTMLButtonElement | null;
+            if (!exitBtn) {
+              exitBtn = document.createElement("button");
+              exitBtn.type = "button";
+              exitBtn.dataset.tourExit = "true";
+              exitBtn.className =
+                "driver-popover-prev-btn driver-popover-footer-btn";
+              exitBtn.textContent = options.labels.skipTour;
+              exitBtn.addEventListener("click", (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                finish("dismissed");
+                requestAdvance();
+              });
+              popover.footerButtons.insertBefore(
+                exitBtn,
+                popover.previousButton,
+              );
+            }
+          }
+
+          const enableNext = () => {
+            actionDone = true;
+            popover.nextButton.disabled = false;
+            popover.nextButton.classList.remove("driver-popover-btn-disabled");
+            popover.nextButton.style.opacity = "1";
+            popover.nextButton.style.cursor = "pointer";
             if (popover.description) {
               popover.description.innerText = options.t(step.descriptionKey);
             }
             window.setTimeout(() => requestAdvance(), 400);
           };
+
+          (popover.wrapper as unknown as { __enableNext?: () => void }).__enableNext =
+            enableNext;
+
+          const onKey = (e: KeyboardEvent) => {
+            if (e.key !== "Enter") return;
+            if (step.waitFor && !actionDone) return;
+            const tag = (e.target as HTMLElement)?.tagName;
+            if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") {
+              return;
+            }
+            e.preventDefault();
+            requestAdvance();
+          };
+          window.addEventListener("keydown", onKey);
+          keyCleanup = () => window.removeEventListener("keydown", onKey);
         },
       },
     });
@@ -240,7 +287,10 @@ export async function runInteractiveOnboarding(
     if (step.waitFor) {
       void waitForOnboardingEvent(step.waitFor, signal)
         .then(() => {
-          enableNext?.();
+          const wrap = document.querySelector(
+            ".hosana-interactive-tour",
+          ) as (HTMLElement & { __enableNext?: () => void }) | null;
+          wrap?.__enableNext?.();
         })
         .catch(() => {
           // aborted
@@ -248,6 +298,8 @@ export async function runInteractiveOnboarding(
     }
 
     await advancePromise;
+    keyCleanup?.();
+
     if (dismissed) break;
     if (isLast && !dismissed) {
       finish("completed");
