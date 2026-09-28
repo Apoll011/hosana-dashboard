@@ -885,7 +885,7 @@ export const pt = {
         open: {
           title: "Abrir um cântico",
           description:
-            "Abra o cântico que acabou de criar (duplo clique na Drive ou na Biblioteca) para continuar no editor.",
+            "Vá à Biblioteca e abra o cântico que criou (duplo clique numa linha). Também pode fazer duplo clique na Drive.",
         },
       },
       chordpro: {

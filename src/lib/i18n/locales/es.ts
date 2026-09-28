@@ -889,7 +889,7 @@ export const es: typeof pt = {
         open: {
           title: "Abrir una canción",
           description:
-            "Abre la canción que acabas de crear (doble clic en Drive o en la Biblioteca) para continuar en el editor.",
+            "Ve a Biblioteca y abre la canción que creaste (doble clic en una fila). También puedes hacerlo con doble clic en Drive.",
         },
       },
       chordpro: {

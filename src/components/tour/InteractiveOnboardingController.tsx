@@ -9,11 +9,11 @@ import { deriveView } from "@/src/layouts/view";
 import { useI18n } from "@/src/lib/i18n";
 import { posthog } from "@/src/lib/posthog";
 import {
-  destroyInteractiveOnboarding,
   emitOnboardingEvent,
   getInteractiveOnboardingRole,
   isInteractiveOnboardingRunning,
   isInteractiveOnboardingSession,
+  refreshInteractiveOnboarding,
   runInteractiveOnboarding,
 } from "@/src/lib/tour";
 import React, { useEffect, useMemo, useRef } from "react";
@@ -35,6 +35,7 @@ export const InteractiveOnboardingController: React.FC = () => {
   useEffect(() => {
     if (!isDemoMode() || !isInteractiveOnboardingSession()) return;
     if (view === "explorer") emitOnboardingEvent("navigated-folders");
+    if (view === "songs") emitOnboardingEvent("navigated-songs");
     if (view === "collections" || view === "collection-detail") {
       emitOnboardingEvent("navigated-collections");
     }
@@ -45,6 +46,13 @@ export const InteractiveOnboardingController: React.FC = () => {
     if (view === "agenda") emitOnboardingEvent("navigated-agenda");
     if (view === "song-editor") emitOnboardingEvent("song-opened");
   }, [view]);
+
+  // Keep the spotlight alive after Drive → Library → editor (etc.).
+  useEffect(() => {
+    if (!isDemoMode() || !isInteractiveOnboardingSession()) return;
+    if (!isInteractiveOnboardingRunning()) return;
+    refreshInteractiveOnboarding();
+  }, [location.pathname]);
 
   useEffect(() => {
     if (!isDemoMode() || !isInteractiveOnboardingSession()) return;
@@ -78,12 +86,6 @@ export const InteractiveOnboardingController: React.FC = () => {
 
     return () => window.clearTimeout(timer);
   }, [view, t, updateSetting]);
-
-  useEffect(() => {
-    return () => {
-      destroyInteractiveOnboarding();
-    };
-  }, []);
 
   return null;
 };
