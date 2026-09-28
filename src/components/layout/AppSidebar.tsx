@@ -722,28 +722,6 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
 
             {isUserMenuOpen && (
               <div className="absolute bottom-full left-0 mb-2 w-56 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl z-50 p-2 space-y-1 animate-in fade-in slide-in-from-bottom-2 duration-150">
-                <button
-                  onClick={() => {
-                    setIsUserMenuOpen(false);
-                    navigate(`${slugPrefix}/settings`);
-                    if (window.innerWidth < 768) setIsSidebarOpen(false);
-                  }}
-                  className="w-full flex items-center gap-3 px-3 py-2 text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors cursor-pointer text-left"
-                >
-                  <Settings className="w-4 h-4 text-sky-600" />
-                  {t("sidebar.openSettings")}
-                </button>
-                <button
-                  onClick={() => {
-                    setIsUserMenuOpen(false);
-                    navigate(`${slugPrefix}/organization`);
-                    if (window.innerWidth < 768) setIsSidebarOpen(false);
-                  }}
-                  className="w-full flex items-center gap-3 px-3 py-2 text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors cursor-pointer text-left"
-                >
-                  <Building2 className="w-4 h-4 text-violet-500" />
-                  {t("sidebar.openOrganization")}
-                </button>
                 {canViewLibraryHealth && (
                   <button
                     onClick={() => {
@@ -757,6 +735,28 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
                     {t("sidebar.openAnalytics")}
                   </button>
                 )}
+                <button
+                  onClick={() => {
+                    setIsUserMenuOpen(false);
+                    navigate(`${slugPrefix}/organization`);
+                    if (window.innerWidth < 768) setIsSidebarOpen(false);
+                  }}
+                  className="w-full flex items-center gap-3 px-3 py-2 text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors cursor-pointer text-left"
+                >
+                  <Building2 className="w-4 h-4 text-violet-500" />
+                  {t("sidebar.openOrganization")}
+                </button>
+                <button
+                  onClick={() => {
+                    setIsUserMenuOpen(false);
+                    navigate(`${slugPrefix}/settings`);
+                    if (window.innerWidth < 768) setIsSidebarOpen(false);
+                  }}
+                  className="w-full flex items-center gap-3 px-3 py-2 text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors cursor-pointer text-left"
+                >
+                  <Settings className="w-4 h-4 text-sky-600" />
+                  {t("sidebar.openSettings")}
+                </button>
                 <div className="my-1 border-t border-slate-100 dark:border-slate-800" />
                 <button
                   onClick={() => {
