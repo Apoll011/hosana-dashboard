@@ -298,9 +298,15 @@ export async function runInteractiveOnboarding(
     repaintActiveStep = null;
     setActiveOnboardingWaitFor(step.waitFor ?? null);
 
-    await waitForSelector(step.element, 6000, signal);
+    const elementWaitMs = step.skipIfElementMissing ? 1500 : 6000;
+    const found = await waitForSelector(step.element, elementWaitMs, signal);
     if (signal.aborted || dismissed || completed || myToken !== paintToken) {
       break;
+    }
+    // Skipped “open + menu” → dependent create-menu step has nothing to attach to.
+    if (!found && step.skipIfElementMissing) {
+      setActiveOnboardingWaitFor(null);
+      continue;
     }
 
     let actionDone = !step.waitFor;
@@ -322,6 +328,12 @@ export async function runInteractiveOnboarding(
       advanceResolver = null;
     };
 
+    const skipStep = () => {
+      if (myToken !== paintToken) return;
+      actionDone = true;
+      leaveStep();
+    };
+
     const advanceStepOnAction = () => {
       if (myToken !== paintToken) return;
       if (actionDone) return;
@@ -333,12 +345,20 @@ export async function runInteractiveOnboarding(
 
     let keyCleanup: (() => void) | null = null;
     let retargetCleanup: (() => void) | null = null;
+
+    // Prefer a more specific target when the context menu is open (Add to collection).
+    const initialElement =
+      step.id === "collections.addSongs" &&
+      document.querySelector("[data-tour='ctx-add-to-collection']")
+        ? "[data-tour='ctx-add-to-collection']"
+        : step.element;
+
     let paintOpts: {
       element?: string;
       side?: InteractiveStepDef["side"];
       align?: InteractiveStepDef["align"];
     } = {
-      element: step.element,
+      element: initialElement,
       side: step.side,
       align: step.align,
     };
@@ -384,9 +404,7 @@ export async function runInteractiveOnboarding(
           onPrevClick: () => {
             if (myToken !== paintToken) return;
             if (step.waitFor) {
-              // Skip this wait-for step
-              actionDone = true;
-              leaveStep();
+              skipStep();
               return;
             }
             finish("dismissed");
@@ -413,6 +431,10 @@ export async function runInteractiveOnboarding(
             popover.footer.style.display = "flex";
             popover.nextButton.style.display = "block";
             popover.previousButton.style.display = "block";
+            popover.previousButton.disabled = false;
+            popover.previousButton.classList.remove(
+              "driver-popover-btn-disabled",
+            );
 
             if (step.waitFor && !actionDone) {
               popover.nextButton.disabled = true;
@@ -428,6 +450,21 @@ export async function runInteractiveOnboarding(
               popover.nextButton.style.cursor = "pointer";
             }
 
+            // Dedicated skip handler — don't rely only on driver onPrevClick
+            // (can be swallowed when the popover is unattached / mid-repaint).
+            const onSkipClick = (e: Event) => {
+              e.preventDefault();
+              e.stopPropagation();
+              if (myToken !== paintToken) return;
+              if (step.waitFor) {
+                skipStep();
+              } else {
+                finish("dismissed");
+                leaveStep();
+              }
+            };
+            popover.previousButton.addEventListener("click", onSkipClick, true);
+
             if (step.waitFor) {
               let exitBtn = popover.footerButtons.querySelector(
                 "[data-tour-exit]",
@@ -436,8 +473,9 @@ export async function runInteractiveOnboarding(
                 exitBtn = document.createElement("button");
                 exitBtn.type = "button";
                 exitBtn.dataset.tourExit = "true";
+                // Do NOT use driver-popover-prev-btn — that aliases to Skip.
                 exitBtn.className =
-                  "driver-popover-prev-btn driver-popover-footer-btn";
+                  "driver-popover-footer-btn hosana-tour-exit-btn";
                 exitBtn.textContent = options.labels.skipTour;
                 exitBtn.addEventListener("click", (e) => {
                   e.preventDefault();
@@ -472,7 +510,14 @@ export async function runInteractiveOnboarding(
               leaveStep();
             };
             window.addEventListener("keydown", onKey);
-            keyCleanup = () => window.removeEventListener("keydown", onKey);
+            keyCleanup = () => {
+              window.removeEventListener("keydown", onKey);
+              popover.previousButton.removeEventListener(
+                "click",
+                onSkipClick,
+                true,
+              );
+            };
 
             unlockInteractiveChrome();
           },

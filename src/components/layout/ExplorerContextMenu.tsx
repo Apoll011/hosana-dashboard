@@ -97,9 +97,11 @@ export const ExplorerContextMenu: React.FC<ExplorerContextMenuProps> = ({
 
   return (
     <div
+      data-tour="explorer-context-menu"
       style={{ top: contextMenu.y, left: contextMenu.x }}
-      className="fixed z-50 w-56 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl p-1.5 flex flex-col gap-0.5 text-xs select-none animate-in fade-in zoom-in-95 duration-100"
+      className="fixed z-[80] w-56 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl p-1.5 flex flex-col gap-0.5 text-xs select-none animate-in fade-in zoom-in-95 duration-100"
       onClick={(e) => e.stopPropagation()}
+      onMouseDown={(e) => e.stopPropagation()}
     >
       {contextMenu.type === "canvas" ? (
         <>
@@ -202,6 +204,7 @@ export const ExplorerContextMenu: React.FC<ExplorerContextMenuProps> = ({
                   </span>
                 </button>
                 <button
+                  data-tour="ctx-add-to-collection"
                   onClick={() => {
                     onOpenModal("batch-add-to-collection");
                     onClose();
@@ -413,6 +416,7 @@ export const ExplorerContextMenu: React.FC<ExplorerContextMenuProps> = ({
 
                 {onAddToCollection && (
                   <button
+                    data-tour="ctx-add-to-collection"
                     onClick={() => {
                       onAddToCollection(contextMenu.item as Song);
                       onClose();
