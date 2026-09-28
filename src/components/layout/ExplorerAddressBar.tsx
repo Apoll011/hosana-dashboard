@@ -449,12 +449,9 @@ export const ExplorerAddressBar: React.FC<ExplorerAddressBarProps> = ({
             "agenda.create",
           ]}
         >
-          <div
-            data-tour="toolbar-create"
-            className="relative shrink-0 ml-1"
-            ref={plusMenuRef}
-          >
+          <div className="relative shrink-0 ml-1" ref={plusMenuRef}>
             <button
+              data-tour="toolbar-create"
               onClick={() => {
                 const next = !isPlusMenuOpen;
                 setIsPlusMenuOpen(next);

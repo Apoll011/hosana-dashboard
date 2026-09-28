@@ -90,11 +90,16 @@ export function destroyInteractiveOnboarding(): void {
 /**
  * Driver.js paints a full-screen SVG overlay at z-index ~1e9 and installs
  * capture listeners. For wait-for-action tours we only want a visual cue —
- * never a click shield.
+ * never a click shield. The SVG <path> sets pointer-events:auto inline, so
+ * we must clear that too or the whole UI stays frozen.
  */
 function unlockInteractiveChrome(): void {
+  document
+    .querySelectorAll<HTMLElement>(".driver-overlay, .driver-overlay *")
+    .forEach((el) => {
+      el.style.setProperty("pointer-events", "none", "important");
+    });
   document.querySelectorAll<HTMLElement>(".driver-overlay").forEach((el) => {
-    el.style.setProperty("pointer-events", "none", "important");
     el.style.setProperty("z-index", "30", "important");
   });
   document
@@ -102,6 +107,15 @@ function unlockInteractiveChrome(): void {
     .forEach((el) => {
       el.style.setProperty("pointer-events", "auto", "important");
       el.style.setProperty("z-index", "60", "important");
+    });
+}
+
+/** Hide every tour popover immediately (used when leaving a step). */
+function hideTourPopovers(): void {
+  document
+    .querySelectorAll<HTMLElement>(".hosana-interactive-tour, .driver-popover")
+    .forEach((el) => {
+      el.style.display = "none";
     });
 }
 
@@ -116,7 +130,7 @@ function purgeOrphanedTourDom(): void {
   // Keep only the newest visible interactive popover.
   const live = Array.from(
     document.querySelectorAll<HTMLElement>(".hosana-interactive-tour"),
-  ).filter((el) => el.style.display !== "none");
+  ).filter((el) => getComputedStyle(el).display !== "none");
   live.slice(0, -1).forEach((el) => el.remove());
 }
 
@@ -290,6 +304,9 @@ export async function runInteractiveOnboarding(
     },
   });
 
+  // After skipping “open + menu”, immediately skip dependent create-menu steps.
+  let skipMissingFollowups = false;
+
   for (let i = 0; i < allSteps.length; i++) {
     if (signal.aborted || dismissed || completed) break;
     const step = allSteps[i]!;
@@ -297,49 +314,81 @@ export async function runInteractiveOnboarding(
     const myToken = ++paintToken;
     repaintActiveStep = null;
     setActiveOnboardingWaitFor(step.waitFor ?? null);
+    unlockInteractiveChrome();
 
-    const elementWaitMs = step.skipIfElementMissing ? 1500 : 6000;
-    const found = await waitForSelector(step.element, elementWaitMs, signal);
-    if (signal.aborted || dismissed || completed || myToken !== paintToken) {
-      break;
-    }
-    // Skipped “open + menu” → dependent create-menu step has nothing to attach to.
-    if (!found && step.skipIfElementMissing) {
+    // Cascade: user skipped opening the + menu → skip steps that need it.
+    if (skipMissingFollowups && step.skipIfElementMissing) {
       setActiveOnboardingWaitFor(null);
       continue;
+    }
+    if (skipMissingFollowups && !step.skipIfElementMissing) {
+      skipMissingFollowups = false;
+    }
+
+    // Missing create-menu / context-menu / builder: skip immediately (no long wait).
+    if (step.skipIfElementMissing && step.element) {
+      if (!document.querySelector(step.element)) {
+        const foundLate = await waitForSelector(step.element, 250, signal);
+        if (
+          !foundLate ||
+          signal.aborted ||
+          dismissed ||
+          completed ||
+          myToken !== paintToken
+        ) {
+          setActiveOnboardingWaitFor(null);
+          continue;
+        }
+      }
+    } else if (step.element) {
+      const found = await waitForSelector(step.element, 6000, signal);
+      if (signal.aborted || dismissed || completed || myToken !== paintToken) {
+        break;
+      }
+      // Still missing: keep going with a centered popover, but unlock UI so
+      // Skip works and the user can still click the real + button.
+      if (!found) {
+        unlockInteractiveChrome();
+      }
     }
 
     let actionDone = !step.waitFor;
     let advanceResolver: (() => void) | null = null;
+    let left = false;
     const advancePromise = new Promise<void>((resolve) => {
       advanceResolver = resolve;
     });
 
     /** Leave this step; invalidate any in-flight paints first. */
     const leaveStep = () => {
-      if (myToken !== paintToken) {
-        advanceResolver?.();
-        advanceResolver = null;
-        return;
+      if (left) return;
+      left = true;
+      if (myToken === paintToken) {
+        paintToken += 1;
       }
-      paintToken += 1;
       repaintActiveStep = null;
+      hideTourPopovers();
+      unlockInteractiveChrome();
       advanceResolver?.();
       advanceResolver = null;
     };
 
     const skipStep = () => {
-      if (myToken !== paintToken) return;
+      if (left || myToken !== paintToken) return;
       actionDone = true;
+      if (step.waitFor === "create-menu-opened") {
+        skipMissingFollowups = true;
+      }
+      if (step.waitFor === "context-menu-opened") {
+        skipMissingFollowups = true;
+      }
       leaveStep();
     };
 
     const advanceStepOnAction = () => {
-      if (myToken !== paintToken) return;
+      if (left || myToken !== paintToken) return;
       if (actionDone) return;
       actionDone = true;
-      // Leave immediately. Delayed auto-advance raced with route refresh and
-      // re-painted this step over later ChordPro steps (jump back to step 8).
       leaveStep();
     };
 
@@ -368,17 +417,16 @@ export async function runInteractiveOnboarding(
       side?: InteractiveStepDef["side"];
       align?: InteractiveStepDef["align"];
     }) => {
-      if (myToken !== paintToken) return;
+      if (myToken !== paintToken || left) return;
       if (!activeDriver || allowDestroy || completed || dismissed) return;
       paintOpts = opts;
 
-      const el =
-        opts.element && document.querySelector(opts.element)
-          ? opts.element
-          : undefined;
+      const node = opts.element
+        ? document.querySelector<HTMLElement>(opts.element)
+        : null;
 
       activeDriver.highlight({
-        element: el,
+        element: node ?? undefined,
         disableActiveInteraction: false,
         popover: {
           title: options.t(step.titleKey),
@@ -397,12 +445,12 @@ export async function runInteractiveOnboarding(
             ? options.labels.skipStep
             : options.labels.skipTour,
           onNextClick: () => {
-            if (myToken !== paintToken) return;
+            if (myToken !== paintToken || left) return;
             if (step.waitFor && !actionDone) return;
             leaveStep();
           },
           onPrevClick: () => {
-            if (myToken !== paintToken) return;
+            if (myToken !== paintToken || left) return;
             if (step.waitFor) {
               skipStep();
               return;
@@ -411,17 +459,15 @@ export async function runInteractiveOnboarding(
             leaveStep();
           },
           onCloseClick: () => {
-            if (myToken !== paintToken) return;
+            if (myToken !== paintToken || left) return;
             finish("dismissed");
             leaveStep();
           },
           onPopoverRender: (popover: PopoverDOM) => {
-            // Always unlock — a stale render must never leave the overlay
-            // blocking the whole app (the "frozen" state).
             unlockInteractiveChrome();
             stripDriverTabTrap();
 
-            if (myToken !== paintToken) {
+            if (myToken !== paintToken || left) {
               popover.wrapper.style.display = "none";
               return;
             }
@@ -435,6 +481,9 @@ export async function runInteractiveOnboarding(
             popover.previousButton.classList.remove(
               "driver-popover-btn-disabled",
             );
+            popover.previousButton.style.opacity = "1";
+            popover.previousButton.style.cursor = "pointer";
+            popover.previousButton.style.pointerEvents = "auto";
 
             if (step.waitFor && !actionDone) {
               popover.nextButton.disabled = true;
@@ -450,12 +499,11 @@ export async function runInteractiveOnboarding(
               popover.nextButton.style.cursor = "pointer";
             }
 
-            // Dedicated skip handler — don't rely only on driver onPrevClick
-            // (can be swallowed when the popover is unattached / mid-repaint).
+            // Single skip path (leaveStep is idempotent).
             const onSkipClick = (e: Event) => {
               e.preventDefault();
               e.stopPropagation();
-              if (myToken !== paintToken) return;
+              if (left || myToken !== paintToken) return;
               if (step.waitFor) {
                 skipStep();
               } else {
@@ -473,7 +521,6 @@ export async function runInteractiveOnboarding(
                 exitBtn = document.createElement("button");
                 exitBtn.type = "button";
                 exitBtn.dataset.tourExit = "true";
-                // Do NOT use driver-popover-prev-btn — that aliases to Skip.
                 exitBtn.className =
                   "driver-popover-footer-btn hosana-tour-exit-btn";
                 exitBtn.textContent = options.labels.skipTour;
@@ -493,14 +540,13 @@ export async function runInteractiveOnboarding(
             keyCleanup?.();
             const onKey = (e: KeyboardEvent) => {
               if (e.key !== "Enter") return;
-              if (myToken !== paintToken) return;
+              if (myToken !== paintToken || left) return;
               if (step.waitFor && !actionDone) return;
               const tag = (e.target as HTMLElement)?.tagName;
               if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") {
                 return;
               }
               if ((e.target as HTMLElement)?.isContentEditable) return;
-              // Don't steal Enter from Ace (textarea.ace_text-input)
               if (
                 (e.target as HTMLElement)?.classList?.contains("ace_text-input")
               ) {
@@ -532,8 +578,17 @@ export async function runInteractiveOnboarding(
       const token = myToken;
       const opts = { ...paintOpts };
       void waitForSelector(opts.element, 3500, signal).then((found) => {
-        if (!found) return;
-        if (token !== paintToken || signal.aborted || dismissed || completed) {
+        if (!found) {
+          unlockInteractiveChrome();
+          return;
+        }
+        if (
+          token !== paintToken ||
+          left ||
+          signal.aborted ||
+          dismissed ||
+          completed
+        ) {
           unlockInteractiveChrome();
           return;
         }
@@ -542,6 +597,22 @@ export async function runInteractiveOnboarding(
     };
 
     paintStep(paintOpts);
+
+    // Re-attach after layout/navigation settles (fixes centered popover when
+    // the + button mounts a tick after the step starts).
+    if (step.element) {
+      window.requestAnimationFrame(() => {
+        window.setTimeout(() => {
+          if (myToken !== paintToken || left) return;
+          if (document.querySelector(step.element!)) {
+            paintStep(paintOpts);
+          }
+          unlockInteractiveChrome();
+        }, 80);
+      });
+    } else {
+      unlockInteractiveChrome();
+    }
 
     if (step.retargetOn && step.retargetElement) {
       retargetCleanup = onOnboardingEvent(step.retargetOn, () => {
