@@ -52,10 +52,7 @@ import {
   getCheckpointLsPrefix,
   getEpochLsKey,
 } from "./dbNames";
-import {
-  subscribeLocalChange,
-  subscribePushBaseline,
-} from "./engine/bus";
+import { subscribeLocalChange, subscribePushBaseline } from "./engine/bus";
 import { HosanaCollection } from "./engine/collection";
 import { idbGet, idbPut, openIDB } from "./engine/idb";
 
@@ -93,11 +90,7 @@ type SyncableDoc = {
 };
 
 type CollectionName =
-  | "songs"
-  | "folders"
-  | "collections"
-  | "services"
-  | "agendaEvents";
+  "songs" | "folders" | "collections" | "services" | "agendaEvents";
 
 const ALL_COLLECTION_NAMES: CollectionName[] = [
   "songs",
@@ -214,10 +207,7 @@ function diffNewDocumentState<T extends SyncableDoc>(
     updatedAt: current.updatedAt,
   };
 
-  const keys = new Set([
-    ...Object.keys(current),
-    ...Object.keys(previous),
-  ]);
+  const keys = new Set([...Object.keys(current), ...Object.keys(previous)]);
 
   for (const key of keys) {
     if (key === "id" || key === "updatedAt" || isVolatileKey(key)) continue;
@@ -240,9 +230,10 @@ function diffNewDocumentState<T extends SyncableDoc>(
  * (`hasConflict` / optimistic `updateMany` where clause) — other assumed
  * fields are ignored.
  */
-function toAssumedMasterState(
-  assumed: SyncableDoc & { _deleted?: boolean },
-): { id: string; updatedAt: string } {
+function toAssumedMasterState(assumed: SyncableDoc & { _deleted?: boolean }): {
+  id: string;
+  updatedAt: string;
+} {
   return { id: assumed.id, updatedAt: assumed.updatedAt };
 }
 
@@ -266,10 +257,7 @@ function toChangeRow<T extends SyncableDoc>(
   change: PendingChange<T>,
 ): ChangeRow<T> {
   return {
-    newDocumentState: diffNewDocumentState(
-      change.fullNew,
-      change.fullAssumed,
-    ),
+    newDocumentState: diffNewDocumentState(change.fullNew, change.fullAssumed),
     assumedMasterState: change.fullAssumed
       ? toAssumedMasterState(change.fullAssumed)
       : null,
@@ -327,10 +315,7 @@ async function pushWithConflictRetry<T extends SyncableDoc>(
       const canRetry =
         attempt < CONFLICT_RETRY_LIMIT &&
         (missingAssumed ||
-          isSpuriousConflict(
-            change.fullAssumed as T | undefined,
-            serverDoc,
-          ));
+          isSpuriousConflict(change.fullAssumed as T | undefined, serverDoc));
 
       if (canRetry) {
         retryChanges.push({
@@ -593,8 +578,7 @@ async function replicateCollection<
     } as T & { _deleted: boolean };
 
     const cached = serverCache.get(d.id) as
-      | (T & { _deleted: boolean })
-      | undefined;
+      (T & { _deleted: boolean }) | undefined;
 
     // Prefer a content/tombstone diff against the last-known server snapshot.
     // This avoids re-pushing every cycle when the pull checkpoint hasn't yet

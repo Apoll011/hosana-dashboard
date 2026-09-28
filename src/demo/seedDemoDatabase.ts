@@ -45,9 +45,7 @@ export async function seedDemoDatabase(
     ...songs.map((doc) => upsertDoc(db.songs, asUpsertable(doc))),
     ...collections.map((doc) => upsertDoc(db.collections, asUpsertable(doc))),
     ...services.map((doc) => upsertDoc(db.services, asUpsertable(doc))),
-    ...agendaEvents.map((doc) =>
-      upsertDoc(db.agendaEvents, asUpsertable(doc)),
-    ),
+    ...agendaEvents.map((doc) => upsertDoc(db.agendaEvents, asUpsertable(doc))),
   ]);
 
   markDemoSeeded();

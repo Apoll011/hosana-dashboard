@@ -115,7 +115,9 @@ function InsightSection({
           <Icon className="w-4 h-4 text-m3-primary" />
           {title}
         </h3>
-        <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{desc}</p>
+        <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+          {desc}
+        </p>
       </div>
       <div className="p-2 sm:p-3 space-y-0.5">
         {songs.length === 0 ? (
@@ -407,9 +409,7 @@ export const SetlistInsightsTab: React.FC<SetlistInsightsTabProps> = ({
                     </span>
                     <span className="block text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5">
                       {song.artist || "—"}
-                      {song.lastServiceName
-                        ? ` · ${song.lastServiceName}`
-                        : ""}
+                      {song.lastServiceName ? ` · ${song.lastServiceName}` : ""}
                       {song.upcomingCount > 0
                         ? ` · ${t("analytics.setlist.upcoming", {
                             count: formatCount(song.upcomingCount),

@@ -125,11 +125,7 @@ function UsageBar({
 
   const pct = percentage ?? 0;
   const tone =
-    pct >= 90
-      ? "bg-rose-500"
-      : pct >= 70
-        ? "bg-amber-500"
-        : "bg-m3-primary";
+    pct >= 90 ? "bg-rose-500" : pct >= 70 ? "bg-amber-500" : "bg-m3-primary";
 
   return (
     <div className="h-1.5 w-full rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
@@ -256,8 +252,7 @@ export const UsageOverviewTab: React.FC<UsageOverviewTabProps> = ({
         ? "analytics.usage.planStatus.active"
         : "analytics.usage.planStatus.none";
 
-  const formatCount = (n: number) =>
-    new Intl.NumberFormat(locale).format(n);
+  const formatCount = (n: number) => new Intl.NumberFormat(locale).format(n);
 
   const formatUsed = (id: UsageResourceId, used: number) => {
     if (id === "storage") return formatBytes(used, locale);

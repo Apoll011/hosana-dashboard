@@ -215,9 +215,7 @@ export function computeSetlistInsights(
         s.daysSinceLastPlayed != null &&
         s.daysSinceLastPlayed >= staleAfterDays,
     )
-    .sort(
-      (a, b) => (b.daysSinceLastPlayed ?? 0) - (a.daysSinceLastPlayed ?? 0),
-    )
+    .sort((a, b) => (b.daysSinceLastPlayed ?? 0) - (a.daysSinceLastPlayed ?? 0))
     .slice(0, highlightLimit);
 
   const recentlyPlayed = songsPlayed

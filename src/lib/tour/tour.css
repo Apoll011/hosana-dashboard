@@ -90,7 +90,11 @@
 }
 
 .hosana-driver-popover .hosana-tour-exit-btn:hover {
-  background: color-mix(in srgb, var(--color-m3-secondary, #64748b) 10%, transparent);
+  background: color-mix(
+    in srgb,
+    var(--color-m3-secondary, #64748b) 10%,
+    transparent
+  );
 }
 
 .hosana-driver-popover .driver-popover-close-btn {
@@ -142,7 +146,8 @@ body:has(.hosana-interactive-tour) .driver-overlay {
   z-index: 30 !important;
 }
 
-body:has(.hosana-interactive-tour) .hosana-driver-popover.hosana-interactive-tour {
+body:has(.hosana-interactive-tour)
+  .hosana-driver-popover.hosana-interactive-tour {
   pointer-events: auto !important;
   z-index: 60 !important;
 }

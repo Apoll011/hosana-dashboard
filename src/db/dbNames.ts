@@ -34,9 +34,7 @@ export function getCheckpointDbName(): string {
 }
 
 export function getCheckpointLsPrefix(): string {
-  return isDemoMode()
-    ? DEMO_CHECKPOINT_LS_PREFIX
-    : PROD_CHECKPOINT_LS_PREFIX;
+  return isDemoMode() ? DEMO_CHECKPOINT_LS_PREFIX : PROD_CHECKPOINT_LS_PREFIX;
 }
 
 export function getEpochLsKey(): string {

@@ -6,10 +6,7 @@
 import { useI18n } from "@/src/lib/i18n";
 import { songImportRegistry } from "@/src/lib/import";
 import { useActiveRole } from "@/src/lib/permissions/client";
-import {
-  startInteractiveOnboarding,
-  startProductTour,
-} from "@/src/lib/tour";
+import { startInteractiveOnboarding, startProductTour } from "@/src/lib/tour";
 import {
   ChevronDown,
   ChevronUp,

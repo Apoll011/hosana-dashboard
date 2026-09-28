@@ -37,9 +37,8 @@ export async function clearDemoData(): Promise<void> {
   disableDemoMode();
 
   try {
-    const { disableInteractiveOnboardingSession } = await import(
-      "../lib/tour/interactive/session"
-    );
+    const { disableInteractiveOnboardingSession } =
+      await import("../lib/tour/interactive/session");
     disableInteractiveOnboardingSession();
   } catch {
     // ignore

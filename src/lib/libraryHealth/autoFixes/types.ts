@@ -25,7 +25,5 @@ export interface LibraryHealthAutoFix {
    */
   apply(
     song: Song,
-  ): Partial<
-    Pick<Song, "content" | "title" | "artist" | "song_number">
-  > | null;
+  ): Partial<Pick<Song, "content" | "title" | "artist" | "song_number">> | null;
 }

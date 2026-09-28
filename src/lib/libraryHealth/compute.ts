@@ -5,10 +5,7 @@
 
 import type { SongScore } from "@hosanna/chordpro";
 import type { Song } from "../../types";
-import {
-  getAutoFixForCriterion,
-  listAutoFixes,
-} from "./autoFixes/registry";
+import { getAutoFixForCriterion, listAutoFixes } from "./autoFixes/registry";
 
 export type ScoreMissingCriterion = SongScore["missing"][number];
 
