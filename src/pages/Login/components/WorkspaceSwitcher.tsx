@@ -75,7 +75,7 @@ export function WorkspaceSwitcher({ className = "" }: { className?: string }) {
         aria-label={t("sidebar.switchWorkspace")}
         aria-expanded={isOpen}
         aria-haspopup="true"
-        className="p-2.5 rounded-full bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border border-slate-200/80 dark:border-slate-800 text-slate-700 dark:text-slate-200 hover:scale-110 active:scale-95 shadow-lg transition-all duration-200 inline-flex items-center gap-1.5"
+        className="p-2.5 rounded-full bg-m3-card/80 backdrop-blur-md border border-m3-border text-m3-text shadow-[var(--shadow-lg)] transition-colors inline-flex items-center gap-1.5"
       >
         <Building2 className="w-5 h-5 shrink-0" />
         <span className="text-xs font-bold max-w-24 truncate hidden sm:inline">
@@ -89,8 +89,8 @@ export function WorkspaceSwitcher({ className = "" }: { className?: string }) {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-64 origin-top-right rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 p-1.5 shadow-xl ring-1 ring-black/5 dark:ring-white/5 z-50 animate-in fade-in zoom-in-95 duration-150">
-          <p className="px-3 pt-1.5 pb-1 text-[10px] font-black uppercase tracking-[0.15em] text-slate-400 dark:text-slate-500">
+        <div className="absolute right-0 mt-2 w-64 origin-top-right rounded-[var(--radius-xl)] border border-m3-border/60 bg-m3-card p-1.5 shadow-[var(--shadow-lg)] ring-1 ring-black/5 dark:ring-white/5 z-50 animate-in fade-in zoom-in-95 duration-150">
+          <p className="px-3 pt-1.5 pb-1 text-label text-m3-secondary">
             {t("sidebar.switchWorkspace")}
           </p>
           {organizations.map((org) => {
@@ -104,11 +104,11 @@ export function WorkspaceSwitcher({ className = "" }: { className?: string }) {
                 onClick={() => handleSwitch(org.id)}
                 className={`flex w-full items-center gap-2.5 rounded-xl px-2.5 py-2 text-xs font-medium transition-colors cursor-pointer ${
                   isActive
-                    ? "bg-blue-50 dark:bg-m3-primary/20 text-m3-primary font-bold"
-                    : "text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white"
+                    ? "bg-m3-primary/10 dark:bg-m3-primary/20 text-m3-primary font-bold"
+                    : "text-m3-secondary hover:bg-m3-hover hover:text-m3-text"
                 }`}
               >
-                <div className="w-7 h-7 rounded-lg shrink-0 overflow-hidden flex items-center justify-center bg-m3-primary/10 border border-slate-200 dark:border-slate-700 text-[11px] font-black text-m3-primary">
+                <div className="w-7 h-7 rounded-lg shrink-0 overflow-hidden flex items-center justify-center bg-m3-primary/10 border border-m3-border text-[11px] font-semibold text-m3-primary">
                   {org.logo ? (
                     <img
                       src={org.logo}
@@ -135,7 +135,7 @@ export function WorkspaceSwitcher({ className = "" }: { className?: string }) {
             );
           })}
           {errorMsg && (
-            <p className="px-3 pb-1.5 pt-2 text-[11px] font-medium text-rose-600 dark:text-rose-400">
+            <p className="px-3 pb-1.5 pt-2 text-[11px] font-medium text-m3-danger">
               {errorMsg}
             </p>
           )}

@@ -33,12 +33,12 @@ export const ResponsibilitiesPanel: React.FC<ResponsibilitiesPanelProps> = ({
 
   if (!event) {
     return (
-      <div className="bg-white dark:bg-slate-900 border border-m3-border rounded-2xl p-10 shadow-xs flex flex-col items-center justify-center text-center h-full">
-        <Calendar className="w-10 h-10 text-slate-300 dark:text-slate-700 mb-3" />
-        <p className="text-sm font-bold text-slate-500 dark:text-slate-400">
+      <div className="bg-m3-card border border-m3-border rounded-[var(--radius-xl)] p-10 shadow-[var(--shadow-sm)] flex flex-col items-center justify-center text-center h-full">
+        <Calendar className="w-10 h-10 text-m3-secondary mb-3" />
+        <p className="text-sm font-bold text-m3-secondary">
           {t("agenda.selectEventToSeeDetails")}
         </p>
-        <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">
+        <p className="text-xs text-m3-secondary mt-1">
           {t("agenda.pickDayHint")}
         </p>
       </div>
@@ -47,15 +47,15 @@ export const ResponsibilitiesPanel: React.FC<ResponsibilitiesPanelProps> = ({
 
   return (
     <div className="space-y-4">
-      <div className="bg-white dark:bg-slate-900 border border-m3-border rounded-2xl p-5 shadow-xs">
+      <div className="bg-m3-card border border-m3-border rounded-[var(--radius-xl)] p-5 shadow-[var(--shadow-sm)]">
         <div className="flex items-center justify-between mb-1">
-          <h3 className="text-sm font-black text-slate-900 dark:text-slate-100">
+          <h3 className="text-title text-m3-text">
             {t("agenda.responsibilities")}
           </h3>
           {canUpdate && (
             <button
               onClick={onAddResponsibility}
-              className="flex items-center gap-1.5 text-xs font-bold text-[#0284c7] bg-sky-50 dark:bg-sky-950/40 hover:bg-sky-100 dark:hover:bg-sky-900/50 px-3 py-1.5 rounded-xl border border-sky-200 dark:border-sky-900/50 transition-colors cursor-pointer"
+              className="flex items-center gap-1.5 text-xs font-bold text-m3-primary bg-m3-primary/10 hover:bg-m3-primary/15 px-3 py-1.5 rounded-xl border border-m3-primary/20 transition-colors cursor-pointer"
             >
               <Plus className="w-3.5 h-3.5" />
               {t("agenda.addResponsibility")}
@@ -64,7 +64,7 @@ export const ResponsibilitiesPanel: React.FC<ResponsibilitiesPanelProps> = ({
         </div>
 
         {responsibilities.length === 0 ? (
-          <p className="text-xs text-slate-400 dark:text-slate-500 py-6 text-center">
+          <p className="text-xs text-m3-secondary py-6 text-center">
             {t("agenda.noResponsibilities")}
           </p>
         ) : (
@@ -82,7 +82,7 @@ export const ResponsibilitiesPanel: React.FC<ResponsibilitiesPanelProps> = ({
           </div>
         )}
 
-        <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-4 pt-3 border-t border-m3-border/40">
+        <p className="text-[11px] text-m3-secondary mt-4 pt-3 border-t border-m3-border/40">
           {t("agenda.assigneesGetNotified")}
         </p>
       </div>

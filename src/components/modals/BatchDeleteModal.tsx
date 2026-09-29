@@ -102,7 +102,7 @@ export const BatchDeleteModal: React.FC<BatchDeleteModalProps> = ({
                   setFolderAction("move_to_root");
                   setConfirmText("");
                 }}
-                className="text-[#0284c7] focus:ring-[#0284c7] mt-0.5"
+                className="text-m3-primary focus:ring-m3-primary mt-0.5"
               />
               <div className="flex flex-col">
                 <span className="text-xs font-bold text-slate-900 dark:text-slate-100">

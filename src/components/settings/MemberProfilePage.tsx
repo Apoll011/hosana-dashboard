@@ -145,13 +145,13 @@ export const MemberProfilePage: React.FC<MemberProfilePageProps> = ({
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <span className="text-2xl font-black text-white">
+                <span className="text-2xl font-semibold text-white">
                   {getInitials(member.name || "?")}
                 </span>
               )}
             </div>
             {isSelf && (
-              <span className="mb-2 text-[10px] font-black uppercase tracking-wider text-m3-primary bg-sky-50 dark:bg-sky-950 px-2 py-1 rounded-md border border-sky-200 dark:border-sky-800">
+              <span className="mb-2 text-label text-m3-primary bg-m3-primary/10 px-2 py-1 rounded-[var(--radius-sm)] border border-m3-primary/20">
                 {t("common.you")}
               </span>
             )}

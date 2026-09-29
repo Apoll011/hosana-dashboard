@@ -78,12 +78,12 @@ export const VerifyEmailPage: React.FC = () => {
         optionalMsg={t("auth.forgotPassword.backToLogin")}
       >
         <div className="py-2 flex flex-col items-center text-center gap-5">
-          <div className="w-16 h-16 bg-blue-50 dark:bg-blue-950/40 rounded-full flex items-center justify-center text-blue-600 dark:text-blue-400">
+          <div className="w-16 h-16 bg-m3-primary/10 rounded-full flex items-center justify-center text-m3-primary">
             <MailCheck className="w-8 h-8" />
           </div>
 
-          <div className="w-full border-t border-slate-100 dark:border-[#303134] pt-5">
-            <p className="text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400 mb-3">
+          <div className="w-full border-t border-m3-border/60 pt-5">
+            <p className="text-xs sm:text-sm font-medium text-m3-secondary mb-3">
               Não recebeu o e-mail? Reenviar:
             </p>
             {resendSuccess ? (
@@ -107,14 +107,14 @@ export const VerifyEmailPage: React.FC = () => {
                 <Button
                   type="submit"
                   isLoading={resendLoading}
-                  className="h-12.5 sm:h-13.5 px-5 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm transition-all shadow-none border-0 shrink-0"
+                  className="h-12.5 sm:h-13.5 px-5 rounded-full bg-m3-primary hover:bg-m3-primary-dark text-white font-medium text-sm transition-colors shadow-none border-0 shrink-0"
                 >
                   <RefreshCw className="w-4 h-4" />
                 </Button>
               </form>
             )}
             {resendError && (
-              <p className="text-xs text-red-600 dark:text-red-400 mt-2">
+              <p className="text-xs text-m3-danger mt-2">
                 {resendError}
               </p>
             )}
@@ -134,7 +134,7 @@ export const VerifyEmailPage: React.FC = () => {
         optionalMsg={t("auth.forgotPassword.backToLogin")}
       >
         <div className="py-12 flex flex-col items-center gap-4">
-          <Loader2 className="w-10 h-10 text-blue-600 animate-spin" />
+          <Loader2 className="w-10 h-10 text-m3-primary animate-spin" />
         </div>
       </LoginLayout>
     );
@@ -155,7 +155,7 @@ export const VerifyEmailPage: React.FC = () => {
           </div>
           <AppLink
             to="/login"
-            className="inline-flex items-center justify-center h-10 px-6 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm transition-all"
+            className="inline-flex items-center justify-center h-10 px-6 rounded-full bg-m3-primary hover:bg-m3-primary-dark text-white font-medium text-sm transition-colors"
           >
             {t("auth.login.loginBtn")}
           </AppLink>
@@ -192,7 +192,7 @@ export const VerifyEmailPage: React.FC = () => {
             <Button
               type="submit"
               isLoading={resendLoading}
-              className="h-12.5 sm:h-13.5 px-5 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm transition-all shadow-none border-0 shrink-0"
+              className="h-12.5 sm:h-13.5 px-5 rounded-full bg-m3-primary hover:bg-m3-primary-dark text-white font-medium text-sm transition-colors shadow-none border-0 shrink-0"
             >
               <RefreshCw className="w-4 h-4" />
             </Button>
@@ -203,7 +203,7 @@ export const VerifyEmailPage: React.FC = () => {
             </p>
           )}
           {resendError && (
-            <p className="text-xs text-red-600 dark:text-red-400">
+            <p className="text-xs text-m3-danger">
               {resendError}
             </p>
           )}
@@ -221,12 +221,12 @@ export const VerifyEmailPage: React.FC = () => {
       optionalMsg={t("auth.forgotPassword.backToLogin")}
     >
       <div className="py-4 flex flex-col items-center text-center gap-4 animate-in zoom-in-95 duration-300">
-        <div className="w-16 h-16 bg-red-100 dark:bg-red-950/50 rounded-full flex items-center justify-center text-red-600 dark:text-red-400 mb-2">
+        <div className="w-16 h-16 bg-m3-danger/10 rounded-full flex items-center justify-center text-m3-danger mb-2">
           <XCircle className="w-8 h-8" />
         </div>
         <Link
           to="/login"
-          className="inline-flex items-center justify-center h-10 px-6 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm transition-all"
+          className="inline-flex items-center justify-center h-10 px-6 rounded-full bg-m3-primary hover:bg-m3-primary-dark text-white font-medium text-sm transition-colors"
         >
           {t("auth.forgotPassword.backToLogin")}
         </Link>

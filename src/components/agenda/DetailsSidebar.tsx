@@ -57,15 +57,15 @@ export const DetailsSidebar: React.FC<DetailsSidebarProps> = ({
 
   return (
     <div className="space-y-4">
-      <div className="bg-white dark:bg-slate-900 border border-m3-border rounded-2xl p-5 shadow-xs">
+      <div className="bg-m3-card border border-m3-border rounded-[var(--radius-xl)] p-5 shadow-[var(--shadow-sm)]">
         <div className="flex items-center justify-between mb-3">
-          <h3 className="text-[11px] font-black uppercase tracking-widest text-m3-secondary opacity-70">
+          <h3 className="text-label">
             {t("common.details")}
           </h3>
           {canUpdate && (
             <button
               onClick={onEdit}
-              className="p-1 rounded-lg text-slate-400 hover:text-[#0284c7] hover:bg-m3-hover transition-colors cursor-pointer"
+              className="p-1 rounded-lg text-m3-secondary hover:text-m3-primary hover:bg-m3-hover transition-colors cursor-pointer"
               title={t("agenda.editEvent")}
             >
               <Pencil className="w-3.5 h-3.5" />
@@ -75,49 +75,49 @@ export const DetailsSidebar: React.FC<DetailsSidebarProps> = ({
 
         <div className="space-y-3">
           <div>
-            <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wide">
+            <p className="text-label">
               {t("common.name")}
             </p>
-            <p className="text-sm font-bold text-slate-900 dark:text-slate-100 mt-0.5 truncate">
+            <p className="text-sm font-semibold text-m3-text mt-0.5 truncate">
               {event.title}
             </p>
           </div>
           <div>
-            <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wide">
+            <p className="text-label">
               {t("common.date")}
             </p>
-            <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 mt-0.5">
+            <p className="text-sm font-semibold text-m3-text mt-0.5">
               {formatLongDate(event.date, t)}
             </p>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wide">
+              <p className="text-label">
                 {t("agenda.time")}
               </p>
-              <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 mt-0.5">
+              <p className="text-sm font-semibold text-m3-text mt-0.5">
                 {event.time}
               </p>
             </div>
             <div>
-              <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wide">
+              <p className="text-label">
                 {t("agenda.duration")}
               </p>
-              <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 mt-0.5">
+              <p className="text-sm font-semibold text-m3-text mt-0.5">
                 {t("agenda.minutes", { minutes: event.durationMinutes })}
               </p>
             </div>
           </div>
           <div>
-            <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wide">
+            <p className="text-label">
               {t("agenda.type")}
             </p>
-            <p className="text-sm font-bold text-[#0284c7] mt-0.5">
+            <p className="text-sm font-semibold text-m3-primary mt-0.5">
               {event.type}
             </p>
           </div>
           <div>
-            <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wide">
+            <p className="text-label">
               {t("agenda.linkedService")}
             </p>
             {linkedService ? (
@@ -127,16 +127,16 @@ export const DetailsSidebar: React.FC<DetailsSidebarProps> = ({
                     navigate(`${slugPrefix}/services/${linkedService.id}`)
                   }
                   title={t("agenda.openService")}
-                  className="flex items-center text-slate-800 justify-between gap-2 rounded-lg hover:text-[#0284c7] hover:text-bold transition-colors cursor-pointer shrink-0"
+                  className="flex items-center text-m3-text justify-between gap-2 rounded-lg hover:text-m3-primary hover:text-bold transition-colors cursor-pointer shrink-0"
                 >
-                  <span className="text-sm font-bold  dark:text-slate-200 truncate min-w-0">
+                  <span className="text-sm font-semibold text-m3-text truncate min-w-0">
                     {linkedService.name}
                   </span>
 
-                  <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
+                  <ExternalLink className="w-3.5 h-3.5 text-m3-secondary" />
                 </button>
-                <p className="text-[11px] font-semibold text-slate-400 mt-0.5 flex items-center gap-2">
-                  <Link2 className="w-3.5 h-3.5 text-[#0284c7] " />
+                <p className="text-[11px] font-semibold text-m3-secondary mt-0.5 flex items-center gap-2">
+                  <Link2 className="w-3.5 h-3.5 text-m3-primary " />
                   {formatShortDate(linkedService.date, t)} ·{" "}
                   {t("agenda.minutes", {
                     minutes: serviceTotalMinutes(linkedService),
@@ -144,24 +144,24 @@ export const DetailsSidebar: React.FC<DetailsSidebarProps> = ({
                 </p>
               </div>
             ) : (
-              <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 mt-0.5">
+              <p className="text-sm font-semibold text-m3-text mt-0.5">
                 —
               </p>
             )}
           </div>
           <div>
-            <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wide">
+            <p className="text-label">
               {t("agenda.location")}
             </p>
-            <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 mt-0.5">
+            <p className="text-sm font-semibold text-m3-text mt-0.5">
               {event.location || "—"}
             </p>
           </div>
           <div>
-            <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wide">
+            <p className="text-label">
               {t("agenda.notes")}
             </p>
-            <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5 leading-relaxed">
+            <p className="text-xs text-m3-secondary mt-0.5 leading-relaxed">
               {event.notes || t("agenda.noNotes")}
             </p>
           </div>
@@ -169,8 +169,8 @@ export const DetailsSidebar: React.FC<DetailsSidebarProps> = ({
       </div>
 
       {canNotify && (
-        <div className="bg-white dark:bg-slate-900 border border-m3-border rounded-2xl p-5 shadow-xs">
-          <h3 className="text-[11px] font-black uppercase tracking-widest text-m3-secondary opacity-70 mb-3 flex items-center gap-1.5">
+        <div className="bg-m3-card border border-m3-border rounded-[var(--radius-xl)] p-5 shadow-[var(--shadow-sm)]">
+          <h3 className="text-label mb-3 flex items-center gap-1.5">
             <Bell className="w-3.5 h-3.5" />
             {t("agenda.notifications")}
           </h3>
@@ -178,10 +178,10 @@ export const DetailsSidebar: React.FC<DetailsSidebarProps> = ({
           <div className="space-y-3">
             {/* Assignments — only people not yet notified */}
             <div>
-              <p className="text-xs font-bold text-slate-900 dark:text-slate-100">
+              <p className="text-xs font-semibold text-m3-text">
                 {t("agenda.notify.assignSection")}
               </p>
-              <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5 leading-relaxed">
+              <p className="text-[11px] text-m3-secondary mt-0.5 leading-relaxed">
                 {unnotifiedCount > 0
                   ? tc("agenda.notify.pending", unnotifiedCount)
                   : t("agenda.notify.allNotified")}
@@ -197,17 +197,17 @@ export const DetailsSidebar: React.FC<DetailsSidebarProps> = ({
               >
                 {t("agenda.notify.assignBtn")}
               </Button>
-              <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1.5">
+              <p className="text-[10px] text-m3-secondary mt-1.5">
                 {t("agenda.notify.assignHint")}
               </p>
             </div>
 
             {/* Date / location changes — explicit, aggregated when both */}
             <div className="pt-3 border-t border-m3-border/40">
-              <p className="text-xs font-bold text-slate-900 dark:text-slate-100">
+              <p className="text-xs font-semibold text-m3-text">
                 {t("agenda.notify.updateSection")}
               </p>
-              <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5 leading-relaxed">
+              <p className="text-[11px] text-m3-secondary mt-0.5 leading-relaxed">
                 {pendingDate && pendingLocation
                   ? t("agenda.notify.bothHint")
                   : pendingDate

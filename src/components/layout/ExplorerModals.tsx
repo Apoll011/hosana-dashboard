@@ -794,10 +794,10 @@ export const ExplorerModals: React.FC<ExplorerModalsProps> = ({
                 value="root"
                 checked={targetParentFolderId === null}
                 onChange={() => setTargetParentFolderId(null)}
-                className="text-[#0284c7] focus:ring-[#0284c7]"
+                className="text-m3-primary focus:ring-m3-primary"
               />
               <div className="flex items-center gap-2 text-xs font-bold text-slate-900 dark:text-slate-100">
-                <HardDrive className="w-4 h-4 text-[#0284c7]" />
+                <HardDrive className="w-4 h-4 text-m3-primary" />
                 <span>{t("explorer.modals.rootTopLevel")}</span>
               </div>
             </label>
@@ -864,7 +864,7 @@ export const ExplorerModals: React.FC<ExplorerModalsProps> = ({
                     setDeleteAcao("move_to_root");
                     setConfirmFolderName("");
                   }}
-                  className="text-[#0284c7] focus:ring-[#0284c7]"
+                  className="text-m3-primary focus:ring-m3-primary"
                 />
                 <div className="flex flex-col">
                   <span className="text-xs font-bold text-slate-900 dark:text-slate-100">

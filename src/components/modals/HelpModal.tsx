@@ -57,7 +57,7 @@ const SHORTCUTS: [string, string][] = [
 
 // Componente visual para as teclas
 const Key = ({ children }: { children: React.ReactNode }) => (
-  <kbd className="inline-flex items-center justify-center min-w-6 px-1.5 py-0.5 rounded-md bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 shadow-[0_2px_0_0_rgba(15,23,42,0.1)] dark:shadow-[0_2px_0_0_rgba(0,0,0,0.5)] text-[10px] sm:text-xs font-mono font-bold text-slate-700 dark:text-slate-300">
+  <kbd className="inline-flex items-center justify-center min-w-6 px-1.5 py-0.5 rounded-md bg-m3-card border border-m3-border shadow-[0_2px_0_0_rgba(15,23,42,0.1)] dark:shadow-[0_2px_0_0_rgba(0,0,0,0.5)] text-[10px] sm:text-xs font-mono font-bold text-m3-text">
     {children}
   </kbd>
 );
@@ -68,7 +68,7 @@ const renderShortcut = (shortcut: string) => {
     <React.Fragment key={key}>
       <Key>{key}</Key>
       {index < array.length - 1 && (
-        <span className="text-slate-400 text-xs">+</span>
+        <span className="text-m3-secondary text-xs">+</span>
       )}
     </React.Fragment>
   ));
@@ -90,22 +90,22 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
 
   return (
     <div
-      className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-100 flex items-center justify-center p-4 sm:p-6 animate-in fade-in duration-200"
+      className="fixed inset-0 bg-black/40 backdrop-blur-sm z-100 flex items-center justify-center p-4 sm:p-6 animate-in fade-in duration-200"
       onClick={onClose}
     >
       <div
-        className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl max-w-4xl w-full max-h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200 border border-slate-200 dark:border-slate-800"
+        className="bg-m3-card rounded-[var(--radius-xl)] shadow-[var(--shadow-lg)] max-w-4xl w-full max-h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200 border border-m3-border"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header Fixo */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
-          <h2 className="text-sm font-black uppercase tracking-widest text-primary dark:text-sky-400 flex items-center gap-2">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-m3-border/60 bg-m3-sidebar/50">
+          <h2 className="text-label text-m3-primary flex items-center gap-2">
             <Lightbulb className="w-4 h-4" />
             {t("misc.help.title")}
           </h2>
           <button
             onClick={onClose}
-            className="p-2 rounded-full hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors cursor-pointer"
+            className="p-2 rounded-full hover:bg-m3-hover text-m3-secondary hover:text-m3-text transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -115,12 +115,12 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
         <div className="overflow-y-auto p-6 grid md:grid-cols-2 gap-8 md:gap-12">
           {/* Coluna 1: Snippets */}
           <div>
-            <div className="flex items-center gap-2 mb-2 text-primary dark:text-sky-400">
+            <div className="flex items-center gap-2 mb-2 text-m3-primary">
               <h3 className="text-lg font-bold">
                 {t("misc.help.smartSnippets")}
               </h3>
             </div>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mb-5 leading-relaxed">
+            <p className="text-xs text-m3-secondary mb-5 leading-relaxed">
               Escreva uma das siglas abaixo numa linha vazia e prima{" "}
               <Key>TAB</Key> para o editor preencher automaticamente.
             </p>
@@ -129,22 +129,22 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
               {SNIPPETS.map(([trigger, result]) => (
                 <div
                   key={trigger}
-                  className="flex items-center justify-between py-2 border-b border-slate-100 dark:border-slate-800/60 group hover:bg-slate-50 dark:hover:bg-slate-800/30 px-2 -mx-2 rounded-lg transition-colors"
+                  className="flex items-center justify-between py-2 border-b border-m3-border/60 group hover:bg-m3-hover px-2 -mx-2 rounded-lg transition-colors"
                 >
-                  <code className="text-[11px] sm:text-xs font-mono font-bold text-primary dark:text-sky-400 bg-blue-50 dark:bg-sky-900/30 px-2 py-1 rounded">
+                  <code className="text-[11px] sm:text-xs font-mono font-bold text-m3-primary bg-m3-primary/10 dark:bg-m3-primary/15 px-2 py-1 rounded">
                     {trigger}
                   </code>
-                  <span className="text-[11px] sm:text-xs text-slate-600 dark:text-slate-400 text-right">
+                  <span className="text-[11px] sm:text-xs text-m3-secondary text-right">
                     {result}
                   </span>
                 </div>
               ))}
             </div>
 
-            <div className="mt-6 p-4 bg-blue-50/50 dark:bg-sky-900/10 rounded-xl border border-blue-100 dark:border-sky-900/30 flex gap-3">
-              <Lightbulb className="w-5 h-5 text-primary dark:text-sky-400 shrink-0 mt-0.5" />
-              <p className="text-[11px] sm:text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                <strong className="text-primary dark:text-sky-400">
+            <div className="mt-6 p-4 bg-m3-primary/10 dark:bg-m3-primary/10 rounded-xl border border-m3-primary/20 dark:border-m3-primary/20 flex gap-3">
+              <Lightbulb className="w-5 h-5 text-m3-primary shrink-0 mt-0.5" />
+              <p className="text-[11px] sm:text-xs text-m3-secondary leading-relaxed">
+                <strong className="text-m3-primary">
                   {t("misc.help.tipTitle")}{" "}
                 </strong>
                 {t("misc.help.tipDesc")}
@@ -154,13 +154,13 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
 
           {/* Coluna 2: Atalhos */}
           <div>
-            <div className="flex items-center gap-2 mb-2 text-primary dark:text-sky-400">
+            <div className="flex items-center gap-2 mb-2 text-m3-primary">
               <Keyboard className="w-5 h-5" />
               <h3 className="text-lg font-bold">
                 {t("misc.help.shortcutsTitle")}
               </h3>
             </div>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mb-5 leading-relaxed">
+            <p className="text-xs text-m3-secondary mb-5 leading-relaxed">
               {t("misc.help.shortcutsDesc")}
             </p>
 
@@ -168,12 +168,12 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
               {SHORTCUTS.map(([key, action]) => (
                 <div
                   key={key}
-                  className="flex items-center justify-between py-2.5 border-b border-slate-100 dark:border-slate-800/60 group hover:bg-slate-50 dark:hover:bg-slate-800/30 px-2 -mx-2 rounded-lg transition-colors gap-4"
+                  className="flex items-center justify-between py-2.5 border-b border-m3-border/60 group hover:bg-m3-hover px-2 -mx-2 rounded-lg transition-colors gap-4"
                 >
                   <div className="flex items-center gap-1.5 shrink-0">
                     {renderShortcut(key)}
                   </div>
-                  <span className="text-[11px] sm:text-xs text-slate-600 dark:text-slate-400 text-right leading-snug">
+                  <span className="text-[11px] sm:text-xs text-m3-secondary text-right leading-snug">
                     {action}
                   </span>
                 </div>

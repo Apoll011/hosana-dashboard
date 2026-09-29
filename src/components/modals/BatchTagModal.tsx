@@ -103,10 +103,10 @@ export const BatchTagModal: React.FC<BatchTagModalProps> = ({
       onClose={onClose}
       title={t("modals.batchTagTitle", { count })}
     >
-      <div className="flex flex-col gap-5 text-slate-700 dark:text-slate-300">
-        <p className="text-xs text-slate-500 dark:text-slate-400">
+      <div className="flex flex-col gap-5 text-m3-text">
+        <p className="text-xs text-m3-secondary">
           {t("modals.selectCategories")}{" "}
-          <strong className="text-slate-900 dark:text-slate-100">
+          <strong className="text-m3-text">
             {t("modals.selectedSongs", { count })}
           </strong>
           .
@@ -114,17 +114,17 @@ export const BatchTagModal: React.FC<BatchTagModalProps> = ({
 
         {/* Mode Selector */}
         <div className="flex flex-col gap-2">
-          <label className="text-xs font-bold text-slate-900 dark:text-slate-100 uppercase tracking-wider text-[10px]">
+          <label className="text-label text-m3-textr text-[10px]">
             {t("modals.applyMode")}
           </label>
-          <div className="grid grid-cols-3 gap-2 p-1 bg-slate-100 dark:bg-slate-800/60 rounded-xl">
+          <div className="grid grid-cols-3 gap-2 p-1 bg-m3-sidebar/60 rounded-xl">
             <button
               type="button"
               onClick={() => setMode("append")}
-              className={`py-2 px-2.5 rounded-lg text-xs font-bold transition-all text-center cursor-pointer ${
+              className={`py-2 px-2.5 rounded-lg text-xs font-bold transition-colors text-center cursor-pointer ${
                 mode === "append"
-                  ? "bg-white dark:bg-slate-900 text-[#0284c7] shadow-xs"
-                  : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100"
+                  ? "bg-m3-card text-m3-primary shadow-[var(--shadow-sm)]"
+                  : "text-m3-secondary hover:text-m3-text"
               }`}
             >
               {t("modals.add")}
@@ -132,10 +132,10 @@ export const BatchTagModal: React.FC<BatchTagModalProps> = ({
             <button
               type="button"
               onClick={() => setMode("replace")}
-              className={`py-2 px-2.5 rounded-lg text-xs font-bold transition-all text-center cursor-pointer ${
+              className={`py-2 px-2.5 rounded-lg text-xs font-bold transition-colors text-center cursor-pointer ${
                 mode === "replace"
-                  ? "bg-white dark:bg-slate-900 text-amber-600 dark:text-amber-400 shadow-xs"
-                  : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100"
+                  ? "bg-m3-card text-amber-600 dark:text-amber-400 shadow-[var(--shadow-sm)]"
+                  : "text-m3-secondary hover:text-m3-text"
               }`}
             >
               {t("modals.replace")}
@@ -143,16 +143,16 @@ export const BatchTagModal: React.FC<BatchTagModalProps> = ({
             <button
               type="button"
               onClick={() => setMode("remove")}
-              className={`py-2 px-2.5 rounded-lg text-xs font-bold transition-all text-center cursor-pointer ${
+              className={`py-2 px-2.5 rounded-lg text-xs font-bold transition-colors text-center cursor-pointer ${
                 mode === "remove"
-                  ? "bg-white dark:bg-slate-900 text-rose-600 dark:text-rose-400 shadow-xs"
-                  : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100"
+                  ? "bg-m3-card text-m3-danger shadow-[var(--shadow-sm)]"
+                  : "text-m3-secondary hover:text-m3-text"
               }`}
             >
               {t("modals.remove")}
             </button>
           </div>
-          <span className="text-[11px] text-slate-500 dark:text-slate-400 italic">
+          <span className="text-[11px] text-m3-secondary italic">
             {mode === "append" && t("modals.appendDesc")}
             {mode === "replace" && t("modals.replaceDesc")}
             {mode === "remove" && t("modals.removeDesc")}
@@ -161,10 +161,10 @@ export const BatchTagModal: React.FC<BatchTagModalProps> = ({
 
         {/* Preset Categories */}
         <div className="flex flex-col gap-2">
-          <label className="text-[10px] font-bold text-slate-900 dark:text-slate-100 uppercase tracking-wider flex items-center gap-1.5">
+          <label className="text-label flex items-center gap-1.5">
             {t("modals.suggestedCategories")}
           </label>
-          <div className="flex flex-wrap gap-1.5 max-h-36 overflow-y-auto p-1.5 border border-slate-200 dark:border-slate-800 rounded-xl bg-slate-50/50 dark:bg-slate-900/30">
+          <div className="flex flex-wrap gap-1.5 max-h-36 overflow-y-auto p-1.5 border border-m3-border rounded-xl bg-m3-sidebar/50 dark:bg-m3-card/30">
             {PRESET_CATEGORIES.map((cat) => {
               const isSelected = tags.includes(cat);
               return (
@@ -172,10 +172,10 @@ export const BatchTagModal: React.FC<BatchTagModalProps> = ({
                   key={cat}
                   type="button"
                   onClick={() => togglePresetTag(cat)}
-                  className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all flex items-center gap-1 cursor-pointer select-none ${
+                  className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1 cursor-pointer select-none ${
                     isSelected
-                      ? "bg-[#0284c7] text-white shadow-xs"
-                      : "bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-[#0284c7]"
+                      ? "bg-m3-primary text-white shadow-[var(--shadow-sm)]"
+                      : "bg-m3-card text-m3-text border border-m3-border hover:border-m3-primary"
                   }`}
                 >
                   {isSelected && <Check className="w-3 h-3 stroke-3" />}
@@ -188,7 +188,7 @@ export const BatchTagModal: React.FC<BatchTagModalProps> = ({
 
         {/* Custom Tag Input */}
         <div className="flex flex-col gap-2">
-          <label className="text-[10px] font-bold text-slate-900 dark:text-slate-100 uppercase tracking-wider">
+          <label className="text-label">
             {t("modals.newCustomTag")}
           </label>
           <div className="flex gap-2">
@@ -198,13 +198,13 @@ export const BatchTagModal: React.FC<BatchTagModalProps> = ({
                 value={customTag}
                 onChange={(e) => setCustomTag(e.target.value)}
                 onKeyDown={handleKeyDown}
-                icon={<TagIcon className="w-4 h-4 text-slate-400" />}
+                icon={<TagIcon className="w-4 h-4 text-m3-secondary" />}
               />
             </div>
             <Button
               type="button"
               variant="outline"
-              icon={<Plus className="w-4 h-4 text-[#0284c7]" />}
+              icon={<Plus className="w-4 h-4 text-m3-primary" />}
               onClick={handleAddCustomTag}
               disabled={!customTag.trim()}
             >
@@ -215,8 +215,8 @@ export const BatchTagModal: React.FC<BatchTagModalProps> = ({
 
         {/* Selected Tags Preview */}
         {tags.length > 0 && (
-          <div className="flex flex-col gap-1.5 p-3 bg-sky-50/70 dark:bg-sky-950/40 border border-sky-200 dark:border-sky-800/60 rounded-xl">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-[#0284c7]">
+          <div className="flex flex-col gap-1.5 p-3 bg-m3-primary/10 border border-m3-primary/20 rounded-xl">
+            <span className="text-label text-m3-primary">
               {t("modals.tagsToApply", {
                 action:
                   mode === "remove"
@@ -236,7 +236,7 @@ export const BatchTagModal: React.FC<BatchTagModalProps> = ({
                   <button
                     type="button"
                     onClick={() => removeTag(tag)}
-                    className="hover:text-rose-500 rounded p-0.5 cursor-pointer ml-0.5"
+                    className="hover:text-m3-danger rounded p-0.5 cursor-pointer ml-0.5"
                   >
                     <X className="w-3 h-3" />
                   </button>
@@ -246,7 +246,7 @@ export const BatchTagModal: React.FC<BatchTagModalProps> = ({
           </div>
         )}
 
-        <div className="flex items-center justify-end gap-3 mt-2 pt-4 border-t border-slate-100 dark:border-slate-800">
+        <div className="flex items-center justify-end gap-3 mt-2 pt-4 border-t border-m3-border/60">
           <Button variant="ghost" onClick={onClose} disabled={isLoading}>
             {t("common.cancel")}
           </Button>

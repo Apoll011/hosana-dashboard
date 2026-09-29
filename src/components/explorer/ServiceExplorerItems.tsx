@@ -87,7 +87,7 @@ export const ServiceGridCard: React.FC<ServiceGridCardProps> = React.memo(
         </div>
 
         <span
-          className={`${isCompact ? "text-xs" : "text-sm"} font-black text-m3-text transition-colors truncate w-full px-1`}
+          className={`${isCompact ? "text-xs" : "text-sm"} font-semibold text-m3-text transition-colors truncate w-full px-1`}
         >
           {service.name}
         </span>

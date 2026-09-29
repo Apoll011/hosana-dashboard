@@ -409,7 +409,7 @@ export const AccountTab: React.FC<{ active: boolean }> = ({ active }) => {
             </div>
           </div>
         ) : (
-          <p className="text-base font-semibold text-m3-text tracking-widest">
+          <p className="text-base font-semibold text-m3-text">
             ••••••••••••
           </p>
         )}

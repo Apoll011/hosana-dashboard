@@ -24,18 +24,18 @@ export const DayAgendaList: React.FC<DayAgendaListProps> = ({
   const { t } = useI18n();
 
   return (
-    <div className="bg-white dark:bg-slate-900 border border-m3-border rounded-2xl p-4 shadow-xs">
+    <div className="bg-m3-card border border-m3-border rounded-[var(--radius-xl)] p-4 shadow-[var(--shadow-sm)]">
       <div className="flex items-center justify-between mb-3">
-        <h3 className="text-[11px] font-black uppercase tracking-widest text-m3-secondary opacity-70">
+        <h3 className="text-label">
           {t("agenda.dayEvents")}
         </h3>
-        <span className="text-[11px] font-black text-m3-secondary bg-m3-sidebar/60 rounded-full px-2 py-0.5">
+        <span className="text-caption bg-m3-sidebar/60 rounded-full px-2 py-0.5">
           {events.length}
         </span>
       </div>
 
       {events.length === 0 ? (
-        <p className="text-xs text-slate-400 dark:text-slate-500 py-4 text-center">
+        <p className="text-xs text-m3-secondary py-4 text-center">
           {t("agenda.noEventsForDay")}
         </p>
       ) : (
@@ -47,29 +47,29 @@ export const DayAgendaList: React.FC<DayAgendaListProps> = ({
               <button
                 key={event.id}
                 onClick={() => onSelectEvent(event.id)}
-                className={`w-full text-left rounded-xl p-3 border transition-colors cursor-pointer flex items-center justify-between gap-2 ${
+                className={`w-full text-left rounded-[var(--radius-md)] p-3 border transition-colors cursor-pointer flex items-center justify-between gap-2 ${
                   isSelected
-                    ? "bg-sky-50 dark:bg-sky-950/30 border-sky-200 dark:border-sky-900/50"
+                    ? "bg-m3-primary/10 border-m3-primary/20"
                     : "border-transparent hover:bg-m3-hover"
                 }`}
               >
                 <div className="min-w-0">
-                  <div className="flex items-center gap-1.5 text-xs font-black text-slate-900 dark:text-slate-100">
+                  <div className="flex items-center gap-1.5 text-xs font-semibold text-m3-text">
                     <span
                       className={`w-1.5 h-1.5 rounded-full ${
                         isSelected
-                          ? "bg-[#0284c7]"
-                          : "bg-slate-300 dark:bg-slate-600"
+                          ? "bg-m3-primary"
+                          : "bg-m3-border"
                       }`}
                     />
                     {event.time}
                     <span className="font-bold truncate">{event.title}</span>
                   </div>
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 truncate">
+                  <p className="text-[11px] text-m3-secondary mt-0.5 truncate">
                     {event.type}
                   </p>
                 </div>
-                <div className="flex items-center gap-1 text-[11px] font-bold text-slate-400 shrink-0">
+                <div className="flex items-center gap-1 text-[11px] font-bold text-m3-secondary shrink-0">
                   <Users className="w-3.5 h-3.5" />
                   {count}
                 </div>

@@ -69,7 +69,7 @@ export const BillingTab: React.FC<BillingTabProps> = ({
 
   if (canManageLoading || canAccessLoading || !organization) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center p-12 text-slate-500">
+      <div className="flex-1 flex flex-col items-center justify-center p-12 text-m3-secondary">
         <Spinner size="lg" label={t("settings.billing.loading")} />
       </div>
     );
@@ -77,12 +77,12 @@ export const BillingTab: React.FC<BillingTabProps> = ({
 
   if (!canAccessBilling) {
     return (
-      <div className="max-w-4xl mx-auto w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-8 text-center">
-        <Lock className="w-8 h-8 text-slate-400 mx-auto mb-3" />
-        <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">
+      <div className="max-w-4xl mx-auto w-full bg-m3-card border border-m3-border rounded-[var(--radius-xl)] p-8 text-center">
+        <Lock className="w-8 h-8 text-m3-secondary mx-auto mb-3" />
+        <h3 className="text-base font-bold text-m3-text">
           {t("settings.billing.noAccessTitle")}
         </h3>
-        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+        <p className="text-sm text-m3-secondary mt-1">
           {t("settings.billing.noAccessDesc")}
         </p>
       </div>
@@ -150,14 +150,14 @@ export const BillingTab: React.FC<BillingTabProps> = ({
 
   return (
     <div className="space-y-6 max-w-4xl mx-auto w-full animate-in fade-in slide-in-from-bottom-2 duration-300">
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xs overflow-hidden">
-        <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-900/50">
+      <div className="bg-m3-card border border-m3-border rounded-[var(--radius-xl)] shadow-[var(--shadow-sm)] overflow-hidden">
+        <div className="px-6 py-5 border-b border-m3-border/60 flex items-center justify-between bg-m3-sidebar/50">
           <div>
-            <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+            <h3 className="text-lg font-bold text-m3-text flex items-center gap-2">
               <CreditCard className="w-5 h-5 text-m3-primary" />
               {t("settings.billing.title")}
             </h3>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+            <p className="text-sm text-m3-secondary mt-1">
               {t("settings.billing.desc")}
             </p>
           </div>
@@ -176,8 +176,8 @@ export const BillingTab: React.FC<BillingTabProps> = ({
             </div>
           ) : fetchError && subscriptions === null ? (
             <div className="flex flex-col items-center text-center gap-3 py-6">
-              <AlertTriangle className="w-6 h-6 text-rose-500" />
-              <p className="text-sm text-rose-600 dark:text-rose-400">
+              <AlertTriangle className="w-6 h-6 text-m3-danger" />
+              <p className="text-sm text-m3-danger">
                 {fetchError}
               </p>
               <Button
@@ -202,11 +202,11 @@ export const BillingTab: React.FC<BillingTabProps> = ({
                     ? t("settings.billing.status.trialing")
                     : t("settings.billing.status.active")}
                 </Badge>
-                <span className="text-sm font-bold text-slate-900 dark:text-slate-100">
+                <span className="text-sm font-bold text-m3-text">
                   {t("settings.billing.planName")}
                 </span>
                 {activeSub.billingInterval && (
-                  <span className="text-xs text-slate-400 capitalize">
+                  <span className="text-xs text-m3-secondary capitalize">
                     ·{" "}
                     {activeSub.billingInterval === "year"
                       ? t("settings.billing.annual")
@@ -237,7 +237,7 @@ export const BillingTab: React.FC<BillingTabProps> = ({
               {activeSub.cancelAtPeriodEnd && (
                 <div className="p-4 bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-800 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div className="flex items-start gap-3">
-                    <AlertTriangle className="w-5 h-5 text-rose-500 shrink-0 mt-0.5" />
+                    <AlertTriangle className="w-5 h-5 text-m3-danger shrink-0 mt-0.5" />
                     <div className="text-sm text-rose-700 dark:text-rose-400">
                       <strong className="font-bold">
                         {t("settings.billing.cancelingTitle")}
@@ -266,20 +266,20 @@ export const BillingTab: React.FC<BillingTabProps> = ({
 
               {/* Billing period info */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-                <div className="p-3.5 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
-                  <span className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                <div className="p-3.5 bg-m3-sidebar rounded-xl">
+                  <span className="block text-label text-m3-secondary">
                     {t("settings.billing.currentPeriod")}
                   </span>
-                  <span className="font-semibold text-slate-800 dark:text-slate-200">
+                  <span className="font-semibold text-m3-text">
                     {formatDate(activeSub.periodStart)} →{" "}
                     {formatDate(activeSub.periodEnd)}
                   </span>
                 </div>
-                <div className="p-3.5 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
-                  <span className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                <div className="p-3.5 bg-m3-sidebar rounded-xl">
+                  <span className="block text-label text-m3-secondary">
                     {t("settings.billing.nextCharge")}
                   </span>
-                  <span className="font-semibold text-slate-800 dark:text-slate-200">
+                  <span className="font-semibold text-m3-text">
                     {activeSub.cancelAtPeriodEnd
                       ? "—"
                       : formatDate(activeSub.periodEnd)}
@@ -297,25 +297,25 @@ export const BillingTab: React.FC<BillingTabProps> = ({
                   >
                     {t("settings.billing.manage")}
                   </Button>
-                  <p className="text-xs text-slate-400 mt-2">
+                  <p className="text-xs text-m3-secondary mt-2">
                     {t("settings.billing.manageDesc")}
                   </p>
                 </div>
               )}
             </div>
           ) : (
-            <div className="border border-m3-primary/20 dark:border-m3-primary/30 bg-m3-primary/5 dark:bg-m3-primary/10 rounded-2xl p-6">
+            <div className="border border-m3-primary/20 dark:border-m3-primary/30 bg-m3-primary/5 dark:bg-m3-primary/10 rounded-[var(--radius-xl)] p-6">
               <div className="flex items-start justify-between gap-4 flex-wrap">
                 <div>
-                  <h4 className="text-base font-black text-slate-900 dark:text-white">
+                  <h4 className="text-base font-semibold text-m3-text">
                     {t("settings.billing.planName")}
                   </h4>
-                  <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 max-w-sm">
+                  <p className="text-sm text-m3-secondary mt-1 max-w-sm">
                     {t("settings.billing.planDesc")}
                   </p>
                 </div>
 
-                <div className="flex items-center gap-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-full p-1">
+                <div className="flex items-center gap-2 bg-m3-card border border-m3-border rounded-full p-1">
                   <button
                     type="button"
                     onClick={() => setAnnual(false)}
@@ -323,7 +323,7 @@ export const BillingTab: React.FC<BillingTabProps> = ({
                     className={`px-3 py-1.5 rounded-full text-xs font-bold transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
                       !annual
                         ? "bg-m3-primary text-white"
-                        : "text-slate-500 dark:text-slate-400"
+                        : "text-m3-secondary"
                     }`}
                   >
                     {t("settings.billing.monthly")}
@@ -335,7 +335,7 @@ export const BillingTab: React.FC<BillingTabProps> = ({
                     className={`px-3 py-1.5 rounded-full text-xs font-bold transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
                       annual
                         ? "bg-m3-primary text-white"
-                        : "text-slate-500 dark:text-slate-400"
+                        : "text-m3-secondary"
                     }`}
                   >
                     {t("settings.billing.annual")}
@@ -344,12 +344,12 @@ export const BillingTab: React.FC<BillingTabProps> = ({
               </div>
 
               <div className="mt-4 flex items-baseline gap-1">
-                <span className="text-3xl font-black text-slate-900 dark:text-white">
+                <span className="text-3xl font-semibold text-m3-text">
                   {annual
                     ? PLAN_PRICING.annual.amount
                     : PLAN_PRICING.monthly.amount}
                 </span>
-                <span className="text-sm text-slate-500 dark:text-slate-400">
+                <span className="text-sm text-m3-secondary">
                   {annual
                     ? PLAN_PRICING.annual.period
                     : PLAN_PRICING.monthly.period}
@@ -366,7 +366,7 @@ export const BillingTab: React.FC<BillingTabProps> = ({
                 {PLAN_FEATURE_KEYS.map((key) => (
                   <li
                     key={key}
-                    className="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300"
+                    className="flex items-center gap-2 text-sm text-m3-text"
                   >
                     <Check className="w-4 h-4 text-m3-primary shrink-0" />
                     {t(key)}
@@ -386,17 +386,17 @@ export const BillingTab: React.FC<BillingTabProps> = ({
                       ? t("settings.billing.subscribe")
                       : t("settings.billing.startTrial")}
                   </Button>
-                  <p className="text-xs text-slate-400 mt-2">
+                  <p className="text-xs text-m3-secondary mt-2">
                     {usedTrial
                       ? t("settings.billing.subscribeNote")
                       : t("settings.billing.trialNote")}
                   </p>
-                  <p className="text-xs text-slate-400 mt-1">
+                  <p className="text-xs text-m3-secondary mt-1">
                     {t("settings.billing.promoHint")}
                   </p>
                 </div>
               ) : (
-                <p className="text-xs text-slate-400 mt-6">
+                <p className="text-xs text-m3-secondary mt-6">
                   {t("settings.billing.askOwner")}
                 </p>
               )}

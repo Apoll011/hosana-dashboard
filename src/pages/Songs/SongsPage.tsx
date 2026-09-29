@@ -379,13 +379,13 @@ export const SongsPage: React.FC<SongsPageProps> = ({
       className="flex-1 flex flex-col w-full mx-auto space-y-4 animate-in fade-in duration-300 overflow-y-auto h-full relative select-none p-4 sm:p-8 max-w-7xl"
     >
       {/* Main Content Area: Grid / Table View */}
-      <div className="bg-m3-card border border-m3-border rounded-3xl shadow-sm overflow-hidden flex flex-col flex-1 transition-all">
+      <div className="bg-m3-card border border-m3-border rounded-[var(--radius-xl)] shadow-[var(--shadow-sm)] overflow-hidden flex flex-col flex-1 transition-colors">
         {songsQuery.isLoading ? (
           <div className="flex-1 flex items-center justify-center p-12 min-h-64">
             <Spinner label={t("songsPage.loading")} />
           </div>
         ) : songsQuery.isError ? (
-          <div className="p-12 text-center text-rose-500 font-bold">
+          <div className="p-12 text-center text-m3-danger font-bold">
             {t("songsPage.loadError", {
               error: (songsQuery.error as unknown as Error).message,
             })}
@@ -409,7 +409,7 @@ export const SongsPage: React.FC<SongsPageProps> = ({
           <div className="overflow-x-auto flex-1">
             <table className="w-full text-left border-collapse select-none">
               <thead>
-                <tr className="bg-m3-sidebar/40 border-b border-m3-border text-[10px] font-black text-m3-secondary uppercase tracking-[0.2em]">
+                <tr className="bg-m3-sidebar/40 border-b border-m3-border text-label">
                   <th className={isCompact ? "py-2.5 px-4" : "py-3.5 px-6"}>
                     {t("songsPage.titlePath")}
                   </th>
@@ -446,7 +446,7 @@ export const SongsPage: React.FC<SongsPageProps> = ({
                       key={song.id}
                       data-item-id={song.id}
                       data-item-type="song"
-                      className={`transition-all group cursor-pointer ${
+                      className={`transition-colors group cursor-pointer ${
                         isSelected
                           ? "bg-m3-primary/10 text-m3-primary"
                           : "hover:bg-m3-hover/50 text-m3-text"
@@ -460,12 +460,12 @@ export const SongsPage: React.FC<SongsPageProps> = ({
                       <td
                         className={`${isCompact ? "py-2.5 px-4" : "py-3.5 px-6"} max-w-xs sm:max-w-md`}
                       >
-                        <div className="flex flex-col group-hover:translate-x-1 transition-transform min-w-0">
+                        <div className="flex flex-col min-w-0">
                           <span className="truncate font-bold">
                             {song.title}
                           </span>
                           {song.path && (
-                            <span className="text-[10px] text-m3-secondary font-black uppercase tracking-widest opacity-60 mt-0.5 truncate">
+                            <span className="text-label opacity-60 mt-0.5 truncate">
                               {song.path.split("/")[0]}/
                             </span>
                           )}
@@ -484,7 +484,7 @@ export const SongsPage: React.FC<SongsPageProps> = ({
                         {folderName ? (
                           <Badge variant="sky">{folderName}</Badge>
                         ) : (
-                          <span className="text-[10px] text-m3-secondary font-black uppercase tracking-widest opacity-40 italic">
+                          <span className="text-label opacity-40 italic">
                             {t("songsPage.root")}
                           </span>
                         )}
@@ -497,7 +497,7 @@ export const SongsPage: React.FC<SongsPageProps> = ({
                       </td>
 
                       <td
-                        className={`${isCompact ? "py-2.5 px-4" : "py-3.5 px-6"} text-[11px] text-m3-secondary opacity-70 font-black uppercase tracking-tighter whitespace-nowrap`}
+                        className={`${isCompact ? "py-2.5 px-4" : "py-3.5 px-6"} text-caption whitespace-nowrap`}
                       >
                         {new Date(song.updatedAt).toLocaleDateString(locale)}
                       </td>
@@ -513,7 +513,7 @@ export const SongsPage: React.FC<SongsPageProps> = ({
                               navigate(`${slugPrefix}/songs/${song.id}`)
                             }
                             title={t("songsPage.openEditor")}
-                            className="p-1.5 text-m3-secondary hover:text-m3-primary hover:bg-m3-primary/10 rounded-xl cursor-pointer transition-all"
+                            className="p-1.5 text-m3-secondary hover:text-m3-primary hover:bg-m3-primary/10 rounded-[var(--radius-md)] cursor-pointer transition-colors"
                           >
                             <FileText className="w-4 h-4" />
                           </button>
@@ -522,7 +522,7 @@ export const SongsPage: React.FC<SongsPageProps> = ({
                               type="button"
                               onClick={() => setMoveSongTarget?.(song)}
                               title={t("songsPage.move")}
-                              className="p-1.5 text-m3-secondary hover:text-sky-500 hover:bg-sky-500/10 rounded-xl cursor-pointer transition-all"
+                              className="p-1.5 text-m3-secondary hover:text-m3-primary hover:bg-m3-primary/10 rounded-[var(--radius-md)] cursor-pointer transition-colors"
                             >
                               <FolderInput className="w-4 h-4" />
                             </button>
@@ -532,7 +532,7 @@ export const SongsPage: React.FC<SongsPageProps> = ({
                               type="button"
                               onClick={() => setDeleteSongTarget?.(song)}
                               title={t("songsPage.delete")}
-                              className="p-1.5 text-m3-secondary hover:text-rose-500 hover:bg-rose-500/10 rounded-xl cursor-pointer transition-all"
+                              className="p-1.5 text-m3-secondary hover:text-m3-danger hover:bg-m3-danger/10 rounded-[var(--radius-md)] cursor-pointer transition-colors"
                             >
                               <Trash2 className="w-4 h-4" />
                             </button>
@@ -575,8 +575,8 @@ export const SongsPage: React.FC<SongsPageProps> = ({
               )}
             </span>
 
-            <div className="flex items-center gap-1.5 bg-m3-card border border-m3-border rounded-xl px-2.5 py-1 shadow-xs">
-              <span className="text-[10px] text-m3-secondary font-bold uppercase tracking-wider">
+            <div className="flex items-center gap-1.5 bg-m3-card border border-m3-border rounded-xl px-2.5 py-1 shadow-[var(--shadow-sm)]">
+              <span className="text-label">
                 {t("songsPage.display")}
               </span>
               <select
@@ -601,7 +601,7 @@ export const SongsPage: React.FC<SongsPageProps> = ({
           {totalPages > 1 && (
             <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
               {/* Navigation button group */}
-              <div className="flex items-center gap-1 bg-m3-card border border-m3-border rounded-xl p-1 shadow-xs">
+              <div className="flex items-center gap-1 bg-m3-card border border-m3-border rounded-xl p-1 shadow-[var(--shadow-sm)]">
                 <button
                   type="button"
                   onClick={() => setPage(1)}
@@ -662,12 +662,12 @@ export const SongsPage: React.FC<SongsPageProps> = ({
 
       {/* Floating Multi-Select Action Bar */}
       {selectedSongIds.size > 1 && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 rounded-3xl shadow-2xl px-5 py-3 animate-in fade-in slide-in-from-bottom-4 duration-200">
-          <span className="text-xs font-black uppercase tracking-widest px-2">
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 bg-m3-card text-m3-text border border-m3-border rounded-[var(--radius-xl)] shadow-[var(--shadow-lg)] px-5 py-3 animate-in fade-in slide-in-from-bottom-4 duration-200">
+          <span className="text-label px-2">
             {t("songsPage.selectedCount", { count: selectedSongIds.size })}
           </span>
 
-          <div className="h-6 w-px bg-white/20 dark:bg-slate-900/20" />
+          <div className="h-6 w-px bg-m3-border" />
 
           <Can permission="song.update">
             <Button
@@ -675,7 +675,7 @@ export const SongsPage: React.FC<SongsPageProps> = ({
               variant="ghost"
               icon={<Tag className="w-4 h-4" />}
               onClick={() => openModal?.("batch-tag")}
-              className="text-white! dark:text-slate-900! hover:bg-white/10! dark:hover:bg-slate-900/10!"
+              className="text-m3-text! hover:bg-m3-hover!"
             >
               {t("songsPage.tag")}
             </Button>
@@ -685,7 +685,7 @@ export const SongsPage: React.FC<SongsPageProps> = ({
               variant="ghost"
               icon={<FolderInput className="w-4 h-4" />}
               onClick={() => openModal?.("batch-move")}
-              className="text-white! dark:text-slate-900! hover:bg-white/10! dark:hover:bg-slate-900/10!"
+              className="text-m3-text! hover:bg-m3-hover!"
             >
               {t("songsPage.move")}
             </Button>
@@ -697,7 +697,7 @@ export const SongsPage: React.FC<SongsPageProps> = ({
               variant="ghost"
               icon={<Trash2 className="w-4 h-4" />}
               onClick={() => openModal?.("batch-delete")}
-              className="text-rose-400! hover:bg-rose-500/10!"
+              className="text-m3-danger! hover:bg-m3-danger/10!"
             >
               {t("songsPage.eliminate")}
             </Button>
@@ -711,7 +711,7 @@ export const SongsPage: React.FC<SongsPageProps> = ({
               setSelectedSongIds(new Set());
               setLastClickedId(null);
             }}
-            className="text-white/70! dark:text-slate-900/70! hover:bg-white/10! dark:hover:bg-slate-900/10!"
+            className="text-m3-secondary! hover:bg-m3-hover!"
           >
             {t("common.cancel")}
           </Button>
@@ -722,12 +722,12 @@ export const SongsPage: React.FC<SongsPageProps> = ({
       {contextMenu && (
         <div
           style={{ top: contextMenu.y, left: contextMenu.x }}
-          className="fixed z-50 w-56 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl p-1.5 flex flex-col gap-0.5 text-xs select-none animate-in fade-in zoom-in-95 duration-100"
+          className="fixed z-50 w-56 bg-m3-card border border-m3-border rounded-[var(--radius-xl)] shadow-[var(--shadow-lg)] p-1.5 flex flex-col gap-0.5 text-xs select-none animate-in fade-in zoom-in-95 duration-100"
           onClick={(e) => e.stopPropagation()}
         >
           {contextMenu.isMulti ? (
             <>
-              <div className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-[#0284c7] border-b border-slate-100 dark:border-slate-800/80 mb-0.5 truncate flex items-center justify-between">
+              <div className="px-3 py-1.5 text-label text-m3-primary border-b border-m3-border/60 mb-0.5 truncate flex items-center justify-between">
                 <span>{t("songsPage.multiSelect")}</span>
                 <Badge variant="sky">{selectedSongIds.size}</Badge>
               </div>
@@ -739,9 +739,9 @@ export const SongsPage: React.FC<SongsPageProps> = ({
                     openModal?.("batch-tag");
                     setContextMenu(null);
                   }}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left cursor-pointer"
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-m3-text hover:bg-m3-hover font-medium transition-colors text-left cursor-pointer"
                 >
-                  <Tag className="w-4 h-4 text-[#0284c7]" />
+                  <Tag className="w-4 h-4 text-m3-primary" />
                   <span>
                     {t("songsPage.tagCount", { count: selectedSongIds.size })}
                   </span>
@@ -753,7 +753,7 @@ export const SongsPage: React.FC<SongsPageProps> = ({
                     openModal?.("batch-move");
                     setContextMenu(null);
                   }}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left cursor-pointer"
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-m3-text hover:bg-m3-hover font-medium transition-colors text-left cursor-pointer"
                 >
                   <FolderInput className="w-4 h-4 text-emerald-500" />
                   <span>
@@ -769,9 +769,9 @@ export const SongsPage: React.FC<SongsPageProps> = ({
                     openModal?.("batch-delete");
                     setContextMenu(null);
                   }}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 font-semibold transition-colors text-left cursor-pointer"
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-m3-danger hover:bg-m3-danger/10 font-semibold transition-colors text-left cursor-pointer"
                 >
-                  <Trash2 className="w-4 h-4 text-rose-500" />
+                  <Trash2 className="w-4 h-4 text-m3-danger" />
                   <span>
                     {t("songsPage.deleteCount", {
                       count: selectedSongIds.size,
@@ -780,7 +780,7 @@ export const SongsPage: React.FC<SongsPageProps> = ({
                 </button>
               </Can>
 
-              <div className="my-1 border-t border-slate-100 dark:border-slate-800/80" />
+              <div className="my-1 border-t border-m3-border/60" />
 
               <button
                 type="button"
@@ -788,15 +788,15 @@ export const SongsPage: React.FC<SongsPageProps> = ({
                   setSelectedSongIds(new Set());
                   setContextMenu(null);
                 }}
-                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left cursor-pointer"
+                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-m3-secondary hover:bg-m3-hover font-medium transition-colors text-left cursor-pointer"
               >
-                <X className="w-4 h-4 text-slate-400" />
+                <X className="w-4 h-4 text-m3-secondary" />
                 <span>{t("songsPage.deselect")}</span>
               </button>
             </>
           ) : contextMenu.song ? (
             <>
-              <div className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400 border-b border-slate-100 dark:border-slate-800/80 mb-0.5 truncate">
+              <div className="px-3 py-1.5 text-label text-m3-secondary border-b border-m3-border/60 mb-0.5 truncate">
                 {contextMenu.song.title}
               </div>
 
@@ -806,9 +806,9 @@ export const SongsPage: React.FC<SongsPageProps> = ({
                   navigate(`${slugPrefix}/songs/${contextMenu.song!.id}`);
                   setContextMenu(null);
                 }}
-                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left cursor-pointer"
+                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-m3-text hover:bg-m3-hover font-medium transition-colors text-left cursor-pointer"
               >
-                <FileText className="w-4 h-4 text-sky-500" />
+                <FileText className="w-4 h-4 text-m3-primary" />
                 <span>{t("songsPage.openInEditor")}</span>
               </button>
 
@@ -819,9 +819,9 @@ export const SongsPage: React.FC<SongsPageProps> = ({
                     setMoveSongTarget?.(contextMenu.song);
                     setContextMenu(null);
                   }}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left cursor-pointer"
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-m3-text hover:bg-m3-hover font-medium transition-colors text-left cursor-pointer"
                 >
-                  <FolderInput className="w-4 h-4 text-sky-500" />
+                  <FolderInput className="w-4 h-4 text-m3-primary" />
                   <span>{t("songsPage.moveSong")}</span>
                 </button>
 
@@ -832,24 +832,24 @@ export const SongsPage: React.FC<SongsPageProps> = ({
                     openModal?.("batch-tag");
                     setContextMenu(null);
                   }}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left cursor-pointer"
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-m3-text hover:bg-m3-hover font-medium transition-colors text-left cursor-pointer"
                 >
-                  <Tag className="w-4 h-4 text-[#0284c7]" />
+                  <Tag className="w-4 h-4 text-m3-primary" />
                   <span>{t("songsPage.tagSong")}</span>
                 </button>
               </Can>
 
               <Can permission="song.delete">
-                <div className="my-1 border-t border-slate-100 dark:border-slate-800/80" />
+                <div className="my-1 border-t border-m3-border/60" />
                 <button
                   type="button"
                   onClick={() => {
                     setDeleteSongTarget?.(contextMenu.song);
                     setContextMenu(null);
                   }}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 font-semibold transition-colors text-left cursor-pointer"
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-m3-danger hover:bg-m3-danger/10 font-semibold transition-colors text-left cursor-pointer"
                 >
-                  <Trash2 className="w-4 h-4 text-rose-500" />
+                  <Trash2 className="w-4 h-4 text-m3-danger" />
                   <span>{t("songsPage.deleteSong")}</span>
                 </button>
               </Can>

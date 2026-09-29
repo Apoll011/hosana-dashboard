@@ -179,17 +179,17 @@ export const PrintModal: React.FC<PrintModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 md:p-6 bg-slate-950/70 backdrop-blur-xs animate-in fade-in duration-200">
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl flex flex-col w-full max-w-6xl h-[94vh] overflow-hidden">
+      <div className="bg-m3-card border border-m3-border rounded-[var(--radius-xl)] shadow-[var(--shadow-lg)] flex flex-col w-full max-w-6xl h-[94vh] overflow-hidden">
         {/* ── MODAL TOP BAR ── */}
-        <div className="px-5 py-3.5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-900/50 shrink-0">
+        <div className="px-5 py-3.5 border-b border-m3-border flex items-center justify-between bg-m3-sidebar/50 shrink-0">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-xl bg-sky-100 dark:bg-sky-950 text-sky-600 dark:text-sky-400">
+            <div className="p-2 rounded-[var(--radius-md)] bg-m3-primary/10 text-m3-primary">
               <Printer className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+              <h2 className="text-base font-semibold text-m3-text flex items-center gap-2">
                 <span>{t("print.modalTitle")}</span>
-                <span className="text-xs font-normal text-slate-500 dark:text-slate-400">
+                <span className="text-xs font-normal text-m3-secondary">
                   (
                   {payload.items.length === 1
                     ? t("print.itemsCount", { count: payload.items.length })
@@ -199,7 +199,7 @@ export const PrintModal: React.FC<PrintModalProps> = ({
                   )
                 </span>
               </h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400 truncate max-w-md">
+              <p className="text-xs text-m3-secondary truncate max-w-md">
                 {title}
               </p>
             </div>
@@ -210,7 +210,7 @@ export const PrintModal: React.FC<PrintModalProps> = ({
               variant="outline"
               size="sm"
               onClick={onClose}
-              className="text-slate-600 dark:text-slate-400"
+              className="text-m3-secondary"
             >
               {t("common.cancel")}
             </Button>
@@ -219,13 +219,13 @@ export const PrintModal: React.FC<PrintModalProps> = ({
               size="sm"
               icon={<Printer className="w-4 h-4" />}
               onClick={handlePrint}
-              className="shadow-sm"
+              className="shadow-[var(--shadow-sm)]"
             >
               {t("common.print")}
             </Button>
             <button
               onClick={onClose}
-              className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors ml-1"
+              className="inline-flex items-center justify-center min-h-10 min-w-10 rounded-[var(--radius-md)] text-m3-secondary hover:text-m3-text hover:bg-m3-hover transition-colors ml-1"
             >
               <X className="w-5 h-5" />
             </button>
@@ -233,13 +233,13 @@ export const PrintModal: React.FC<PrintModalProps> = ({
         </div>
 
         {/* ── TOOLBAR / CONTROLS ── */}
-        <div className="px-5 py-3 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex flex-wrap items-center justify-between gap-3 text-xs shrink-0">
+        <div className="px-5 py-3 border-b border-m3-border bg-m3-card flex flex-wrap items-center justify-between gap-3 text-xs shrink-0">
           {/* Template Family Selector */}
           <div className="flex items-center gap-2">
-            <span className="font-semibold text-slate-500 uppercase text-[10px] tracking-wider flex items-center gap-1">
+            <span className="text-label flex items-center gap-1">
               {t("print.template")}
             </span>
-            <div className="inline-flex bg-slate-100 dark:bg-slate-800 p-1 rounded-xl">
+            <div className="inline-flex bg-m3-sidebar p-1 rounded-[var(--radius-md)]">
               {TEMPLATE_FAMILIES.map((family) => {
                 const active = options.templateFamily === family.id;
                 const badge =
@@ -267,10 +267,10 @@ export const PrintModal: React.FC<PrintModalProps> = ({
                         templateFamily: family.id as PrintTemplateFamily,
                       }))
                     }
-                    className={`px-3 py-1 rounded-lg font-medium transition-all cursor-pointer text-xs ${
+                    className={`px-3 py-1.5 min-h-10 rounded-[var(--radius-sm)] font-medium transition-colors cursor-pointer text-xs ${
                       active
-                        ? "bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 shadow-xs font-bold"
-                        : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
+                        ? "bg-m3-card text-m3-text shadow-[var(--shadow-sm)] font-semibold"
+                        : "text-m3-secondary hover:text-m3-text"
                     }`}
                     title={desc}
                   >

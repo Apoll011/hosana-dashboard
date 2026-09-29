@@ -178,21 +178,21 @@ export const SearchSyntaxModal: React.FC<SearchSyntaxModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-100 flex items-center justify-center p-3 sm:p-6 animate-in fade-in duration-200"
+      className="fixed inset-0 bg-black/40 backdrop-blur-sm z-100 flex items-center justify-center p-3 sm:p-6 animate-in fade-in duration-200"
       onClick={onClose}
     >
       <div
-        className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl max-w-4xl w-full max-h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200 border border-slate-200 dark:border-slate-800"
+        className="bg-m3-card rounded-[var(--radius-xl)] shadow-[var(--shadow-lg)] max-w-4xl w-full max-h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200 border border-m3-border"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-m3-border/60 bg-m3-sidebar/50">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-xl bg-m3-primary/10 text-m3-primary flex items-center justify-center font-bold">
               <Search className="w-4 h-4" />
             </div>
             <div>
-              <h2 className="text-sm font-black uppercase tracking-wider text-slate-900 dark:text-slate-100 flex items-center gap-2">
+              <h2 className="text-label text-m3-text flex items-center gap-2">
                 {isPt
                   ? "Pesquisa Avançada (Liqe / Lucene)"
                   : "Advanced Search Syntax (Liqe / Lucene)"}
@@ -200,7 +200,7 @@ export const SearchSyntaxModal: React.FC<SearchSyntaxModalProps> = ({
                   LQL
                 </span>
               </h2>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
+              <p className="text-[11px] text-m3-secondary font-medium">
                 {isPt
                   ? "Pesquise por qualquer palavra ou utilize filtros precisos por campo, tom, ano e operadores."
                   : "Search freely or use precise filters by field, key, year, and boolean operators."}
@@ -209,7 +209,7 @@ export const SearchSyntaxModal: React.FC<SearchSyntaxModalProps> = ({
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-full hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors cursor-pointer"
+            className="p-2 rounded-full hover:bg-m3-hover text-m3-secondary hover:text-m3-text transition-colors cursor-pointer"
             aria-label="Close"
           >
             <X className="w-5 h-5" />
@@ -219,10 +219,10 @@ export const SearchSyntaxModal: React.FC<SearchSyntaxModalProps> = ({
         {/* Modal Body */}
         <div className="overflow-y-auto p-6 space-y-6">
           {/* Quick Intro Banner */}
-          <div className="p-4 bg-m3-primary/5 rounded-2xl border border-m3-primary/20 flex items-start gap-3">
+          <div className="p-4 bg-m3-primary/5 rounded-[var(--radius-xl)] border border-m3-primary/20 flex items-start gap-3">
             <Sparkles className="w-5 h-5 text-m3-primary shrink-0 mt-0.5" />
-            <div className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-              <p className="font-bold text-slate-900 dark:text-slate-100 mb-1">
+            <div className="text-xs text-m3-secondary leading-relaxed">
+              <p className="font-bold text-m3-text mb-1">
                 {isPt
                   ? "Pesquisa rápida em tempo real"
                   : "Real-time fast search"}
@@ -239,10 +239,10 @@ export const SearchSyntaxModal: React.FC<SearchSyntaxModalProps> = ({
               <button
                 key={c.id}
                 onClick={() => setFilterCat(c.id)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-colors cursor-pointer ${
                   filterCat === c.id
-                    ? "bg-m3-primary text-white shadow-sm"
-                    : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700"
+                    ? "bg-m3-primary text-white shadow-[var(--shadow-sm)]"
+                    : "bg-m3-sidebar text-m3-secondary hover:bg-m3-hover"
                 }`}
               >
                 {c.label}
@@ -253,7 +253,7 @@ export const SearchSyntaxModal: React.FC<SearchSyntaxModalProps> = ({
           <div className="grid md:grid-cols-12 gap-6">
             {/* Examples Column */}
             <div className="md:col-span-7 space-y-2.5">
-              <div className="flex items-center gap-2 text-m3-primary font-bold text-xs uppercase tracking-wider mb-2">
+              <div className="flex items-center gap-2 text-label text-m3-primary mb-2">
                 <Code className="w-4 h-4" />
                 <span>{isPt ? "Exemplos Práticos" : "Practical Examples"}</span>
               </div>
@@ -268,7 +268,7 @@ export const SearchSyntaxModal: React.FC<SearchSyntaxModalProps> = ({
                         onClose();
                       }
                     }}
-                    className="p-2.5 rounded-xl border border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-800/30 hover:border-m3-primary/40 hover:bg-m3-primary/5 transition-all cursor-pointer group flex items-center justify-between gap-3"
+                    className="p-2.5 rounded-xl border border-m3-border/60 bg-m3-sidebar/50 dark:bg-m3-sidebar/30 hover:border-m3-primary/40 hover:bg-m3-primary/5 transition-colors cursor-pointer group flex items-center justify-between gap-3"
                     title={
                       isPt
                         ? "Clique para usar na pesquisa"
@@ -276,10 +276,10 @@ export const SearchSyntaxModal: React.FC<SearchSyntaxModalProps> = ({
                     }
                   >
                     <div className="min-w-0 flex-1">
-                      <code className="text-xs font-mono font-bold text-m3-primary dark:text-sky-400 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/80 px-2 py-0.5 rounded-lg inline-block truncate max-w-full">
+                      <code className="text-xs font-mono font-bold text-m3-primary dark:text-m3-primary bg-m3-card border border-m3-border/80 px-2 py-0.5 rounded-lg inline-block truncate max-w-full">
                         {ex.query}
                       </code>
-                      <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 truncate">
+                      <p className="text-[11px] text-m3-secondary mt-1 truncate">
                         {isPt ? ex.descriptionPt : ex.descriptionEn}
                       </p>
                     </div>
@@ -293,23 +293,23 @@ export const SearchSyntaxModal: React.FC<SearchSyntaxModalProps> = ({
 
             {/* Available Fields Column */}
             <div className="md:col-span-5 space-y-2.5">
-              <div className="flex items-center gap-2 text-m3-primary font-bold text-xs uppercase tracking-wider mb-2">
+              <div className="flex items-center gap-2 text-label text-m3-primary mb-2">
                 <BookOpen className="w-4 h-4" />
                 <span>
                   {isPt ? "Campos Pesquisáveis" : "Searchable Fields"}
                 </span>
               </div>
 
-              <div className="border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden divide-y divide-slate-100 dark:divide-slate-800/60 bg-white dark:bg-slate-900 text-xs">
+              <div className="border border-m3-border rounded-[var(--radius-xl)] overflow-hidden divide-y divide-m3-border/60 bg-m3-card text-xs">
                 {SEARCHABLE_FIELDS.map(([field, descPt, descEn]) => (
                   <div
                     key={field}
-                    className="p-2.5 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors"
+                    className="p-2.5 flex items-center justify-between hover:bg-m3-hover transition-colors"
                   >
-                    <code className="font-mono font-bold text-m3-primary text-[11px] bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">
+                    <code className="font-mono font-bold text-m3-primary text-[11px] bg-m3-sidebar px-1.5 py-0.5 rounded">
                       {field}:
                     </code>
-                    <span className="text-[11px] text-slate-500 dark:text-slate-400 text-right ml-2">
+                    <span className="text-[11px] text-m3-secondary text-right ml-2">
                       {isPt ? descPt : descEn}
                     </span>
                   </div>

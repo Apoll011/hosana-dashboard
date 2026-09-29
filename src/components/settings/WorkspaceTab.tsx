@@ -72,7 +72,7 @@ const DEFAULT_ACCENT_COLOR = "#4f46e5"; // Indigo 600
 
 const PRESET_COLORS = [
   { name: "Indigo", hex: "#4f46e5" },
-  { name: "Azul Oceano", hex: "#0284c7" },
+  { name: "Azul Oceano", hex: "#5babdb" },
   { name: "Esmeralda", hex: "#059669" },
   { name: "Âmbar", hex: "#d97706" },
   { name: "Rosa", hex: "#e11d48" },
@@ -429,15 +429,15 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
       {/* 1. PERFIL E IDENTIDADE DA ORGANIZAÇÃO      */}
       {/* ========================================== */}
       <form id="org-main-form" onSubmit={handleSaveOrganization}>
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm overflow-hidden transition-all">
+        <div className="bg-m3-card border border-m3-border rounded-[var(--radius-xl)] shadow-[var(--shadow-sm)] overflow-hidden">
           {/* Card Header */}
-          <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-900/50">
+          <div className="px-6 py-5 border-b border-m3-border/60 flex items-center justify-between bg-m3-sidebar/50">
             <div>
-              <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+              <h2 className="text-lg font-bold text-m3-text flex items-center gap-2">
                 <Building2 className="w-5 h-5 text-m3-primary" />
                 {t("settings.workspace.title")}
               </h2>
-              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+              <p className="text-sm text-m3-secondary mt-1">
                 {t("settings.workspace.desc")}
               </p>
             </div>
@@ -456,17 +456,17 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
             <div className="flex flex-col md:flex-row gap-8 items-start">
               {/* Logo Upload Box */}
               <div className="flex flex-col items-center gap-3 shrink-0 mx-auto md:mx-0">
-                <div className="relative group w-32 h-32 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center border-2 border-dashed border-slate-200 dark:border-slate-700 overflow-hidden shadow-inner">
+                <div className="relative group w-32 h-32 rounded-[var(--radius-xl)] bg-m3-sidebar flex items-center justify-center border-2 border-dashed border-m3-border overflow-hidden shadow-inner">
                   {displayLogo ? (
                     <img
                       src={displayLogo}
                       alt="Logo da Organização"
-                      className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                      className="w-full h-full object-cover transition-colors"
                     />
                   ) : (
-                    <div className="flex flex-col items-center justify-center text-slate-400 p-2 text-center">
+                    <div className="flex flex-col items-center justify-center text-m3-secondary p-2 text-center">
                       <ImagePlus className="w-10 h-10 mb-1 opacity-70" />
-                      <span className="text-[10px] font-medium uppercase tracking-wider">
+                      <span className="text-label">
                         {t("settings.workspace.noLogo")}
                       </span>
                     </div>
@@ -474,13 +474,13 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
 
                   {/* Edit/Hover Overlay */}
                   {isEditing && canManageOrg && (
-                    <label className="absolute inset-0 bg-slate-900/70 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center cursor-pointer transition-all duration-200 backdrop-blur-xs">
+                    <label className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center cursor-pointer transition-colors backdrop-blur-xs">
                       {isCompressing ? (
                         <Loader2 className="w-6 h-6 text-white animate-spin" />
                       ) : (
                         <>
                           <Camera className="w-6 h-6 text-white mb-1.5" />
-                          <span className="text-[11px] font-semibold text-white uppercase tracking-wider">
+                          <span className="text-label text-white">
                             {displayLogo
                               ? t("settings.workspace.change")
                               : t("settings.workspace.add")}
@@ -505,13 +505,13 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
                       <button
                         type="button"
                         onClick={handleRemoveLogo}
-                        className="text-xs text-rose-500 hover:text-rose-600 dark:hover:text-rose-400 flex items-center gap-1 font-medium transition-colors cursor-pointer"
+                        className="text-xs text-m3-danger hover:text-rose-600 dark:hover:text-rose-400 flex items-center gap-1 font-medium transition-colors cursor-pointer"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                         {t("settings.workspace.removeLogo")}
                       </button>
                     )}
-                    <p className="text-[11px] text-slate-400 text-center max-w-32">
+                    <p className="text-[11px] text-m3-secondary text-center max-w-32">
                       {t("settings.workspace.logoSpecs")}
                     </p>
                   </div>
@@ -544,7 +544,7 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
                       />
                     </div>
                     <div className="md:col-span-3">
-                      <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide mb-1.5">
+                      <label className="block text-label text-m3-text mb-1.5">
                         {t("settings.workspace.descriptionLabel")}
                       </label>
                       <textarea
@@ -555,14 +555,14 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
                           "settings.workspace.descriptionPlaceholder",
                         )}
                         disabled={isSavingOrganization}
-                        className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3.5 py-2.5 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-hidden focus:ring-2 focus:ring-m3-primary/30 focus:border-m3-primary transition-all resize-none disabled:opacity-50"
+                        className="w-full rounded-xl border border-m3-border bg-m3-card px-3.5 py-2.5 text-sm text-m3-text placeholder:text-m3-secondary focus:outline-hidden focus:ring-2 focus:ring-m3-primary/30 focus:border-m3-primary transition-colors resize-none disabled:opacity-50"
                       />
                     </div>
                   </div>
                 ) : (
                   <div className="space-y-3">
                     <div className="flex flex-wrap items-center gap-2.5">
-                      <h3 className="text-2xl font-black tracking-tight text-slate-900 dark:text-white">
+                      <h3 className="text-2xl font-semibold tracking-tight text-m3-text">
                         {currentName || t("settings.workspace.defaultOrgName")}
                       </h3>
                       {currentShortName && (
@@ -572,9 +572,9 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
                       )}
                     </div>
 
-                    <p className="text-sm text-slate-600 dark:text-slate-300 max-w-xl leading-relaxed">
+                    <p className="text-sm text-m3-secondary max-w-xl leading-relaxed">
                       {currentDescription || (
-                        <span className="italic text-slate-400 dark:text-slate-500">
+                        <span className="italic text-m3-secondary">
                           {t("settings.workspace.noDescription")}
                         </span>
                       )}
@@ -582,19 +582,19 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
 
                     {/* Metadata Specs Pills */}
                     <div className="pt-2 flex flex-wrap gap-4 text-xs">
-                      <div className="bg-slate-50 dark:bg-slate-800/60 px-3 py-1.5 rounded-lg border border-slate-200/70 dark:border-slate-700 flex items-center gap-2">
-                        <span className="font-semibold text-slate-400 uppercase text-[10px] tracking-wider">
+                      <div className="bg-m3-sidebar px-3 py-1.5 rounded-lg border border-m3-border/70 dark:border-m3-border flex items-center gap-2">
+                        <span className="font-semibold text-m3-secondary uppercase text-[10px] tracking-wider">
                           ID:
                         </span>
-                        <span className="font-mono text-slate-700 dark:text-slate-300">
+                        <span className="font-mono text-m3-text">
                           {organization?.id || "—"}
                         </span>
                       </div>
-                      <div className="bg-slate-50 dark:bg-slate-800/60 px-3 py-1.5 rounded-lg border border-slate-200/70 dark:border-slate-700 flex items-center gap-2">
-                        <span className="font-semibold text-slate-400 uppercase text-[10px] tracking-wider">
+                      <div className="bg-m3-sidebar px-3 py-1.5 rounded-lg border border-m3-border/70 dark:border-m3-border flex items-center gap-2">
+                        <span className="font-semibold text-m3-secondary uppercase text-[10px] tracking-wider">
                           Slug:
                         </span>
-                        <span className="font-mono text-slate-700 dark:text-slate-300">
+                        <span className="font-mono text-m3-text">
                           {organization?.slug || "—"}
                         </span>
                       </div>
@@ -605,25 +605,25 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
             </div>
 
             {/* Separador */}
-            <hr className="border-slate-100 dark:border-slate-800" />
+            <hr className="border-m3-border/60" />
 
             {/* Secção de Identidade Visual e Cores */}
             <div className="space-y-5">
               <div>
-                <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2 uppercase tracking-wide">
-                  <Palette className="w-4 h-4 text-rose-500" />
+                <h3 className="text-label text-m3-text flex items-center gap-2">
+                  <Palette className="w-4 h-4 text-m3-danger" />
                   {t("settings.workspace.visualIdentityTitle")}
                 </h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                <p className="text-xs text-m3-secondary mt-0.5">
                   {t("settings.workspace.visualIdentityDesc")}
                 </p>
               </div>
 
               {isEditing ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-50/70 dark:bg-slate-800/40 p-5 rounded-2xl border border-slate-200/70 dark:border-slate-700">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-m3-sidebar/70 dark:bg-m3-sidebar/40 p-5 rounded-[var(--radius-xl)] border border-m3-border/70 dark:border-m3-border">
                   {/* Cor de Destaque */}
                   <div className="space-y-3">
-                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide block">
+                    <label className="text-label text-m3-text block">
                       {t("settings.workspace.accentColorLabel")}
                     </label>
 
@@ -641,7 +641,7 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
                           }
                           className="w-12 h-12 rounded-xl cursor-pointer border-0 p-0 bg-transparent overflow-hidden [&::-webkit-color-swatch-wrapper]:p-0 [&::-webkit-color-swatch]:border-none [&::-webkit-color-swatch]:rounded-xl disabled:opacity-50"
                         />
-                        <div className="absolute inset-0 rounded-xl ring-1 ring-inset ring-slate-300 dark:ring-slate-600 pointer-events-none" />
+                        <div className="absolute inset-0 rounded-xl ring-1 ring-inset ring-m3-border pointer-events-none" />
                       </div>
 
                       <div className="flex-1">
@@ -662,7 +662,7 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
 
                     {/* Predefinições Rápidas */}
                     <div className="pt-1">
-                      <span className="text-[11px] text-slate-400 font-medium block mb-1.5">
+                      <span className="text-[11px] text-m3-secondary font-medium block mb-1.5">
                         {t("settings.workspace.quickColors")}
                       </span>
                       <div className="flex flex-wrap gap-1.5">
@@ -678,10 +678,10 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
                               })
                             }
                             title={preset.name}
-                            className={`w-6 h-6 rounded-full transition-transform hover:scale-110 flex items-center justify-center cursor-pointer ${
+                            className={`w-6 h-6 rounded-full transition-transform flex items-center justify-center cursor-pointer ${
                               draftAppearance.accentColor.toLowerCase() ===
                               preset.hex.toLowerCase()
-                                ? "ring-2 ring-offset-2 ring-slate-900 dark:ring-white dark:ring-offset-slate-900"
+                                ? "ring-2 ring-offset-2 ring-m3-text dark:ring-white dark:ring-offset-m3-card"
                                 : ""
                             }`}
                             style={{ backgroundColor: preset.hex }}
@@ -699,9 +699,9 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
                   {/* Toggle de Marca & Live Preview */}
                   <div className="flex flex-col justify-between space-y-4">
                     <label
-                      className={`flex items-start gap-3 p-3.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl transition-all ${
+                      className={`flex items-start gap-3 p-3.5 bg-m3-card border border-m3-border rounded-[var(--radius-md)] transition-colors ${
                         !isSavingOrganization
-                          ? "cursor-pointer hover:border-slate-300 dark:hover:border-slate-600"
+                          ? "cursor-pointer hover:border-m3-border"
                           : "opacity-70 cursor-not-allowed"
                       }`}
                     >
@@ -715,27 +715,27 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
                             showBranding: e.target.checked,
                           })
                         }
-                        className="w-4 h-4 mt-0.5 rounded text-m3-primary border-slate-300 focus:ring-m3-primary cursor-pointer"
+                        className="w-4 h-4 mt-0.5 rounded text-m3-primary border-m3-border focus:ring-m3-primary cursor-pointer"
                       />
                       <div className="text-xs">
-                        <span className="font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
-                          <ImageIcon className="w-3.5 h-3.5 text-slate-400" />
+                        <span className="font-bold text-m3-text flex items-center gap-1.5">
+                          <ImageIcon className="w-3.5 h-3.5 text-m3-secondary" />
                           {t("settings.workspace.showBrandingLabel")}
                         </span>
-                        <p className="text-slate-500 dark:text-slate-400 mt-0.5">
+                        <p className="text-m3-secondary mt-0.5">
                           {t("settings.workspace.showBrandingDesc")}
                         </p>
                       </div>
                     </label>
 
                     {/* Preview Box */}
-                    <div className="p-3 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 flex items-center justify-between text-xs">
-                      <span className="text-slate-500 font-medium flex items-center gap-1.5">
+                    <div className="p-3 bg-m3-card rounded-xl border border-m3-border flex items-center justify-between text-xs">
+                      <span className="text-m3-secondary font-medium flex items-center gap-1.5">
                         {t("settings.workspace.preview")}
                       </span>
                       <div className="flex items-center gap-2">
                         <span
-                          className="px-2.5 py-1 rounded-md text-white font-medium text-[11px] shadow-xs"
+                          className="px-2.5 py-1 rounded-md text-white font-medium text-[11px] shadow-[var(--shadow-sm)]"
                           style={{
                             backgroundColor: draftAppearance.accentColor,
                           }}
@@ -743,7 +743,7 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
                           {t("settings.workspace.activeButton")}
                         </span>
                         {draftAppearance.showBranding && (
-                          <span className="text-[11px] font-semibold text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 px-2 py-0.5 rounded">
+                          <span className="text-[11px] font-semibold text-m3-text border border-m3-border px-2 py-0.5 rounded">
                             {draftShortName ||
                               draftName ||
                               t("settings.workspace.churchFallback")}
@@ -756,38 +756,38 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
               ) : (
                 /* Modo Visualização de Identidade */
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="flex items-center gap-3 p-3.5 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
+                  <div className="flex items-center gap-3 p-3.5 rounded-xl border border-m3-border/60 bg-m3-sidebar/50 dark:bg-m3-sidebar/30">
                     <div
-                      className="w-10 h-10 rounded-xl border border-white/20 shadow-xs shrink-0 flex items-center justify-center"
+                      className="w-10 h-10 rounded-xl border border-white/20 shadow-[var(--shadow-sm)] shrink-0 flex items-center justify-center"
                       style={{ backgroundColor: displayAccentColor }}
                     >
-                      <Palette className="w-5 h-5 text-white drop-shadow-xs" />
+                      <Palette className="w-5 h-5 text-white drop-shadow-[var(--shadow-sm)]" />
                     </div>
                     <div>
-                      <span className="text-xs text-slate-400 uppercase font-semibold tracking-wider block">
+                      <span className="text-xs text-m3-secondary uppercase font-semibold tracking-wider block">
                         {t("settings.workspace.accentColorTitle")}
                       </span>
-                      <span className="font-mono font-bold text-sm text-slate-800 dark:text-slate-200">
+                      <span className="font-mono font-bold text-sm text-m3-text">
                         {displayAccentColor.toUpperCase()}
                       </span>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-3 p-3.5 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
+                  <div className="flex items-center gap-3 p-3.5 rounded-xl border border-m3-border/60 bg-m3-sidebar/50 dark:bg-m3-sidebar/30">
                     <div
                       className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
                         displayShowBranding
                           ? "bg-emerald-100 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400"
-                          : "bg-slate-200 dark:bg-slate-800 text-slate-400"
+                          : "bg-m3-hover text-m3-secondary"
                       }`}
                     >
                       <ImageIcon className="w-5 h-5" />
                     </div>
                     <div>
-                      <span className="text-xs text-slate-400 uppercase font-semibold tracking-wider block">
+                      <span className="text-xs text-m3-secondary uppercase font-semibold tracking-wider block">
                         {t("settings.workspace.brandingTitle")}
                       </span>
-                      <span className="font-semibold text-sm text-slate-800 dark:text-slate-200">
+                      <span className="font-semibold text-sm text-m3-text">
                         {displayShowBranding
                           ? t("settings.workspace.brandingActive")
                           : t("settings.workspace.brandingHidden")}
@@ -810,7 +810,7 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
 
           {/* Card Footer (Actions) */}
           {canManageOrg && (
-            <div className="px-6 py-4 bg-slate-50/70 dark:bg-slate-900/70 border-t border-slate-100 dark:border-slate-800 flex justify-end items-center gap-3">
+            <div className="px-6 py-4 bg-m3-sidebar/70 dark:bg-m3-card/70 border-t border-m3-border/60 flex justify-end items-center gap-3">
               {isEditing ? (
                 <>
                   <Button
@@ -858,13 +858,13 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
       {/* 2. CÓPIAS DE SEGURANÇA & DADOS             */}
       {/* ========================================== */}
       <CanAny permissions={["backup.export", "backup.import"]}>
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm overflow-hidden">
-          <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
-            <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-              <ShieldAlert className="w-5 h-5 text-sky-500" />
+        <div className="bg-m3-card border border-m3-border rounded-[var(--radius-xl)] shadow-[var(--shadow-sm)] overflow-hidden">
+          <div className="px-6 py-5 border-b border-m3-border/60 bg-m3-sidebar/50">
+            <h3 className="text-lg font-bold text-m3-text flex items-center gap-2">
+              <ShieldAlert className="w-5 h-5 text-m3-primary" />
               {t("settings.workspace.backupTitle")}
             </h3>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+            <p className="text-sm text-m3-secondary mt-1">
               {t("settings.workspace.backupDesc")}
             </p>
           </div>
@@ -873,16 +873,16 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Export Area */}
               <Can permission="backup.export">
-                <div className="flex flex-col p-4 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/50 dark:bg-m3-bg justify-between">
+                <div className="flex flex-col p-4 rounded-xl border border-m3-border bg-m3-sidebar/50 dark:bg-m3-bg justify-between">
                   <div className="flex items-start gap-3.5 mb-4">
-                    <div className="p-2.5 bg-sky-100 dark:bg-sky-500/15 text-sky-600 dark:text-sky-400 rounded-xl shrink-0">
+                    <div className="p-2.5 bg-m3-primary/10 text-m3-primary rounded-xl shrink-0">
                       <Download className="w-5 h-5" />
                     </div>
                     <div>
-                      <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100">
+                      <h4 className="text-sm font-bold text-m3-text">
                         {t("settings.workspace.exportData")}
                       </h4>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                      <p className="text-xs text-m3-secondary mt-0.5">
                         {t("settings.workspace.exportDesc")}
                       </p>
                     </div>
@@ -895,9 +895,9 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
                     disabled={isDownloading}
                     icon={
                       isDownloading ? (
-                        <Loader2 className="w-4 h-4 animate-spin text-sky-500" />
+                        <Loader2 className="w-4 h-4 animate-spin text-m3-primary" />
                       ) : (
-                        <Download className="w-4 h-4 text-sky-500" />
+                        <Download className="w-4 h-4 text-m3-primary" />
                       )
                     }
                   >
@@ -910,13 +910,13 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
 
               {/* Import Area */}
               <Can permission="backup.import">
-                <div className="flex flex-col p-4 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/50 dark:bg-m3-bg justify-between">
+                <div className="flex flex-col p-4 rounded-xl border border-m3-border bg-m3-sidebar/50 dark:bg-m3-bg justify-between">
                   <div className="flex items-start gap-3.5 mb-4">
                     <div className="p-2.5 bg-emerald-100 dark:bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 rounded-xl shrink-0">
                       <Upload className="w-5 h-5" />
                     </div>
                     <div>
-                      <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100">
+                      <h4 className="text-sm font-bold text-m3-text">
                         {t("settings.workspace.restoreData")}
                       </h4>
                       <p className="text-xs text-amber-600 dark:text-amber-400 mt-0.5 flex items-center gap-1">
@@ -949,13 +949,13 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
         </div>
       </CanAny>
       {organizations.length > 1 && (
-        <section className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm overflow-hidden">
-          <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
-            <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+        <section className="bg-m3-card border border-m3-border rounded-[var(--radius-xl)] shadow-[var(--shadow-sm)] overflow-hidden">
+          <div className="px-6 py-5 border-b border-m3-border/60 bg-m3-sidebar/50">
+            <h2 className="text-lg font-bold text-m3-text flex items-center gap-2">
               <Layers className="w-5 h-5 text-m3-primary" />
               {t("settings.workspace.switchOrgTitle")}
             </h2>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+            <p className="text-sm text-m3-secondary mt-1">
               {t("settings.workspace.switchOrgDesc")}
             </p>
           </div>
@@ -966,14 +966,14 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
                 return (
                   <li
                     key={org.id}
-                    className={`flex items-center justify-between gap-4 p-3.5 rounded-2xl border transition-colors ${
+                    className={`flex items-center justify-between gap-4 p-3.5 rounded-[var(--radius-xl)] border transition-colors ${
                       isCurrent
                         ? "border-m3-primary/30 bg-m3-primary/4 dark:bg-m3-primary/10"
-                        : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-slate-300 dark:hover:border-slate-700"
+                        : "border-m3-border bg-m3-card hover:border-m3-border"
                     }`}
                   >
                     <div className="flex items-center gap-3.5 min-w-0">
-                      <div className="w-11 h-11 rounded-xl shrink-0 overflow-hidden flex items-center justify-center bg-m3-primary/10 border border-m3-border/60 text-sm font-black text-m3-primary">
+                      <div className="w-11 h-11 rounded-xl shrink-0 overflow-hidden flex items-center justify-center bg-m3-primary/10 border border-m3-border/60 text-sm font-semibold text-m3-primary">
                         {org.logo ? (
                           <img
                             src={org.logo}
@@ -985,17 +985,17 @@ export const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
                         )}
                       </div>
                       <div className="min-w-0">
-                        <p className="text-sm font-bold text-slate-900 dark:text-slate-100 truncate">
+                        <p className="text-sm font-bold text-m3-text truncate">
                           {org.name}
                         </p>
-                        <p className="text-xs text-slate-400 dark:text-slate-500 font-mono truncate">
+                        <p className="text-xs text-m3-secondary font-mono truncate">
                           @{org.slug}
                         </p>
                       </div>
                     </div>
 
                     {isCurrent ? (
-                      <span className="shrink-0 inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wide text-emerald-600 dark:text-emerald-400 bg-emerald-100/70 dark:bg-emerald-950/40 px-2.5 py-1 rounded-full">
+                      <span className="shrink-0 inline-flex items-center gap-1.5 text-label text-emerald-600 dark:text-emerald-400 bg-emerald-100/70 dark:bg-emerald-950/40 px-2.5 py-1 rounded-full">
                         <Check className="w-3 h-3" />
                         {t("settings.workspace.currentOrg")}
                       </span>

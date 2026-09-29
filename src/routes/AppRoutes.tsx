@@ -106,7 +106,7 @@ const ErrorFallback = ({
       <p className="text-gray-500 mb-4">{t("routes.errorBoundary.desc")}</p>
       <button
         onClick={resetErrorBoundary}
-        className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors cursor-pointer"
+        className="px-4 py-2 min-h-10 bg-m3-primary text-white rounded-[var(--radius-md)] hover:bg-m3-primary-dark transition-colors cursor-pointer"
       >
         {t("routes.errorBoundary.reloadBtn")}
       </button>

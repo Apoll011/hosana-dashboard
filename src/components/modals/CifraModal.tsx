@@ -184,7 +184,7 @@ export const CifraClubImportModal: React.FC<{
     >
       {previewText !== null ? (
         <div className="space-y-4 py-2">
-          <p className="text-xs text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800/60 p-2.5 rounded-xl border border-slate-200 dark:border-slate-700">
+          <p className="text-xs text-m3-secondary bg-m3-sidebar/60 p-2.5 rounded-xl border border-m3-border">
             {t("modals.chordProPreviewHint")}
           </p>
 
@@ -192,10 +192,10 @@ export const CifraClubImportModal: React.FC<{
             readOnly
             value={previewText}
             rows={12}
-            className="w-full px-3 py-2 text-xs font-mono rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#0284c7]"
+            className="w-full px-3 py-2 text-xs font-mono rounded-xl border border-m3-border bg-m3-sidebar/50 text-m3-text focus:outline-none focus:ring-2 focus:ring-m3-primary"
           />
 
-          <div className="flex items-center justify-end gap-2 pt-4 border-t border-slate-200 dark:border-slate-800">
+          <div className="flex items-center justify-end gap-2 pt-4 border-t border-m3-border">
             <Button
               type="button"
               variant="ghost"
@@ -216,19 +216,19 @@ export const CifraClubImportModal: React.FC<{
         </div>
       ) : (
         <form onSubmit={handleImport} className="space-y-5 py-2">
-          <p className="text-xs text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800/60 p-2.5 rounded-xl border border-slate-200 dark:border-slate-700">
+          <p className="text-xs text-m3-secondary bg-m3-sidebar/60 p-2.5 rounded-xl border border-m3-border">
             {t("modals.pasteLink")}
           </p>
 
           {/* Error Alert */}
           {error && (
-            <div className="p-3 text-xs font-semibold text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/40 rounded-xl border border-red-200 dark:border-red-800/80">
+            <div className="p-3 text-xs font-semibold text-m3-danger bg-red-50 dark:bg-red-950/40 rounded-xl border border-red-200 dark:border-red-800/80">
               {error}
             </div>
           )}
 
           <div className="space-y-1.5">
-            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+            <label className="block text-xs font-bold text-m3-text">
               {t("modals.songLink")}
             </label>
             <input
@@ -236,18 +236,18 @@ export const CifraClubImportModal: React.FC<{
               value={urlInput}
               onChange={handleUrlInputChange}
               placeholder="https://www.cifraclub.com.br/... ou https://tabs.ultimate-guitar.com/..."
-              className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#0284c7]"
+              className="w-full px-3 py-2 text-xs rounded-xl border border-m3-border bg-m3-sidebar/50 text-m3-text focus:outline-none focus:ring-2 focus:ring-m3-primary"
               autoFocus
             />
           </div>
 
           {/* Preview-only toggle */}
-          <div className="flex items-start justify-between gap-3 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/40">
+          <div className="flex items-start justify-between gap-3 p-2.5 rounded-xl border border-m3-border bg-m3-sidebar/50 dark:bg-m3-card/40">
             <div className="space-y-0.5">
-              <p className="text-xs font-bold text-slate-700 dark:text-slate-300">
+              <p className="text-xs font-bold text-m3-text">
                 {t("modals.showChordProOnlyLabel")}
               </p>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400">
+              <p className="text-[11px] text-m3-secondary">
                 {t("modals.showChordProOnlyHint")}
               </p>
             </div>
@@ -257,7 +257,7 @@ export const CifraClubImportModal: React.FC<{
               aria-checked={previewOnly}
               onClick={() => setPreviewOnly((v) => !v)}
               className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors ${
-                previewOnly ? "bg-[#0284c7]" : "bg-slate-300 dark:bg-slate-700"
+                previewOnly ? "bg-m3-primary" : "bg-m3-border"
               }`}
             >
               <span
@@ -269,7 +269,7 @@ export const CifraClubImportModal: React.FC<{
           </div>
 
           {/* Footer Actions */}
-          <div className="flex items-center justify-end gap-2 pt-4 border-t border-slate-200 dark:border-slate-800">
+          <div className="flex items-center justify-end gap-2 pt-4 border-t border-m3-border">
             <Button
               type="button"
               variant="ghost"

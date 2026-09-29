@@ -76,29 +76,29 @@ export const MiniCalendar: React.FC<MiniCalendarProps> = ({
   const todayIso = toIso(new Date());
 
   return (
-    <div className="bg-white dark:bg-slate-900 border border-m3-border rounded-2xl p-4 shadow-xs">
+    <div className="bg-m3-card border border-m3-border rounded-[var(--radius-lg)] p-4 shadow-[var(--shadow-sm)]">
       <div className="flex items-center justify-between mb-3">
-        <h3 className="text-sm font-black text-slate-900 dark:text-slate-100">
+        <h3 className="text-title text-m3-text">
           {t(MONTH_KEYS[visibleMonth.getMonth()])} {visibleMonth.getFullYear()}
         </h3>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-0.5">
           <button
             onClick={() => onChangeMonth(-1)}
-            className="p-1 rounded-lg hover:bg-m3-hover text-m3-secondary hover:text-m3-text transition-colors cursor-pointer"
+            className="inline-flex items-center justify-center min-h-10 min-w-10 rounded-[var(--radius-md)] hover:bg-m3-hover text-m3-secondary hover:text-m3-text transition-colors cursor-pointer"
             aria-label={t("agenda.previousMonth")}
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
           <button
             onClick={() => onChangeMonth(1)}
-            className="p-1 rounded-lg hover:bg-m3-hover text-m3-secondary hover:text-m3-text transition-colors cursor-pointer"
+            className="inline-flex items-center justify-center min-h-10 min-w-10 rounded-[var(--radius-md)] hover:bg-m3-hover text-m3-secondary hover:text-m3-text transition-colors cursor-pointer"
             aria-label={t("agenda.nextMonth")}
           >
             <ChevronRight className="w-4 h-4" />
           </button>
           <button
             onClick={onGoToday}
-            className="ml-1 px-2.5 py-1 text-[11px] font-bold rounded-lg border border-m3-border text-m3-secondary hover:bg-m3-hover hover:text-m3-text transition-colors cursor-pointer"
+            className="ml-1 min-h-10 px-3 text-label rounded-[var(--radius-md)] border border-m3-border text-m3-secondary hover:bg-m3-hover hover:text-m3-text transition-colors cursor-pointer"
           >
             {t("agenda.today")}
           </button>
@@ -107,10 +107,7 @@ export const MiniCalendar: React.FC<MiniCalendarProps> = ({
 
       <div className="grid grid-cols-7 gap-1 mb-1">
         {WEEKDAY_KEYS.map((w) => (
-          <div
-            key={w}
-            className="text-center text-[10px] font-black uppercase text-m3-secondary opacity-60 py-1"
-          >
+          <div key={w} className="text-center text-label py-1">
             {t(w)}
           </div>
         ))}
@@ -129,9 +126,9 @@ export const MiniCalendar: React.FC<MiniCalendarProps> = ({
             <button
               key={iso}
               onClick={() => onSelectDate(iso)}
-              className={`aspect-square rounded-full flex flex-col items-center justify-center text-xs font-bold transition-colors cursor-pointer relative ${
+              className={`aspect-square min-h-10 rounded-full flex flex-col items-center justify-center text-xs font-semibold transition-colors cursor-pointer relative ${
                 isSelected
-                  ? "bg-m3-primary text-white shadow-sm"
+                  ? "bg-m3-primary text-white shadow-[var(--shadow-sm)]"
                   : isToday
                     ? "border border-m3-primary text-m3-primary"
                     : "text-m3-text hover:bg-m3-hover"
