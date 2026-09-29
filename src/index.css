@@ -318,6 +318,26 @@ textarea:focus-visible,
   background: var(--m3-primary);
 }
 
+/* Named scrollbar used by sidebar / inbox / editors */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--m3-border);
+  border-radius: var(--radius-pill);
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--m3-primary);
+}
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--m3-border) transparent;
+}
+
 /* ============================================================
    ChordPro editor highlight
    ============================================================ */

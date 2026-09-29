@@ -176,9 +176,9 @@ export const CreateCollectionModal: React.FC<CreateCollectionModalProps> = ({
     >
       <form onSubmit={handleSave} className="flex flex-col gap-5 pr-0.5">
         {/* Live Preview Card */}
-        <div className="relative overflow-hidden flex items-center gap-4 p-4 rounded-2xl bg-linear-to-br from-slate-50 to-slate-100/70 dark:from-slate-800/70 dark:to-slate-900/80 border border-slate-200/80 dark:border-slate-700/60 shadow-inner">
+        <div className="relative overflow-hidden flex items-center gap-4 p-4 rounded-2xl bg-linear-to-br from-m3-sidebar to-m3-hover/70 dark:from-m3-sidebar dark:to-m3-card border border-m3-border/80 dark:border-m3-border/60 shadow-inner">
           {imageBase64 ? (
-            <div className="w-14 h-14 rounded-2xl overflow-hidden shrink-0 border border-slate-200 dark:border-slate-700 shadow-sm">
+            <div className="w-14 h-14 rounded-2xl overflow-hidden shrink-0 border border-m3-border dark:border-m3-border shadow-sm">
               <img
                 src={imageBase64}
                 alt="cover"
@@ -193,11 +193,11 @@ export const CreateCollectionModal: React.FC<CreateCollectionModalProps> = ({
             </div>
           )}
           <div className="flex flex-col min-w-0 flex-1">
-            <span className="text-sm font-bold text-slate-900 dark:text-slate-100 truncate">
+            <span className="text-sm font-bold text-m3-text dark:text-m3-text truncate">
               {name ||
                 (locale === "pt" ? "Título da Coleção" : "Collection Title")}
             </span>
-            <span className="text-xs text-slate-500 dark:text-slate-400 line-clamp-1">
+            <span className="text-xs text-m3-secondary dark:text-m3-secondary line-clamp-1">
               {description ||
                 (locale === "pt"
                   ? "Descrição da coleção..."
@@ -214,7 +214,7 @@ export const CreateCollectionModal: React.FC<CreateCollectionModalProps> = ({
 
         {/* Collection Name */}
         <div>
-          <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">
+          <label className="block text-xs font-semibold text-m3-secondary dark:text-m3-secondary mb-1.5">
             {locale === "pt" ? "Nome da Coleção *" : "Collection Name *"}
           </label>
           <Input
@@ -235,7 +235,7 @@ export const CreateCollectionModal: React.FC<CreateCollectionModalProps> = ({
 
         {/* Description */}
         <div>
-          <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">
+          <label className="block text-xs font-semibold text-m3-secondary dark:text-m3-secondary mb-1.5">
             {locale === "pt"
               ? "Descrição (opcional)"
               : "Description (optional)"}
@@ -249,14 +249,14 @@ export const CreateCollectionModal: React.FC<CreateCollectionModalProps> = ({
                 ? "Músicas para momentos de louvor e adoração a Deus..."
                 : "Songs for praise and worship moments..."
             }
-            className="w-full px-3.5 py-2.5 text-xs rounded-xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-hidden focus:ring-1 focus:ring-sky-500 focus:border-sky-500 transition-all resize-none"
+            className="w-full px-3.5 py-2.5 text-xs rounded-xl bg-m3-hover dark:bg-m3-sidebar border border-m3-border dark:border-m3-border text-m3-text dark:text-m3-text placeholder-m3-input focus:outline-hidden focus:ring-1 focus:ring-m3-primary focus:border-m3-primary transition-all resize-none"
           />
         </div>
 
         {/* Cover Image Upload */}
         <div>
-          <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5 flex items-center gap-1.5">
-            <ImageIcon className="w-3.5 h-3.5 text-sky-500" />
+          <label className="block text-xs font-semibold text-m3-secondary dark:text-m3-secondary mb-1.5 flex items-center gap-1.5">
+            <ImageIcon className="w-3.5 h-3.5 text-m3-primary" />
             <span>
               {locale === "pt"
                 ? "Imagem de Capa (opcional)"
@@ -265,7 +265,7 @@ export const CreateCollectionModal: React.FC<CreateCollectionModalProps> = ({
           </label>
 
           {imageBase64 ? (
-            <div className="relative rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 group h-28">
+            <div className="relative rounded-xl overflow-hidden border border-m3-border dark:border-m3-border group h-28">
               <img
                 src={imageBase64}
                 alt="cover preview"
@@ -275,7 +275,7 @@ export const CreateCollectionModal: React.FC<CreateCollectionModalProps> = ({
                 <button
                   type="button"
                   onClick={() => imageInputRef.current?.click()}
-                  className="px-3 py-1.5 text-xs font-semibold bg-white/90 text-slate-800 rounded-lg hover:bg-white transition-colors cursor-pointer flex items-center gap-1"
+                  className="px-3 py-1.5 text-xs font-semibold bg-m3-card/90 text-m3-text rounded-lg hover:bg-m3-card transition-colors cursor-pointer flex items-center gap-1"
                 >
                   <UploadCloud className="w-3.5 h-3.5" />
                   {locale === "pt" ? "Trocar" : "Change"}
@@ -301,18 +301,18 @@ export const CreateCollectionModal: React.FC<CreateCollectionModalProps> = ({
               onDrop={handleDrop}
               className={`flex flex-col items-center justify-center gap-2 h-24 rounded-xl border-2 border-dashed cursor-pointer transition-all ${
                 isDragging
-                  ? "border-sky-500 bg-sky-50 dark:bg-sky-950/30"
-                  : "border-slate-200 dark:border-slate-700 bg-slate-50/60 dark:bg-slate-800/40 hover:border-sky-400 hover:bg-sky-50/60 dark:hover:bg-sky-950/20"
+                  ? "border-m3-primary bg-m3-primary/10 dark:bg-m3-primary/10"
+                  : "border-m3-border dark:border-m3-border bg-m3-sidebar/60 dark:bg-m3-sidebar/60 hover:border-m3-primary hover:bg-m3-primary/10/60 dark:hover:bg-sky-950/20"
               }`}
             >
               {isCompressing ? (
-                <Loader2 className="w-5 h-5 animate-spin text-sky-500" />
+                <Loader2 className="w-5 h-5 animate-spin text-m3-primary" />
               ) : (
                 <>
                   <UploadCloud
-                    className={`w-5 h-5 ${isDragging ? "text-sky-500" : "text-slate-400"}`}
+                    className={`w-5 h-5 ${isDragging ? "text-m3-primary" : "text-m3-secondary"}`}
                   />
-                  <span className="text-xs text-slate-400 dark:text-slate-500 text-center leading-relaxed">
+                  <span className="text-xs text-m3-secondary dark:text-m3-secondary text-center leading-relaxed">
                     {locale === "pt"
                       ? "Clique ou arraste uma imagem"
                       : "Click or drag an image here"}
@@ -334,11 +334,11 @@ export const CreateCollectionModal: React.FC<CreateCollectionModalProps> = ({
         {/* Color Swatches */}
         <div className="flex flex-col gap-2">
           <div className="flex items-center justify-between">
-            <label className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
-              <Palette className="w-3.5 h-3.5 text-sky-500" />
+            <label className="text-xs font-semibold text-m3-secondary dark:text-m3-secondary flex items-center gap-1.5">
+              <Palette className="w-3.5 h-3.5 text-m3-primary" />
               <span>{locale === "pt" ? "Cor" : "Color"}</span>
             </label>
-            <span className="text-xs text-slate-400 dark:text-slate-500 font-medium">
+            <span className="text-xs text-m3-secondary dark:text-m3-secondary font-medium">
               {previewColorStyle.name}
             </span>
           </div>
@@ -354,7 +354,7 @@ export const CreateCollectionModal: React.FC<CreateCollectionModalProps> = ({
                   aria-label={`Cor ${c.name}`}
                   className={`group relative w-7 h-7 sm:w-8 sm:h-8 rounded-full transition-all duration-200 flex items-center justify-center cursor-pointer ${
                     isSelected
-                      ? "ring-2 ring-offset-2 ring-sky-500 dark:ring-offset-slate-900 scale-110 shadow-sm"
+                      ? "ring-2 ring-offset-2 ring-m3-primary dark:ring-offset-m3-card scale-110 shadow-sm"
                       : "hover:scale-110 opacity-90 hover:opacity-100"
                   }`}
                   style={{ backgroundColor: c.colorHex }}
@@ -363,7 +363,7 @@ export const CreateCollectionModal: React.FC<CreateCollectionModalProps> = ({
                     <Check
                       className={`w-4 h-4 ${
                         c.id === "yellow" || c.id === "white" || c.id === "lime"
-                          ? "text-slate-900"
+                          ? "text-m3-text"
                           : "text-white"
                       } drop-shadow`}
                     />
@@ -376,8 +376,8 @@ export const CreateCollectionModal: React.FC<CreateCollectionModalProps> = ({
         {/* Icon Selection with Search Header */}
         <div className="flex flex-col gap-2 min-h-0 flex-1">
           <div className="flex items-center justify-between gap-2">
-            <label className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5 shrink-0">
-              <Sparkles className="w-3.5 h-3.5 text-sky-500" />
+            <label className="text-xs font-semibold text-m3-secondary dark:text-m3-secondary flex items-center gap-1.5 shrink-0">
+              <Sparkles className="w-3.5 h-3.5 text-m3-primary" />
               <span>
                 {t("modals.iconCount", { count: filteredIcons.length })}
               </span>
@@ -385,19 +385,19 @@ export const CreateCollectionModal: React.FC<CreateCollectionModalProps> = ({
 
             {/* Quick Search */}
             <div className="relative w-36 sm:w-48">
-              <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+              <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-m3-secondary pointer-events-none" />
               <input
                 type="text"
                 placeholder={t("modals.searchIcons")}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-8 pr-7 py-1 text-xs rounded-lg bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-hidden focus:ring-1 focus:ring-sky-500 focus:border-sky-500 transition-all"
+                className="w-full pl-8 pr-7 py-1 text-xs rounded-lg bg-m3-hover dark:bg-m3-sidebar border border-m3-border dark:border-m3-border text-m3-text dark:text-m3-text placeholder-m3-input focus:outline-hidden focus:ring-1 focus:ring-m3-primary focus:border-m3-primary transition-all"
               />
               {searchQuery && (
                 <button
                   type="button"
                   onClick={() => setSearchQuery("")}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-m3-secondary hover:text-slate-600 dark:hover:text-slate-200"
                 >
                   <X className="w-3 h-3" />
                 </button>
@@ -406,9 +406,9 @@ export const CreateCollectionModal: React.FC<CreateCollectionModalProps> = ({
           </div>
 
           {/* Icons Grid with dedicated scroll containment */}
-          <div className="relative flex-1 min-h-35 max-h-55 sm:max-h-60 overflow-y-auto rounded-xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/40 dark:bg-slate-900/40 p-2 scrollbar-thin scrollbar-thumb-slate-300 dark:scrollbar-thumb-slate-700">
+          <div className="relative flex-1 min-h-35 max-h-55 sm:max-h-60 overflow-y-auto rounded-xl border border-m3-border/80 dark:border-m3-border bg-m3-sidebar/40 dark:bg-m3-card/40 p-2 scrollbar-thin scrollbar-thumb-slate-300 dark:scrollbar-thumb-slate-700">
             {filteredIcons.length === 0 ? (
-              <div className="h-full flex flex-col items-center justify-center py-8 text-center text-slate-400">
+              <div className="h-full flex flex-col items-center justify-center py-8 text-center text-m3-secondary">
                 <Search className="w-6 h-6 mb-1 opacity-50" />
                 <p className="text-xs">
                   {t("modals.noIconFound", { query: searchQuery })}
@@ -428,12 +428,12 @@ export const CreateCollectionModal: React.FC<CreateCollectionModalProps> = ({
                       aria-label={item.name}
                       className={`group relative flex flex-col items-center justify-center aspect-square p-2 rounded-xl border transition-all ${
                         isSelected
-                          ? "bg-sky-500/10 border-sky-500 text-sky-600 dark:text-sky-400 ring-2 ring-sky-500/20 font-semibold shadow-2xs"
-                          : "bg-white dark:bg-slate-800/60 border-slate-200/70 dark:border-slate-700/50 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 hover:scale-105"
+                          ? "bg-m3-primary/100/10 border-m3-primary text-sky-600 dark:text-sky-400 ring-2 ring-m3-primary/20 font-semibold shadow-2xs"
+                          : "bg-m3-card dark:bg-m3-sidebar/60 border-m3-border/70 dark:border-m3-border/50 hover:bg-m3-hover dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 hover:scale-105"
                       }`}
                     >
                       <IconComp className="w-5 h-5 transition-transform group-hover:scale-110" />
-                      <span className="text-[10px] text-slate-500 dark:text-slate-400 truncate w-full text-center mt-1 leading-none opacity-80 group-hover:opacity-100">
+                      <span className="text-[10px] text-m3-secondary dark:text-m3-secondary truncate w-full text-center mt-1 leading-none opacity-80 group-hover:opacity-100">
                         {item.name}
                       </span>
                     </button>
@@ -445,7 +445,7 @@ export const CreateCollectionModal: React.FC<CreateCollectionModalProps> = ({
         </div>
 
         {/* Action Buttons */}
-        <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100 dark:border-slate-800 mt-auto">
+        <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100 dark:border-m3-border mt-auto">
           <Button
             type="button"
             variant="ghost"

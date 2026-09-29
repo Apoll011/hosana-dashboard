@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Tabs } from "@/src/components/common";
+import { PageHeader, Tabs } from "@/src/components/common";
 import { useI18n } from "@/src/lib/i18n";
 import { AppWindow, CloudOff, Info, User, Zap } from "lucide-react";
 import React, { useEffect, useState } from "react";
@@ -101,6 +101,8 @@ export const SettingsPage: React.FC = () => {
   return (
     <div className="h-full w-full overflow-y-auto bg-m3-bg text-m3-text p-4 sm:p-6 lg:p-8">
       <div className="max-w-5xl mx-auto space-y-6">
+        <PageHeader title={t("common.settings")} />
+
         {!isOnline && (
           <div className="flex items-center gap-3 p-3.5 bg-amber-500/10 border border-amber-500/30 rounded-[var(--radius-lg)] text-amber-700 dark:text-amber-300 text-xs">
             <CloudOff className="w-5 h-5 shrink-0 text-amber-500" />

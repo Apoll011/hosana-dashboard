@@ -21,7 +21,7 @@ export const MarqueeSelectionBox: React.FC<MarqueeSelectionBoxProps> = ({
         pointerEvents: "none",
         zIndex: 100,
       }}
-      className="border-2 border-sky-500 bg-sky-500/20 rounded-xl shadow-xl backdrop-blur-[1px] select-none"
+      className="border-2 border-m3-primary bg-m3-primary/25 rounded-[var(--radius-md)] shadow-[var(--shadow-md)] backdrop-blur-[1px] select-none"
     />
   );
 };
