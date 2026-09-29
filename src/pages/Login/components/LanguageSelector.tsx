@@ -41,7 +41,7 @@ export function LanguageSelector({ className = "" }: { className?: string }) {
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="p-2.5 rounded-full bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border border-slate-200/80 dark:border-slate-800 text-slate-700 dark:text-slate-200 hover:scale-110 active:scale-95 shadow-lg transition-all duration-200 inline-flex items-center gap-1.5"
+        className="p-2.5 rounded-full bg-m3-card/80 backdrop-blur-md border border-m3-border/80 text-m3-text shadow-[var(--shadow-sm)] transition-colors inline-flex items-center gap-1.5"
         aria-expanded={isOpen}
         aria-haspopup="true"
         aria-label="Change language"
@@ -53,7 +53,7 @@ export function LanguageSelector({ className = "" }: { className?: string }) {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-40 origin-top-right rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 p-1.5 shadow-xl ring-1 ring-black/5 dark:ring-white/5 z-50 animate-in fade-in zoom-in-95 duration-150">
+        <div className="absolute right-0 mt-2 w-40 origin-top-right rounded-[var(--radius-xl)] border border-m3-border bg-m3-card p-1.5 shadow-[var(--shadow-lg)] z-50 animate-in fade-in zoom-in-95 duration-150">
           {LANGUAGES.map((lang) => {
             const isSelected = lang.code === language;
             return (
@@ -63,10 +63,10 @@ export function LanguageSelector({ className = "" }: { className?: string }) {
                   setPersonalLanguage(lang.code as Language);
                   setIsOpen(false);
                 }}
-                className={`flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium transition-colors cursor-pointer ${
+                className={`flex w-full items-center gap-2.5 rounded-[var(--radius-md)] px-3 py-2 min-h-10 text-xs font-medium transition-colors cursor-pointer ${
                   isSelected
-                    ? "bg-blue-50 dark:bg-m3-primary/20 text-m3-primary font-bold"
-                    : "text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white"
+                    ? "bg-m3-primary/10 text-m3-primary font-semibold"
+                    : "text-m3-secondary hover:bg-m3-hover hover:text-m3-text"
                 }`}
               >
                 <span>{lang.flag}</span>

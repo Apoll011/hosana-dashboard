@@ -32,14 +32,10 @@ interface BadgeProps {
 const VARIANT_MAP: Record<string, string> = {
   accent: "bg-m3-primary/10 text-m3-primary border-m3-primary/20",
   sky: "bg-m3-primary/10 text-m3-primary border-m3-primary/20",
-  success:
-    "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20",
-  emerald:
-    "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20",
-  warning:
-    "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20",
-  amber:
-    "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20",
+  success: "bg-m3-success/10 text-m3-success border-m3-success/20",
+  emerald: "bg-m3-success/10 text-m3-success border-m3-success/20",
+  warning: "bg-m3-warning/10 text-m3-warning border-m3-warning/20",
+  amber: "bg-m3-warning/10 text-m3-warning border-m3-warning/20",
   danger: "bg-m3-danger/10 text-m3-danger border-m3-danger/20",
   rose: "bg-m3-danger/10 text-m3-danger border-m3-danger/20",
   neutral: "bg-m3-hover text-m3-secondary border-m3-border",

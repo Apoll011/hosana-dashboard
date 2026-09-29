@@ -220,7 +220,7 @@ export const CollectionDetailPage: React.FC = () => {
             <IconComp className="w-6 h-6" />
           </div>
           <div className="flex flex-col min-w-0 flex-1">
-            <h1 className="text-title text-m3-text truncate">
+            <h1 className="text-display text-m3-text truncate">
               {collection.name}
             </h1>
             <div className="flex items-center gap-2 mt-0.5 flex-wrap">

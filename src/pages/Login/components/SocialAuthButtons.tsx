@@ -111,9 +111,9 @@ export const SocialAuthButtons: React.FC<SocialAuthButtonsProps> = ({
       {showDivider && (
         <div className="relative flex items-center justify-center my-5">
           <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-slate-200 dark:border-[#303134]" />
+            <div className="w-full border-t border-m3-border" />
           </div>
-          <div className="relative px-3 bg-white dark:bg-[#1e1f20] text-xs uppercase tracking-wider font-medium text-slate-500 dark:text-slate-400">
+          <div className="relative px-3 bg-m3-card text-caption">
             {t("auth.login.orContinueWith")}
           </div>
         </div>
@@ -130,12 +130,12 @@ export const SocialAuthButtons: React.FC<SocialAuthButtonsProps> = ({
               type="button"
               disabled={disabled || loadingProvider !== null}
               onClick={() => handleSocialSignIn(provider.id)}
-              className="w-full h-10 sm:h-11 px-4 rounded-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-[#1e1f20] hover:bg-slate-50 dark:hover:bg-white/5 text-slate-700 dark:text-slate-200 font-medium text-sm transition-all flex items-center justify-center gap-3 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed hover:border-slate-400 dark:hover:border-slate-600 active:bg-slate-100 dark:active:bg-white/10"
+              className="w-full min-h-10 sm:min-h-11 px-4 rounded-full border border-m3-border bg-m3-card hover:bg-m3-hover text-m3-text font-medium text-sm transition-colors flex items-center justify-center gap-3 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? (
-                <Loader2 className="w-4 h-4 animate-spin text-slate-500" />
+                <Loader2 className="w-4 h-4 animate-spin text-m3-secondary" aria-hidden="true" />
               ) : (
-                <Icon className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
+                <Icon className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" aria-hidden="true" />
               )}
               <span>
                 {provider.id === "google"
