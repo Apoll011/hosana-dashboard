@@ -1,7 +1,7 @@
-import { Button, Spinner } from "@/src/components/common";
+import { EmptyState, Spinner } from "@/src/components/common";
 import { useI18n } from "@/src/lib/i18n";
 import { Folder, Song } from "@/src/types";
-import { FolderOpen, Plus, Upload } from "lucide-react";
+import { FolderOpen, Upload } from "lucide-react";
 import React from "react";
 import { useOutletContext } from "react-router-dom";
 import {
@@ -117,6 +117,7 @@ export const FoldersPage: React.FC = () => {
   const { organization } = useAuth();
   const { settings: personalSettings } = usePersonalSettings();
   const { granted: canViewLibraryHealth } = useCan("library.health");
+  const { granted: canCreateSong } = useCan("song.create");
   const slugPrefix = organization?.slug ? `/${organization.slug}` : "";
   const showSongScore = canViewLibraryHealth && personalSettings.showSongScore;
 
@@ -169,22 +170,22 @@ export const FoldersPage: React.FC = () => {
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
       className={`flex-1 p-6 overflow-y-auto bg-m3-bg dark:bg-m3-bg relative transition-all select-none min-h-75 h-full ${
-        isDraggingOver //TODO: Remove with the permission
-          ? "ring-4 ring-inset ring-[#0284c7] bg-sky-50/50 dark:bg-sky-950/30"
+        isDraggingOver
+          ? "ring-4 ring-inset ring-m3-primary bg-m3-primary/5"
           : ""
       }`}
     >
       {/* Drag Over Overlay (só para upload externo, nunca durante drag interno) */}
       {isDraggingOver && !isInternalDragActive && (
         <Can permission="song.import">
-          <div className="absolute inset-0 bg-[#0284c7]/10 backdrop-blur-xs z-30 flex flex-col items-center justify-center p-6 text-center pointer-events-none">
-            <div className="w-16 h-16 rounded-3xl bg-[#0284c7] text-white flex items-center justify-center shadow-lg mb-3 animate-bounce">
+          <div className="absolute inset-0 bg-m3-primary/10 backdrop-blur-xs z-30 flex flex-col items-center justify-center p-6 text-center pointer-events-none">
+            <div className="w-16 h-16 rounded-3xl bg-m3-primary text-white flex items-center justify-center shadow-lg mb-3 animate-bounce">
               <Upload className="w-8 h-8" />
             </div>
-            <h3 className="text-lg font-extrabold text-[#0284c7]">
+            <h3 className="text-title text-m3-primary">
               {t("foldersPage.dropHere")}
             </h3>
-            <p className="text-xs font-semibold text-slate-600 dark:text-slate-300 mt-1">
+            <p className="text-caption mt-1">
               {t("foldersPage.dropHereDesc", {
                 folder: currentFolder
                   ? currentFolder.name
@@ -200,49 +201,49 @@ export const FoldersPage: React.FC = () => {
           <Spinner label={t("foldersPage.loading")} />
         </div>
       ) : totalItemsCount === 0 ? (
-        <div className="h-full flex flex-col items-center justify-center p-12 text-center my-8 select-none">
-          <div className="w-16 h-16 rounded-3xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-800/50 flex items-center justify-center text-amber-500 mb-4">
-            <FolderOpen className="w-8 h-8" />
-          </div>
-          <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">
-            {searchQuery
-              ? t("foldersPage.noResults")
-              : t("foldersPage.emptyTitle")}
-          </h3>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-sm">
-            {searchQuery
-              ? t("foldersPage.noResultsDesc", {
-                  folder: currentFolder ? currentFolder.name : t("common.root"),
-                  query: searchQuery,
-                })
-              : currentFolderId === null
-                ? t("foldersPage.emptyRootDesc")
-                : t("foldersPage.emptyFolderDesc", {
-                    folder: currentFolder?.name || "",
-                  })}
-          </p>
-
+        <div className="h-full flex flex-col items-center justify-center">
+          <EmptyState
+            icon={<FolderOpen className="w-8 h-8" />}
+            title={
+              searchQuery
+                ? t("foldersPage.noResults")
+                : t("foldersPage.emptyTitle")
+            }
+            description={
+              searchQuery
+                ? t("foldersPage.noResultsDesc", {
+                    folder: currentFolder
+                      ? currentFolder.name
+                      : t("common.root"),
+                    query: searchQuery,
+                  })
+                : currentFolderId === null
+                  ? t("foldersPage.emptyRootDesc")
+                  : t("foldersPage.emptyFolderDesc", {
+                      folder: currentFolder?.name || "",
+                    })
+            }
+            actionLabel={
+              !searchQuery && canCreateSong
+                ? t("addressBar.newSong")
+                : undefined
+            }
+            onAction={
+              !searchQuery && canCreateSong
+                ? () => setIsCreateSongModalOpen(true)
+                : undefined
+            }
+          />
           {!searchQuery && (
-            <div className="flex flex-col items-center gap-3 mt-6">
-              <Can permission="song.create">
-                <Button
-                  variant="primary"
-                  size="sm"
-                  icon={<Plus className="w-4 h-4" />}
-                  onClick={() => setIsCreateSongModalOpen(true)}
-                >
-                  {t("addressBar.newSong")}
-                </Button>
-              </Can>
+            <div className="flex flex-col items-center gap-3 -mt-2 mb-8">
               <CanAll permissions={["song.create", "song.import"]}>
-                <span className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
-                  {t("common.or")}
-                </span>
+                <span className="text-label">{t("common.or")}</span>
               </CanAll>
               <Can permission="song.import">
                 <button
+                  type="button"
                   onClick={() => fileInputRef?.current?.click()}
-                  className="text-xs font-medium text-[#0284c7] hover:underline flex items-center gap-1.5 cursor-pointer bg-sky-50/80 dark:bg-sky-950/40 px-4 py-2 rounded-xl border border-sky-200 dark:border-sky-900/50 hover:bg-sky-100 dark:hover:bg-sky-900/50 transition-colors"
+                  className="text-sm font-medium text-m3-primary hover:underline flex items-center gap-1.5 cursor-pointer bg-m3-primary/10 px-4 py-2 rounded-[var(--radius-md)] border border-m3-primary/25 hover:bg-m3-primary/15 transition-colors"
                 >
                   <Upload className="w-3.5 h-3.5" />
                   <span>{t("foldersPage.dragOrClick")}</span>
@@ -305,28 +306,38 @@ export const FoldersPage: React.FC = () => {
           <div className="overflow-x-auto flex-1">
             <table className="w-full text-left border-collapse select-none">
               <thead>
-                <tr className="bg-m3-sidebar/40 border-b border-m3-border text-[10px] font-black text-m3-secondary uppercase tracking-[0.2em]">
-                  <th className={isCompact ? "py-2.5 px-4" : "py-3.5 px-6"}>
+                <tr className="bg-m3-sidebar/40 border-b border-m3-border">
+                  <th
+                    className={`text-label ${isCompact ? "py-2.5 px-4" : "py-3.5 px-6"}`}
+                  >
                     {t("common.name")}
                   </th>
-                  <th className={isCompact ? "py-2.5 px-4" : "py-3.5 px-6"}>
+                  <th
+                    className={`text-label ${isCompact ? "py-2.5 px-4" : "py-3.5 px-6"}`}
+                  >
                     {t("common.type")}
                   </th>
                   {isSearchingOrFiltering && (
-                    <th className={isCompact ? "py-2.5 px-4" : "py-3.5 px-6"}>
+                    <th
+                      className={`text-label ${isCompact ? "py-2.5 px-4" : "py-3.5 px-6"}`}
+                    >
                       {t("common.location")}
                     </th>
                   )}
-                  <th className={isCompact ? "py-2.5 px-4" : "py-3.5 px-6"}>
+                  <th
+                    className={`text-label ${isCompact ? "py-2.5 px-4" : "py-3.5 px-6"}`}
+                  >
                     {t("common.details")}
                   </th>
                   {showSongScore && (
-                    <th className={isCompact ? "py-2.5 px-4" : "py-3.5 px-6"}>
+                    <th
+                      className={`text-label ${isCompact ? "py-2.5 px-4" : "py-3.5 px-6"}`}
+                    >
                       Score
                     </th>
                   )}
                   <th
-                    className={`${isCompact ? "py-2.5 px-4" : "py-3.5 px-6"} text-right`}
+                    className={`text-label ${isCompact ? "py-2.5 px-4" : "py-3.5 px-6"} text-right`}
                   >
                     {t("common.action")}
                   </th>

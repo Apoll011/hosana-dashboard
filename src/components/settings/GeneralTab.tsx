@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Button, Spinner } from "@/src/components/common";
+import { Button, Spinner, Surface } from "@/src/components/common";
 import { useI18n } from "@/src/lib/i18n";
 import { useCan } from "@/src/lib/permissions/client";
 import {
@@ -52,6 +52,9 @@ const SERMON_PRESETS = [
   { label: "60:00", sec: 3600 },
 ];
 
+const selectClass =
+  "w-full rounded-[var(--radius-md)] border border-m3-border bg-m3-card text-m3-text text-sm px-3.5 py-2.5 focus:outline-none focus:ring-2 focus:ring-m3-primary/25 focus:border-m3-primary disabled:opacity-60 disabled:bg-m3-sidebar transition-colors cursor-pointer";
+
 export const GeneralTab: React.FC<GeneralTabProps> = ({
   active,
   showToast,
@@ -72,7 +75,6 @@ export const GeneralTab: React.FC<GeneralTabProps> = ({
     removeResponsibilityCategory,
   } = useOrgSettings();
 
-  // Local MM:SS text state for the duration inputs — committed to hook on blur/preset
   const [songRaw, setSongRaw] = React.useState(
     secondsToDurationInput(settings.services.songDuration),
   );
@@ -80,7 +82,6 @@ export const GeneralTab: React.FC<GeneralTabProps> = ({
     secondsToDurationInput(settings.services.sermonDuration),
   );
 
-  // Keep local text in sync when hook resets/saves
   React.useEffect(() => {
     setSongRaw(secondsToDurationInput(settings.services.songDuration));
   }, [settings.services.songDuration]);
@@ -92,7 +93,7 @@ export const GeneralTab: React.FC<GeneralTabProps> = ({
 
   if (canLoading || !organization) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center p-12 text-slate-500">
+      <div className="flex-1 flex flex-col items-center justify-center p-12 text-m3-secondary">
         <Spinner size="lg" label={t("settings.general.loading")} />
       </div>
     );
@@ -121,175 +122,160 @@ export const GeneralTab: React.FC<GeneralTabProps> = ({
       onSubmit={handleSubmit}
       className="space-y-6 max-w-4xl mx-auto w-full animate-in fade-in slide-in-from-bottom-2 duration-300"
     >
-      {/* ── 1. LOCALIZAÇÃO E DATAS ─────────────────────────────────── */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xs overflow-hidden">
-        <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-900/50">
+      <Surface>
+        <div className="flex items-start justify-between gap-4 mb-6">
           <div>
-            <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+            <h3 className="text-title text-m3-text flex items-center gap-2">
               <Settings2 className="w-5 h-5 text-m3-primary" />
               {t("settings.general.title")}
             </h3>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-              {t("settings.general.desc")}
-            </p>
+            <p className="text-muted mt-1">{t("settings.general.desc")}</p>
           </div>
           {!canManageOrg && (
-            <span className="text-xs bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 px-3 py-1.5 rounded-full flex items-center gap-1.5 font-semibold">
+            <span className="text-xs bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 px-3 py-1.5 rounded-[var(--radius-md)] flex items-center gap-1.5 font-semibold shrink-0">
               <Lock className="w-3.5 h-3.5" />
               {t("settings.general.readOnly")}
             </span>
           )}
         </div>
 
-        <div className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Idioma */}
-            <div className="flex flex-col gap-2">
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5 uppercase tracking-wide">
-                <Globe className="w-4 h-4 text-slate-400" />
-                {t("settings.general.orgLanguage")}
-              </label>
-              <select
-                disabled={!canManageOrg || isSaving}
-                value={settings.general.locale}
-                onChange={(e) => update("general", "locale", e.target.value)}
-                className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-sm px-3.5 py-2.5 focus:outline-hidden focus:ring-2 focus:ring-m3-primary/40 focus:border-m3-primary disabled:opacity-60 disabled:bg-slate-50 dark:disabled:bg-slate-800/50 transition-colors cursor-pointer"
-              >
-                <option value="pt-PT">
-                  {t("settings.general.locales.ptPT")}
-                </option>
-                <option value="pt-BR">
-                  {t("settings.general.locales.ptBR")}
-                </option>
-                <option value="en-US">
-                  {t("settings.general.locales.enUS")}
-                </option>
-                <option value="es-ES">
-                  {t("settings.general.locales.esES")}
-                </option>
-              </select>
-            </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="flex flex-col gap-1.5">
+            <label className="text-label flex items-center gap-1.5">
+              <Globe className="w-4 h-4" />
+              {t("settings.general.orgLanguage")}
+            </label>
+            <select
+              disabled={!canManageOrg || isSaving}
+              value={settings.general.locale}
+              onChange={(e) => update("general", "locale", e.target.value)}
+              className={selectClass}
+            >
+              <option value="pt-PT">
+                {t("settings.general.locales.ptPT")}
+              </option>
+              <option value="pt-BR">
+                {t("settings.general.locales.ptBR")}
+              </option>
+              <option value="en-US">
+                {t("settings.general.locales.enUS")}
+              </option>
+              <option value="es-ES">
+                {t("settings.general.locales.esES")}
+              </option>
+            </select>
+          </div>
 
-            {/* Fuso Horário */}
-            <div className="flex flex-col gap-2">
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5 uppercase tracking-wide">
-                <Clock className="w-4 h-4 text-slate-400" />
-                {t("settings.general.timezone")}
-              </label>
-              <select
-                disabled={!canManageOrg || isSaving}
-                value={settings.general.timezone}
-                onChange={(e) => update("general", "timezone", e.target.value)}
-                className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-sm px-3.5 py-2.5 focus:outline-hidden focus:ring-2 focus:ring-m3-primary/40 focus:border-m3-primary disabled:opacity-60 disabled:bg-slate-50 dark:disabled:bg-slate-800/50 transition-colors cursor-pointer"
+          <div className="flex flex-col gap-1.5">
+            <label className="text-label flex items-center gap-1.5">
+              <Clock className="w-4 h-4" />
+              {t("settings.general.timezone")}
+            </label>
+            <select
+              disabled={!canManageOrg || isSaving}
+              value={settings.general.timezone}
+              onChange={(e) => update("general", "timezone", e.target.value)}
+              className={selectClass}
+            >
+              <optgroup label={t("settings.general.timezones.portugalGroup")}>
+                <option value="Europe/Lisbon">
+                  {t("settings.general.timezones.lisbon")}
+                </option>
+                <option value="Atlantic/Azores">
+                  {t("settings.general.timezones.azores")}
+                </option>
+              </optgroup>
+              <optgroup label={t("settings.general.timezones.brazilGroup")}>
+                <option value="America/Sao_Paulo">
+                  {t("settings.general.timezones.saoPaulo")}
+                </option>
+                <option value="America/Manaus">
+                  {t("settings.general.timezones.manaus")}
+                </option>
+              </optgroup>
+              <optgroup
+                label={t("settings.general.timezones.otherRegionsGroup")}
               >
-                <optgroup label={t("settings.general.timezones.portugalGroup")}>
-                  <option value="Europe/Lisbon">
-                    {t("settings.general.timezones.lisbon")}
-                  </option>
-                  <option value="Atlantic/Azores">
-                    {t("settings.general.timezones.azores")}
-                  </option>
-                </optgroup>
-                <optgroup label={t("settings.general.timezones.brazilGroup")}>
-                  <option value="America/Sao_Paulo">
-                    {t("settings.general.timezones.saoPaulo")}
-                  </option>
-                  <option value="America/Manaus">
-                    {t("settings.general.timezones.manaus")}
-                  </option>
-                </optgroup>
-                <optgroup
-                  label={t("settings.general.timezones.otherRegionsGroup")}
-                >
-                  <option value="Europe/London">
-                    {t("settings.general.timezones.london")}
-                  </option>
-                  <option value="America/New_York">
-                    {t("settings.general.timezones.newYork")}
-                  </option>
-                  <option value="UTC">
-                    {t("settings.general.timezones.utc")}
-                  </option>
-                </optgroup>
-              </select>
-            </div>
+                <option value="Europe/London">
+                  {t("settings.general.timezones.london")}
+                </option>
+                <option value="America/New_York">
+                  {t("settings.general.timezones.newYork")}
+                </option>
+                <option value="UTC">
+                  {t("settings.general.timezones.utc")}
+                </option>
+              </optgroup>
+            </select>
+          </div>
 
-            {/* Primeiro Dia da Semana */}
-            <div className="flex flex-col gap-2 md:col-span-2">
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5 uppercase tracking-wide">
-                <Calendar className="w-4 h-4 text-slate-400" />
-                {t("settings.general.weekStartsOn")}
-              </label>
-              <div className="grid grid-cols-2 gap-3 max-w-md">
-                {[
-                  {
-                    value: 1,
-                    label: t("settings.general.monday"),
-                    desc: t("settings.general.mondayDesc"),
-                  },
-                  {
-                    value: 0,
-                    label: t("settings.general.sunday"),
-                    desc: t("settings.general.sundayDesc"),
-                  },
-                ].map((day) => {
-                  const isChecked = settings.general.weekStartsOn === day.value;
-                  return (
-                    <label
-                      key={day.value}
-                      className={`flex flex-col p-3 rounded-xl border transition-all cursor-pointer ${
-                        isChecked
-                          ? "border-m3-primary bg-m3-primary/5 text-m3-primary ring-1 ring-m3-primary/30"
-                          : "border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800/50 text-slate-700 dark:text-slate-300"
-                      } ${!canManageOrg ? "opacity-60 cursor-not-allowed" : ""}`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-bold">{day.label}</span>
-                        <input
-                          type="radio"
-                          name="weekStartsOn"
-                          disabled={!canManageOrg || isSaving}
-                          checked={isChecked}
-                          onChange={() =>
-                            update("general", "weekStartsOn", day.value)
-                          }
-                          className="w-4 h-4 text-m3-primary focus:ring-m3-primary cursor-pointer"
-                        />
-                      </div>
-                      <span className="text-[11px] text-slate-400 mt-0.5">
-                        {day.desc}
-                      </span>
-                    </label>
-                  );
-                })}
-              </div>
+          <div className="flex flex-col gap-1.5 md:col-span-2">
+            <label className="text-label flex items-center gap-1.5">
+              <Calendar className="w-4 h-4" />
+              {t("settings.general.weekStartsOn")}
+            </label>
+            <div className="grid grid-cols-2 gap-3 max-w-md">
+              {[
+                {
+                  value: 1,
+                  label: t("settings.general.monday"),
+                  desc: t("settings.general.mondayDesc"),
+                },
+                {
+                  value: 0,
+                  label: t("settings.general.sunday"),
+                  desc: t("settings.general.sundayDesc"),
+                },
+              ].map((day) => {
+                const isChecked = settings.general.weekStartsOn === day.value;
+                return (
+                  <label
+                    key={day.value}
+                    className={`flex flex-col p-3 rounded-[var(--radius-md)] border transition-colors cursor-pointer ${
+                      isChecked
+                        ? "border-m3-primary bg-m3-primary/5 text-m3-primary ring-1 ring-m3-primary/30"
+                        : "border-m3-border hover:bg-m3-sidebar text-m3-text"
+                    } ${!canManageOrg ? "opacity-60 cursor-not-allowed" : ""}`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-semibold">{day.label}</span>
+                      <input
+                        type="radio"
+                        name="weekStartsOn"
+                        disabled={!canManageOrg || isSaving}
+                        checked={isChecked}
+                        onChange={() =>
+                          update("general", "weekStartsOn", day.value)
+                        }
+                        className="w-4 h-4 text-m3-primary focus:ring-m3-primary cursor-pointer"
+                      />
+                    </div>
+                    <span className="text-caption mt-0.5">{day.desc}</span>
+                  </label>
+                );
+              })}
             </div>
           </div>
         </div>
-      </div>
+      </Surface>
 
-      {/* ── 2. DURAÇÕES & COMPORTAMENTO ───────────────────────────── */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xs overflow-hidden">
-        <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
-          <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-            <Timer className="w-5 h-5 text-indigo-500" />
+      <Surface padding="none" className="overflow-hidden">
+        <div className="px-5 sm:px-6 pt-5 sm:pt-6 pb-0">
+          <h3 className="text-title text-m3-text flex items-center gap-2">
+            <Timer className="w-5 h-5 text-m3-primary" />
             {t("settings.general.durationsTitle")}
           </h3>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-            {t("settings.general.durationsDesc")}
-          </p>
+          <p className="text-muted mt-1">{t("settings.general.durationsDesc")}</p>
         </div>
 
-        <div className="p-6 space-y-6">
+        <div className="p-5 sm:p-6 space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Duração de Cântico — uses shared DurationField */}
             <DurationField
               label={t("settings.general.songLabel")}
               icon={<Music className="w-4 h-4 text-indigo-500" />}
               value={songRaw}
               onChange={(v) => {
                 setSongRaw(v);
-                // commit seconds on change so badge is live
                 update("services", "songDuration", durationInputToSeconds(v));
               }}
               accentRingClass="focus:ring-indigo-400/60"
@@ -299,7 +285,6 @@ export const GeneralTab: React.FC<GeneralTabProps> = ({
               placeholder="05:00"
             />
 
-            {/* Duração do Sermão */}
             <DurationField
               label={t("settings.general.sermonLabel")}
               icon={<Mic2 className="w-4 h-4 text-rose-500" />}
@@ -316,12 +301,11 @@ export const GeneralTab: React.FC<GeneralTabProps> = ({
             />
           </div>
 
-          <hr className="border-slate-100 dark:border-slate-800" />
+          <hr className="border-m3-border" />
 
-          {/* Comportamento */}
           <div className="space-y-3">
-            <h4 className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide flex items-center gap-1.5 mb-3">
-              <Shield className="w-4 h-4 text-slate-400" />
+            <h4 className="text-label flex items-center gap-1.5 mb-3">
+              <Shield className="w-4 h-4" />
               {t("settings.general.behaviorTitle")}
             </h4>
 
@@ -349,9 +333,9 @@ export const GeneralTab: React.FC<GeneralTabProps> = ({
             ).map((toggle) => (
               <label
                 key={toggle.id}
-                className={`flex items-start gap-4 p-4 border border-slate-200 dark:border-slate-800 rounded-xl transition-colors ${
+                className={`flex items-start gap-4 p-4 border border-m3-border rounded-[var(--radius-md)] transition-colors ${
                   canManageOrg && !isSaving
-                    ? "cursor-pointer hover:bg-slate-50/80 dark:hover:bg-slate-800/40"
+                    ? "cursor-pointer hover:bg-m3-sidebar/80"
                     : "opacity-75 cursor-not-allowed"
                 }`}
               >
@@ -363,30 +347,27 @@ export const GeneralTab: React.FC<GeneralTabProps> = ({
                     onChange={(e) =>
                       update("services", toggle.id, e.target.checked)
                     }
-                    className="w-4.5 h-4.5 text-m3-primary border-slate-300 rounded focus:ring-m3-primary cursor-pointer"
+                    className="w-4.5 h-4.5 text-m3-primary border-m3-border rounded focus:ring-m3-primary cursor-pointer"
                   />
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-sm font-bold text-slate-900 dark:text-slate-100">
+                  <span className="text-sm font-semibold text-m3-text">
                     {toggle.label}
                   </span>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                    {toggle.description}
-                  </p>
+                  <p className="text-caption mt-0.5">{toggle.description}</p>
                 </div>
               </label>
             ))}
           </div>
         </div>
 
-        {/* Footer */}
         {canManageOrg && (
-          <div className="px-6 py-4 bg-slate-50/70 dark:bg-slate-900/70 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center">
+          <div className="px-5 sm:px-6 py-4 bg-m3-sidebar/50 border-t border-m3-border flex justify-between items-center">
             <button
               type="button"
               onClick={reset}
               disabled={isSaving}
-              className="text-xs text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 flex items-center gap-1 font-medium transition-colors"
+              className="text-xs text-m3-secondary hover:text-m3-text flex items-center gap-1 font-medium transition-colors cursor-pointer"
             >
               <RotateCcw className="w-3.5 h-3.5" />
               {t("settings.general.reset")}
@@ -410,9 +391,8 @@ export const GeneralTab: React.FC<GeneralTabProps> = ({
             </Button>
           </div>
         )}
-      </div>
+      </Surface>
 
-      {/* ── 3. RESPONSABILIDADES DA AGENDA ─────────────────────────── */}
       <ResponsibilityCategoriesCard
         disabled={!canManageOrg || isSaving}
         categories={settings.agenda.responsibilityCategories}

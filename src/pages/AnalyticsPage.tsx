@@ -6,6 +6,7 @@
 import { LibraryHealthTab } from "@/src/components/analytics/LibraryHealthTab";
 import { SetlistInsightsTab } from "@/src/components/analytics/SetlistInsightsTab";
 import { UsageOverviewTab } from "@/src/components/analytics/UsageOverviewTab";
+import { PageHeader, Tabs } from "@/src/components/common";
 import { useI18n } from "@/src/lib/i18n";
 import { useCan } from "@/src/lib/permissions/client";
 import { Gauge, HeartPulse, ListMusic } from "lucide-react";
@@ -45,58 +46,44 @@ export const AnalyticsPage: React.FC = () => {
     return <Navigate to={slug ? `/${slug}/folders` : "/"} replace />;
   }
 
-  const tabs = [
+  const tabItems = [
     {
-      id: "usage" as const,
+      id: "usage",
       label: t("analytics.tabs.usage"),
-      icon: Gauge,
-      show: true,
+      icon: <Gauge className="w-4 h-4" />,
     },
     {
-      id: "setlist" as const,
+      id: "setlist",
       label: t("analytics.tabs.setlist"),
-      icon: ListMusic,
-      show: true,
+      icon: <ListMusic className="w-4 h-4" />,
     },
     {
-      id: "libraryHealth" as const,
+      id: "libraryHealth",
       label: t("analytics.tabs.libraryHealth"),
-      icon: HeartPulse,
-      show: true,
+      icon: <HeartPulse className="w-4 h-4" />,
     },
   ];
 
   return (
-    <div className="h-full w-full overflow-y-auto bg-slate-50/50 dark:bg-m3-bg text-slate-900 dark:text-slate-100 p-4 sm:p-6 lg:p-8">
+    <div className="h-full w-full overflow-y-auto bg-m3-bg text-m3-text p-4 sm:p-6 lg:p-8">
       <div className="max-w-5xl mx-auto space-y-6">
-        <div className="flex items-center gap-1 overflow-x-auto pb-2 scrollbar-none border-b border-slate-200 dark:border-slate-800">
-          {tabs.map((tab) => {
-            const Icon = tab.icon;
-            const isActive = activeTab === tab.id;
-            if (!tab.show) return null;
+        <PageHeader
+          title={t("analytics.title")}
+          description={t("analytics.desc")}
+        />
 
-            return (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => {
-                  setActiveTab(tab.id);
-                  const next = new URLSearchParams(searchParams);
-                  next.set("tab", tab.id);
-                  setSearchParams(next, { replace: true });
-                }}
-                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
-                  isActive
-                    ? "bg-m3-primary text-white shadow-md shadow-m3-primary/20"
-                    : "text-slate-600 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800/60 hover:text-slate-900 dark:hover:text-slate-100"
-                }`}
-              >
-                <Icon className="w-4 h-4" />
-                <span>{tab.label}</span>
-              </button>
-            );
-          })}
-        </div>
+        <Tabs
+          items={tabItems}
+          value={activeTab}
+          onChange={(id) => {
+            const nextId = id as TabType;
+            setActiveTab(nextId);
+            const next = new URLSearchParams(searchParams);
+            next.set("tab", nextId);
+            setSearchParams(next, { replace: true });
+          }}
+          aria-label={t("analytics.title")}
+        />
 
         <div className="pt-2 pb-12">
           <UsageOverviewTab active={activeTab === "usage"} />

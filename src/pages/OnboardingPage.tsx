@@ -277,7 +277,7 @@ export const OnboardingPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen w-full flex flex-col justify-between relative overflow-x-hidden font-sans text-slate-900 dark:text-slate-100 antialiased selection:bg-blue-500/20">
+    <div className="min-h-screen w-full flex flex-col justify-between relative overflow-x-hidden font-sans text-m3-text antialiased selection:bg-m3-primary/20">
       {/* Dynamic Ambient Background Image with smooth subtle overlay */}
       <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
         <img
@@ -286,19 +286,19 @@ export const OnboardingPage: React.FC = () => {
           className="w-full h-full object-cover scale-105 opacity-35 dark:opacity-25 transition-all duration-700 blur-[3px]"
           referrerPolicy="no-referrer"
         />
-        <div className="absolute inset-0 bg-linear-to-b from-slate-100/70 via-slate-100/85 to-slate-200/95 dark:from-[#131314]/85 dark:via-[#131314]/92 dark:to-[#131314]/98 transition-colors duration-500" />
+        <div className="absolute inset-0 bg-linear-to-b from-m3-bg/70 via-m3-bg/85 to-m3-sidebar/95 dark:from-m3-bg/85 dark:via-m3-bg/92 dark:to-m3-bg/98 transition-colors duration-500" />
       </div>
 
       {/* Top action header */}
       <header className="w-full px-4 sm:px-8 pt-4 pb-2 flex items-center justify-between z-20 shrink-0">
         <div className="flex items-center gap-2">
-          <div className="flex items-center gap-2 select-none px-3 py-1.5 rounded-full bg-white/70 dark:bg-[#1e1f20]/70 backdrop-blur-md border border-slate-200/60 dark:border-white/10 shadow-xs">
+          <div className="flex items-center gap-2 select-none px-3 py-1.5 rounded-full bg-m3-card/70 backdrop-blur-md border border-m3-border/60 shadow-xs">
             <img
               src="/favicon.png"
               alt="Hosanna Studio"
               className="w-5 h-5 object-contain rounded-md"
             />
-            <span className="font-semibold text-xs sm:text-sm tracking-tight text-slate-800 dark:text-slate-200">
+            <span className="font-semibold text-xs sm:text-sm tracking-tight text-m3-text">
               Hosanna Studio
             </span>
           </div>
@@ -311,12 +311,12 @@ export const OnboardingPage: React.FC = () => {
             type="button"
             onClick={toggleDarkMode}
             aria-label="Alternar tema"
-            className="w-9 h-9 flex items-center justify-center rounded-full bg-white/70 dark:bg-[#1e1f20]/70 backdrop-blur-md border border-slate-200/60 dark:border-white/10 text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-white/15 active:scale-95 transition-all shadow-xs cursor-pointer"
+            className="w-9 h-9 flex items-center justify-center rounded-full bg-m3-card/70 backdrop-blur-md border border-m3-border/60 text-m3-secondary hover:bg-m3-card dark:hover:bg-m3-hover active:scale-95 transition-all shadow-xs cursor-pointer"
           >
             {darkMode ? (
               <Sun className="w-4 h-4 text-amber-300" />
             ) : (
-              <Moon className="w-4 h-4 text-slate-600" />
+              <Moon className="w-4 h-4 text-m3-secondary" />
             )}
           </button>
         </div>
@@ -324,23 +324,23 @@ export const OnboardingPage: React.FC = () => {
 
       {/* Main Center Stage */}
       <main className="flex-1 w-full flex items-center justify-center p-2 sm:p-3 md:p-4 z-10">
-        <div className="w-full max-w-md sm:max-w-124 md:max-w-135 bg-white/95 dark:bg-[#1e1f20]/95 backdrop-blur-xl sm:border sm:border-slate-200/80 dark:sm:border-[#303134]/90 rounded-2xl sm:rounded-[28px] shadow-lg shadow-black/5 dark:shadow-black/40 px-6 py-4 sm:p-6 md:p-8 transition-all">
+        <div className="w-full max-w-md sm:max-w-124 md:max-w-135 bg-m3-card/95 backdrop-blur-xl sm:border sm:border-m3-border/80 rounded-[var(--radius-xl)] sm:rounded-[28px] shadow-lg shadow-black/5 dark:shadow-black/40 px-6 py-4 sm:p-6 md:p-8 transition-all">
           {/* Header Brand & Titles */}
           <div className="flex flex-col items-center text-center mb-7 sm:mb-8 select-none">
-            <h1 className="text-2xl sm:text-[26px] font-normal tracking-tight text-slate-900 dark:text-slate-100 font-sans">
+            <h1 className="text-title text-m3-text">
               {getHeaderTitle()}
             </h1>
 
             {getHeaderSubtitle() && (
-              <p className="mt-1.5 text-sm sm:text-[15px] text-slate-600 dark:text-slate-400 font-normal max-w-sm">
+              <p className="mt-1.5 text-muted max-w-sm">
                 {getHeaderSubtitle()}
               </p>
             )}
           </div>
 
           {errorMsg && (
-            <div className="mb-5 p-3 rounded-lg bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800/60 text-red-800 dark:text-red-300 text-xs sm:text-sm font-medium flex items-start gap-2.5 animate-in fade-in duration-200">
-              <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-red-600 dark:text-red-400" />
+            <div className="mb-5 p-3 rounded-[var(--radius-md)] bg-m3-danger/10 border border-m3-danger/30 text-m3-danger text-xs sm:text-sm font-medium flex items-start gap-2.5 animate-in fade-in duration-200">
+              <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-m3-danger" />
               <span className="flex-1 leading-snug">{errorMsg}</span>
             </div>
           )}
@@ -348,7 +348,7 @@ export const OnboardingPage: React.FC = () => {
           {/* Mode: Trial */}
           {mode === "trial" && newOrg && (
             <div className="text-center space-y-5">
-              <div className="bg-slate-50 dark:bg-white/5 border border-slate-200/80 dark:border-white/10 rounded-xl p-4 text-left space-y-2.5">
+              <div className="bg-m3-sidebar/60 border border-m3-border/60 rounded-[var(--radius-lg)] p-4 text-left space-y-2.5">
                 {(
                   [
                     "onboarding.trial.features.sync",
@@ -358,8 +358,8 @@ export const OnboardingPage: React.FC = () => {
                   ] as TranslationKey[]
                 ).map((key) => (
                   <div key={key} className="flex items-center gap-2.5">
-                    <Check className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0" />
-                    <span className="text-sm text-slate-700 dark:text-slate-300">
+                    <Check className="w-4 h-4 text-m3-primary shrink-0" />
+                    <span className="text-sm text-m3-text">
                       {t(key)}
                     </span>
                   </div>
@@ -367,16 +367,16 @@ export const OnboardingPage: React.FC = () => {
               </div>
 
               {/* Billing interval choice */}
-              <div className="bg-slate-50 dark:bg-white/5 border border-slate-200/80 dark:border-white/10 rounded-xl p-3">
-                <div className="flex items-center gap-2 bg-white dark:bg-[#1e1f20] border border-slate-200 dark:border-slate-700 rounded-full p-1 mb-3">
+              <div className="bg-m3-sidebar/60 border border-m3-border/60 rounded-[var(--radius-lg)] p-3">
+                <div className="flex items-center gap-2 bg-m3-card border border-m3-border rounded-full p-1 mb-3">
                   <button
                     type="button"
                     onClick={() => setAnnual(false)}
                     disabled={pendingAction === "checkout"}
                     className={`flex-1 px-3 py-1.5 rounded-full text-xs font-medium transition-colors cursor-pointer disabled:opacity-50 ${
                       !annual
-                        ? "bg-blue-600 text-white shadow-xs"
-                        : "text-slate-500 dark:text-slate-400"
+                        ? "bg-m3-primary text-white shadow-xs"
+                        : "text-m3-secondary"
                     }`}
                   >
                     {t("settings.billing.monthly")}
@@ -387,20 +387,20 @@ export const OnboardingPage: React.FC = () => {
                     disabled={pendingAction === "checkout"}
                     className={`flex-1 px-3 py-1.5 rounded-full text-xs font-medium transition-colors cursor-pointer disabled:opacity-50 ${
                       annual
-                        ? "bg-blue-600 text-white shadow-xs"
-                        : "text-slate-500 dark:text-slate-400"
+                        ? "bg-m3-primary text-white shadow-xs"
+                        : "text-m3-secondary"
                     }`}
                   >
                     {t("settings.billing.annual")}
                   </button>
                 </div>
                 <div className="flex items-baseline justify-center gap-1">
-                  <span className="text-2xl font-semibold text-slate-900 dark:text-white">
+                  <span className="text-2xl font-semibold text-m3-text">
                     {annual
                       ? PLAN_PRICING.annual.amount
                       : PLAN_PRICING.monthly.amount}
                   </span>
-                  <span className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+                  <span className="text-xs sm:text-sm text-m3-secondary">
                     {annual
                       ? PLAN_PRICING.annual.period
                       : PLAN_PRICING.monthly.period}
@@ -416,7 +416,7 @@ export const OnboardingPage: React.FC = () => {
 
               <Button
                 variant="primary"
-                className="w-full h-10 sm:h-11 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm transition-all shadow-none border-0"
+                className="w-full rounded-full"
                 isLoading={pendingAction === "checkout"}
                 disabled={pendingAction === "checkout"}
                 icon={<CreditCard className="w-4 h-4" />}
@@ -424,7 +424,7 @@ export const OnboardingPage: React.FC = () => {
               >
                 {t("onboarding.trial.startBtn")}
               </Button>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-m3-secondary">
                 {t("onboarding.trial.note")}
               </p>
 
@@ -432,7 +432,7 @@ export const OnboardingPage: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => logout()}
-                  className="inline-flex items-center text-xs sm:text-sm font-medium text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 transition-colors gap-1.5 cursor-pointer"
+                  className="inline-flex items-center text-xs sm:text-sm font-medium text-m3-secondary hover:text-m3-text transition-colors gap-1.5 cursor-pointer"
                 >
                   <LogOut className="w-3.5 h-3.5" />
                   <span>{t("sidebar.logout")}</span>
@@ -455,8 +455,8 @@ export const OnboardingPage: React.FC = () => {
               ) : invitations.length > 0 ? (
                 <div className="space-y-3">
                   <div className="flex items-center gap-2 px-1">
-                    <MailCheck className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                    <h3 className="text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                    <MailCheck className="w-4 h-4 text-m3-primary" />
+                    <h3 className="text-label">
                       {t("settings.members.pendingInvites", {
                         count: invitations.length,
                       })}
@@ -469,18 +469,18 @@ export const OnboardingPage: React.FC = () => {
                       return (
                         <div
                           key={inv.id}
-                          className="p-4 bg-blue-50/50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900/60 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-all"
+                          className="p-4 bg-m3-primary/5 border border-m3-primary/25 rounded-[var(--radius-lg)] flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-all"
                         >
                           <div className="space-y-0.5">
                             <div className="flex items-center gap-2">
-                              <Building2 className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                              <span className="font-semibold text-slate-900 dark:text-white text-sm">
+                              <Building2 className="w-4 h-4 text-m3-primary" />
+                              <span className="font-semibold text-m3-text text-sm">
                                 {inv.organizationName || inv.organizationId}
                               </span>
                             </div>
-                            <p className="text-xs text-slate-500 dark:text-slate-400">
+                            <p className="text-xs text-m3-secondary">
                               {t("settings.account.profile.role")}:{" "}
-                              <span className="font-medium text-slate-700 dark:text-slate-300 capitalize">
+                              <span className="font-medium text-m3-text capitalize">
                                 {inv.role}
                               </span>
                             </p>
@@ -491,7 +491,7 @@ export const OnboardingPage: React.FC = () => {
                               type="button"
                               disabled={isProcessing}
                               onClick={() => handleRejectInvitation(inv.id)}
-                              className="h-8 px-3 rounded-full border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/40 dark:hover:text-red-400 transition-colors text-xs font-medium cursor-pointer"
+                              className="h-8 px-3 rounded-full border border-m3-border text-m3-text hover:bg-m3-danger/10 hover:text-m3-danger transition-colors text-xs font-medium cursor-pointer"
                             >
                               {t("auth.acceptInvitation.rejectBtn")}
                             </button>
@@ -501,7 +501,7 @@ export const OnboardingPage: React.FC = () => {
                               isLoading={isProcessing}
                               disabled={isProcessing}
                               onClick={() => handleAcceptInvitation(inv.id)}
-                              className="h-8 px-4 rounded-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium shadow-none border-0"
+                              className="rounded-full"
                             >
                               <Check className="w-3.5 h-3.5 mr-1" />
                               {t("auth.acceptInvitation.acceptBtn")}
@@ -517,7 +517,7 @@ export const OnboardingPage: React.FC = () => {
               {/* Action options */}
               <div className="space-y-3">
                 {invitations.length > 0 && (
-                  <h3 className="text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400 px-1">
+                  <h3 className="text-label px-1">
                     Outras Opções
                   </h3>
                 )}
@@ -525,20 +525,20 @@ export const OnboardingPage: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setMode("create")}
-                  className="w-full flex items-center p-4 border border-slate-200 dark:border-slate-700/80 hover:border-blue-600 dark:hover:border-blue-400 rounded-xl transition-all group text-left bg-transparent hover:bg-slate-50 dark:hover:bg-white/5 cursor-pointer"
+                  className="w-full flex items-center p-4 border border-m3-border hover:border-m3-primary rounded-[var(--radius-lg)] transition-all group text-left bg-transparent hover:bg-m3-hover cursor-pointer"
                 >
-                  <div className="w-10 h-10 bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 rounded-full flex items-center justify-center mr-3.5 group-hover:scale-105 transition-transform">
+                  <div className="w-10 h-10 bg-m3-primary/10 text-m3-primary rounded-full flex items-center justify-center mr-3.5 transition-colors">
                     <PlusCircle className="w-5 h-5" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="font-medium text-slate-900 dark:text-white text-sm">
+                    <h3 className="font-medium text-m3-text text-sm">
                       {t("onboarding.createOrgTab")}
                     </h3>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                    <p className="text-xs text-m3-secondary">
                       {t("onboarding.step1Desc")}
                     </p>
                   </div>
-                  <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 group-hover:translate-x-0.5 transition-all" />
+                  <ArrowRight className="w-4 h-4 text-m3-secondary group-hover:text-m3-primary group-hover:translate-x-0.5 transition-all" />
                 </button>
               </div>
 
@@ -546,7 +546,7 @@ export const OnboardingPage: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => logout()}
-                  className="inline-flex items-center text-xs sm:text-sm font-medium text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 transition-colors gap-1.5 cursor-pointer"
+                  className="inline-flex items-center text-xs sm:text-sm font-medium text-m3-secondary hover:text-m3-text transition-colors gap-1.5 cursor-pointer"
                 >
                   <LogOut className="w-3.5 h-3.5" />
                   <span>{t("sidebar.logout")}</span>
@@ -589,7 +589,7 @@ export const OnboardingPage: React.FC = () => {
                   ) : slugStatus === "available" ? (
                     <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                   ) : slugStatus === "taken" ? (
-                    <XCircle className="w-4 h-4 text-red-600 dark:text-red-400" />
+                    <XCircle className="w-4 h-4 text-m3-danger" />
                   ) : undefined
                 }
               />
@@ -598,7 +598,7 @@ export const OnboardingPage: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setMode("choose")}
-                  className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 py-2 cursor-pointer"
+                  className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium text-m3-secondary hover:text-m3-text py-2 cursor-pointer"
                 >
                   <ArrowLeft className="w-4 h-4" />
                   <span>{t("common.back")}</span>
@@ -613,7 +613,7 @@ export const OnboardingPage: React.FC = () => {
                     slugStatus !== "available"
                   }
                   isLoading={isLoading}
-                  className="h-10 sm:h-11 px-6 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm transition-all shadow-none border-0"
+                  className="rounded-full px-6"
                 >
                   {t("onboarding.createOrgBtn")}
                 </Button>
@@ -624,7 +624,7 @@ export const OnboardingPage: React.FC = () => {
       </main>
 
       {/* Footer */}
-      <footer className="w-full max-w-135 mx-auto px-6 py-4 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-500 dark:text-slate-400 shrink-0 z-10">
+      <footer className="w-full max-w-135 mx-auto px-6 py-4 flex flex-wrap items-center justify-between gap-3 text-xs text-m3-secondary shrink-0 z-10">
         <div className="flex items-center gap-2">
           <span>Hosanna Studio &copy; {new Date().getFullYear()}</span>
         </div>
@@ -632,21 +632,21 @@ export const OnboardingPage: React.FC = () => {
           <a
             href="#"
             onClick={(e) => e.preventDefault()}
-            className="hover:text-slate-800 dark:hover:text-slate-200 transition-colors"
+            className="hover:text-m3-text transition-colors"
           >
             Ajuda
           </a>
           <a
             href="#"
             onClick={(e) => e.preventDefault()}
-            className="hover:text-slate-800 dark:hover:text-slate-200 transition-colors"
+            className="hover:text-m3-text transition-colors"
           >
             Privacidade
           </a>
           <a
             href="#"
             onClick={(e) => e.preventDefault()}
-            className="hover:text-slate-800 dark:hover:text-slate-200 transition-colors"
+            className="hover:text-m3-text transition-colors"
           >
             Termos
           </a>

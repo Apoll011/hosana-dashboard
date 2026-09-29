@@ -128,14 +128,14 @@ export const TwoFactorPage: React.FC = () => {
     >
       <form onSubmit={handleSubmit} className="space-y-5">
         {/* Method selector tabs */}
-        <div className="flex rounded-lg bg-slate-100 dark:bg-white/5 p-1 border border-slate-200/80 dark:border-white/10">
+        <div className="flex rounded-[var(--radius-md)] bg-m3-sidebar/80 p-1 border border-m3-border/60">
           <button
             type="button"
             onClick={() => handleSwitchMethod("totp")}
-            className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-md text-xs sm:text-sm font-medium transition-all cursor-pointer ${
+            className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-[var(--radius-sm)] text-xs sm:text-sm font-medium transition-all cursor-pointer ${
               method === "totp"
-                ? "bg-white dark:bg-[#1e1f20] text-blue-600 dark:text-blue-400 shadow-xs"
-                : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
+                ? "bg-m3-card text-m3-primary shadow-xs"
+                : "text-m3-secondary hover:text-m3-text"
             }`}
           >
             <Smartphone className="w-4 h-4" />
@@ -144,10 +144,10 @@ export const TwoFactorPage: React.FC = () => {
           <button
             type="button"
             onClick={() => handleSwitchMethod("otp")}
-            className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-md text-xs sm:text-sm font-medium transition-all cursor-pointer ${
+            className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-[var(--radius-sm)] text-xs sm:text-sm font-medium transition-all cursor-pointer ${
               method === "otp"
-                ? "bg-white dark:bg-[#1e1f20] text-blue-600 dark:text-blue-400 shadow-xs"
-                : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
+                ? "bg-m3-card text-m3-primary shadow-xs"
+                : "text-m3-secondary hover:text-m3-text"
             }`}
           >
             <MailCheck className="w-4 h-4" />
@@ -156,10 +156,10 @@ export const TwoFactorPage: React.FC = () => {
           <button
             type="button"
             onClick={() => handleSwitchMethod("backup")}
-            className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-md text-xs sm:text-sm font-medium transition-all cursor-pointer ${
+            className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-[var(--radius-sm)] text-xs sm:text-sm font-medium transition-all cursor-pointer ${
               method === "backup"
-                ? "bg-white dark:bg-[#1e1f20] text-blue-600 dark:text-blue-400 shadow-xs"
-                : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
+                ? "bg-m3-card text-m3-primary shadow-xs"
+                : "text-m3-secondary hover:text-m3-text"
             }`}
           >
             <KeyRound className="w-4 h-4" />
@@ -192,7 +192,7 @@ export const TwoFactorPage: React.FC = () => {
               type="button"
               onClick={handleSendOtp}
               disabled={isSendingOtp}
-              className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline disabled:opacity-50 cursor-pointer"
+              className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium text-m3-primary hover:text-m3-primary-dark hover:underline disabled:opacity-50 cursor-pointer"
             >
               <RefreshCw
                 className={`w-3.5 h-3.5 ${isSendingOtp ? "animate-spin" : ""}`}
@@ -203,12 +203,12 @@ export const TwoFactorPage: React.FC = () => {
         )}
 
         <div className="flex items-center justify-start pt-1">
-          <label className="flex items-center gap-2 cursor-pointer select-none text-xs sm:text-sm text-slate-600 dark:text-slate-400">
+          <label className="flex items-center gap-2 cursor-pointer select-none text-xs sm:text-sm text-m3-secondary">
             <input
               type="checkbox"
               checked={trustDevice}
               onChange={(e) => setTrustDevice(e.target.checked)}
-              className="w-4 h-4 rounded-sm border-slate-300 dark:border-slate-600 text-blue-600 focus:ring-blue-500 dark:bg-[#1e1f20] cursor-pointer"
+              className="w-4 h-4 rounded-sm border-m3-border text-m3-primary focus:ring-m3-primary bg-m3-card cursor-pointer"
             />
             <span>{t("auth.login.rememberMe")}</span>
           </label>
@@ -217,7 +217,7 @@ export const TwoFactorPage: React.FC = () => {
         <div className="flex items-center justify-between gap-3 pt-2">
           <AppLink
             to="/login"
-            className="text-xs sm:text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline py-2"
+            className="text-xs sm:text-sm font-medium text-m3-primary hover:text-m3-primary-dark hover:underline py-2"
           >
             {t("auth.forgotPassword.backToLogin")}
           </AppLink>
@@ -225,7 +225,7 @@ export const TwoFactorPage: React.FC = () => {
           <Button
             type="submit"
             isLoading={isLoading}
-            className="h-10 sm:h-11 px-6 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm transition-all shadow-none hover:shadow-xs active:scale-[0.98] border-0"
+            className="rounded-full px-6"
           >
             {t("auth.twoFactor.verifyBtn")}
           </Button>
@@ -316,7 +316,7 @@ function OtpInput({
           onChange={(e) => handleChange(i, e)}
           onKeyDown={(e) => handleKey(i, e)}
           onFocus={(e) => e.target.select()}
-          className="w-10 sm:w-12 h-12 sm:h-14 text-center text-lg sm:text-xl font-medium rounded-sm border border-slate-300 dark:border-slate-700 bg-transparent text-slate-900 dark:text-white focus:border-blue-600 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-600 dark:focus:ring-blue-400 focus:outline-none transition-all"
+          className="w-10 sm:w-12 h-12 sm:h-14 text-center text-lg sm:text-xl font-medium rounded-[var(--radius-md)] border border-m3-border bg-transparent text-m3-text focus:border-m3-primary focus:ring-2 focus:ring-m3-primary/25 focus:outline-none transition-all"
         />
       ))}
     </div>

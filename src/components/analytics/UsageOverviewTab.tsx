@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Spinner } from "@/src/components/common";
+import { Spinner, Surface } from "@/src/components/common";
 import { useAuth } from "@/src/contexts/AuthContext";
 import { getDatabase } from "@/src/db";
 import { useAgenda } from "@/src/hooks/useAgenda";
@@ -117,7 +117,7 @@ function UsageBar({
 }) {
   if (unlimited) {
     return (
-      <div className="h-1.5 w-full rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+      <div className="h-1.5 w-full rounded-full bg-m3-sidebar overflow-hidden">
         <div className="h-full w-1/3 rounded-full bg-m3-primary/40" />
       </div>
     );
@@ -128,9 +128,9 @@ function UsageBar({
     pct >= 90 ? "bg-rose-500" : pct >= 70 ? "bg-amber-500" : "bg-m3-primary";
 
   return (
-    <div className="h-1.5 w-full rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+    <div className="h-1.5 w-full rounded-full bg-m3-sidebar overflow-hidden">
       <div
-        className={`h-full rounded-full transition-all duration-500 ${tone}`}
+        className={`h-full rounded-full transition-[width] duration-500 ${tone}`}
         style={{ width: `${Math.max(pct, pct > 0 ? 2 : 0)}%` }}
       />
     </div>
@@ -266,25 +266,22 @@ export const UsageOverviewTab: React.FC<UsageOverviewTabProps> = ({
   };
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto w-full animate-in fade-in slide-in-from-bottom-2 duration-300">
-      {/* Plan header */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xs overflow-hidden">
-        <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div className="space-y-8 max-w-4xl mx-auto w-full animate-in fade-in slide-in-from-bottom-2 duration-300">
+      <section className="space-y-5">
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
           <div>
-            <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+            <h2 className="text-title text-m3-text flex items-center gap-2">
               <Cloud className="w-5 h-5 text-m3-primary" />
               {t("analytics.usage.title")}
             </h2>
-            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-              {t("analytics.usage.desc")}
-            </p>
+            <p className="mt-1 text-muted">{t("analytics.usage.desc")}</p>
           </div>
           <div className="flex flex-col items-start sm:items-end gap-1 shrink-0">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-m3-primary/10 text-m3-primary text-xs font-bold">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[var(--radius-md)] bg-m3-primary/10 text-m3-primary text-xs font-semibold">
               <InfinityIcon className="w-3.5 h-3.5" />
               {t("settings.billing.planName")}
             </span>
-            <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+            <span className="text-caption">
               {t(planStatusKey)}
               {isTrialing && activeSubscription?.trialEnd
                 ? ` · ${t("analytics.usage.trialUntil", {
@@ -301,177 +298,171 @@ export const UsageOverviewTab: React.FC<UsageOverviewTabProps> = ({
           </div>
         </div>
 
-        <div className="p-6">
-          <p className="text-sm text-slate-600 dark:text-slate-300 mb-5">
-            {t("analytics.usage.planNote")}
-          </p>
+        <p className="text-sm text-m3-secondary">{t("analytics.usage.planNote")}</p>
 
-          <div className="grid gap-4 sm:grid-cols-2">
-            {summary.resources.map((item) => {
-              const Icon = RESOURCE_ICONS[item.id];
-              const unlimited = item.limit == null;
-              return (
-                <div
-                  key={item.id}
-                  className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/40 space-y-3"
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <div className="w-9 h-9 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-center shrink-0">
-                        <Icon className="w-4 h-4 text-m3-primary" />
-                      </div>
-                      <div className="min-w-0">
-                        <span className="block text-sm font-bold text-slate-900 dark:text-slate-100 truncate">
-                          {t(RESOURCE_LABEL_KEYS[item.id])}
-                        </span>
-                        <span className="block text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                          {t("analytics.usage.usedOf", {
-                            used: formatUsed(item.id, item.used),
-                            limit: formatLimit(item.id, item.limit),
-                          })}
-                        </span>
-                      </div>
+        <div className="grid gap-3 sm:grid-cols-2">
+          {summary.resources.map((item) => {
+            const Icon = RESOURCE_ICONS[item.id];
+            const unlimited = item.limit == null;
+            return (
+              <div
+                key={item.id}
+                className="p-4 rounded-[var(--radius-md)] border border-m3-border bg-m3-sidebar/60 space-y-3"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="w-9 h-9 rounded-[var(--radius-md)] bg-m3-card border border-m3-border flex items-center justify-center shrink-0">
+                      <Icon className="w-4 h-4 text-m3-primary" />
                     </div>
-                    {unlimited ? (
-                      <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 shrink-0">
-                        <InfinityIcon className="w-3 h-3" />
-                        {t("analytics.usage.unlimited")}
+                    <div className="min-w-0">
+                      <span className="block text-sm font-semibold text-m3-text truncate">
+                        {t(RESOURCE_LABEL_KEYS[item.id])}
                       </span>
-                    ) : (
-                      <span className="text-xs font-bold tabular-nums text-slate-600 dark:text-slate-300 shrink-0">
-                        {item.percentage}%
+                      <span className="block text-xs text-m3-secondary mt-0.5">
+                        {t("analytics.usage.usedOf", {
+                          used: formatUsed(item.id, item.used),
+                          limit: formatLimit(item.id, item.limit),
+                        })}
                       </span>
-                    )}
+                    </div>
                   </div>
-                  <UsageBar
-                    percentage={item.percentage}
-                    unlimited={unlimited}
-                  />
+                  {unlimited ? (
+                    <span className="inline-flex items-center gap-1 text-caption text-emerald-600 dark:text-emerald-400 shrink-0">
+                      <InfinityIcon className="w-3 h-3" />
+                      {t("analytics.usage.unlimited")}
+                    </span>
+                  ) : (
+                    <span className="text-xs font-semibold tabular-nums text-m3-secondary shrink-0">
+                      {item.percentage}%
+                    </span>
+                  )}
                 </div>
-              );
-            })}
-          </div>
+                <UsageBar percentage={item.percentage} unlimited={unlimited} />
+              </div>
+            );
+          })}
         </div>
-      </div>
+      </section>
 
-      {/* Breakdown */}
-      <div className="grid gap-6 sm:grid-cols-2">
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xs overflow-hidden">
-          <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
-            <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-              <Music2 className="w-4 h-4 text-m3-primary" />
-              {t("analytics.usage.sections.library")}
-            </h3>
-          </div>
-          <dl className="divide-y divide-slate-100 dark:divide-slate-800">
-            <DetailRow
-              label={t("analytics.usage.details.songs")}
-              value={formatCount(summary.songs)}
-            />
-            <DetailRow
-              label={t("analytics.usage.details.folders")}
-              value={formatCount(summary.folders)}
-            />
-            <DetailRow
-              label={t("analytics.usage.details.collections")}
-              value={formatCount(summary.collections)}
-            />
-            <DetailRow
-              label={t("analytics.usage.details.uniqueTags")}
-              value={formatCount(summary.uniqueTags)}
-            />
-            <DetailRow
-              label={t("analytics.usage.details.estimatedData")}
-              value={formatBytes(summary.estimatedDataBytes, locale)}
-              hint={t("analytics.usage.details.estimatedDataHint")}
-            />
-          </dl>
-        </div>
+      <div className="grid gap-5 sm:grid-cols-2">
+        <BreakdownCard
+          title={t("analytics.usage.sections.library")}
+          icon={<Music2 className="w-4 h-4 text-m3-primary" />}
+        >
+          <DetailRow
+            label={t("analytics.usage.details.songs")}
+            value={formatCount(summary.songs)}
+          />
+          <DetailRow
+            label={t("analytics.usage.details.folders")}
+            value={formatCount(summary.folders)}
+          />
+          <DetailRow
+            label={t("analytics.usage.details.collections")}
+            value={formatCount(summary.collections)}
+          />
+          <DetailRow
+            label={t("analytics.usage.details.uniqueTags")}
+            value={formatCount(summary.uniqueTags)}
+          />
+          <DetailRow
+            label={t("analytics.usage.details.estimatedData")}
+            value={formatBytes(summary.estimatedDataBytes, locale)}
+            hint={t("analytics.usage.details.estimatedDataHint")}
+          />
+        </BreakdownCard>
 
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xs overflow-hidden">
-          <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
-            <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-              <Users className="w-4 h-4 text-m3-primary" />
-              {t("analytics.usage.sections.workspace")}
-            </h3>
-          </div>
-          <dl className="divide-y divide-slate-100 dark:divide-slate-800">
-            <DetailRow
-              label={t("analytics.usage.details.members")}
-              value={formatCount(summary.members)}
-            />
-            <DetailRow
-              label={t("analytics.usage.details.pendingInvites")}
-              value={formatCount(summary.pendingInvitations)}
-            />
-            {Object.entries(summary.memberRoles)
-              .sort((a, b) => b[1] - a[1])
-              .map(([role, count]) => (
-                <DetailRow
-                  key={role}
-                  label={t("analytics.usage.details.roleCount", {
-                    role: getRoleLabel(role, t),
-                  })}
-                  value={formatCount(count)}
-                />
-              ))}
-          </dl>
-        </div>
+        <BreakdownCard
+          title={t("analytics.usage.sections.workspace")}
+          icon={<Users className="w-4 h-4 text-m3-primary" />}
+        >
+          <DetailRow
+            label={t("analytics.usage.details.members")}
+            value={formatCount(summary.members)}
+          />
+          <DetailRow
+            label={t("analytics.usage.details.pendingInvites")}
+            value={formatCount(summary.pendingInvitations)}
+          />
+          {Object.entries(summary.memberRoles)
+            .sort((a, b) => b[1] - a[1])
+            .map(([role, count]) => (
+              <DetailRow
+                key={role}
+                label={t("analytics.usage.details.roleCount", {
+                  role: getRoleLabel(role, t),
+                })}
+                value={formatCount(count)}
+              />
+            ))}
+        </BreakdownCard>
 
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xs overflow-hidden">
-          <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
-            <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-              <Archive className="w-4 h-4 text-m3-primary" />
-              {t("analytics.usage.sections.services")}
-            </h3>
-          </div>
-          <dl className="divide-y divide-slate-100 dark:divide-slate-800">
-            <DetailRow
-              label={t("analytics.usage.details.servicesTotal")}
-              value={formatCount(summary.services)}
-            />
-            <DetailRow
-              label={t("analytics.usage.details.servicesActive")}
-              value={formatCount(summary.activeServices)}
-            />
-            <DetailRow
-              label={t("analytics.usage.details.servicesArchived")}
-              value={formatCount(summary.archivedServices)}
-            />
-          </dl>
-        </div>
+        <BreakdownCard
+          title={t("analytics.usage.sections.services")}
+          icon={<Archive className="w-4 h-4 text-m3-primary" />}
+        >
+          <DetailRow
+            label={t("analytics.usage.details.servicesTotal")}
+            value={formatCount(summary.services)}
+          />
+          <DetailRow
+            label={t("analytics.usage.details.servicesActive")}
+            value={formatCount(summary.activeServices)}
+          />
+          <DetailRow
+            label={t("analytics.usage.details.servicesArchived")}
+            value={formatCount(summary.archivedServices)}
+          />
+        </BreakdownCard>
 
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xs overflow-hidden">
-          <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
-            <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-              <CalendarDays className="w-4 h-4 text-m3-primary" />
-              {t("analytics.usage.sections.agenda")}
-            </h3>
-          </div>
-          <dl className="divide-y divide-slate-100 dark:divide-slate-800">
-            <DetailRow
-              label={t("analytics.usage.details.eventsTotal")}
-              value={formatCount(summary.events)}
-            />
-            <DetailRow
-              label={t("analytics.usage.details.eventsUpcoming")}
-              value={formatCount(summary.upcomingEvents)}
-            />
-            <DetailRow
-              label={t("analytics.usage.details.eventsPast")}
-              value={formatCount(summary.pastEvents)}
-            />
-            <DetailRow
-              label={t("analytics.usage.details.trash")}
-              value={formatCount(summary.trashItems)}
-              icon={<Trash2 className="w-3.5 h-3.5 text-slate-400" />}
-            />
-          </dl>
-        </div>
+        <BreakdownCard
+          title={t("analytics.usage.sections.agenda")}
+          icon={<CalendarDays className="w-4 h-4 text-m3-primary" />}
+        >
+          <DetailRow
+            label={t("analytics.usage.details.eventsTotal")}
+            value={formatCount(summary.events)}
+          />
+          <DetailRow
+            label={t("analytics.usage.details.eventsUpcoming")}
+            value={formatCount(summary.upcomingEvents)}
+          />
+          <DetailRow
+            label={t("analytics.usage.details.eventsPast")}
+            value={formatCount(summary.pastEvents)}
+          />
+          <DetailRow
+            label={t("analytics.usage.details.trash")}
+            value={formatCount(summary.trashItems)}
+            icon={<Trash2 className="w-3.5 h-3.5 text-m3-secondary" />}
+          />
+        </BreakdownCard>
       </div>
     </div>
   );
 };
+
+function BreakdownCard({
+  title,
+  icon,
+  children,
+}: {
+  title: string;
+  icon: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  return (
+    <Surface padding="none" className="overflow-hidden">
+      <div className="px-5 py-4 border-b border-m3-border">
+        <h3 className="text-sm font-semibold text-m3-text flex items-center gap-2">
+          {icon}
+          {title}
+        </h3>
+      </div>
+      <dl className="divide-y divide-m3-border">{children}</dl>
+    </Surface>
+  );
+}
 
 function DetailRow({
   label,
@@ -486,18 +477,16 @@ function DetailRow({
 }) {
   return (
     <div className="flex items-center justify-between gap-4 px-5 py-3">
-      <dt className="text-sm text-slate-600 dark:text-slate-400 flex items-center gap-2 min-w-0">
+      <dt className="text-sm text-m3-secondary flex items-center gap-2 min-w-0">
         {icon}
         <span className="truncate">
           {label}
           {hint ? (
-            <span className="block text-[11px] text-slate-400 dark:text-slate-500 font-normal">
-              {hint}
-            </span>
+            <span className="block text-caption font-normal">{hint}</span>
           ) : null}
         </span>
       </dt>
-      <dd className="text-sm font-bold tabular-nums text-slate-900 dark:text-slate-100 shrink-0">
+      <dd className="text-sm font-semibold tabular-nums text-m3-text shrink-0">
         {value}
       </dd>
     </div>

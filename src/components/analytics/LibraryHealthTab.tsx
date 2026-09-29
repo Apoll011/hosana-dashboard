@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Button, Spinner } from "@/src/components/common";
+import { Button, Spinner, Surface } from "@/src/components/common";
 import { SongScoreVisualizer } from "@/src/components/explorer/SongScoreVisualizer";
 import { useSync } from "@/src/contexts/SyncContext";
 import { useAppNavigate } from "@/src/hooks/useAppNavigate";
@@ -123,107 +123,99 @@ export const LibraryHealthTab: React.FC<LibraryHealthTabProps> = ({
   }
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto w-full animate-in fade-in slide-in-from-bottom-2 duration-300">
-      {/* Overview */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xs overflow-hidden">
-        <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 flex items-center justify-between gap-4">
-          <div>
-            <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-              <HeartPulse className="w-5 h-5 text-m3-primary" />
-              {t("analytics.libraryHealth.title")}
-            </h2>
-            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-              {t("analytics.libraryHealth.desc")}
-            </p>
-          </div>
+    <div className="space-y-8 max-w-4xl mx-auto w-full animate-in fade-in slide-in-from-bottom-2 duration-300">
+      <section className="space-y-5">
+        <div>
+          <h2 className="text-title text-m3-text flex items-center gap-2">
+            <HeartPulse className="w-5 h-5 text-m3-primary" />
+            {t("analytics.libraryHealth.title")}
+          </h2>
+          <p className="mt-1 text-muted">{t("analytics.libraryHealth.desc")}</p>
         </div>
 
-        <div className="p-6">
-          <div className="flex flex-col sm:flex-row items-center gap-8">
-            <div className="relative w-36 h-36 shrink-0">
-              <svg className="w-full h-full -rotate-90" viewBox="0 0 120 120">
-                <circle
-                  cx="60"
-                  cy="60"
-                  r="52"
-                  fill="none"
-                  strokeWidth="10"
-                  className="stroke-slate-100 dark:stroke-slate-800"
-                />
-                <circle
-                  cx="60"
-                  cy="60"
-                  r="52"
-                  fill="none"
-                  strokeWidth="10"
-                  strokeLinecap="round"
-                  className={healthRing}
-                  strokeDasharray={`${(summary.healthPercentage / 100) * 326.73} 326.73`}
-                />
-              </svg>
-              <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span
-                  className={`text-3xl font-extrabold tabular-nums ${healthColor}`}
-                >
-                  {summary.healthPercentage}%
-                </span>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                  {t("analytics.libraryHealth.healthLabel")}
-                </span>
-              </div>
+        <div className="flex flex-col sm:flex-row items-center gap-8">
+          <div className="relative w-36 h-36 shrink-0">
+            <svg className="w-full h-full -rotate-90" viewBox="0 0 120 120">
+              <circle
+                cx="60"
+                cy="60"
+                r="52"
+                fill="none"
+                strokeWidth="10"
+                className="stroke-m3-sidebar"
+              />
+              <circle
+                cx="60"
+                cy="60"
+                r="52"
+                fill="none"
+                strokeWidth="10"
+                strokeLinecap="round"
+                className={healthRing}
+                strokeDasharray={`${(summary.healthPercentage / 100) * 326.73} 326.73`}
+              />
+            </svg>
+            <div className="absolute inset-0 flex flex-col items-center justify-center">
+              <span
+                className={`text-3xl font-semibold tabular-nums ${healthColor}`}
+              >
+                {summary.healthPercentage}%
+              </span>
+              <span className="text-caption">
+                {t("analytics.libraryHealth.healthLabel")}
+              </span>
             </div>
+          </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 w-full">
-              <div className="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/40">
-                <span className="block text-2xl font-extrabold text-slate-900 dark:text-slate-100 tabular-nums">
-                  {summary.songCount}
-                </span>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
-                  {t("analytics.libraryHealth.statSongs")}
-                </span>
-              </div>
-              <div className="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/40">
-                <span className="block text-2xl font-extrabold text-emerald-600 dark:text-emerald-400 tabular-nums">
-                  {summary.healthyCount}
-                </span>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
-                  {t("analytics.libraryHealth.statHealthy")}
-                </span>
-              </div>
-              <div className="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/40 col-span-2 sm:col-span-1">
-                <span className="block text-2xl font-extrabold text-amber-600 dark:text-amber-400 tabular-nums">
-                  {summary.issueCount}
-                </span>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
-                  {t("analytics.libraryHealth.statIssues")}
-                </span>
-              </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 w-full">
+            <div className="p-3.5 rounded-[var(--radius-md)] border border-m3-border bg-m3-sidebar/60">
+              <span className="block text-2xl font-semibold text-m3-text tabular-nums">
+                {summary.songCount}
+              </span>
+              <span className="text-caption">
+                {t("analytics.libraryHealth.statSongs")}
+              </span>
+            </div>
+            <div className="p-3.5 rounded-[var(--radius-md)] border border-m3-border bg-m3-sidebar/60">
+              <span className="block text-2xl font-semibold text-emerald-600 dark:text-emerald-400 tabular-nums">
+                {summary.healthyCount}
+              </span>
+              <span className="text-caption">
+                {t("analytics.libraryHealth.statHealthy")}
+              </span>
+            </div>
+            <div className="p-3.5 rounded-[var(--radius-md)] border border-m3-border bg-m3-sidebar/60 col-span-2 sm:col-span-1">
+              <span className="block text-2xl font-semibold text-amber-600 dark:text-amber-400 tabular-nums">
+                {summary.issueCount}
+              </span>
+              <span className="text-caption">
+                {t("analytics.libraryHealth.statIssues")}
+              </span>
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* Categorized issues */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xs overflow-hidden">
-        <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
-          <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+      <Surface padding="none" className="overflow-hidden">
+        <div className="px-6 py-5 border-b border-m3-border">
+          <h3 className="text-title text-m3-text flex items-center gap-2">
             <AlertTriangle className="w-5 h-5 text-amber-500" />
             {t("analytics.libraryHealth.issuesTitle")}
           </h3>
-          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+          <p className="mt-1 text-muted">
             {t("analytics.libraryHealth.issuesDesc")}
           </p>
         </div>
 
-        <div className="divide-y divide-slate-100 dark:divide-slate-800">
+        <div className="divide-y divide-m3-border">
           {summary.categories.length === 0 ? (
             <div className="flex flex-col items-center justify-center gap-3 py-16 px-6 text-center">
               <CheckCircle2 className="w-10 h-10 text-emerald-500" />
               <div>
-                <p className="text-sm font-bold text-slate-900 dark:text-slate-100">
+                <p className="text-sm font-semibold text-m3-text">
                   {t("analytics.libraryHealth.allHealthyTitle")}
                 </p>
-                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                <p className="mt-1 text-caption">
                   {t("analytics.libraryHealth.allHealthyDesc")}
                 </p>
               </div>
@@ -240,19 +232,19 @@ export const LibraryHealthTab: React.FC<LibraryHealthTabProps> = ({
                     <button
                       type="button"
                       onClick={() => toggleCategory(category.criterion)}
-                      className="flex-1 flex items-center justify-between gap-3 px-3 py-4 text-left hover:bg-slate-50/80 dark:hover:bg-slate-800/40 rounded-xl transition-colors cursor-pointer min-w-0"
+                      className="flex-1 flex items-center justify-between gap-3 px-3 py-4 text-left hover:bg-m3-sidebar/80 rounded-[var(--radius-md)] transition-colors cursor-pointer min-w-0"
                     >
                       <div className="flex items-center gap-3 min-w-0">
                         {isOpen ? (
-                          <ChevronDown className="w-4 h-4 text-slate-400 shrink-0" />
+                          <ChevronDown className="w-4 h-4 text-m3-secondary shrink-0" />
                         ) : (
-                          <ChevronRight className="w-4 h-4 text-slate-400 shrink-0" />
+                          <ChevronRight className="w-4 h-4 text-m3-secondary shrink-0" />
                         )}
                         <div className="min-w-0">
-                          <span className="block text-sm font-bold text-slate-900 dark:text-slate-100">
+                          <span className="block text-sm font-semibold text-m3-text">
                             {criterionLabel(t, category.criterion)}
                           </span>
-                          <span className="block text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                          <span className="block text-xs text-m3-secondary mt-0.5">
                             {t("analytics.libraryHealth.affectedCount", {
                               count: category.songs.length,
                             })}
@@ -267,7 +259,7 @@ export const LibraryHealthTab: React.FC<LibraryHealthTabProps> = ({
                           </span>
                         </div>
                       </div>
-                      <span className="text-xs font-bold tabular-nums px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-700 dark:text-amber-300 shrink-0">
+                      <span className="text-xs font-semibold tabular-nums px-2.5 py-1 rounded-[var(--radius-md)] bg-amber-500/10 text-amber-700 dark:text-amber-300 shrink-0">
                         {category.songs.length}
                       </span>
                     </button>
@@ -305,17 +297,17 @@ export const LibraryHealthTab: React.FC<LibraryHealthTabProps> = ({
                               <button
                                 type="button"
                                 onClick={() => openSong(song.id)}
-                                className="flex-1 flex items-center gap-3 px-3 py-2.5 rounded-xl text-left hover:bg-m3-primary/5 border border-transparent hover:border-m3-primary/20 transition-all cursor-pointer group min-w-0"
+                                className="flex-1 flex items-center gap-3 px-3 py-2.5 rounded-[var(--radius-md)] text-left hover:bg-m3-primary/5 border border-transparent hover:border-m3-primary/20 transition-colors cursor-pointer group min-w-0"
                               >
-                                <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 group-hover:bg-m3-primary/10">
-                                  <Music2 className="w-4 h-4 text-slate-400 group-hover:text-m3-primary" />
+                                <div className="w-8 h-8 rounded-[var(--radius-md)] bg-m3-sidebar flex items-center justify-center shrink-0 group-hover:bg-m3-primary/10">
+                                  <Music2 className="w-4 h-4 text-m3-secondary group-hover:text-m3-primary" />
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                  <span className="block text-sm font-bold text-slate-900 dark:text-slate-100 truncate">
+                                  <span className="block text-sm font-semibold text-m3-text truncate">
                                     {song.title}
                                   </span>
                                   {song.artist && (
-                                    <span className="block text-xs text-slate-500 dark:text-slate-400 truncate">
+                                    <span className="block text-xs text-m3-secondary truncate">
                                       {song.artist}
                                     </span>
                                   )}
@@ -325,7 +317,7 @@ export const LibraryHealthTab: React.FC<LibraryHealthTabProps> = ({
                                   layout="badge"
                                   compact
                                 />
-                                <ChevronRight className="w-4 h-4 text-slate-300 dark:text-slate-600 group-hover:text-m3-primary shrink-0" />
+                                <ChevronRight className="w-4 h-4 text-m3-secondary/50 group-hover:text-m3-primary shrink-0" />
                               </button>
 
                               {canUpdateSong && song.autoFixable && (
@@ -360,7 +352,7 @@ export const LibraryHealthTab: React.FC<LibraryHealthTabProps> = ({
             })
           )}
         </div>
-      </div>
+      </Surface>
     </div>
   );
 };

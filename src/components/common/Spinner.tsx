@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from "react";
 import { Loader2 } from "lucide-react";
+import React from "react";
 
 interface SpinnerProps {
   size?: "sm" | "md" | "lg";
@@ -20,13 +20,19 @@ export const Spinner: React.FC<SpinnerProps> = React.memo(
     };
 
     return (
-      <div className="flex flex-col items-center justify-center gap-3 p-6 text-slate-500">
-        <Loader2 className={`${sizeMap[size]} animate-spin text-[#0284c7]`} />
-        {label && (
-          <p className="text-xs font-medium text-slate-600 dark:text-slate-400">
-            {label}
-          </p>
-        )}
+      <div
+        className="flex flex-col items-center justify-center gap-3 p-6 text-m3-secondary"
+        role="status"
+        aria-live="polite"
+        aria-busy="true"
+      >
+        <Loader2
+          className={`${sizeMap[size]} animate-spin text-m3-primary`}
+          aria-hidden="true"
+        />
+        <p className={label ? "text-caption" : "sr-only"}>
+          {label || "Loading…"}
+        </p>
       </div>
     );
   },

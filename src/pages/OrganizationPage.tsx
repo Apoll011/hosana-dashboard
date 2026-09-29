@@ -4,7 +4,7 @@
  */
 
 import { backupApi } from "@/src/api";
-import { Button, Modal } from "@/src/components/common";
+import { Button, Modal, Surface, Tabs } from "@/src/components/common";
 import { useI18n } from "@/src/lib/i18n";
 import { useAnyRole, useCan } from "@/src/lib/permissions/client";
 import {
@@ -139,55 +139,64 @@ export const OrganizationPage: React.FC = () => {
     {
       id: "workspace" as const,
       label: t("organization.tabs.workspace"),
-      icon: Building2,
+      icon: <Building2 className="w-4 h-4" />,
       requiresNetwork: true,
       show: true,
     },
     {
       id: "members" as const,
       label: t("organization.tabs.members"),
-      icon: Users,
+      icon: <Users className="w-4 h-4" />,
       requiresNetwork: true,
       show: true,
     },
     {
       id: "notifications" as const,
       label: t("organization.tabs.notifications"),
-      icon: Bell,
+      icon: <Bell className="w-4 h-4" />,
       requiresNetwork: true,
       show: canSendNotifications,
     },
     {
       id: "billing" as const,
       label: t("organization.tabs.billing"),
-      icon: CreditCard,
+      icon: <CreditCard className="w-4 h-4" />,
       requiresNetwork: true,
       show: canAccessBilling && !isDemoMode(),
     },
     {
       id: "general" as const,
       label: t("organization.tabs.general"),
-      icon: Server,
+      icon: <Server className="w-4 h-4" />,
       requiresNetwork: true,
       show: canUpdate,
     },
     {
       id: "loginActivity" as const,
       label: t("organization.tabs.loginActivity"),
-      icon: History,
+      icon: <History className="w-4 h-4" />,
       requiresNetwork: true,
       show: canViewLoginActivity,
     },
   ];
 
+  const tabItems = tabs
+    .filter((tab) => tab.show)
+    .map((tab) => ({
+      id: tab.id,
+      label: tab.label,
+      icon: tab.icon,
+      disabled: !isOnline && tab.requiresNetwork,
+    }));
+
   return (
-    <div className="h-full w-full overflow-y-auto bg-slate-50/50 dark:bg-m3-bg text-slate-900 dark:text-slate-100 p-4 sm:p-6 lg:p-8">
+    <div className="h-full w-full overflow-y-auto bg-m3-bg text-m3-text p-4 sm:p-6 lg:p-8">
       <div className="max-w-5xl mx-auto space-y-6">
         {!isOnline && (
-          <div className="flex items-center gap-3 p-3.5 bg-amber-500/10 border border-amber-500/30 rounded-2xl text-amber-700 dark:text-amber-300 text-xs">
+          <div className="flex items-center gap-3 p-3.5 bg-amber-500/10 border border-amber-500/30 rounded-[var(--radius-lg)] text-amber-700 dark:text-amber-300 text-xs">
             <CloudOff className="w-5 h-5 shrink-0 text-amber-500" />
             <div>
-              <span className="font-bold block">
+              <span className="font-semibold block">
                 {t("organization.offlineTitle")}
               </span>
               <span className="opacity-90">
@@ -197,46 +206,24 @@ export const OrganizationPage: React.FC = () => {
           </div>
         )}
 
-        <div className="flex items-center gap-1 overflow-x-auto pb-2 scrollbar-none border-b border-slate-200 dark:border-slate-800">
-          {tabs.map((tab) => {
-            const Icon = tab.icon;
-            const isActive = activeTab === tab.id;
-            const isTabDisabled = !isOnline && tab.requiresNetwork;
-            if (!tab.show) return null;
-
-            return (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => {
-                  setActiveTab(tab.id);
-                  const next = new URLSearchParams(searchParams);
-                  next.set("tab", tab.id);
-                  setSearchParams(next, { replace: true });
-                }}
-                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
-                  isActive
-                    ? "bg-m3-primary text-white shadow-md shadow-m3-primary/20"
-                    : "text-slate-600 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800/60 hover:text-slate-900 dark:hover:text-slate-100"
-                } ${isTabDisabled ? "opacity-60" : ""}`}
-              >
-                <Icon className="w-4 h-4" />
-                <span>{tab.label}</span>
-                {isTabDisabled && (
-                  <span className="text-[10px] uppercase tracking-wider font-semibold px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-800 text-slate-500 dark:text-slate-400">
-                    {t("common.offline")}
-                  </span>
-                )}
-              </button>
-            );
-          })}
-        </div>
+        <Tabs
+          items={tabItems}
+          value={activeTab}
+          onChange={(id) => {
+            const nextId = id as TabType;
+            setActiveTab(nextId);
+            const next = new URLSearchParams(searchParams);
+            next.set("tab", nextId);
+            setSearchParams(next, { replace: true });
+          }}
+          aria-label={t("common.organization")}
+        />
 
         <div className="pt-2 pb-12">
           <div
             className={
               !isOnline
-                ? "opacity-40 pointer-events-none select-none filter grayscale transition-all"
+                ? "opacity-40 pointer-events-none select-none filter grayscale transition-opacity"
                 : ""
             }
           >
@@ -273,15 +260,15 @@ export const OrganizationPage: React.FC = () => {
             {activeTab === "loginActivity" &&
               !roleLoading &&
               !canViewLoginActivity && (
-                <div className="max-w-4xl mx-auto w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-8 text-center">
-                  <Lock className="w-8 h-8 text-slate-400 mx-auto mb-3" />
-                  <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">
+                <Surface className="max-w-4xl mx-auto w-full text-center">
+                  <Lock className="w-8 h-8 text-m3-secondary mx-auto mb-3" />
+                  <h3 className="text-title text-m3-text">
                     {t("organization.loginActivity.noAccessTitle")}
                   </h3>
-                  <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                  <p className="text-muted mt-1">
                     {t("organization.loginActivity.noAccessDesc")}
                   </p>
-                </div>
+                </Surface>
               )}
           </div>
         </div>
@@ -297,10 +284,10 @@ export const OrganizationPage: React.FC = () => {
           title={t("settings.restore.confirmTitle")}
         >
           <div className="flex flex-col gap-4">
-            <div className="p-3.5 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 rounded-xl flex items-start gap-3 text-xs text-amber-800 dark:text-amber-300">
+            <div className="p-3.5 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 rounded-[var(--radius-md)] flex items-start gap-3 text-xs text-amber-800 dark:text-amber-300">
               <AlertTriangle className="w-5 h-5 shrink-0 text-amber-500 mt-0.5" />
               <div>
-                <strong className="font-bold">
+                <strong className="font-semibold">
                   {t("settings.restore.attention")}
                 </strong>
                 <p className="mt-0.5">{t("settings.restore.attentionDesc")}</p>
@@ -308,40 +295,40 @@ export const OrganizationPage: React.FC = () => {
             </div>
 
             {restoreStats && (
-              <div className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-4 space-y-2">
-                <span className="text-xs font-bold text-slate-900 dark:text-slate-100 block">
+              <Surface variant="inset" padding="sm" className="space-y-2">
+                <span className="text-label text-m3-text block">
                   {t("settings.restore.summary")}
                 </span>
                 <div className="grid grid-cols-3 gap-2 text-center text-xs">
-                  <div className="p-2 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800">
-                    <span className="block text-lg font-extrabold text-m3-primary">
+                  <div className="p-2 bg-m3-card rounded-[var(--radius-md)] border border-m3-border">
+                    <span className="block text-lg font-semibold text-m3-primary tabular-nums">
                       {restoreStats.songs}
                     </span>
-                    <span className="text-[10px] text-slate-500">
+                    <span className="text-caption">
                       {t("settings.restore.songs")}
                     </span>
                   </div>
-                  <div className="p-2 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800">
-                    <span className="block text-lg font-extrabold text-amber-500">
+                  <div className="p-2 bg-m3-card rounded-[var(--radius-md)] border border-m3-border">
+                    <span className="block text-lg font-semibold text-amber-500 tabular-nums">
                       {restoreStats.folders}
                     </span>
-                    <span className="text-[10px] text-slate-500">
+                    <span className="text-caption">
                       {t("settings.restore.folders")}
                     </span>
                   </div>
-                  <div className="p-2 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800">
-                    <span className="block text-lg font-extrabold text-emerald-500">
+                  <div className="p-2 bg-m3-card rounded-[var(--radius-md)] border border-m3-border">
+                    <span className="block text-lg font-semibold text-emerald-500 tabular-nums">
                       {restoreStats.services}
                     </span>
-                    <span className="text-[10px] text-slate-500">
+                    <span className="text-caption">
                       {t("settings.restore.services")}
                     </span>
                   </div>
                 </div>
-              </div>
+              </Surface>
             )}
 
-            <div className="flex items-center justify-end gap-3 mt-2 pt-4 border-t border-slate-100 dark:border-slate-800">
+            <div className="flex items-center justify-end gap-3 mt-2 pt-4 border-t border-m3-border">
               <Button
                 variant="outline"
                 size="sm"

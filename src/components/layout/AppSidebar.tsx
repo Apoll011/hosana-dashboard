@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Badge } from "@/src/components/common";
+import { Badge, Button } from "@/src/components/common";
 import { useI18n } from "@/src/lib/i18n";
 import { posthog } from "@/src/lib/posthog";
 import { Folder } from "@/src/types";
@@ -73,6 +73,13 @@ interface AppSidebarProps {
   logout: () => void;
 }
 
+const NAV_ACTIVE =
+  "bg-m3-primary/10 text-m3-primary";
+const NAV_INACTIVE =
+  "text-m3-secondary hover:bg-m3-hover hover:text-m3-text";
+const NAV_BASE =
+  "w-full flex items-center justify-between px-3.5 py-3 min-h-10 text-[13px] font-medium rounded-[var(--radius-md)] transition-colors cursor-pointer group";
+
 export const AppSidebar: React.FC<AppSidebarProps> = ({
   isSidebarOpen,
   setIsSidebarOpen,
@@ -135,12 +142,26 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  const collapseText = (extra = "") =>
+    `truncate transition-[opacity,max-width,transform] duration-300 ease-in-out overflow-hidden whitespace-nowrap ${
+      isSidebarCollapsed
+        ? "opacity-0 max-w-0 -translate-x-2 pointer-events-none"
+        : "opacity-100 max-w-35 translate-x-0"
+    } ${extra}`;
+
+  const collapseBadge = () =>
+    `transition-[opacity,max-width] duration-300 ease-in-out overflow-hidden shrink-0 ${
+      isSidebarCollapsed
+        ? "opacity-0 max-w-0 pointer-events-none"
+        : "opacity-100 max-w-15"
+    }`;
+
   return (
     <>
       {/* Mobile Sidebar Overlay */}
       {isSidebarOpen && (
         <div
-          className="md:hidden fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-40"
+          className="md:hidden fixed inset-0 bg-m3-text/40 backdrop-blur-sm z-40"
           onClick={() => setIsSidebarOpen(false)}
         />
       )}
@@ -149,11 +170,11 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
         data-tour="sidebar"
         className={`${
           isSidebarOpen
-            ? "flex absolute inset-y-0 left-0 z-50 bg-m3-sidebar shadow-2xl"
+            ? "flex absolute inset-y-0 left-0 z-50 bg-m3-sidebar shadow-[var(--shadow-lg)]"
             : "hidden"
         } md:flex md:relative md:bg-m3-sidebar/30 ${
           isSidebarCollapsed ? "md:w-20" : "md:w-64"
-        } w-72 border-r border-m3-border p-4 flex-col gap-1 select-none shrink-0 transition-all duration-300 ease-in-out z-30`}
+        } w-72 border-r border-m3-border p-4 flex-col gap-1 select-none shrink-0 transition-[width] duration-300 ease-in-out z-30`}
         role="navigation"
       >
         {/* Integrated Sidebar Header */}
@@ -168,7 +189,8 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
               onClick={() => isSidebarCollapsed && setIsSidebarCollapsed(false)}
               disabled={!isSidebarCollapsed}
               title={isSidebarCollapsed ? t("sidebar.expand") : undefined}
-              className={`w-11 h-11 rounded-xl flex items-center justify-center border border-m3-border/50 bg-m3-card text-m3-secondary shadow-xs shrink-0 relative group transition-all duration-300 ${
+              aria-label={isSidebarCollapsed ? t("sidebar.expand") : undefined}
+              className={`w-11 h-11 rounded-[var(--radius-md)] flex items-center justify-center border border-m3-border/50 bg-m3-card text-m3-secondary shadow-[var(--shadow-sm)] shrink-0 relative group transition-colors duration-200 ${
                 isSidebarCollapsed
                   ? "cursor-pointer hover:bg-m3-hover hover:border-m3-border hover:text-m3-text"
                   : ""
@@ -177,10 +199,8 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
               <img
                 src="/favicon.png"
                 alt="Hosanna Studio"
-                className={`w-10 h-10 object-contain rounded-lg transition-all duration-200 ${
-                  isSidebarCollapsed
-                    ? "group-hover:opacity-0"
-                    : "hover:scale-105"
+                className={`w-10 h-10 object-contain rounded-[var(--radius-md)] transition-opacity duration-200 ${
+                  isSidebarCollapsed ? "group-hover:opacity-0" : ""
                 }`}
               />
               <ChevronRight
@@ -194,23 +214,27 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
 
             {/* Title & Subtitle + Collapse button with smooth transition */}
             <div
-              className={`flex flex-col items-start min-w-0 flex-1 transition-all duration-300 ease-in-out overflow-hidden whitespace-nowrap ${
+              className={`flex flex-col items-start min-w-0 flex-1 transition-[opacity,max-width,transform] duration-300 ease-in-out overflow-hidden whitespace-nowrap ${
                 isSidebarCollapsed
                   ? "opacity-0 max-w-0 -translate-x-2 pointer-events-none"
                   : "opacity-100 max-w-50 translate-x-0"
               }`}
             >
               <div className="flex items-center justify-between w-full">
-                <h1 className="font-display font-black text-xl tracking-tighter text-slate-900 dark:text-slate-100 leading-none truncate">
+                <h1 className="font-display font-semibold text-title text-m3-text leading-none truncate">
                   Hosanna Studio
                 </h1>
-                <button
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
                   onClick={() => setIsSidebarCollapsed(true)}
-                  className="hidden md:flex p-1.5 rounded-xl hover:bg-m3-hover text-m3-secondary hover:text-m3-text border border-transparent hover:border-m3-border/60 transition-all cursor-pointer shrink-0 -mr-2"
+                  className="hidden md:flex shrink-0 -mr-2 min-h-10 min-w-10"
                   title={t("sidebar.collapse")}
+                  aria-label={t("sidebar.collapse")}
                 >
                   <ChevronLeft className="w-4 h-4" />
-                </button>
+                </Button>
               </div>
               {organization &&
                 (hasMultipleOrgs ? (
@@ -219,7 +243,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
                     title={t("sidebar.switchWorkspace")}
                     aria-haspopup="menu"
                     aria-expanded={isOrgMenuOpen}
-                    className="mt-1 inline-flex max-w-full min-w-0 items-center gap-1 rounded-md text-xs font-medium text-slate-500 dark:text-slate-400 transition-colors hover:text-slate-700 dark:hover:text-slate-200 cursor-pointer focus:outline-hidden focus-visible:ring-2 focus-visible:ring-m3-primary/40"
+                    className="mt-1 inline-flex max-w-full min-w-0 items-center gap-1 rounded-[var(--radius-md)] text-caption text-m3-secondary transition-colors hover:text-m3-text cursor-pointer"
                   >
                     <span className="truncate min-w-0">
                       {organization?.metadata?.shortName || organization.slug}
@@ -231,7 +255,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
                     />
                   </button>
                 ) : (
-                  <span className="mt-1 block max-w-32.5 truncate text-xs font-medium text-slate-500 dark:text-slate-400">
+                  <span className="mt-1 block max-w-32.5 truncate text-caption text-m3-secondary">
                     {organization?.metadata?.shortName || organization.slug}
                   </span>
                 ))}
@@ -241,10 +265,10 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
           {/* Workspace Switcher Popover */}
           {hasMultipleOrgs && isOrgMenuOpen && (
             <div
-              className="absolute top-full left-0 right-0 mt-2 z-50 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl p-2 space-y-1 animate-in fade-in slide-in-from-top-2 duration-150"
+              className="absolute top-full left-0 right-0 mt-2 z-50 bg-m3-card border border-m3-border rounded-[var(--radius-xl)] shadow-[var(--shadow-lg)] p-2 space-y-1 animate-in fade-in slide-in-from-top-2 duration-150"
               role="menu"
             >
-              <p className="px-2.5 pt-1.5 pb-1 text-[10px] font-black uppercase tracking-[0.15em] text-slate-400 dark:text-slate-500">
+              <p className="px-2.5 pt-1.5 pb-1 text-label">
                 {t("sidebar.switchWorkspace")}
               </p>
               {organizations?.map((o) => {
@@ -260,13 +284,13 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
                         void onSwitchOrganization(o);
                       }
                     }}
-                    className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-left transition-colors ${
+                    className={`w-full flex items-center gap-2.5 px-2.5 py-2 min-h-10 rounded-[var(--radius-md)] text-left transition-colors ${
                       isActive
                         ? "bg-m3-primary/10 text-m3-primary cursor-default"
-                        : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
+                        : "text-m3-text hover:bg-m3-hover cursor-pointer"
                     }`}
                   >
-                    <div className="w-7 h-7 rounded-lg shrink-0 overflow-hidden flex items-center justify-center bg-m3-primary/10 border border-m3-border/60 text-[11px] font-black text-m3-primary">
+                    <div className="w-7 h-7 rounded-[var(--radius-md)] shrink-0 overflow-hidden flex items-center justify-center bg-m3-primary/10 border border-m3-border/60 text-[11px] font-semibold text-m3-primary">
                       {o.logo ? (
                         <img
                           src={o.logo}
@@ -281,7 +305,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
                       <span className="block text-xs font-semibold truncate">
                         {o.name}
                       </span>
-                      <span className="block text-[10px] text-slate-400 truncate">
+                      <span className="block text-caption truncate">
                         @{o.slug}
                       </span>
                     </span>
@@ -297,10 +321,10 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
 
         {/* Main Menu Label */}
         <div
-          className={`px-3 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-m3-secondary transition-all duration-300 ease-in-out overflow-hidden whitespace-nowrap ${
+          className={`px-3 py-2 text-label transition-[opacity,max-height,transform] duration-300 ease-in-out overflow-hidden whitespace-nowrap ${
             isSidebarCollapsed
               ? "opacity-0 max-h-0 py-0 -translate-x-2 pointer-events-none"
-              : "opacity-60 max-h-8 translate-x-0"
+              : "opacity-100 max-h-8 translate-x-0"
           }`}
         >
           {t("sidebar.mainMenu")}
@@ -319,11 +343,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
               ? t("sidebar.drive", { name: shortName })
               : undefined
           }
-          className={`w-full flex items-center justify-between px-3.5 py-3 text-[13px] font-bold rounded-2xl transition-all cursor-pointer group ${
-            isDriveRoot
-              ? "bg-m3-primary/10 text-m3-primary border border-m3-primary/20 shadow-sm"
-              : "text-m3-secondary hover:bg-m3-hover hover:text-m3-text"
-          }`}
+          className={`${NAV_BASE} ${isDriveRoot ? NAV_ACTIVE : NAV_INACTIVE}`}
         >
           <div className="flex items-center gap-3 min-w-0 flex-1">
             <div className="w-5 h-5 flex items-center justify-center shrink-0">
@@ -333,24 +353,12 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
                 }`}
               />
             </div>
-            <span
-              className={`truncate transition-all duration-300 ease-in-out overflow-hidden whitespace-nowrap ${
-                isSidebarCollapsed
-                  ? "opacity-0 max-w-0 -translate-x-2 pointer-events-none"
-                  : "opacity-100 max-w-35 translate-x-0"
-              }`}
-            >
+            <span className={collapseText()}>
               {t("sidebar.drive", { name: shortName })}
             </span>
           </div>
-          <div
-            className={`transition-all duration-300 ease-in-out overflow-hidden shrink-0 ${
-              isSidebarCollapsed
-                ? "opacity-0 max-w-0 scale-75 pointer-events-none"
-                : "opacity-100 max-w-15 scale-100"
-            }`}
-          >
-            <Badge variant={isDriveRoot ? "sky" : "slate"}>
+          <div className={collapseBadge()}>
+            <Badge variant={isDriveRoot ? "accent" : "neutral"}>
               {rootSongsCount + rootFoldersCount}
             </Badge>
           </div>
@@ -364,38 +372,22 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
             if (window.innerWidth < 768) setIsSidebarOpen(false);
           }}
           title={isSidebarCollapsed ? t("common.library") : undefined}
-          className={`w-full flex items-center justify-between px-3.5 py-3 text-[13px] font-bold rounded-2xl transition-all cursor-pointer group ${
-            view === "songs"
-              ? "bg-violet-500/10 text-violet-600 dark:text-violet-400 border border-violet-500/20 shadow-sm"
-              : "text-m3-secondary hover:bg-m3-hover hover:text-m3-text"
+          className={`${NAV_BASE} ${
+            view === "songs" ? NAV_ACTIVE : NAV_INACTIVE
           }`}
         >
           <div className="flex items-center gap-3 min-w-0 flex-1">
             <div className="w-5 h-5 flex items-center justify-center shrink-0">
               <Music
                 className={`w-4.5 h-4.5 ${
-                  view === "songs" ? "text-violet-500" : "text-m3-secondary"
+                  view === "songs" ? "text-m3-primary" : "text-m3-secondary"
                 }`}
               />
             </div>
-            <span
-              className={`truncate transition-all duration-300 ease-in-out overflow-hidden whitespace-nowrap ${
-                isSidebarCollapsed
-                  ? "opacity-0 max-w-0 -translate-x-2 pointer-events-none"
-                  : "opacity-100 max-w-35 translate-x-0"
-              }`}
-            >
-              {t("common.library")}
-            </span>
+            <span className={collapseText()}>{t("common.library")}</span>
           </div>
-          <div
-            className={`transition-all duration-300 ease-in-out overflow-hidden shrink-0 ${
-              isSidebarCollapsed
-                ? "opacity-0 max-w-0 scale-75 pointer-events-none"
-                : "opacity-100 max-w-15 scale-100"
-            }`}
-          >
-            <Badge variant={view === "songs" ? "sky" : "slate"}>
+          <div className={collapseBadge()}>
+            <Badge variant={view === "songs" ? "accent" : "neutral"}>
               {totalSongs}
             </Badge>
           </div>
@@ -410,10 +402,10 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
                 if (window.innerWidth < 768) setIsSidebarOpen(false);
               }}
               title={isSidebarCollapsed ? "Coleções" : undefined}
-              className={`w-full flex items-center justify-between px-3.5 py-3 text-[13px] font-bold rounded-2xl transition-all cursor-pointer group ${
+              className={`${NAV_BASE} ${
                 view === "collections" || view === "collection-detail"
-                  ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 shadow-sm"
-                  : "text-m3-secondary hover:bg-m3-hover hover:text-m3-text"
+                  ? NAV_ACTIVE
+                  : NAV_INACTIVE
               }`}
             >
               <div className="flex items-center gap-3 min-w-0 flex-1">
@@ -421,33 +413,21 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
                   <LibraryBig
                     className={`w-4.5 h-4.5 ${
                       view === "collections" || view === "collection-detail"
-                        ? "text-amber-500"
+                        ? "text-m3-primary"
                         : "text-m3-secondary"
                     }`}
                   />
                 </div>
-                <span
-                  className={`truncate transition-all duration-300 ease-in-out overflow-hidden whitespace-nowrap ${
-                    isSidebarCollapsed
-                      ? "opacity-0 max-w-0 -translate-x-2 pointer-events-none"
-                      : "opacity-100 max-w-35 translate-x-0"
-                  }`}
-                >
+                <span className={collapseText()}>
                   {t("common.collections")}
                 </span>
               </div>
-              <div
-                className={`transition-all duration-300 ease-in-out overflow-hidden shrink-0 ${
-                  isSidebarCollapsed
-                    ? "opacity-0 max-w-0 scale-75 pointer-events-none"
-                    : "opacity-100 max-w-15 scale-100"
-                }`}
-              >
+              <div className={collapseBadge()}>
                 <Badge
                   variant={
                     view === "collections" || view === "collection-detail"
-                      ? "sky"
-                      : "slate"
+                      ? "accent"
+                      : "neutral"
                   }
                 >
                   {totalCollections}
@@ -465,38 +445,22 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
             if (window.innerWidth < 768) setIsSidebarOpen(false);
           }}
           title={isSidebarCollapsed ? t("common.services") : undefined}
-          className={`w-full flex items-center justify-between px-3.5 py-3 text-[13px] font-bold rounded-2xl transition-all cursor-pointer group ${
-            view === "services"
-              ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 shadow-sm"
-              : "text-m3-secondary hover:bg-m3-hover hover:text-m3-text"
+          className={`${NAV_BASE} ${
+            view === "services" ? NAV_ACTIVE : NAV_INACTIVE
           }`}
         >
           <div className="flex items-center gap-3 min-w-0 flex-1">
             <div className="w-5 h-5 flex items-center justify-center shrink-0">
               <Church
                 className={`w-4.5 h-4.5 ${
-                  view === "services" ? "text-emerald-500" : "text-m3-secondary"
+                  view === "services" ? "text-m3-primary" : "text-m3-secondary"
                 }`}
               />
             </div>
-            <span
-              className={`truncate transition-all duration-300 ease-in-out overflow-hidden whitespace-nowrap ${
-                isSidebarCollapsed
-                  ? "opacity-0 max-w-0 -translate-x-2 pointer-events-none"
-                  : "opacity-100 max-w-35 translate-x-0"
-              }`}
-            >
-              {t("common.services")}
-            </span>
+            <span className={collapseText()}>{t("common.services")}</span>
           </div>
-          <div
-            className={`transition-all duration-300 ease-in-out overflow-hidden shrink-0 ${
-              isSidebarCollapsed
-                ? "opacity-0 max-w-0 scale-75 pointer-events-none"
-                : "opacity-100 max-w-15 scale-100"
-            }`}
-          >
-            <Badge variant={view === "services" ? "sky" : "slate"}>
+          <div className={collapseBadge()}>
+            <Badge variant={view === "services" ? "accent" : "neutral"}>
               {totalServices}
             </Badge>
           </div>
@@ -509,29 +473,19 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
               if (window.innerWidth < 768) setIsSidebarOpen(false);
             }}
             title={isSidebarCollapsed ? t("common.teams") : undefined}
-            className={`w-full flex items-center justify-between px-3.5 py-3 text-[13px] font-bold rounded-2xl transition-all cursor-pointer group ${
-              view === "teams"
-                ? "bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 shadow-sm"
-                : "text-m3-secondary hover:bg-m3-hover hover:text-m3-text"
+            className={`${NAV_BASE} ${
+              view === "teams" ? NAV_ACTIVE : NAV_INACTIVE
             }`}
           >
             <div className="flex items-center gap-3 min-w-0 flex-1">
               <div className="w-5 h-5 flex items-center justify-center shrink-0">
                 <Users
                   className={`w-4.5 h-4.5 ${
-                    view === "teams" ? "text-rose-500" : "text-m3-secondary"
+                    view === "teams" ? "text-m3-primary" : "text-m3-secondary"
                   }`}
                 />
               </div>
-              <span
-                className={`truncate transition-all duration-300 ease-in-out overflow-hidden whitespace-nowrap ${
-                  isSidebarCollapsed
-                    ? "opacity-0 max-w-0 -translate-x-2 pointer-events-none"
-                    : "opacity-100 max-w-35 translate-x-0"
-                }`}
-              >
-                {t("common.teams")}
-              </span>
+              <span className={collapseText()}>{t("common.teams")}</span>
             </div>
           </button>
         )}
@@ -545,10 +499,8 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
                 if (window.innerWidth < 768) setIsSidebarOpen(false);
               }}
               title={isSidebarCollapsed ? t("common.agenda") : undefined}
-              className={`w-full flex items-center justify-between px-3.5 py-3 text-[13px] font-bold rounded-2xl transition-all cursor-pointer group ${
-                view === "agenda"
-                  ? "bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/20 shadow-sm"
-                  : "text-m3-secondary hover:bg-m3-hover hover:text-m3-text"
+              className={`${NAV_BASE} ${
+                view === "agenda" ? NAV_ACTIVE : NAV_INACTIVE
               }`}
             >
               <div className="flex items-center gap-3 min-w-0 flex-1">
@@ -556,29 +508,15 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
                   <Calendar1
                     className={`w-4.5 h-4.5 ${
                       view === "agenda"
-                        ? "text-orange-500"
+                        ? "text-m3-primary"
                         : "text-m3-secondary"
                     }`}
                   />
                 </div>
-                <span
-                  className={`truncate transition-all duration-300 ease-in-out overflow-hidden whitespace-nowrap ${
-                    isSidebarCollapsed
-                      ? "opacity-0 max-w-0 -translate-x-2 pointer-events-none"
-                      : "opacity-100 max-w-35 translate-x-0"
-                  }`}
-                >
-                  {t("common.agenda")}
-                </span>
+                <span className={collapseText()}>{t("common.agenda")}</span>
               </div>
-              <div
-                className={`transition-all duration-300 ease-in-out overflow-hidden shrink-0 ${
-                  isSidebarCollapsed
-                    ? "opacity-0 max-w-0 scale-75 pointer-events-none"
-                    : "opacity-100 max-w-15 scale-100"
-                }`}
-              >
-                <Badge variant={view === "agenda" ? "sky" : "slate"}>
+              <div className={collapseBadge()}>
+                <Badge variant={view === "agenda" ? "accent" : "neutral"}>
                   {eventCount}
                 </Badge>
               </div>
@@ -589,13 +527,13 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
         {/* Folder Tree */}
         {showFolderTree && (
           <div
-            className={`flex-1 flex flex-col min-h-0 transition-all duration-300 ease-in-out overflow-hidden ${
+            className={`flex-1 flex flex-col min-h-0 transition-[opacity,max-height] duration-300 ease-in-out overflow-hidden ${
               isSidebarCollapsed
                 ? "opacity-0 max-h-0 pointer-events-none"
                 : "opacity-100 max-h-full"
             }`}
           >
-            <div className="mt-6 px-3 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-m3-secondary opacity-60 shrink-0 whitespace-nowrap">
+            <div className="mt-6 px-3 py-2 text-label shrink-0 whitespace-nowrap">
               {t("sidebar.foldersCount", { count: allFolders.length })}
             </div>
 
@@ -628,38 +566,22 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
               if (window.innerWidth < 768) setIsSidebarOpen(false);
             }}
             title={isSidebarCollapsed ? t("sidebar.trash") : undefined}
-            className={`w-full flex items-center justify-between px-3.5 py-3 text-[13px] font-bold rounded-2xl transition-all cursor-pointer group ${
-              view === "trash"
-                ? "bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 shadow-sm"
-                : "text-m3-secondary hover:bg-m3-hover hover:text-m3-text"
+            className={`${NAV_BASE} ${
+              view === "trash" ? NAV_ACTIVE : NAV_INACTIVE
             }`}
           >
             <div className="flex items-center gap-3 min-w-0 flex-1">
               <div className="w-5 h-5 flex items-center justify-center shrink-0">
                 <Trash2
                   className={`w-4.5 h-4.5 ${
-                    view === "trash" ? "text-rose-500" : "text-m3-secondary"
+                    view === "trash" ? "text-m3-primary" : "text-m3-secondary"
                   }`}
                 />
               </div>
-              <span
-                className={`truncate transition-all duration-300 ease-in-out overflow-hidden whitespace-nowrap ${
-                  isSidebarCollapsed
-                    ? "opacity-0 max-w-0 -translate-x-2 pointer-events-none"
-                    : "opacity-100 max-w-35 translate-x-0"
-                }`}
-              >
-                {t("sidebar.trash")}
-              </span>
+              <span className={collapseText()}>{t("sidebar.trash")}</span>
             </div>
-            <div
-              className={`transition-all duration-300 ease-in-out overflow-hidden shrink-0 ${
-                isSidebarCollapsed
-                  ? "opacity-0 max-w-0 scale-75 pointer-events-none"
-                  : "opacity-100 max-w-15 scale-100"
-              }`}
-            >
-              <Badge variant={view === "trash" ? "rose" : "slate"}>
+            <div className={collapseBadge()}>
+              <Badge variant={view === "trash" ? "accent" : "neutral"}>
                 {trashCount}
               </Badge>
             </div>
@@ -669,20 +591,20 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
         {/* User profile footer with smooth transitions */}
         {user && (
           <div
-            className="mt-2 pt-2 border-t border-slate-200 dark:border-slate-800 relative shrink-0"
+            className="mt-2 pt-2 border-t border-m3-border relative shrink-0"
             ref={userMenuRef}
           >
             <button
               data-tour="nav-user-menu"
               onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
               title={isSidebarCollapsed ? user.name : undefined}
-              className="w-full flex items-center justify-between p-2 rounded-xl hover:bg-slate-200/60 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+              className="w-full flex items-center justify-between p-2 min-h-10 rounded-[var(--radius-md)] hover:bg-m3-hover transition-colors cursor-pointer"
             >
               <div className="flex items-center gap-2.5 min-w-0 flex-1">
                 <div
                   className={`w-8 h-8 rounded-full bg-linear-to-tr ${getAvatarGradient(
                     user.name,
-                  )} flex items-center justify-center text-white font-extrabold text-xs shadow-sm shrink-0`}
+                  )} flex items-center justify-center text-white font-semibold text-xs shadow-[var(--shadow-sm)] shrink-0`}
                 >
                   {user.image ? (
                     <img
@@ -695,33 +617,33 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
                   )}
                 </div>
                 <div
-                  className={`flex flex-col min-w-0 text-left transition-all duration-300 ease-in-out overflow-hidden whitespace-nowrap ${
+                  className={`flex flex-col min-w-0 text-left transition-[opacity,max-width,transform] duration-300 ease-in-out overflow-hidden whitespace-nowrap ${
                     isSidebarCollapsed
                       ? "opacity-0 max-w-0 -translate-x-2 pointer-events-none"
                       : "opacity-100 max-w-35 translate-x-0"
                   }`}
                 >
-                  <span className="text-xs font-bold text-slate-900 dark:text-slate-100 truncate">
+                  <span className="text-xs font-medium text-m3-text truncate">
                     {user.name}
                   </span>
-                  <span className="text-[9px] text-emerald-600 dark:text-emerald-400 font-bold uppercase tracking-wider truncate">
+                  <span className="text-caption truncate">
                     {getRoleLabel(user.role ?? "guest")}
                   </span>
                 </div>
               </div>
               <div
-                className={`transition-all duration-300 ease-in-out overflow-hidden shrink-0 ${
+                className={`transition-[opacity,max-width] duration-300 ease-in-out overflow-hidden shrink-0 ${
                   isSidebarCollapsed
-                    ? "opacity-0 max-w-0 scale-75 pointer-events-none"
-                    : "opacity-100 max-w-6 scale-100"
+                    ? "opacity-0 max-w-0 pointer-events-none"
+                    : "opacity-100 max-w-6"
                 }`}
               >
-                <Settings className="w-4 h-4 text-slate-400 shrink-0" />
+                <Settings className="w-4 h-4 text-m3-secondary shrink-0" />
               </div>
             </button>
 
             {isUserMenuOpen && (
-              <div className="absolute bottom-full left-0 mb-2 w-56 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl z-50 p-2 space-y-1 animate-in fade-in slide-in-from-bottom-2 duration-150">
+              <div className="absolute bottom-full left-0 mb-2 w-56 bg-m3-card border border-m3-border rounded-[var(--radius-xl)] shadow-[var(--shadow-lg)] z-50 p-2 space-y-1 animate-in fade-in slide-in-from-bottom-2 duration-150">
                 {canViewLibraryHealth && (
                   <button
                     onClick={() => {
@@ -729,9 +651,9 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
                       navigate(`${slugPrefix}/analytics`);
                       if (window.innerWidth < 768) setIsSidebarOpen(false);
                     }}
-                    className="w-full flex items-center gap-3 px-3 py-2 text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors cursor-pointer text-left"
+                    className="w-full flex items-center gap-3 px-3 py-2 min-h-10 text-xs font-medium text-m3-text hover:bg-m3-hover rounded-[var(--radius-md)] transition-colors cursor-pointer text-left"
                   >
-                    <BarChart3 className="w-4 h-4 text-amber-500" />
+                    <BarChart3 className="w-4 h-4 text-m3-secondary" />
                     {t("sidebar.openAnalytics")}
                   </button>
                 )}
@@ -741,9 +663,9 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
                     navigate(`${slugPrefix}/organization`);
                     if (window.innerWidth < 768) setIsSidebarOpen(false);
                   }}
-                  className="w-full flex items-center gap-3 px-3 py-2 text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors cursor-pointer text-left"
+                  className="w-full flex items-center gap-3 px-3 py-2 min-h-10 text-xs font-medium text-m3-text hover:bg-m3-hover rounded-[var(--radius-md)] transition-colors cursor-pointer text-left"
                 >
-                  <Building2 className="w-4 h-4 text-violet-500" />
+                  <Building2 className="w-4 h-4 text-m3-secondary" />
                   {t("sidebar.openOrganization")}
                 </button>
                 <button
@@ -752,20 +674,20 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
                     navigate(`${slugPrefix}/settings`);
                     if (window.innerWidth < 768) setIsSidebarOpen(false);
                   }}
-                  className="w-full flex items-center gap-3 px-3 py-2 text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors cursor-pointer text-left"
+                  className="w-full flex items-center gap-3 px-3 py-2 min-h-10 text-xs font-medium text-m3-text hover:bg-m3-hover rounded-[var(--radius-md)] transition-colors cursor-pointer text-left"
                 >
-                  <Settings className="w-4 h-4 text-sky-600" />
+                  <Settings className="w-4 h-4 text-m3-secondary" />
                   {t("sidebar.openSettings")}
                 </button>
-                <div className="my-1 border-t border-slate-100 dark:border-slate-800" />
+                <div className="my-1 border-t border-m3-border" />
                 <button
                   onClick={() => {
                     setIsUserMenuOpen(false);
                     logout();
                   }}
-                  className="w-full flex items-center gap-3 px-3 py-2 text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-xl transition-colors cursor-pointer text-left"
+                  className="w-full flex items-center gap-3 px-3 py-2 min-h-10 text-xs font-semibold text-m3-danger hover:bg-m3-danger/10 rounded-[var(--radius-md)] transition-colors cursor-pointer text-left"
                 >
-                  <LogOut className="w-4 h-4 text-rose-500" />
+                  <LogOut className="w-4 h-4 text-m3-danger" />
                   {t("sidebar.logout")}
                 </button>
               </div>

@@ -26,34 +26,38 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   onConfirm,
   title,
   message,
-  confirmText = "Confirmar",
-  cancelText = "Cancelar",
+  confirmText = "Confirm",
+  cancelText = "Cancel",
   variant = "danger",
   isLoading = false,
 }) => {
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={title} maxWidth="sm">
-      <div className="flex flex-col gap-6">
-        <div className="flex items-start gap-4">
-          {variant == "danger" && (
-            <div className="p-3 rounded-2xl bg-rose-500/10 text-rose-500 shrink-0">
-              <AlertTriangle className="w-6 h-6" />
-            </div>
-          )}
-
-          <p className="text-sm text-m3-text leading-relaxed font-medium">
-            {message}
-          </p>
-        </div>
-
-        <div className="flex items-center justify-end gap-3 mt-6 pt-6 border-t border-m3-border/30">
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={title}
+      maxWidth="sm"
+      footer={
+        <>
           <Button variant="ghost" onClick={onClose} disabled={isLoading}>
             {cancelText}
           </Button>
           <Button variant={variant} onClick={onConfirm} isLoading={isLoading}>
             {confirmText}
           </Button>
-        </div>
+        </>
+      }
+    >
+      <div className="flex items-start gap-4">
+        {variant === "danger" && (
+          <div
+            className="p-2.5 rounded-[var(--radius-md)] bg-m3-danger/10 text-m3-danger shrink-0"
+            aria-hidden="true"
+          >
+            <AlertTriangle className="w-5 h-5" />
+          </div>
+        )}
+        <p className="text-sm text-m3-text leading-relaxed">{message}</p>
       </div>
     </Modal>
   );

@@ -69,11 +69,11 @@ export const FolderTableRow: React.FC<FolderTableRowProps> = React.memo(
         onDragOver={onDragOver}
         onDragLeave={onDragLeave}
         onDrop={onDrop}
-        className={`cursor-pointer transition-all group select-none ${
+        className={`cursor-pointer transition-colors group select-none ${
           isDropTarget && !isDropDisabled
-            ? "bg-emerald-50 dark:bg-emerald-950/30 outline outline-dashed outline-emerald-400 -outline-offset-2"
+            ? "bg-m3-primary/5 ring-2 ring-inset ring-m3-primary/30"
             : isSelected
-              ? "bg-m3-primary/10 text-m3-primary"
+              ? "bg-m3-primary/5 ring-2 ring-inset ring-m3-primary/30 text-m3-primary"
               : "hover:bg-m3-hover/50 text-m3-text"
         } ${showDisabledDuringDrag ? "opacity-40 cursor-not-allowed" : ""}`}
       >
@@ -82,11 +82,11 @@ export const FolderTableRow: React.FC<FolderTableRowProps> = React.memo(
             const IconComponent = getFolderIconComponent(folder.icon);
             const colorStyle = getFolderColorStyle(folder.color);
             return (
-              <div className="flex items-center gap-3 group-hover:translate-x-1 transition-transform min-w-0">
+              <div className="flex items-center gap-3 min-w-0">
                 <IconComponent
                   className={`${isCompact ? "w-4 h-4" : "w-5 h-5"} ${colorStyle.textClass} opacity-90 shrink-0`}
                 />
-                <span className="truncate">{folder.name}</span>
+                <span className="truncate font-medium">{folder.name}</span>
               </div>
             );
           })()}
@@ -114,18 +114,19 @@ export const FolderTableRow: React.FC<FolderTableRowProps> = React.memo(
             >
               {t("explorer.open")}
             </Button>
-            <button
+            <Button
               type="button"
+              size="icon"
+              variant="ghost"
               onClick={(e) => {
                 e.stopPropagation();
                 onContextMenu(e);
               }}
-              className="p-1.5 rounded-xl text-m3-secondary hover:text-m3-text hover:bg-m3-hover dark:hover:bg-slate-800 transition-colors cursor-pointer"
               title={t("explorer.moreOptions")}
               aria-label={t("explorer.moreOptions")}
             >
               <MoreVertical className="w-4 h-4" />
-            </button>
+            </Button>
           </div>
         </td>
       </tr>
@@ -185,18 +186,18 @@ export const SongTableRow: React.FC<SongTableRowProps> = React.memo(
         onContextMenu={onContextMenu}
         onDragStart={onDragStart}
         onDragEnd={onDragEnd}
-        className={`cursor-pointer transition-all group select-none ${
+        className={`cursor-pointer transition-colors group select-none ${
           isSelected
-            ? "bg-m3-primary/10 text-m3-primary"
+            ? "bg-m3-primary/5 ring-2 ring-inset ring-m3-primary/30 text-m3-primary"
             : "hover:bg-m3-hover/50 text-m3-text"
         }`}
       >
         <td className={`${cellPadding} max-w-xs sm:max-w-md`}>
-          <div className="flex items-center gap-3 group-hover:translate-x-1 transition-transform min-w-0">
+          <div className="flex items-center gap-3 min-w-0">
             <FileMusic
               className={`${isCompact ? "w-4 h-4" : "w-5 h-5"} text-m3-primary opacity-80 shrink-0`}
             />
-            <span className="truncate">{song.title}</span>
+            <span className="truncate font-medium">{song.title}</span>
           </div>
         </td>
         <td className={`${cellPadding} text-m3-secondary opacity-70`}>
@@ -247,18 +248,19 @@ export const SongTableRow: React.FC<SongTableRowProps> = React.memo(
             >
               {t("explorer.edit")}
             </Button>
-            <button
+            <Button
               type="button"
+              size="icon"
+              variant="ghost"
               onClick={(e) => {
                 e.stopPropagation();
                 onContextMenu(e);
               }}
-              className="p-1.5 rounded-xl text-m3-secondary hover:text-m3-text hover:bg-m3-hover dark:hover:bg-slate-800 transition-colors cursor-pointer"
               title={t("explorer.moreOptions")}
               aria-label={t("explorer.moreOptions")}
             >
               <MoreVertical className="w-4 h-4" />
-            </button>
+            </Button>
           </div>
         </td>
       </tr>

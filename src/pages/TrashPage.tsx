@@ -3,7 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Badge, Button, EmptyState, Spinner } from "@/src/components/common";
+import {
+  Badge,
+  Button,
+  EmptyState,
+  PageHeader,
+  Spinner,
+} from "@/src/components/common";
 import { useAuth } from "@/src/contexts/AuthContext";
 import { useAppNavigate } from "@/src/hooks/useAppNavigate";
 import { useI18n } from "@/src/lib/i18n";
@@ -22,7 +28,7 @@ import { useTrash } from "../hooks/useTrash";
 
 const TYPE_ICONS: Record<string, React.ReactNode> = {
   folder: <FolderIcon className="w-4 h-4 text-amber-500" />,
-  song: <FileMusic className="w-4 h-4 text-sky-500" />,
+  song: <FileMusic className="w-4 h-4 text-m3-primary" />,
   service: <Calendar className="w-4 h-4 text-emerald-500" />,
   agenda: <CalendarClock className="w-4 h-4 text-violet-500" />,
 };
@@ -83,6 +89,7 @@ export const TrashPage: React.FC = () => {
   if (items.length === 0) {
     return (
       <div className="flex-1 flex flex-col w-full mx-auto p-4 sm:p-8 max-w-7xl">
+        <PageHeader title={t("common.trash")} />
         <EmptyState
           icon={<Trash2 className="w-12 h-12 text-m3-primary opacity-40" />}
           title={t("trashPage.emptyTitle")}
@@ -94,18 +101,28 @@ export const TrashPage: React.FC = () => {
 
   return (
     <div className="flex-1 p-6 overflow-y-auto">
-      <div className="overflow-x-auto border border-m3-border/40 rounded-3xl bg-m3-card shadow-sm">
+      <PageHeader
+        title={t("common.trash")}
+        description={t("trashPage.emptyDesc")}
+      />
+      <div className="overflow-x-auto border border-m3-border/40 rounded-[var(--radius-xl)] bg-m3-card shadow-sm">
         <table className="w-full text-left border-collapse">
           <thead>
-            <tr className="bg-m3-sidebar/40 border-b border-m3-border text-[10px] font-black text-m3-secondary uppercase tracking-[0.2em]">
-              <th className="py-4 px-6">{t("common.name")}</th>
-              <th className="py-4 px-6">{t("common.type")}</th>
-              <th className="py-4 px-6">{t("trashPage.deletedAt")}</th>
-              <th className="py-4 px-6">{t("trashPage.permanentDeletion")}</th>
-              <th className="py-4 px-6 text-right">{t("common.action")}</th>
+            <tr className="bg-m3-sidebar/40 border-b border-m3-border">
+              <th className="text-label py-4 px-6">{t("common.name")}</th>
+              <th className="text-label py-4 px-6">{t("common.type")}</th>
+              <th className="text-label py-4 px-6">
+                {t("trashPage.deletedAt")}
+              </th>
+              <th className="text-label py-4 px-6">
+                {t("trashPage.permanentDeletion")}
+              </th>
+              <th className="text-label py-4 px-6 text-right">
+                {t("common.action")}
+              </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-m3-border/30 text-[13px] font-bold">
+          <tbody className="divide-y divide-m3-border/30 text-sm font-semibold">
             {items.map((item) => (
               <tr
                 key={`${item.type}-${item.id}`}
@@ -121,7 +138,7 @@ export const TrashPage: React.FC = () => {
                 <td className="py-3 px-6 text-m3-secondary font-medium">
                   {formatDate(item.updatedAt, locale)}
                 </td>
-                <td className="py-3 px-6 text-rose-500 font-medium">
+                <td className="py-3 px-6 text-m3-danger font-medium">
                   {formatDate(item.purgeAt, locale)}
                 </td>
                 <td className="py-3 px-6 text-right">

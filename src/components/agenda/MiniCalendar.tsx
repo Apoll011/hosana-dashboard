@@ -131,15 +131,15 @@ export const MiniCalendar: React.FC<MiniCalendarProps> = ({
               onClick={() => onSelectDate(iso)}
               className={`aspect-square rounded-full flex flex-col items-center justify-center text-xs font-bold transition-colors cursor-pointer relative ${
                 isSelected
-                  ? "bg-[#0284c7] text-white shadow-sm"
+                  ? "bg-m3-primary text-white shadow-sm"
                   : isToday
-                    ? "border border-[#0284c7] text-[#0284c7]"
-                    : "text-slate-700 dark:text-slate-300 hover:bg-m3-hover"
+                    ? "border border-m3-primary text-m3-primary"
+                    : "text-m3-text hover:bg-m3-hover"
               }`}
             >
               {date.getDate()}
               {hasMark && !isSelected && (
-                <span className="absolute bottom-1 w-1 h-1 rounded-full bg-[#0284c7]" />
+                <span className="absolute bottom-1 w-1 h-1 rounded-full bg-m3-primary" />
               )}
             </button>
           );
