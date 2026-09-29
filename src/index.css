@@ -1,56 +1,102 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@500;600;700&display=swap");
 @import "tailwindcss";
 @source "../node_modules/@hosanna/chordpro";
 @custom-variant dark (&:where(.dark, .dark *));
 
-:root {
-  --m3-primary: #0284c7;
-  --m3-primary-light: #e0f2fe;
-  --m3-primary-dark: #075985;
-  --m3-text: #1d1b20;
-  --m3-secondary: #49454f;
-  --m3-bg: #f8fafc;
-  --m3-sidebar: #f1f5f9;
-  --m3-border: #cbd5e1;
-  --m3-hover: #e2e8f0;
-  --m3-toolbar: #f1f5f9;
-  --m3-card: #ffffff;
-  --m3-input: #79747e;
+/* ============================================================
+   Hosanna Studio Design Tokens
+   Three layers: primitive → semantic (m3-*) → component utilities
+   Brand: calm worship-planning workspace — sky accent, quiet chrome
+   ============================================================ */
 
-  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+:root {
+  /* --- Primitive: brand --- */
+  --brand-500: #0284c7;
+  --brand-600: #0369a1;
+  --brand-400: #38bdf8;
+  --brand-100: #e0f2fe;
+
+  /* --- Primitive: status --- */
+  --success-500: #059669;
+  --success-100: #d1fae5;
+  --warning-500: #d97706;
+  --warning-100: #fef3c7;
+  --danger-500: #e11d48;
+  --danger-100: #ffe4e6;
+
+  /* --- Semantic surfaces (light) --- */
+  --m3-primary: var(--brand-500);
+  --m3-primary-light: var(--brand-100);
+  --m3-primary-dark: var(--brand-600);
+  --m3-text: #1a1d24;
+  --m3-secondary: #5c6570;
+  --m3-bg: #f4f6f8;
+  --m3-sidebar: #eef1f4;
+  --m3-border: #d0d7e0;
+  --m3-hover: #e8ecf0;
+  --m3-toolbar: #eef1f4;
+  --m3-card: #ffffff;
+  --m3-input: #6b7280;
+
+  /* --- Semantic status --- */
+  --m3-success: var(--success-500);
+  --m3-warning: var(--warning-500);
+  --m3-danger: var(--danger-500);
+
+  /* --- Radius scale --- */
+  --radius-sm: 0.375rem; /* 6px — chips, dense controls */
+  --radius-md: 0.625rem; /* 10px — buttons, inputs */
+  --radius-lg: 0.875rem; /* 14px — cards, panels */
+  --radius-xl: 1.25rem; /* 20px — modals, menus */
+  --radius-pill: 9999px;
+
+  /* --- Shadow scale --- */
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.05);
+  --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.07);
+  --shadow-lg: 0 12px 32px rgba(15, 23, 42, 0.1);
+
+  /* --- Type --- */
+  --font-sans: "Figtree", system-ui, -apple-system, sans-serif;
   --font-display: "Outfit", var(--font-sans);
-  --font-mono: "JetBrains Mono", monospace;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+  /* --- Type scale (rem) --- */
+  --text-display: 1.75rem; /* 28px */
+  --text-title: 1.125rem; /* 18px */
+  --text-body: 0.875rem; /* 14px */
+  --text-secondary: 0.8125rem; /* 13px */
+  --text-label: 0.75rem; /* 12px */
+  --text-caption: 0.6875rem; /* 11px */
+
+  /* --- Spacing rhythm --- */
+  --space-page-x: 1rem;
+  --space-page-y: 1rem;
+  --space-section: 1.5rem;
 }
 
 .dark {
-  /* --- Accent (brand blue, desaturated ~15% for dark mode) --- */
   --m3-primary: #5babdb;
   --m3-primary-light: #0f2d40;
   --m3-primary-dark: #3d8ab8;
 
-  /* --- Surface elevation ladder (no pure black) --- */
-  /* surface-0: app base — darkest, very dark desaturated navy */
   --m3-bg: #0b0d12;
-  /* surface-1: sidebar, top bar — one step lighter */
   --m3-sidebar: #12151c;
   --m3-toolbar: #12151c;
-  /* surface-2: cards, panels */
   --m3-card: #181b23;
-  /* surface-3: hover state on interactive surfaces */
   --m3-hover: #1f2330;
-
-  /* --- Borders — neutral cool-dark hairline ---
-     Used as-is: subtle panel edge (~16% white equiv)
-     Used with /50: very faint dividers             */
   --m3-border: #2d3244;
 
-  /* --- Text hierarchy --- */
-  /* Primary body text (~93% opacity via text-m3-text) */
   --m3-text: #eceef2;
-  /* Secondary / helper text (~65% opacity via text-m3-secondary) */
   --m3-secondary: #9aa0b0;
-  /* Input placeholder / muted tier */
   --m3-input: #636a7a;
+
+  --m3-success: #34d399;
+  --m3-warning: #fbbf24;
+  --m3-danger: #fb7185;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.5);
 }
 
 @theme {
@@ -66,13 +112,189 @@
   --color-m3-toolbar: var(--m3-toolbar);
   --color-m3-card: var(--m3-card);
   --color-m3-input: var(--m3-input);
+  --color-m3-success: var(--m3-success);
+  --color-m3-warning: var(--m3-warning);
+  --color-m3-danger: var(--m3-danger);
 
   --font-sans: var(--font-sans);
   --font-display: var(--font-display);
   --font-mono: var(--font-mono);
+
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-xl: var(--radius-xl);
+
+  --shadow-sm: var(--shadow-sm);
+  --shadow-md: var(--shadow-md);
+  --shadow-lg: var(--shadow-lg);
 }
 
-/* Custom Scrollbars */
+/* ============================================================
+   Base
+   ============================================================ */
+
+html {
+  color-scheme: light;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+html.dark {
+  color-scheme: dark;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  height: 100dvh;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+body {
+  font-family: var(--font-sans);
+  font-size: var(--text-body);
+  line-height: 1.5;
+  background-color: var(--m3-bg);
+  color: var(--m3-text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ============================================================
+   Typography utilities — prefer these over ad-hoc sizes
+   ============================================================ */
+
+.text-display {
+  font-family: var(--font-display);
+  font-size: clamp(1.375rem, 1.1rem + 1vw, var(--text-display));
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  text-wrap: balance;
+}
+
+.text-title {
+  font-family: var(--font-display);
+  font-size: var(--text-title);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  line-height: 1.3;
+  text-wrap: balance;
+}
+
+.text-body {
+  font-size: var(--text-body);
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+.text-muted {
+  font-size: var(--text-secondary);
+  font-weight: 500;
+  color: var(--m3-secondary);
+  line-height: 1.45;
+}
+
+.text-label {
+  font-size: var(--text-label);
+  font-weight: 600;
+  color: var(--m3-secondary);
+  letter-spacing: 0.01em;
+  line-height: 1.3;
+}
+
+.text-caption {
+  font-size: var(--text-caption);
+  font-weight: 500;
+  color: var(--m3-secondary);
+  line-height: 1.35;
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ============================================================
+   Surface / elevation utilities
+   ============================================================ */
+
+.surface {
+  background-color: var(--m3-card);
+  border: 1px solid var(--m3-border);
+  border-radius: var(--radius-lg);
+}
+
+.surface-quiet {
+  background-color: var(--m3-card);
+  border-radius: var(--radius-lg);
+}
+
+.surface-inset {
+  background-color: var(--m3-sidebar);
+  border: 1px solid color-mix(in srgb, var(--m3-border) 60%, transparent);
+  border-radius: var(--radius-md);
+}
+
+.shadow-float {
+  box-shadow: var(--shadow-md);
+}
+
+.shadow-float-lg {
+  box-shadow: var(--shadow-lg);
+}
+
+/* ============================================================
+   Focus ring — visible keyboard focus without click rings
+   ============================================================ */
+
+.focus-ring {
+  outline: none;
+}
+
+.focus-ring:focus-visible {
+  outline: 2px solid var(--m3-primary);
+  outline-offset: 2px;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[role="button"]:focus-visible,
+[role="tab"]:focus-visible,
+[role="menuitem"]:focus-visible,
+[role="checkbox"]:focus-visible,
+[role="radio"]:focus-visible,
+[tabindex]:not([tabindex="-1"]):focus-visible {
+  outline: 2px solid var(--m3-primary);
+  outline-offset: 2px;
+}
+
+/* ============================================================
+   Motion — respect reduced motion
+   ============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ============================================================
+   Scrollbars
+   ============================================================ */
+
 .hide-scrollbar::-webkit-scrollbar {
   display: none;
 }
@@ -90,104 +312,23 @@
 }
 ::-webkit-scrollbar-thumb {
   background: var(--m3-border);
-  border-radius: 9999px;
+  border-radius: var(--radius-pill);
 }
 ::-webkit-scrollbar-thumb:hover {
   background: var(--m3-primary);
 }
 
-/* App Containers */
-html,
-body,
-#root {
-  height: 100%;
-  height: 100dvh;
-  width: 100%;
-  margin: 0;
-  padding: 0;
-  overflow: hidden;
-}
+/* ============================================================
+   ChordPro editor highlight
+   ============================================================ */
 
-body {
-  font-family: var(--font-sans);
-  background-color: var(--m3-bg);
-  color: var(--m3-text);
-}
-
-/* Syntax Highlighting Overlay for ChordPro Editor */
 .chordpro-highlight mark {
   background: transparent;
 }
 
-/* Print Stylesheet for High Quality PDFs */
-@media print {
-  body {
-    background: white !important;
-    color: black !important;
-    overflow: visible !important;
-    font-size: 12pt;
-  }
-
-  /* Hide non-printable elements */
-  .no-print,
-  nav,
-  aside,
-  button,
-  .print-toggle-row,
-  .unsaved-dot {
-    display: none !important;
-  }
-
-  /* Full screen width for printed page content */
-  .print-page {
-    position: static;
-    width: 100% !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    box-shadow: none !important;
-    background: transparent !important;
-  }
-
-  /* Song Page Break Rules */
-  .print-song-card {
-    page-break-after: always;
-    break-after: page;
-    margin-bottom: 2rem;
-    padding: 1rem 0;
-    border: none !important;
-  }
-
-  .print-song-card:last-child {
-    page-break-after: avoid;
-    break-after: auto;
-  }
-
-  /* Keep titles and their following notes or verses together */
-  h1,
-  h2,
-  h3 {
-    page-break-inside: avoid;
-    break-inside: avoid;
-  }
-
-  /* Keep ChordPro verse blocks intact */
-  .song-verse-block {
-    page-break-inside: avoid;
-    break-inside: avoid;
-    margin-bottom: 1.5rem;
-  }
-
-  /* Ensure lyrics text is crisp and black */
-  .lyrics-line {
-    color: black !important;
-  }
-
-  /* Ensure printed chords are bold and readable */
-  .chord-label {
-    color: #0369a1 !important; /* Rich sky-700 in print */
-    font-weight: bold !important;
-  }
-}
+/* ============================================================
+   Loading bar
+   ============================================================ */
 
 @keyframes loading-bar {
   0% {
@@ -203,125 +344,95 @@ body {
 
 /* ============================================================
    Dark Mode — Tonal Badge Utilities
-   Usage: class="badge-orange" etc.
-   Pattern: muted tint bg + full-hue icon/text; no neon fill.
    ============================================================ */
 
-/* Tonal orange (folder / category) */
 .dark .badge-orange {
   background-color: rgba(234, 88, 12, 0.13);
   color: #fb923c;
 }
-/* Tonal blue */
 .dark .badge-blue {
   background-color: rgba(59, 130, 246, 0.13);
   color: #60a5fa;
 }
-/* Tonal teal */
 .dark .badge-teal {
   background-color: rgba(20, 184, 166, 0.13);
   color: #2dd4bf;
 }
-/* Tonal rose / pink */
 .dark .badge-rose {
   background-color: rgba(244, 63, 94, 0.13);
   color: #fb7185;
 }
-/* Tonal purple (duration tags) */
 .dark .badge-purple {
   background-color: rgba(139, 92, 246, 0.13);
   color: #a78bfa;
 }
-/* Tonal red (duration / alert tags) */
 .dark .badge-red {
   background-color: rgba(220, 38, 38, 0.13);
   color: #f87171;
 }
 
 /* ============================================================
-   Dark Mode — Active tab pill: tonal instead of solid saturated fill.
-   Targets the settings tab button when active (bg-m3-primary text-white).
-   Override to a low-opacity tint + accent-colored text.
-   ============================================================ */
-.dark button.bg-m3-primary {
-  background-color: rgba(91, 171, 219, 0.15) !important;
-  color: var(--m3-primary) !important;
-  box-shadow: none !important;
-}
-/* Keep primary action buttons (non-tab) solid — scope by common patterns */
-.dark button.bg-m3-primary[data-action="primary"],
-.dark button.bg-m3-primary.rounded-full,
-.dark button.bg-m3-primary.rounded-2xl:not([role="tab"]) {
-  background-color: var(--m3-primary) !important;
-  color: #ffffff !important;
-}
-
-/* ============================================================
-   Dark Mode — "Owner" / role badge: tonal amber, not solid gold.
-   Tailwind: bg-amber-500 text-white → tonal amber
-   ============================================================ */
-.dark .bg-amber-500 {
-  background-color: rgba(245, 158, 11, 0.15) !important;
-}
-.dark .bg-amber-500 + *,
-.dark .bg-amber-500,
-.dark [class*="bg-amber-500"] {
-  color: #fbbf24 !important;
-}
-
-/* ============================================================
-   Dark Mode — Avatar camera-upload icon: tonal, not vivid cyan.
-   ============================================================ */
-.dark .bg-m3-primary.rounded-full.absolute {
-  background-color: rgba(91, 171, 219, 0.2) !important;
-  border: 1px solid rgba(91, 171, 219, 0.3);
-}
-
-/* ============================================================
-   Dark Mode — Keyboard focus-visible on interactive controls only.
-   Scoped to buttons/inputs/selects — does NOT apply to panels.
-   ============================================================ */
-.dark button:focus-visible,
-.dark input:focus-visible,
-.dark select:focus-visible,
-.dark textarea:focus-visible,
-.dark [role="radio"]:focus-visible,
-.dark [role="checkbox"]:focus-visible {
-  outline: 2px solid var(--m3-primary);
-  outline-offset: 2px;
-  box-shadow: none;
-}
-
-/* ============================================================
-   Dark Mode — Floating element shadows
-   Soft, neutral-cool, low-opacity. No colored glows.
-   ============================================================ */
-.dark .shadow-float {
-  box-shadow:
-    0 4px 6px -1px rgba(0, 0, 0, 0.4),
-    0 2px 4px -2px rgba(0, 0, 0, 0.3);
-}
-.dark .shadow-float-lg {
-  box-shadow:
-    0 10px 25px -5px rgba(0, 0, 0, 0.5),
-    0 4px 10px -6px rgba(0, 0, 0, 0.4);
-}
-
-/* ============================================================
-   Dark Mode — Settings page: align bg & cards with app tokens
+   Print
    ============================================================ */
 
-/* Page background: match app base (--m3-bg) instead of slate-950 */
-.dark .dark\:bg-slate-950 {
-  background-color: var(--m3-bg) !important;
-}
+@media print {
+  body {
+    background: white !important;
+    color: black !important;
+    overflow: visible !important;
+    font-size: 12pt;
+  }
 
-/* Settings cards: match folder card surface (--m3-card) instead of slate-900 */
-.dark .dark\:bg-slate-900 {
-  background-color: var(--m3-card) !important;
-}
+  .no-print,
+  nav,
+  aside,
+  button,
+  .print-toggle-row,
+  .unsaved-dot {
+    display: none !important;
+  }
 
-/* Settings card borders: match the app neutral hairline token */
-.dark .dark\:border-slate-800 {
-  border-color: var(--m3-border) !important;
+  .print-page {
+    position: static;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    background: transparent !important;
+  }
+
+  .print-song-card {
+    page-break-after: always;
+    break-after: page;
+    margin-bottom: 2rem;
+    padding: 1rem 0;
+    border: none !important;
+  }
+
+  .print-song-card:last-child {
+    page-break-after: avoid;
+    break-after: auto;
+  }
+
+  h1,
+  h2,
+  h3 {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  .song-verse-block {
+    page-break-inside: avoid;
+    break-inside: avoid;
+    margin-bottom: 1.5rem;
+  }
+
+  .lyrics-line {
+    color: black !important;
+  }
+
+  .chord-label {
+    color: #0369a1 !important;
+    font-weight: bold !important;
+  }
 }

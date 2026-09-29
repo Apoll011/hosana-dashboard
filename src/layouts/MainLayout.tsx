@@ -1628,10 +1628,10 @@ export const MainLayout: React.FC = () => {
 
             {/* Status Bar */}
             {view === "explorer" && (
-              <div className="h-10 bg-m3-sidebar/40 border-t border-m3-border px-6 flex items-center justify-between text-[10px] text-m3-secondary font-black uppercase tracking-widest select-none">
+              <div className="h-10 bg-m3-sidebar/40 border-t border-m3-border px-6 flex items-center justify-between text-caption select-none">
                 <div className="flex items-center gap-4">
                   <span className="flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-xs" />
+                    <span className="w-2 h-2 rounded-full bg-m3-primary shadow-[var(--shadow-sm)]" />
                     {currentFolder
                       ? `/${currentFolder.name}`
                       : t("layout.rootLocation")}
@@ -1646,7 +1646,7 @@ export const MainLayout: React.FC = () => {
                   <span>
                     {t("layout.statusFiles", { count: filteredFiles.length })}
                   </span>
-                  <span className="text-m3-primary font-bold">
+                  <span className="text-m3-primary font-medium">
                     {t("layout.statusTotal", { count: totalItemsCount })}
                   </span>
                 </div>
@@ -1855,7 +1855,7 @@ export const MainLayout: React.FC = () => {
             pointerEvents: "none",
             zIndex: 100,
           }}
-          className="border-2 border-[#0284c7] bg-[#0284c7]/25 rounded-lg shadow-xl backdrop-blur-[1px]"
+          className="border-2 border-m3-primary bg-m3-primary/25 rounded-[var(--radius-md)] shadow-[var(--shadow-md)] backdrop-blur-[1px]"
         />
       )}
     </>

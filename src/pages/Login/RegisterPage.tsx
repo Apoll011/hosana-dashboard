@@ -115,7 +115,7 @@ export const RegisterPage: React.FC = () => {
           </div>
           <AppLink
             to="/login"
-            className="inline-flex items-center justify-center h-10 px-6 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm transition-all"
+            className="inline-flex items-center justify-center h-10 px-6 rounded-full bg-m3-primary hover:bg-m3-primary-dark text-white font-medium text-sm transition-all"
           >
             {t("auth.register.loginLink")}
           </AppLink>
@@ -176,9 +176,9 @@ export const RegisterPage: React.FC = () => {
               type="checkbox"
               checked={showPassword}
               onChange={(e) => setShowPassword(e.target.checked)}
-              className="w-4 h-4 rounded-sm border-slate-300 dark:border-slate-600 text-blue-600 focus:ring-blue-500 dark:bg-[#1e1f20] cursor-pointer"
+              className="w-4 h-4 rounded-sm border-m3-border text-m3-primary focus:ring-m3-primary bg-m3-card cursor-pointer"
             />
-            <span className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">
+            <span className="text-xs sm:text-sm text-m3-secondary">
               Mostrar palavra-passe
             </span>
           </label>
@@ -202,7 +202,7 @@ export const RegisterPage: React.FC = () => {
         <div className="flex items-center justify-between gap-3 pt-2">
           <AppLink
             to="/login"
-            className="text-xs sm:text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline py-2"
+            className="text-xs sm:text-sm font-medium text-m3-primary hover:text-m3-primary-dark hover:underline py-2"
           >
             {t("auth.register.loginLink")}
           </AppLink>
@@ -210,7 +210,7 @@ export const RegisterPage: React.FC = () => {
           <Button
             type="submit"
             isLoading={isLoading}
-            className="h-10 sm:h-11 px-6 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm transition-all shadow-none hover:shadow-xs active:scale-[0.98] border-0"
+            className="rounded-full px-6"
           >
             {t("auth.register.registerBtn")}
           </Button>

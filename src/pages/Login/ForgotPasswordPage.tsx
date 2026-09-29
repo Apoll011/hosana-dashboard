@@ -94,7 +94,7 @@ export const ForgotPasswordPage: React.FC = () => {
           </div>
           <AppLink
             to="/login"
-            className="inline-flex items-center justify-center h-10 px-6 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm transition-all"
+            className="inline-flex items-center justify-center h-10 px-6 rounded-full bg-m3-primary hover:bg-m3-primary-dark text-white font-medium text-sm transition-all"
           >
             {t("auth.forgotPassword.backToLogin")}
           </AppLink>
@@ -110,14 +110,14 @@ export const ForgotPasswordPage: React.FC = () => {
       errorMsg={errorMsg}
     >
       {/* Mode switcher tabs styled like Google material chips */}
-      <div className="flex rounded-lg bg-slate-100 dark:bg-white/5 p-1 mb-5 border border-slate-200/80 dark:border-white/10">
+      <div className="flex rounded-[var(--radius-md)] bg-m3-sidebar/80 p-1 mb-5 border border-m3-border/60">
         <button
           type="button"
           onClick={() => setMode("link")}
-          className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-md text-xs sm:text-sm font-medium transition-all cursor-pointer ${
+          className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-[var(--radius-sm)] text-xs sm:text-sm font-medium transition-all cursor-pointer ${
             mode === "link"
-              ? "bg-white dark:bg-[#1e1f20] text-blue-600 dark:text-blue-400 shadow-xs"
-              : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
+              ? "bg-m3-card text-m3-primary shadow-xs"
+              : "text-m3-secondary hover:text-m3-text"
           }`}
         >
           <Mail className="w-4 h-4" />
@@ -126,10 +126,10 @@ export const ForgotPasswordPage: React.FC = () => {
         <button
           type="button"
           onClick={() => setMode("code")}
-          className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-md text-xs sm:text-sm font-medium transition-all cursor-pointer ${
+          className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-[var(--radius-sm)] text-xs sm:text-sm font-medium transition-all cursor-pointer ${
             mode === "code"
-              ? "bg-white dark:bg-[#1e1f20] text-blue-600 dark:text-blue-400 shadow-xs"
-              : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
+              ? "bg-m3-card text-m3-primary shadow-xs"
+              : "text-m3-secondary hover:text-m3-text"
           }`}
         >
           <ShieldCheck className="w-4 h-4" />
@@ -152,7 +152,7 @@ export const ForgotPasswordPage: React.FC = () => {
         <div className="flex items-center justify-between gap-3 pt-2">
           <AppLink
             to="/login"
-            className="text-xs sm:text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline py-2"
+            className="text-xs sm:text-sm font-medium text-m3-primary hover:text-m3-primary-dark hover:underline py-2"
           >
             {t("auth.forgotPassword.backToLogin")}
           </AppLink>
@@ -160,7 +160,7 @@ export const ForgotPasswordPage: React.FC = () => {
           <Button
             type="submit"
             isLoading={isLoading}
-            className="h-10 sm:h-11 px-6 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm transition-all shadow-none hover:shadow-xs active:scale-[0.98] border-0"
+            className="rounded-full px-6"
           >
             {t("auth.forgotPassword.sendLinkBtn")}
           </Button>

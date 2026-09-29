@@ -3,12 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Button, ConfirmDialog, Spinner } from "@/src/components/common";
+import { ConfirmDialog, EmptyState, Spinner } from "@/src/components/common";
 import { CreateCollectionModal } from "@/src/components/modals/CreateCollectionModal";
 import { useAuth } from "@/src/contexts/AuthContext";
 import { useAppNavigate } from "@/src/hooks/useAppNavigate";
 import { useCollections } from "@/src/hooks/useCollections";
 import { useI18n } from "@/src/lib/i18n";
+import { useCan } from "@/src/lib/permissions/client";
 import { Can } from "@/src/lib/permissions/components";
 import { Collection } from "@/src/types";
 import {
@@ -19,7 +20,6 @@ import {
   Edit2,
   LibraryBig,
   MoreHorizontal,
-  Plus,
   Printer,
   Trash2,
 } from "lucide-react";
@@ -33,6 +33,7 @@ export const CollectionsPage: React.FC = () => {
   const { t } = useI18n();
   const { organization, user } = useAuth();
   const slugPrefix = organization?.slug ? `/${organization.slug}` : "";
+  const { granted: canCreateCollection } = useCan("collection.create");
 
   const { searchQuery, sortBy } = useOutletContext<{
     searchQuery: string;
@@ -137,42 +138,36 @@ export const CollectionsPage: React.FC = () => {
   }
 
   return (
-    <div className="flex-1 flex flex-col h-full overflow-y-auto bg-white dark:bg-m3-bg">
+    <div className="flex-1 flex flex-col h-full overflow-y-auto bg-m3-bg">
       {/* COLLECTIONS GRID */}
       {filteredCollections.length === 0 ? (
-        <div className="h-full flex flex-col items-center justify-center p-12 text-center my-8 select-none">
-          <div className="w-16 h-16 rounded-3xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-800/50 flex items-center justify-center text-amber-500 mb-4">
-            <LibraryBig className="w-8 h-8" />
-          </div>
-          <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">
-            {searchQuery
-              ? t("foldersPage.noResults")
-              : t("foldersPage.emptyTitle")}
-          </h3>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-sm">
-            {searchQuery
-              ? t("foldersPage.noResultsDesc", {
-                  folder: t("common.root"),
-                  query: searchQuery,
-                })
-              : t("foldersPage.emptyRootDesc")}
-          </p>
-
-          {!searchQuery && (
-            <div className="flex flex-col items-center gap-3 mt-6">
-              <Can permission="collection.create">
-                <Button
-                  variant="primary"
-                  size="sm"
-                  icon={<Plus className="w-4 h-4" />}
-                  onClick={() => setIsCreateModalOpen(true)}
-                >
-                  {" "}
-                  {t("addressBar.newCollection")}
-                </Button>
-              </Can>
-            </div>
-          )}
+        <div className="h-full flex flex-col items-center justify-center p-8">
+          <EmptyState
+            icon={<LibraryBig className="w-8 h-8" />}
+            title={
+              searchQuery
+                ? t("foldersPage.noResults")
+                : t("collectionsPage.noCollectionsAvailable")
+            }
+            description={
+              searchQuery
+                ? t("foldersPage.noResultsDesc", {
+                    folder: t("common.collections"),
+                    query: searchQuery,
+                  })
+                : t("collectionsPage.createCollectionFirst")
+            }
+            actionLabel={
+              !searchQuery && canCreateCollection
+                ? t("addressBar.newCollection")
+                : undefined
+            }
+            onAction={
+              !searchQuery && canCreateCollection
+                ? () => setIsCreateModalOpen(true)
+                : undefined
+            }
+          />
         </div>
       ) : (
         <div className="p-6">
@@ -191,15 +186,15 @@ export const CollectionsPage: React.FC = () => {
                   onClick={() =>
                     navigate(`${slugPrefix}/collections/${collection.id}`)
                   }
-                  className="group relative rounded-3xl border border-m3-border/80 bg-white dark:bg-m3-card overflow-hidden hover:shadow-xl hover:border-m3-primary/40 transition-all duration-300 cursor-pointer flex flex-col min-h-60"
+                  className="group relative rounded-[var(--radius-xl)] border border-m3-border/80 bg-m3-card overflow-hidden hover:border-m3-primary/40 hover:shadow-[var(--shadow-sm)] transition-colors duration-200 cursor-pointer flex flex-col min-h-60"
                 >
                   {/* Banner / Header */}
-                  <div className="relative h-28 w-full overflow-hidden bg-slate-100 dark:bg-slate-800">
+                  <div className="relative h-28 w-full overflow-hidden bg-m3-sidebar">
                     {collection.image ? (
                       <img
                         src={collection.image}
                         alt={collection.name}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        className="w-full h-full object-cover"
                       />
                     ) : (
                       <div
@@ -216,7 +211,7 @@ export const CollectionsPage: React.FC = () => {
                     <div className="flex items-center justify-between -mt-6 mb-3">
                       {/* Floating Badge */}
                       <div
-                        className="w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-lg border-2 border-white dark:border-m3-card shrink-0 transition-transform duration-300 group-hover:scale-105"
+                        className="w-12 h-12 rounded-[var(--radius-lg)] flex items-center justify-center text-white shadow-lg border-2 border-m3-card shrink-0"
                         style={{ backgroundColor: colorStyle.colorHex }}
                       >
                         <IconComp className="w-6 h-6" />
@@ -233,7 +228,7 @@ export const CollectionsPage: React.FC = () => {
                             e.stopPropagation();
                             setOpenMenuId(isMenuOpen ? null : collection.id);
                           }}
-                          className="p-1.5 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                          className="p-1.5 rounded-[var(--radius-md)] text-m3-secondary hover:text-m3-text hover:bg-m3-hover transition-colors cursor-pointer"
                           title={t("explorer.moreOptions")}
                         >
                           <MoreHorizontal className="w-4 h-4" />
@@ -241,7 +236,7 @@ export const CollectionsPage: React.FC = () => {
 
                         {/* Dropdown Menu */}
                         {isMenuOpen && (
-                          <div className="absolute right-0 top-full mt-1 w-40 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl z-20 p-1.5 space-y-1 animate-in fade-in slide-in-from-top-2 duration-150">
+                          <div className="absolute right-0 top-full mt-1 w-40 bg-m3-card border border-m3-border rounded-[var(--radius-xl)] shadow-xl z-20 p-1.5 space-y-1 animate-in fade-in slide-in-from-top-2 duration-150">
                             <Can permission="collection.update">
                               <button
                                 type="button"
@@ -250,9 +245,9 @@ export const CollectionsPage: React.FC = () => {
                                   setOpenMenuId(null);
                                   setEditingCollection(collection);
                                 }}
-                                className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors cursor-pointer text-left"
+                                className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-m3-text hover:bg-m3-hover rounded-[var(--radius-md)] transition-colors cursor-pointer text-left"
                               >
-                                <Edit2 className="w-3.5 h-3.5 text-sky-500" />
+                                <Edit2 className="w-3.5 h-3.5 text-m3-primary" />
                                 {t("collectionsPage.edit")}
                               </button>
                             </Can>
@@ -264,9 +259,9 @@ export const CollectionsPage: React.FC = () => {
                                   setOpenMenuId(null);
                                   void printCollection(collection);
                                 }}
-                                className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors cursor-pointer text-left"
+                                className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-m3-text hover:bg-m3-hover rounded-[var(--radius-md)] transition-colors cursor-pointer text-left"
                               >
-                                <Printer className="w-3.5 h-3.5 text-slate-500" />
+                                <Printer className="w-3.5 h-3.5 text-m3-secondary" />
                                 {t("print.buttons.printCollection")}
                               </button>
                             </Can>
@@ -290,10 +285,10 @@ export const CollectionsPage: React.FC = () => {
                     </div>
 
                     {/* Title & Count */}
-                    <h4 className="text-base font-bold text-slate-900 dark:text-slate-100 line-clamp-1 group-hover:text-m3-primary transition-colors">
+                    <h4 className="text-title text-m3-text line-clamp-1 group-hover:text-m3-primary transition-colors">
                       {collection.name}
                     </h4>
-                    <span className="text-xs font-medium text-slate-400 dark:text-slate-500 mt-0.5">
+                    <span className="text-caption mt-0.5">
                       {t(
                         `collectionsPage.songCount.${songCount === 1 ? "one" : "other"}`,
                         { count: songCount },
@@ -302,7 +297,7 @@ export const CollectionsPage: React.FC = () => {
 
                     {/* Description */}
                     {collection.description && (
-                      <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 mt-2 leading-relaxed">
+                      <p className="text-caption line-clamp-2 mt-2 leading-relaxed">
                         {collection.description}
                       </p>
                     )}

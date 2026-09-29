@@ -3,9 +3,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Button, Input, Modal } from "@/src/components/common";
+import {
+  Button,
+  Input,
+  Modal,
+  Spinner,
+  Surface,
+  Tabs,
+} from "@/src/components/common";
 import { useI18n } from "@/src/lib/i18n";
-import { Can, CanAny } from "@/src/lib/permissions/components";
+import { useCanAny } from "@/src/lib/permissions/client";
+import { Can } from "@/src/lib/permissions/components";
 import { getAvatarGradient, getInitials } from "@/src/utils";
 import {
   ChevronRight,
@@ -17,7 +25,7 @@ import {
   UserPlus,
   XCircle,
 } from "lucide-react";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { useSync } from "../../contexts/SyncContext";
 import { authClient } from "../../lib/authClient";
@@ -52,6 +60,10 @@ export const MembersTab: React.FC<{ active: boolean }> = ({ active }) => {
   const { user, organization } = useAuth();
   const { showToast } = useSync();
   const { t } = useI18n();
+  const { granted: canManageInvites } = useCanAny([
+    "invitation.create",
+    "invitation.cancel",
+  ]);
 
   const [activeSubTab, setActiveSubTab] = useState<SubTab>("members");
   const [searchQuery, setSearchQuery] = useState("");
@@ -155,12 +167,36 @@ export const MembersTab: React.FC<{ active: boolean }> = ({ active }) => {
 
   const refetchInvitations = fetchInvitations;
 
-  if (!active) return null;
-
   const members: OrgMember[] = orgMembersData || [];
   const pendingInvites: OrgInvitation[] = (invitationsData || []).filter(
     (inv: OrgInvitation) => inv.status === "pending",
   );
+
+  const subTabItems = useMemo(() => {
+    const items = [
+      {
+        id: "members",
+        label: t("settings.members.activeMembers", { count: members.length }),
+      },
+    ];
+    if (canManageInvites) {
+      items.push({
+        id: "invites",
+        label: t("settings.members.pendingInvites", {
+          count: pendingInvites.length,
+        }),
+      });
+    }
+    return items;
+  }, [t, members.length, pendingInvites.length, canManageInvites]);
+
+  useEffect(() => {
+    if (activeSubTab === "invites" && !canManageInvites) {
+      setActiveSubTab("members");
+    }
+  }, [activeSubTab, canManageInvites]);
+
+  if (!active) return null;
 
   const refetchAll = () => {
     refetchOrgMembers();
@@ -342,43 +378,20 @@ export const MembersTab: React.FC<{ active: boolean }> = ({ active }) => {
 
   return (
     <div className="space-y-6 max-w-5xl">
-      {/* Subtabs & Action Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-1">
+        <Tabs
+          items={subTabItems}
+          value={activeSubTab}
+          onChange={(id) => setActiveSubTab(id as SubTab)}
+          className="flex-1 min-w-0"
+          aria-label={t("organization.tabs.members")}
+        />
+
+        <div className="flex items-center gap-2 shrink-0">
           <button
             type="button"
-            onClick={() => setActiveSubTab("members")}
-            className={`px-3 py-1.5 text-xs font-bold rounded-lg flex items-center gap-1.5 transition-colors cursor-pointer ${
-              activeSubTab === "members"
-                ? "bg-m3-primary/10 text-m3-primary"
-                : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
-            }`}
-          >
-            {t("settings.members.activeMembers", { count: members.length })}
-          </button>
-
-          {/* Only show pending-invites tab to those who can manage invites */}
-          <CanAny permissions={["invitation.create", "invitation.cancel"]}>
-            <button
-              type="button"
-              onClick={() => setActiveSubTab("invites")}
-              className={`px-3 py-1.5 text-xs font-bold rounded-lg flex items-center gap-1.5 transition-colors cursor-pointer ${
-                activeSubTab === "invites"
-                  ? "bg-m3-primary/10 text-m3-primary"
-                  : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
-              }`}
-            >
-              {t("settings.members.pendingInvites", {
-                count: pendingInvites.length,
-              })}
-            </button>
-          </CanAny>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <button
             onClick={refetchAll}
-            className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            className="p-2 text-m3-secondary hover:text-m3-text rounded-[var(--radius-md)] hover:bg-m3-sidebar transition-colors cursor-pointer"
             title={t("common.refresh")}
           >
             <RefreshCw className="w-4 h-4" />
@@ -397,47 +410,41 @@ export const MembersTab: React.FC<{ active: boolean }> = ({ active }) => {
         </div>
       </div>
 
-      {/* Search Input */}
-      <div className="relative">
-        <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
-        <input
-          type="text"
-          placeholder={
-            activeSubTab === "members"
-              ? t("settings.members.searchPlaceholder")
-              : t("settings.members.searchInvitesPlaceholder")
-          }
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full pl-9 pr-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-semibold focus:outline-none focus:border-m3-primary"
-        />
-      </div>
+      <Input
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+        placeholder={
+          activeSubTab === "members"
+            ? t("settings.members.searchPlaceholder")
+            : t("settings.members.searchInvitesPlaceholder")
+        }
+        icon={<Search className="w-4 h-4" />}
+      />
 
-      {/* Members Content */}
       {activeSubTab === "members" && (
         <>
           {isLoadingOrgMembers ? (
-            <div className="py-12 text-center text-xs text-slate-400 flex items-center justify-center gap-2">
-              <Loader2 className="w-4 h-4 animate-spin text-m3-primary" />
-              {t("settings.members.loadingMembers")}
+            <div className="py-12 flex items-center justify-center">
+              <Spinner size="md" label={t("settings.members.loadingMembers")} />
             </div>
           ) : filteredMembers.length === 0 ? (
-            <div className="py-12 text-center text-xs text-slate-400">
+            <p className="py-12 text-center text-sm text-m3-secondary">
               {t("settings.members.noMembers")}
-            </div>
+            </p>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {filteredMembers.map((member: OrgMember) => (
-                <div
+                <Surface
                   key={member.id}
+                  padding="sm"
+                  className="hover:border-m3-primary/50 hover:shadow-[var(--shadow-sm)] transition-colors cursor-pointer flex items-center justify-between group"
                   onClick={() => setSelectedMember(member)}
-                  className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 hover:border-m3-primary/50 hover:shadow-md transition-all cursor-pointer flex items-center justify-between group"
                 >
                   <div className="flex items-center gap-3 min-w-0">
                     <div
                       className={`w-10 h-10 rounded-full bg-linear-to-tr ${getAvatarGradient(
                         member.name,
-                      )} text-white font-black text-sm flex items-center justify-center shrink-0 overflow-hidden`}
+                      )} text-white font-semibold text-sm flex items-center justify-center shrink-0 overflow-hidden`}
                     >
                       {member.image ? (
                         <img
@@ -451,62 +458,61 @@ export const MembersTab: React.FC<{ active: boolean }> = ({ active }) => {
                     </div>
                     <div className="min-w-0">
                       <div className="flex items-center gap-2">
-                        <span className="font-bold text-slate-900 dark:text-slate-100 text-sm truncate">
+                        <span className="font-semibold text-m3-text text-sm truncate">
                           {member.name}
                         </span>
                       </div>
-                      <p className="text-xs text-slate-500 truncate">
+                      <p className="text-xs text-m3-secondary truncate">
                         {member.email}
                       </p>
                       <div className="mt-1">{getRoleBadge(member.role, t)}</div>
                     </div>
                   </div>
 
-                  <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-m3-primary transition-colors shrink-0" />
-                </div>
+                  <ChevronRight className="w-4 h-4 text-m3-secondary group-hover:text-m3-primary transition-colors shrink-0" />
+                </Surface>
               ))}
             </div>
           )}
         </>
       )}
 
-      {/* Pending Invites Content */}
-      {activeSubTab === "invites" && (
+      {activeSubTab === "invites" && canManageInvites && (
         <>
           {isLoadingInvitations ? (
-            <div className="py-12 text-center text-xs text-slate-400 flex items-center justify-center gap-2">
-              <Loader2 className="w-4 h-4 animate-spin text-m3-primary" />
-              {t("settings.members.loadingInvites")}
+            <div className="py-12 flex items-center justify-center">
+              <Spinner size="md" label={t("settings.members.loadingInvites")} />
             </div>
           ) : filteredInvites.length === 0 ? (
-            <div className="py-12 text-center text-xs text-slate-400">
+            <p className="py-12 text-center text-sm text-m3-secondary">
               {t("settings.members.noInvites")}
-            </div>
+            </p>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {filteredInvites.map((invite) => {
                 const expired = isExpired(invite);
                 return (
-                  <div
+                  <Surface
                     key={invite.id}
-                    className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 flex items-center justify-between gap-3"
+                    padding="sm"
+                    className="flex items-center justify-between gap-3"
                   >
                     <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 flex items-center justify-center shrink-0">
+                      <div className="w-10 h-10 rounded-full bg-m3-sidebar text-m3-secondary flex items-center justify-center shrink-0">
                         <Mail className="w-4 h-4" />
                       </div>
                       <div className="min-w-0">
-                        <p className="font-bold text-slate-900 dark:text-slate-100 text-sm truncate">
+                        <p className="font-semibold text-m3-text text-sm truncate">
                           {invite.email}
                         </p>
                         <div className="mt-1 flex items-center gap-2 flex-wrap">
                           {getRoleBadge(invite.role, t)}
                           {expired ? (
-                            <span className="text-[10px] font-black uppercase tracking-wider text-red-600 bg-red-50 dark:bg-red-950 px-2 py-0.5 rounded-md border border-red-200 dark:border-red-800">
+                            <span className="text-caption font-semibold text-rose-600 bg-rose-50 dark:bg-rose-950 px-2 py-0.5 rounded-[var(--radius-md)] border border-rose-200 dark:border-rose-800">
                               {t("settings.members.expired")}
                             </span>
                           ) : (
-                            <span className="text-[10px] text-slate-400">
+                            <span className="text-caption">
                               {t("settings.members.expires", {
                                 date: formatRelativeDays(invite.expiresAt),
                               })}
@@ -523,7 +529,7 @@ export const MembersTab: React.FC<{ active: boolean }> = ({ active }) => {
                           onClick={() => handleResendInvite(invite)}
                           disabled={resendingId === invite.id}
                           title={t("settings.members.resendInviteTitle")}
-                          className="p-2 text-slate-400 hover:text-m3-primary rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors disabled:opacity-50 cursor-pointer"
+                          className="p-2 text-m3-secondary hover:text-m3-primary rounded-[var(--radius-md)] hover:bg-m3-sidebar transition-colors disabled:opacity-50 cursor-pointer"
                         >
                           {resendingId === invite.id ? (
                             <Loader2 className="w-4 h-4 animate-spin" />
@@ -537,13 +543,13 @@ export const MembersTab: React.FC<{ active: boolean }> = ({ active }) => {
                           type="button"
                           onClick={() => setInviteToCancel(invite)}
                           title={t("settings.members.cancelInviteTitle")}
-                          className="p-2 text-slate-400 hover:text-red-500 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                          className="p-2 text-m3-secondary hover:text-rose-500 rounded-[var(--radius-md)] hover:bg-m3-sidebar transition-colors cursor-pointer"
                         >
                           <XCircle className="w-4 h-4" />
                         </button>
                       </Can>
                     </div>
-                  </div>
+                  </Surface>
                 );
               })}
             </div>
@@ -551,7 +557,6 @@ export const MembersTab: React.FC<{ active: boolean }> = ({ active }) => {
         </>
       )}
 
-      {/* Invite Modal */}
       {isInviteModalOpen && (
         <Modal
           isOpen={isInviteModalOpen}
@@ -575,13 +580,13 @@ export const MembersTab: React.FC<{ active: boolean }> = ({ active }) => {
             />
 
             <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+              <label className="text-label block mb-1.5">
                 {t("settings.members.roleLabel")}
               </label>
               <select
                 value={inviteRole}
                 onChange={(e) => setInviteRole(e.target.value)}
-                className="w-full h-11 px-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-semibold"
+                className="w-full min-h-10 px-3.5 bg-m3-card border border-m3-border rounded-[var(--radius-md)] text-sm text-m3-text focus:outline-none focus:ring-2 focus:ring-m3-primary/25 focus:border-m3-primary"
               >
                 <Can permission="organization.update">
                   <option value="owner">{t("settings.roles.owner")}</option>
@@ -614,7 +619,6 @@ export const MembersTab: React.FC<{ active: boolean }> = ({ active }) => {
         </Modal>
       )}
 
-      {/* Cancel Invite Confirmation */}
       {inviteToCancel && (
         <Modal
           isOpen={!!inviteToCancel}
@@ -622,7 +626,7 @@ export const MembersTab: React.FC<{ active: boolean }> = ({ active }) => {
           title={t("settings.members.cancelModalTitle")}
         >
           <div className="space-y-4 pt-2">
-            <p className="text-xs text-slate-600 dark:text-slate-400">
+            <p className="text-sm text-m3-secondary">
               {t("settings.members.cancelModalConfirm", {
                 email: inviteToCancel.email,
               })}

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Input, Spinner } from "@/src/components/common";
+import { Input, Spinner, Surface } from "@/src/components/common";
 import { useAppNavigate } from "@/src/hooks/useAppNavigate";
 import { useServices } from "@/src/hooks/useServices";
 import { useAllSongs } from "@/src/hooks/useSongs";
@@ -35,9 +35,9 @@ type SortDir = "asc" | "desc";
 function FrequencyBar({ count, max }: { count: number; max: number }) {
   const pct = max <= 0 ? 0 : Math.round((count / max) * 100);
   return (
-    <div className="h-1.5 w-16 sm:w-20 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden shrink-0">
+    <div className="h-1.5 w-16 sm:w-20 rounded-full bg-m3-sidebar overflow-hidden shrink-0">
       <div
-        className="h-full rounded-full bg-m3-primary transition-all"
+        className="h-full rounded-full bg-m3-primary transition-[width]"
         style={{ width: `${Math.max(pct, count > 0 ? 8 : 0)}%` }}
       />
     </div>
@@ -61,16 +61,16 @@ function SongRow({
     <button
       type="button"
       onClick={() => onOpen(song.songId)}
-      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left hover:bg-m3-primary/5 border border-transparent hover:border-m3-primary/20 transition-all cursor-pointer group"
+      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-[var(--radius-md)] text-left hover:bg-m3-primary/5 border border-transparent hover:border-m3-primary/20 transition-colors cursor-pointer group"
     >
-      <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 group-hover:bg-m3-primary/10">
-        <Music2 className="w-4 h-4 text-slate-400 group-hover:text-m3-primary" />
+      <div className="w-8 h-8 rounded-[var(--radius-md)] bg-m3-sidebar flex items-center justify-center shrink-0 group-hover:bg-m3-primary/10">
+        <Music2 className="w-4 h-4 text-m3-secondary group-hover:text-m3-primary" />
       </div>
       <div className="flex-1 min-w-0">
-        <span className="block text-sm font-bold text-slate-900 dark:text-slate-100 truncate">
+        <span className="block text-sm font-semibold text-m3-text truncate">
           {song.title}
         </span>
-        <span className="block text-xs text-slate-500 dark:text-slate-400 truncate">
+        <span className="block text-xs text-m3-secondary truncate">
           {song.artist || "—"}
           {" · "}
           {formatLastPlayed(song)}
@@ -78,10 +78,10 @@ function SongRow({
       </div>
       <div className="flex items-center gap-2 shrink-0">
         <FrequencyBar count={song.playCount} max={maxPlays} />
-        <span className="text-xs font-bold tabular-nums text-slate-700 dark:text-slate-200 w-10 text-right">
+        <span className="text-xs font-semibold tabular-nums text-m3-text w-10 text-right">
           {playsLabel}
         </span>
-        <ChevronRight className="w-4 h-4 text-slate-300 dark:text-slate-600 group-hover:text-m3-primary" />
+        <ChevronRight className="w-4 h-4 text-m3-secondary/50 group-hover:text-m3-primary" />
       </div>
     </button>
   );
@@ -109,19 +109,17 @@ function InsightSection({
   formatPlays: (count: number) => string;
 }) {
   return (
-    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xs overflow-hidden">
-      <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
-        <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+    <Surface padding="none" className="overflow-hidden">
+      <div className="px-5 py-4 border-b border-m3-border">
+        <h3 className="text-sm font-semibold text-m3-text flex items-center gap-2">
           <Icon className="w-4 h-4 text-m3-primary" />
           {title}
         </h3>
-        <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-          {desc}
-        </p>
+        <p className="mt-1 text-caption">{desc}</p>
       </div>
       <div className="p-2 sm:p-3 space-y-0.5">
         {songs.length === 0 ? (
-          <p className="text-sm text-slate-500 dark:text-slate-400 px-3 py-8 text-center">
+          <p className="text-sm text-m3-secondary px-3 py-8 text-center">
             {empty}
           </p>
         ) : (
@@ -137,7 +135,7 @@ function InsightSection({
           ))
         )}
       </div>
-    </div>
+    </Surface>
   );
 }
 
@@ -207,7 +205,6 @@ export const SetlistInsightsTab: React.FC<SetlistInsightsTabProps> = ({
       if (sortKey === "frequency") {
         cmp = a.playCount - b.playCount;
       } else if (sortKey === "lastPlayed") {
-        // Never played sorts as oldest when descending wants "most recent first"
         const aKey = a.lastPlayed ?? "";
         const bKey = b.lastPlayed ?? "";
         cmp = aKey.localeCompare(bKey);
@@ -254,20 +251,17 @@ export const SetlistInsightsTab: React.FC<SetlistInsightsTabProps> = ({
   };
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto w-full animate-in fade-in slide-in-from-bottom-2 duration-300">
-      {/* Overview */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xs overflow-hidden">
-        <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
-          <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+    <div className="space-y-8 max-w-4xl mx-auto w-full animate-in fade-in slide-in-from-bottom-2 duration-300">
+      <section className="space-y-5">
+        <div>
+          <h2 className="text-title text-m3-text flex items-center gap-2">
             <ListMusic className="w-5 h-5 text-m3-primary" />
             {t("analytics.setlist.title")}
           </h2>
-          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-            {t("analytics.setlist.desc")}
-          </p>
+          <p className="mt-1 text-muted">{t("analytics.setlist.desc")}</p>
         </div>
 
-        <div className="p-6 grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <Stat
             value={formatCount(summary.songsPlayed)}
             label={t("analytics.setlist.statPlayed")}
@@ -285,10 +279,9 @@ export const SetlistInsightsTab: React.FC<SetlistInsightsTabProps> = ({
             label={t("analytics.setlist.statServices")}
           />
         </div>
-      </div>
+      </section>
 
-      {/* Highlight lists */}
-      <div className="grid gap-6 sm:grid-cols-2">
+      <div className="grid gap-5 sm:grid-cols-2">
         <InsightSection
           title={t("analytics.setlist.sections.mostPlayed")}
           desc={t("analytics.setlist.sections.mostPlayedDesc")}
@@ -347,16 +340,13 @@ export const SetlistInsightsTab: React.FC<SetlistInsightsTabProps> = ({
         />
       </div>
 
-      {/* Full table */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xs overflow-hidden">
-        <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 space-y-3">
+      <Surface padding="none" className="overflow-hidden">
+        <div className="px-5 py-4 border-b border-m3-border space-y-3">
           <div>
-            <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
+            <h3 className="text-sm font-semibold text-m3-text">
               {t("analytics.setlist.allSongs")}
             </h3>
-            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-              {t("analytics.setlist.allSongsDesc")}
-            </p>
+            <p className="mt-1 text-caption">{t("analytics.setlist.allSongsDesc")}</p>
           </div>
           <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
             <div className="flex-1">
@@ -375,10 +365,10 @@ export const SetlistInsightsTab: React.FC<SetlistInsightsTabProps> = ({
                     key={opt.id}
                     type="button"
                     onClick={() => toggleSort(opt.id)}
-                    className={`px-3 py-1.5 rounded-lg text-[11px] font-bold whitespace-nowrap cursor-pointer transition-colors ${
+                    className={`px-3 py-1.5 rounded-[var(--radius-md)] text-xs font-semibold whitespace-nowrap cursor-pointer transition-colors ${
                       activeSort
                         ? "bg-m3-primary text-white"
-                        : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700"
+                        : "bg-m3-sidebar text-m3-secondary hover:text-m3-text"
                     }`}
                   >
                     {t(opt.labelKey)}
@@ -390,9 +380,9 @@ export const SetlistInsightsTab: React.FC<SetlistInsightsTabProps> = ({
           </div>
         </div>
 
-        <div className="divide-y divide-slate-100 dark:divide-slate-800">
+        <div className="divide-y divide-m3-border">
           {filteredSongs.length === 0 ? (
-            <p className="text-sm text-slate-500 dark:text-slate-400 px-5 py-12 text-center">
+            <p className="text-sm text-m3-secondary px-5 py-12 text-center">
               {t("analytics.setlist.noMatch")}
             </p>
           ) : (
@@ -401,13 +391,13 @@ export const SetlistInsightsTab: React.FC<SetlistInsightsTabProps> = ({
                 <button
                   type="button"
                   onClick={() => openSong(song.songId)}
-                  className="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-left hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer group"
+                  className="w-full flex items-center gap-3 px-3 py-3 rounded-[var(--radius-md)] text-left hover:bg-m3-sidebar/80 transition-colors cursor-pointer group"
                 >
                   <div className="flex-1 min-w-0">
-                    <span className="block text-sm font-bold text-slate-900 dark:text-slate-100 truncate">
+                    <span className="block text-sm font-semibold text-m3-text truncate">
                       {song.title}
                     </span>
-                    <span className="block text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5">
+                    <span className="block text-xs text-m3-secondary truncate mt-0.5">
                       {song.artist || "—"}
                       {song.lastServiceName ? ` · ${song.lastServiceName}` : ""}
                       {song.upcomingCount > 0
@@ -418,39 +408,37 @@ export const SetlistInsightsTab: React.FC<SetlistInsightsTabProps> = ({
                     </span>
                   </div>
                   <div className="hidden sm:flex flex-col items-end gap-0.5 shrink-0 min-w-[7rem]">
-                    <span className="text-xs font-bold tabular-nums text-slate-800 dark:text-slate-100">
+                    <span className="text-xs font-semibold tabular-nums text-m3-text">
                       {formatPlays(song.playCount)}
                     </span>
-                    <span className="text-[11px] text-slate-500 dark:text-slate-400">
+                    <span className="text-caption">
                       {formatLastPlayed(song)}
                     </span>
                   </div>
                   <div className="flex sm:hidden flex-col items-end gap-0.5 shrink-0">
-                    <span className="text-xs font-bold tabular-nums">
+                    <span className="text-xs font-semibold tabular-nums">
                       {formatCount(song.playCount)}×
                     </span>
                   </div>
                   <FrequencyBar count={song.playCount} max={maxPlays || 1} />
-                  <ChevronRight className="w-4 h-4 text-slate-300 dark:text-slate-600 group-hover:text-m3-primary shrink-0" />
+                  <ChevronRight className="w-4 h-4 text-m3-secondary/50 group-hover:text-m3-primary shrink-0" />
                 </button>
               </div>
             ))
           )}
         </div>
-      </div>
+      </Surface>
     </div>
   );
 };
 
 function Stat({ value, label }: { value: string; label: string }) {
   return (
-    <div className="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/40">
-      <span className="block text-2xl font-extrabold text-slate-900 dark:text-slate-100 tabular-nums">
+    <div className="p-3.5 rounded-[var(--radius-md)] border border-m3-border bg-m3-sidebar/60">
+      <span className="block text-2xl font-semibold text-m3-text tabular-nums">
         {value}
       </span>
-      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
-        {label}
-      </span>
+      <span className="text-caption">{label}</span>
     </div>
   );
 }

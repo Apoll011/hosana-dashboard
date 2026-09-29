@@ -513,7 +513,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
           }
         >
           {filteredServices.length === 0 && !showArchived ? (
-            <div className="col-span-full text-center py-20 text-m3-secondary font-black uppercase tracking-widest opacity-60">
+            <div className="col-span-full text-center py-20 text-label opacity-80">
               {t("servicesPage.noMatch")}
             </div>
           ) : (
@@ -539,7 +539,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
             <>
               <div className="col-span-full flex items-center gap-3 mt-4 mb-2">
                 <div className="h-px flex-1 bg-amber-500/20" />
-                <span className="text-[10px] font-black uppercase tracking-widest text-amber-600 dark:text-amber-400 flex items-center gap-2">
+                <span className="text-label text-amber-600 dark:text-amber-400 flex items-center gap-2">
                   <Archive className="w-3.5 h-3.5" />
                   {t("servicesPage.archivedTitle", {
                     count: filteredArchivedServices.length,
@@ -578,30 +578,30 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
         <div className="overflow-x-auto border border-m3-border/40 rounded-3xl bg-m3-card shadow-sm">
           <table className="w-full text-left border-collapse select-none">
             <thead>
-              <tr className="bg-m3-sidebar/40 border-b border-m3-border text-[10px] font-black text-m3-secondary uppercase tracking-[0.2em]">
+              <tr className="bg-m3-sidebar/40 border-b border-m3-border">
                 <th
-                  className={
+                  className={`text-label ${
                     density === "compact" ? "py-2.5 px-4" : "py-4 px-6"
-                  }
+                  }`}
                 >
                   {t("servicesPage.serviceName")}
                 </th>
                 <th
-                  className={
+                  className={`text-label ${
                     density === "compact" ? "py-2.5 px-4" : "py-4 px-6"
-                  }
+                  }`}
                 >
                   {t("common.type")}
                 </th>
                 <th
-                  className={
+                  className={`text-label ${
                     density === "compact" ? "py-2.5 px-4" : "py-4 px-6"
-                  }
+                  }`}
                 >
                   {t("servicesPage.scheduledDate")}
                 </th>
                 <th
-                  className={`${density === "compact" ? "py-2.5 px-4" : "py-4 px-6"} text-right`}
+                  className={`text-label ${density === "compact" ? "py-2.5 px-4" : "py-4 px-6"} text-right`}
                 >
                   {t("servicesPage.actions")}
                 </th>
@@ -645,7 +645,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
                       colSpan={4}
                       className="py-3 px-6 bg-amber-50/50 dark:bg-amber-950/20"
                     >
-                      <span className="text-[10px] font-black uppercase tracking-widest text-amber-600 dark:text-amber-400 flex items-center gap-2">
+                      <span className="text-label text-amber-600 dark:text-amber-400 flex items-center gap-2">
                         <Archive className="w-3.5 h-3.5" />
                         {t("servicesPage.archivedTitle", {
                           count: filteredArchivedServices.length,
@@ -719,13 +719,13 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
       {contextMenu && (
         <div
           style={{ top: contextMenu.y, left: contextMenu.x }}
-          className="fixed z-50 w-56 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl p-1.5 flex flex-col gap-0.5 text-xs select-none animate-in fade-in zoom-in-95 duration-100"
+          className="fixed z-50 w-56 bg-m3-card border border-m3-border rounded-[var(--radius-xl)] shadow-[var(--shadow-lg)] p-1.5 flex flex-col gap-0.5 text-xs select-none animate-in fade-in zoom-in-95 duration-100"
           onClick={(e) => e.stopPropagation()}
           onContextMenu={(e) => e.preventDefault()}
         >
           {contextMenu.isMulti ? (
             <>
-              <div className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-sky-500 border-b border-slate-100 dark:border-slate-800/80 mb-0.5 flex items-center justify-between">
+              <div className="px-3 py-1.5 text-label text-m3-primary border-b border-m3-border/60 mb-0.5 flex items-center justify-between">
                 <span>{t("servicesPage.multiSelect")}</span>
                 <Badge variant="sky">{selectedServiceIds.size}</Badge>
               </div>
@@ -739,9 +739,9 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
                   }
                   setContextMenu(null);
                 }}
-                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left cursor-pointer"
+                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-[var(--radius-md)] text-m3-text hover:bg-m3-hover font-medium transition-colors text-left cursor-pointer"
               >
-                <Printer className="w-4 h-4 text-sky-500" />
+                <Printer className="w-4 h-4 text-m3-primary" />
                 <span>
                   {t("print.buttons.printCount", {
                     count: selectedServiceIds.size,
@@ -753,7 +753,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
                   setIsBatchArchiveOpen(true);
                   setContextMenu(null);
                 }}
-                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left cursor-pointer"
+                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-[var(--radius-md)] text-m3-text hover:bg-m3-hover font-medium transition-colors text-left cursor-pointer"
               >
                 <Archive className="w-4 h-4 text-amber-500" />
                 <span>
@@ -776,21 +776,21 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
                   })}
                 </span>
               </button>
-              <div className="my-1 border-t border-slate-100 dark:border-slate-800/80" />
+              <div className="my-1 border-t border-m3-border/60" />
               <button
                 onClick={() => {
                   setSelectedServiceIds(new Set());
                   setContextMenu(null);
                 }}
-                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left cursor-pointer"
+                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-[var(--radius-md)] text-m3-secondary hover:bg-m3-hover font-medium transition-colors text-left cursor-pointer"
               >
-                <X className="w-4 h-4 text-slate-400" />
+                <X className="w-4 h-4 text-m3-secondary" />
                 <span>{t("servicesPage.deselect")}</span>
               </button>
             </>
           ) : contextMenu.service ? (
             <>
-              <div className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400 border-b border-slate-100 dark:border-slate-800/80 mb-0.5 truncate">
+              <div className="px-3 py-1.5 text-label border-b border-m3-border/60 mb-0.5 truncate">
                 {contextMenu.service.name}
               </div>
 
@@ -799,9 +799,9 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
                   navigate(`${slugPrefix}/services/${contextMenu.service!.id}`);
                   setContextMenu(null);
                 }}
-                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left cursor-pointer"
+                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-[var(--radius-md)] text-m3-text hover:bg-m3-hover font-medium transition-colors text-left cursor-pointer"
               >
-                <Calendar className="w-4 h-4 text-sky-500" />
+                <Calendar className="w-4 h-4 text-m3-primary" />
                 <span>{t("servicesPage.openService")}</span>
               </button>
 
@@ -810,9 +810,9 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
                   setEditTarget(contextMenu.service);
                   setContextMenu(null);
                 }}
-                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left cursor-pointer"
+                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-[var(--radius-md)] text-m3-text hover:bg-m3-hover font-medium transition-colors text-left cursor-pointer"
               >
-                <Edit2 className="w-4 h-4 text-blue-500" />
+                <Edit2 className="w-4 h-4 text-m3-primary" />
                 <span>{t("servicesPage.editNameDate")}</span>
               </button>
 
@@ -821,7 +821,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
                   handleDuplicateService(contextMenu.service!);
                   setContextMenu(null);
                 }}
-                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left cursor-pointer"
+                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-[var(--radius-md)] text-m3-text hover:bg-m3-hover font-medium transition-colors text-left cursor-pointer"
               >
                 <Copy className="w-4 h-4 text-emerald-500" />
                 <span>{t("servicesPage.duplicate")}</span>
@@ -834,9 +834,9 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
                   }
                   setContextMenu(null);
                 }}
-                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left cursor-pointer"
+                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-[var(--radius-md)] text-m3-text hover:bg-m3-hover font-medium transition-colors text-left cursor-pointer"
               >
-                <Printer className="w-4 h-4 text-sky-500" />
+                <Printer className="w-4 h-4 text-m3-primary" />
                 <span>{t("print.buttons.printServiceShort")}</span>
               </button>
 
@@ -844,7 +844,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
                 onClick={() => {
                   handleArchiveToggle(contextMenu.service!);
                 }}
-                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-left cursor-pointer"
+                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-[var(--radius-md)] text-m3-text hover:bg-m3-hover font-medium transition-colors text-left cursor-pointer"
               >
                 {contextMenu.service.archived ? (
                   <ArchiveRestore className="w-4 h-4 text-orange-500" />
@@ -858,7 +858,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
                 </span>
               </button>
 
-              <div className="my-1 border-t border-slate-100 dark:border-slate-800/80" />
+              <div className="my-1 border-t border-m3-border/60" />
 
               <button
                 onClick={() => {

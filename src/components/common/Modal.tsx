@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect } from "react";
 import { X } from "lucide-react";
+import React, { useEffect, useId, useRef } from "react";
 
 interface ModalProps {
   isOpen: boolean;
@@ -14,6 +14,7 @@ interface ModalProps {
   maxWidth?: "sm" | "md" | "lg" | "xl" | "2xl";
   /** Optional tour anchor, e.g. create-folder-modal */
   dataTour?: string;
+  footer?: React.ReactNode;
 }
 
 export const Modal: React.FC<ModalProps> = ({
@@ -23,7 +24,11 @@ export const Modal: React.FC<ModalProps> = ({
   children,
   maxWidth = "md",
   dataTour,
+  footer,
 }) => {
+  const titleId = useId();
+  const panelRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
@@ -31,9 +36,11 @@ export const Modal: React.FC<ModalProps> = ({
     if (isOpen) {
       document.body.style.overflow = "hidden";
       window.addEventListener("keydown", handleKeyDown);
+      // Focus the dialog panel for screen readers / keyboard
+      requestAnimationFrame(() => panelRef.current?.focus());
     }
     return () => {
-      document.body.style.overflow = "auto";
+      document.body.style.overflow = "";
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [isOpen, onClose]);
@@ -49,26 +56,45 @@ export const Modal: React.FC<ModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-m3-bg/80 backdrop-blur-md transition-all duration-300">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-m3-bg/75 backdrop-blur-sm overscroll-contain"
+      role="presentation"
+      onMouseDown={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
       <div
+        ref={panelRef}
         data-tour={dataTour}
-        className={`w-full ${maxWidthClasses[maxWidth]} bg-m3-card border border-m3-border rounded-[32px] shadow-2xl shadow-black/20 overflow-hidden flex flex-col max-h-[90vh] animate-in fade-in zoom-in-95 duration-200`}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        tabIndex={-1}
+        className={`w-full ${maxWidthClasses[maxWidth]} bg-m3-card border border-m3-border rounded-[var(--radius-xl)] shadow-[var(--shadow-lg)] overflow-hidden flex flex-col max-h-[min(90vh,720px)] outline-none`}
       >
-        {/* Modal Header */}
-        <div className="flex items-center justify-between px-8 py-6 border-b border-m3-border/30 bg-m3-sidebar/30">
-          <h3 className="text-lg font-black text-m3-text uppercase tracking-widest">
+        <div className="flex items-center justify-between gap-4 px-6 py-4 border-b border-m3-border/50">
+          <h2 id={titleId} className="text-title text-m3-text min-w-0 truncate">
             {title}
-          </h3>
+          </h2>
           <button
+            type="button"
             onClick={onClose}
-            className="p-2 text-m3-secondary hover:text-m3-text hover:bg-m3-hover rounded-2xl transition-all cursor-pointer"
+            aria-label="Close"
+            className="shrink-0 p-2 min-h-10 min-w-10 inline-flex items-center justify-center text-m3-secondary hover:text-m3-text hover:bg-m3-hover rounded-[var(--radius-md)] transition-colors cursor-pointer"
           >
-            <X className="w-6 h-6" />
+            <X className="w-5 h-5" aria-hidden="true" />
           </button>
         </div>
 
-        {/* Modal Content */}
-        <div className="p-8 overflow-y-auto flex-1">{children}</div>
+        <div className="px-6 py-5 overflow-y-auto flex-1 overscroll-contain">
+          {children}
+        </div>
+
+        {footer && (
+          <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-m3-border/50 bg-m3-sidebar/40">
+            {footer}
+          </div>
+        )}
       </div>
     </div>
   );

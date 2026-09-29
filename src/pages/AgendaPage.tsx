@@ -15,6 +15,7 @@ import {
 import { MiniCalendar, toIso } from "@/src/components/agenda/MiniCalendar";
 import { RemoveAssignmentModal } from "@/src/components/agenda/RemoveAssignmentModal";
 import { ResponsibilitiesPanel } from "@/src/components/agenda/ResponsibilitiesPanel";
+import { Button, PageHeader, Spinner } from "@/src/components/common";
 import { useAuth } from "@/src/contexts/AuthContext";
 import { useAgendaNotifications } from "@/src/hooks/useAgendaNotifications";
 import { useI18n } from "@/src/lib/i18n";
@@ -280,82 +281,87 @@ export const AgendaPage: React.FC = () => {
   return (
     <div className="flex-1 p-4 sm:p-6 overflow-y-auto bg-m3-bg dark:bg-m3-bg">
       <div className="max-w-7xl mx-auto space-y-6">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-black text-slate-900 dark:text-slate-100">
-              {t("common.agenda")}
-            </h1>
-            <p className="text-slate-500 text-xs sm:text-sm mt-0.5">
-              {t("agenda.subtitle")}
-            </p>
-          </div>
-          <div className="flex items-center gap-2 flex-wrap justify-end">
-            {selectedEvent ? (
-              <button
-                type="button"
-                onClick={() => {
-                  printEvent(selectedEvent, store.categories);
-                }}
-                className="flex items-center gap-2 px-3.5 py-2.5 text-xs font-bold rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 shadow-sm transition-colors cursor-pointer"
-                title={t("print.buttons.printEventTitle")}
-              >
-                <Printer className="w-4 h-4 text-sky-500" />
-                <span className="hidden sm:inline">
-                  {t("print.buttons.printEvent")}
-                </span>
-              </button>
-            ) : eventsForSelectedDate.length > 0 ? (
-              <button
-                type="button"
-                onClick={() => {
-                  printEvents(
-                    eventsForSelectedDate,
-                    store.categories,
-                    t("agenda.printDayAgenda", {
-                      date: formatLongDate(selectedDate, t),
-                    }),
-                  );
-                }}
-                className="flex items-center gap-2 px-3.5 py-2.5 text-xs font-bold rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 shadow-sm transition-colors cursor-pointer"
-                title={t("print.buttons.printDayTitle")}
-              >
-                <Printer className="w-4 h-4 text-sky-500" />
-                <span className="hidden sm:inline">
-                  {t("print.buttons.printDay", {
-                    count: eventsForSelectedDate.length,
-                  })}
-                </span>
-              </button>
-            ) : null}
-
-            {selectedEvent && (
-              <Can permission="agenda.delete">
-                <button
+        <PageHeader
+          title={t("common.agenda")}
+          description={t("agenda.subtitle")}
+          actions={
+            <>
+              {selectedEvent ? (
+                <Button
                   type="button"
-                  onClick={() => setPendingDeleteEvent(selectedEvent)}
-                  className="flex items-center gap-2 px-4 py-2.5 text-xs font-bold rounded-xl border border-rose-200 dark:border-rose-900/60 bg-white dark:bg-slate-800 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 shadow-sm transition-colors cursor-pointer"
+                  variant="secondary"
+                  size="sm"
+                  icon={<Printer className="w-4 h-4" />}
+                  onClick={() => {
+                    printEvent(selectedEvent, store.categories);
+                  }}
+                  title={t("print.buttons.printEventTitle")}
                 >
-                  <Trash2 className="w-4 h-4" />
-                  {t("agenda.deleteEvent")}
-                </button>
+                  <span className="hidden sm:inline">
+                    {t("print.buttons.printEvent")}
+                  </span>
+                </Button>
+              ) : eventsForSelectedDate.length > 0 ? (
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  icon={<Printer className="w-4 h-4" />}
+                  onClick={() => {
+                    printEvents(
+                      eventsForSelectedDate,
+                      store.categories,
+                      t("agenda.printDayAgenda", {
+                        date: formatLongDate(selectedDate, t),
+                      }),
+                    );
+                  }}
+                  title={t("print.buttons.printDayTitle")}
+                >
+                  <span className="hidden sm:inline">
+                    {t("print.buttons.printDay", {
+                      count: eventsForSelectedDate.length,
+                    })}
+                  </span>
+                </Button>
+              ) : null}
+
+              {selectedEvent && (
+                <Can permission="agenda.delete">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    icon={<Trash2 className="w-4 h-4" />}
+                    onClick={() => setPendingDeleteEvent(selectedEvent)}
+                    className="text-m3-danger hover:text-m3-danger hover:bg-m3-danger/10"
+                  >
+                    {t("agenda.deleteEvent")}
+                  </Button>
+                </Can>
+              )}
+
+              <Can permission="agenda.create">
+                <Button
+                  type="button"
+                  variant="primary"
+                  size="sm"
+                  icon={<CalendarPlus className="w-4 h-4" />}
+                  onClick={() => setIsNewEventOpen(true)}
+                >
+                  {t("agenda.newEvent")}
+                </Button>
               </Can>
-            )}
+            </>
+          }
+        />
 
-            <Can permission="agenda.create">
-              <button
-                type="button"
-                onClick={() => setIsNewEventOpen(true)}
-                className="flex items-center gap-2 px-4 py-2.5 text-xs font-bold rounded-xl bg-sky-500 text-white hover:bg-sky-600 shadow-sm transition-colors cursor-pointer"
-              >
-                <CalendarPlus className="w-4 h-4" />
-                {t("agenda.newEvent")}
-              </button>
-            </Can>
+        {store.isLoading ? (
+          <div className="flex items-center justify-center py-24">
+            <Spinner label={t("common.loading")} />
           </div>
-        </div>
-
-        {/* Body: calendar / events / details */}
+        ) : (
+        /* Body: calendar / events / details */
         <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr_280px] gap-5 items-start">
           <div className="space-y-4">
             <MiniCalendar
@@ -414,6 +420,7 @@ export const AgendaPage: React.FC = () => {
             onNotifyUpdate={() => void notifications.notifyUpdate()}
           />
         </div>
+        )}
       </div>
 
       {/* Create event */}

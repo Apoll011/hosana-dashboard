@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Button, ConfirmDialog, Spinner } from "@/src/components/common";
+import { Button, ConfirmDialog, EmptyState, Spinner } from "@/src/components/common";
 import { AddSongsToCollectionModal } from "@/src/components/modals/AddSongsToCollectionModal";
 import { CreateCollectionModal } from "@/src/components/modals/CreateCollectionModal";
 import { useAuth } from "@/src/contexts/AuthContext";
@@ -19,7 +19,6 @@ import {
   getFolderIconComponent,
 } from "@/src/utils/folderCustomization";
 import {
-  ArrowLeft,
   ChevronLeft,
   ChevronRight,
   Edit2,
@@ -77,7 +76,6 @@ export const CollectionDetailPage: React.FC = () => {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [songToRemove, setSongToRemove] = useState<Song | null>(null);
   const [isHeaderMenuOpen, setIsHeaderMenuOpen] = useState(false);
-  const [hoveredSongId, setHoveredSongId] = useState<string | null>(null);
   const [activeSongMenuId, setActiveSongMenuId] = useState<string | null>(null);
   const headerMenuRef = useRef<HTMLDivElement>(null);
 
@@ -176,26 +174,14 @@ export const CollectionDetailPage: React.FC = () => {
   // ── Not found ───────────────────────────────────────────────────────────────
   if (!collection) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center gap-4 p-8 text-center">
-        <div className="w-16 h-16 rounded-3xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
-          <FolderKanban className="w-8 h-8 text-slate-400" />
-        </div>
-        <div>
-          <h2 className="text-lg font-bold text-slate-900 dark:text-white">
-            {t("collectionsPage.notFoundTitle")}
-          </h2>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-            {t("collectionsPage.notFoundDesc")}
-          </p>
-        </div>
-        <Button
-          variant="secondary"
-          size="sm"
-          icon={<ArrowLeft className="w-4 h-4" />}
-          onClick={() => navigate(`${slugPrefix}/collections`)}
-        >
-          {t("collectionsPage.backToCollections")}
-        </Button>
+      <div className="flex-1 flex flex-col items-center justify-center p-8">
+        <EmptyState
+          icon={<FolderKanban className="w-8 h-8" />}
+          title={t("collectionsPage.notFoundTitle")}
+          description={t("collectionsPage.notFoundDesc")}
+          actionLabel={t("collectionsPage.backToCollections")}
+          onAction={() => navigate(`${slugPrefix}/collections`)}
+        />
       </div>
     );
   }
@@ -206,47 +192,39 @@ export const CollectionDetailPage: React.FC = () => {
   const isFiltering = searchQuery.trim() !== "";
 
   return (
-    <div className="flex-1 flex flex-col h-full overflow-y-auto bg-white dark:bg-m3-bg">
-      {/* ── HERO BANNER ──────────────────────────────────────────────────────── */}
-      <div
-        className="relative w-full overflow-hidden"
-        style={{ minHeight: 220 }}
-      >
-        {/* Background */}
+    <div className="flex-1 flex flex-col h-full overflow-y-auto bg-m3-bg">
+      {/* Identity strip */}
+      <div className="relative w-full overflow-hidden border-b border-m3-border">
         {collection.image ? (
           <img
             src={collection.image}
-            alt={collection.name}
-            className="absolute inset-0 w-full h-full object-cover"
+            alt=""
+            aria-hidden
+            className="absolute inset-0 w-full h-full object-cover opacity-30"
           />
         ) : (
           <div
-            className="absolute inset-0"
+            className="absolute inset-0 opacity-40"
             style={{
-              background: `linear-gradient(135deg, ${colorStyle.colorHex}30 0%, ${colorStyle.colorHex}90 60%, ${colorStyle.colorHex}cc 100%)`,
+              background: `linear-gradient(90deg, ${colorStyle.colorHex}22 0%, ${colorStyle.colorHex}55 100%)`,
             }}
           />
         )}
-        {/* Scrim */}
-        <div className="absolute inset-0 bg-linear-to-t from-black/65 via-black/20 to-transparent" />
+        <div className="absolute inset-0 bg-m3-card/80 backdrop-blur-sm" />
 
-        {/* Collection identity */}
-        <div className="relative z-10 flex items-end gap-4 px-6 sm:px-8 pb-6 pt-16">
+        <div className="relative z-10 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 px-4 sm:px-6 py-4">
           <div
-            className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl flex items-center justify-center text-white shadow-2xl shrink-0 border-2 border-white/20"
+            className="w-12 h-12 rounded-[var(--radius-lg)] flex items-center justify-center text-white shrink-0 border border-white/20"
             style={{ backgroundColor: colorStyle.colorHex }}
           >
-            <IconComp className="w-8 h-8 sm:w-10 sm:h-10" />
+            <IconComp className="w-6 h-6" />
           </div>
-          <div className="flex flex-col min-w-0 pb-0.5">
-            <p className="text-[11px] font-semibold uppercase tracking-widest text-white/55 mb-0.5">
-              Collection
-            </p>
-            <h1 className="text-2xl sm:text-4xl font-black text-white drop-shadow-md truncate leading-tight">
+          <div className="flex flex-col min-w-0 flex-1">
+            <h1 className="text-title text-m3-text truncate">
               {collection.name}
             </h1>
-            <div className="flex items-center gap-2 mt-1 flex-wrap">
-              <span className="text-xs font-medium text-white/70">
+            <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+              <span className="text-caption">
                 {t(
                   `collectionsPage.songCount.${songCount === 1 ? "one" : "other"}`,
                   { count: songCount },
@@ -254,182 +232,158 @@ export const CollectionDetailPage: React.FC = () => {
               </span>
               {collection.description && (
                 <>
-                  <span className="text-white/30">·</span>
-                  <span className="text-xs text-white/60 line-clamp-1">
+                  <span className="text-m3-border">·</span>
+                  <span className="text-caption line-clamp-1">
                     {collection.description}
                   </span>
                 </>
               )}
             </div>
           </div>
-        </div>
 
-        {/* Top-right actions */}
-        <div
-          ref={headerMenuRef}
-          className="absolute top-4 right-4 z-10 flex items-center gap-2"
-        >
-          <Can permission="export.pdf">
-            <button
-              type="button"
-              onClick={() =>
-                void printCollection(collection, songsInCollection)
-              }
-              className="flex items-center gap-1.5 px-3 py-2 rounded-2xl bg-white/15 hover:bg-white/28 backdrop-blur-sm text-white text-xs font-semibold transition-all cursor-pointer shadow-md border border-white/10"
-              title={t("print.buttons.printCollection")}
-            >
-              <Printer className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">{t("common.print")}</span>
-            </button>
-          </Can>
-          <Can permission="collection.update">
-            <button
-              type="button"
-              onClick={() => setIsAddSongsModalOpen(true)}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-2xl bg-white/15 hover:bg-white/28 backdrop-blur-sm text-white text-xs font-semibold transition-all cursor-pointer shadow-md border border-white/10"
-            >
-              <Plus className="w-3.5 h-3.5" />
-              {t("collectionsPage.addSongs")}
-            </button>
-          </Can>
-          <div className="relative">
-            <button
-              type="button"
-              onClick={() => setIsHeaderMenuOpen((v) => !v)}
-              className="p-2.5 rounded-2xl bg-black/30 hover:bg-black/50 text-white backdrop-blur-sm transition-all cursor-pointer shadow-md"
-              title={t("explorer.moreOptions")}
-            >
-              <MoreHorizontal className="w-4 h-4" />
-            </button>
-            {isHeaderMenuOpen && (
-              <div className="absolute right-0 top-full mt-2 w-52 bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-700/80 rounded-2xl shadow-2xl z-30 p-1.5 space-y-0.5 animate-in fade-in slide-in-from-top-2 duration-150">
-                <Can permission="export.pdf">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsHeaderMenuOpen(false);
-                      void printCollection(collection, songsInCollection);
-                    }}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors cursor-pointer text-left"
-                  >
-                    <Printer className="w-3.5 h-3.5 text-slate-500" />
-                    {t("print.buttons.printCollection")}
-                  </button>
-                </Can>
-                <Can permission="collection.update">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsHeaderMenuOpen(false);
-                      setIsEditModalOpen(true);
-                    }}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors cursor-pointer text-left"
-                  >
-                    <Edit2 className="w-3.5 h-3.5 text-sky-500" />
-                    {t("collectionsPage.editCollection")}
-                  </button>
-                </Can>
-                <Can permission="collection.update">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsHeaderMenuOpen(false);
-                      setIsAddSongsModalOpen(true);
-                    }}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors cursor-pointer text-left"
-                  >
-                    <Plus className="w-3.5 h-3.5 text-emerald-500" />
-                    {t("collectionsPage.addSongs")}
-                  </button>
-                </Can>
-                <Can permission="collection.delete">
-                  <div className="my-1 h-px bg-slate-100 dark:bg-slate-800 mx-1" />
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsHeaderMenuOpen(false);
-                      setIsDeleteDialogOpen(true);
-                    }}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-xl transition-colors cursor-pointer text-left"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                    {t("collectionsPage.deleteTitle")}
-                  </button>
-                </Can>
-              </div>
-            )}
+          <div
+            ref={headerMenuRef}
+            className="flex items-center gap-2 shrink-0"
+          >
+            <Can permission="export.pdf">
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                icon={<Printer className="w-3.5 h-3.5" />}
+                onClick={() =>
+                  void printCollection(collection, songsInCollection)
+                }
+                title={t("print.buttons.printCollection")}
+              >
+                <span className="hidden sm:inline">{t("common.print")}</span>
+              </Button>
+            </Can>
+            <Can permission="collection.update">
+              <Button
+                type="button"
+                variant="primary"
+                size="sm"
+                icon={<Plus className="w-3.5 h-3.5" />}
+                onClick={() => setIsAddSongsModalOpen(true)}
+              >
+                {t("collectionsPage.addSongs")}
+              </Button>
+            </Can>
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setIsHeaderMenuOpen((v) => !v)}
+                className="p-2 min-h-10 min-w-10 inline-flex items-center justify-center rounded-[var(--radius-md)] border border-m3-border bg-m3-card text-m3-secondary hover:text-m3-text hover:bg-m3-hover transition-colors cursor-pointer"
+                title={t("explorer.moreOptions")}
+              >
+                <MoreHorizontal className="w-4 h-4" />
+              </button>
+              {isHeaderMenuOpen && (
+                <div className="absolute right-0 top-full mt-2 w-52 bg-m3-card border border-m3-border rounded-[var(--radius-xl)] shadow-[var(--shadow-lg)] z-30 p-1.5 space-y-0.5 animate-in fade-in slide-in-from-top-2 duration-150">
+                  <Can permission="export.pdf">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsHeaderMenuOpen(false);
+                        void printCollection(collection, songsInCollection);
+                      }}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-m3-text hover:bg-m3-hover rounded-[var(--radius-md)] transition-colors cursor-pointer text-left"
+                    >
+                      <Printer className="w-3.5 h-3.5 text-m3-secondary" />
+                      {t("print.buttons.printCollection")}
+                    </button>
+                  </Can>
+                  <Can permission="collection.update">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsHeaderMenuOpen(false);
+                        setIsEditModalOpen(true);
+                      }}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-m3-text hover:bg-m3-hover rounded-[var(--radius-md)] transition-colors cursor-pointer text-left"
+                    >
+                      <Edit2 className="w-3.5 h-3.5 text-m3-primary" />
+                      {t("collectionsPage.editCollection")}
+                    </button>
+                  </Can>
+                  <Can permission="collection.update">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsHeaderMenuOpen(false);
+                        setIsAddSongsModalOpen(true);
+                      }}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-m3-text hover:bg-m3-hover rounded-[var(--radius-md)] transition-colors cursor-pointer text-left"
+                    >
+                      <Plus className="w-3.5 h-3.5 text-emerald-500" />
+                      {t("collectionsPage.addSongs")}
+                    </button>
+                  </Can>
+                  <Can permission="collection.delete">
+                    <div className="my-1 h-px bg-m3-border mx-1" />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsHeaderMenuOpen(false);
+                        setIsDeleteDialogOpen(true);
+                      }}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-m3-danger hover:bg-m3-danger/10 rounded-[var(--radius-md)] transition-colors cursor-pointer text-left"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      {t("collectionsPage.deleteTitle")}
+                    </button>
+                  </Can>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
 
       <div className="flex-1 px-4 sm:px-6 py-4">
         {paginatedSongs.length === 0 ? (
-          /* Empty / No-results state */
-          <div
-            className={`mt-4 rounded-3xl border-2 border-dashed flex flex-col items-center justify-center gap-4 py-16 px-8 text-center transition-all ${
-              !isFiltering && canUpdateCollection
-                ? "border-slate-200 dark:border-slate-700/70 hover:border-m3-primary/40 hover:bg-slate-50/80 dark:hover:bg-slate-800/20 cursor-pointer group"
-                : "border-slate-200 dark:border-slate-700/50"
-            }`}
-            onClick={() =>
-              !isFiltering &&
-              canUpdateCollection &&
-              setIsAddSongsModalOpen(true)
+          <EmptyState
+            icon={<Music2 className="w-8 h-8" />}
+            title={
+              songsInCollection.length === 0
+                ? t("collectionsPage.emptyTitle")
+                : t("collectionsPage.noSearchResultsTitle")
             }
-          >
-            <div className="w-14 h-14 rounded-2xl bg-slate-100 dark:bg-slate-800 group-hover:bg-m3-primary/10 flex items-center justify-center transition-colors">
-              <Music2 className="w-7 h-7 text-slate-400 dark:text-slate-500 group-hover:text-m3-primary transition-colors" />
-            </div>
-            <div>
-              <p className="text-sm font-bold text-slate-700 dark:text-slate-300">
-                {songsInCollection.length === 0
-                  ? t("collectionsPage.emptyTitle")
-                  : t("collectionsPage.noSearchResultsTitle")}
-              </p>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-xs">
-                {songsInCollection.length === 0
-                  ? t("collectionsPage.emptyDesc")
-                  : t("collectionsPage.noSearchResultsDesc", {
-                      query: searchQuery,
-                    })}
-              </p>
-            </div>
-            {!isFiltering && (
-              <Can permission="collection.update">
-                <Button
-                  variant="primary"
-                  size="sm"
-                  icon={<Plus className="w-4 h-4" />}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setIsAddSongsModalOpen(true);
-                  }}
-                >
-                  {t("collectionsPage.addSongs")}
-                </Button>
-              </Can>
-            )}
-          </div>
+            description={
+              songsInCollection.length === 0
+                ? t("collectionsPage.emptyDesc")
+                : t("collectionsPage.noSearchResultsDesc", {
+                    query: searchQuery,
+                  })
+            }
+            actionLabel={
+              !isFiltering && canUpdateCollection
+                ? t("collectionsPage.addSongs")
+                : undefined
+            }
+            onAction={
+              !isFiltering && canUpdateCollection
+                ? () => setIsAddSongsModalOpen(true)
+                : undefined
+            }
+          />
         ) : (
           /* Song table */
-          <div className="bg-m3-card border border-m3-border rounded-3xl shadow-sm overflow-hidden flex flex-col transition-all">
+          <div className="bg-m3-card border border-m3-border rounded-[var(--radius-xl)] shadow-sm overflow-hidden flex flex-col transition-all">
             {/* Column headers */}
             <div className="grid grid-cols-[2rem_1fr_auto] sm:grid-cols-[2rem_1fr_auto_6.5rem] gap-3 items-center px-6 py-3.5 border-b border-m3-border bg-m3-sidebar/40">
-              <span className="text-[10px] font-black text-m3-secondary uppercase tracking-[0.2em] text-center">
-                #
-              </span>
-              <span className="text-[10px] font-black text-m3-secondary uppercase tracking-[0.2em]">
-                {t("songsPage.titlePath")}
-              </span>
-              <span className="hidden sm:block text-[10px] font-black text-m3-secondary uppercase tracking-[0.2em] text-right">
+              <span className="text-label text-center">#</span>
+              <span className="text-label">{t("songsPage.titlePath")}</span>
+              <span className="hidden sm:block text-label text-right">
                 {t("songsPage.tags")}
               </span>
-              <span className="text-[10px] font-black text-m3-secondary uppercase tracking-[0.2em] text-right">
+              <span className="text-label text-right">
                 {t("songsPage.actions")}
               </span>
             </div>
 
-            <div className="divide-y divide-m3-border/30 text-[13px] font-bold">
+            <div className="divide-y divide-m3-border/30 text-sm font-semibold">
               {paginatedSongs.map((song, index) => {
                 const globalIndex =
                   (currentPage - 1) * itemsPerPage + index + 1;
@@ -437,45 +391,29 @@ export const CollectionDetailPage: React.FC = () => {
                   ?.match(/\{key:\s*([^}]+)\}/i)?.[1]
                   ?.trim();
                 const isMenuOpen = activeSongMenuId === song.id;
-                const isHovered = hoveredSongId === song.id;
 
                 return (
                   <div
                     key={song.id}
-                    onMouseEnter={() => setHoveredSongId(song.id)}
-                    onMouseLeave={() => setHoveredSongId(null)}
-                    className={`grid grid-cols-[2rem_1fr_auto] sm:grid-cols-[2rem_1fr_auto_6.5rem] gap-3 items-center px-6 py-3.5 transition-all select-none cursor-pointer ${
-                      isHovered ? "bg-m3-hover/50 text-m3-text" : "text-m3-text"
-                    }`}
+                    className="grid grid-cols-[2rem_1fr_auto] sm:grid-cols-[2rem_1fr_auto_6.5rem] gap-3 items-center px-6 py-3.5 transition-colors select-none cursor-pointer text-m3-text hover:bg-m3-hover/50"
                   >
-                    {/* Index / Play icon on hover */}
                     <span
-                      className="text-center"
+                      className="text-center text-caption tabular-nums"
                       onClick={() => navigate(`${slugPrefix}/songs/${song.id}`)}
                     >
-                      {isHovered ? (
-                        <Music2 className="w-3.5 h-3.5 mx-auto text-m3-primary" />
-                      ) : (
-                        <span className="text-[11px] text-m3-secondary opacity-70 font-black uppercase tracking-tighter">
-                          {globalIndex}
-                        </span>
-                      )}
+                      {globalIndex}
                     </span>
 
-                    {/* Title + Artist */}
                     <div
                       className="flex flex-col min-w-0"
                       onClick={() => navigate(`${slugPrefix}/songs/${song.id}`)}
                     >
-                      <span className="truncate font-bold group-hover:translate-x-1 transition-transform">
-                        {song.title}
-                      </span>
-                      <span className="text-[10px] text-m3-secondary font-black uppercase tracking-widest opacity-60 mt-0.5 truncate">
+                      <span className="truncate font-semibold">{song.title}</span>
+                      <span className="text-caption mt-0.5 truncate">
                         {song.artist || "—"}
                       </span>
                     </div>
 
-                    {/* Tags + Key (desktop) */}
                     <div className="hidden sm:flex items-center gap-1.5 flex-wrap justify-end">
                       {keyMatch && (
                         <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 border border-amber-200/60 dark:border-amber-800/40">
@@ -485,49 +423,43 @@ export const CollectionDetailPage: React.FC = () => {
                       {song.tags?.slice(0, 2).map((tag) => (
                         <span
                           key={tag}
-                          className="text-[10px] font-medium px-1.5 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700"
+                          className="text-[10px] font-medium px-1.5 py-0.5 rounded-md bg-m3-sidebar text-m3-secondary border border-m3-border"
                         >
                           {tag}
                         </span>
                       ))}
                       {(song.tags?.length ?? 0) > 2 && (
-                        <span className="text-[10px] text-slate-400 dark:text-slate-500">
+                        <span className="text-caption">
                           +{(song.tags?.length ?? 0) - 2}
                         </span>
                       )}
                     </div>
 
-                    {/* Row actions */}
                     <div
                       className="flex items-center justify-end gap-1"
                       onClick={(e) => e.stopPropagation()}
                     >
-                      {isHovered && !isMenuOpen && (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          navigate(`${slugPrefix}/songs/${song.id}`)
+                        }
+                        className="p-1.5 text-m3-secondary hover:text-m3-primary hover:bg-m3-primary/10 rounded-[var(--radius-md)] cursor-pointer transition-colors"
+                        title={t("collectionsPage.viewSong")}
+                      >
+                        <ExternalLink className="w-3.5 h-3.5" />
+                      </button>
+                      <Can permission="collection.update">
                         <button
                           type="button"
-                          onClick={() =>
-                            navigate(`${slugPrefix}/songs/${song.id}`)
-                          }
-                          className="p-1.5 text-m3-secondary hover:text-m3-primary hover:bg-m3-primary/10 rounded-xl cursor-pointer transition-all"
-                          title={t("collectionsPage.viewSong")}
+                          onClick={() => setSongToRemove(song)}
+                          className="p-1.5 text-m3-secondary hover:text-m3-danger hover:bg-m3-danger/10 rounded-[var(--radius-md)] cursor-pointer transition-colors"
+                          title={t("collectionsPage.removeFromCollection")}
                         >
-                          <ExternalLink className="w-3.5 h-3.5" />
+                          <X className="w-3.5 h-3.5" />
                         </button>
-                      )}
-                      {isHovered && !isMenuOpen && (
-                        <Can permission="collection.update">
-                          <button
-                            type="button"
-                            onClick={() => setSongToRemove(song)}
-                            className="p-1.5 text-m3-secondary hover:text-rose-500 hover:bg-rose-500/10 rounded-xl cursor-pointer transition-all"
-                            title={t("collectionsPage.removeFromCollection")}
-                          >
-                            <X className="w-3.5 h-3.5" />
-                          </button>
-                        </Can>
-                      )}
+                      </Can>
 
-                      {/* Three-dot menu */}
                       <div className="relative">
                         <button
                           type="button"
@@ -535,12 +467,10 @@ export const CollectionDetailPage: React.FC = () => {
                             e.stopPropagation();
                             setActiveSongMenuId(isMenuOpen ? null : song.id);
                           }}
-                          className={`p-1.5 rounded-xl transition-all cursor-pointer ${
+                          className={`p-1.5 rounded-[var(--radius-md)] transition-colors cursor-pointer ${
                             isMenuOpen
                               ? "bg-m3-primary/10 text-m3-primary"
-                              : isHovered
-                                ? "text-m3-secondary hover:text-m3-text hover:bg-m3-hover"
-                                : "text-transparent"
+                              : "text-m3-secondary hover:text-m3-text hover:bg-m3-hover"
                           }`}
                           title={t("explorer.moreOptions")}
                         >
@@ -548,16 +478,16 @@ export const CollectionDetailPage: React.FC = () => {
                         </button>
 
                         {isMenuOpen && (
-                          <div className="absolute right-0 top-full mt-1 w-48 bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-700/80 rounded-2xl shadow-2xl z-30 p-1.5 space-y-0.5 animate-in fade-in slide-in-from-top-2 duration-150">
+                          <div className="absolute right-0 top-full mt-1 w-48 bg-m3-card border border-m3-border rounded-[var(--radius-xl)] shadow-[var(--shadow-lg)] z-30 p-1.5 space-y-0.5 animate-in fade-in slide-in-from-top-2 duration-150">
                             <button
                               type="button"
                               onClick={() => {
                                 setActiveSongMenuId(null);
                                 navigate(`${slugPrefix}/songs/${song.id}`);
                               }}
-                              className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors cursor-pointer text-left"
+                              className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-m3-text hover:bg-m3-hover rounded-[var(--radius-md)] transition-colors cursor-pointer text-left"
                             >
-                              <Music2 className="w-3.5 h-3.5 text-sky-500" />
+                              <Music2 className="w-3.5 h-3.5 text-m3-primary" />
                               {t("collectionsPage.viewSong")}
                             </button>
                             {song.tags && song.tags.length > 0 && (
@@ -565,7 +495,7 @@ export const CollectionDetailPage: React.FC = () => {
                                 {song.tags.map((tag) => (
                                   <span
                                     key={tag}
-                                    className="inline-flex items-center gap-1 text-[10px] font-medium px-1.5 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400"
+                                    className="inline-flex items-center gap-1 text-[10px] font-medium px-1.5 py-0.5 rounded-md bg-m3-sidebar text-m3-secondary"
                                   >
                                     <Tag className="w-2.5 h-2.5" />
                                     {tag}
@@ -573,7 +503,7 @@ export const CollectionDetailPage: React.FC = () => {
                                 ))}
                               </div>
                             )}
-                            <div className="h-px bg-slate-100 dark:bg-slate-800 mx-1" />
+                            <div className="h-px bg-m3-border mx-1" />
                             <Can permission="collection.update">
                               <button
                                 type="button"
@@ -581,7 +511,7 @@ export const CollectionDetailPage: React.FC = () => {
                                   setActiveSongMenuId(null);
                                   setSongToRemove(song);
                                 }}
-                                className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-xl transition-colors cursor-pointer text-left"
+                                className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-m3-danger hover:bg-m3-danger/10 rounded-[var(--radius-md)] transition-colors cursor-pointer text-left"
                               >
                                 <X className="w-3.5 h-3.5" />
                                 {t("collectionsPage.removeFromCollection")}
