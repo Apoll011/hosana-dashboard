@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Button, Input, Modal } from "@/src/components/common";
+import { Button, Input, Modal, PageHeader } from "@/src/components/common";
 import { useI18n } from "@/src/lib/i18n";
 import {
   ArrowLeft,
@@ -332,14 +332,14 @@ export const TeamsPage: React.FC = () => {
         <div className="flex items-center justify-between">
           <button
             onClick={() => setSelectedTeam(null)}
-            className="inline-flex items-center text-sm font-bold text-slate-500 hover:text-slate-900 dark:hover:text-slate-100 transition-colors cursor-pointer"
+            className="inline-flex items-center text-sm font-bold text-m3-secondary hover:text-m3-text transition-colors cursor-pointer"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             {t("teamsPage.backToTeams")}
           </button>
 
           <div className="flex items-center gap-2">
-            <span className="text-xs bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400 font-bold px-3 py-1 rounded-full flex items-center gap-1">
+            <span className="text-caption bg-m3-sidebar text-m3-secondary border border-m3-border px-2.5 py-1 rounded-[var(--radius-md)] flex items-center gap-1">
               <Shield className="w-3.5 h-3.5" />
               {isLeaderOfTeam
                 ? t("teamsPage.teamManagerBadge")
@@ -348,34 +348,31 @@ export const TeamsPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Team Header Banner */}
-        <div className="bg-linear-to-r from-sky-600 to-indigo-700 rounded-3xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden">
-          <div className="relative z-10">
-            <span className="text-xs font-black uppercase tracking-widest text-sky-200 bg-white/10 px-3 py-1 rounded-full">
-              {selectedTeam.slug}
-            </span>
-            <h1 className="text-2xl sm:text-3xl font-black mt-2 mb-1">
-              {selectedTeam.name}
-            </h1>
-            <p className="text-sky-100 text-sm max-w-xl">
-              {selectedTeam.description || t("teamsPage.noDesc")}
-            </p>
+        <div className="bg-m3-card border border-m3-border rounded-[var(--radius-xl)] p-6 sm:p-8 shadow-[var(--shadow-sm)]">
+          <span className="text-label text-m3-secondary bg-m3-sidebar px-2.5 py-1 rounded-[var(--radius-md)]">
+            {selectedTeam.slug}
+          </span>
+          <h1 className="text-display text-m3-text mt-3 mb-1">
+            {selectedTeam.name}
+          </h1>
+          <p className="text-muted max-w-xl">
+            {selectedTeam.description || t("teamsPage.noDesc")}
+          </p>
 
-            <div className="flex flex-wrap gap-4 mt-6 text-xs font-bold text-sky-100">
-              <div className="flex items-center gap-1.5 bg-black/20 px-3 py-1.5 rounded-xl">
-                <Crown className="w-4 h-4 text-amber-300" />
-                <span>
-                  {t("teamsPage.leaderLabel", {
-                    name: selectedTeam.leaderName || t("teamsPage.notAssigned"),
-                  })}
-                </span>
-              </div>
-              <div className="flex items-center gap-1.5 bg-black/20 px-3 py-1.5 rounded-xl">
-                <Users className="w-4 h-4 text-sky-200" />
-                <span>
-                  {t("teamsPage.membersCount", { count: members.length })}
-                </span>
-              </div>
+          <div className="flex flex-wrap gap-3 mt-5 text-caption">
+            <div className="flex items-center gap-1.5 bg-m3-sidebar border border-m3-border px-3 py-1.5 rounded-[var(--radius-md)]">
+              <Crown className="w-4 h-4 text-amber-500" />
+              <span>
+                {t("teamsPage.leaderLabel", {
+                  name: selectedTeam.leaderName || t("teamsPage.notAssigned"),
+                })}
+              </span>
+            </div>
+            <div className="flex items-center gap-1.5 bg-m3-sidebar border border-m3-border px-3 py-1.5 rounded-[var(--radius-md)]">
+              <Users className="w-4 h-4 text-m3-primary" />
+              <span>
+                {t("teamsPage.membersCount", { count: members.length })}
+              </span>
             </div>
           </div>
         </div>
@@ -384,7 +381,7 @@ export const TeamsPage: React.FC = () => {
           {/* Members List (TEAM-03 & TEAM-04) */}
           <div className="lg:col-span-2 space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-black text-slate-900 dark:text-slate-100 flex items-center gap-2">
+              <h2 className="text-title text-m3-text flex items-center gap-2">
                 <Users className="w-5 h-5 text-m3-primary" />
                 {t("teamsPage.teamMembersTitle")}
               </h2>
@@ -401,29 +398,29 @@ export const TeamsPage: React.FC = () => {
               )}
             </div>
 
-            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl divide-y divide-slate-100 dark:divide-slate-800 overflow-hidden shadow-xs">
+            <div className="bg-m3-card border border-m3-border rounded-[var(--radius-xl)] divide-y divide-m3-border/60 overflow-hidden shadow-[var(--shadow-sm)]">
               {members.map((member) => (
                 <div
                   key={member.id}
-                  className="p-4 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors"
+                  className="p-4 flex items-center justify-between hover:bg-m3-hover transition-colors"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center font-bold text-slate-700 dark:text-slate-300 text-sm">
+                    <div className="w-10 h-10 rounded-full bg-m3-sidebar flex items-center justify-center font-bold text-m3-text text-sm">
                       {member.name.charAt(0)}
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="font-bold text-slate-900 dark:text-slate-100 text-sm">
+                        <span className="font-bold text-m3-text text-sm">
                           {member.name}
                         </span>
                         {member.role === "leader" && (
-                          <span className="text-[10px] font-black uppercase tracking-wider bg-amber-100 text-amber-700 dark:bg-amber-950/60 dark:text-amber-400 px-2 py-0.5 rounded-md flex items-center gap-1">
+                          <span className="text-label bg-amber-100 text-amber-700 dark:bg-amber-950/60 dark:text-amber-400 px-2 py-0.5 rounded-md flex items-center gap-1">
                             <Crown className="w-3 h-3" />
                             {t("settings.roles.teamLeader")}
                           </span>
                         )}
                       </div>
-                      <p className="text-xs text-slate-500">{member.email}</p>
+                      <p className="text-xs text-m3-secondary">{member.email}</p>
                     </div>
                   </div>
 
@@ -450,7 +447,7 @@ export const TeamsPage: React.FC = () => {
                             handleRemoveMember(selectedTeam.id, member.id)
                           }
                           title={t("teamsPage.removeFromTeamTitle")}
-                          className="p-1.5 text-slate-400 hover:text-red-500 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors cursor-pointer"
+                          className="p-1.5 text-m3-secondary hover:text-m3-danger rounded-lg hover:bg-m3-danger/10 transition-colors cursor-pointer"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -464,25 +461,25 @@ export const TeamsPage: React.FC = () => {
 
           {/* Team Permissions & Settings (TEAM-05) */}
           <div className="space-y-4">
-            <h2 className="text-lg font-black text-slate-900 dark:text-slate-100 flex items-center gap-2">
+            <h2 className="text-title text-m3-text flex items-center gap-2">
               <Shield className="w-5 h-5 text-m3-primary" />
               {t("teamsPage.teamPermissionsTitle")}
             </h2>
 
-            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 space-y-4 shadow-xs">
-              <p className="text-xs text-slate-500 leading-relaxed">
+            <div className="bg-m3-card border border-m3-border rounded-[var(--radius-xl)] p-5 space-y-4 shadow-[var(--shadow-sm)]">
+              <p className="text-xs text-m3-secondary leading-relaxed">
                 {t("teamsPage.teamPermissionsDesc")}
               </p>
 
               <div className="space-y-3">
-                <label className="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 cursor-pointer">
+                <label className="flex items-center justify-between p-3 rounded-xl bg-m3-sidebar border border-m3-border/60 cursor-pointer">
                   <div className="flex items-center gap-2.5">
-                    <Music className="w-4 h-4 text-sky-500" />
+                    <Music className="w-4 h-4 text-m3-primary" />
                     <div>
-                      <p className="text-xs font-bold text-slate-900 dark:text-slate-100">
+                      <p className="text-xs font-bold text-m3-text">
                         {t("teamsPage.manageSongs")}
                       </p>
-                      <p className="text-[10px] text-slate-500">
+                      <p className="text-[10px] text-m3-secondary">
                         {t("teamsPage.manageSongsDesc")}
                       </p>
                     </div>
@@ -496,14 +493,14 @@ export const TeamsPage: React.FC = () => {
                   />
                 </label>
 
-                <label className="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 cursor-pointer">
+                <label className="flex items-center justify-between p-3 rounded-xl bg-m3-sidebar border border-m3-border/60 cursor-pointer">
                   <div className="flex items-center gap-2.5">
                     <Calendar className="w-4 h-4 text-emerald-500" />
                     <div>
-                      <p className="text-xs font-bold text-slate-900 dark:text-slate-100">
+                      <p className="text-xs font-bold text-m3-text">
                         {t("teamsPage.manageServices")}
                       </p>
-                      <p className="text-[10px] text-slate-500">
+                      <p className="text-[10px] text-m3-secondary">
                         {t("teamsPage.manageServicesDesc")}
                       </p>
                     </div>
@@ -519,14 +516,14 @@ export const TeamsPage: React.FC = () => {
                   />
                 </label>
 
-                <label className="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 cursor-pointer">
+                <label className="flex items-center justify-between p-3 rounded-xl bg-m3-sidebar border border-m3-border/60 cursor-pointer">
                   <div className="flex items-center gap-2.5">
                     <UserPlus className="w-4 h-4 text-amber-500" />
                     <div>
-                      <p className="text-xs font-bold text-slate-900 dark:text-slate-100">
+                      <p className="text-xs font-bold text-m3-text">
                         {t("teamsPage.inviteMembers")}
                       </p>
-                      <p className="text-[10px] text-slate-500">
+                      <p className="text-[10px] text-m3-secondary">
                         {t("teamsPage.inviteMembersDesc")}
                       </p>
                     </div>
@@ -569,7 +566,7 @@ export const TeamsPage: React.FC = () => {
               />
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                <label className="block text-xs font-bold text-m3-text mb-1">
                   {t("teamsPage.teamRoleLabel")}
                 </label>
                 <select
@@ -577,7 +574,7 @@ export const TeamsPage: React.FC = () => {
                   onChange={(e) =>
                     setNewMemberRole(e.target.value as "leader" | "member")
                   }
-                  className="w-full h-11 px-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-sm font-semibold"
+                  className="w-full h-11 px-3 bg-m3-sidebar border border-m3-border rounded-xl text-sm font-semibold"
                 >
                   <option value="member">{t("settings.roles.member")}</option>
                   {isOrgAdminOrOwner && (
@@ -609,43 +606,36 @@ export const TeamsPage: React.FC = () => {
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-6xl mx-auto space-y-6 animate-in fade-in duration-200">
-      {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-black text-slate-900 dark:text-slate-100 flex items-center gap-2">
-            <Users className="w-7 h-7 text-m3-primary" />
-            {t("teamsPage.title")}
-          </h1>
-          <p className="text-slate-500 text-xs sm:text-sm mt-0.5">
-            {t("teamsPage.desc")}
-          </p>
-        </div>
-
-        {isOrgAdminOrOwner && (
-          <Button
-            variant="primary"
-            onClick={() => setIsCreateModalOpen(true)}
-            icon={<Plus className="w-4 h-4" />}
-          >
-            {t("teamsPage.newTeam")}
-          </Button>
-        )}
-      </div>
+      <PageHeader
+        title={t("teamsPage.title")}
+        description={t("teamsPage.desc")}
+        actions={
+          isOrgAdminOrOwner ? (
+            <Button
+              variant="primary"
+              onClick={() => setIsCreateModalOpen(true)}
+              icon={<Plus className="w-4 h-4" />}
+            >
+              {t("teamsPage.newTeam")}
+            </Button>
+          ) : undefined
+        }
+      />
 
       {/* Search & Stats */}
-      <div className="flex flex-col sm:flex-row gap-3 items-center justify-between bg-white dark:bg-slate-900 p-4 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xs">
+      <div className="flex flex-col sm:flex-row gap-3 items-center justify-between bg-m3-card p-4 border border-m3-border rounded-[var(--radius-xl)] shadow-[var(--shadow-sm)]">
         <div className="relative w-full sm:w-80">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3.5" />
+          <Search className="w-4 h-4 text-m3-secondary absolute left-3 top-3.5" />
           <input
             type="text"
             placeholder={t("teamsPage.searchPlaceholder")}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 rounded-xl text-xs font-semibold focus:outline-none focus:border-m3-primary"
+            className="w-full pl-9 pr-4 py-2 bg-m3-sidebar border border-m3-border rounded-xl text-xs font-semibold focus:outline-none focus:border-m3-primary"
           />
         </div>
 
-        <div className="flex items-center gap-4 text-xs font-bold text-slate-500">
+        <div className="flex items-center gap-4 text-xs font-bold text-m3-secondary">
           <span>{t("teamsPage.totalTeams", { count: teams.length })}</span>
         </div>
       </div>
@@ -656,7 +646,7 @@ export const TeamsPage: React.FC = () => {
           <div
             key={team.id}
             onClick={() => setSelectedTeam(team)}
-            className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 hover:border-m3-primary/50 hover:shadow-lg transition-all cursor-pointer group flex flex-col justify-between relative"
+            className="bg-m3-card border border-m3-border rounded-[var(--radius-xl)] p-5 hover:border-m3-primary/50 hover:shadow-[var(--shadow-md)] transition-colors cursor-pointer group flex flex-col justify-between relative"
           >
             <div>
               <div className="flex items-start justify-between gap-2 mb-3">
@@ -664,22 +654,22 @@ export const TeamsPage: React.FC = () => {
                   <Users className="w-5 h-5" />
                 </div>
 
-                <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-md">
+                <span className="text-label text-m3-secondary bg-m3-sidebar px-2 py-1 rounded-md">
                   {team.slug}
                 </span>
               </div>
 
-              <h3 className="font-bold text-slate-900 dark:text-slate-100 text-base group-hover:text-m3-primary transition-colors">
+              <h3 className="font-bold text-m3-text text-base group-hover:text-m3-primary transition-colors">
                 {team.name}
               </h3>
 
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2 leading-relaxed">
+              <p className="text-xs text-m3-secondary mt-1 line-clamp-2 leading-relaxed">
                 {team.description || t("teamsPage.noDesc")}
               </p>
             </div>
 
-            <div className="mt-5 pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs">
-              <div className="flex items-center gap-1.5 text-slate-600 dark:text-slate-400 font-semibold">
+            <div className="mt-5 pt-4 border-t border-m3-border/60 flex items-center justify-between text-xs">
+              <div className="flex items-center gap-1.5 text-m3-secondary font-semibold">
                 <Crown className="w-3.5 h-3.5 text-amber-500" />
                 <span className="truncate max-w-30">
                   {team.leaderName || t("teamsPage.noLeader")}
@@ -687,7 +677,7 @@ export const TeamsPage: React.FC = () => {
               </div>
 
               <div className="flex items-center gap-2">
-                <span className="font-bold text-m3-primary bg-sky-50 dark:bg-sky-950/40 px-2 py-0.5 rounded-md">
+                <span className="font-bold text-m3-primary bg-m3-primary/10 px-2 py-0.5 rounded-md">
                   {t("teamsPage.membersCount", { count: team.membersCount })}
                 </span>
 
@@ -698,7 +688,7 @@ export const TeamsPage: React.FC = () => {
                       handleDeleteTeam(team.id);
                     }}
                     title={t("teamsPage.removeTeamTitle")}
-                    className="p-1 text-slate-400 hover:text-red-500 rounded transition-colors cursor-pointer"
+                    className="p-1 text-m3-secondary hover:text-m3-danger rounded transition-colors cursor-pointer"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
@@ -726,14 +716,14 @@ export const TeamsPage: React.FC = () => {
             />
 
             <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+              <label className="block text-xs font-bold text-m3-text mb-1">
                 {t("teamsPage.descLabel")}
               </label>
               <textarea
                 placeholder={t("teamsPage.descPlaceholder")}
                 value={newTeamDesc}
                 onChange={(e) => setNewTeamDesc(e.target.value)}
-                className="w-full h-20 p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-medium focus:outline-none focus:border-m3-primary resize-none"
+                className="w-full h-20 p-3 bg-m3-sidebar border border-m3-border rounded-xl text-xs font-medium focus:outline-none focus:border-m3-primary resize-none"
               />
             </div>
 

@@ -64,10 +64,10 @@ const MoveFolderTreeItem: React.FC<{
     <div className="flex flex-col w-full">
       <label
         style={{ paddingLeft: `${12 + node.level * 16}px` }}
-        className={`flex items-center gap-2.5 p-2.5 border rounded-xl transition-colors cursor-pointer ${
+        className={`flex items-center gap-2.5 p-2.5 border rounded-[var(--radius-md)] transition-colors cursor-pointer ${
           isSelected
-            ? "bg-sky-50 dark:bg-sky-950/60 border-sky-300 dark:border-sky-800"
-            : "border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50"
+            ? "bg-m3-primary/10 border-m3-primary/40"
+            : "border-m3-border hover:bg-m3-hover"
         }`}
       >
         <input
@@ -75,7 +75,7 @@ const MoveFolderTreeItem: React.FC<{
           name="moveSongTreeRadio"
           checked={isSelected}
           onChange={() => onSelect(node.folder.id)}
-          className="text-[#0284c7] focus:ring-[#0284c7]"
+          className="text-m3-primary focus:ring-m3-primary"
         />
 
         {hasChildren ? (
@@ -196,17 +196,17 @@ export const MoveSongModal: React.FC<MoveSongModalProps> = ({
         )}
 
         <div className="flex flex-col gap-2 max-h-72 overflow-y-auto pr-1">
-          <label className="flex items-center gap-3 p-3 border border-slate-200 dark:border-slate-800 rounded-xl cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50">
+          <label className="flex items-center gap-3 p-3 border border-m3-border rounded-[var(--radius-md)] cursor-pointer hover:bg-m3-hover">
             <input
               type="radio"
               name="moveSongTreeRadio"
               value="root"
               checked={selectedFolderId === null}
               onChange={() => setSelectedFolderId(null)}
-              className="text-[#0284c7] focus:ring-[#0284c7]"
+              className="text-m3-primary focus:ring-m3-primary"
             />
-            <div className="flex items-center gap-2 text-xs font-bold text-slate-900 dark:text-slate-100">
-              <HardDrive className="w-4 h-4 text-[#0284c7]" />
+            <div className="flex items-center gap-2 text-xs font-bold text-m3-text">
+              <HardDrive className="w-4 h-4 text-m3-primary" />
               <span>{t("modals.rootLevel")}</span>
             </div>
           </label>

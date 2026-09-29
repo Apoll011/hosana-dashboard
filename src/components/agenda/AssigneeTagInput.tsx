@@ -163,18 +163,18 @@ export const AssigneeTagInput: React.FC<AssigneeTagInputProps> = ({
         {assignees.map((a) => (
           <span
             key={a.id}
-            className="flex items-center gap-1.5 pl-1 pr-2 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-200"
+            className="flex items-center gap-1.5 pl-1 pr-2 py-1 rounded-[var(--radius-pill)] bg-m3-sidebar text-xs font-semibold text-m3-text"
           >
             <Avatar assignee={a} className="w-5 h-5 text-[9px]" />
             {a.name}
             {a.memberId && (
-              <span className="text-[9px] font-black uppercase tracking-wide text-sky-600 dark:text-sky-400 bg-sky-50 dark:bg-sky-950/50 border border-sky-200 dark:border-sky-900/60 px-1.5 py-0.5 rounded-full">
+              <span className="text-label text-m3-primary bg-m3-primary/10 border border-m3-primary/20 px-1.5 py-0.5 rounded-[var(--radius-pill)]">
                 {t("agenda.memberBadge")}
               </span>
             )}
             <button
               onClick={() => onChange(assignees.filter((x) => x.id !== a.id))}
-              className="text-slate-400 hover:text-rose-500 cursor-pointer"
+              className="inline-flex items-center justify-center min-h-6 min-w-6 text-m3-secondary hover:text-m3-danger cursor-pointer"
               title={t("agenda.remove")}
             >
               <X className="w-3 h-3" />
@@ -195,19 +195,19 @@ export const AssigneeTagInput: React.FC<AssigneeTagInputProps> = ({
             onFocus={() => setOpen(true)}
             onKeyDown={handleKeyDown}
             placeholder={t("agenda.assigneePlaceholder")}
-            className="flex-1 h-10 px-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-semibold focus:outline-none focus:border-[#0284c7]"
+            className="flex-1 min-h-10 px-3 bg-m3-card border border-m3-border rounded-[var(--radius-md)] text-xs font-semibold text-m3-text placeholder:text-m3-input focus:outline-none focus:ring-2 focus:ring-m3-primary/25 focus:border-m3-primary transition-colors"
           />
           <button
             type="button"
             onClick={addFromDraft}
-            className="px-3 h-10 rounded-xl border border-slate-200 dark:border-slate-800 text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-m3-hover transition-colors cursor-pointer"
+            className="px-3 min-h-10 rounded-[var(--radius-md)] border border-m3-border text-xs font-semibold text-m3-text hover:bg-m3-hover transition-colors cursor-pointer"
           >
             {t("agenda.add")}
           </button>
         </div>
 
         {open && filtered.length > 0 && (
-          <div className="absolute z-20 mt-1 w-full max-h-52 overflow-y-auto bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl p-1.5">
+          <div className="absolute z-20 mt-1 w-full max-h-52 overflow-y-auto bg-m3-card border border-m3-border rounded-[var(--radius-lg)] shadow-[var(--shadow-lg)] p-1.5">
             {filtered.map((s, i) => (
               <button
                 key={s.id}
@@ -217,17 +217,17 @@ export const AssigneeTagInput: React.FC<AssigneeTagInputProps> = ({
                   addAssignee(s);
                 }}
                 onMouseEnter={() => setHighlight(i)}
-                className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-left transition-colors cursor-pointer ${
+                className={`w-full flex items-center gap-2.5 px-2.5 py-2 min-h-10 rounded-[var(--radius-md)] text-left transition-colors cursor-pointer ${
                   i === highlight
-                    ? "bg-slate-100 dark:bg-slate-800"
-                    : "hover:bg-slate-50 dark:hover:bg-slate-800/50"
+                    ? "bg-m3-hover"
+                    : "hover:bg-m3-hover/60"
                 }`}
               >
                 <Avatar assignee={s} className="w-6 h-6 text-[10px]" />
-                <span className="flex-1 min-w-0 text-xs font-bold text-slate-800 dark:text-slate-200 truncate">
+                <span className="flex-1 min-w-0 text-xs font-semibold text-m3-text truncate">
                   {s.name}
                 </span>
-                <span className="text-[9px] font-black uppercase tracking-wide text-slate-400 shrink-0">
+                <span className="text-label shrink-0">
                   {s.memberId
                     ? t("agenda.memberBadge")
                     : t("agenda.otherEvents")}

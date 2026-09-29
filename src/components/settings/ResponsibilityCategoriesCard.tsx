@@ -138,7 +138,7 @@ export const ResponsibilityCategoriesCard: React.FC<
 
         {/* Create new category */}
         <div className="border-t border-slate-100 dark:border-slate-800 pt-5 space-y-3">
-          <p className="text-xs font-black text-slate-700 dark:text-slate-300 uppercase tracking-wide">
+          <p className="text-label text-m3-text">
             {t("settings.general.responsibilities.newLabel")}
           </p>
 
@@ -159,7 +159,7 @@ export const ResponsibilityCategoriesCard: React.FC<
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* Icon picker */}
             <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+              <label className="block text-label mb-1">
                 {t("settings.general.responsibilities.iconLabel")}
               </label>
               <div className="flex flex-wrap gap-1.5">
@@ -172,10 +172,10 @@ export const ResponsibilityCategoriesCard: React.FC<
                       type="button"
                       onClick={() => setIcon(opt)}
                       disabled={disabled}
-                      className={`w-8 h-8 rounded-lg flex items-center justify-center border transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed ${
+                      className={`inline-flex items-center justify-center min-h-10 min-w-10 rounded-[var(--radius-md)] border transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed ${
                         isSelected
-                          ? "border-[#0284c7] bg-sky-50 dark:bg-sky-950/40 text-[#0284c7]"
-                          : "border-slate-200 dark:border-slate-700 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+                          ? "border-m3-primary bg-m3-primary/10 text-m3-primary"
+                          : "border-m3-border text-m3-secondary hover:bg-m3-hover"
                       }`}
                       aria-label={opt}
                     >
@@ -188,7 +188,7 @@ export const ResponsibilityCategoriesCard: React.FC<
 
             {/* Color picker */}
             <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+              <label className="block text-label mb-1">
                 {t("settings.general.responsibilities.colorLabel")}
               </label>
               <div className="flex flex-wrap gap-1.5">
@@ -201,9 +201,9 @@ export const ResponsibilityCategoriesCard: React.FC<
                       type="button"
                       onClick={() => setColor(opt)}
                       disabled={disabled}
-                      className={`w-8 h-8 rounded-lg border-2 transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed ${colors.bg} ${
+                      className={`min-h-10 min-w-10 rounded-[var(--radius-md)] border-2 transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed ${colors.bg} ${
                         isSelected
-                          ? "border-slate-900 dark:border-white"
+                          ? "border-m3-text"
                           : "border-transparent"
                       }`}
                       aria-label={opt}

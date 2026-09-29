@@ -98,7 +98,7 @@ const RingLayout: React.FC<{ score: number; compact: boolean }> = ({
       </svg>
       {/* Label centred on top of SVG */}
       <span
-        className={`absolute font-black ${col.text} leading-none pointer-events-none`}
+        className={`absolute font-bold ${col.text} leading-none pointer-events-none`}
         style={{ fontSize }}
         aria-label={`${score}%`}
       >
@@ -132,7 +132,7 @@ const BarLayout: React.FC<{ score: number; compact: boolean }> = ({
         />
       </div>
       <span
-        className={`${compact ? "text-[9px]" : "text-[10px]"} font-black tabular-nums ${col.text} shrink-0`}
+        className={`${compact ? "text-[9px]" : "text-[10px]"} font-semibold tabular-nums ${col.text} shrink-0`}
       >
         {score}
       </span>
@@ -184,11 +184,11 @@ const BadgeLayout: React.FC<{ score: number; compact: boolean }> = ({
 
   return (
     <span
-      className={`inline-flex items-center justify-center rounded-full font-black ring-1 ${col.bg} ${col.text} ${col.ring} ${
+      className={`inline-flex items-center justify-center rounded-full font-semibold ring-1 ${col.bg} ${col.text} ${col.ring} ${
         compact
           ? "text-[9px] px-1.5 py-0.5 mt-1"
           : "text-[10px] px-2 py-0.5 mt-1.5"
-      } transition-all duration-300`}
+      } transition-colors duration-300`}
       title={`Score: ${score}`}
       aria-label={`Score ${score}`}
     >

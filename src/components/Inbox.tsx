@@ -230,9 +230,9 @@ export const InboxPanel: React.FC<InboxPanelProps> = ({
       case "service_date_changed":
       case "service_location_changed":
       case "service_updated":
-        return <Building2 className="w-4 h-4 text-sky-500" />;
+        return <Building2 className="w-4 h-4 text-m3-primary" />;
       case "organization":
-        return <Building2 className="w-4 h-4 text-sky-500" />;
+        return <Building2 className="w-4 h-4 text-m3-primary" />;
       case "team":
         return <Users className="w-4 h-4 text-emerald-500" />;
       case "security":
@@ -240,7 +240,7 @@ export const InboxPanel: React.FC<InboxPanelProps> = ({
       case "billing":
         return <CreditCard className="w-4 h-4 text-purple-500" />;
       default:
-        return <Info className="w-4 h-4 text-slate-500" />;
+        return <Info className="w-4 h-4 text-m3-secondary" />;
     }
   };
 
@@ -254,18 +254,18 @@ export const InboxPanel: React.FC<InboxPanelProps> = ({
   };
 
   return (
-    <div className="w-80 sm:w-96 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-130 animate-in fade-in zoom-in-95 duration-200">
+    <div className="w-80 sm:w-96 bg-m3-card border border-m3-border rounded-[var(--radius-xl)] shadow-[var(--shadow-lg)] overflow-hidden flex flex-col max-h-130 animate-in fade-in zoom-in-95 duration-200">
       {/* Header */}
-      <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-900/50">
+      <div className="p-4 border-b border-m3-border/60 flex items-center justify-between bg-m3-sidebar/50">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-xl bg-m3-primary/10 text-m3-primary flex items-center justify-center font-bold">
             <Bell className="w-4 h-4" />
           </div>
           <div>
-            <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
+            <h3 className="text-sm font-bold text-m3-text">
               {t("misc.inbox.title")}
             </h3>
-            <p className="text-[11px] text-slate-500 dark:text-slate-400">
+            <p className="text-[11px] text-m3-secondary">
               {t("misc.inbox.unreadCount", { count: inbox.unreadCount })}
             </p>
           </div>
@@ -287,7 +287,7 @@ export const InboxPanel: React.FC<InboxPanelProps> = ({
           {onClose && (
             <button
               onClick={onClose}
-              className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+              className="p-1.5 text-m3-secondary hover:text-m3-text rounded-lg hover:bg-m3-hover transition-colors cursor-pointer"
             >
               <X className="w-4 h-4" />
             </button>
@@ -296,13 +296,13 @@ export const InboxPanel: React.FC<InboxPanelProps> = ({
       </div>
 
       {/* Filter Tabs */}
-      <div className="flex border-b border-slate-100 dark:border-slate-800 text-xs px-2 pt-2 bg-slate-50/30 dark:bg-slate-900/30">
+      <div className="flex border-b border-m3-border/60 text-xs px-2 pt-2 bg-m3-sidebar/30">
         <button
           onClick={() => setFilter("all")}
           className={`px-3 py-1.5 font-bold rounded-t-lg transition-colors border-b-2 cursor-pointer ${
             filter === "all"
-              ? "border-m3-primary text-m3-primary bg-white dark:bg-slate-900"
-              : "border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
+              ? "border-m3-primary text-m3-primary bg-m3-card"
+              : "border-transparent text-m3-secondary hover:text-m3-text"
           }`}
         >
           {t("misc.inbox.all", { count: inbox.notifications.length })}
@@ -311,8 +311,8 @@ export const InboxPanel: React.FC<InboxPanelProps> = ({
           onClick={() => setFilter("unread")}
           className={`px-3 py-1.5 font-bold rounded-t-lg transition-colors border-b-2 cursor-pointer ${
             filter === "unread"
-              ? "border-m3-primary text-m3-primary bg-white dark:bg-slate-900"
-              : "border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
+              ? "border-m3-primary text-m3-primary bg-m3-card"
+              : "border-transparent text-m3-secondary hover:text-m3-text"
           }`}
         >
           {t("misc.inbox.unread", { count: inbox.unreadCount })}
@@ -320,15 +320,15 @@ export const InboxPanel: React.FC<InboxPanelProps> = ({
       </div>
 
       {/* List */}
-      <div className="flex-1 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800/60 custom-scrollbar">
+      <div className="flex-1 overflow-y-auto divide-y divide-m3-border/60 custom-scrollbar">
         {inbox.isLoading && inbox.notifications.length === 0 ? (
-          <div className="p-8 text-center text-slate-400 dark:text-slate-600">
+          <div className="p-8 text-center text-m3-secondary">
             <p className="text-xs font-semibold animate-pulse">
               {t("misc.inbox.loading")}
             </p>
           </div>
         ) : filteredNotifications.length === 0 ? (
-          <div className="p-8 text-center text-slate-400 dark:text-slate-600">
+          <div className="p-8 text-center text-m3-secondary">
             <p className="text-xs font-semibold">{t("misc.inbox.empty")}</p>
           </div>
         ) : (
@@ -348,17 +348,17 @@ export const InboxPanel: React.FC<InboxPanelProps> = ({
                   }}
                   className={`p-3 transition-colors cursor-pointer flex gap-3 items-start group ${
                     !notif.read
-                      ? "bg-sky-50/40 dark:bg-sky-950/20 hover:bg-sky-50 dark:hover:bg-sky-950/40"
-                      : "hover:bg-slate-50 dark:hover:bg-slate-800/40"
+                      ? "bg-m3-primary/5 hover:bg-m3-hover"
+                      : "hover:bg-m3-hover"
                   }`}
                 >
-                  <div className="p-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700/60 shadow-xs shrink-0 mt-0.5">
+                  <div className="p-2 rounded-xl bg-m3-card border border-m3-border/60 dark:border-m3-border/60 shadow-[var(--shadow-sm)] shrink-0 mt-0.5">
                     {getIcon(notif.type)}
                   </div>
 
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2 mb-0.5">
-                      <span className="text-xs font-bold text-slate-900 dark:text-slate-100 truncate">
+                      <span className="text-xs font-bold text-m3-text truncate">
                         {notif.title}
                       </span>
                       {!notif.read && (
@@ -366,11 +366,11 @@ export const InboxPanel: React.FC<InboxPanelProps> = ({
                       )}
                     </div>
                     {bodyContent && (
-                      <p className="text-[11px] text-slate-600 dark:text-slate-400 line-clamp-2 leading-relaxed">
+                      <p className="text-[11px] text-m3-secondary line-clamp-2 leading-relaxed">
                         {bodyContent}
                       </p>
                     )}
-                    <span className="text-[10px] text-slate-400 dark:text-slate-500 mt-1.5 block">
+                    <span className="text-[10px] text-m3-secondary mt-1.5 block">
                       {formatDate(notif.createdAt)}
                     </span>
                   </div>
@@ -393,24 +393,24 @@ export const InboxPanel: React.FC<InboxPanelProps> = ({
 
       {/* Selected Details Modal/Drawer */}
       {selectedNotif && (
-        <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900">
+        <div className="p-4 border-t border-m3-border bg-m3-sidebar">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-bold text-m3-primary flex items-center gap-1 uppercase tracking-wider">
+            <span className="text-label text-m3-primary flex items-center gap-1">
               {getIcon(selectedNotif.type)}
               {selectedNotif.type}
             </span>
             <button
               onClick={() => setSelectedNotif(null)}
-              className="text-xs text-slate-400 hover:text-slate-600 cursor-pointer"
+              className="text-xs text-m3-secondary hover:text-m3-secondary cursor-pointer"
             >
               {t("common.close")}
             </button>
           </div>
-          <h4 className="text-xs font-bold text-slate-900 dark:text-slate-100 mb-1">
+          <h4 className="text-xs font-bold text-m3-text mb-1">
             {selectedNotif.title}
           </h4>
           {(selectedNotif.body || selectedNotif.message) && (
-            <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+            <p className="text-xs text-m3-secondary leading-relaxed">
               {selectedNotif.body || selectedNotif.message}
             </p>
           )}
@@ -462,12 +462,12 @@ export const InboxButton: React.FC<InboxButtonProps> = ({
     <div className={`relative inline-block ${className}`} ref={containerRef}>
       <button
         onClick={() => setIsOpen((prev) => !prev)}
-        className="relative p-2 text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all cursor-pointer focus:outline-none"
+        className="relative p-2 text-m3-secondary hover:text-m3-text hover:bg-m3-hover rounded-xl transition-colors cursor-pointer focus:outline-none"
         title={t("misc.inbox.buttonTitle")}
       >
         <Bell className="w-5 h-5" />
         {inbox.unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 min-w-4.5 h-4.5 px-1 bg-red-500 text-white text-[10px] font-black rounded-full flex items-center justify-center shadow-xs animate-pulse">
+          <span className="absolute -top-1 -right-1 min-w-4.5 h-4.5 px-1 bg-red-500 text-white text-[10px] font-semibold rounded-full flex items-center justify-center shadow-[var(--shadow-sm)] animate-pulse">
             {inbox.unreadCount > 9 ? "9+" : inbox.unreadCount}
           </span>
         )}

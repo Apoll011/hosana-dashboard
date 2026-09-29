@@ -111,7 +111,7 @@ export const ServiceLinkField: React.FC<ServiceLinkFieldProps> = ({
   return (
     <div ref={rootRef} className="space-y-2">
       <div className="relative">
-        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-m3-secondary pointer-events-none" />
         <input
           value={draft}
           onChange={(e) => {
@@ -128,11 +128,11 @@ export const ServiceLinkField: React.FC<ServiceLinkFieldProps> = ({
                 ? t("agenda.changeLinkedService")
                 : t("agenda.searchServiceToLink")
           }
-          className="w-full h-11 pl-10 pr-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-sm font-semibold placeholder:font-medium placeholder:text-slate-400 focus:outline-none focus:border-[#0284c7]"
+          className="w-full min-h-11 pl-10 pr-3 bg-m3-card border border-m3-border rounded-[var(--radius-md)] text-sm font-semibold text-m3-text placeholder:font-medium placeholder:text-m3-input focus:outline-none focus:ring-2 focus:ring-m3-primary/25 focus:border-m3-primary transition-colors"
         />
 
         {open && filtered.length > 0 && (
-          <div className="absolute z-20 mt-1 w-full max-h-56 overflow-y-auto bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl p-1.5">
+          <div className="absolute z-20 mt-1 w-full max-h-56 overflow-y-auto bg-m3-card border border-m3-border rounded-[var(--radius-lg)] shadow-[var(--shadow-lg)] p-1.5">
             {filtered.map((s, i) => (
               <button
                 key={s.id}
@@ -142,20 +142,20 @@ export const ServiceLinkField: React.FC<ServiceLinkFieldProps> = ({
                   pick(s.id);
                 }}
                 onMouseEnter={() => setHighlight(i)}
-                className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-left transition-colors cursor-pointer ${
+                className={`w-full flex items-center gap-2.5 px-2.5 py-2 min-h-10 rounded-[var(--radius-md)] text-left transition-colors cursor-pointer ${
                   i === highlight
-                    ? "bg-slate-100 dark:bg-slate-800"
-                    : "hover:bg-slate-50 dark:hover:bg-slate-800/50"
+                    ? "bg-m3-hover"
+                    : "hover:bg-m3-hover/60"
                 }`}
               >
-                <span className="w-6 h-6 rounded-lg bg-[#0284c7]/10 text-[#0284c7] flex items-center justify-center shrink-0">
+                <span className="w-6 h-6 rounded-[var(--radius-sm)] bg-m3-primary/10 text-m3-primary flex items-center justify-center shrink-0">
                   <Link2 className="w-3.5 h-3.5" />
                 </span>
                 <span className="flex-1 min-w-0">
-                  <span className="block text-xs font-bold text-slate-800 dark:text-slate-200 truncate">
+                  <span className="block text-xs font-semibold text-m3-text truncate">
                     {s.name}
                   </span>
-                  <span className="block text-[10px] font-semibold text-slate-400">
+                  <span className="block text-caption">
                     {formatShortDate(s.date, t)} ·{" "}
                     {t("agenda.minutes", { minutes: serviceTotalMinutes(s) })}
                   </span>
@@ -167,21 +167,21 @@ export const ServiceLinkField: React.FC<ServiceLinkFieldProps> = ({
       </div>
 
       {value && !linked && (
-        <p className="text-[11px] font-semibold text-amber-600 dark:text-amber-400">
+        <p className="text-caption text-amber-600 dark:text-amber-400">
           {t("agenda.linkedServiceMissing")}
         </p>
       )}
 
       {linked && (
-        <div className="flex items-center gap-3 rounded-xl border border-sky-200 dark:border-sky-900/60 bg-sky-50/60 dark:bg-sky-950/30 p-3">
-          <span className="w-9 h-9 rounded-xl bg-[#0284c7]/10 text-[#0284c7] flex items-center justify-center shrink-0">
+        <div className="flex items-center gap-3 rounded-[var(--radius-lg)] border border-m3-primary/25 bg-m3-primary/5 p-3">
+          <span className="w-9 h-9 rounded-[var(--radius-md)] bg-m3-primary/10 text-m3-primary flex items-center justify-center shrink-0">
             <Link2 className="w-4 h-4" />
           </span>
           <div className="min-w-0 flex-1">
-            <p className="text-sm font-black text-slate-900 dark:text-slate-100 truncate">
+            <p className="text-sm font-semibold text-m3-text truncate">
               {linked.name}
             </p>
-            <p className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">
+            <p className="text-caption">
               {formatShortDate(linked.date, t)} ·{" "}
               {t("agenda.minutes", { minutes: serviceTotalMinutes(linked) })} ·{" "}
               {tc("agenda.elementsCount", (linked.elements ?? []).length)}
@@ -191,7 +191,7 @@ export const ServiceLinkField: React.FC<ServiceLinkFieldProps> = ({
             type="button"
             onClick={() => onChange(null)}
             title={t("agenda.removeLink")}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors cursor-pointer shrink-0"
+            className="inline-flex items-center justify-center min-h-10 min-w-10 rounded-[var(--radius-md)] text-m3-secondary hover:text-m3-danger hover:bg-m3-danger/10 transition-colors cursor-pointer shrink-0"
           >
             <X className="w-4 h-4" />
           </button>
@@ -199,9 +199,7 @@ export const ServiceLinkField: React.FC<ServiceLinkFieldProps> = ({
       )}
 
       {!isLoading && services.length === 0 && (
-        <p className="text-[11px] font-semibold text-slate-400">
-          {t("agenda.noServicesToLink")}
-        </p>
+        <p className="text-caption">{t("agenda.noServicesToLink")}</p>
       )}
     </div>
   );

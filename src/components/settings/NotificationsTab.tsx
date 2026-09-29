@@ -92,17 +92,17 @@ const Section: React.FC<{
   action?: React.ReactNode;
   children: React.ReactNode;
 }> = ({ icon, title, desc, action, children }) => (
-  <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xs overflow-hidden">
-    <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between gap-3 bg-slate-50/50 dark:bg-slate-900/50">
+  <div className="bg-m3-card border border-m3-border rounded-[var(--radius-xl)] shadow-[var(--shadow-sm)] overflow-hidden">
+    <div className="px-6 py-5 border-b border-m3-border/60 flex items-center justify-between gap-3 bg-m3-sidebar/50">
       <div className="flex items-center gap-3 min-w-0">
         <div className="w-9 h-9 rounded-xl bg-m3-primary/10 text-m3-primary flex items-center justify-center shrink-0">
           {icon}
         </div>
         <div className="min-w-0">
-          <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100 leading-tight">
+          <h3 className="text-base sm:text-lg font-bold text-m3-text leading-tight">
             {title}
           </h3>
-          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+          <p className="text-xs sm:text-sm text-m3-secondary mt-0.5">
             {desc}
           </p>
         </div>
@@ -141,17 +141,17 @@ function Segmented<T extends string>({
             key={opt.value}
             type="button"
             onClick={() => onChange(opt.value)}
-            className={`flex items-center gap-3 p-3 rounded-xl border text-left transition-all cursor-pointer ${
+            className={`flex items-center gap-3 p-3 rounded-xl border text-left transition-colors cursor-pointer ${
               isActive
-                ? "border-m3-primary bg-m3-primary/5 shadow-sm shadow-m3-primary/10"
-                : "border-slate-200 dark:border-slate-800 hover:border-m3-primary/40 hover:bg-slate-50 dark:hover:bg-slate-800/40"
+                ? "border-m3-primary bg-m3-primary/5 shadow-[var(--shadow-sm)] shadow-m3-primary/10"
+                : "border-m3-border hover:border-m3-primary/40 hover:bg-m3-hover"
             }`}
           >
             <span
               className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-colors ${
                 isActive
                   ? "bg-m3-primary text-white"
-                  : "bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400"
+                  : "bg-m3-sidebar text-m3-secondary"
               }`}
             >
               {opt.icon}
@@ -161,13 +161,13 @@ function Segmented<T extends string>({
                 className={`block text-xs font-bold ${
                   isActive
                     ? "text-m3-primary"
-                    : "text-slate-700 dark:text-slate-300"
+                    : "text-m3-text"
                 }`}
               >
                 {opt.label}
               </span>
               {opt.desc && (
-                <span className="block text-[11px] text-slate-400 dark:text-slate-500 truncate">
+                <span className="block text-[11px] text-m3-secondary truncate">
                   {opt.desc}
                 </span>
               )}
@@ -434,7 +434,7 @@ export const NotificationsTab: React.FC<NotificationsTabProps> = ({
 
   if (permissionLoading) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center p-12 text-slate-500 gap-3">
+      <div className="flex-1 flex flex-col items-center justify-center p-12 text-m3-secondary gap-3">
         <Loader2 className="w-6 h-6 animate-spin text-m3-primary" />
         <span className="text-xs font-semibold">
           {t("settings.notifications.loading")}
@@ -446,14 +446,14 @@ export const NotificationsTab: React.FC<NotificationsTabProps> = ({
   if (!canSend || permissionError || !organization) {
     return (
       <div className="max-w-4xl mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-10 text-center shadow-xs">
-          <div className="w-14 h-14 mx-auto rounded-2xl bg-amber-100 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center mb-4">
+        <div className="bg-m3-card border border-m3-border rounded-[var(--radius-xl)] p-10 text-center shadow-[var(--shadow-sm)]">
+          <div className="w-14 h-14 mx-auto rounded-[var(--radius-xl)] bg-amber-100 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center mb-4">
             <Lock className="w-7 h-7" />
           </div>
-          <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">
+          <h3 className="text-lg font-bold text-m3-text">
             {t("settings.notifications.noAccessTitle")}
           </h3>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mt-2 max-w-sm mx-auto leading-relaxed">
+          <p className="text-sm text-m3-secondary mt-2 max-w-sm mx-auto leading-relaxed">
             {t("settings.notifications.noAccessDesc")}
           </p>
         </div>
@@ -488,7 +488,7 @@ export const NotificationsTab: React.FC<NotificationsTabProps> = ({
         title={t("settings.notifications.recipient.title")}
         desc={t("settings.notifications.recipient.desc")}
         action={
-          <span className="hidden sm:flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full bg-m3-primary/10 text-m3-primary border border-m3-primary/20">
+          <span className="hidden sm:flex items-center gap-1.5 text-label px-2.5 py-1 rounded-full bg-m3-primary/10 text-m3-primary border border-m3-primary/20">
             <Send className="w-3 h-3" />
             {isOrgTarget
               ? t("settings.notifications.recipient.organization")
@@ -528,37 +528,37 @@ export const NotificationsTab: React.FC<NotificationsTabProps> = ({
           {isOrgTarget ? (
             <div className="space-y-4">
               {/* Locked organization identity — never editable. */}
-              <div className="flex flex-wrap items-center gap-3 p-3.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl">
+              <div className="flex flex-wrap items-center gap-3 p-3.5 bg-m3-sidebar border border-m3-border rounded-xl">
                 <div className="w-10 h-10 rounded-xl bg-m3-primary/10 text-m3-primary flex items-center justify-center shrink-0">
                   <Building2 className="w-5 h-5" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-bold text-slate-900 dark:text-slate-100 truncate">
+                  <p className="text-sm font-bold text-m3-text truncate">
                     {organization.name}
                   </p>
-                  <p className="text-[11px] text-slate-400 font-mono truncate">
+                  <p className="text-[11px] text-m3-secondary font-mono truncate">
                     {organization.id}
                   </p>
                 </div>
                 <span
                   title={t("settings.notifications.recipient.lockedHint")}
-                  className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-300 dark:border-slate-700 shrink-0"
+                  className="inline-flex items-center gap-1.5 text-label px-2.5 py-1 rounded-full bg-m3-hover text-m3-secondary border border-m3-border shrink-0"
                 >
                   <Lock className="w-3 h-3" />
                   {t("settings.notifications.recipient.lockedBadge")}
                 </span>
               </div>
-              <p className="text-[11px] text-slate-400 dark:text-slate-500 -mt-2">
+              <p className="text-[11px] text-m3-secondary -mt-2">
                 {t("settings.notifications.recipient.lockedHint")}
               </p>
 
               {/* Optional role restriction */}
               <div>
                 <div className="flex items-center justify-between gap-2 mb-2">
-                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide">
+                  <label className="text-label text-m3-text">
                     {t("settings.notifications.recipient.rolesFilter")}
                   </label>
-                  <span className="text-[11px] font-semibold text-slate-400">
+                  <span className="text-[11px] font-semibold text-m3-secondary">
                     {selectedRoles.length === 0
                       ? t("settings.notifications.recipient.everyone")
                       : `${selectedRoles.length}/${ORG_ROLES.length}`}
@@ -572,10 +572,10 @@ export const NotificationsTab: React.FC<NotificationsTabProps> = ({
                         key={role}
                         type="button"
                         onClick={() => toggleRole(role)}
-                        className={`px-3 py-1.5 rounded-full text-[11px] font-bold border transition-all cursor-pointer ${
+                        className={`px-3 py-1.5 rounded-full text-[11px] font-bold border transition-colors cursor-pointer ${
                           isSelected
-                            ? "bg-m3-primary text-white border-m3-primary shadow-sm shadow-m3-primary/20"
-                            : "bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-800 hover:border-m3-primary/50"
+                            ? "bg-m3-primary text-white border-m3-primary shadow-[var(--shadow-sm)] shadow-m3-primary/20"
+                            : "bg-m3-card text-m3-secondary border-m3-border hover:border-m3-primary/50"
                         }`}
                       >
                         {t(`settings.roles.${role}` as "settings.roles.owner")}
@@ -583,14 +583,14 @@ export const NotificationsTab: React.FC<NotificationsTabProps> = ({
                     );
                   })}
                 </div>
-                <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-2">
+                <p className="text-[11px] text-m3-secondary mt-2">
                   {t("settings.notifications.recipient.rolesFilterHint")}
                 </p>
               </div>
 
               {/* Org fan-out is in-app only — hide the channel controls. */}
-              <div className="flex items-start gap-2.5 p-3 bg-sky-50/60 dark:bg-sky-950/30 border border-sky-200/70 dark:border-sky-900 rounded-xl text-[11px] text-sky-700 dark:text-sky-300 leading-relaxed">
-                <Info className="w-4 h-4 shrink-0 mt-0.5 text-sky-500" />
+              <div className="flex items-start gap-2.5 p-3 bg-m3-primary/10 border border-m3-primary/20 rounded-xl text-[11px] text-m3-primary leading-relaxed">
+                <Info className="w-4 h-4 shrink-0 mt-0.5 text-m3-primary" />
                 <span>{t("settings.notifications.recipient.inboxOnly")}</span>
               </div>
             </div>
@@ -601,7 +601,7 @@ export const NotificationsTab: React.FC<NotificationsTabProps> = ({
                   <div
                     className={`w-10 h-10 rounded-full bg-linear-to-tr ${getAvatarGradient(
                       recipient.name,
-                    )} text-white font-black text-sm flex items-center justify-center shrink-0 overflow-hidden`}
+                    )} text-white font-semibold text-sm flex items-center justify-center shrink-0 overflow-hidden`}
                   >
                     {recipient.image ? (
                       <img
@@ -614,10 +614,10 @@ export const NotificationsTab: React.FC<NotificationsTabProps> = ({
                     )}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-bold text-slate-900 dark:text-slate-100 truncate">
+                    <p className="text-sm font-bold text-m3-text truncate">
                       {recipient.name}
                     </p>
-                    <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
+                    <p className="text-[11px] text-m3-secondary truncate">
                       {recipient.email}
                     </p>
                   </div>
@@ -626,7 +626,7 @@ export const NotificationsTab: React.FC<NotificationsTabProps> = ({
                     type="button"
                     onClick={() => setRecipient(null)}
                     title={t("settings.notifications.recipient.clear")}
-                    className="p-2 rounded-xl text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors cursor-pointer shrink-0"
+                    className="p-2 rounded-xl text-m3-secondary hover:text-m3-danger hover:bg-m3-danger/10 transition-colors cursor-pointer shrink-0"
                   >
                     <X className="w-4 h-4" />
                   </button>
@@ -634,7 +634,7 @@ export const NotificationsTab: React.FC<NotificationsTabProps> = ({
               ) : (
                 <>
                   <div className="relative">
-                    <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                    <Search className="w-4 h-4 text-m3-secondary absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                     <input
                       type="text"
                       value={query}
@@ -642,19 +642,19 @@ export const NotificationsTab: React.FC<NotificationsTabProps> = ({
                       placeholder={t(
                         "settings.notifications.recipient.searchPlaceholder",
                       )}
-                      className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-semibold focus:outline-none focus:border-m3-primary transition-colors"
+                      className="w-full pl-10 pr-4 py-2.5 bg-m3-card border border-m3-border rounded-xl text-xs font-semibold focus:outline-none focus:border-m3-primary transition-colors"
                     />
                   </div>
 
-                  <div className="max-h-64 overflow-y-auto rounded-xl border border-slate-200 dark:border-slate-800 divide-y divide-slate-100 dark:divide-slate-800/70">
+                  <div className="max-h-64 overflow-y-auto rounded-xl border border-m3-border divide-y divide-m3-border/60">
                     {isLoadingMembers ? (
-                      <div className="py-8 flex items-center justify-center gap-2 text-xs text-slate-400">
+                      <div className="py-8 flex items-center justify-center gap-2 text-xs text-m3-secondary">
                         <Loader2 className="w-4 h-4 animate-spin text-m3-primary" />
                         {t("settings.notifications.recipient.searching")}
                       </div>
                     ) : membersError ? (
                       <div className="py-8 text-center">
-                        <p className="text-xs text-red-500 font-semibold mb-3">
+                        <p className="text-xs text-m3-danger font-semibold mb-3">
                           {membersError}
                         </p>
                         <Button
@@ -667,7 +667,7 @@ export const NotificationsTab: React.FC<NotificationsTabProps> = ({
                         </Button>
                       </div>
                     ) : filteredMembers.length === 0 ? (
-                      <div className="py-8 text-center text-xs text-slate-400">
+                      <div className="py-8 text-center text-xs text-m3-secondary">
                         {t("settings.notifications.recipient.noResults")}
                       </div>
                     ) : (
@@ -679,12 +679,12 @@ export const NotificationsTab: React.FC<NotificationsTabProps> = ({
                             setRecipient(member);
                             setQuery("");
                           }}
-                          className="w-full flex items-center gap-3 p-3 text-left hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors cursor-pointer"
+                          className="w-full flex items-center gap-3 p-3 text-left hover:bg-m3-hover transition-colors cursor-pointer"
                         >
                           <div
                             className={`w-8 h-8 rounded-full bg-linear-to-tr ${getAvatarGradient(
                               member.name,
-                            )} text-white font-black text-[11px] flex items-center justify-center shrink-0 overflow-hidden`}
+                            )} text-white font-semibold text-[11px] flex items-center justify-center shrink-0 overflow-hidden`}
                           >
                             {member.image ? (
                               <img
@@ -697,10 +697,10 @@ export const NotificationsTab: React.FC<NotificationsTabProps> = ({
                             )}
                           </div>
                           <div className="min-w-0 flex-1">
-                            <p className="text-xs font-bold text-slate-900 dark:text-slate-100 truncate">
+                            <p className="text-xs font-bold text-m3-text truncate">
                               {member.name}
                             </p>
-                            <p className="text-[11px] text-slate-400 truncate">
+                            <p className="text-[11px] text-m3-secondary truncate">
                               {member.email}
                             </p>
                           </div>
@@ -723,7 +723,7 @@ export const NotificationsTab: React.FC<NotificationsTabProps> = ({
           title={t("settings.notifications.delivery.title")}
           desc={t("settings.notifications.delivery.desc")}
           action={
-            <span className="hidden sm:inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+            <span className="hidden sm:inline-flex items-center gap-1.5 text-label px-2.5 py-1 rounded-full bg-m3-hover text-m3-secondary">
               {channel === "inbox"
                 ? t("settings.notifications.delivery.inbox")
                 : channel === "push"
@@ -760,23 +760,23 @@ export const NotificationsTab: React.FC<NotificationsTabProps> = ({
             />
 
             {showPushFields && (
-              <div className="p-4 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl space-y-4">
+              <div className="p-4 bg-m3-sidebar border border-m3-border rounded-[var(--radius-xl)] space-y-4">
                 <div>
-                  <h4 className="text-xs font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
+                  <h4 className="text-xs font-bold text-m3-text flex items-center gap-1.5">
                     <Smartphone className="w-4 h-4 text-m3-primary" />
                     {t("settings.notifications.delivery.pushTitle")}
                   </h4>
-                  <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5 leading-relaxed">
+                  <p className="text-[11px] text-m3-secondary mt-0.5 leading-relaxed">
                     {t("settings.notifications.delivery.pushHint")}
                   </p>
                 </div>
 
                 {/* The deep link is mirrored into the push data automatically. */}
                 {href.trim() && (
-                  <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-[11px] font-mono">
+                  <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-m3-card border border-m3-border text-[11px] font-mono">
                     <Link2 className="w-3.5 h-3.5 text-m3-primary shrink-0" />
-                    <span className="text-slate-400 shrink-0">link:</span>
-                    <span className="text-slate-600 dark:text-slate-300 truncate">
+                    <span className="text-m3-secondary shrink-0">link:</span>
+                    <span className="text-m3-secondary truncate">
                       {href.trim()}
                     </span>
                   </div>
@@ -784,7 +784,7 @@ export const NotificationsTab: React.FC<NotificationsTabProps> = ({
 
                 <div>
                   <div className="flex items-center justify-between gap-2 mb-2">
-                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide">
+                    <label className="text-label text-m3-text">
                       {t("settings.notifications.delivery.dataLabel")}
                     </label>
                     <button
@@ -811,7 +811,7 @@ export const NotificationsTab: React.FC<NotificationsTabProps> = ({
                             placeholder={t(
                               "settings.notifications.delivery.keyPlaceholder",
                             )}
-                            className="w-full sm:w-1/3 px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-xs font-mono focus:outline-none focus:border-m3-primary"
+                            className="w-full sm:w-1/3 px-3 py-2 bg-m3-card border border-m3-border rounded-lg text-xs font-mono focus:outline-none focus:border-m3-primary"
                           />
                           <input
                             type="text"
@@ -823,7 +823,7 @@ export const NotificationsTab: React.FC<NotificationsTabProps> = ({
                             placeholder={t(
                               "settings.notifications.delivery.valuePlaceholder",
                             )}
-                            className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-xs font-mono focus:outline-none focus:border-m3-primary"
+                            className="w-full px-3 py-2 bg-m3-card border border-m3-border rounded-lg text-xs font-mono focus:outline-none focus:border-m3-primary"
                           />
                           <button
                             type="button"
@@ -831,7 +831,7 @@ export const NotificationsTab: React.FC<NotificationsTabProps> = ({
                             title={t(
                               "settings.notifications.delivery.removeRow",
                             )}
-                            className="p-2 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors cursor-pointer shrink-0"
+                            className="p-2 rounded-lg text-m3-secondary hover:text-m3-danger hover:bg-m3-danger/10 transition-colors cursor-pointer shrink-0"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
@@ -840,7 +840,7 @@ export const NotificationsTab: React.FC<NotificationsTabProps> = ({
                     </div>
                   )}
 
-                  <p className="text-[11px] text-slate-400 dark:text-slate-500 leading-relaxed">
+                  <p className="text-[11px] text-m3-secondary leading-relaxed">
                     {t("settings.notifications.delivery.dataHint")}
                   </p>
                 </div>
@@ -861,7 +861,7 @@ export const NotificationsTab: React.FC<NotificationsTabProps> = ({
             {/* Type — only decorates the in-app bell item */}
             {showTypeField && (
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-2 uppercase tracking-wide">
+                <label className="block text-label text-m3-text mb-2">
                   {t("settings.notifications.content.typeLabel")}
                 </label>
                 <div className="flex flex-wrap gap-2">
@@ -872,10 +872,10 @@ export const NotificationsTab: React.FC<NotificationsTabProps> = ({
                         key={preset.value}
                         type="button"
                         onClick={() => setTypePreset(preset.value)}
-                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold border transition-all cursor-pointer ${
+                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold border transition-colors cursor-pointer ${
                           isActive
-                            ? "bg-m3-primary text-white border-m3-primary shadow-sm shadow-m3-primary/20"
-                            : "bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-800 hover:border-m3-primary/50"
+                            ? "bg-m3-primary text-white border-m3-primary shadow-[var(--shadow-sm)] shadow-m3-primary/20"
+                            : "bg-m3-card text-m3-secondary border-m3-border hover:border-m3-primary/50"
                         }`}
                       >
                         {preset.icon}
@@ -888,10 +888,10 @@ export const NotificationsTab: React.FC<NotificationsTabProps> = ({
                   <button
                     type="button"
                     onClick={() => setTypePreset("custom")}
-                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold border transition-all cursor-pointer ${
+                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold border transition-colors cursor-pointer ${
                       typePreset === "custom"
-                        ? "bg-m3-primary text-white border-m3-primary shadow-sm shadow-m3-primary/20"
-                        : "bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-800 hover:border-m3-primary/50"
+                        ? "bg-m3-primary text-white border-m3-primary shadow-[var(--shadow-sm)] shadow-m3-primary/20"
+                        : "bg-m3-card text-m3-secondary border-m3-border hover:border-m3-primary/50"
                     }`}
                   >
                     <Plus className="w-3.5 h-3.5" />
@@ -908,7 +908,7 @@ export const NotificationsTab: React.FC<NotificationsTabProps> = ({
                       placeholder={t(
                         "settings.notifications.content.customTypePlaceholder",
                       )}
-                      className="w-full px-4 py-2.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-semibold focus:outline-none focus:border-m3-primary transition-colors"
+                      className="w-full px-4 py-2.5 bg-m3-card border border-m3-border rounded-xl text-xs font-semibold focus:outline-none focus:border-m3-primary transition-colors"
                     />
                   </div>
                 )}
@@ -925,7 +925,7 @@ export const NotificationsTab: React.FC<NotificationsTabProps> = ({
             />
 
             <div className="flex flex-col gap-1.5">
-              <label className="text-[11px] font-bold text-m3-text/60 uppercase tracking-wider ml-1">
+              <label className="text-label ml-1">
                 {t("settings.notifications.content.descriptionLabel")}
               </label>
               <textarea
@@ -936,7 +936,7 @@ export const NotificationsTab: React.FC<NotificationsTabProps> = ({
                 placeholder={t(
                   "settings.notifications.content.descriptionPlaceholder",
                 )}
-                className="w-full rounded-xl border border-m3-border hover:border-m3-primary/30 focus:border-m3-primary bg-m3-card text-m3-text text-sm px-4 py-2.5 transition-all focus:outline-none focus:ring-2 focus:ring-m3-primary/20 resize-y"
+                className="w-full rounded-xl border border-m3-border hover:border-m3-primary/30 focus:border-m3-primary bg-m3-card text-m3-text text-sm px-4 py-2.5 transition-colors focus:outline-none focus:ring-2 focus:ring-m3-primary/20 resize-y"
               />
             </div>
 
@@ -953,50 +953,50 @@ export const NotificationsTab: React.FC<NotificationsTabProps> = ({
 
           {/* Live preview — one mock per delivery channel */}
           <div className="lg:col-span-2 space-y-4">
-            <p className="text-[11px] font-bold text-m3-text/60 uppercase tracking-wider ml-1 mb-2">
+            <p className="text-label ml-1 mb-2">
               {t("settings.notifications.content.preview")}
             </p>
 
             {showInboxPreview && (
               <div>
-                <div className="flex items-center gap-1.5 mb-2 text-[10px] font-black uppercase tracking-wider text-slate-400">
+                <div className="flex items-center gap-1.5 mb-2 text-label text-m3-secondary">
                   <Bell className="w-3 h-3" />
                   {t("settings.notifications.delivery.inbox")}
                 </div>
-                <div className="p-3.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xs">
+                <div className="p-3.5 bg-m3-card border border-m3-border rounded-[var(--radius-xl)] shadow-[var(--shadow-sm)]">
                   <div className="flex gap-3 items-start">
-                    <div className="p-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700/60 shadow-xs shrink-0 mt-0.5">
+                    <div className="p-2 rounded-xl bg-m3-sidebar dark:bg-m3-sidebar border border-m3-border/60 dark:border-m3-border/60 shadow-[var(--shadow-sm)] shrink-0 mt-0.5">
                       {previewIcon}
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center justify-between gap-2 mb-0.5">
-                        <span className="text-xs font-bold text-slate-900 dark:text-slate-100 truncate">
+                        <span className="text-xs font-bold text-m3-text truncate">
                           {title.trim() ||
                             t("settings.notifications.content.previewEmpty")}
                         </span>
                         <span className="w-2 h-2 rounded-full bg-m3-primary shrink-0" />
                       </div>
                       {description.trim() && (
-                        <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-relaxed">
+                        <p className="text-[11px] text-m3-secondary leading-relaxed">
                           {description.trim()}
                         </p>
                       )}
-                      <span className="text-[10px] text-slate-400 mt-1.5 block">
+                      <span className="text-[10px] text-m3-secondary mt-1.5 block">
                         {t("settings.notifications.content.now")}
                       </span>
                     </div>
                   </div>
                   {href.trim() && (
-                    <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center gap-1.5 text-[10px] font-mono text-slate-400">
+                    <div className="mt-3 pt-3 border-t border-m3-border/60 flex items-center gap-1.5 text-[10px] font-mono text-m3-secondary">
                       <Link2 className="w-3 h-3 shrink-0" />
                       <span className="truncate">{href.trim()}</span>
                     </div>
                   )}
-                  <div className="mt-2 flex items-center gap-1.5 text-[10px] font-semibold text-slate-400">
+                  <div className="mt-2 flex items-center gap-1.5 text-[10px] font-semibold text-m3-secondary">
                     <span className="uppercase tracking-wider">
                       {t("settings.notifications.content.typeLabel")}:
                     </span>
-                    <span className="font-mono text-slate-500 dark:text-slate-400 truncate">
+                    <span className="font-mono text-m3-secondary truncate">
                       {effectiveType || "—"}
                     </span>
                   </div>
@@ -1006,16 +1006,16 @@ export const NotificationsTab: React.FC<NotificationsTabProps> = ({
 
             {showPushPreview && (
               <div>
-                <div className="flex items-center gap-1.5 mb-2 text-[10px] font-black uppercase tracking-wider text-slate-400">
+                <div className="flex items-center gap-1.5 mb-2 text-label text-m3-secondary">
                   <Smartphone className="w-3 h-3" />
                   {t("settings.notifications.delivery.push")}
                 </div>
-                <div className="rounded-2xl bg-linear-to-b from-slate-700 to-slate-900 border border-slate-600/50 shadow-lg p-3.5">
+                <div className="rounded-[var(--radius-xl)] bg-linear-to-b from-m3-sidebar to-m3-card border border-m3-border shadow-[var(--shadow-lg)] p-3.5">
                   <div className="flex items-center gap-2 mb-2">
                     <span className="w-4 h-4 rounded-md bg-m3-primary flex items-center justify-center shrink-0">
                       <Bell className="w-2.5 h-2.5 text-white" />
                     </span>
-                    <span className="text-[10px] font-bold text-white/70 uppercase tracking-wider truncate">
+                    <span className="text-label text-white/70 truncate">
                       {t("settings.notifications.content.appName")}
                     </span>
                     <span className="text-[10px] text-white/50 ml-auto shrink-0">
@@ -1026,11 +1026,11 @@ export const NotificationsTab: React.FC<NotificationsTabProps> = ({
                     {title.trim() ||
                       t("settings.notifications.content.previewEmpty")}
                   </p>
-                  <p className="text-[11px] text-slate-300 leading-snug mt-0.5">
+                  <p className="text-[11px] text-m3-secondary leading-snug mt-0.5">
                     {description.trim() || title.trim()}
                   </p>
                   {href.trim() && (
-                    <div className="mt-2 inline-flex items-center gap-1.5 max-w-full px-2 py-1 rounded-lg bg-white/10 text-slate-200">
+                    <div className="mt-2 inline-flex items-center gap-1.5 max-w-full px-2 py-1 rounded-lg bg-white/10 text-m3-secondary">
                       <Link2 className="w-3 h-3 shrink-0" />
                       <span className="text-[10px] font-mono truncate">
                         {href.trim()}
@@ -1045,8 +1045,8 @@ export const NotificationsTab: React.FC<NotificationsTabProps> = ({
       </Section>
 
       {/* ── 4. SEND ─────────────────────────────────────────────────────── */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-xs">
-        <div className="flex items-start gap-2.5 text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-m3-card border border-m3-border rounded-[var(--radius-xl)] p-5 shadow-[var(--shadow-sm)]">
+        <div className="flex items-start gap-2.5 text-[11px] text-m3-secondary leading-relaxed">
           <Send className="w-4 h-4 shrink-0 mt-0.5 text-m3-primary" />
           <span>
             {isOrgTarget

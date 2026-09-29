@@ -70,10 +70,10 @@ const MoveFolderTreeItem: React.FC<{
         style={{ paddingLeft: `${12 + node.level * 16}px` }}
         className={`flex items-center gap-2.5 p-2.5 border rounded-xl transition-colors ${
           isDisabled
-            ? "opacity-40 bg-slate-100 dark:bg-slate-800/40 cursor-not-allowed border-dashed border-slate-200 dark:border-slate-800"
+            ? "opacity-40 bg-m3-sidebar/40 cursor-not-allowed border-dashed border-m3-border"
             : isSelected
-              ? "bg-sky-50 dark:bg-sky-950/60 border-sky-300 dark:border-sky-800 cursor-pointer"
-              : "border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer"
+              ? "bg-m3-primary/10 border-m3-primary/40 cursor-pointer"
+              : "border-m3-border hover:bg-m3-hover cursor-pointer"
         }`}
       >
         <input
@@ -82,7 +82,7 @@ const MoveFolderTreeItem: React.FC<{
           disabled={isDisabled}
           checked={isSelected}
           onChange={() => !isDisabled && onSelect(node.folder.id)}
-          className="text-[#0284c7] focus:ring-[#0284c7]"
+          className="text-m3-primary focus:ring-m3-primary"
         />
 
         {hasChildren ? (
@@ -93,7 +93,7 @@ const MoveFolderTreeItem: React.FC<{
               e.stopPropagation();
               toggleExpand(node.folder.id);
             }}
-            className="p-0.5 hover:bg-slate-200 dark:hover:bg-slate-700 rounded text-slate-500 transition-colors shrink-0"
+            className="p-0.5 hover:bg-m3-hover rounded text-m3-secondary transition-colors shrink-0"
           >
             {isExpanded ? (
               <ChevronDown className="w-3.5 h-3.5" />
@@ -106,10 +106,10 @@ const MoveFolderTreeItem: React.FC<{
         )}
 
         <FolderIcon className="w-4 h-4 text-amber-500 shrink-0" />
-        <span className="text-xs font-bold text-slate-900 dark:text-slate-100 truncate">
+        <span className="text-xs font-bold text-m3-text truncate">
           {node.folder.name}
           {isDisabled && (
-            <span className="text-[10px] font-normal text-slate-400 ml-1.5">
+            <span className="text-[10px] font-normal text-m3-secondary ml-1.5">
               {t("modals.invalid")}
             </span>
           )}
@@ -200,9 +200,9 @@ export const BatchMoveModal: React.FC<BatchMoveModalProps> = ({
       title={t("modals.batchMoveTitle", { count: totalItems })}
     >
       <div className="flex flex-col gap-4">
-        <p className="text-xs text-slate-500 dark:text-slate-400">
+        <p className="text-xs text-m3-secondary">
           {t("modals.chooseDestFolder")}{" "}
-          <strong className="text-slate-900 dark:text-slate-100">
+          <strong className="text-m3-text">
             {selectedFoldersCount > 0 &&
               t("modals.folderCount", { count: selectedFoldersCount })}
             {selectedFoldersCount > 0 &&
@@ -215,17 +215,17 @@ export const BatchMoveModal: React.FC<BatchMoveModalProps> = ({
         </p>
 
         <div className="flex flex-col gap-2 max-h-72 overflow-y-auto pr-1">
-          <label className="flex items-center gap-3 p-3 border border-slate-200 dark:border-slate-800 rounded-xl cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50">
+          <label className="flex items-center gap-3 p-3 border border-m3-border rounded-xl cursor-pointer hover:bg-m3-hover">
             <input
               type="radio"
               name="batchMoveFolderRadio"
               value="root"
               checked={selectedFolderId === null}
               onChange={() => setSelectedFolderId(null)}
-              className="text-[#0284c7] focus:ring-[#0284c7]"
+              className="text-m3-primary focus:ring-m3-primary"
             />
-            <div className="flex items-center gap-2 text-xs font-bold text-slate-900 dark:text-slate-100">
-              <HardDrive className="w-4 h-4 text-[#0284c7]" />
+            <div className="flex items-center gap-2 text-xs font-bold text-m3-text">
+              <HardDrive className="w-4 h-4 text-m3-primary" />
               <span>{t("modals.rootLevel")}</span>
             </div>
           </label>
@@ -245,7 +245,7 @@ export const BatchMoveModal: React.FC<BatchMoveModalProps> = ({
           </div>
         </div>
 
-        <div className="flex items-center justify-end gap-3 mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
+        <div className="flex items-center justify-end gap-3 mt-4 pt-4 border-t border-m3-border/60">
           <Button variant="ghost" onClick={onClose} disabled={isLoading}>
             {t("common.cancel")}
           </Button>

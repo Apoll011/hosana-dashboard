@@ -1519,7 +1519,7 @@ export const MainLayout: React.FC = () => {
 
           {/* Window Container */}
           <div
-            className="bg-m3-card border md:border-none border-m3-border rounded-4xl md:rounded-none shadow-2xl md:shadow-none shadow-black/10 overflow-hidden flex flex-col flex-1 h-full transition-all duration-300"
+            className="bg-m3-card border md:border-none border-m3-border rounded-[var(--radius-xl)] md:rounded-none shadow-[var(--shadow-lg)] md:shadow-none overflow-hidden flex flex-col flex-1 h-full transition-colors duration-300"
             role="main"
           >
             <ExplorerAddressBar

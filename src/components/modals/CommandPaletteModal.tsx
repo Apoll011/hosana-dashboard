@@ -198,7 +198,7 @@ export function CommandPaletteModal({
       onClick={closePalette}
     >
       <div
-        className="w-full max-w-2xl rounded-2xl bg-m3-card border border-m3-border shadow-2xl overflow-hidden flex flex-col transition-all duration-150"
+        className="w-full max-w-2xl rounded-[var(--radius-xl)] bg-m3-card border border-m3-border shadow-[var(--shadow-lg)] overflow-hidden flex flex-col transition-colors duration-150"
         onClick={(e) => e.stopPropagation()}
         onKeyDown={handleKeyDown}
       >

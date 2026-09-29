@@ -176,25 +176,25 @@ export const AcceptInvitationPage: React.FC = () => {
         {isFetching ? (
           <div className="flex flex-col items-center justify-center py-8 space-y-3">
             <Spinner size="md" />
-            <p className="text-sm text-slate-500 dark:text-slate-400">
+            <p className="text-sm text-m3-secondary">
               {t("common.loading")}
             </p>
           </div>
         ) : invitation ? (
           <div className="space-y-6">
-            <div className="w-14 h-14 bg-blue-50 text-blue-600 dark:bg-blue-950/50 dark:text-blue-400 rounded-full flex items-center justify-center mx-auto">
+            <div className="w-14 h-14 bg-m3-primary/10 text-m3-primary rounded-full flex items-center justify-center mx-auto">
               <Building2 className="w-7 h-7" />
             </div>
 
-            <div className="p-4 bg-slate-50 dark:bg-white/5 rounded-xl border border-slate-200/80 dark:border-white/10 text-left">
-              <span className="text-base sm:text-lg font-medium text-slate-900 dark:text-white block">
+            <div className="p-4 bg-m3-sidebar rounded-xl border border-m3-border text-left">
+              <span className="text-base sm:text-lg font-medium text-m3-text block">
                 {invitation.organizationName ||
                   invitation.organizationId ||
                   "Organização Hosanna"}
               </span>
-              <span className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1 block">
+              <span className="text-xs sm:text-sm text-m3-secondary mt-1 block">
                 {t("settings.account.profile.role")}:{" "}
-                <strong className="text-blue-600 dark:text-blue-400 font-semibold">
+                <strong className="text-m3-primary font-semibold">
                   {invitation.role}
                 </strong>
               </span>
@@ -211,7 +211,7 @@ export const AcceptInvitationPage: React.FC = () => {
                 type="button"
                 onClick={handleReject}
                 disabled={actionLoading !== null}
-                className="text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:underline py-2 disabled:opacity-50 cursor-pointer"
+                className="text-xs sm:text-sm font-medium text-m3-secondary hover:text-m3-danger hover:underline py-2 disabled:opacity-50 cursor-pointer"
               >
                 {t("auth.acceptInvitation.rejectBtn")}
               </button>
@@ -223,7 +223,7 @@ export const AcceptInvitationPage: React.FC = () => {
                 disabled={
                   actionLoading !== null || invitation.status !== "pending"
                 }
-                className="h-10 sm:h-11 px-6 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm transition-all shadow-none border-0"
+                className="h-10 sm:h-11 px-6 rounded-full bg-m3-primary hover:bg-m3-primary-dark text-white font-medium text-sm transition-colors shadow-none border-0"
               >
                 <span>{t("auth.acceptInvitation.acceptBtn")}</span>
               </Button>
@@ -231,10 +231,10 @@ export const AcceptInvitationPage: React.FC = () => {
           </div>
         ) : (
           <div className="py-6 space-y-4 text-center">
-            <div className="w-14 h-14 bg-red-50 text-red-500 dark:bg-red-950/30 rounded-full flex items-center justify-center mx-auto">
+            <div className="w-14 h-14 bg-m3-danger/10 text-m3-danger rounded-full flex items-center justify-center mx-auto">
               <ShieldAlert className="w-7 h-7" />
             </div>
-            <p className="text-sm text-slate-600 dark:text-slate-300">
+            <p className="text-sm text-m3-secondary">
               {t("auth.acceptInvitation.invalidDesc")}
             </p>
           </div>

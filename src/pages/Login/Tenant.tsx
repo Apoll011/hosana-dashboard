@@ -176,7 +176,7 @@ export const RegisterOrganizationPage: React.FC = () => {
         <div className="py-6 flex flex-col items-center justify-center text-center">
           <AppLink
             to="/login"
-            className="inline-flex items-center justify-center h-10 px-6 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm transition-all"
+            className="inline-flex items-center justify-center h-10 px-6 rounded-full bg-m3-primary hover:bg-m3-primary-dark text-white font-medium text-sm transition-colors"
           >
             {t("auth.login.title")}
           </AppLink>
@@ -202,7 +202,7 @@ export const RegisterOrganizationPage: React.FC = () => {
           <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-950/50 rounded-full flex items-center justify-center text-emerald-600 dark:text-emerald-400 mb-4">
             <CheckCircle2 className="w-8 h-8" />
           </div>
-          <p className="text-slate-600 dark:text-slate-400 text-sm">
+          <p className="text-m3-secondary text-sm">
             {t("auth.resetPassword.successDesc")}
           </p>
         </div>
@@ -210,7 +210,7 @@ export const RegisterOrganizationPage: React.FC = () => {
         <>
           {/* Step Progress Bar with Google Material Stepper design */}
           <div className="mb-6">
-            <div className="flex items-center justify-between mb-2 text-xs font-medium text-slate-500 dark:text-slate-400">
+            <div className="flex items-center justify-between mb-2 text-xs font-medium text-m3-secondary">
               <span>Passo {step} de 3</span>
               <span>
                 {step === 1
@@ -220,9 +220,9 @@ export const RegisterOrganizationPage: React.FC = () => {
                     : t("settings.tabs.account")}
               </span>
             </div>
-            <div className="w-full bg-slate-100 dark:bg-white/10 h-1 rounded-full overflow-hidden">
+            <div className="w-full bg-m3-sidebar h-1 rounded-full overflow-hidden">
               <div
-                className="bg-blue-600 h-full transition-all duration-300 rounded-full"
+                className="bg-m3-primary h-full transition-[width] duration-300 rounded-full"
                 style={{ width: `${(step / 3) * 100}%` }}
               />
             </div>
@@ -263,7 +263,7 @@ export const RegisterOrganizationPage: React.FC = () => {
                     ) : slugStatus === "available" ? (
                       <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                     ) : slugStatus === "taken" ? (
-                      <XCircle className="w-4 h-4 text-red-600 dark:text-red-400" />
+                      <XCircle className="w-4 h-4 text-m3-danger" />
                     ) : undefined
                   }
                 />
@@ -319,9 +319,9 @@ export const RegisterOrganizationPage: React.FC = () => {
                       type="checkbox"
                       checked={showPassword}
                       onChange={(e) => setShowPassword(e.target.checked)}
-                      className="w-4 h-4 rounded-sm border-slate-300 dark:border-slate-600 text-blue-600 focus:ring-blue-500 dark:bg-[#1e1f20] cursor-pointer"
+                      className="w-4 h-4 rounded-sm border-m3-border text-m3-primary focus:ring-m3-primary dark:bg-[#1e1f20] cursor-pointer"
                     />
-                    <span className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">
+                    <span className="text-xs sm:text-sm text-m3-secondary">
                       Mostrar palavra-passe
                     </span>
                   </label>
@@ -339,11 +339,11 @@ export const RegisterOrganizationPage: React.FC = () => {
                     id="org-terms"
                     checked={agreedToTerms}
                     onChange={(e) => setAgreedToTerms(e.target.checked)}
-                    className="mt-0.5 w-4 h-4 rounded-sm border-slate-300 dark:border-slate-600 text-blue-600 focus:ring-blue-500 dark:bg-[#1e1f20] cursor-pointer"
+                    className="mt-0.5 w-4 h-4 rounded-sm border-m3-border text-m3-primary focus:ring-m3-primary dark:bg-[#1e1f20] cursor-pointer"
                   />
                   <label
                     htmlFor="org-terms"
-                    className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-snug cursor-pointer select-none"
+                    className="text-xs sm:text-sm text-m3-secondary leading-snug cursor-pointer select-none"
                   >
                     Concordo com os Termos de Serviço e a Política de
                     Privacidade.
@@ -359,7 +359,7 @@ export const RegisterOrganizationPage: React.FC = () => {
                   type="button"
                   onClick={handleBack}
                   disabled={isLoading}
-                  className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 py-2 cursor-pointer"
+                  className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium text-m3-secondary hover:text-m3-text py-2 cursor-pointer"
                 >
                   <ArrowLeft className="w-4 h-4" />
                   <span>Voltar</span>
@@ -367,7 +367,7 @@ export const RegisterOrganizationPage: React.FC = () => {
               ) : (
                 <AppLink
                   to="/login"
-                  className="text-xs sm:text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline py-2"
+                  className="text-xs sm:text-sm font-medium text-m3-primary hover:underline py-2"
                 >
                   {t("auth.register.loginLink")}
                 </AppLink>
@@ -378,7 +378,7 @@ export const RegisterOrganizationPage: React.FC = () => {
                   type="button"
                   onClick={handleNext}
                   disabled={step === 1 ? !isStep1Valid : !isStep2Valid}
-                  className="h-10 sm:h-11 px-6 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm transition-all shadow-none border-0"
+                  className="h-10 sm:h-11 px-6 rounded-full bg-m3-primary hover:bg-m3-primary-dark text-white font-medium text-sm transition-colors shadow-none border-0"
                 >
                   {t("settings.twoFactor.continue")}
                 </Button>
@@ -388,7 +388,7 @@ export const RegisterOrganizationPage: React.FC = () => {
                   onClick={handleCreateSubmit}
                   isLoading={isLoading}
                   disabled={!isStep3Valid || isLoading}
-                  className="h-10 sm:h-11 px-6 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm transition-all shadow-none border-0"
+                  className="h-10 sm:h-11 px-6 rounded-full bg-m3-primary hover:bg-m3-primary-dark text-white font-medium text-sm transition-colors shadow-none border-0"
                 >
                   {t("onboarding.createOrgBtn")}
                 </Button>
