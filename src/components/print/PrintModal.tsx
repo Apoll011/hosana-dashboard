@@ -295,7 +295,7 @@ export const PrintModal: React.FC<PrintModalProps> = ({
                       showChords: e.target.checked,
                     }))
                   }
-                  className="rounded text-sky-600 focus:ring-sky-500 w-3.5 h-3.5"
+                  className="rounded text-m3-primary focus:ring-m3-primary w-3.5 h-3.5"
                 />
                 <span>{t("print.chords")}</span>
               </label>
@@ -313,7 +313,7 @@ export const PrintModal: React.FC<PrintModalProps> = ({
                       twoColumnLayout: e.target.checked,
                     }))
                   }
-                  className="rounded text-sky-600 focus:ring-sky-500 w-3.5 h-3.5"
+                  className="rounded text-m3-primary focus:ring-m3-primary w-3.5 h-3.5"
                 />
                 <Columns className="w-3.5 h-3.5 text-slate-400" />
                 <span>{t("print.twoColumns")}</span>
@@ -331,7 +331,7 @@ export const PrintModal: React.FC<PrintModalProps> = ({
                     showChurchHeader: e.target.checked,
                   }))
                 }
-                className="rounded text-sky-600 focus:ring-sky-500 w-3.5 h-3.5"
+                className="rounded text-m3-primary focus:ring-m3-primary w-3.5 h-3.5"
               />
               <span>{t("print.churchHeader")}</span>
             </label>
@@ -355,7 +355,7 @@ export const PrintModal: React.FC<PrintModalProps> = ({
                       includeCollectionSongs: e.target.checked,
                     }))
                   }
-                  className="rounded text-sky-600 focus:ring-sky-500 w-3.5 h-3.5"
+                  className="rounded text-m3-primary focus:ring-m3-primary w-3.5 h-3.5"
                 />
                 <span>{t("print.includeChords")}</span>
               </label>
