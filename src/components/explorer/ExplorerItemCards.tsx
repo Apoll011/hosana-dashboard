@@ -168,6 +168,8 @@ export const SongGridCard: React.FC<SongGridCardProps> = React.memo(
     const isCompact = density === "compact";
     const scoreValue = (song as { score?: { score: number } }).score?.score;
     const hasScore = showSongScore && scoreValue !== undefined;
+    const scoreCorner =
+      hasScore && (songScoreLayout === "ring" || songScoreLayout === "badge");
 
     return (
       <div
@@ -182,7 +184,15 @@ export const SongGridCard: React.FC<SongGridCardProps> = React.memo(
         onContextMenu={onContextMenu}
         onDragStart={onDragStart}
         onDragEnd={onDragEnd}
-        className={`${isCompact ? "p-3" : "p-4"} rounded-[var(--radius-lg)] border transition-colors cursor-pointer flex flex-col items-center text-center group relative overflow-hidden select-none ${
+        className={`${
+          scoreCorner
+            ? isCompact
+              ? "pt-12 px-3 pb-3"
+              : "pt-14 px-4 pb-4"
+            : isCompact
+              ? "p-3"
+              : "p-4"
+        } rounded-[var(--radius-lg)] border transition-colors cursor-pointer flex flex-col items-center text-center group relative overflow-hidden select-none ${
           isSelected
             ? "border-m3-primary/40 bg-m3-primary/5 ring-2 ring-m3-primary/30"
             : "border-m3-border/50 bg-m3-card hover:bg-m3-hover hover:border-m3-primary/40"
@@ -213,9 +223,10 @@ export const SongGridCard: React.FC<SongGridCardProps> = React.memo(
           </span>
         )}
 
-        {(hasScore &&
-          (songScoreLayout === "ring" || songScoreLayout === "badge")) && (
-          <div className="mb-2">
+        {scoreCorner && (
+          <div
+            className={`absolute z-10 ${isCompact ? "top-2 left-2" : "top-2.5 left-2.5"}`}
+          >
             <SongScoreVisualizer
               score={scoreValue!}
               layout={songScoreLayout}

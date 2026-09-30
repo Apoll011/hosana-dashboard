@@ -168,7 +168,7 @@ export const ExplorerToolbar: React.FC<ExplorerToolbarProps> = ({
       {/* Right Side: View Mode Toggle & Density Selector */}
       <div className="flex items-center gap-2.5">
         {/* View Mode Toggle (hidden in Songs view) */}
-        {view !== "songs" && view !== "collections" && (
+        {view !== "songs" && (
           <div
             role="group"
             aria-label={t("toolbar.viewMode")}

@@ -736,12 +736,12 @@ export const SongsPage: React.FC<SongsPageProps> = ({
       {contextMenu && (
         <div
           style={{ top: contextMenu.y, left: contextMenu.x }}
-          className="fixed z-50 w-56 bg-m3-card border border-m3-border rounded-[var(--radius-xl)] shadow-[var(--shadow-lg)] p-1.5 flex flex-col gap-0.5 text-xs select-none animate-in fade-in zoom-in-95 duration-100"
+          className="fixed z-50 w-56 bg-m3-card border border-m3-border rounded-[var(--radius-xl)] shadow-[var(--shadow-lg)] p-1.5 flex flex-col gap-0.5 text-xs select-none hosanna-enter"
           onClick={(e) => e.stopPropagation()}
         >
           {contextMenu.isMulti ? (
             <>
-              <div className="px-3 py-1.5 text-label text-m3-primary border-b border-m3-border/60 mb-0.5 truncate flex items-center justify-between">
+              <div className="px-3 py-1.5 text-label text-m3-secondary border-b border-m3-border/60 mb-0.5 truncate flex items-center justify-between">
                 <span>{t("songsPage.multiSelect")}</span>
                 <Badge variant="sky">{selectedSongIds.size}</Badge>
               </div>
@@ -755,7 +755,7 @@ export const SongsPage: React.FC<SongsPageProps> = ({
                   }}
                   className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-m3-text hover:bg-m3-hover font-medium transition-colors text-left cursor-pointer"
                 >
-                  <Tag className="w-4 h-4 text-m3-primary" />
+                  <Tag className="w-4 h-4 text-m3-secondary" />
                   <span>
                     {t("songsPage.tagCount", { count: selectedSongIds.size })}
                   </span>
@@ -769,7 +769,7 @@ export const SongsPage: React.FC<SongsPageProps> = ({
                   }}
                   className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-m3-text hover:bg-m3-hover font-medium transition-colors text-left cursor-pointer"
                 >
-                  <FolderInput className="w-4 h-4 text-emerald-500" />
+                  <FolderInput className="w-4 h-4 text-m3-secondary" />
                   <span>
                     {t("songsPage.moveCount", { count: selectedSongIds.size })}
                   </span>
@@ -822,7 +822,7 @@ export const SongsPage: React.FC<SongsPageProps> = ({
                 }}
                 className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-m3-text hover:bg-m3-hover font-medium transition-colors text-left cursor-pointer"
               >
-                <FileText className="w-4 h-4 text-m3-primary" />
+                <FileText className="w-4 h-4 text-m3-secondary" />
                 <span>{t("songsPage.openInEditor")}</span>
               </button>
 
@@ -835,7 +835,7 @@ export const SongsPage: React.FC<SongsPageProps> = ({
                   }}
                   className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-m3-text hover:bg-m3-hover font-medium transition-colors text-left cursor-pointer"
                 >
-                  <FolderInput className="w-4 h-4 text-m3-primary" />
+                  <FolderInput className="w-4 h-4 text-m3-secondary" />
                   <span>{t("songsPage.moveSong")}</span>
                 </button>
 
@@ -848,7 +848,7 @@ export const SongsPage: React.FC<SongsPageProps> = ({
                   }}
                   className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-m3-text hover:bg-m3-hover font-medium transition-colors text-left cursor-pointer"
                 >
-                  <Tag className="w-4 h-4 text-m3-primary" />
+                  <Tag className="w-4 h-4 text-m3-secondary" />
                   <span>{t("songsPage.tagSong")}</span>
                 </button>
               </Can>

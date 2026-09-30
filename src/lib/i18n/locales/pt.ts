@@ -41,6 +41,7 @@ export const pt = {
     type: "Tipo",
     action: "Ação",
     details: "Detalhes",
+    score: "Pontuação",
     location: "Localização",
     or: "Ou",
     updatedAt: "Atualização",
@@ -1153,6 +1154,9 @@ export const pt = {
     addToCollection: "Adicionar à Coleção",
     selectCollectionPrompt: "Selecione a coleção de destino:",
     noCollectionsAvailable: "Nenhuma coleção encontrada.",
+    deleteManyTitle: "Excluir coleções",
+    deleteManyMessage:
+      "Enviar {count} coleções para a lixeira? As músicas continuam na biblioteca.",
     createCollectionFirst:
       "Crie uma coleção primeiro para poder adicionar músicas.",
   },
