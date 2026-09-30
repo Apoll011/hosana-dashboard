@@ -4,7 +4,7 @@
  */
 
 import { X } from "lucide-react";
-import React, { useEffect, useId, useRef } from "react";
+import React, { useEffect, useId, useRef, useState } from "react";
 
 interface ModalProps {
   isOpen: boolean;
@@ -28,6 +28,19 @@ export const Modal: React.FC<ModalProps> = ({
 }) => {
   const titleId = useId();
   const panelRef = useRef<HTMLDivElement>(null);
+  const [rendered, setRendered] = useState(isOpen);
+  const [shown, setShown] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      setRendered(true);
+      const frame = requestAnimationFrame(() => setShown(true));
+      return () => cancelAnimationFrame(frame);
+    }
+    setShown(false);
+    const timer = window.setTimeout(() => setRendered(false), 200);
+    return () => window.clearTimeout(timer);
+  }, [isOpen]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -45,7 +58,7 @@ export const Modal: React.FC<ModalProps> = ({
     };
   }, [isOpen, onClose]);
 
-  if (!isOpen) return null;
+  if (!rendered) return null;
 
   const maxWidthClasses = {
     sm: "max-w-sm",
@@ -57,7 +70,9 @@ export const Modal: React.FC<ModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-m3-bg/75 backdrop-blur-sm overscroll-contain"
+      className={`fixed inset-0 z-50 flex items-center justify-center p-4 bg-m3-bg/75 backdrop-blur-sm overscroll-contain transition-opacity duration-200 ease-in-out ${
+        shown ? "opacity-100" : "opacity-0"
+      }`}
       role="presentation"
       onMouseDown={(e) => {
         if (e.target === e.currentTarget) onClose();
@@ -70,7 +85,9 @@ export const Modal: React.FC<ModalProps> = ({
         aria-modal="true"
         aria-labelledby={titleId}
         tabIndex={-1}
-        className={`w-full ${maxWidthClasses[maxWidth]} bg-m3-card border border-m3-border rounded-[var(--radius-xl)] shadow-[var(--shadow-lg)] overflow-hidden flex flex-col max-h-[min(90vh,720px)] outline-none`}
+        className={`w-full ${maxWidthClasses[maxWidth]} bg-m3-card border border-m3-border rounded-[var(--radius-xl)] shadow-[var(--shadow-lg)] overflow-hidden flex flex-col max-h-[min(90vh,720px)] outline-none transition-all duration-200 ease-in-out ${
+          shown ? "opacity-100 scale-100" : "opacity-0 scale-[0.98]"
+        }`}
       >
         <div className="flex items-center justify-between gap-4 px-6 py-4 border-b border-m3-border/50">
           <h2 id={titleId} className="text-title text-m3-text min-w-0 truncate">

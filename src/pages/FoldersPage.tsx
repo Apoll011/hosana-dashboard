@@ -39,7 +39,10 @@ interface FolderExplorerContext {
   selectedFolderIds: Set<string>;
   selectedSongIds: Set<string>;
   foldersQuery: { isLoading: boolean };
-  songsQuery: { isLoading: boolean };
+  songsQuery: {
+    isLoading: boolean;
+    data?: { songs?: Song[] };
+  };
   setIsCreateSongModalOpen: (open: boolean) => void;
   fileInputRef: React.RefObject<HTMLInputElement>;
   containerRef: React.RefObject<HTMLDivElement>;
@@ -157,6 +160,24 @@ export const FoldersPage: React.FC = () => {
     handleFolderDragLeave,
     handleFolderDrop,
   } = context;
+
+  const folderAverageScores = React.useMemo(() => {
+    const songs = songsQuery.data?.songs ?? [];
+    const buckets = new Map<string, { sum: number; count: number }>();
+    for (const song of songs) {
+      const value = song.score?.score;
+      if (!song.folderId || typeof value !== "number") continue;
+      const bucket = buckets.get(song.folderId) ?? { sum: 0, count: 0 };
+      bucket.sum += value;
+      bucket.count += 1;
+      buckets.set(song.folderId, bucket);
+    }
+    const averages = new Map<string, number>();
+    buckets.forEach((bucket, id) => {
+      averages.set(id, Math.round(bucket.sum / bucket.count));
+    });
+    return averages;
+  }, [songsQuery.data?.songs]);
 
   const isCompact = density === "compact";
 
@@ -333,7 +354,7 @@ export const FoldersPage: React.FC = () => {
                     <th
                       className={`text-label ${isCompact ? "py-2.5 px-4" : "py-3.5 px-6"}`}
                     >
-                      Score
+                      {t("common.score")}
                     </th>
                   )}
                   <th
@@ -369,6 +390,9 @@ export const FoldersPage: React.FC = () => {
                     onDragOver={(e) => handleFolderDragOver(e, folder.id)}
                     onDragLeave={(e) => handleFolderDragLeave(e, folder.id)}
                     onDrop={(e) => handleFolderDrop(e, folder.id)}
+                    showSongScore={showSongScore}
+                    averageScore={folderAverageScores.get(folder.id) ?? null}
+                    songScoreLayout={personalSettings.songScoreLayout}
                   />
                 ))}
 

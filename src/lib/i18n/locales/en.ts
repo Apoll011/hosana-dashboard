@@ -43,6 +43,7 @@ export const en: typeof pt = {
     type: "Type",
     action: "Action",
     details: "Details",
+    score: "Score",
     location: "Location",
     or: "Or",
     updatedAt: "Updated",
@@ -1145,6 +1146,9 @@ export const en: typeof pt = {
     addToCollection: "Add to Collection",
     selectCollectionPrompt: "Select destination collection:",
     noCollectionsAvailable: "No collections found.",
+    deleteManyTitle: "Delete collections",
+    deleteManyMessage:
+      "Move {count} collections to the trash? The songs stay in the library.",
     createCollectionFirst: "Create a collection first to add songs.",
   },
 

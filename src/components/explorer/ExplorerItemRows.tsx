@@ -19,6 +19,9 @@ export interface FolderTableRowProps {
   isInternalDragActive?: boolean;
   getFolderPathString?: (folderId: string | null | undefined) => string;
   density?: "comfortable" | "compact";
+  showSongScore?: boolean;
+  averageScore?: number | null;
+  songScoreLayout?: SongScoreLayout;
   onClick: (e: React.MouseEvent) => void;
   onDoubleClick: (e: React.MouseEvent) => void;
   onContextMenu: (e: React.MouseEvent) => void;
@@ -39,6 +42,9 @@ export const FolderTableRow: React.FC<FolderTableRowProps> = React.memo(
     isInternalDragActive,
     getFolderPathString,
     density = "comfortable",
+    showSongScore = false,
+    averageScore = null,
+    songScoreLayout = "ring",
     onClick,
     onDoubleClick,
     onContextMenu,
@@ -102,6 +108,29 @@ export const FolderTableRow: React.FC<FolderTableRowProps> = React.memo(
         <td className={`${cellPadding} text-m3-secondary`}>
           {t("explorer.songsCount", { count: folder.songCount || 0 })}
         </td>
+        {showSongScore && (
+          <td className={cellPadding}>
+            {typeof averageScore === "number" ? (
+              songScoreLayout === "bar" || songScoreLayout === "dots" ? (
+                <div className="min-w-[80px] max-w-[120px]">
+                  <SongScoreVisualizer
+                    score={averageScore}
+                    layout={songScoreLayout}
+                    compact={isCompact}
+                  />
+                </div>
+              ) : (
+                <SongScoreVisualizer
+                  score={averageScore}
+                  layout={songScoreLayout}
+                  compact={isCompact}
+                />
+              )
+            ) : (
+              <span className="text-m3-secondary">—</span>
+            )}
+          </td>
+        )}
         <td className={`${cellPadding} text-right`}>
           <div className="flex items-center justify-end gap-1">
             <Button
@@ -212,26 +241,26 @@ export const SongTableRow: React.FC<SongTableRowProps> = React.memo(
           {song.artist || "—"}
         </td>
 
-        {/* Score column — only rendered when enabled */}
-        {hasScore && (
-          <td className={`${cellPadding}`}>
-            {/* ring & badge: just drop the widget inline */}
-            {(songScoreLayout === "ring" || songScoreLayout === "badge") && (
-              <SongScoreVisualizer
-                score={scoreValue!}
-                layout={songScoreLayout}
-                compact={isCompact}
-              />
-            )}
-            {/* bar & dots: constrain to a reasonable width */}
-            {(songScoreLayout === "bar" || songScoreLayout === "dots") && (
-              <div className="min-w-[80px] max-w-[120px]">
+        {showSongScore && (
+          <td className={cellPadding}>
+            {hasScore ? (
+              songScoreLayout === "bar" || songScoreLayout === "dots" ? (
+                <div className="min-w-[80px] max-w-[120px]">
+                  <SongScoreVisualizer
+                    score={scoreValue!}
+                    layout={songScoreLayout}
+                    compact={isCompact}
+                  />
+                </div>
+              ) : (
                 <SongScoreVisualizer
                   score={scoreValue!}
                   layout={songScoreLayout}
                   compact={isCompact}
                 />
-              </div>
+              )
+            ) : (
+              <span className="text-m3-secondary">—</span>
             )}
           </td>
         )}

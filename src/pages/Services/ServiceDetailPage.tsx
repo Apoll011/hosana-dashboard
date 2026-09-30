@@ -298,6 +298,12 @@ interface ServiceRowProps {
   showNotes?: boolean;
 }
 
+const SERVICE_MENU_ITEM =
+  "w-full flex items-center gap-2.5 px-3 py-2 min-h-10 rounded-[var(--radius-md)] text-m3-text hover:bg-m3-hover font-medium transition-colors text-left cursor-pointer";
+const SERVICE_MENU_DANGER =
+  "w-full flex items-center gap-2.5 px-3 py-2 min-h-10 rounded-[var(--radius-md)] text-m3-danger hover:bg-m3-danger/10 font-semibold transition-colors text-left cursor-pointer";
+const SERVICE_MENU_ICON = "w-4 h-4 text-m3-secondary shrink-0";
+
 const ServiceRow: React.FC<ServiceRowProps> = ({
   element,
   index,
@@ -379,6 +385,10 @@ const ServiceRow: React.FC<ServiceRowProps> = ({
 
   const [isExpanded, setIsExpanded] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [menuPos, setMenuPos] = useState<{ top: number; left: number } | null>(
+    null,
+  );
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
   const [isEditingNote, setIsEditingNote] = useState(false);
   const [localNote, setLocalNote] = useState(element.notes || "");
   useEffect(() => setLocalNote(element.notes || ""), [element.notes]);
@@ -391,6 +401,32 @@ const ServiceRow: React.FC<ServiceRowProps> = ({
     if (isSong) onTogglePreview(element);
     else setIsExpanded(!isExpanded);
   };
+
+  const toggleMenu = () => {
+    if (menuOpen) {
+      setMenuOpen(false);
+      return;
+    }
+    const rect = menuButtonRef.current?.getBoundingClientRect();
+    const menuWidth = 224;
+    const menuHeight = 196;
+    if (rect) {
+      const left = Math.max(
+        8,
+        Math.min(rect.right - menuWidth, window.innerWidth - menuWidth - 8),
+      );
+      const below = rect.bottom + 4;
+      const top =
+        below + menuHeight > window.innerHeight
+          ? Math.max(8, rect.top - menuHeight - 4)
+          : below;
+      setMenuPos({ top, left });
+    }
+    setMenuOpen(true);
+  };
+
+  const notesOpen = isExpanded && (isEditingNote || Boolean(element.notes));
+  const contentOpen = isExpanded && !isSong;
 
   return (
     <div
@@ -519,57 +555,74 @@ const ServiceRow: React.FC<ServiceRowProps> = ({
 
           <div className="relative">
             <button
+              ref={menuButtonRef}
               type="button"
-              onClick={() => setMenuOpen(!menuOpen)}
-              className="min-h-10 min-w-10 inline-flex items-center justify-center text-m3-secondary hover:text-m3-primary hover:bg-m3-primary/10 rounded-lg transition-colors cursor-pointer"
+              onClick={toggleMenu}
+              className="min-h-10 min-w-10 inline-flex items-center justify-center text-m3-secondary hover:text-m3-text hover:bg-m3-hover rounded-[var(--radius-md)] transition-colors cursor-pointer"
               aria-label={t("explorer.moreOptions")}
+              aria-expanded={menuOpen}
+              aria-haspopup="menu"
             >
               <MoreHorizontal className="w-4 h-4" />
             </button>
-            {menuOpen && (
+            {menuOpen && menuPos && (
               <>
                 <div
-                  className="fixed inset-0 z-10"
+                  className="fixed inset-0 z-[70]"
                   onClick={() => setMenuOpen(false)}
                 />
-                <div className="absolute right-0 top-8 z-20 w-40 bg-m3-card rounded-xl shadow-[var(--shadow-lg)] border border-m3-border dark:border-m3-border/40 py-1">
+                <div
+                  role="menu"
+                  style={{ top: menuPos.top, left: menuPos.left }}
+                  className="fixed z-[80] w-56 bg-m3-card border border-m3-border rounded-[var(--radius-xl)] shadow-[var(--shadow-lg)] p-1.5 flex flex-col gap-0.5 text-xs select-none hosanna-enter"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div className="px-3 py-1.5 text-label text-m3-secondary border-b border-m3-border mb-0.5 truncate">
+                    {element.title || t("serviceDetailPage.untitledElement")}
+                  </div>
                   {!isSong && (
                     <button
                       type="button"
+                      role="menuitem"
                       onClick={() => {
                         onEdit(element);
                         setMenuOpen(false);
                       }}
-                      className="w-full flex items-center gap-2 px-3 py-2 text-xs font-medium text-m3-text hover:bg-m3-hover cursor-pointer"
+                      className={SERVICE_MENU_ITEM}
                     >
-                      <Edit3 className="w-3.5 h-3.5" />{" "}
-                      {t("serviceDetailPage.editElement")}
+                      <Edit3 className={SERVICE_MENU_ICON} />
+                      <span>{t("serviceDetailPage.editElement")}</span>
                     </button>
                   )}
                   <button
                     type="button"
+                    role="menuitem"
                     onClick={() => {
                       setIsEditingNote(true);
                       setIsExpanded(true);
                       setMenuOpen(false);
                     }}
-                    className="w-full flex items-center gap-2 px-3 py-2 text-xs font-medium text-m3-text hover:bg-m3-hover cursor-pointer"
+                    className={SERVICE_MENU_ITEM}
                   >
-                    <FileText className="w-3.5 h-3.5" />{" "}
-                    {element.notes
-                      ? t("serviceDetailPage.editNotes")
-                      : t("serviceDetailPage.addNotes")}
+                    <FileText className={SERVICE_MENU_ICON} />
+                    <span>
+                      {element.notes
+                        ? t("serviceDetailPage.editNotes")
+                        : t("serviceDetailPage.addNotes")}
+                    </span>
                   </button>
+                  <div className="my-1 border-t border-m3-border" />
                   <button
                     type="button"
+                    role="menuitem"
                     onClick={() => {
                       onRemove(element.id);
                       setMenuOpen(false);
                     }}
-                    className="w-full flex items-center gap-2 px-3 py-2 text-xs font-medium text-m3-danger hover:bg-rose-50 dark:hover:bg-rose-900/20 cursor-pointer"
+                    className={SERVICE_MENU_DANGER}
                   >
-                    <Trash2 className="w-3.5 h-3.5" />{" "}
-                    {t("serviceDetailPage.removeElement")}
+                    <Trash2 className="w-4 h-4 text-m3-danger shrink-0" />
+                    <span>{t("serviceDetailPage.removeElement")}</span>
                   </button>
                 </div>
               </>
@@ -578,50 +631,64 @@ const ServiceRow: React.FC<ServiceRowProps> = ({
         </div>
       </div>
 
-      {isExpanded && (isEditingNote || element.notes) && (
-        <div className="border-t border-m3-border dark:border-m3-border/30 bg-m3-sidebar/10 dark:bg-black/10 rounded-b-2xl p-4 flex flex-col gap-4">
-          <div className="flex flex-col gap-2">
-            <label className="text-label flex items-center gap-1">
-              <FileText className="w-3 h-3" />{" "}
-              {t("serviceDetailPage.elementNotes")}
-            </label>
-            {isEditingNote ? (
-              <div className="flex items-center gap-2">
-                <input
-                  type="text"
-                  value={localNote}
-                  onChange={(e) => setLocalNote(e.target.value)}
-                  placeholder={t("serviceDetailPage.elementNotesPlaceholder")}
-                  className="flex-1 text-xs rounded-lg border border-m3-border px-3 py-2 bg-m3-card focus:outline-none focus:border-m3-primary text-m3-text"
-                  autoFocus
-                />
-                <Button
-                  size="sm"
-                  variant="primary"
-                  onClick={() => {
-                    onNoteChange(element.id, localNote);
-                    setIsEditingNote(false);
-                    setIsExpanded(false);
-                  }}
-                >
-                  <Save className="w-3.5 h-3.5" />
-                </Button>
-              </div>
-            ) : (
-              <div className="text-sm text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-900/20 px-3 py-2 rounded-lg border border-amber-200 dark:border-amber-800/50">
-                {element.notes}
-              </div>
-            )}
+      <div
+        className={`grid transition-[grid-template-rows] duration-300 ease-in-out ${
+          notesOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
+        }`}
+      >
+        <div className="overflow-hidden">
+          <div className="border-t border-m3-border dark:border-m3-border/30 bg-m3-sidebar/10 dark:bg-black/10 p-4 flex flex-col gap-4">
+            <div className="flex flex-col gap-2">
+              <label className="text-label flex items-center gap-1">
+                <FileText className="w-3 h-3" />{" "}
+                {t("serviceDetailPage.elementNotes")}
+              </label>
+              {isEditingNote ? (
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={localNote}
+                    onChange={(e) => setLocalNote(e.target.value)}
+                    placeholder={t("serviceDetailPage.elementNotesPlaceholder")}
+                    className="flex-1 text-xs rounded-lg border border-m3-border px-3 py-2 bg-m3-card focus:outline-none focus:border-m3-primary text-m3-text"
+                    autoFocus
+                  />
+                  <Button
+                    size="sm"
+                    variant="primary"
+                    onClick={() => {
+                      onNoteChange(element.id, localNote);
+                      setIsEditingNote(false);
+                      setIsExpanded(false);
+                    }}
+                  >
+                    <Save className="w-3.5 h-3.5" />
+                  </Button>
+                </div>
+              ) : (
+                element.notes && (
+                  <div className="text-sm text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-900/20 px-3 py-2 rounded-lg border border-amber-200 dark:border-amber-800/50">
+                    {element.notes}
+                  </div>
+                )
+              )}
+            </div>
           </div>
         </div>
-      )}
-      {isExpanded && !isSong && (
-        <div className="pt-0 p-4 flex flex-col gap-4">
-          <div className="mt-2 text-sm text-m3-text whitespace-pre-wrap bg-m3-card p-4 rounded-xl border border-m3-border dark:border-m3-border/50">
-            {element.content || t("serviceDetailPage.noContent")}
+      </div>
+      <div
+        className={`grid transition-[grid-template-rows] duration-300 ease-in-out ${
+          contentOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
+        }`}
+      >
+        <div className="overflow-hidden">
+          <div className="p-4 flex flex-col gap-4">
+            <div className="text-sm text-m3-text whitespace-pre-wrap bg-m3-card p-4 rounded-xl border border-m3-border dark:border-m3-border/50">
+              {element.content || t("serviceDetailPage.noContent")}
+            </div>
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 };
@@ -1453,16 +1520,28 @@ export const ServiceDetailPage: React.FC = () => {
         </div>
       )}
 
-      {/* ── Split Layout ────────────────────────────────────────────── */}
+      {/* ── Split Layout — panes stay mounted so width/opacity can animate ── */}
       <div className="flex-1 flex overflow-hidden relative">
-        {readingMode ? (
+        <div
+          className={`absolute inset-0 flex min-h-0 min-w-0 transition-all duration-300 ease-in-out ${
+            readingMode
+              ? "opacity-100 translate-y-0"
+              : "opacity-0 pointer-events-none translate-y-1"
+          }`}
+          aria-hidden={!readingMode}
+        >
           <ReadingStage
             elements={elements}
             activeId={previewElement?.id ?? elements[0]?.id ?? null}
             onSelect={setPreviewElement}
           />
-        ) : (
-          <>
+        </div>
+        <div
+          className={`flex-1 flex min-w-0 min-h-0 transition-opacity duration-300 ease-in-out ${
+            readingMode ? "opacity-0 pointer-events-none" : "opacity-100"
+          }`}
+          aria-hidden={readingMode}
+        >
         {!showLibrary && (
           <button
             type="button"
@@ -1474,16 +1553,20 @@ export const ServiceDetailPage: React.FC = () => {
             <PanelLeftOpen className="w-4 h-4" />
           </button>
         )}
-        {/* Library Sidebar */}
+        {/* Library Sidebar — width animates; never display:none */}
         <div
-          className={`transition-all duration-300 flex-col border-r border-m3-border bg-m3-sidebar/30 ${
+          className={`flex flex-col overflow-hidden shrink-0 min-w-0 bg-m3-sidebar/30 transition-[width,opacity] duration-300 ease-in-out ${
+            showLibrary && mobilePane === "library"
+              ? "max-md:w-full max-md:opacity-100"
+              : "max-md:w-0 max-md:opacity-0 max-md:pointer-events-none"
+          } ${
             showLibrary
-              ? mobilePane === "library"
-                ? "flex w-full md:w-80 lg:w-96"
-                : "hidden md:flex md:w-80 lg:w-96"
-              : "hidden"
+              ? "md:w-80 lg:w-96 md:opacity-100 md:border-r md:border-m3-border"
+              : "md:w-0 md:opacity-0 md:pointer-events-none"
           }`}
+          aria-hidden={!showLibrary}
         >
+          <div className="flex flex-col h-full min-h-0 w-full md:w-80 lg:w-96">
           <div className="p-4 border-b border-m3-border bg-m3-card shrink-0">
             <div className="flex items-center justify-between mb-3">
               <h2 className="text-sm font-bold text-m3-text flex items-center gap-2">
@@ -1492,7 +1575,10 @@ export const ServiceDetailPage: React.FC = () => {
               </h2>
               <button
                 type="button"
-                onClick={() => setShowLibrary(false)}
+                onClick={() => {
+                  setShowLibrary(false);
+                  setMobilePane("order");
+                }}
                 className="p-1.5 rounded-lg text-m3-secondary hover:text-m3-primary hover:bg-m3-primary/10 transition-colors cursor-pointer"
                 title={t("serviceDetailPage.hideLibrary")}
                 aria-label={t("serviceDetailPage.hideLibrary")}
@@ -1553,13 +1639,15 @@ export const ServiceDetailPage: React.FC = () => {
               ))
             )}
           </div>
+          </div>
         </div>
 
         <div
-          className={`flex-1 flex flex-col min-w-0 overflow-hidden bg-m3-background relative
-    transition-all duration-250 ease-out
-    ${mobilePane === "library" && showLibrary ? "max-md:hidden" : ""}
-    ${!showLibrary && !previewElement ? "p-4 lg:p-6" : ""}`}
+          className={`flex flex-col min-w-0 overflow-hidden bg-m3-background relative flex-1 transition-[width,opacity,padding,flex-grow] duration-300 ease-in-out ${
+            mobilePane === "library" && showLibrary
+              ? "max-md:grow-0 max-md:w-0 max-md:opacity-0 max-md:pointer-events-none max-md:p-0"
+              : ""
+          } ${!showLibrary && !previewElement ? "p-4 lg:p-6" : ""}`}
         >
           <div className="max-w-5xl w-full mx-auto flex flex-col h-full">
             <div
@@ -1744,12 +1832,14 @@ export const ServiceDetailPage: React.FC = () => {
         </div>
 
         <div
-          className={`transition-all duration-300 flex-col border-l border-m3-border bg-m3-card ${
+          className={`flex flex-col overflow-hidden shrink-0 min-w-0 bg-m3-card transition-[width,opacity,transform] duration-300 ease-in-out max-md:absolute max-md:inset-y-0 max-md:right-0 max-md:z-20 ${
             previewElement
-              ? "flex w-full md:w-96 lg:w-md max-md:absolute max-md:inset-0 max-md:z-20"
-              : "hidden"
+              ? "max-md:w-full max-md:translate-x-0 max-md:opacity-100 md:w-96 lg:w-md md:opacity-100 md:border-l md:border-m3-border"
+              : "max-md:w-full max-md:translate-x-full max-md:opacity-0 max-md:pointer-events-none md:w-0 md:opacity-0 md:pointer-events-none"
           }`}
+          aria-hidden={!previewElement}
         >
+          <div className="flex flex-col h-full min-h-0 w-full md:w-96 lg:w-md">
           {previewContent && (
             <>
               <div className="p-4 border-b border-m3-border bg-m3-card shrink-0">
@@ -1777,9 +1867,9 @@ export const ServiceDetailPage: React.FC = () => {
               </div>
             </>
           )}
+          </div>
         </div>
-          </>
-        )}
+        </div>
       </div>
 
       <WelcomeModal
