@@ -171,7 +171,7 @@ export const CollectionsPage: React.FC = () => {
         </div>
       ) : (
         <div className="p-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
             {/* Collection Cards */}
             {filteredCollections.map((collection) => {
               const IconComp = getFolderIconComponent(collection.icon);
@@ -186,35 +186,40 @@ export const CollectionsPage: React.FC = () => {
                   onClick={() =>
                     navigate(`${slugPrefix}/collections/${collection.id}`)
                   }
-                  className="group relative rounded-[var(--radius-xl)] border border-m3-border/80 bg-m3-card overflow-hidden hover:border-m3-primary/40 hover:shadow-[var(--shadow-sm)] transition-colors duration-200 cursor-pointer flex flex-col min-h-60"
+                  className="group relative rounded-[var(--radius-lg)] border border-m3-border/80 bg-m3-card overflow-hidden hover:border-m3-primary/40 transition-colors duration-200 cursor-pointer flex flex-col"
                 >
-                  {/* Banner / Header */}
-                  <div className="relative h-28 w-full overflow-hidden bg-m3-sidebar">
-                    {collection.image ? (
+                  {collection.image && (
+                    <div className="relative h-16 w-full overflow-hidden bg-m3-sidebar">
                       <img
                         src={collection.image}
-                        alt={collection.name}
+                        alt=""
                         className="w-full h-full object-cover"
                       />
-                    ) : (
-                      <div
-                        className="w-full h-full opacity-85 group-hover:opacity-100 transition-opacity"
-                        style={{
-                          background: `linear-gradient(135deg, ${colorStyle.colorHex}25 0%, ${colorStyle.colorHex}70 100%)`,
-                        }}
-                      />
-                    )}
-                  </div>
+                    </div>
+                  )}
 
-                  {/* Badge Icon & Context Menu */}
-                  <div className="relative px-5 pt-0 pb-5 flex-1 flex flex-col">
-                    <div className="flex items-center justify-between -mt-6 mb-3">
-                      {/* Floating Badge */}
+                  <div className="relative px-4 py-3.5 flex-1 flex flex-col">
+                    <div className="flex items-start gap-3">
                       <div
-                        className="w-12 h-12 rounded-[var(--radius-lg)] flex items-center justify-center text-white shadow-lg border-2 border-m3-card shrink-0"
-                        style={{ backgroundColor: colorStyle.colorHex }}
+                        className="w-10 h-10 rounded-[var(--radius-md)] flex items-center justify-center shrink-0 border"
+                        style={{
+                          backgroundColor: `${colorStyle.colorHex}18`,
+                          color: colorStyle.colorHex,
+                          borderColor: `${colorStyle.colorHex}33`,
+                        }}
                       >
-                        <IconComp className="w-6 h-6" />
+                        <IconComp className="w-5 h-5" />
+                      </div>
+                      <div className="min-w-0 flex-1 pt-0.5">
+                        <h4 className="text-sm font-semibold text-m3-text line-clamp-1 group-hover:text-m3-primary transition-colors">
+                          {collection.name}
+                        </h4>
+                        <span className="text-caption mt-0.5 block">
+                          {t(
+                            `collectionsPage.songCount.${songCount === 1 ? "one" : "other"}`,
+                            { count: songCount },
+                          )}
+                        </span>
                       </div>
 
                       {/* Three Dots Menu Button */}
@@ -228,7 +233,8 @@ export const CollectionsPage: React.FC = () => {
                             e.stopPropagation();
                             setOpenMenuId(isMenuOpen ? null : collection.id);
                           }}
-                          className="p-1.5 rounded-[var(--radius-md)] text-m3-secondary hover:text-m3-text hover:bg-m3-hover transition-colors cursor-pointer"
+                          className="min-h-10 min-w-10 inline-flex items-center justify-center rounded-[var(--radius-md)] text-m3-secondary hover:text-m3-text hover:bg-m3-hover transition-colors cursor-pointer"
+                          aria-label={t("explorer.moreOptions")}
                           title={t("explorer.moreOptions")}
                         >
                           <MoreHorizontal className="w-4 h-4" />
@@ -284,20 +290,8 @@ export const CollectionsPage: React.FC = () => {
                       </div>
                     </div>
 
-                    {/* Title & Count */}
-                    <h4 className="text-title text-m3-text line-clamp-1 group-hover:text-m3-primary transition-colors">
-                      {collection.name}
-                    </h4>
-                    <span className="text-caption mt-0.5">
-                      {t(
-                        `collectionsPage.songCount.${songCount === 1 ? "one" : "other"}`,
-                        { count: songCount },
-                      )}
-                    </span>
-
-                    {/* Description */}
                     {collection.description && (
-                      <p className="text-caption line-clamp-2 mt-2 leading-relaxed">
+                      <p className="text-caption line-clamp-2 mt-2.5 leading-relaxed">
                         {collection.description}
                       </p>
                     )}

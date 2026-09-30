@@ -1812,6 +1812,15 @@ export const es: typeof pt = {
     unknownSong: "Canción Desconocida",
     noComposer: "Sin Compositor",
     failedToLoadSong: "Error al cargar la canción",
+    planMode: "Planear",
+    readingMode: "Leer",
+    readingModeHint: "Vista de lectura para el culto",
+    mobileOrder: "Orden",
+    mobileLibrary: "Biblioteca",
+    nowLabel: "Ahora",
+    nextLabel: "Siguiente",
+    readingEmpty: "Este plan aún no tiene elementos.",
+    readingKeys: "Flechas para avanzar",
   },
 
   serviceModals: {

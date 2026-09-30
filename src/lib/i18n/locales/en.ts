@@ -1784,6 +1784,15 @@ export const en: typeof pt = {
     unknownSong: "Unknown Song",
     noComposer: "No Composer",
     failedToLoadSong: "Failed to load song",
+    planMode: "Plan",
+    readingMode: "Read",
+    readingModeHint: "Reading view for the service",
+    mobileOrder: "Order",
+    mobileLibrary: "Library",
+    nowLabel: "Now",
+    nextLabel: "Next",
+    readingEmpty: "This plan has no items yet.",
+    readingKeys: "Arrow keys to move",
   },
 
   serviceModals: {
