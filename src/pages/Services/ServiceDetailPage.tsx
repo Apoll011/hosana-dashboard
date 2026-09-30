@@ -430,19 +430,18 @@ const ServiceRow: React.FC<ServiceRowProps> = ({
           className="min-w-0 flex-1 cursor-pointer select-none"
           onClick={handleExpandToggle}
         >
-          <div className="flex items-center gap-2">
-            <p className="text-sm font-semibold truncate text-m3-text">
-              {element.title || t("serviceDetailPage.untitledElement")}
-            </p>
+          <p className="text-sm font-semibold truncate text-m3-text">
+            {element.title || t("serviceDetailPage.untitledElement")}
+          </p>
+          <div className="flex items-center gap-1.5 mt-0.5 min-w-0">
             <span
-              className="text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0"
+              className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full shrink-0"
               style={{ backgroundColor: badge.bg, color: badge.color }}
             >
               {badge.label}
             </span>
             {Number(element.duration || 0) > 0 && (
-              <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-m3-sidebar text-m3-secondary shrink-0 tabular-nums">
-                <Clock3 className="w-3 h-3 inline mr-1" />{" "}
+              <span className="text-[10px] font-semibold text-m3-secondary shrink-0 tabular-nums">
                 {formatDuration(Number(element.duration || 0))}
               </span>
             )}
@@ -467,7 +466,7 @@ const ServiceRow: React.FC<ServiceRowProps> = ({
           )}
         </div>
 
-        <div className="flex flex-col items-center gap-0.5 shrink-0">
+        <div className="hidden sm:flex flex-col items-center gap-0.5 shrink-0">
           <button
             type="button"
             onClick={onMoveUp}
@@ -522,7 +521,8 @@ const ServiceRow: React.FC<ServiceRowProps> = ({
             <button
               type="button"
               onClick={() => setMenuOpen(!menuOpen)}
-              className="p-1.5 text-m3-secondary hover:text-m3-primary hover:bg-m3-primary/10 rounded-lg transition-colors cursor-pointer"
+              className="min-h-10 min-w-10 inline-flex items-center justify-center text-m3-secondary hover:text-m3-primary hover:bg-m3-primary/10 rounded-lg transition-colors cursor-pointer"
+              aria-label={t("explorer.moreOptions")}
             >
               <MoreHorizontal className="w-4 h-4" />
             </button>
