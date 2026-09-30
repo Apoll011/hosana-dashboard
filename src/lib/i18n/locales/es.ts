@@ -43,6 +43,7 @@ export const es: typeof pt = {
     type: "Tipo",
     action: "Acción",
     details: "Detalles",
+    score: "Puntuación",
     location: "Ubicación",
     or: "O",
     updatedAt: "Actualización",
@@ -1158,6 +1159,9 @@ export const es: typeof pt = {
     addToCollection: "Añadir a la Colección",
     selectCollectionPrompt: "Seleccione la colección de destino:",
     noCollectionsAvailable: "No se encontraron colecciones.",
+    deleteManyTitle: "Eliminar colecciones",
+    deleteManyMessage:
+      "¿Enviar {count} colecciones a la papelera? Las canciones siguen en la biblioteca.",
     createCollectionFirst:
       "Cree una colección primero para poder añadir canciones.",
   },

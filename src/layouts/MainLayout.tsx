@@ -952,6 +952,8 @@ export const MainLayout: React.FC = () => {
         return;
       }
 
+      if (view === "collections") return;
+
       if (e.key === "Delete" || e.key === "Backspace") {
         if (totalSelectedCount === 0) return;
         e.preventDefault();
