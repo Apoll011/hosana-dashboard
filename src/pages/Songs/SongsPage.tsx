@@ -4,7 +4,7 @@
  */
 
 import { OverflowTagList } from "@/src/components/OverflowTagList";
-import { Badge, Button, EmptyState, Spinner } from "@/src/components/common";
+import { Badge, EmptyState, Spinner } from "@/src/components/common";
 import { MarqueeSelectionBox } from "@/src/components/explorer";
 import { useAppNavigate } from "@/src/hooks/useAppNavigate";
 import { useMarqueeSelection } from "@/src/hooks/useMarqueeSelection";
@@ -673,64 +673,6 @@ export const SongsPage: React.FC<SongsPageProps> = ({
           )}
         </div>
       </div>
-
-      {/* Floating Multi-Select Action Bar */}
-      {selectedSongIds.size > 1 && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 bg-m3-card text-m3-text border border-m3-border rounded-[var(--radius-xl)] shadow-[var(--shadow-lg)] px-5 py-3 animate-in fade-in slide-in-from-bottom-4 duration-200">
-          <span className="text-label px-2">
-            {t("songsPage.selectedCount", { count: selectedSongIds.size })}
-          </span>
-
-          <div className="h-6 w-px bg-m3-border" />
-
-          <Can permission="song.update">
-            <Button
-              size="sm"
-              variant="ghost"
-              icon={<Tag className="w-4 h-4" />}
-              onClick={() => openModal?.("batch-tag")}
-              className="text-m3-text! hover:bg-m3-hover!"
-            >
-              {t("songsPage.tag")}
-            </Button>
-
-            <Button
-              size="sm"
-              variant="ghost"
-              icon={<FolderInput className="w-4 h-4" />}
-              onClick={() => openModal?.("batch-move")}
-              className="text-m3-text! hover:bg-m3-hover!"
-            >
-              {t("songsPage.move")}
-            </Button>
-          </Can>
-
-          <Can permission="song.delete">
-            <Button
-              size="sm"
-              variant="ghost"
-              icon={<Trash2 className="w-4 h-4" />}
-              onClick={() => openModal?.("batch-delete")}
-              className="text-m3-danger! hover:bg-m3-danger/10!"
-            >
-              {t("songsPage.eliminate")}
-            </Button>
-          </Can>
-
-          <Button
-            size="sm"
-            variant="ghost"
-            icon={<X className="w-4 h-4" />}
-            onClick={() => {
-              setSelectedSongIds(new Set());
-              setLastClickedId(null);
-            }}
-            className="text-m3-secondary! hover:bg-m3-hover!"
-          >
-            {t("common.cancel")}
-          </Button>
-        </div>
-      )}
 
       {/* Floating Context Menu */}
       {contextMenu && (

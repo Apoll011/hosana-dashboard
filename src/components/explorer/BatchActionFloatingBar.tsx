@@ -1,6 +1,6 @@
 import { Button } from "@/src/components/common";
 import { useI18n } from "@/src/lib/i18n";
-import { Archive, Printer, Trash2, X } from "lucide-react";
+import { Archive, FolderInput, Printer, Tag, Trash2, X } from "lucide-react";
 import React from "react";
 
 interface BatchActionFloatingBarProps {
@@ -8,8 +8,12 @@ interface BatchActionFloatingBarProps {
   itemLabel?: string;
   onArchive?: () => void;
   onPrint?: () => void;
+  onTag?: () => void;
+  onMove?: () => void;
   onDelete: () => void;
   onCancel: () => void;
+  /** Override the delete button label (e.g. “Remove”). */
+  deleteLabel?: string;
 }
 
 export const BatchActionFloatingBar: React.FC<BatchActionFloatingBarProps> = ({
@@ -17,8 +21,11 @@ export const BatchActionFloatingBar: React.FC<BatchActionFloatingBarProps> = ({
   itemLabel = "cultos",
   onArchive,
   onPrint,
+  onTag,
+  onMove,
   onDelete,
   onCancel,
+  deleteLabel,
 }) => {
   if (selectedCount <= 1) return null;
   const { t } = useI18n();
@@ -28,13 +35,35 @@ export const BatchActionFloatingBar: React.FC<BatchActionFloatingBarProps> = ({
         {selectedCount} {itemLabel} selecionados
       </span>
       <div className="h-6 w-px bg-m3-border" />
+      {onTag && (
+        <Button
+          size="sm"
+          variant="ghost"
+          icon={<Tag className="w-4 h-4" />}
+          onClick={onTag}
+          className="text-m3-text hover:bg-m3-hover"
+        >
+          {t("songsPage.tag")}
+        </Button>
+      )}
+      {onMove && (
+        <Button
+          size="sm"
+          variant="ghost"
+          icon={<FolderInput className="w-4 h-4" />}
+          onClick={onMove}
+          className="text-m3-text hover:bg-m3-hover"
+        >
+          {t("songsPage.move")}
+        </Button>
+      )}
       {onPrint && (
         <Button
           size="sm"
           variant="ghost"
           icon={<Printer className="w-4 h-4" />}
           onClick={onPrint}
-          className="text-m3-primary hover:bg-m3-primary/10"
+          className="text-m3-text hover:bg-m3-hover"
         >
           {t("common.print")}
         </Button>
@@ -45,7 +74,7 @@ export const BatchActionFloatingBar: React.FC<BatchActionFloatingBarProps> = ({
           variant="ghost"
           icon={<Archive className="w-4 h-4" />}
           onClick={onArchive}
-          className="text-m3-secondary hover:bg-m3-hover"
+          className="text-m3-text hover:bg-m3-hover"
         >
           {t("common.archive")}
         </Button>
@@ -57,13 +86,14 @@ export const BatchActionFloatingBar: React.FC<BatchActionFloatingBarProps> = ({
         onClick={onDelete}
         className="text-m3-danger hover:bg-m3-danger/10"
       >
-        {t("common.delete")}
+        {deleteLabel ?? t("common.delete")}
       </Button>
       <Button
         size="sm"
         variant="ghost"
         icon={<X className="w-4 h-4" />}
         onClick={onCancel}
+        className="text-m3-text hover:bg-m3-hover"
       >
         {t("common.cancel")}
       </Button>

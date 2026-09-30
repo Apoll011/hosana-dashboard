@@ -53,6 +53,7 @@ interface ExplorerAddressBarProps {
   currentSong: Song | undefined;
   currentSongFileName: string;
   currentService: Service | undefined;
+  currentCollectionName?: string;
   searchQuery: string;
   onSearchChange: (q: string) => void;
   onSelectFolder: (id: string | null) => void;
@@ -73,6 +74,7 @@ export const ExplorerAddressBar: React.FC<ExplorerAddressBarProps> = ({
   currentSong,
   currentSongFileName,
   currentService,
+  currentCollectionName,
   searchQuery,
   onSearchChange,
   onSelectFolder,
@@ -371,6 +373,15 @@ export const ExplorerAddressBar: React.FC<ExplorerAddressBarProps> = ({
                 <LibraryBig className="w-4 h-4 opacity-70" />
                 <span>{t("common.collections")}</span>
               </button>
+              {currentCollectionName && (
+                <>
+                  <ChevronRight className="w-3.5 h-3.5 text-m3-secondary/40 shrink-0" />
+                  <div className={crumbCurrent}>
+                    <LibraryBig className="w-4 h-4" />
+                    <span>{currentCollectionName}</span>
+                  </div>
+                </>
+              )}
             </>
           )}
         </div>

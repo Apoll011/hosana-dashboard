@@ -719,13 +719,13 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
       {contextMenu && (
         <div
           style={{ top: contextMenu.y, left: contextMenu.x }}
-          className="fixed z-50 w-56 bg-m3-card border border-m3-border rounded-[var(--radius-xl)] shadow-[var(--shadow-lg)] p-1.5 flex flex-col gap-0.5 text-xs select-none animate-in fade-in zoom-in-95 duration-100"
+          className="fixed z-50 w-56 bg-m3-card border border-m3-border rounded-[var(--radius-xl)] shadow-[var(--shadow-lg)] p-1.5 flex flex-col gap-0.5 text-xs select-none hosanna-enter"
           onClick={(e) => e.stopPropagation()}
           onContextMenu={(e) => e.preventDefault()}
         >
           {contextMenu.isMulti ? (
             <>
-              <div className="px-3 py-1.5 text-label text-m3-primary border-b border-m3-border/60 mb-0.5 flex items-center justify-between">
+              <div className="px-3 py-1.5 text-label border-b border-m3-border mb-0.5 flex items-center justify-between">
                 <span>{t("servicesPage.multiSelect")}</span>
                 <Badge variant="sky">{selectedServiceIds.size}</Badge>
               </div>
@@ -739,9 +739,9 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
                   }
                   setContextMenu(null);
                 }}
-                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-[var(--radius-md)] text-m3-text hover:bg-m3-hover font-medium transition-colors text-left cursor-pointer"
+                className="w-full flex items-center gap-2.5 px-3 py-2 min-h-10 rounded-[var(--radius-md)] text-m3-text hover:bg-m3-hover font-medium transition-colors text-left cursor-pointer"
               >
-                <Printer className="w-4 h-4 text-m3-primary" />
+                <Printer className="w-4 h-4 text-m3-secondary" />
                 <span>
                   {t("print.buttons.printCount", {
                     count: selectedServiceIds.size,
@@ -753,9 +753,9 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
                   setIsBatchArchiveOpen(true);
                   setContextMenu(null);
                 }}
-                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-[var(--radius-md)] text-m3-text hover:bg-m3-hover font-medium transition-colors text-left cursor-pointer"
+                className="w-full flex items-center gap-2.5 px-3 py-2 min-h-10 rounded-[var(--radius-md)] text-m3-text hover:bg-m3-hover font-medium transition-colors text-left cursor-pointer"
               >
-                <Archive className="w-4 h-4 text-amber-500" />
+                <Archive className="w-4 h-4 text-m3-secondary" />
                 <span>
                   {t("servicesPage.archiveCount", {
                     count: selectedServiceIds.size,
@@ -767,22 +767,22 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
                   setIsBatchDeleteOpen(true);
                   setContextMenu(null);
                 }}
-                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 font-semibold transition-colors text-left cursor-pointer"
+                className="w-full flex items-center gap-2.5 px-3 py-2 min-h-10 rounded-[var(--radius-md)] text-m3-danger hover:bg-m3-danger/10 font-semibold transition-colors text-left cursor-pointer"
               >
-                <Trash2 className="w-4 h-4 text-rose-500" />
+                <Trash2 className="w-4 h-4 text-m3-danger" />
                 <span>
                   {t("servicesPage.deleteCount", {
                     count: selectedServiceIds.size,
                   })}
                 </span>
               </button>
-              <div className="my-1 border-t border-m3-border/60" />
+              <div className="my-1 border-t border-m3-border" />
               <button
                 onClick={() => {
                   setSelectedServiceIds(new Set());
                   setContextMenu(null);
                 }}
-                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-[var(--radius-md)] text-m3-secondary hover:bg-m3-hover font-medium transition-colors text-left cursor-pointer"
+                className="w-full flex items-center gap-2.5 px-3 py-2 min-h-10 rounded-[var(--radius-md)] text-m3-text hover:bg-m3-hover font-medium transition-colors text-left cursor-pointer"
               >
                 <X className="w-4 h-4 text-m3-secondary" />
                 <span>{t("servicesPage.deselect")}</span>
@@ -790,7 +790,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
             </>
           ) : contextMenu.service ? (
             <>
-              <div className="px-3 py-1.5 text-label border-b border-m3-border/60 mb-0.5 truncate">
+              <div className="px-3 py-1.5 text-label border-b border-m3-border mb-0.5 truncate">
                 {contextMenu.service.name}
               </div>
 
@@ -799,9 +799,9 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
                   navigate(`${slugPrefix}/services/${contextMenu.service!.id}`);
                   setContextMenu(null);
                 }}
-                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-[var(--radius-md)] text-m3-text hover:bg-m3-hover font-medium transition-colors text-left cursor-pointer"
+                className="w-full flex items-center gap-2.5 px-3 py-2 min-h-10 rounded-[var(--radius-md)] text-m3-text hover:bg-m3-hover font-medium transition-colors text-left cursor-pointer"
               >
-                <Calendar className="w-4 h-4 text-m3-primary" />
+                <Calendar className="w-4 h-4 text-m3-secondary" />
                 <span>{t("servicesPage.openService")}</span>
               </button>
 
@@ -810,9 +810,9 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
                   setEditTarget(contextMenu.service);
                   setContextMenu(null);
                 }}
-                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-[var(--radius-md)] text-m3-text hover:bg-m3-hover font-medium transition-colors text-left cursor-pointer"
+                className="w-full flex items-center gap-2.5 px-3 py-2 min-h-10 rounded-[var(--radius-md)] text-m3-text hover:bg-m3-hover font-medium transition-colors text-left cursor-pointer"
               >
-                <Edit2 className="w-4 h-4 text-m3-primary" />
+                <Edit2 className="w-4 h-4 text-m3-secondary" />
                 <span>{t("servicesPage.editNameDate")}</span>
               </button>
 
@@ -821,9 +821,9 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
                   handleDuplicateService(contextMenu.service!);
                   setContextMenu(null);
                 }}
-                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-[var(--radius-md)] text-m3-text hover:bg-m3-hover font-medium transition-colors text-left cursor-pointer"
+                className="w-full flex items-center gap-2.5 px-3 py-2 min-h-10 rounded-[var(--radius-md)] text-m3-text hover:bg-m3-hover font-medium transition-colors text-left cursor-pointer"
               >
-                <Copy className="w-4 h-4 text-emerald-500" />
+                <Copy className="w-4 h-4 text-m3-secondary" />
                 <span>{t("servicesPage.duplicate")}</span>
               </button>
 
@@ -834,9 +834,9 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
                   }
                   setContextMenu(null);
                 }}
-                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-[var(--radius-md)] text-m3-text hover:bg-m3-hover font-medium transition-colors text-left cursor-pointer"
+                className="w-full flex items-center gap-2.5 px-3 py-2 min-h-10 rounded-[var(--radius-md)] text-m3-text hover:bg-m3-hover font-medium transition-colors text-left cursor-pointer"
               >
-                <Printer className="w-4 h-4 text-m3-primary" />
+                <Printer className="w-4 h-4 text-m3-secondary" />
                 <span>{t("print.buttons.printServiceShort")}</span>
               </button>
 
@@ -844,12 +844,12 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
                 onClick={() => {
                   handleArchiveToggle(contextMenu.service!);
                 }}
-                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-[var(--radius-md)] text-m3-text hover:bg-m3-hover font-medium transition-colors text-left cursor-pointer"
+                className="w-full flex items-center gap-2.5 px-3 py-2 min-h-10 rounded-[var(--radius-md)] text-m3-text hover:bg-m3-hover font-medium transition-colors text-left cursor-pointer"
               >
                 {contextMenu.service.archived ? (
-                  <ArchiveRestore className="w-4 h-4 text-orange-500" />
+                  <ArchiveRestore className="w-4 h-4 text-m3-secondary" />
                 ) : (
-                  <Archive className="w-4 h-4 text-orange-500" />
+                  <Archive className="w-4 h-4 text-m3-secondary" />
                 )}
                 <span>
                   {contextMenu.service.archived
@@ -858,16 +858,16 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
                 </span>
               </button>
 
-              <div className="my-1 border-t border-m3-border/60" />
+              <div className="my-1 border-t border-m3-border" />
 
               <button
                 onClick={() => {
                   setDeleteTarget(contextMenu.service);
                   setContextMenu(null);
                 }}
-                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 font-semibold transition-colors text-left cursor-pointer"
+                className="w-full flex items-center gap-2.5 px-3 py-2 min-h-10 rounded-[var(--radius-md)] text-m3-danger hover:bg-m3-danger/10 font-semibold transition-colors text-left cursor-pointer"
               >
-                <Trash2 className="w-4 h-4 text-rose-500" />
+                <Trash2 className="w-4 h-4 text-m3-danger" />
                 <span>{t("servicesPage.deleteService")}</span>
               </button>
             </>

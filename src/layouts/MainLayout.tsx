@@ -789,6 +789,13 @@ export const MainLayout: React.FC = () => {
   );
   const { collections, createCollection, addSongsToCollection } =
     useCollections();
+  const currentCollectionId =
+    view === "collection-detail" ? location.pathname.split("/").pop() : null;
+  const currentCollectionName = useMemo(
+    () =>
+      collections.find((c) => c.id === currentCollectionId)?.name ?? undefined,
+    [collections, currentCollectionId],
+  );
   const [addToCollectionTarget, setAddToCollectionTarget] =
     useState<Song | null>(null);
 
@@ -1536,6 +1543,7 @@ export const MainLayout: React.FC = () => {
               currentSong={currentSong}
               currentSongFileName={currentSongFileName}
               currentService={currentService}
+              currentCollectionName={currentCollectionName}
               searchQuery={searchQuery}
               onSearchChange={handleSearchChange}
               onSelectFolder={handleSelectFolder}
@@ -1664,6 +1672,16 @@ export const MainLayout: React.FC = () => {
       <BatchActionFloatingBar
         selectedCount={totalSelectedCount}
         itemLabel={t("layout.items")}
+        onTag={
+          selectedSongIds.size > 0
+            ? () => openModal("batch-tag")
+            : undefined
+        }
+        onMove={
+          selectedSongIds.size > 0 || selectedFolderIds.size > 0
+            ? () => openModal("batch-move")
+            : undefined
+        }
         onPrint={() => {
           const sList = allSongs.filter((s) => selectedSongIds.has(s.id));
           const fList = allFolders
