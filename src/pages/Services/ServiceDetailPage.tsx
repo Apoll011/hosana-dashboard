@@ -60,6 +60,7 @@ import React, {
   useState,
 } from "react";
 import { useParams } from "react-router-dom";
+import { useAuth } from "../../contexts/AuthContext";
 import { usePrint } from "../../contexts/PrintContext";
 import { useSync } from "../../contexts/SyncContext";
 import { useOrgSettings } from "../../hooks/useOrgSettings";
@@ -132,7 +133,10 @@ const getElementBadge = (type: string, t: TranslateFn) => {
   }
 };
 
-const SongPreview: React.FC<{ element: ServiceElement }> = ({ element }) => {
+const SongPreview: React.FC<{ element: ServiceElement; chrome?: boolean }> = ({
+  element,
+  chrome = true,
+}) => {
   const { t } = useI18n();
   const { data: song, isLoading } = useSong(element.songId || null);
   const { settings, updateSetting, resetSettings } = usePreviewSettings();
@@ -167,31 +171,35 @@ const SongPreview: React.FC<{ element: ServiceElement }> = ({ element }) => {
 
   return (
     <div className="flex flex-col h-full relative">
-      <div className="h-10 bg-m3-sidebar/50 border-b border-m3-border dark:border-m3-dark-border flex items-center justify-between px-3 shrink-0">
-        <span className="text-label flex items-center gap-1.5">
-          <LayoutTemplate className="w-3 h-3" />{" "}
-          {t("serviceDetailPage.previewTitle")}
-        </span>
-        <button
-          onClick={() => setShowSettings(!showSettings)}
-          className={`p-1 rounded transition-colors cursor-pointer ${showSettings ? "bg-m3-primary/10 text-m3-primary" : "text-m3-secondary hover:bg-m3-hover hover:text-m3-text"}`}
-          title={t("serviceDetailPage.readingSettings")}
-        >
-          <Settings2 className="w-3.5 h-3.5" />
-        </button>
-      </div>
+      {chrome && (
+        <>
+          <div className="h-10 bg-m3-sidebar/50 border-b border-m3-border dark:border-m3-dark-border flex items-center justify-between px-3 shrink-0">
+            <span className="text-label flex items-center gap-1.5">
+              <LayoutTemplate className="w-3 h-3" />{" "}
+              {t("serviceDetailPage.previewTitle")}
+            </span>
+            <button
+              onClick={() => setShowSettings(!showSettings)}
+              className={`p-1 rounded transition-colors cursor-pointer ${showSettings ? "bg-m3-primary/10 text-m3-primary" : "text-m3-secondary hover:bg-m3-hover hover:text-m3-text"}`}
+              title={t("serviceDetailPage.readingSettings")}
+            >
+              <Settings2 className="w-3.5 h-3.5" />
+            </button>
+          </div>
 
-      {showSettings && (
-        <ChordProPreviewSettings
-          settings={settings}
-          updateSetting={updateSetting}
-          resetSettings={resetSettings}
-          capo={transformedSong.metadata.capo}
-        />
+          {showSettings && (
+            <ChordProPreviewSettings
+              settings={settings}
+              updateSetting={updateSetting}
+              resetSettings={resetSettings}
+              capo={transformedSong.metadata.capo}
+            />
+          )}
+        </>
       )}
 
       <div
-        className="flex-1 overflow-auto bg-m3-card relative custom-scrollbar p-2"
+        className="hosanna-sheet flex-1 overflow-auto bg-m3-card relative custom-scrollbar p-2"
         onClick={() => showSettings && setShowSettings(false)}
       >
         <ChordProRenderer
@@ -239,8 +247,8 @@ const LibrarySongItem: React.FC<LibrarySongItemProps> = ({
   return (
     <div
       ref={itemRef}
-      className={`flex items-center justify-between gap-3 px-3 py-2 bg-m3-card hover:bg-m3-hover rounded-xl border border-m3-border/50 cursor-grab active:cursor-grabbing transition-colors shadow-[var(--shadow-sm)] ${
-        isDragging ? "opacity-40 scale-95" : "opacity-100"
+      className={`flex items-center justify-between gap-3 px-3 py-2 min-h-14 bg-transparent hover:bg-m3-hover cursor-grab active:cursor-grabbing transition-colors ${
+        isDragging ? "opacity-40" : "opacity-100"
       }`}
     >
       <div className="min-w-0 flex-1">
@@ -261,7 +269,8 @@ const LibrarySongItem: React.FC<LibrarySongItemProps> = ({
           type="button"
           onClick={() => onAdd(song.id)}
           disabled={isPending}
-          className="p-1.5 rounded-lg bg-m3-primary/10 text-m3-primary hover:bg-m3-primary/20 disabled:opacity-50 transition-colors cursor-pointer"
+          className="min-w-11 min-h-11 inline-flex items-center justify-center rounded-[var(--radius-md)] bg-m3-primary/10 text-m3-primary hover:bg-m3-primary/20 disabled:opacity-50 transition-colors cursor-pointer"
+          aria-label={t("serviceDetailPage.addSong")}
         >
           {isPending ? (
             <Loader2 className="w-4 h-4 animate-spin" />
@@ -386,14 +395,14 @@ const ServiceRow: React.FC<ServiceRowProps> = ({
   return (
     <div
       ref={rowRef}
-      className={`bg-m3-card rounded-[var(--radius-xl)] border transition-colors relative ${
-        isDragging ? "opacity-40 scale-[0.98]" : "opacity-100"
-      } ${isPreviewed ? "ring-2 ring-m3-primary/30 shadow-md" : ""} ${
+      className={`bg-m3-card transition-colors relative ${
+        isDragging ? "opacity-40" : "opacity-100"
+      } ${isPreviewed ? "bg-m3-primary/5" : "hover:bg-m3-hover/50"} ${
         closestEdge === "top"
-          ? "border-t-m3-primary border-t-2 shadow-[var(--shadow-sm)]"
+          ? "shadow-[inset_0_2px_0_var(--m3-primary)]"
           : closestEdge === "bottom"
-            ? "border-b-m3-primary border-b-2 shadow-[var(--shadow-sm)]"
-            : "border-m3-border dark:border-m3-border/30 hover:border-m3-primary/30"
+            ? "shadow-[inset_0_-2px_0_var(--m3-primary)]"
+            : ""
       } flex flex-col`}
     >
       <div className="flex items-center gap-3 px-4 py-3">
@@ -406,7 +415,7 @@ const ServiceRow: React.FC<ServiceRowProps> = ({
           <GripVertical className="w-4 h-4" />
         </button>
 
-        <span className="text-xs font-semibold text-m3-secondary w-4 shrink-0 text-center">
+        <span className="text-xs font-semibold text-m3-secondary w-5 shrink-0 text-center tabular-nums">
           {index + 1}
         </span>
 
@@ -432,7 +441,7 @@ const ServiceRow: React.FC<ServiceRowProps> = ({
               {badge.label}
             </span>
             {Number(element.duration || 0) > 0 && (
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-m3-sidebar text-m3-secondary shrink-0">
+              <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-m3-sidebar text-m3-secondary shrink-0 tabular-nums">
                 <Clock3 className="w-3 h-3 inline mr-1" />{" "}
                 {formatDuration(Number(element.duration || 0))}
               </span>
@@ -620,10 +629,116 @@ const ServiceRow: React.FC<ServiceRowProps> = ({
 type ModalType =
   "welcome" | "scripture" | "message" | "announcement" | "custom" | null;
 
+const ReadingStage: React.FC<{
+  elements: ServiceElement[];
+  activeId: string | null;
+  onSelect: (el: ServiceElement) => void;
+}> = ({ elements, activeId, onSelect }) => {
+  const { t } = useI18n();
+  const activeIndex = Math.max(
+    0,
+    elements.findIndex((el) => el.id === activeId),
+  );
+  const current = elements[activeIndex];
+  const next = elements[activeIndex + 1];
+
+  if (!current) {
+    return (
+      <div className="flex-1 flex items-center justify-center p-8 text-center">
+        <p className="text-muted">{t("serviceDetailPage.readingEmpty")}</p>
+      </div>
+    );
+  }
+
+  const badge = getElementBadge(current.type, t);
+
+  return (
+    <div className="flex-1 flex flex-col md:flex-row min-h-0 min-w-0 bg-m3-card">
+      <div className="md:w-72 lg:w-80 shrink-0 border-b md:border-b-0 md:border-r border-m3-border bg-m3-sidebar/30 flex flex-col min-h-0 max-h-36 md:max-h-none">
+        <div className="hidden md:flex items-center justify-between px-4 h-11 border-b border-m3-border shrink-0">
+          <span className="text-label">{t("serviceDetailPage.serviceOrder")}</span>
+          <span className="text-caption">{t("serviceDetailPage.readingKeys")}</span>
+        </div>
+        <div
+          className="flex md:flex-col gap-1 overflow-x-auto md:overflow-y-auto p-2 custom-scrollbar"
+          role="listbox"
+          aria-label={t("serviceDetailPage.serviceOrder")}
+        >
+          {elements.map((el, i) => {
+            const selected = el.id === current.id;
+            return (
+              <button
+                key={el.id}
+                type="button"
+                role="option"
+                aria-selected={selected}
+                onClick={() => onSelect(el)}
+                className={`shrink-0 md:w-full text-left rounded-[var(--radius-md)] px-3 min-h-11 cursor-pointer transition-colors flex items-center gap-2 ${
+                  selected
+                    ? "bg-m3-primary/10 text-m3-primary"
+                    : "text-m3-text hover:bg-m3-hover"
+                }`}
+              >
+                <span className="text-[11px] font-semibold tabular-nums text-m3-secondary w-4 shrink-0">
+                  {i + 1}
+                </span>
+                <span className="text-sm font-semibold truncate">
+                  {el.title || t("serviceDetailPage.untitledElement")}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+      <div className="flex-1 min-w-0 min-h-0 flex flex-col">
+        <div className="px-4 sm:px-6 py-3 border-b border-m3-border flex items-end justify-between gap-4 shrink-0">
+          <div className="min-w-0">
+            <p className="text-caption">
+              {t("serviceDetailPage.nowLabel")} · {badge.label}
+            </p>
+            <h2 className="text-title truncate">{current.title}</h2>
+          </div>
+          {next && (
+            <p className="text-caption shrink-0 max-w-[46%] text-right truncate">
+              <span className="font-semibold text-m3-text">
+                {t("serviceDetailPage.nextLabel")}
+              </span>
+              {" · "}
+              {next.title}
+            </p>
+          )}
+        </div>
+        {current.notes && (
+          <p className="px-4 sm:px-6 py-2 text-sm text-m3-text bg-m3-warning/10 border-b border-m3-warning/20 shrink-0">
+            {current.notes}
+          </p>
+        )}
+        <div className="flex-1 min-h-0 overflow-hidden">
+          {current.type === "song" ? (
+            <SongPreview element={current} chrome={false} />
+          ) : (
+            <div className="h-full overflow-auto px-5 sm:px-10 py-8">
+              {current.passage && (
+                <p className="text-sm font-semibold text-m3-primary mb-4">
+                  {current.passage}
+                </p>
+              )}
+              <div className="font-lyric text-[1.35rem] sm:text-[1.6rem] leading-snug text-m3-text whitespace-pre-wrap max-w-2xl">
+                {current.content || t("serviceDetailPage.noContent")}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export const ServiceDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { navigate } = useAppNavigate();
   const { t } = useI18n();
+  const { user } = useAuth();
 
   const { data: service, isLoading, isError } = useService(id || null);
   const { updateElements, updateService } = useServices();
@@ -642,7 +757,14 @@ export const ServiceDetailPage: React.FC = () => {
   );
   const searchInputRef = useRef<HTMLInputElement>(null);
 
-  const [showLibrary, setShowLibrary] = useState(true);
+  const [showLibrary, setShowLibrary] = useState(() =>
+    typeof window !== "undefined"
+      ? window.matchMedia("(min-width: 768px)").matches
+      : true,
+  );
+  const [mobilePane, setMobilePane] = useState<"order" | "library">("order");
+  const [readingMode, setReadingMode] = useState(false);
+  const readingRoleApplied = useRef(false);
   const [previewElement, setPreviewElement] = useState<ServiceElement | null>(
     null,
   );
@@ -773,9 +895,57 @@ export const ServiceDetailPage: React.FC = () => {
   const syncMeta = syncStatusMeta[syncStatus] ?? syncStatusMeta.local_only;
 
   const handleOpenLibrary = () => {
+    setReadingMode(false);
     setShowLibrary(true);
+    setMobilePane("library");
     requestAnimationFrame(() => searchInputRef.current?.focus());
   };
+
+  useEffect(() => {
+    if (readingRoleApplied.current || !user?.role) return;
+    readingRoleApplied.current = true;
+    if (user.role === "musician") setReadingMode(true);
+  }, [user?.role]);
+
+  const enterReadingMode = () => {
+    setReadingMode(true);
+    setMobilePane("order");
+    setPreviewElement((prev) => prev ?? elementsRef.current[0] ?? null);
+  };
+
+  useEffect(() => {
+    if (!readingMode) return;
+    const onKey = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement | null;
+      if (
+        target &&
+        (target.tagName === "INPUT" ||
+          target.tagName === "TEXTAREA" ||
+          target.isContentEditable)
+      ) {
+        return;
+      }
+      if (
+        event.key !== "ArrowDown" &&
+        event.key !== "ArrowUp" &&
+        event.key !== "ArrowRight" &&
+        event.key !== "ArrowLeft"
+      ) {
+        return;
+      }
+      const list = elementsRef.current;
+      if (!list.length) return;
+      event.preventDefault();
+      const currentIndex = list.findIndex((el) => el.id === previewElement?.id);
+      const index = currentIndex < 0 ? 0 : currentIndex;
+      const delta =
+        event.key === "ArrowDown" || event.key === "ArrowRight" ? 1 : -1;
+      const next = list[Math.min(list.length - 1, Math.max(0, index + delta))];
+      if (next) setPreviewElement(next);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [readingMode, previewElement]);
 
   const handleTogglePreview = (el: ServiceElement) => {
     setPreviewElement((prev) => (prev?.id === el.id ? null : el));
@@ -1159,6 +1329,37 @@ export const ServiceDetailPage: React.FC = () => {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          <div
+            className="flex rounded-[var(--radius-md)] border border-m3-border bg-m3-card p-0.5"
+            role="group"
+            aria-label={t("serviceDetailPage.readingModeHint")}
+          >
+            <button
+              type="button"
+              onClick={() => setReadingMode(false)}
+              className={`min-h-8 px-2.5 text-xs font-semibold rounded-[var(--radius-sm)] cursor-pointer transition-colors ${
+                readingMode
+                  ? "text-m3-secondary hover:text-m3-text"
+                  : "bg-m3-primary text-white"
+              }`}
+              aria-pressed={!readingMode}
+            >
+              {t("serviceDetailPage.planMode")}
+            </button>
+            <button
+              type="button"
+              onClick={enterReadingMode}
+              className={`min-h-8 px-2.5 text-xs font-semibold rounded-[var(--radius-sm)] cursor-pointer transition-colors ${
+                readingMode
+                  ? "bg-m3-primary text-white"
+                  : "text-m3-secondary hover:text-m3-text"
+              }`}
+              aria-pressed={readingMode}
+              title={t("serviceDetailPage.readingModeHint")}
+            >
+              {t("serviceDetailPage.readingMode")}
+            </button>
+          </div>
           <Button
             variant="outline"
             size="sm"
@@ -1214,8 +1415,54 @@ export const ServiceDetailPage: React.FC = () => {
         </div>
       </div>
 
+      {!readingMode && (
+        <div
+          className="md:hidden flex border-b border-m3-border bg-m3-card shrink-0"
+          role="tablist"
+          aria-label={t("serviceDetailPage.serviceOrder")}
+        >
+          <button
+            type="button"
+            role="tab"
+            aria-selected={mobilePane === "order"}
+            onClick={() => setMobilePane("order")}
+            className={`flex-1 min-h-11 text-sm font-semibold cursor-pointer ${
+              mobilePane === "order"
+                ? "text-m3-primary border-b-2 border-m3-primary"
+                : "text-m3-secondary"
+            }`}
+          >
+            {t("serviceDetailPage.mobileOrder")}
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={mobilePane === "library"}
+            onClick={() => {
+              setShowLibrary(true);
+              setMobilePane("library");
+            }}
+            className={`flex-1 min-h-11 text-sm font-semibold cursor-pointer ${
+              mobilePane === "library"
+                ? "text-m3-primary border-b-2 border-m3-primary"
+                : "text-m3-secondary"
+            }`}
+          >
+            {t("serviceDetailPage.mobileLibrary")}
+          </button>
+        </div>
+      )}
+
       {/* ── Split Layout ────────────────────────────────────────────── */}
       <div className="flex-1 flex overflow-hidden relative">
+        {readingMode ? (
+          <ReadingStage
+            elements={elements}
+            activeId={previewElement?.id ?? elements[0]?.id ?? null}
+            onSelect={setPreviewElement}
+          />
+        ) : (
+          <>
         {!showLibrary && (
           <button
             type="button"
@@ -1229,7 +1476,13 @@ export const ServiceDetailPage: React.FC = () => {
         )}
         {/* Library Sidebar */}
         <div
-          className={`transition-all duration-300 flex flex-col border-r border-m3-border bg-m3-sidebar/30 ${showLibrary ? "w-full md:w-80 lg:w-96 translate-x-0" : "w-0 -translate-x-full border-none opacity-0 overflow-hidden"}`}
+          className={`transition-all duration-300 flex-col border-r border-m3-border bg-m3-sidebar/30 ${
+            showLibrary
+              ? mobilePane === "library"
+                ? "flex w-full md:w-80 lg:w-96"
+                : "hidden md:flex md:w-80 lg:w-96"
+              : "hidden"
+          }`}
         >
           <div className="p-4 border-b border-m3-border bg-m3-card shrink-0">
             <div className="flex items-center justify-between mb-3">
@@ -1283,7 +1536,7 @@ export const ServiceDetailPage: React.FC = () => {
               </span>
             </div>
           </div>
-          <div className="flex-1 overflow-y-auto min-h-0 custom-scrollbar p-3 space-y-2">
+          <div className="flex-1 overflow-y-auto min-h-0 custom-scrollbar divide-y divide-m3-border/60">
             {filteredLibrarySongs.length === 0 ? (
               <div className="p-6 text-center text-xs text-m3-secondary">
                 {t("serviceDetailPage.noSongsFound")}
@@ -1305,6 +1558,7 @@ export const ServiceDetailPage: React.FC = () => {
         <div
           className={`flex-1 flex flex-col min-w-0 overflow-hidden bg-m3-background relative
     transition-all duration-250 ease-out
+    ${mobilePane === "library" && showLibrary ? "max-md:hidden" : ""}
     ${!showLibrary && !previewElement ? "p-4 lg:p-6" : ""}`}
         >
           <div className="max-w-5xl w-full mx-auto flex flex-col h-full">
@@ -1444,7 +1698,7 @@ export const ServiceDetailPage: React.FC = () => {
                     </p>
                   </div>
                 ) : (
-                  <div className="flex flex-col gap-3">
+                  <div className="flex flex-col rounded-[var(--radius-lg)] border border-m3-border overflow-hidden divide-y divide-m3-border/70">
                     {elements.map((el, i) => (
                       <ServiceRow
                         key={el.id}
@@ -1490,7 +1744,11 @@ export const ServiceDetailPage: React.FC = () => {
         </div>
 
         <div
-          className={`transition-all duration-300 flex flex-col border-l border-m3-border bg-m3-sidebar/30 ${previewElement ? "w-full md:w-96 lg:w-md translate-x-0" : "w-0 translate-x-full border-none opacity-0 overflow-hidden"}`}
+          className={`transition-all duration-300 flex-col border-l border-m3-border bg-m3-card ${
+            previewElement
+              ? "flex w-full md:w-96 lg:w-md max-md:absolute max-md:inset-0 max-md:z-20"
+              : "hidden"
+          }`}
         >
           {previewContent && (
             <>
@@ -1503,7 +1761,7 @@ export const ServiceDetailPage: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setPreviewElement(null)}
-                    className="p-1.5 rounded-lg text-m3-secondary hover:text-m3-primary hover:bg-m3-primary/10 transition-colors shrink-0 cursor-pointer"
+                    className="min-h-11 min-w-11 inline-flex items-center justify-center rounded-lg text-m3-secondary hover:text-m3-primary hover:bg-m3-primary/10 transition-colors shrink-0 cursor-pointer"
                     title={t("serviceDetailPage.closePreview")}
                     aria-label={t("serviceDetailPage.closePreview")}
                   >
@@ -1520,6 +1778,8 @@ export const ServiceDetailPage: React.FC = () => {
             </>
           )}
         </div>
+          </>
+        )}
       </div>
 
       <WelcomeModal

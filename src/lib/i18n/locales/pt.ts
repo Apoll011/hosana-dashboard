@@ -1804,6 +1804,15 @@ export const pt = {
     unknownSong: "Cântico Desconhecido",
     noComposer: "Sem Compositor",
     failedToLoadSong: "Falha ao carregar cântico",
+    planMode: "Planear",
+    readingMode: "Ler",
+    readingModeHint: "Vista de leitura para o culto",
+    mobileOrder: "Ordem",
+    mobileLibrary: "Biblioteca",
+    nowLabel: "Agora",
+    nextLabel: "A seguir",
+    readingEmpty: "Este plano ainda não tem elementos.",
+    readingKeys: "Setas para avançar",
   },
 
   serviceModals: {

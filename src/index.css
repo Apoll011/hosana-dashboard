@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap");
 @import "tailwindcss";
 @source "../node_modules/@hosanna/chordpro";
 @custom-variant dark (&:where(.dark, .dark *));
@@ -55,14 +55,18 @@
   --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.07);
   --shadow-lg: 0 12px 32px rgba(15, 23, 42, 0.1);
 
-  /* --- Type --- */
+  /* --- Type ---
+     Figtree for all chrome: one humanist voice, strong Portuguese
+     coverage, readable at 13–14px. Source Serif 4 is reserved for
+     lyrics and readings — the text people sing or speak. */
   --font-sans: "Figtree", system-ui, -apple-system, sans-serif;
-  --font-display: "Outfit", var(--font-sans);
+  --font-display: "Figtree", system-ui, -apple-system, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  --font-lyric: "Source Serif 4", "Iowan Old Style", Palatino, Georgia, serif;
 
   /* --- Type scale (rem) --- */
-  --text-display: 1.75rem; /* 28px */
-  --text-title: 1.125rem; /* 18px */
+  --text-display: 1.5rem; /* 24px — page titles, not posters */
+  --text-title: 1.0625rem; /* 17px */
   --text-body: 0.875rem; /* 14px */
   --text-secondary: 0.8125rem; /* 13px */
   --text-label: 0.75rem; /* 12px */
@@ -119,6 +123,7 @@
   --font-sans: var(--font-sans);
   --font-display: var(--font-display);
   --font-mono: var(--font-mono);
+  --font-lyric: var(--font-lyric);
 
   --radius-sm: var(--radius-sm);
   --radius-md: var(--radius-md);
@@ -171,11 +176,25 @@ body {
 
 .text-display {
   font-family: var(--font-display);
-  font-size: clamp(1.375rem, 1.1rem + 1vw, var(--text-display));
+  font-size: clamp(1.25rem, 1.05rem + 0.6vw, var(--text-display));
   font-weight: 600;
   letter-spacing: -0.02em;
   line-height: 1.2;
   text-wrap: balance;
+}
+
+.font-lyric {
+  font-family: var(--font-lyric);
+  font-optical-sizing: auto;
+}
+
+/* Chord sheets: lyrics in the reading face, chord symbols stay mono. */
+.hosanna-sheet .font-sans {
+  font-family: var(--font-lyric);
+}
+
+.hosanna-sheet .font-mono {
+  font-family: var(--font-mono);
 }
 
 .text-title {

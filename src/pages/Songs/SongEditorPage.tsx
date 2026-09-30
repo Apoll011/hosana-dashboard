@@ -419,7 +419,7 @@ export const SongEditorPage: React.FC = () => {
             />
           )}
           <div
-            className="flex-1 overflow-auto bg-m3-card relative"
+            className="hosanna-sheet flex-1 overflow-auto bg-m3-card relative"
             onClick={() => showPreviewSettings && setShowPreviewSettings(false)}
           >
             <ChordProRenderer
