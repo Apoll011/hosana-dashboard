@@ -410,32 +410,40 @@ export const SongsPage: React.FC<SongsPageProps> = ({
             <table className="w-full text-left border-collapse select-none">
               <thead>
                 <tr className="bg-m3-sidebar/40 border-b border-m3-border text-label">
-                  <th className={isCompact ? "py-2.5 px-4" : "py-3.5 px-6"}>
+                  <th className={isCompact ? "py-2.5 px-4" : "py-3 px-5"}>
                     {t("songsPage.titlePath")}
                   </th>
-                  <th className={isCompact ? "py-2.5 px-4" : "py-3.5 px-6"}>
+                  <th
+                    className={`hidden sm:table-cell ${isCompact ? "py-2.5 px-4" : "py-3 px-5"}`}
+                  >
                     {t("songsPage.artist")}
                   </th>
-                  <th className={isCompact ? "py-2.5 px-4" : "py-3.5 px-6"}>
+                  <th
+                    className={`hidden lg:table-cell ${isCompact ? "py-2.5 px-4" : "py-3 px-5"}`}
+                  >
                     {t("songsPage.folder")}
                   </th>
-                  <th className={isCompact ? "py-2.5 px-4" : "py-3.5 px-6"}>
+                  <th
+                    className={`hidden lg:table-cell ${isCompact ? "py-2.5 px-4" : "py-3 px-5"}`}
+                  >
                     {t("songsPage.tags")}
                   </th>
-                  <th className={isCompact ? "py-2.5 px-4" : "py-3.5 px-6"}>
+                  <th
+                    className={`hidden md:table-cell ${isCompact ? "py-2.5 px-4" : "py-3 px-5"}`}
+                  >
                     {t("songsPage.updatedAt")}
                   </th>
                   <th
-                    className={`${isCompact ? "py-2.5 px-4" : "py-3.5 px-6"} text-right`}
+                    className={`${isCompact ? "py-2.5 px-4" : "py-3 px-5"} text-right`}
                   >
-                    {t("songsPage.actions")}
+                    <span className="sr-only">{t("songsPage.actions")}</span>
                   </th>
                 </tr>
               </thead>
               <tbody
-                className={`divide-y divide-m3-border/30 ${
+                className={`divide-y divide-m3-border/40 ${
                   isCompact ? "text-xs" : "text-[13px]"
-                } font-bold`}
+                } font-medium`}
               >
                 {songsData.map((song) => {
                   const folderName = folderMap.get(song.folderId || "");
@@ -458,14 +466,17 @@ export const SongsPage: React.FC<SongsPageProps> = ({
                       onContextMenu={(e) => openContextMenu(e, song)}
                     >
                       <td
-                        className={`${isCompact ? "py-2.5 px-4" : "py-3.5 px-6"} max-w-xs sm:max-w-md`}
+                        className={`${isCompact ? "py-2.5 px-4" : "py-3 px-5"} max-w-xs sm:max-w-md`}
                       >
                         <div className="flex flex-col min-w-0">
-                          <span className="truncate font-bold">
+                          <span className="truncate font-semibold text-m3-text">
                             {song.title}
                           </span>
+                          <span className="sm:hidden text-caption truncate mt-0.5">
+                            {song.artist || "—"}
+                          </span>
                           {song.path && (
-                            <span className="text-label opacity-60 mt-0.5 truncate">
+                            <span className="hidden sm:block text-label opacity-60 mt-0.5 truncate">
                               {song.path.split("/")[0]}/
                             </span>
                           )}
@@ -473,13 +484,13 @@ export const SongsPage: React.FC<SongsPageProps> = ({
                       </td>
 
                       <td
-                        className={`${isCompact ? "py-2.5 px-4" : "py-3.5 px-6"} text-m3-secondary max-w-40 truncate`}
+                        className={`hidden sm:table-cell ${isCompact ? "py-2.5 px-4" : "py-3 px-5"} text-m3-secondary max-w-40 truncate font-normal`}
                       >
                         {song.artist || "—"}
                       </td>
 
                       <td
-                        className={`${isCompact ? "py-2.5 px-4" : "py-3.5 px-6"}`}
+                        className={`hidden lg:table-cell ${isCompact ? "py-2.5 px-4" : "py-3 px-5"}`}
                       >
                         {folderName ? (
                           <Badge variant="sky">{folderName}</Badge>
@@ -491,29 +502,30 @@ export const SongsPage: React.FC<SongsPageProps> = ({
                       </td>
 
                       <td
-                        className={`${isCompact ? "py-2.5 px-4" : "py-3.5 px-6"} max-w-56`}
+                        className={`hidden lg:table-cell ${isCompact ? "py-2.5 px-4" : "py-3 px-5"} max-w-56`}
                       >
                         <OverflowTagList tags={song.tags} />
                       </td>
 
                       <td
-                        className={`${isCompact ? "py-2.5 px-4" : "py-3.5 px-6"} text-caption whitespace-nowrap`}
+                        className={`hidden md:table-cell tabular-nums ${isCompact ? "py-2.5 px-4" : "py-3 px-5"} text-caption whitespace-nowrap`}
                       >
                         {new Date(song.updatedAt).toLocaleDateString(locale)}
                       </td>
 
                       <td
-                        className={`${isCompact ? "py-2.5 px-4" : "py-3.5 px-6"} text-right`}
+                        className={`${isCompact ? "py-2.5 px-3" : "py-3 px-4"} text-right`}
                         onClick={(e) => e.stopPropagation()}
                       >
-                        <div className="flex items-center justify-end gap-1">
+                        <div className="flex items-center justify-end gap-0.5">
                           <button
                             type="button"
                             onClick={() =>
                               navigate(`${slugPrefix}/songs/${song.id}`)
                             }
                             title={t("songsPage.openEditor")}
-                            className="p-1.5 text-m3-secondary hover:text-m3-primary hover:bg-m3-primary/10 rounded-[var(--radius-md)] cursor-pointer transition-colors"
+                            aria-label={t("songsPage.openEditor")}
+                            className="min-h-10 min-w-10 inline-flex items-center justify-center text-m3-secondary hover:text-m3-primary hover:bg-m3-primary/10 rounded-[var(--radius-md)] cursor-pointer transition-colors"
                           >
                             <FileText className="w-4 h-4" />
                           </button>
@@ -522,7 +534,8 @@ export const SongsPage: React.FC<SongsPageProps> = ({
                               type="button"
                               onClick={() => setMoveSongTarget?.(song)}
                               title={t("songsPage.move")}
-                              className="p-1.5 text-m3-secondary hover:text-m3-primary hover:bg-m3-primary/10 rounded-[var(--radius-md)] cursor-pointer transition-colors"
+                              aria-label={t("songsPage.move")}
+                              className="hidden md:inline-flex min-h-10 min-w-10 items-center justify-center text-m3-secondary hover:text-m3-primary hover:bg-m3-primary/10 rounded-[var(--radius-md)] cursor-pointer transition-colors"
                             >
                               <FolderInput className="w-4 h-4" />
                             </button>
@@ -532,7 +545,8 @@ export const SongsPage: React.FC<SongsPageProps> = ({
                               type="button"
                               onClick={() => setDeleteSongTarget?.(song)}
                               title={t("songsPage.delete")}
-                              className="p-1.5 text-m3-secondary hover:text-m3-danger hover:bg-m3-danger/10 rounded-[var(--radius-md)] cursor-pointer transition-colors"
+                              aria-label={t("songsPage.delete")}
+                              className="hidden md:inline-flex min-h-10 min-w-10 items-center justify-center text-m3-secondary hover:text-m3-danger hover:bg-m3-danger/10 rounded-[var(--radius-md)] cursor-pointer transition-colors"
                             >
                               <Trash2 className="w-4 h-4" />
                             </button>

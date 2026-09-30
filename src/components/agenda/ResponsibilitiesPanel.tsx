@@ -33,7 +33,7 @@ export const ResponsibilitiesPanel: React.FC<ResponsibilitiesPanelProps> = ({
 
   if (!event) {
     return (
-      <div className="bg-m3-card border border-m3-border rounded-[var(--radius-xl)] p-10 shadow-[var(--shadow-sm)] flex flex-col items-center justify-center text-center h-full">
+      <div className="bg-m3-card border border-dashed border-m3-border rounded-[var(--radius-lg)] px-6 py-10 flex flex-col items-center justify-center text-center self-start">
         <Calendar className="w-10 h-10 text-m3-secondary mb-3" />
         <p className="text-sm font-bold text-m3-secondary">
           {t("agenda.selectEventToSeeDetails")}
