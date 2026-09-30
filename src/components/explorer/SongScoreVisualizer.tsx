@@ -72,17 +72,6 @@ const RingLayout: React.FC<{ score: number; compact: boolean }> = ({
         className="-rotate-90"
         aria-hidden="true"
       >
-        {/* Track */}
-        <circle
-          cx={size / 2}
-          cy={size / 2}
-          r={r}
-          fill="none"
-          stroke="currentColor"
-          strokeWidth={strokeW}
-          className="text-slate-200 dark:text-slate-700"
-        />
-        {/* Progress arc */}
         <circle
           cx={size / 2}
           cy={size / 2}
@@ -96,7 +85,6 @@ const RingLayout: React.FC<{ score: number; compact: boolean }> = ({
           className="transition-all duration-500"
         />
       </svg>
-      {/* Label centred on top of SVG */}
       <span
         className={`absolute font-bold ${col.text} leading-none pointer-events-none`}
         style={{ fontSize }}
@@ -123,9 +111,7 @@ const BarLayout: React.FC<{ score: number; compact: boolean }> = ({
       className={`flex items-center gap-1.5 w-full ${compact ? "mt-1" : "mt-1.5"}`}
       title={`Score: ${score}`}
     >
-      <div
-        className={`flex-1 ${h} rounded-full bg-slate-200/80 dark:bg-slate-700/80 overflow-hidden`}
-      >
+      <div className={`flex-1 ${h} overflow-hidden`}>
         <div
           className={`${h} rounded-full ${col.bar} transition-all duration-500`}
           style={{ width: `${score}%` }}

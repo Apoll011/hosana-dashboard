@@ -15,7 +15,10 @@ import React, {
 } from "react";
 import { getDemoOrganization, getDemoUser } from "../demo/demoAuth";
 import { clearDemoData, isDemoMode } from "../demo/index";
-import { syncSettingsFromMetadata } from "../hooks/usePersonalSettings";
+import {
+  getPersistedSettingsJson,
+  syncSettingsFromMetadata,
+} from "../hooks/usePersonalSettings";
 import { authClient } from "../lib/authClient";
 import { clearPermissionCache } from "../lib/permissions/client";
 import { posthog } from "../lib/posthog";
@@ -368,8 +371,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         role: userRole,
       } as SessionUser;
 
+      // Prefer the local personal-settings snapshot when caching the user so a
+      // slow/stale session refetch cannot regress optimistic setting edits.
+      const localSettingsJson = getPersistedSettingsJson();
+      const userToCache: SessionUser = localSettingsJson
+        ? { ...fullUser, metadata: localSettingsJson }
+        : fullUser;
+
       setOrganization(activeOrg);
-      setUser(fullUser);
+      setUser(userToCache);
       syncSettingsFromMetadata(fullUser.metadata);
 
       // Identify the user in PostHog on every session refresh
@@ -383,7 +393,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
       // Cache for offline usage
       try {
-        localStorage.setItem(CACHED_USER_KEY, JSON.stringify(fullUser));
+        localStorage.setItem(CACHED_USER_KEY, JSON.stringify(userToCache));
         if (activeOrg) {
           localStorage.setItem(CACHED_ORG_KEY, JSON.stringify(activeOrg));
         } else {

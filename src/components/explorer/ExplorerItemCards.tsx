@@ -184,15 +184,7 @@ export const SongGridCard: React.FC<SongGridCardProps> = React.memo(
         onContextMenu={onContextMenu}
         onDragStart={onDragStart}
         onDragEnd={onDragEnd}
-        className={`${
-          scoreCorner
-            ? isCompact
-              ? "pt-12 px-3 pb-3"
-              : "pt-14 px-4 pb-4"
-            : isCompact
-              ? "p-3"
-              : "p-4"
-        } rounded-[var(--radius-lg)] border transition-colors cursor-pointer flex flex-col items-center text-center group relative overflow-hidden select-none ${
+        className={`${isCompact ? "p-3" : "p-4"} rounded-[var(--radius-lg)] border transition-colors cursor-pointer flex flex-col items-center text-center group relative overflow-hidden select-none ${
           isSelected
             ? "border-m3-primary/40 bg-m3-primary/5 ring-2 ring-m3-primary/30"
             : "border-m3-border/50 bg-m3-card hover:bg-m3-hover hover:border-m3-primary/40"

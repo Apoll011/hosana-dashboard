@@ -85,6 +85,15 @@ export function shouldOfferMissedProductTour(
 
 const STORAGE_KEY = "personal-settings";
 
+/** Current local settings JSON, if any. Prefer this over lagging session metadata. */
+export function getPersistedSettingsJson(): string | null {
+  try {
+    return localStorage.getItem(STORAGE_KEY);
+  } catch {
+    return null;
+  }
+}
+
 /**
  * Legacy keys from before the consolidation. Read once so existing users keep
  * their preferences, then removed in favour of the unified store.
@@ -247,9 +256,20 @@ function getSnapshot() {
 }
 
 /**
- * Updates in-memory store if new metadata arrives (e.g. from session fetch or another tab).
+ * Hydrates the in-memory store from user metadata (session fetch / login).
+ *
+ * Local `personal-settings` is the device source of truth once it exists —
+ * every edit writes it synchronously, while session metadata can lag behind
+ * `updateUser` and briefly regress the UI if applied on every refetch.
+ * Logout clears localStorage, so the next login still hydrates from metadata.
  */
 export function syncSettingsFromMetadata(metadata: unknown) {
+  try {
+    if (localStorage.getItem(STORAGE_KEY)) return;
+  } catch {
+    // storage unavailable — fall through and try metadata
+  }
+
   const parsed = parseSettingsJson(metadata);
   if (parsed) {
     const merged = { ...DEFAULT_SETTINGS, ...parsed };
