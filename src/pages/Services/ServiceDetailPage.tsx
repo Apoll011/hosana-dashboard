@@ -170,7 +170,7 @@ const SongPreview: React.FC<{ element: ServiceElement; chrome?: boolean }> = ({
     );
 
   return (
-    <div className="flex flex-col h-full relative">
+    <div className="flex flex-col h-full min-h-0 relative">
       {chrome && (
         <>
           <div className="h-10 bg-m3-sidebar/50 border-b border-m3-border dark:border-m3-dark-border flex items-center justify-between px-3 shrink-0">
@@ -199,7 +199,7 @@ const SongPreview: React.FC<{ element: ServiceElement; chrome?: boolean }> = ({
       )}
 
       <div
-        className="hosanna-sheet flex-1 overflow-auto bg-m3-card relative custom-scrollbar p-2"
+        className="hosanna-sheet flex-1 min-h-0 overflow-y-auto overscroll-contain bg-m3-card relative custom-scrollbar p-2"
         onClick={() => showSettings && setShowSettings(false)}
       >
         <ChordProRenderer
@@ -683,7 +683,7 @@ const ServiceRow: React.FC<ServiceRowProps> = ({
       >
         <div className="overflow-hidden">
           <div className="p-4 flex flex-col gap-4">
-            <div className="text-sm text-m3-text whitespace-pre-wrap bg-m3-card p-4 rounded-xl border border-m3-border dark:border-m3-border/50">
+            <div className="text-sm text-m3-text whitespace-pre-wrap bg-m3-card p-4 rounded-xl border border-m3-border dark:border-m3-border/50 max-h-64 overflow-y-auto custom-scrollbar">
               {element.content || t("serviceDetailPage.noContent")}
             </div>
           </div>
@@ -721,13 +721,13 @@ const ReadingStage: React.FC<{
 
   return (
     <div className="flex-1 flex flex-col md:flex-row min-h-0 min-w-0 bg-m3-card">
-      <div className="md:w-72 lg:w-80 shrink-0 border-b md:border-b-0 md:border-r border-m3-border bg-m3-sidebar/30 flex flex-col min-h-0 max-h-36 md:max-h-none">
+      <div className="md:w-72 lg:w-80 shrink-0 border-b md:border-b-0 md:border-r border-m3-border bg-m3-sidebar/30 flex flex-col min-h-0 max-h-36 md:max-h-none md:h-full">
         <div className="hidden md:flex items-center justify-between px-4 h-11 border-b border-m3-border shrink-0">
           <span className="text-label">{t("serviceDetailPage.serviceOrder")}</span>
           <span className="text-caption">{t("serviceDetailPage.readingKeys")}</span>
         </div>
         <div
-          className="flex md:flex-col gap-1 overflow-x-auto md:overflow-y-auto p-2 custom-scrollbar"
+          className="flex md:flex-col gap-1 overflow-x-auto md:overflow-y-auto min-h-0 flex-1 p-2 custom-scrollbar"
           role="listbox"
           aria-label={t("serviceDetailPage.serviceOrder")}
         >
@@ -780,11 +780,11 @@ const ReadingStage: React.FC<{
             {current.notes}
           </p>
         )}
-        <div className="flex-1 min-h-0 overflow-hidden">
+        <div className="flex-1 min-h-0 overflow-hidden overscroll-contain">
           {current.type === "song" ? (
             <SongPreview element={current} chrome={false} />
           ) : (
-            <div className="h-full overflow-auto px-5 sm:px-10 py-8">
+            <div className="h-full min-h-0 overflow-y-auto overscroll-contain px-5 sm:px-10 py-8 custom-scrollbar">
               {current.passage && (
                 <p className="text-sm font-semibold text-m3-primary mb-4">
                   {current.passage}
@@ -857,16 +857,26 @@ export const ServiceDetailPage: React.FC = () => {
 
   const [isEditingGeneralNotes, setIsEditingGeneralNotes] = useState(false);
 
+  const appliedUpdatedAtRef = useRef<string | null>(null);
+
   useEffect(() => {
-    if (service) {
+    if (!service) return;
+    // While a modal is open, keep remote service updates queued — applying them
+    // would wipe local form state via parent re-renders / stale element sync.
+    if (activeModal) return;
+    if (service.updatedAt === appliedUpdatedAtRef.current) return;
+    appliedUpdatedAtRef.current = service.updatedAt;
+
+    if (!isEditingGeneralNotes) {
       setGeneralNotes(service.notes || "");
-      const sortedElements = [...(service.elements || [])].sort(
-        (a, b) => (a.position || 0) - (b.position || 0),
-      );
-      setElements(sortedElements);
-      elementsRef.current = sortedElements;
     }
-  }, [service]);
+
+    const sortedElements = [...(service.elements || [])].sort(
+      (a, b) => (a.position || 0) - (b.position || 0),
+    );
+    setElements(sortedElements);
+    elementsRef.current = sortedElements;
+  }, [service, activeModal, isEditingGeneralNotes]);
 
   useEffect(() => {
     elementsRef.current = elements;
@@ -1078,7 +1088,7 @@ export const ServiceDetailPage: React.FC = () => {
   };
 
   const handleRemoveElement = async (elementId: string) => {
-    await syncElements(elements.filter((e) => e.id !== elementId));
+    await syncElements(elementsRef.current.filter((e) => e.id !== elementId));
   };
 
   const handleMoveElement = async (elementId: string, direction: -1 | 1) => {
@@ -1092,7 +1102,9 @@ export const ServiceDetailPage: React.FC = () => {
 
   const handleNoteChange = async (elementId: string, note: string) => {
     await syncElements(
-      elements.map((e) => (e.id === elementId ? { ...e, notes: note } : e)),
+      elementsRef.current.map((e) =>
+        e.id === elementId ? { ...e, notes: note } : e,
+      ),
     );
   };
 
@@ -1179,7 +1191,8 @@ export const ServiceDetailPage: React.FC = () => {
       duration?: number;
     },
   ) => {
-    let nextElements = [...elements];
+    const previousElements = [...elementsRef.current];
+    let nextElements = [...previousElements];
     if (editingElement) {
       nextElements = nextElements.map((e) =>
         e.id === editingElement.id
@@ -1201,13 +1214,17 @@ export const ServiceDetailPage: React.FC = () => {
         content: data.content || "",
         passage: data.passage || "",
         notes: data.notes || "",
-        position: elements.length,
+        position: previousElements.length,
         duration: data.duration || 0,
       });
     }
-    await syncElements(nextElements);
-    setActiveModal(null);
-    setEditingElement(null);
+    try {
+      await syncElements(nextElements, previousElements);
+      setActiveModal(null);
+      setEditingElement(null);
+    } catch {
+      showToast(t("serviceDetailPage.serviceSaveError", { error: "Save error" }), "error");
+    }
   };
 
   const openAddModal = (type: ModalType) => {
@@ -1321,31 +1338,43 @@ export const ServiceDetailPage: React.FC = () => {
     });
   }, []);
 
-  const editInitial = editingElement
-    ? {
-        title: editingElement.title,
-        content: editingElement.content || "",
-        passage: editingElement.passage || "",
-        notes: editingElement.notes || "",
-        duration: Number(editingElement.duration || 0),
-      }
-    : undefined;
+  const editInitial = useMemo(
+    () =>
+      editingElement
+        ? {
+            title: editingElement.title,
+            content: editingElement.content || "",
+            passage: editingElement.passage || "",
+            notes: editingElement.notes || "",
+            duration: Number(editingElement.duration || 0),
+          }
+        : undefined,
+    [editingElement],
+  );
 
   // When creating new elements, pre-fill duration from org defaults
-  const newMessageInitial = editInitial ?? {
-    title: "",
-    content: "",
-    passage: "",
-    notes: "",
-    duration: orgSettings.services.sermonDuration,
-  };
-  const newGenericInitial = editInitial ?? {
-    title: "",
-    content: "",
-    passage: "",
-    notes: "",
-    duration: orgSettings.services.songDuration,
-  };
+  const newMessageInitial = useMemo(
+    () =>
+      editInitial ?? {
+        title: "",
+        content: "",
+        passage: "",
+        notes: "",
+        duration: orgSettings.services.sermonDuration,
+      },
+    [editInitial, orgSettings.services.sermonDuration],
+  );
+  const newGenericInitial = useMemo(
+    () =>
+      editInitial ?? {
+        title: "",
+        content: "",
+        passage: "",
+        notes: "",
+        duration: orgSettings.services.songDuration,
+      },
+    [editInitial, orgSettings.services.songDuration],
+  );
 
   if (isLoading)
     return (
@@ -1643,13 +1672,13 @@ export const ServiceDetailPage: React.FC = () => {
         </div>
 
         <div
-          className={`flex flex-col min-w-0 overflow-hidden bg-m3-background relative flex-1 transition-[width,opacity,padding,flex-grow] duration-300 ease-in-out ${
+          className={`flex flex-col min-w-0 min-h-0 overflow-hidden bg-m3-background relative flex-1 transition-[width,opacity,padding,flex-grow] duration-300 ease-in-out ${
             mobilePane === "library" && showLibrary
               ? "max-md:grow-0 max-md:w-0 max-md:opacity-0 max-md:pointer-events-none max-md:p-0"
               : ""
           } ${!showLibrary && !previewElement ? "p-4 lg:p-6" : ""}`}
         >
-          <div className="max-w-5xl w-full mx-auto flex flex-col h-full">
+          <div className="max-w-5xl w-full mx-auto flex flex-col h-full min-h-0">
             <div
               className={`flex-1 flex flex-col bg-m3-card overflow-hidden min-h-0
         transition-all duration-300 ease-out
@@ -1699,6 +1728,13 @@ export const ServiceDetailPage: React.FC = () => {
                     className="px-2.5 py-1 text-caption font-semibold rounded-[var(--radius-md)] bg-m3-sidebar text-m3-secondary border border-m3-border hover:bg-m3-hover hover:text-m3-text transition-colors cursor-pointer"
                   >
                     + {t("serviceDetailPage.addAnnouncement")}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => openAddModal("custom")}
+                    className="px-2.5 py-1 text-caption font-semibold rounded-[var(--radius-md)] bg-m3-sidebar text-m3-secondary border border-m3-border hover:bg-m3-hover hover:text-m3-text transition-colors cursor-pointer"
+                  >
+                    + {t("serviceDetailPage.addCustom")}
                   </button>
                 </div>
               </div>
@@ -1771,7 +1807,7 @@ export const ServiceDetailPage: React.FC = () => {
 
               <div
                 ref={dropContainerRef}
-                className={`flex-1 overflow-y-auto p-4 flex flex-col gap-3 relative custom-scrollbar transition-colors ${isDropTargetActive ? "bg-m3-primary/5 ring-2 ring-m3-primary/20 rounded-[var(--radius-xl)]" : ""}`}
+                className={`flex-1 min-h-0 overflow-y-auto overscroll-contain p-4 flex flex-col gap-3 relative custom-scrollbar transition-colors ${isDropTargetActive ? "bg-m3-primary/5 ring-2 ring-m3-primary/20 rounded-[var(--radius-xl)]" : ""}`}
               >
                 {elements.length === 0 ? (
                   <div className="m-auto text-center rounded-[var(--radius-xl)] border border-dashed border-m3-border flex flex-col items-center justify-center p-12 shrink-0">
@@ -1784,9 +1820,16 @@ export const ServiceDetailPage: React.FC = () => {
                     <p className="text-xs text-m3-secondary mt-1 max-w-50">
                       {t("serviceDetailPage.emptyOutlineDesc")}
                     </p>
+                    <button
+                      type="button"
+                      onClick={handleOpenLibrary}
+                      className="mt-4 px-3 py-2 text-xs font-semibold rounded-[var(--radius-md)] border border-m3-primary/30 text-m3-primary hover:bg-m3-primary/5 transition-colors cursor-pointer"
+                    >
+                      {t("serviceDetailPage.viewLibrary")}
+                    </button>
                   </div>
                 ) : (
-                  <div className="flex flex-col rounded-[var(--radius-lg)] border border-m3-border overflow-hidden divide-y divide-m3-border/70">
+                  <div className="flex flex-col rounded-[var(--radius-lg)] border border-m3-border divide-y divide-m3-border/70">
                     {elements.map((el, i) => (
                       <ServiceRow
                         key={el.id}
@@ -1806,26 +1849,6 @@ export const ServiceDetailPage: React.FC = () => {
                     ))}
                   </div>
                 )}
-
-                <div className="flex gap-3 mt-auto pt-4 shrink-0">
-                  <button
-                    type="button"
-                    onClick={handleOpenLibrary}
-                    className="flex-1 py-3 rounded-[var(--radius-xl)] border border-dashed border-m3-primary/30 text-xs font-semibold flex items-center justify-center gap-2 cursor-pointer transition-colors hover:bg-m3-primary/5 text-m3-primary bg-m3-card shadow-[var(--shadow-sm)]"
-                    title={t("serviceDetailPage.openLibraryToSearch")}
-                  >
-                    <Plus className="w-4 h-4" />{" "}
-                    {t("serviceDetailPage.addSong")}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => openAddModal("custom")}
-                    className="flex-1 py-3 rounded-[var(--radius-xl)] border border-dashed border-m3-border text-xs font-semibold flex items-center justify-center gap-2 cursor-pointer transition-colors hover:bg-m3-sidebar text-m3-secondary bg-m3-card shadow-[var(--shadow-sm)]"
-                  >
-                    <Plus className="w-4 h-4" />{" "}
-                    {t("serviceDetailPage.addCustom")}
-                  </button>
-                </div>
               </div>
             </div>
           </div>

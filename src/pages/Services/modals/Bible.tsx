@@ -424,19 +424,20 @@ export const ScriptureModal: React.FC<ScriptureModalProps> = ({
     };
   }, [isOpen]);
 
-  // Reset state on open
+  // Snapshot form fields only when the modal opens — do not depend on
+  // `initial` identity, or parent re-renders reset in-progress edits.
   useEffect(() => {
-    if (isOpen) {
-      setTitle(initial?.title || defaultTitle);
-      setPassageInput(initial?.passage || "");
-      setNotes(initial?.notes || "");
-      setDuration(secondsToDurationInput(initial?.duration));
-      setFetchedText(null);
-      setFetchedPassageLabel("");
-      setFetchError(null);
-      setAccepted(false);
-    }
-  }, [isOpen, initial, defaultTitle]);
+    if (!isOpen) return;
+    setTitle(initial?.title?.trim() ? initial.title : defaultTitle);
+    setPassageInput(initial?.passage || "");
+    setNotes(initial?.notes || "");
+    setDuration(secondsToDurationInput(initial?.duration));
+    setFetchedText(initial?.content || null);
+    setFetchedPassageLabel(initial?.passage || "");
+    setFetchError(null);
+    setAccepted(Boolean(initial?.content?.trim()));
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- reset on open only
+  }, [isOpen]);
 
   const handleSearch = useCallback(async () => {
     const parsed = parsePassageInput(passageInput);
