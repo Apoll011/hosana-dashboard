@@ -3,7 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Button, ConfirmDialog, EmptyState, Spinner } from "@/src/components/common";
+import {
+  Button,
+  ConfirmDialog,
+  EmptyState,
+  Spinner,
+} from "@/src/components/common";
 import { BatchActionFloatingBar } from "@/src/components/explorer/BatchActionFloatingBar";
 import { MarqueeSelectionBox } from "@/src/components/explorer/MarqueeSelectionBox";
 import { AddSongsToCollectionModal } from "@/src/components/modals/AddSongsToCollectionModal";
@@ -35,7 +40,13 @@ import {
   Trash2,
   X,
 } from "lucide-react";
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useOutletContext, useParams } from "react-router-dom";
 
 const MENU_ITEM =
@@ -247,22 +258,19 @@ export const CollectionDetailPage: React.FC = () => {
     [filteredSongs, lastClickedId],
   );
 
-  const openContextMenu = useCallback(
-    (e: React.MouseEvent, song?: Song) => {
-      e.preventDefault();
-      e.stopPropagation();
-      if (song) {
-        setSelectedSongIds((prev) =>
-          prev.has(song.id) && prev.size > 1 ? prev : new Set([song.id]),
-        );
-        setLastClickedId(song.id);
-      }
-      const x = Math.min(e.clientX, window.innerWidth - 240);
-      const y = Math.min(e.clientY, window.innerHeight - 240);
-      setContextMenu({ x, y, songId: song?.id ?? null });
-    },
-    [],
-  );
+  const openContextMenu = useCallback((e: React.MouseEvent, song?: Song) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (song) {
+      setSelectedSongIds((prev) =>
+        prev.has(song.id) && prev.size > 1 ? prev : new Set([song.id]),
+      );
+      setLastClickedId(song.id);
+    }
+    const x = Math.min(e.clientX, window.innerWidth - 240);
+    const y = Math.min(e.clientY, window.innerHeight - 240);
+    setContextMenu({ x, y, songId: song?.id ?? null });
+  }, []);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -288,9 +296,7 @@ export const CollectionDetailPage: React.FC = () => {
         if (selectedSongIds.size === 0 || !canUpdateCollection) return;
         e.preventDefault();
         if (selectedSongIds.size === 1) {
-          const song = filteredSongs.find((s) =>
-            selectedSongIds.has(s.id),
-          );
+          const song = filteredSongs.find((s) => selectedSongIds.has(s.id));
           if (song) setSongToRemove(song);
         } else {
           setPendingRemoveIds(Array.from(selectedSongIds));
@@ -394,10 +400,7 @@ export const CollectionDetailPage: React.FC = () => {
             </div>
           </div>
 
-          <div
-            ref={headerMenuRef}
-            className="flex items-center gap-2 shrink-0"
-          >
+          <div ref={headerMenuRef} className="flex items-center gap-2 shrink-0">
             <Can permission="export.pdf">
               <Button
                 type="button"
@@ -565,7 +568,9 @@ export const CollectionDetailPage: React.FC = () => {
                     </span>
 
                     <div className="flex flex-col min-w-0">
-                      <span className="truncate font-semibold">{song.title}</span>
+                      <span className="truncate font-semibold">
+                        {song.title}
+                      </span>
                       <span className="text-caption mt-0.5 truncate">
                         {song.artist || "—"}
                       </span>

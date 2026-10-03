@@ -102,9 +102,7 @@ const Section: React.FC<{
           <h3 className="text-base sm:text-lg font-bold text-m3-text leading-tight">
             {title}
           </h3>
-          <p className="text-xs sm:text-sm text-m3-secondary mt-0.5">
-            {desc}
-          </p>
+          <p className="text-xs sm:text-sm text-m3-secondary mt-0.5">{desc}</p>
         </div>
       </div>
       {action}
@@ -159,9 +157,7 @@ function Segmented<T extends string>({
             <span className="min-w-0">
               <span
                 className={`block text-xs font-bold ${
-                  isActive
-                    ? "text-m3-primary"
-                    : "text-m3-text"
+                  isActive ? "text-m3-primary" : "text-m3-text"
                 }`}
               >
                 {opt.label}

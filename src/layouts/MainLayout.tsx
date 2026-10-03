@@ -123,7 +123,14 @@ export const MainLayout: React.FC = () => {
 
   useEffect(() => {
     const runTrashVerifier = () => {
-      void getDatabase().then(purgeExpiredTrash);
+      void getDatabase()
+        .then(purgeExpiredTrash)
+        .catch((err: unknown) => {
+          // Swallow errors from a closed/reset IDB connection (e.g. right after
+          // logout before the page reloads) so they don't surface as unhandled
+          // promise rejections in the console or error-tracking tools.
+          console.warn("[MainLayout] purgeExpiredTrash failed:", err);
+        });
     };
     runTrashVerifier();
     const interval = setInterval(() => {
@@ -307,7 +314,7 @@ export const MainLayout: React.FC = () => {
   const totalServices =
     servicesQuery.data?.filter((s) => !s.archived).length || 0;
   const rootSongsCount = foldersQuery.data?.rootSongsCount || 0;
-  const rootFoldersCount = foldersQuery.data?.folders.length || 0;
+  const rootFoldersCount = foldersQuery.data?.folders?.length || 0;
 
   const folderTree = useMemo(() => buildFolderTree(allFolders), [allFolders]);
   const currentFolder = useMemo(
@@ -1673,9 +1680,7 @@ export const MainLayout: React.FC = () => {
         selectedCount={totalSelectedCount}
         itemLabel={t("layout.items")}
         onTag={
-          selectedSongIds.size > 0
-            ? () => openModal("batch-tag")
-            : undefined
+          selectedSongIds.size > 0 ? () => openModal("batch-tag") : undefined
         }
         onMove={
           selectedSongIds.size > 0 || selectedFolderIds.size > 0

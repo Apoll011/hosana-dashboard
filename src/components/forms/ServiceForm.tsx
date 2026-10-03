@@ -118,9 +118,7 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
       />
 
       <div className="flex flex-col gap-1.5">
-        <label className="text-label ml-0.5">
-          {t("forms.planningNotes")}
-        </label>
+        <label className="text-label ml-0.5">{t("forms.planningNotes")}</label>
         <textarea
           name="notes"
           rows={3}

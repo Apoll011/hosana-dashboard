@@ -7,7 +7,6 @@ import { isDemoMode } from "@/src/demo";
 import { usePersonalSettings } from "@/src/hooks/usePersonalSettings";
 import { deriveView } from "@/src/layouts/view";
 import { useI18n } from "@/src/lib/i18n";
-import { posthog } from "@/src/lib/posthog";
 import {
   emitOnboardingEvent,
   getInteractiveOnboardingRole,
@@ -64,8 +63,8 @@ export const InteractiveOnboardingController: React.FC = () => {
     const timer = window.setTimeout(() => {
       void runInteractiveOnboarding({
         role,
-        collectionsEnabled: posthog.isFeatureEnabled("collection") || true,
-        agendaEnabled: posthog.isFeatureEnabled("agenda") ?? true,
+        collectionsEnabled: true,
+        agendaEnabled: true,
         t,
         labels: {
           next: t("tour.interactive.controls.next"),

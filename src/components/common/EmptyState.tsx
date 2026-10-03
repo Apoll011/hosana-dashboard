@@ -32,7 +32,9 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
         </div>
       )}
       <h3 className="text-title text-m3-text">{title}</h3>
-      <p className="text-muted max-w-sm mt-1.5 mb-6 text-pretty">{description}</p>
+      <p className="text-muted max-w-sm mt-1.5 mb-6 text-pretty">
+        {description}
+      </p>
       {actionLabel && onAction && (
         <Button onClick={onAction} variant="primary">
           {actionLabel}

@@ -3,6 +3,7 @@ import tsparser from "@typescript-eslint/parser";
 import prettierConfig from "eslint-config-prettier";
 import prettierPlugin from "eslint-plugin-prettier";
 import pluginReact from "eslint-plugin-react";
+import reactHooks from "eslint-plugin-react-hooks";
 import globals from "globals";
 
 export default [
@@ -13,6 +14,7 @@ export default [
       "build/**",
       "coverage/**",
       "android/**",
+      ".agents/**",
     ],
   },
   {
@@ -27,11 +29,14 @@ export default [
     plugins: {
       "@typescript-eslint": tseslint,
       prettier: prettierPlugin,
+      "react-hooks": reactHooks,
     },
 
     rules: {
       ...tseslint.configs.recommended.rules,
       ...prettierConfig.rules,
+      "react-hooks/rules-of-hooks": "error",
+      "react-hooks/exhaustive-deps": "warn",
       "prettier/prettier": "error",
       "@typescript-eslint/no-unused-vars": [
         "warn",

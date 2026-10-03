@@ -143,9 +143,7 @@ export const ServiceLinkField: React.FC<ServiceLinkFieldProps> = ({
                 }}
                 onMouseEnter={() => setHighlight(i)}
                 className={`w-full flex items-center gap-2.5 px-2.5 py-2 min-h-10 rounded-[var(--radius-md)] text-left transition-colors cursor-pointer ${
-                  i === highlight
-                    ? "bg-m3-hover"
-                    : "hover:bg-m3-hover/60"
+                  i === highlight ? "bg-m3-hover" : "hover:bg-m3-hover/60"
                 }`}
               >
                 <span className="w-6 h-6 rounded-[var(--radius-sm)] bg-m3-primary/10 text-m3-primary flex items-center justify-center shrink-0">

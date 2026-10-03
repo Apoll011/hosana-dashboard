@@ -57,9 +57,7 @@ const SectionHeader: React.FC<{
 );
 
 const FieldLabel: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <label className="block text-label ml-1 mb-1.5">
-    {children}
-  </label>
+  <label className="block text-label ml-1 mb-1.5">{children}</label>
 );
 
 const fieldInputClass =
@@ -170,7 +168,7 @@ export const EventFormModal: React.FC<EventFormModalProps> = ({
       setTitleTouched(false);
       setConfirmingDelete(false);
     }
-  }, [isOpen]);
+  }, [isOpen, initial, defaultType]);
 
   const titleIsEmpty = form.title.trim().length === 0;
   const showTitleError = titleTouched && titleIsEmpty;
@@ -497,7 +495,7 @@ export const AddResponsibilityModal: React.FC<AddResponsibilityModalProps> = ({
       setCategoryId(available[0]?.id ?? "");
       setAssignees([]);
     }
-  }, [isOpen]);
+  }, [isOpen, available]);
 
   if (!isOpen) return null;
 
@@ -623,7 +621,7 @@ export const EditAssigneesModal: React.FC<EditAssigneesModalProps> = ({
 
   useEffect(() => {
     if (isOpen) setValue(assignees);
-  }, [isOpen]);
+  }, [isOpen, assignees]);
 
   if (!isOpen) return null;
 

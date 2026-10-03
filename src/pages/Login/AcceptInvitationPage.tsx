@@ -176,9 +176,7 @@ export const AcceptInvitationPage: React.FC = () => {
         {isFetching ? (
           <div className="flex flex-col items-center justify-center py-8 space-y-3">
             <Spinner size="md" />
-            <p className="text-sm text-m3-secondary">
-              {t("common.loading")}
-            </p>
+            <p className="text-sm text-m3-secondary">{t("common.loading")}</p>
           </div>
         ) : invitation ? (
           <div className="space-y-6">

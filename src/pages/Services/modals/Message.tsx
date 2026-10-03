@@ -45,14 +45,16 @@ export const MessageModal: React.FC<MessageModalProps> = ({
     secondsToDurationInput(initial?.duration),
   );
 
+  // Snapshot form fields only when the modal opens — do not depend on
+  // `initial` identity, or parent re-renders reset in-progress edits.
   useEffect(() => {
-    if (isOpen) {
-      setTitle(initial?.title || defaultTitle);
-      setContent(initial?.content || "");
-      setNotes(initial?.notes || "");
-      setDuration(secondsToDurationInput(initial?.duration));
-    }
-  }, [isOpen, initial, defaultTitle]);
+    if (!isOpen) return;
+    setTitle(initial?.title?.trim() ? initial.title : defaultTitle);
+    setContent(initial?.content || "");
+    setNotes(initial?.notes || "");
+    setDuration(secondsToDurationInput(initial?.duration));
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- reset on open only
+  }, [isOpen]);
 
   return (
     <Modal

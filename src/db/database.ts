@@ -12,7 +12,7 @@
 import { parseChordPro } from "@hosanna/chordpro";
 import { getMainDbName } from "./dbNames";
 import { HosanaCollection } from "./engine/collection";
-import { idbGetAll, openIDB } from "./engine/idb";
+import { _registerResetDatabase, idbGetAll, openIDB } from "./engine/idb";
 import type {
   AgendaEventDocType,
   CollectionDocType,
@@ -237,6 +237,10 @@ export async function getDatabase(): Promise<HosanaDatabase> {
 export function resetDatabase(): void {
   dbPromise = null;
 }
+
+// Wire the idb layer back to this module so it can clear the singleton
+// automatically when the IDB connection is closed (onversionchange / onclose).
+_registerResetDatabase(resetDatabase);
 
 async function _open(): Promise<HosanaDatabase> {
   const idb = await openIDB(getMainDbName(), DB_VERSION, (db, oldVersion) => {

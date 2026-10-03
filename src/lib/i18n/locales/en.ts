@@ -1796,6 +1796,10 @@ export const en: typeof pt = {
     nowLabel: "Now",
     nextLabel: "Next",
     readingEmpty: "This plan has no items yet.",
+    songDeleted: "Song removed",
+    songDeletedHint: "This song was deleted from the library.",
+    restoreSong: "Restore song",
+    removeFromPlan: "Remove from plan",
     readingKeys: "Arrow keys to move",
   },
 

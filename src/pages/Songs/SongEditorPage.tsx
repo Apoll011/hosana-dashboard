@@ -114,7 +114,7 @@ export const SongEditorPage: React.FC = () => {
       setContent(song.content);
       setHasUnsavedChanges(false);
     }
-  }, [song?.id]);
+  }, [song]);
 
   useEffect(() => {
     setSelectedVariant(null);

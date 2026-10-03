@@ -3,7 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Badge, ConfirmDialog, EmptyState, Spinner } from "@/src/components/common";
+import {
+  Badge,
+  ConfirmDialog,
+  EmptyState,
+  Spinner,
+} from "@/src/components/common";
 import { BatchActionFloatingBar } from "@/src/components/explorer/BatchActionFloatingBar";
 import { MarqueeSelectionBox } from "@/src/components/explorer/MarqueeSelectionBox";
 import { CreateCollectionModal } from "@/src/components/modals/CreateCollectionModal";
@@ -30,7 +35,13 @@ import {
   Trash2,
   X,
 } from "lucide-react";
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useOutletContext } from "react-router-dom";
 
 type CollectionSortBy = "updatedAt" | "title" | "number";
@@ -44,19 +55,20 @@ const MENU_ICON = "w-4 h-4 text-m3-secondary shrink-0";
 export const CollectionsPage: React.FC = () => {
   const { navigate } = useAppNavigate();
   const { t } = useI18n();
-  const { organization, user } = useAuth();
+  const { organization } = useAuth();
   const slugPrefix = organization?.slug ? `/${organization.slug}` : "";
   const { granted: canCreateCollection } = useCan("collection.create");
   const { granted: canDeleteCollection } = useCan("collection.delete");
   const { granted: canPrint } = useCan("export.pdf");
 
-  const { searchQuery, sortBy, sortOrder, viewMode, density } = useOutletContext<{
-    searchQuery: string;
-    sortBy: CollectionSortBy;
-    sortOrder?: "asc" | "desc";
-    viewMode?: "grid" | "list";
-    density?: "comfortable" | "compact";
-  }>();
+  const { searchQuery, sortBy, sortOrder, viewMode, density } =
+    useOutletContext<{
+      searchQuery: string;
+      sortBy: CollectionSortBy;
+      sortOrder?: "asc" | "desc";
+      viewMode?: "grid" | "list";
+      density?: "comfortable" | "compact";
+    }>();
 
   const order = sortOrder ?? "asc";
   const mode = viewMode ?? "grid";
@@ -130,7 +142,7 @@ export const CollectionsPage: React.FC = () => {
     });
 
     return result;
-  }, [collections, searchQuery, sortBy, order, user?.id, organization?.id]);
+  }, [collections, searchQuery, sortBy, order]);
 
   const openCollection = useCallback(
     (id: string) => {
@@ -185,11 +197,14 @@ export const CollectionsPage: React.FC = () => {
     setContextMenu({ x, y, id: collection?.id ?? null });
   };
 
-  const requestDelete = (ids: string[]) => {
-    if (!canDeleteCollection || ids.length === 0) return;
-    setPendingDeleteIds(ids);
-    setContextMenu(null);
-  };
+  const requestDelete = useCallback(
+    (ids: string[]) => {
+      if (!canDeleteCollection || ids.length === 0) return;
+      setPendingDeleteIds(ids);
+      setContextMenu(null);
+    },
+    [canDeleteCollection],
+  );
 
   const handleDeleteConfirm = async () => {
     const ids = [...pendingDeleteIds];
@@ -242,7 +257,13 @@ export const CollectionsPage: React.FC = () => {
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [filteredCollections, selectedIds, openCollection, canDeleteCollection]);
+  }, [
+    filteredCollections,
+    selectedIds,
+    openCollection,
+    canDeleteCollection,
+    requestDelete,
+  ]);
 
   const menuCollection = contextMenu?.id
     ? filteredCollections.find((c) => c.id === contextMenu.id)
@@ -382,7 +403,11 @@ export const CollectionsPage: React.FC = () => {
                 <Badge variant="accent">{selectedIds.size}</Badge>
               </div>
               <Can permission="export.pdf">
-                <button type="button" className={MENU_ITEM} onClick={printSelected}>
+                <button
+                  type="button"
+                  className={MENU_ITEM}
+                  onClick={printSelected}
+                >
                   <Printer className={MENU_ICON} />
                   <span>{t("common.print")}</span>
                 </button>
@@ -677,7 +702,9 @@ const CollectionRow: React.FC<CollectionItemProps> = ({
         </div>
       )}
       <div className="min-w-0 flex-1">
-        <div className={`${isCompact ? "text-xs" : "text-sm"} font-medium truncate`}>
+        <div
+          className={`${isCompact ? "text-xs" : "text-sm"} font-medium truncate`}
+        >
           {collection.name}
         </div>
         {!isCompact && collection.description && (

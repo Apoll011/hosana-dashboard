@@ -30,6 +30,7 @@ if (!enabled) {
     api_host: host,
     defaults: "2026-05-30",
     capture_pageview: false, // We handle pageviews manually via router
+    capture_pageleave: true,
   });
 }
 

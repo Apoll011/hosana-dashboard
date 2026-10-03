@@ -56,7 +56,7 @@ export const ServicePrintView: React.FC<ServicePrintViewProps> = ({
     }
   }, [service.date]);
 
-  const elements = service.elements || [];
+  const elements = useMemo(() => service.elements || [], [service.elements]);
   const totalDurationSeconds = elements.reduce(
     (acc, el) => acc + (el.duration || 0),
     0,

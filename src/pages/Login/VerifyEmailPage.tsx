@@ -114,9 +114,7 @@ export const VerifyEmailPage: React.FC = () => {
               </form>
             )}
             {resendError && (
-              <p className="text-xs text-m3-danger mt-2">
-                {resendError}
-              </p>
+              <p className="text-xs text-m3-danger mt-2">{resendError}</p>
             )}
           </div>
         </div>
@@ -203,9 +201,7 @@ export const VerifyEmailPage: React.FC = () => {
             </p>
           )}
           {resendError && (
-            <p className="text-xs text-m3-danger">
-              {resendError}
-            </p>
+            <p className="text-xs text-m3-danger">{resendError}</p>
           )}
         </div>
       </LoginLayout>

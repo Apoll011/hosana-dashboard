@@ -23,6 +23,7 @@ import { authClient } from "../lib/authClient";
 import { clearPermissionCache } from "../lib/permissions/client";
 import { posthog } from "../lib/posthog";
 import { fetchSubscriptionRows } from "../lib/subscriptions";
+import { resetDatabase } from "../db";
 
 export interface SessionUser {
   id: string;
@@ -150,7 +151,41 @@ const CACHED_ORG_KEY = "cached_auth_org";
 const CACHED_ORGS_KEY = "cached_auth_orgs";
 const CACHED_TRIAL_KEY = "cached_auth_trial";
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
+const DemoAuthProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const demoLogout = useCallback(async () => {
+    setIsLoading(true);
+    localStorage.clear();
+    await clearDemoData();
+    window.location.assign("/login");
+  }, []);
+  const demoNoOp = useCallback(async () => {}, []);
+  const demoOrg = useMemo(() => getDemoOrganization(), []);
+  const demoUser = useMemo(() => getDemoUser(), []);
+  const demoDemoValue = useMemo<AuthContextType>(
+    () => ({
+      user: demoUser,
+      organization: demoOrg,
+      organizations: [demoOrg],
+      hasAcceptedTrial: true,
+      isAuthenticated: true,
+      isLoading,
+      refetch: demoNoOp,
+      switchOrganization: demoNoOp as (org: Organization) => Promise<void>,
+      logout: demoLogout,
+    }),
+    [demoUser, demoOrg, isLoading, demoNoOp, demoLogout],
+  );
+  return (
+    <AuthContext.Provider value={demoDemoValue}>
+      {children}
+    </AuthContext.Provider>
+  );
+};
+
+const StandardAuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   // Stale-While-Revalidate: If we have a cached user, start with isLoading = false immediately!
@@ -162,38 +197,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       return true;
     }
   });
-
-  // ------------------------------------------------------------------
-  // Demo mode — return mock session immediately, no server calls.
-  // ------------------------------------------------------------------
-  if (isDemoMode()) {
-    setIsLoading(false);
-    const demoLogout = async () => {
-      setIsLoading(true);
-      localStorage.clear();
-      await clearDemoData();
-      window.location.assign("/login");
-    };
-    const demoNoOp = async () => {};
-    const demoOrg = getDemoOrganization();
-    const demoDemoValue: AuthContextType = {
-      user: getDemoUser(),
-      organization: demoOrg,
-      organizations: [demoOrg],
-      hasAcceptedTrial: true,
-      isAuthenticated: true,
-      isLoading: isLoading,
-      refetch: demoNoOp,
-      switchOrganization: demoNoOp as (org: Organization) => Promise<void>,
-      logout: demoLogout,
-    };
-    return (
-      <AuthContext.Provider value={demoDemoValue}>
-        {children}
-      </AuthContext.Provider>
-    );
-  }
-  // ------------------------------------------------------------------
 
   const [user, setUser] = useState<SessionUser | null>(() => {
     try {
@@ -469,6 +472,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     // Clear all localStorage data
     localStorage.clear();
 
+    // Reset the IDB singleton *before* deleting the databases.
+    // This ensures the next getDatabase() call (e.g. after an in-tab re-login)
+    // opens a fresh connection instead of reusing the now-closing one, which
+    // would throw "The database connection is closing" on every write/purge.
+    resetDatabase();
+
     // Clear all IndexedDB databases
     if (typeof indexedDB !== "undefined" && indexedDB.databases) {
       try {
@@ -547,6 +556,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   return (
     <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>
   );
+};
+
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
+  if (isDemoMode()) {
+    return <DemoAuthProvider>{children}</DemoAuthProvider>;
+  }
+  return <StandardAuthProvider>{children}</StandardAuthProvider>;
 };
 
 export const useAuth = () => {

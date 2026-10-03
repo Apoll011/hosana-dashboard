@@ -420,7 +420,9 @@ export const TeamsPage: React.FC = () => {
                           </span>
                         )}
                       </div>
-                      <p className="text-xs text-m3-secondary">{member.email}</p>
+                      <p className="text-xs text-m3-secondary">
+                        {member.email}
+                      </p>
                     </div>
                   </div>
 

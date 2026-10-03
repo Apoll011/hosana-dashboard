@@ -59,9 +59,7 @@ export const DetailsSidebar: React.FC<DetailsSidebarProps> = ({
     <div className="space-y-4">
       <div className="bg-m3-card border border-m3-border rounded-[var(--radius-xl)] p-5 shadow-[var(--shadow-sm)]">
         <div className="flex items-center justify-between mb-3">
-          <h3 className="text-label">
-            {t("common.details")}
-          </h3>
+          <h3 className="text-label">{t("common.details")}</h3>
           {canUpdate && (
             <button
               onClick={onEdit}
@@ -75,51 +73,39 @@ export const DetailsSidebar: React.FC<DetailsSidebarProps> = ({
 
         <div className="space-y-3">
           <div>
-            <p className="text-label">
-              {t("common.name")}
-            </p>
+            <p className="text-label">{t("common.name")}</p>
             <p className="text-sm font-semibold text-m3-text mt-0.5 truncate">
               {event.title}
             </p>
           </div>
           <div>
-            <p className="text-label">
-              {t("common.date")}
-            </p>
+            <p className="text-label">{t("common.date")}</p>
             <p className="text-sm font-semibold text-m3-text mt-0.5">
               {formatLongDate(event.date, t)}
             </p>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <p className="text-label">
-                {t("agenda.time")}
-              </p>
+              <p className="text-label">{t("agenda.time")}</p>
               <p className="text-sm font-semibold text-m3-text mt-0.5">
                 {event.time}
               </p>
             </div>
             <div>
-              <p className="text-label">
-                {t("agenda.duration")}
-              </p>
+              <p className="text-label">{t("agenda.duration")}</p>
               <p className="text-sm font-semibold text-m3-text mt-0.5">
                 {t("agenda.minutes", { minutes: event.durationMinutes })}
               </p>
             </div>
           </div>
           <div>
-            <p className="text-label">
-              {t("agenda.type")}
-            </p>
+            <p className="text-label">{t("agenda.type")}</p>
             <p className="text-sm font-semibold text-m3-primary mt-0.5">
               {event.type}
             </p>
           </div>
           <div>
-            <p className="text-label">
-              {t("agenda.linkedService")}
-            </p>
+            <p className="text-label">{t("agenda.linkedService")}</p>
             {linkedService ? (
               <div className="mt-0.5">
                 <button
@@ -144,23 +130,17 @@ export const DetailsSidebar: React.FC<DetailsSidebarProps> = ({
                 </p>
               </div>
             ) : (
-              <p className="text-sm font-semibold text-m3-text mt-0.5">
-                —
-              </p>
+              <p className="text-sm font-semibold text-m3-text mt-0.5">—</p>
             )}
           </div>
           <div>
-            <p className="text-label">
-              {t("agenda.location")}
-            </p>
+            <p className="text-label">{t("agenda.location")}</p>
             <p className="text-sm font-semibold text-m3-text mt-0.5">
               {event.location || "—"}
             </p>
           </div>
           <div>
-            <p className="text-label">
-              {t("agenda.notes")}
-            </p>
+            <p className="text-label">{t("agenda.notes")}</p>
             <p className="text-xs text-m3-secondary mt-0.5 leading-relaxed">
               {event.notes || t("agenda.noNotes")}
             </p>

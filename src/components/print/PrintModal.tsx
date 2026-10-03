@@ -7,7 +7,7 @@ import { Button } from "@/src/components/common";
 import { useAuth } from "@/src/contexts/AuthContext";
 import { useI18n } from "@/src/lib/i18n";
 import { Columns, Minus, Plus, Printer, X } from "lucide-react";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { triggerPrint } from "./printEngine";
 import { TEMPLATE_FAMILIES } from "./templateFamilies";
 import { BatchPrintView } from "./templates/BatchPrintView";
@@ -32,7 +32,11 @@ export const PrintModal: React.FC<PrintModalProps> = ({
 
   const orgMetadata = (organization?.metadata as Record<string, unknown>) || {};
   const orgSettings = (orgMetadata.settings as Record<string, unknown>) || {};
-  const savedPrintSettings = (orgSettings.print as Partial<PrintOptions>) || {};
+  const savedPrintSettings = useMemo(() => {
+    const meta = (organization?.metadata as Record<string, unknown>) || {};
+    const settings = (meta.settings as Record<string, unknown>) || {};
+    return (settings.print as Partial<PrintOptions>) || {};
+  }, [organization?.metadata]);
 
   // Active options state initialized from org settings + payload overrides
   const [options, setOptions] = useState<PrintOptions>({

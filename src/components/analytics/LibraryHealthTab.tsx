@@ -48,7 +48,10 @@ export const LibraryHealthTab: React.FC<LibraryHealthTabProps> = ({
   const slugPrefix = slug ? `/${slug}` : "";
   const { songsQuery } = useAllSongs();
   const { granted: canUpdateSong } = useCan("song.update");
-  const songs = songsQuery.data?.songs ?? [];
+  const songs = useMemo(
+    () => songsQuery.data?.songs ?? [],
+    [songsQuery.data?.songs],
+  );
   const isLoading = songsQuery.isLoading;
 
   const summary = useMemo(() => computeLibraryHealth(songs), [songs]);

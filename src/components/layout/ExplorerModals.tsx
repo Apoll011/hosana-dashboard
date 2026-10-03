@@ -505,7 +505,7 @@ interface ExplorerModalsProps {
   // Create Song
   currentFolder: Folder | undefined;
   currentFolderId: string | null;
-  allFolders: Folder[];
+  allFolders?: Folder[];
   onCreateSongSubmit: (data: {
     title: string;
     artist: string;
@@ -611,7 +611,7 @@ export const ExplorerModals: React.FC<ExplorerModalsProps> = ({
   onCifraClubSubmit,
   currentFolder,
   currentFolderId,
-  allFolders,
+  allFolders = [],
   onCreateSongSubmit,
   onCreateServiceSubmit,
   onCreateEventSubmit,

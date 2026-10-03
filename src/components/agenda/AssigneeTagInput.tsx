@@ -68,11 +68,10 @@ export const AssigneeTagInput: React.FC<AssigneeTagInputProps> = ({
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
 
-  const members = organization?.members ?? [];
-
   // Org members first, then manual assignees whose name doesn't collide with a
   // member (a member link always wins over a free-typed name).
   const suggestions = useMemo<Assignee[]>(() => {
+    const members = organization?.members ?? [];
     const memberNames = new Set(
       members.map((m) => m.user.name.trim().toLowerCase()),
     );
@@ -88,7 +87,7 @@ export const AssigneeTagInput: React.FC<AssigneeTagInputProps> = ({
       (a) => !memberNames.has(a.name.trim().toLowerCase()),
     );
     return [...memberSuggestions, ...manual];
-  }, [members, manualSuggestions]);
+  }, [organization?.members, manualSuggestions]);
 
   const q = draft.trim().toLowerCase();
   const filtered = useMemo(
@@ -218,9 +217,7 @@ export const AssigneeTagInput: React.FC<AssigneeTagInputProps> = ({
                 }}
                 onMouseEnter={() => setHighlight(i)}
                 className={`w-full flex items-center gap-2.5 px-2.5 py-2 min-h-10 rounded-[var(--radius-md)] text-left transition-colors cursor-pointer ${
-                  i === highlight
-                    ? "bg-m3-hover"
-                    : "hover:bg-m3-hover/60"
+                  i === highlight ? "bg-m3-hover" : "hover:bg-m3-hover/60"
                 }`}
               >
                 <Avatar assignee={s} className="w-6 h-6 text-[10px]" />

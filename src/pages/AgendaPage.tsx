@@ -21,7 +21,11 @@ import { useAgendaNotifications } from "@/src/hooks/useAgendaNotifications";
 import { useI18n } from "@/src/lib/i18n";
 import { useCan } from "@/src/lib/permissions/client";
 import { Can } from "@/src/lib/permissions/components";
-import type { AgendaEvent, Assignee } from "@/src/types";
+import type {
+  AgendaEvent,
+  Assignee,
+  ResponsibilityCategory,
+} from "@/src/types";
 import { formatLongDate } from "@/src/utils/agendaDate";
 import {
   assigneeKey,
@@ -130,7 +134,7 @@ export const AgendaPage: React.FC = () => {
   }, [store.events]);
 
   const categoriesById = useMemo(() => {
-    const map: Record<string, (typeof store.categories)[number]> = {};
+    const map: Record<string, ResponsibilityCategory> = {};
     for (const c of store.categories) map[c.id] = c;
     return map;
   }, [store.categories]);
@@ -361,65 +365,65 @@ export const AgendaPage: React.FC = () => {
             <Spinner label={t("common.loading")} />
           </div>
         ) : (
-        /* Body: calendar / events / details */
-        <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr_280px] gap-5 items-start">
-          <div className="space-y-4">
-            <MiniCalendar
-              visibleMonth={visibleMonth}
-              selectedDate={selectedDate}
-              markedDates={markedDates}
-              onSelectDate={handleSelectDate}
-              onChangeMonth={(delta) =>
-                setVisibleMonth(
-                  (prev) =>
-                    new Date(prev.getFullYear(), prev.getMonth() + delta, 1),
-                )
-              }
-              onGoToday={() => {
-                const iso = toIso(new Date());
-                setVisibleMonth(new Date());
-                handleSelectDate(iso);
+          /* Body: calendar / events / details */
+          <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr_280px] gap-5 items-start">
+            <div className="space-y-4">
+              <MiniCalendar
+                visibleMonth={visibleMonth}
+                selectedDate={selectedDate}
+                markedDates={markedDates}
+                onSelectDate={handleSelectDate}
+                onChangeMonth={(delta) =>
+                  setVisibleMonth(
+                    (prev) =>
+                      new Date(prev.getFullYear(), prev.getMonth() + delta, 1),
+                  )
+                }
+                onGoToday={() => {
+                  const iso = toIso(new Date());
+                  setVisibleMonth(new Date());
+                  handleSelectDate(iso);
+                }}
+              />
+              <DayAgendaList
+                events={eventsForSelectedDate}
+                selectedEventId={effectiveEventId}
+                responsibilityCounts={responsibilityCounts}
+                onSelectEvent={setSelectedEventId}
+              />
+            </div>
+
+            <ResponsibilitiesPanel
+              event={selectedEvent}
+              responsibilities={responsibilitiesForSelectedEvent}
+              categories={categoriesById}
+              canUpdate={canUpdateAgenda}
+              onAddResponsibility={() => setIsAddResponsibilityOpen(true)}
+              onEditAssignees={(respId) => setEditingAssigneesFor(respId)}
+              onRemoveResponsibility={(respId) => {
+                if (selectedEvent) {
+                  setPendingRemoval({
+                    kind: "responsibility",
+                    eventId: selectedEvent.id,
+                    respId,
+                  });
+                }
               }}
             />
-            <DayAgendaList
-              events={eventsForSelectedDate}
-              selectedEventId={effectiveEventId}
-              responsibilityCounts={responsibilityCounts}
-              onSelectEvent={setSelectedEventId}
+
+            <DetailsSidebar
+              event={selectedEvent}
+              onEdit={() => setIsEditEventOpen(true)}
+              canUpdate={canUpdateAgenda}
+              canNotify={notifications.canNotify}
+              unnotifiedCount={notifications.unnotifiedCount}
+              pendingDate={notifications.pendingDate}
+              pendingLocation={notifications.pendingLocation}
+              isNotifying={notifications.isNotifying}
+              onNotifyAssignments={() => void notifications.notifyAssignments()}
+              onNotifyUpdate={() => void notifications.notifyUpdate()}
             />
           </div>
-
-          <ResponsibilitiesPanel
-            event={selectedEvent}
-            responsibilities={responsibilitiesForSelectedEvent}
-            categories={categoriesById}
-            canUpdate={canUpdateAgenda}
-            onAddResponsibility={() => setIsAddResponsibilityOpen(true)}
-            onEditAssignees={(respId) => setEditingAssigneesFor(respId)}
-            onRemoveResponsibility={(respId) => {
-              if (selectedEvent) {
-                setPendingRemoval({
-                  kind: "responsibility",
-                  eventId: selectedEvent.id,
-                  respId,
-                });
-              }
-            }}
-          />
-
-          <DetailsSidebar
-            event={selectedEvent}
-            onEdit={() => setIsEditEventOpen(true)}
-            canUpdate={canUpdateAgenda}
-            canNotify={notifications.canNotify}
-            unnotifiedCount={notifications.unnotifiedCount}
-            pendingDate={notifications.pendingDate}
-            pendingLocation={notifications.pendingLocation}
-            isNotifying={notifications.isNotifying}
-            onNotifyAssignments={() => void notifications.notifyAssignments()}
-            onNotifyUpdate={() => void notifications.notifyUpdate()}
-          />
-        </div>
         )}
       </div>
 

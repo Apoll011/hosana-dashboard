@@ -133,11 +133,12 @@ export const SyncProvider: React.FC<{ children: React.ReactNode }> = ({
 
   // Clear all pending toast timers on unmount
   useEffect(() => {
+    const timers = toastTimersRef.current;
     return () => {
-      for (const timer of toastTimersRef.current.values()) {
+      for (const timer of timers.values()) {
         clearTimeout(timer);
       }
-      toastTimersRef.current.clear();
+      timers.clear();
     };
   }, []);
 

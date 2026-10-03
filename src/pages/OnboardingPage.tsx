@@ -20,7 +20,7 @@ import {
   Sun,
   XCircle,
 } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import bg from "../assets/images/background.webp";
 import { useAuth } from "../contexts/AuthContext";
 import { useTheme } from "../contexts/ThemeContext";
@@ -98,7 +98,7 @@ export const OnboardingPage: React.FC = () => {
   const [isFetchingInvitations, setIsFetchingInvitations] = useState(true);
   const [processingInvId, setProcessingInvId] = useState<string | null>(null);
 
-  const fetchUserInvitations = async () => {
+  const fetchUserInvitations = useCallback(async () => {
     setIsFetchingInvitations(true);
     try {
       const res = await authClient.organization.listUserInvitations({
@@ -115,7 +115,7 @@ export const OnboardingPage: React.FC = () => {
     } finally {
       setIsFetchingInvitations(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     // Check for a pending invitation token stored before sign-up/sign-in
@@ -128,7 +128,7 @@ export const OnboardingPage: React.FC = () => {
     }
 
     fetchUserInvitations();
-  }, []);
+  }, [navigate, fetchUserInvitations]);
 
   // If the user already has an organization that has never accepted a trial /
   // set up billing (e.g. they created the org and refreshed, or they cancelled
@@ -327,9 +327,7 @@ export const OnboardingPage: React.FC = () => {
         <div className="w-full max-w-md sm:max-w-124 md:max-w-135 bg-m3-card/95 backdrop-blur-xl sm:border sm:border-m3-border/80 rounded-[var(--radius-xl)] sm:rounded-[28px] shadow-lg shadow-black/5 dark:shadow-black/40 px-6 py-4 sm:p-6 md:p-8 transition-all">
           {/* Header Brand & Titles */}
           <div className="flex flex-col items-center text-center mb-7 sm:mb-8 select-none">
-            <h1 className="text-title text-m3-text">
-              {getHeaderTitle()}
-            </h1>
+            <h1 className="text-title text-m3-text">{getHeaderTitle()}</h1>
 
             {getHeaderSubtitle() && (
               <p className="mt-1.5 text-muted max-w-sm">
@@ -359,9 +357,7 @@ export const OnboardingPage: React.FC = () => {
                 ).map((key) => (
                   <div key={key} className="flex items-center gap-2.5">
                     <Check className="w-4 h-4 text-m3-primary shrink-0" />
-                    <span className="text-sm text-m3-text">
-                      {t(key)}
-                    </span>
+                    <span className="text-sm text-m3-text">{t(key)}</span>
                   </div>
                 ))}
               </div>
@@ -517,9 +513,7 @@ export const OnboardingPage: React.FC = () => {
               {/* Action options */}
               <div className="space-y-3">
                 {invitations.length > 0 && (
-                  <h3 className="text-label px-1">
-                    Outras Opções
-                  </h3>
+                  <h3 className="text-label px-1">Outras Opções</h3>
                 )}
 
                 <button

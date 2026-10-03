@@ -18,9 +18,38 @@ export interface TrashItem {
   purgeAt: string | null;
 }
 
+let cachedTrashMap = {
+  folders: [] as TrashItem[],
+  songs: [] as TrashItem[],
+  services: [] as TrashItem[],
+  agendaEvents: [] as TrashItem[],
+};
+let isTrashCached = false;
+
+export function invalidateTrashCache(): void {
+  cachedTrashMap = {
+    folders: [],
+    songs: [],
+    services: [],
+    agendaEvents: [],
+  };
+  isTrashCached = false;
+}
+
+function getCombinedTrashItems(): TrashItem[] {
+  return [
+    ...cachedTrashMap.folders,
+    ...cachedTrashMap.songs,
+    ...cachedTrashMap.services,
+    ...cachedTrashMap.agendaEvents,
+  ];
+}
+
 export function useTrash() {
-  const [items, setItems] = useState<TrashItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [items, setItems] = useState<TrashItem[]>(() =>
+    isTrashCached ? getCombinedTrashItems() : [],
+  );
+  const [isLoading, setIsLoading] = useState(() => !isTrashCached);
 
   const { restoreFolder, isRestoring: isRestoringFolder } = useFolders();
   const { restoreSong, isRestoring: isRestoringSong } = useSongs();
@@ -35,18 +64,23 @@ export function useTrash() {
       const db = await getDatabase();
       if (!isSubscribed) return;
 
-      let latestFolders: TrashItem[] = [];
-      let latestSongs: TrashItem[] = [];
-      let latestServices: TrashItem[] = [];
-      let latestAgendaEvents: TrashItem[] = [];
+      let receivedFolders = isTrashCached;
+      let receivedSongs = isTrashCached;
+      let receivedServices = isTrashCached;
+      let receivedAgendaEvents = isTrashCached;
 
       const emit = () => {
-        setItems([
-          ...latestFolders,
-          ...latestSongs,
-          ...latestServices,
-          ...latestAgendaEvents,
-        ]);
+        if (
+          !receivedFolders ||
+          !receivedSongs ||
+          !receivedServices ||
+          !receivedAgendaEvents
+        ) {
+          return;
+        }
+        isTrashCached = true;
+        const allItems = getCombinedTrashItems();
+        setItems(allItems);
         setIsLoading(false);
       };
 
@@ -55,13 +89,14 @@ export function useTrash() {
           .find({ selector: { isDeleted: true } })
           .$.subscribe((docs) => {
             if (!isSubscribed) return;
-            latestFolders = docs.map((d) => ({
+            cachedTrashMap.folders = docs.map((d) => ({
               id: d.id,
               type: "folder" as const,
               name: d.name,
               updatedAt: d.updatedAt,
               purgeAt: d.purgeAt ?? null,
             }));
+            receivedFolders = true;
             emit();
           }),
       );
@@ -69,13 +104,14 @@ export function useTrash() {
       subs.push(
         db.songs.find({ selector: { isDeleted: true } }).$.subscribe((docs) => {
           if (!isSubscribed) return;
-          latestSongs = docs.map((d) => ({
+          cachedTrashMap.songs = docs.map((d) => ({
             id: d.id,
             type: "song" as const,
             name: d.title,
             updatedAt: d.updatedAt,
             purgeAt: d.purgeAt ?? null,
           }));
+          receivedSongs = true;
           emit();
         }),
       );
@@ -85,13 +121,14 @@ export function useTrash() {
           .find({ selector: { isDeleted: true } })
           .$.subscribe((docs) => {
             if (!isSubscribed) return;
-            latestServices = docs.map((d) => ({
+            cachedTrashMap.services = docs.map((d) => ({
               id: d.id,
               type: "service" as const,
               name: d.name,
               updatedAt: d.updatedAt,
               purgeAt: d.purgeAt ?? null,
             }));
+            receivedServices = true;
             emit();
           }),
       );
@@ -101,13 +138,14 @@ export function useTrash() {
           .find({ selector: { isDeleted: true } })
           .$.subscribe((docs) => {
             if (!isSubscribed) return;
-            latestAgendaEvents = docs.map((d) => ({
+            cachedTrashMap.agendaEvents = docs.map((d) => ({
               id: d.id,
               type: "agenda" as const,
               name: d.title,
               updatedAt: d.updatedAt,
               purgeAt: d.purgeAt ?? null,
             }));
+            receivedAgendaEvents = true;
             emit();
           }),
       );

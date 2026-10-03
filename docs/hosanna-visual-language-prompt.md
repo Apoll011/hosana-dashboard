@@ -17,6 +17,7 @@ Match the existing Hosanna Studio. Do not invent a palette, a display typeface, 
 One accent, sky. Everything else is neutral.
 
 Light:
+
 - Accent `#0284c7`, pressed `#0369a1`, tint `#e0f2fe`
 - Text `#1a1d24`, secondary text `#5c6570`
 - Page background `#f4f6f8`, sidebar and toolbars `#eef1f4`, cards `#ffffff`
@@ -24,6 +25,7 @@ Light:
 - Success `#059669`, warning `#d97706`, danger `#e11d48`
 
 Dark:
+
 - Accent `#5babdb` on surfaces `#0b0d12` / `#12151c` / `#181b23`
 - Text `#eceef2`, secondary `#9aa0b0`, border `#2d3244`, hover `#1f2330`
 - Danger `#fb7185`
@@ -37,6 +39,7 @@ One sans for all interface text, including titles: Figtree. If Figtree cannot lo
 Source Serif 4 is only for words people sing or read aloud: lyrics and readings. Chord symbols stay monospace (JetBrains Mono).
 
 Scale, and do not go larger:
+
 - Page title 24px, weight 600, tracking -0.02em. This is the ceiling.
 - Section title 17px, weight 600, tracking -0.015em
 - Body 14px, weight 400
@@ -53,6 +56,7 @@ Radius: 6px chips, 10px controls, 14px cards, 20px menus and dialogs, full pill 
 Shadows stay quiet: a 1px hairline plus, at most, `0 1px 2px` on resting cards, `0 4px 12px` on popovers, `0 12px 32px` on dialogs. No glow, no colored shadow.
 
 Two densities, and both must be real:
+
 - Comfortable is the default: card padding 16px, icons 40–44px, list rows about 56px, collection covers 144px tall.
 - Compact tightens padding, type, icons, and cover height. It does not remove actions or metadata.
 
@@ -69,6 +73,7 @@ Empty states are a short dashed region with one sentence and, when the person ca
 ### Menus
 
 Every context menu is the same object:
+
 - Fixed to the pointer or the button, 224px wide, 20px radius, 6px padding, surface card, border, quiet shadow.
 - A one-line header in the label style, then a hairline.
 - Rows are at least 40px, 14px icons, secondary icon color, medium label.
@@ -84,6 +89,7 @@ Motion explains a change of size or presence. It does not flash, bounce, or bloc
 The reference is the song editor: both panes stay mounted. They animate width (or flex basis) and opacity together, 300ms, ease-in-out. Closed means width 0, opacity 0, no pointer events. Do not use `display: none` or `hidden` on a pane whose width should animate — that skips the motion.
 
 Use that same 300ms ease-in-out for:
+
 - The service library opening and closing beside the order
 - The service preview opening and closing
 - Switching Plan and Read (crossfade, about 4px of travel, both views mounted)
@@ -99,6 +105,7 @@ If the person prefers reduced motion, durations collapse to nearly nothing. Do n
 ### Explorer behavior
 
 Collections, folders, and songs share one set of gestures:
+
 - Click selects. Shift extends the range. Command or Ctrl toggles.
 - Double-click or Enter opens.
 - Escape clears the selection and closes a menu.
@@ -117,6 +124,7 @@ The score sits inside the card, in the top-left, clear of the "…" button in th
 ### Service
 
 Two modes, same service:
+
 - Plan: library, order, preview. The library and the preview open and close with the panel motion above. The order stays readable.
 - Read: a short order and the current item large enough to speak from. A musician starts here. Arrow keys move the current item.
 

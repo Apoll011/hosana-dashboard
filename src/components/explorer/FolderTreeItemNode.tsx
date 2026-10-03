@@ -19,10 +19,11 @@ export interface FolderTreeNode {
   children: FolderTreeNode[];
 }
 
-export function buildFolderTree(folders: Folder[]): FolderTreeNode[] {
+export function buildFolderTree(folders?: Folder[] | null): FolderTreeNode[] {
   const childrenMap = new Map<string | null, Folder[]>();
+  const safeFolders = Array.isArray(folders) ? folders : [];
 
-  folders.forEach((f) => {
+  safeFolders.forEach((f) => {
     const parentId = f.parentId || null;
     if (!childrenMap.has(parentId)) {
       childrenMap.set(parentId, []);
@@ -48,9 +49,9 @@ export function buildFolderTree(folders: Folder[]): FolderTreeNode[] {
  */
 export function getFolderAncestors(
   folderId: string | null | undefined,
-  folders: Folder[],
+  folders?: Folder[] | null,
 ): Folder[] {
-  if (!folderId) return [];
+  if (!folderId || !Array.isArray(folders)) return [];
   const trail: Folder[] = [];
   const visited = new Set<string>();
   let current = folders.find((f) => f.id === folderId);
@@ -68,9 +69,10 @@ export function getFolderAncestors(
 
 export function getFolderDescendantIds(
   folderId: string,
-  folders: Folder[],
+  folders?: Folder[] | null,
 ): Set<string> {
   const descendantIds = new Set<string>([folderId]);
+  if (!Array.isArray(folders)) return descendantIds;
   let addedNew = true;
 
   while (addedNew) {
