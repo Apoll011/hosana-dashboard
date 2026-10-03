@@ -158,7 +158,7 @@ export const ExplorerAddressBar: React.FC<ExplorerAddressBarProps> = ({
         </Button>
 
         {/* Address Path Bar */}
-        <div className="flex-1 flex items-center gap-2 px-4 py-2.5 min-h-10 bg-m3-bg border border-m3-border rounded-[var(--radius-md)] text-[13px] overflow-x-auto select-none hide-scrollbar shadow-[var(--shadow-sm)] min-w-0">
+        <div className="flex-1 flex items-center gap-2 px-4 py-2.5 min-h-10 bg-m3-bg border border-m3-border rounded-md text-[13px] overflow-x-auto select-none hide-scrollbar shadow-sm min-w-0">
           <button
             onClick={() => {
               onSelectFolder(null);
@@ -270,8 +270,8 @@ export const ExplorerAddressBar: React.FC<ExplorerAddressBarProps> = ({
                     <span>{currentService.name}.service</span>
                   </div>
                   <div
-                    className="ml-auto mr-2 inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-[var(--radius-md)]
-                          px-3 py-1.5 text-xs font-medium
+                    className="ml-auto mr-2 inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-md
+                          px-3 py-0.8 text-xs font-medium
                           bg-m3-primary/10 text-m3-primary
                           border border-m3-primary/20"
                   >
@@ -417,7 +417,7 @@ export const ExplorerAddressBar: React.FC<ExplorerAddressBarProps> = ({
                 }
               }}
               icon={<Search className="w-4 h-4 text-m3-secondary" />}
-              className={`py-2.5 text-sm rounded-[var(--radius-md)] ${
+              className={`py-2.5 text-sm rounded-md ${
                 view === "services"
                   ? searchQuery
                     ? "pr-9"
