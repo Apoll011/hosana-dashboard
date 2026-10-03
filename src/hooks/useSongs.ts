@@ -691,7 +691,13 @@ export function useSong(id: string | null) {
       setIsLoading(false);
       return;
     }
-    setIsLoading(true);
+
+    // Only enter the loading state if we don't already have a cached copy.
+    // This prevents the ~2s blank/spinner flash on every navigation when the
+    // in-memory DB already holds the document.
+    if (!cachedSingleSongs.has(id)) {
+      setIsLoading(true);
+    }
 
     let isSubscribed = true;
     let rxSub: { unsubscribe: () => void } | null = null;
