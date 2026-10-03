@@ -314,7 +314,7 @@ export const MainLayout: React.FC = () => {
   const totalServices =
     servicesQuery.data?.filter((s) => !s.archived).length || 0;
   const rootSongsCount = foldersQuery.data?.rootSongsCount || 0;
-  const rootFoldersCount = foldersQuery.data?.folders.length || 0;
+  const rootFoldersCount = foldersQuery.data?.folders?.length || 0;
 
   const folderTree = useMemo(() => buildFolderTree(allFolders), [allFolders]);
   const currentFolder = useMemo(

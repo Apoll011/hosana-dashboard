@@ -19,6 +19,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { isDemoMode } from "../demo/index";
 import { MainLayout } from "../layouts/MainLayout";
 import { usePreloadPermissions } from "../lib/permissions/client";
+import { posthog } from "../lib/posthog";
 import { CaptchaPage } from "../pages/CaptchaPage";
 import { ProtectedRoute } from "./ProtectedRoute";
 
@@ -91,6 +92,28 @@ function prefetchRemainingRoutes() {
 
   runWhenIdle(step);
 }
+
+const RouteErrorFallback = ({
+  resetErrorBoundary,
+}: {
+  resetErrorBoundary: () => void;
+}) => {
+  const { t } = useI18n();
+  return (
+    <div className="flex flex-col items-center justify-center flex-1 h-full min-h-[300px] text-center p-6 bg-m3-bg">
+      <h2 className="text-xl font-bold mb-2">
+        {t("routes.errorBoundary.title")}
+      </h2>
+      <p className="text-gray-500 mb-4">{t("routes.errorBoundary.desc")}</p>
+      <button
+        onClick={resetErrorBoundary}
+        className="px-4 py-2 min-h-10 bg-m3-primary text-white rounded-[var(--radius-md)] hover:bg-m3-primary-dark transition-colors cursor-pointer"
+      >
+        {t("routes.errorBoundary.reloadBtn")}
+      </button>
+    </div>
+  );
+};
 
 const ErrorFallback = ({
   resetErrorBoundary,
@@ -176,7 +199,19 @@ export const AppRoutes: React.FC = () => {
             <Route path="/:slug" element={<OrganizationGuard />}>
               <Route element={<MainLayout />}>
                 <Route index element={<Navigate to="folders" replace />} />
-                <Route path="folders" element={<FoldersPage />} />
+                <Route
+                  path="folders"
+                  element={
+                    <ErrorBoundary
+                      FallbackComponent={RouteErrorFallback}
+                      onError={(error) => {
+                        posthog?.captureException?.(error);
+                      }}
+                    >
+                      <FoldersPage />
+                    </ErrorBoundary>
+                  }
+                />
                 <Route path="songs" element={<SongsPage />} />
                 <Route path="songs/:id" element={<SongEditorPage />} />
                 <Route path="collections" element={<CollectionsPage />} />
