@@ -346,7 +346,9 @@ export const SetlistInsightsTab: React.FC<SetlistInsightsTabProps> = ({
             <h3 className="text-sm font-semibold text-m3-text">
               {t("analytics.setlist.allSongs")}
             </h3>
-            <p className="mt-1 text-caption">{t("analytics.setlist.allSongsDesc")}</p>
+            <p className="mt-1 text-caption">
+              {t("analytics.setlist.allSongsDesc")}
+            </p>
           </div>
           <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
             <div className="flex-1">

@@ -218,9 +218,7 @@ export const AssigneeTagInput: React.FC<AssigneeTagInputProps> = ({
                 }}
                 onMouseEnter={() => setHighlight(i)}
                 className={`w-full flex items-center gap-2.5 px-2.5 py-2 min-h-10 rounded-[var(--radius-md)] text-left transition-colors cursor-pointer ${
-                  i === highlight
-                    ? "bg-m3-hover"
-                    : "hover:bg-m3-hover/60"
+                  i === highlight ? "bg-m3-hover" : "hover:bg-m3-hover/60"
                 }`}
               >
                 <Avatar assignee={s} className="w-6 h-6 text-[10px]" />

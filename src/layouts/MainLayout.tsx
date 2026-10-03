@@ -1673,9 +1673,7 @@ export const MainLayout: React.FC = () => {
         selectedCount={totalSelectedCount}
         itemLabel={t("layout.items")}
         onTag={
-          selectedSongIds.size > 0
-            ? () => openModal("batch-tag")
-            : undefined
+          selectedSongIds.size > 0 ? () => openModal("batch-tag") : undefined
         }
         onMove={
           selectedSongIds.size > 0 || selectedFolderIds.size > 0

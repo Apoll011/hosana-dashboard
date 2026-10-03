@@ -298,7 +298,9 @@ export const UsageOverviewTab: React.FC<UsageOverviewTabProps> = ({
           </div>
         </div>
 
-        <p className="text-sm text-m3-secondary">{t("analytics.usage.planNote")}</p>
+        <p className="text-sm text-m3-secondary">
+          {t("analytics.usage.planNote")}
+        </p>
 
         <div className="grid gap-3 sm:grid-cols-2">
           {summary.resources.map((item) => {

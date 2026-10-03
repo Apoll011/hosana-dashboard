@@ -188,9 +188,7 @@ export const BatchTagModal: React.FC<BatchTagModalProps> = ({
 
         {/* Custom Tag Input */}
         <div className="flex flex-col gap-2">
-          <label className="text-label">
-            {t("modals.newCustomTag")}
-          </label>
+          <label className="text-label">{t("modals.newCustomTag")}</label>
           <div className="flex gap-2">
             <div className="flex-1">
               <Input

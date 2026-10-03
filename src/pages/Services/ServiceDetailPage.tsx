@@ -1414,7 +1414,10 @@ export const ServiceDetailPage: React.FC = () => {
           >
             <button
               type="button"
-              onClick={() => { setReadingMode(false); setPreviewElement(null); }}
+              onClick={() => {
+                setReadingMode(false);
+                setPreviewElement(null);
+              }}
               className={`min-h-8 px-2.5 text-xs font-semibold rounded-[var(--radius-sm)] cursor-pointer transition-colors ${
                 readingMode
                   ? "text-m3-secondary hover:text-m3-text"
@@ -1846,64 +1849,76 @@ export const ServiceDetailPage: React.FC = () => {
             aria-hidden={!previewElement}
           >
             <div className="flex flex-col h-full min-h-0 w-full md:w-96 lg:w-md">
-              {previewContent && (() => {
-                const badge = getElementBadge(previewContent.type, t);
-                const Icon = badge.icon;
-                return (
-                  <>
-                    <div className="p-4 border-b border-m3-border bg-m3-card shrink-0">
-                      <div className="flex items-center justify-between gap-2">
-                        <h2 className="text-sm font-bold text-m3-text flex items-center gap-2 min-w-0">
-                          <Icon className="w-4 h-4 text-m3-primary shrink-0" />
-                          <span className="truncate">{previewContent.title}</span>
-                        </h2>
-                        <button
-                          type="button"
-                          onClick={() => setPreviewElement(null)}
-                          className="min-h-11 min-w-11 inline-flex items-center justify-center rounded-lg text-m3-secondary hover:text-m3-primary hover:bg-m3-primary/10 transition-colors shrink-0 cursor-pointer"
-                          title={t("serviceDetailPage.closePreview")}
-                          aria-label={t("serviceDetailPage.closePreview")}
-                        >
-                          <PanelRightClose className="w-4 h-4" />
-                        </button>
+              {previewContent &&
+                (() => {
+                  const badge = getElementBadge(previewContent.type, t);
+                  const Icon = badge.icon;
+                  return (
+                    <>
+                      <div className="p-4 border-b border-m3-border bg-m3-card shrink-0">
+                        <div className="flex items-center justify-between gap-2">
+                          <h2 className="text-sm font-bold text-m3-text flex items-center gap-2 min-w-0">
+                            <Icon className="w-4 h-4 text-m3-primary shrink-0" />
+                            <span className="truncate">
+                              {previewContent.title}
+                            </span>
+                          </h2>
+                          <button
+                            type="button"
+                            onClick={() => setPreviewElement(null)}
+                            className="min-h-11 min-w-11 inline-flex items-center justify-center rounded-lg text-m3-secondary hover:text-m3-primary hover:bg-m3-primary/10 transition-colors shrink-0 cursor-pointer"
+                            title={t("serviceDetailPage.closePreview")}
+                            aria-label={t("serviceDetailPage.closePreview")}
+                          >
+                            <PanelRightClose className="w-4 h-4" />
+                          </button>
+                        </div>
+                        <div className="flex items-center gap-2 mt-1.5">
+                          <span
+                            className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full shrink-0"
+                            style={{
+                              backgroundColor: badge.bg,
+                              color: badge.color,
+                            }}
+                          >
+                            {badge.label}
+                          </span>
+                          {previewContent.type === "song" &&
+                            previewContent.content && (
+                              <p className="text-xs text-m3-secondary truncate">
+                                {previewContent.content}
+                              </p>
+                            )}
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2 mt-1.5">
-                        <span
-                          className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full shrink-0"
-                          style={{ backgroundColor: badge.bg, color: badge.color }}
-                        >
-                          {badge.label}
-                        </span>
-                        {previewContent.type === "song" && previewContent.content && (
-                          <p className="text-xs text-m3-secondary truncate">{previewContent.content}</p>
+                      <div className="flex-1 overflow-hidden min-h-0">
+                        {previewContent.type === "song" ? (
+                          <SongPreview element={previewContent} />
+                        ) : (
+                          <div className="h-full min-h-0 overflow-y-auto overscroll-contain px-5 sm:px-8 py-6 custom-scrollbar">
+                            {previewContent.passage && (
+                              <p className="text-sm font-semibold text-m3-primary mb-4">
+                                {previewContent.passage}
+                              </p>
+                            )}
+                            {previewContent.notes && (
+                              <div className="flex items-start gap-2 mb-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/50 rounded-lg px-3 py-2">
+                                <StickyNote className="w-3.5 h-3.5 shrink-0 text-amber-500 dark:text-amber-400 mt-0.5" />
+                                <p className="text-xs text-amber-700 dark:text-amber-300 italic">
+                                  {previewContent.notes}
+                                </p>
+                              </div>
+                            )}
+                            <div className="font-lyric text-[1.25rem] sm:text-[1.5rem] leading-snug text-m3-text whitespace-pre-wrap max-w-2xl">
+                              {previewContent.content ||
+                                t("serviceDetailPage.noContent")}
+                            </div>
+                          </div>
                         )}
                       </div>
-                    </div>
-                    <div className="flex-1 overflow-hidden min-h-0">
-                      {previewContent.type === "song" ? (
-                        <SongPreview element={previewContent} />
-                      ) : (
-                        <div className="h-full min-h-0 overflow-y-auto overscroll-contain px-5 sm:px-8 py-6 custom-scrollbar">
-                          {previewContent.passage && (
-                            <p className="text-sm font-semibold text-m3-primary mb-4">
-                              {previewContent.passage}
-                            </p>
-                          )}
-                          {previewContent.notes && (
-                            <div className="flex items-start gap-2 mb-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/50 rounded-lg px-3 py-2">
-                              <StickyNote className="w-3.5 h-3.5 shrink-0 text-amber-500 dark:text-amber-400 mt-0.5" />
-                              <p className="text-xs text-amber-700 dark:text-amber-300 italic">{previewContent.notes}</p>
-                            </div>
-                          )}
-                          <div className="font-lyric text-[1.25rem] sm:text-[1.5rem] leading-snug text-m3-text whitespace-pre-wrap max-w-2xl">
-                            {previewContent.content || t("serviceDetailPage.noContent")}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </>
-                );
-              })()}
+                    </>
+                  );
+                })()}
             </div>
           </div>
         </div>

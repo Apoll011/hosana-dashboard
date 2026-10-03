@@ -265,7 +265,9 @@ export const GeneralTab: React.FC<GeneralTabProps> = ({
             <Timer className="w-5 h-5 text-m3-primary" />
             {t("settings.general.durationsTitle")}
           </h3>
-          <p className="text-muted mt-1">{t("settings.general.durationsDesc")}</p>
+          <p className="text-muted mt-1">
+            {t("settings.general.durationsDesc")}
+          </p>
         </div>
 
         <div className="p-5 sm:p-6 space-y-6">

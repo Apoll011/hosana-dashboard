@@ -177,9 +177,7 @@ export const BillingTab: React.FC<BillingTabProps> = ({
           ) : fetchError && subscriptions === null ? (
             <div className="flex flex-col items-center text-center gap-3 py-6">
               <AlertTriangle className="w-6 h-6 text-m3-danger" />
-              <p className="text-sm text-m3-danger">
-                {fetchError}
-              </p>
+              <p className="text-sm text-m3-danger">{fetchError}</p>
               <Button
                 variant="outline"
                 size="sm"
@@ -321,9 +319,7 @@ export const BillingTab: React.FC<BillingTabProps> = ({
                     onClick={() => setAnnual(false)}
                     disabled={pendingAction === "checkout"}
                     className={`px-3 py-1.5 rounded-full text-xs font-bold transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
-                      !annual
-                        ? "bg-m3-primary text-white"
-                        : "text-m3-secondary"
+                      !annual ? "bg-m3-primary text-white" : "text-m3-secondary"
                     }`}
                   >
                     {t("settings.billing.monthly")}
@@ -333,9 +329,7 @@ export const BillingTab: React.FC<BillingTabProps> = ({
                     onClick={() => setAnnual(true)}
                     disabled={pendingAction === "checkout"}
                     className={`px-3 py-1.5 rounded-full text-xs font-bold transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
-                      annual
-                        ? "bg-m3-primary text-white"
-                        : "text-m3-secondary"
+                      annual ? "bg-m3-primary text-white" : "text-m3-secondary"
                     }`}
                   >
                     {t("settings.billing.annual")}

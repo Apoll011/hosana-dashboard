@@ -590,9 +590,7 @@ export const SongsPage: React.FC<SongsPageProps> = ({
             </span>
 
             <div className="flex items-center gap-1.5 bg-m3-card border border-m3-border rounded-xl px-2.5 py-1 shadow-[var(--shadow-sm)]">
-              <span className="text-label">
-                {t("songsPage.display")}
-              </span>
+              <span className="text-label">{t("songsPage.display")}</span>
               <select
                 value={itemsPerPage}
                 onChange={(e) => {

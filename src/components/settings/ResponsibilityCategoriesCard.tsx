@@ -202,9 +202,7 @@ export const ResponsibilityCategoriesCard: React.FC<
                       onClick={() => setColor(opt)}
                       disabled={disabled}
                       className={`min-h-10 min-w-10 rounded-[var(--radius-md)] border-2 transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed ${colors.bg} ${
-                        isSelected
-                          ? "border-m3-text"
-                          : "border-transparent"
+                        isSelected ? "border-m3-text" : "border-transparent"
                       }`}
                       aria-label={opt}
                     />

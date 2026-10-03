@@ -3,7 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Badge, ConfirmDialog, EmptyState, Spinner } from "@/src/components/common";
+import {
+  Badge,
+  ConfirmDialog,
+  EmptyState,
+  Spinner,
+} from "@/src/components/common";
 import { BatchActionFloatingBar } from "@/src/components/explorer/BatchActionFloatingBar";
 import { MarqueeSelectionBox } from "@/src/components/explorer/MarqueeSelectionBox";
 import { CreateCollectionModal } from "@/src/components/modals/CreateCollectionModal";
@@ -30,7 +35,13 @@ import {
   Trash2,
   X,
 } from "lucide-react";
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useOutletContext } from "react-router-dom";
 
 type CollectionSortBy = "updatedAt" | "title" | "number";
@@ -50,13 +61,14 @@ export const CollectionsPage: React.FC = () => {
   const { granted: canDeleteCollection } = useCan("collection.delete");
   const { granted: canPrint } = useCan("export.pdf");
 
-  const { searchQuery, sortBy, sortOrder, viewMode, density } = useOutletContext<{
-    searchQuery: string;
-    sortBy: CollectionSortBy;
-    sortOrder?: "asc" | "desc";
-    viewMode?: "grid" | "list";
-    density?: "comfortable" | "compact";
-  }>();
+  const { searchQuery, sortBy, sortOrder, viewMode, density } =
+    useOutletContext<{
+      searchQuery: string;
+      sortBy: CollectionSortBy;
+      sortOrder?: "asc" | "desc";
+      viewMode?: "grid" | "list";
+      density?: "comfortable" | "compact";
+    }>();
 
   const order = sortOrder ?? "asc";
   const mode = viewMode ?? "grid";
@@ -382,7 +394,11 @@ export const CollectionsPage: React.FC = () => {
                 <Badge variant="accent">{selectedIds.size}</Badge>
               </div>
               <Can permission="export.pdf">
-                <button type="button" className={MENU_ITEM} onClick={printSelected}>
+                <button
+                  type="button"
+                  className={MENU_ITEM}
+                  onClick={printSelected}
+                >
                   <Printer className={MENU_ICON} />
                   <span>{t("common.print")}</span>
                 </button>
@@ -677,7 +693,9 @@ const CollectionRow: React.FC<CollectionItemProps> = ({
         </div>
       )}
       <div className="min-w-0 flex-1">
-        <div className={`${isCompact ? "text-xs" : "text-sm"} font-medium truncate`}>
+        <div
+          className={`${isCompact ? "text-xs" : "text-sm"} font-medium truncate`}
+        >
           {collection.name}
         </div>
         {!isCompact && collection.description && (

@@ -53,7 +53,11 @@ export const Input = React.memo(
             />
           </div>
           {error && (
-            <span id={errorId} className="text-xs text-m3-danger font-medium" role="alert">
+            <span
+              id={errorId}
+              className="text-xs text-m3-danger font-medium"
+              role="alert"
+            >
               {error}
             </span>
           )}

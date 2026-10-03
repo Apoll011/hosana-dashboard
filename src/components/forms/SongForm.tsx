@@ -128,9 +128,7 @@ export const SongForm: React.FC<SongFormProps> = ({
       />
 
       <div className="flex flex-col gap-1.5">
-        <label className="text-label ml-0.5">
-          {t("forms.folderCategory")}
-        </label>
+        <label className="text-label ml-0.5">{t("forms.folderCategory")}</label>
         <select
           name="folderId"
           value={formData.folderId}

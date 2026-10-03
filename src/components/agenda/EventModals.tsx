@@ -57,9 +57,7 @@ const SectionHeader: React.FC<{
 );
 
 const FieldLabel: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <label className="block text-label ml-1 mb-1.5">
-    {children}
-  </label>
+  <label className="block text-label ml-1 mb-1.5">{children}</label>
 );
 
 const fieldInputClass =

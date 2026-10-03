@@ -75,8 +75,7 @@ interface AppSidebarProps {
 
 const NAV_ACTIVE =
   "bg-m3-primary/10 text-m3-primary shadow-[inset_2px_0_0_var(--m3-primary)]";
-const NAV_INACTIVE =
-  "text-m3-secondary hover:bg-m3-hover hover:text-m3-text";
+const NAV_INACTIVE = "text-m3-secondary hover:bg-m3-hover hover:text-m3-text";
 const NAV_BASE =
   "w-full flex items-center justify-between px-3 py-2 min-h-10 text-[13px] font-medium rounded-[var(--radius-md)] transition-colors cursor-pointer group";
 
