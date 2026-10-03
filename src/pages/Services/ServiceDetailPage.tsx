@@ -1388,15 +1388,6 @@ export const ServiceDetailPage: React.FC = () => {
       {/* ── Top Header ────────────────────────────────────────────── */}
       <div className="h-14 bg-m3-sidebar border-b border-m3-border flex items-center justify-between px-4 shrink-0 gap-4">
         <div className="flex items-center gap-3">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => navigate(-1)}
-            className="p-1 -ml-2"
-            title={t("common.back")}
-          >
-            <ArrowLeft className="w-4 h-4 text-m3-secondary" />
-          </Button>
           <div className="flex flex-col">
             <h1 className="text-sm font-bold text-m3-text flex items-center gap-2">
               {service.name}
