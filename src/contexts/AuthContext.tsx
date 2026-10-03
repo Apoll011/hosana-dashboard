@@ -23,6 +23,7 @@ import { authClient } from "../lib/authClient";
 import { clearPermissionCache } from "../lib/permissions/client";
 import { posthog } from "../lib/posthog";
 import { fetchSubscriptionRows } from "../lib/subscriptions";
+import { resetDatabase } from "../db";
 
 export interface SessionUser {
   id: string;
@@ -470,6 +471,12 @@ const StandardAuthProvider: React.FC<{ children: React.ReactNode }> = ({
     handleClearSession();
     // Clear all localStorage data
     localStorage.clear();
+
+    // Reset the IDB singleton *before* deleting the databases.
+    // This ensures the next getDatabase() call (e.g. after an in-tab re-login)
+    // opens a fresh connection instead of reusing the now-closing one, which
+    // would throw "The database connection is closing" on every write/purge.
+    resetDatabase();
 
     // Clear all IndexedDB databases
     if (typeof indexedDB !== "undefined" && indexedDB.databases) {

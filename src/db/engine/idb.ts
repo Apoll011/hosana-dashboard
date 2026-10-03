@@ -3,6 +3,14 @@
  * No external dependencies. No abstractions beyond what the engine needs.
  */
 
+// Lazy import to avoid a circular dependency: database.ts → idb.ts → database.ts.
+// We only call resetDatabase() inside event handlers, never at module-load time.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let _resetDatabase: (() => void) | null = null;
+export function _registerResetDatabase(fn: () => void): void {
+  _resetDatabase = fn;
+}
+
 /**
  * Open an IndexedDB database.
  *
@@ -31,6 +39,13 @@ export function openIDB(
     req.onsuccess = () => {
       const db = req.result;
 
+      // Clears the singleton so the next getDatabase() reopens a fresh
+      // connection instead of reusing this closed one.
+      const onConnectionClosed = (reason: string) => {
+        console.warn(`[hosana-idb] connection closed (${reason}) — resetting singleton`);
+        _resetDatabase?.();
+      };
+
       // If another tab opens a newer DB version it will be blocked by us.
       // Close gracefully so the upgrade can proceed without wiping stores.
       db.onversionchange = () => {
@@ -38,6 +53,15 @@ export function openIDB(
           "[hosana-idb] versionchange received — closing connection to allow upgrade",
         );
         db.close();
+        onConnectionClosed("versionchange");
+      };
+
+      // Fired when the connection is closed externally (e.g. deleteDatabase
+      // during logout). Without this the dbPromise singleton stays pointing at
+      // the now-dead connection, causing "The database connection is closing"
+      // errors on the next write after an in-tab re-login.
+      db.onclose = () => {
+        onConnectionClosed("close");
       };
 
       resolve(db);

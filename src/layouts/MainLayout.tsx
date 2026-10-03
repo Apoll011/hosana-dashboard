@@ -123,7 +123,14 @@ export const MainLayout: React.FC = () => {
 
   useEffect(() => {
     const runTrashVerifier = () => {
-      void getDatabase().then(purgeExpiredTrash);
+      void getDatabase()
+        .then(purgeExpiredTrash)
+        .catch((err: unknown) => {
+          // Swallow errors from a closed/reset IDB connection (e.g. right after
+          // logout before the page reloads) so they don't surface as unhandled
+          // promise rejections in the console or error-tracking tools.
+          console.warn("[MainLayout] purgeExpiredTrash failed:", err);
+        });
     };
     runTrashVerifier();
     const interval = setInterval(() => {
