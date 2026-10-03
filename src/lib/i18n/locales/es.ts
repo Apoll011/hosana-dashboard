@@ -1824,6 +1824,10 @@ export const es: typeof pt = {
     nowLabel: "Ahora",
     nextLabel: "Siguiente",
     readingEmpty: "Este plan aún no tiene elementos.",
+    songDeleted: "Canción eliminada",
+    songDeletedHint: "Esta canción fue eliminada de la biblioteca.",
+    restoreSong: "Restaurar canción",
+    removeFromPlan: "Quitar del plan",
     readingKeys: "Flechas para avanzar",
   },
 

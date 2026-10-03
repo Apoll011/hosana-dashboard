@@ -1816,6 +1816,10 @@ export const pt = {
     nowLabel: "Agora",
     nextLabel: "A seguir",
     readingEmpty: "Este plano ainda não tem elementos.",
+    songDeleted: "Cântico removido",
+    songDeletedHint: "Este cântico foi eliminado da biblioteca.",
+    restoreSong: "Restaurar cântico",
+    removeFromPlan: "Remover do plano",
     readingKeys: "Setas para avançar",
   },
 

@@ -23,6 +23,7 @@ import {
 } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
 import { ChordProRenderer, parseChordPro } from "@hosanna/chordpro";
 import {
+  AlertTriangle,
   ArrowDown,
   ArrowLeft,
   ArrowUp,
@@ -42,6 +43,7 @@ import {
   PanelRightClose,
   Plus,
   Printer,
+  RotateCcw,
   Save,
   Search,
   Settings2,
@@ -292,6 +294,7 @@ interface ServiceRowProps {
   onRemove: (id: string) => void;
   onEdit: (el: ServiceElement) => void;
   onNoteChange: (id: string, note: string) => void;
+  onRestoreSong?: (songId: string) => Promise<void>;
   showNotes?: boolean;
 }
 
@@ -313,6 +316,7 @@ const ServiceRow: React.FC<ServiceRowProps> = ({
   onRemove,
   onEdit,
   onNoteChange,
+  onRestoreSong,
   showNotes = true,
 }) => {
   const { t } = useI18n();
@@ -320,6 +324,14 @@ const ServiceRow: React.FC<ServiceRowProps> = ({
   const dragHandleRef = useRef<HTMLButtonElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [closestEdge, setClosestEdge] = useState<Edge | null>(null);
+  const [isRestoring, setIsRestoring] = useState(false);
+
+  // Detect whether the song linked to this row still exists (not deleted/purged).
+  const isSong = element.type === "song";
+  const { data: linkedSong, isLoading: isSongLoading } = useSong(
+    isSong ? (element.songId ?? null) : null,
+  );
+  const isSongMissing = isSong && !isSongLoading && !linkedSong;
 
   useEffect(() => {
     const rowEl = rowRef.current;
@@ -390,7 +402,6 @@ const ServiceRow: React.FC<ServiceRowProps> = ({
   const [localNote, setLocalNote] = useState(element.notes || "");
   useEffect(() => setLocalNote(element.notes || ""), [element.notes]);
 
-  const isSong = element.type === "song";
   const badge = getElementBadge(element.type, t);
   const Icon = badge.icon;
 
@@ -596,6 +607,34 @@ const ServiceRow: React.FC<ServiceRowProps> = ({
                         : t("serviceDetailPage.addNotes")}
                     </span>
                   </button>
+                  {isSongMissing && onRestoreSong && element.songId && (
+                    <>
+                      <div className="my-1 border-t border-m3-border" />
+                      <button
+                        type="button"
+                        role="menuitem"
+                        disabled={isRestoring}
+                        onClick={async () => {
+                          if (!element.songId) return;
+                          setMenuOpen(false);
+                          setIsRestoring(true);
+                          try {
+                            await onRestoreSong(element.songId);
+                          } finally {
+                            setIsRestoring(false);
+                          }
+                        }}
+                        className={SERVICE_MENU_ITEM}
+                      >
+                        {isRestoring ? (
+                          <Loader2 className={SERVICE_MENU_ICON + " animate-spin"} />
+                        ) : (
+                          <RotateCcw className={SERVICE_MENU_ICON} />
+                        )}
+                        <span>{t("serviceDetailPage.restoreSong")}</span>
+                      </button>
+                    </>
+                  )}
                   <div className="my-1 border-t border-m3-border" />
                   <button
                     type="button"
@@ -615,6 +654,51 @@ const ServiceRow: React.FC<ServiceRowProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Deleted-song warning banner */}
+      {isSongMissing && (
+        <div className="flex items-center justify-between gap-3 px-4 py-2.5 bg-amber-50 dark:bg-amber-900/20 border-t border-amber-200 dark:border-amber-800/40">
+          <div className="flex items-center gap-2 min-w-0">
+            <AlertTriangle className="w-3.5 h-3.5 shrink-0 text-amber-500 dark:text-amber-400" />
+            <span className="text-xs font-medium text-amber-700 dark:text-amber-300 truncate">
+              {t("serviceDetailPage.songDeletedHint")}
+            </span>
+          </div>
+          <div className="flex items-center gap-1.5 shrink-0">
+            {onRestoreSong && element.songId && (
+              <button
+                type="button"
+                disabled={isRestoring}
+                onClick={async () => {
+                  if (!element.songId) return;
+                  setIsRestoring(true);
+                  try {
+                    await onRestoreSong(element.songId);
+                  } finally {
+                    setIsRestoring(false);
+                  }
+                }}
+                className="inline-flex items-center gap-1 px-2 py-1 text-[10px] font-semibold rounded-md bg-amber-100 dark:bg-amber-800/40 text-amber-700 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-700/50 transition-colors disabled:opacity-60 cursor-pointer disabled:cursor-not-allowed"
+              >
+                {isRestoring ? (
+                  <Loader2 className="w-3 h-3 animate-spin" />
+                ) : (
+                  <RotateCcw className="w-3 h-3" />
+                )}
+                {t("serviceDetailPage.restoreSong")}
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => onRemove(element.id)}
+              className="inline-flex items-center gap-1 px-2 py-1 text-[10px] font-semibold rounded-md bg-m3-danger/10 text-m3-danger hover:bg-m3-danger/20 transition-colors cursor-pointer"
+            >
+              <Trash2 className="w-3 h-3" />
+              {t("serviceDetailPage.removeFromPlan")}
+            </button>
+          </div>
+        </div>
+      )}
 
       <div
         className={`grid transition-[grid-template-rows] duration-300 ease-in-out ${
@@ -785,7 +869,7 @@ export const ServiceDetailPage: React.FC = () => {
 
   const { data: service, isLoading, isError } = useService(id || null);
   const { updateElements, updateService } = useServices();
-  const { songsQuery } = useSongs();
+  const { songsQuery, restoreSong } = useSongs();
   const { foldersQuery } = useFolders();
   const { showToast, syncStatus } = useSync();
   const { settings: orgSettings } = useOrgSettings();
@@ -1821,6 +1905,7 @@ export const ServiceDetailPage: React.FC = () => {
                           onRemove={handleRemoveElement}
                           onEdit={openEditModal}
                           onNoteChange={handleNoteChange}
+                          onRestoreSong={restoreSong}
                           showNotes={orgSettings.services.showNotes}
                         />
                       ))}
