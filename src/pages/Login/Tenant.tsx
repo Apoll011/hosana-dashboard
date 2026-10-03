@@ -7,7 +7,6 @@ import { AppLink } from "@/src/components/AppLink";
 import { Button, Spinner } from "@/src/components/common";
 import { useAppNavigate } from "@/src/hooks/useAppNavigate";
 import { useI18n } from "@/src/lib/i18n";
-import { posthog } from "@/src/lib/posthog";
 import { ArrowLeft, CheckCircle2, XCircle } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import { authClient } from "../../lib/authClient";
@@ -23,7 +22,6 @@ import {
 export const RegisterOrganizationPage: React.FC = () => {
   const { navigate } = useAppNavigate();
   const { t } = useI18n();
-  const beta_release = Boolean(posthog.isFeatureEnabled("beta-release"));
 
   // Step state
   const [step, setStep] = useState(1);
@@ -164,26 +162,6 @@ export const RegisterOrganizationPage: React.FC = () => {
       if (step === 3 && isStep3Valid) handleCreateSubmit();
     }
   };
-
-  if (!beta_release) {
-    return (
-      <LoginLayout
-        headerTitle={t("auth.tenant.title")}
-        headerSubtitle={t("auth.tenant.beta")}
-        optionalLink="/login"
-        optionalMsg={t("auth.login.title")}
-      >
-        <div className="py-6 flex flex-col items-center justify-center text-center">
-          <AppLink
-            to="/login"
-            className="inline-flex items-center justify-center h-10 px-6 rounded-full bg-m3-primary hover:bg-m3-primary-dark text-white font-medium text-sm transition-colors"
-          >
-            {t("auth.login.title")}
-          </AppLink>
-        </div>
-      </LoginLayout>
-    );
-  }
 
   const getStepSubtitle = () => {
     if (step === 1) return t("onboarding.step1Desc");
