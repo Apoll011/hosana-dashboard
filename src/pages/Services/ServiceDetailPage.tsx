@@ -1898,7 +1898,7 @@ export const ServiceDetailPage: React.FC = () => {
                       </button>
                     </div>
                   ) : (
-                    <div className="flex flex-col rounded-[var(--radius-lg)] border border-m3-border divide-y divide-m3-border/70 overflow-hidden">
+                    <div className="flex flex-col rounded-[var(--radius-lg)] border border-m3-border divide-y divide-m3-border/70 overflow-visible">
                       {elements.map((el, i) => (
                         <ServiceRow
                           key={el.id}
