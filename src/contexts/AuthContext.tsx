@@ -154,25 +154,29 @@ const DemoAuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const [isLoading, setIsLoading] = useState(false);
-  const demoLogout = async () => {
+  const demoLogout = useCallback(async () => {
     setIsLoading(true);
     localStorage.clear();
     await clearDemoData();
     window.location.assign("/login");
-  };
-  const demoNoOp = async () => {};
-  const demoOrg = getDemoOrganization();
-  const demoDemoValue: AuthContextType = {
-    user: getDemoUser(),
-    organization: demoOrg,
-    organizations: [demoOrg],
-    hasAcceptedTrial: true,
-    isAuthenticated: true,
-    isLoading,
-    refetch: demoNoOp,
-    switchOrganization: demoNoOp as (org: Organization) => Promise<void>,
-    logout: demoLogout,
-  };
+  }, []);
+  const demoNoOp = useCallback(async () => {}, []);
+  const demoOrg = useMemo(() => getDemoOrganization(), []);
+  const demoUser = useMemo(() => getDemoUser(), []);
+  const demoDemoValue = useMemo<AuthContextType>(
+    () => ({
+      user: demoUser,
+      organization: demoOrg,
+      organizations: [demoOrg],
+      hasAcceptedTrial: true,
+      isAuthenticated: true,
+      isLoading,
+      refetch: demoNoOp,
+      switchOrganization: demoNoOp as (org: Organization) => Promise<void>,
+      logout: demoLogout,
+    }),
+    [demoUser, demoOrg, isLoading, demoNoOp, demoLogout],
+  );
   return (
     <AuthContext.Provider value={demoDemoValue}>
       {children}

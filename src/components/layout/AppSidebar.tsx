@@ -332,7 +332,6 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
           data-tour="nav-drive"
           onClick={() => {
             onSelectFolder(null);
-            navigate(`${slugPrefix}/folders`);
             if (window.innerWidth < 768) setIsSidebarOpen(false);
           }}
           title={

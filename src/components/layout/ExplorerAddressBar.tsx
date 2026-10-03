@@ -159,7 +159,6 @@ export const ExplorerAddressBar: React.FC<ExplorerAddressBarProps> = ({
           <button
             onClick={() => {
               onSelectFolder(null);
-              navigate(`${slugPrefix}/folders`);
             }}
             className={`flex items-center gap-2 font-semibold transition-colors cursor-pointer shrink-0 ${
               isDriveRoot
