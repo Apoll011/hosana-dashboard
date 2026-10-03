@@ -4,7 +4,6 @@
  */
 import { Button, Input } from "@/src/components/common";
 import { useI18n } from "@/src/lib/i18n";
-import { posthog } from "@/src/lib/posthog";
 import { Folder, Service, Song } from "@/src/types";
 import {
   BarChart3,
@@ -99,8 +98,6 @@ export const ExplorerAddressBar: React.FC<ExplorerAddressBarProps> = ({
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
-
-  const collections_enabled = posthog.isFeatureEnabled("collection") || true;
 
   const crumbCurrent =
     "flex items-center gap-2 font-semibold text-m3-primary shrink-0";
@@ -567,22 +564,20 @@ export const ExplorerAddressBar: React.FC<ExplorerAddressBarProps> = ({
                     {t("addressBar.newFolder")}
                   </button>
                 </Can>
-                {collections_enabled && (
-                  <Can permission="collection.create">
-                    <button
-                      onClick={() => {
-                        setIsPlusMenuOpen(false);
-                        onOpenModal("create-collection");
-                      }}
-                      className="w-full flex items-center gap-4 px-4 py-3 min-h-10 text-xs font-medium text-m3-text hover:bg-m3-hover rounded-[var(--radius-md)] transition-colors cursor-pointer text-left"
-                    >
-                      <div className="w-8 h-8 rounded-[var(--radius-md)] bg-m3-primary/10 text-m3-primary flex items-center justify-center shrink-0">
-                        <LibraryBig className="w-4 h-4" />
-                      </div>
-                      {t("addressBar.newCollection")}
-                    </button>
-                  </Can>
-                )}
+                <Can permission="collection.create">
+                  <button
+                    onClick={() => {
+                      setIsPlusMenuOpen(false);
+                      onOpenModal("create-collection");
+                    }}
+                    className="w-full flex items-center gap-4 px-4 py-3 min-h-10 text-xs font-medium text-m3-text hover:bg-m3-hover rounded-[var(--radius-md)] transition-colors cursor-pointer text-left"
+                  >
+                    <div className="w-8 h-8 rounded-[var(--radius-md)] bg-m3-primary/10 text-m3-primary flex items-center justify-center shrink-0">
+                      <LibraryBig className="w-4 h-4" />
+                    </div>
+                    {t("addressBar.newCollection")}
+                  </button>
+                </Can>
                 <Can permission="agenda.create">
                   <button
                     onClick={() => {

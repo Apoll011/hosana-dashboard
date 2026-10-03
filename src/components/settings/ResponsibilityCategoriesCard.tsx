@@ -4,7 +4,6 @@
  */
 
 import { useI18n } from "@/src/lib/i18n";
-import { posthog } from "@/src/lib/posthog";
 import {
   ResponsibilityCategory,
   ResponsibilityColor,
@@ -70,8 +69,6 @@ export const ResponsibilityCategoriesCard: React.FC<
     onAdd({ label: label.trim(), icon, color });
     setLabel("");
   };
-
-  if (!posthog.isFeatureEnabled("agenda")) return <></>;
 
   return (
     <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xs overflow-hidden">

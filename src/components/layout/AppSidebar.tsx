@@ -119,8 +119,6 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
   const hasMultipleOrgs = (organizations?.length ?? 0) > 1;
 
   const teams_enabled = posthog.isFeatureEnabled("teams-enabled") || false;
-  const agenda_enabled = posthog.isFeatureEnabled("agenda") || true;
-  const collections_enabled = posthog.isFeatureEnabled("collection") || true;
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -392,49 +390,45 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
           </div>
         </button>
 
-        {collections_enabled && (
-          <Can permission="collection.access">
-            <button
-              data-tour="nav-collections"
-              onClick={() => {
-                navigate(`${slugPrefix}/collections`);
-                if (window.innerWidth < 768) setIsSidebarOpen(false);
-              }}
-              title={isSidebarCollapsed ? "Coleções" : undefined}
-              className={`${NAV_BASE} ${
-                view === "collections" || view === "collection-detail"
-                  ? NAV_ACTIVE
-                  : NAV_INACTIVE
-              }`}
-            >
-              <div className="flex items-center gap-3 min-w-0 flex-1">
-                <div className="w-5 h-5 flex items-center justify-center shrink-0">
-                  <LibraryBig
-                    className={`w-4.5 h-4.5 ${
-                      view === "collections" || view === "collection-detail"
-                        ? "text-m3-primary"
-                        : "text-m3-secondary"
-                    }`}
-                  />
-                </div>
-                <span className={collapseText()}>
-                  {t("common.collections")}
-                </span>
-              </div>
-              <div className={collapseBadge()}>
-                <Badge
-                  variant={
+        <Can permission="collection.access">
+          <button
+            data-tour="nav-collections"
+            onClick={() => {
+              navigate(`${slugPrefix}/collections`);
+              if (window.innerWidth < 768) setIsSidebarOpen(false);
+            }}
+            title={isSidebarCollapsed ? "Coleções" : undefined}
+            className={`${NAV_BASE} ${
+              view === "collections" || view === "collection-detail"
+                ? NAV_ACTIVE
+                : NAV_INACTIVE
+            }`}
+          >
+            <div className="flex items-center gap-3 min-w-0 flex-1">
+              <div className="w-5 h-5 flex items-center justify-center shrink-0">
+                <LibraryBig
+                  className={`w-4.5 h-4.5 ${
                     view === "collections" || view === "collection-detail"
-                      ? "accent"
-                      : "neutral"
-                  }
-                >
-                  {totalCollections}
-                </Badge>
+                      ? "text-m3-primary"
+                      : "text-m3-secondary"
+                  }`}
+                />
               </div>
-            </button>
-          </Can>
-        )}
+              <span className={collapseText()}>{t("common.collections")}</span>
+            </div>
+            <div className={collapseBadge()}>
+              <Badge
+                variant={
+                  view === "collections" || view === "collection-detail"
+                    ? "accent"
+                    : "neutral"
+                }
+              >
+                {totalCollections}
+              </Badge>
+            </div>
+          </button>
+        </Can>
 
         {/* Services Item */}
         <button
@@ -489,39 +483,35 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
           </button>
         )}
 
-        {agenda_enabled && (
-          <Can permission="agenda.access">
-            <button
-              data-tour="nav-agenda"
-              onClick={() => {
-                navigate(`${slugPrefix}/agenda`);
-                if (window.innerWidth < 768) setIsSidebarOpen(false);
-              }}
-              title={isSidebarCollapsed ? t("common.agenda") : undefined}
-              className={`${NAV_BASE} ${
-                view === "agenda" ? NAV_ACTIVE : NAV_INACTIVE
-              }`}
-            >
-              <div className="flex items-center gap-3 min-w-0 flex-1">
-                <div className="w-5 h-5 flex items-center justify-center shrink-0">
-                  <Calendar1
-                    className={`w-4.5 h-4.5 ${
-                      view === "agenda"
-                        ? "text-m3-primary"
-                        : "text-m3-secondary"
-                    }`}
-                  />
-                </div>
-                <span className={collapseText()}>{t("common.agenda")}</span>
+        <Can permission="agenda.access">
+          <button
+            data-tour="nav-agenda"
+            onClick={() => {
+              navigate(`${slugPrefix}/agenda`);
+              if (window.innerWidth < 768) setIsSidebarOpen(false);
+            }}
+            title={isSidebarCollapsed ? t("common.agenda") : undefined}
+            className={`${NAV_BASE} ${
+              view === "agenda" ? NAV_ACTIVE : NAV_INACTIVE
+            }`}
+          >
+            <div className="flex items-center gap-3 min-w-0 flex-1">
+              <div className="w-5 h-5 flex items-center justify-center shrink-0">
+                <Calendar1
+                  className={`w-4.5 h-4.5 ${
+                    view === "agenda" ? "text-m3-primary" : "text-m3-secondary"
+                  }`}
+                />
               </div>
-              <div className={collapseBadge()}>
-                <Badge variant={view === "agenda" ? "accent" : "neutral"}>
-                  {eventCount}
-                </Badge>
-              </div>
-            </button>
-          </Can>
-        )}
+              <span className={collapseText()}>{t("common.agenda")}</span>
+            </div>
+            <div className={collapseBadge()}>
+              <Badge variant={view === "agenda" ? "accent" : "neutral"}>
+                {eventCount}
+              </Badge>
+            </div>
+          </button>
+        </Can>
 
         {/* Folder Tree */}
         {showFolderTree && (

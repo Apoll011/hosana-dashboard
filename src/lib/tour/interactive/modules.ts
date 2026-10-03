@@ -228,7 +228,6 @@ export const INTERACTIVE_MODULES: InteractiveModuleDef[] = [
   {
     id: "collections",
     requireAll: ["collection.access"],
-    when: (ctx) => ctx.collectionsEnabled,
     steps: [
       {
         id: "collections.nav",
@@ -406,7 +405,6 @@ export const INTERACTIVE_MODULES: InteractiveModuleDef[] = [
   {
     id: "agenda",
     requireAll: ["agenda.access"],
-    when: (ctx) => ctx.agendaEnabled,
     steps: [
       {
         id: "agenda.nav",

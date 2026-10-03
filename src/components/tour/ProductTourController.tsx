@@ -14,7 +14,6 @@ import {
 import { deriveView } from "@/src/layouts/view";
 import { useI18n } from "@/src/lib/i18n";
 import { useActiveRole } from "@/src/lib/permissions/client";
-import { posthog } from "@/src/lib/posthog";
 import {
   destroyProductTour,
   isProductTourRunning,
@@ -78,13 +77,9 @@ export const ProductTourController: React.FC = () => {
       }
 
       requestAnimationFrame(() => {
-        const collectionsEnabled =
-          posthog.isFeatureEnabled("collection") || true;
-        const agendaEnabled = posthog.isFeatureEnabled("agenda") ?? true;
-
         const started = runProductTour({
           role,
-          flags: { collectionsEnabled, agendaEnabled },
+          flags: { collectionsEnabled: true, agendaEnabled: true },
           t,
           labels: {
             next: t("tour.product.controls.next"),
