@@ -42,7 +42,9 @@ export function openIDB(
       // Clears the singleton so the next getDatabase() reopens a fresh
       // connection instead of reusing this closed one.
       const onConnectionClosed = (reason: string) => {
-        console.warn(`[hosana-idb] connection closed (${reason}) — resetting singleton`);
+        console.warn(
+          `[hosana-idb] connection closed (${reason}) — resetting singleton`,
+        );
         _resetDatabase?.();
       };
 

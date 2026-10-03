@@ -627,7 +627,9 @@ const ServiceRow: React.FC<ServiceRowProps> = ({
                         className={SERVICE_MENU_ITEM}
                       >
                         {isRestoring ? (
-                          <Loader2 className={SERVICE_MENU_ICON + " animate-spin"} />
+                          <Loader2
+                            className={SERVICE_MENU_ICON + " animate-spin"}
+                          />
                         ) : (
                           <RotateCcw className={SERVICE_MENU_ICON} />
                         )}
