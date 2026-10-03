@@ -131,6 +131,7 @@ export function useRxDbSearch({
     unregisterDynamicActions,
     closePalette,
     t,
+    tc,
     locale,
   ]);
 

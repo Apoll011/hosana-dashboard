@@ -21,7 +21,11 @@ import { useAgendaNotifications } from "@/src/hooks/useAgendaNotifications";
 import { useI18n } from "@/src/lib/i18n";
 import { useCan } from "@/src/lib/permissions/client";
 import { Can } from "@/src/lib/permissions/components";
-import type { AgendaEvent, Assignee } from "@/src/types";
+import type {
+  AgendaEvent,
+  Assignee,
+  ResponsibilityCategory,
+} from "@/src/types";
 import { formatLongDate } from "@/src/utils/agendaDate";
 import {
   assigneeKey,
@@ -130,7 +134,7 @@ export const AgendaPage: React.FC = () => {
   }, [store.events]);
 
   const categoriesById = useMemo(() => {
-    const map: Record<string, (typeof store.categories)[number]> = {};
+    const map: Record<string, ResponsibilityCategory> = {};
     for (const c of store.categories) map[c.id] = c;
     return map;
   }, [store.categories]);

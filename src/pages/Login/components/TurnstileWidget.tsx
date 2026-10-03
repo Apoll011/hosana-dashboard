@@ -5,6 +5,7 @@
 
 import {
   forwardRef,
+  useCallback,
   useEffect,
   useImperativeHandle,
   useRef,
@@ -52,7 +53,14 @@ export const TurnstileWidget = forwardRef<
   // and we reveal the widget.
   const [requiresInteraction, setRequiresInteraction] = useState(false);
 
-  const renderWidget = () => {
+  const onVerifyRef = useRef(onVerify);
+  onVerifyRef.current = onVerify;
+  const onExpireRef = useRef(onExpire);
+  onExpireRef.current = onExpire;
+  const onErrorRef = useRef(onError);
+  onErrorRef.current = onError;
+
+  const renderWidget = useCallback(() => {
     if (!containerRef.current || !window.turnstile) return;
     if (widgetIdRef.current) {
       window.turnstile.remove(widgetIdRef.current);
@@ -64,7 +72,7 @@ export const TurnstileWidget = forwardRef<
       size: "flexible",
       callback: (token: string) => {
         setRequiresInteraction(false);
-        onVerify(token);
+        onVerifyRef.current(token);
       },
       "before-interactive-callback": () => {
         // Turnstile requires interactive challenge / user input
@@ -75,13 +83,13 @@ export const TurnstileWidget = forwardRef<
         setRequiresInteraction(false);
       },
       "expired-callback": () => {
-        onExpire?.();
+        onExpireRef.current?.();
       },
       "error-callback": () => {
-        onError?.();
+        onErrorRef.current?.();
       },
     });
-  };
+  }, [darkMode]);
 
   useEffect(() => {
     // If Turnstile is already loaded
@@ -107,7 +115,7 @@ export const TurnstileWidget = forwardRef<
         widgetIdRef.current = null;
       }
     };
-  }, [darkMode]);
+  }, [renderWidget]);
 
   useImperativeHandle(ref, () => ({
     reset: () => {

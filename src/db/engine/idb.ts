@@ -5,7 +5,6 @@
 
 // Lazy import to avoid a circular dependency: database.ts → idb.ts → database.ts.
 // We only call resetDatabase() inside event handlers, never at module-load time.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 let _resetDatabase: (() => void) | null = null;
 export function _registerResetDatabase(fn: () => void): void {
   _resetDatabase = fn;

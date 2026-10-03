@@ -969,6 +969,7 @@ export const ServiceDetailPage: React.FC = () => {
     orgSettings.services.autoSave,
     service,
     isEditingGeneralNotes,
+    updateService,
   ]);
 
   // Close the preview if the song it references is removed from the plan
@@ -1330,6 +1331,11 @@ export const ServiceDetailPage: React.FC = () => {
     });
   }, []);
 
+  const syncElementsRef = useRef(syncElements);
+  syncElementsRef.current = syncElements;
+  const handleAddSongToServiceRef = useRef(handleAddSongToService);
+  handleAddSongToServiceRef.current = handleAddSongToService;
+
   // Monitor all pragmatic drag-and-drop operations
   useEffect(() => {
     return monitorForElements({
@@ -1369,7 +1375,7 @@ export const ServiceDetailPage: React.FC = () => {
               oldIndex,
               Math.max(0, Math.min(newIndex, currentElements.length - 1)),
             );
-            await syncElements(reordered);
+            await syncElementsRef.current(reordered);
           }
           return;
         }
@@ -1400,7 +1406,7 @@ export const ServiceDetailPage: React.FC = () => {
             }
           }
 
-          await handleAddSongToService(songId, insertBeforeId);
+          await handleAddSongToServiceRef.current(songId, insertBeforeId);
         }
       },
     });

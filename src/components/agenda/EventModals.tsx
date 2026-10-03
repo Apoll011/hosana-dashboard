@@ -168,7 +168,7 @@ export const EventFormModal: React.FC<EventFormModalProps> = ({
       setTitleTouched(false);
       setConfirmingDelete(false);
     }
-  }, [isOpen]);
+  }, [isOpen, initial, defaultType]);
 
   const titleIsEmpty = form.title.trim().length === 0;
   const showTitleError = titleTouched && titleIsEmpty;
@@ -495,7 +495,7 @@ export const AddResponsibilityModal: React.FC<AddResponsibilityModalProps> = ({
       setCategoryId(available[0]?.id ?? "");
       setAssignees([]);
     }
-  }, [isOpen]);
+  }, [isOpen, available]);
 
   if (!isOpen) return null;
 
@@ -621,7 +621,7 @@ export const EditAssigneesModal: React.FC<EditAssigneesModalProps> = ({
 
   useEffect(() => {
     if (isOpen) setValue(assignees);
-  }, [isOpen]);
+  }, [isOpen, assignees]);
 
   if (!isOpen) return null;
 

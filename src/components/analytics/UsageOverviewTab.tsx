@@ -157,11 +157,23 @@ export const UsageOverviewTab: React.FC<UsageOverviewTabProps> = ({
   } | null>(null);
   const [extrasReady, setExtrasReady] = useState(false);
 
-  const songs = songsQuery.data?.songs ?? [];
-  const services = servicesQuery.data ?? [];
-  const folders = foldersQuery.data?.folders ?? [];
+  const songs = useMemo(
+    () => songsQuery.data?.songs ?? [],
+    [songsQuery.data?.songs],
+  );
+  const services = useMemo(
+    () => servicesQuery.data ?? [],
+    [servicesQuery.data],
+  );
+  const folders = useMemo(
+    () => foldersQuery.data?.folders ?? [],
+    [foldersQuery.data?.folders],
+  );
   const foldersLoading = foldersQuery.isLoading;
-  const members = organization?.members ?? [];
+  const members = useMemo(
+    () => organization?.members ?? [],
+    [organization?.members],
+  );
   const pendingInvitations = (organization?.invitations ?? []).filter(
     (inv) => inv.status === "pending",
   ).length;

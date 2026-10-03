@@ -1,5 +1,5 @@
 import { Badge } from "@/src/components/common";
-import React, { useLayoutEffect, useRef, useState } from "react";
+import React, { useLayoutEffect, useMemo, useRef, useState } from "react";
 
 interface OverflowTagListProps {
   tags?: string[] | null;
@@ -7,7 +7,7 @@ interface OverflowTagListProps {
 
 export const OverflowTagList: React.FC<OverflowTagListProps> = ({ tags }) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const safeTags = tags ?? [];
+  const safeTags = useMemo(() => tags ?? [], [tags]);
 
   const [visibleCount, setVisibleCount] = useState<number>(safeTags.length);
   const [isMeasured, setIsMeasured] = useState<boolean>(false);

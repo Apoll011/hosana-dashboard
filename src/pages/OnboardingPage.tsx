@@ -20,7 +20,7 @@ import {
   Sun,
   XCircle,
 } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import bg from "../assets/images/background.webp";
 import { useAuth } from "../contexts/AuthContext";
 import { useTheme } from "../contexts/ThemeContext";
@@ -98,7 +98,7 @@ export const OnboardingPage: React.FC = () => {
   const [isFetchingInvitations, setIsFetchingInvitations] = useState(true);
   const [processingInvId, setProcessingInvId] = useState<string | null>(null);
 
-  const fetchUserInvitations = async () => {
+  const fetchUserInvitations = useCallback(async () => {
     setIsFetchingInvitations(true);
     try {
       const res = await authClient.organization.listUserInvitations({
@@ -115,7 +115,7 @@ export const OnboardingPage: React.FC = () => {
     } finally {
       setIsFetchingInvitations(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     // Check for a pending invitation token stored before sign-up/sign-in
@@ -128,7 +128,7 @@ export const OnboardingPage: React.FC = () => {
     }
 
     fetchUserInvitations();
-  }, []);
+  }, [navigate, fetchUserInvitations]);
 
   // If the user already has an organization that has never accepted a trial /
   // set up billing (e.g. they created the org and refreshed, or they cancelled

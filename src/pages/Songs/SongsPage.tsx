@@ -128,8 +128,18 @@ export const SongsPage: React.FC<SongsPageProps> = ({
     new Set(),
   );
   const selectedSongIds = contextSelectedSongIds ?? localSelectedSongIds;
-  const setSelectedSongIds =
-    contextSetSelectedSongIds ?? setLocalSelectedSongIds;
+  const setSelectedSongIds = useCallback<
+    React.Dispatch<React.SetStateAction<Set<string>>>
+  >(
+    (action) => {
+      if (contextSetSelectedSongIds) {
+        contextSetSelectedSongIds(action);
+      } else {
+        setLocalSelectedSongIds(action);
+      }
+    },
+    [contextSetSelectedSongIds],
+  );
 
   const [lastClickedId, setLastClickedId] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -245,6 +255,7 @@ export const SongsPage: React.FC<SongsPageProps> = ({
     actualSelectedKey,
     actualSelectedTag,
     itemsPerPage,
+    setSelectedSongIds,
   ]);
 
   const songsData = useMemo(() => {
@@ -304,7 +315,14 @@ export const SongsPage: React.FC<SongsPageProps> = ({
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [songsData, selectedSongIds, allSongs]);
+  }, [
+    songsData,
+    selectedSongIds,
+    allSongs,
+    setSelectedSongIds,
+    setDeleteSongTarget,
+    openModal,
+  ]);
 
   // Outside click to close context menu
   useEffect(() => {
@@ -356,7 +374,14 @@ export const SongsPage: React.FC<SongsPageProps> = ({
         setLastClickedId(song.id);
       }
     },
-    [navigate, slugPrefix, lastClickedId, selectedSongIds, songsData],
+    [
+      navigate,
+      slugPrefix,
+      lastClickedId,
+      selectedSongIds,
+      songsData,
+      setSelectedSongIds,
+    ],
   );
 
   const openContextMenu = useCallback(

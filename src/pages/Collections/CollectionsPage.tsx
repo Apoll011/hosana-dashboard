@@ -55,7 +55,7 @@ const MENU_ICON = "w-4 h-4 text-m3-secondary shrink-0";
 export const CollectionsPage: React.FC = () => {
   const { navigate } = useAppNavigate();
   const { t } = useI18n();
-  const { organization, user } = useAuth();
+  const { organization } = useAuth();
   const slugPrefix = organization?.slug ? `/${organization.slug}` : "";
   const { granted: canCreateCollection } = useCan("collection.create");
   const { granted: canDeleteCollection } = useCan("collection.delete");
@@ -142,7 +142,7 @@ export const CollectionsPage: React.FC = () => {
     });
 
     return result;
-  }, [collections, searchQuery, sortBy, order, user?.id, organization?.id]);
+  }, [collections, searchQuery, sortBy, order]);
 
   const openCollection = useCallback(
     (id: string) => {
@@ -197,11 +197,14 @@ export const CollectionsPage: React.FC = () => {
     setContextMenu({ x, y, id: collection?.id ?? null });
   };
 
-  const requestDelete = (ids: string[]) => {
-    if (!canDeleteCollection || ids.length === 0) return;
-    setPendingDeleteIds(ids);
-    setContextMenu(null);
-  };
+  const requestDelete = useCallback(
+    (ids: string[]) => {
+      if (!canDeleteCollection || ids.length === 0) return;
+      setPendingDeleteIds(ids);
+      setContextMenu(null);
+    },
+    [canDeleteCollection],
+  );
 
   const handleDeleteConfirm = async () => {
     const ids = [...pendingDeleteIds];
@@ -254,7 +257,13 @@ export const CollectionsPage: React.FC = () => {
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [filteredCollections, selectedIds, openCollection, canDeleteCollection]);
+  }, [
+    filteredCollections,
+    selectedIds,
+    openCollection,
+    canDeleteCollection,
+    requestDelete,
+  ]);
 
   const menuCollection = contextMenu?.id
     ? filteredCollections.find((c) => c.id === contextMenu.id)

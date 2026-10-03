@@ -153,8 +153,14 @@ export const SetlistInsightsTab: React.FC<SetlistInsightsTabProps> = ({
   const [sortKey, setSortKey] = useState<SortKey>("frequency");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
 
-  const songs = songsQuery.data?.songs ?? [];
-  const services = servicesQuery.data ?? [];
+  const songs = useMemo(
+    () => songsQuery.data?.songs ?? [],
+    [songsQuery.data?.songs],
+  );
+  const services = useMemo(
+    () => servicesQuery.data ?? [],
+    [servicesQuery.data],
+  );
 
   const summary = useMemo(
     () => computeSetlistInsights(songs, services),

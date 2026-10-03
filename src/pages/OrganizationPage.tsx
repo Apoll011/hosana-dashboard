@@ -92,7 +92,7 @@ export const OrganizationPage: React.FC = () => {
       if (!next.get("tab")) next.set("tab", "billing");
       setSearchParams(next, { replace: true });
     }
-  }, []);
+  }, [searchParams, setSearchParams, showToast, t]);
 
   // If a non-admin lands on loginActivity, fall back to workspace.
   useEffect(() => {
