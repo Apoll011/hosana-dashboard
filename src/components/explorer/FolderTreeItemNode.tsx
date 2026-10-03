@@ -19,9 +19,7 @@ export interface FolderTreeNode {
   children: FolderTreeNode[];
 }
 
-export function buildFolderTree(
-  folders?: Folder[] | null,
-): FolderTreeNode[] {
+export function buildFolderTree(folders?: Folder[] | null): FolderTreeNode[] {
   const childrenMap = new Map<string | null, Folder[]>();
   const safeFolders = Array.isArray(folders) ? folders : [];
 
