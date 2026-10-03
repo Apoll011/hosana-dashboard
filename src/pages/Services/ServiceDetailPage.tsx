@@ -27,16 +27,13 @@ import {
   ArrowLeft,
   ArrowUp,
   BookOpen,
-  Clock3,
   Edit3,
   FileText,
   GripVertical,
   LayoutTemplate,
   Loader2,
-  Maximize2,
   Megaphone,
   MessageSquare,
-  Minimize2,
   MoreHorizontal,
   Music,
   PanelLeftClose,
@@ -398,8 +395,7 @@ const ServiceRow: React.FC<ServiceRowProps> = ({
   const Icon = badge.icon;
 
   const handleExpandToggle = () => {
-    if (isSong) onTogglePreview(element);
-    else setIsExpanded(!isExpanded);
+    onTogglePreview(element);
   };
 
   const toggleMenu = () => {
@@ -426,7 +422,6 @@ const ServiceRow: React.FC<ServiceRowProps> = ({
   };
 
   const notesOpen = isExpanded && (isEditingNote || Boolean(element.notes));
-  const contentOpen = isExpanded && !isSong;
 
   return (
     <div
@@ -487,12 +482,12 @@ const ServiceRow: React.FC<ServiceRowProps> = ({
               {element.passage}
             </p>
           )}
-          {element.content && !isSong && !isExpanded && (
+          {element.content && !isSong && (
             <p className="text-xs text-m3-secondary line-clamp-1 mt-0.5">
               {element.content}
             </p>
           )}
-          {showNotes && (isEditingNote || element.notes) && !isExpanded && (
+          {showNotes && (isEditingNote || element.notes) && (
             <div className="flex items-center gap-1.5 mt-1 min-w-0">
               <StickyNote className="w-3.5 h-3.5 shrink-0 text-amber-500 dark:text-amber-400" />
               <span className="text-xs italic text-amber-700 dark:text-amber-300/90 truncate">
@@ -529,27 +524,17 @@ const ServiceRow: React.FC<ServiceRowProps> = ({
           <button
             type="button"
             onClick={handleExpandToggle}
-            className={`p-1.5 rounded-lg transition-colors cursor-pointer ${isSong && isPreviewed ? "bg-m3-primary/10 text-m3-primary" : "text-m3-secondary hover:text-m3-primary hover:bg-m3-primary/10"}`}
+            className={`p-1.5 rounded-lg transition-colors cursor-pointer ${isPreviewed ? "bg-m3-primary/10 text-m3-primary" : "text-m3-secondary hover:text-m3-primary hover:bg-m3-primary/10"}`}
             title={
-              isSong
-                ? isPreviewed
-                  ? t("serviceDetailPage.closePreview")
-                  : t("serviceDetailPage.openPreview")
-                : isExpanded
-                  ? t("serviceDetailPage.collapse")
-                  : t("serviceDetailPage.expand")
+              isPreviewed
+                ? t("serviceDetailPage.closePreview")
+                : t("serviceDetailPage.openPreview")
             }
           >
-            {isSong ? (
-              isPreviewed ? (
-                <PanelRightClose className="w-4 h-4" />
-              ) : (
-                <PanelRight className="w-4 h-4" />
-              )
-            ) : isExpanded ? (
-              <Minimize2 className="w-4 h-4" />
+            {isPreviewed ? (
+              <PanelRightClose className="w-4 h-4" />
             ) : (
-              <Maximize2 className="w-4 h-4" />
+              <PanelRight className="w-4 h-4" />
             )}
           </button>
 
@@ -676,19 +661,6 @@ const ServiceRow: React.FC<ServiceRowProps> = ({
           </div>
         </div>
       </div>
-      <div
-        className={`grid transition-[grid-template-rows] duration-300 ease-in-out ${
-          contentOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
-        }`}
-      >
-        <div className="overflow-hidden">
-          <div className="p-4 flex flex-col gap-4">
-            <div className="text-sm text-m3-text whitespace-pre-wrap bg-m3-card p-4 rounded-xl border border-m3-border dark:border-m3-border/50 max-h-64 overflow-y-auto custom-scrollbar">
-              {element.content || t("serviceDetailPage.noContent")}
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
   );
 };
@@ -723,8 +695,12 @@ const ReadingStage: React.FC<{
     <div className="flex-1 flex flex-col md:flex-row min-h-0 min-w-0 bg-m3-card">
       <div className="md:w-72 lg:w-80 shrink-0 border-b md:border-b-0 md:border-r border-m3-border bg-m3-sidebar/30 flex flex-col min-h-0 max-h-36 md:max-h-none md:h-full">
         <div className="hidden md:flex items-center justify-between px-4 h-11 border-b border-m3-border shrink-0">
-          <span className="text-label">{t("serviceDetailPage.serviceOrder")}</span>
-          <span className="text-caption">{t("serviceDetailPage.readingKeys")}</span>
+          <span className="text-label">
+            {t("serviceDetailPage.serviceOrder")}
+          </span>
+          <span className="text-caption">
+            {t("serviceDetailPage.readingKeys")}
+          </span>
         </div>
         <div
           className="flex md:flex-col gap-1 overflow-x-auto md:overflow-y-auto min-h-0 flex-1 p-2 custom-scrollbar"
@@ -740,7 +716,7 @@ const ReadingStage: React.FC<{
                 role="option"
                 aria-selected={selected}
                 onClick={() => onSelect(el)}
-                className={`shrink-0 md:w-full text-left rounded-[var(--radius-md)] px-3 min-h-11 cursor-pointer transition-colors flex items-center gap-2 ${
+                className={`shrink-0 md:w-full text-left rounded-md px-3 min-h-11 cursor-pointer transition-colors flex items-center gap-2 ${
                   selected
                     ? "bg-m3-primary/10 text-m3-primary"
                     : "text-m3-text hover:bg-m3-hover"
@@ -967,7 +943,10 @@ export const ServiceDetailPage: React.FC = () => {
     },
     error: { dot: "bg-rose-500", label: t("misc.syncStatus.error") },
     offline: { dot: "bg-amber-500", label: t("misc.syncStatus.offline") },
-    local_only: { dot: "bg-m3-secondary", label: t("misc.syncStatus.local_only") },
+    local_only: {
+      dot: "bg-m3-secondary",
+      label: t("misc.syncStatus.local_only"),
+    },
   } as const;
   const syncMeta = syncStatusMeta[syncStatus] ?? syncStatusMeta.local_only;
 
@@ -1223,7 +1202,10 @@ export const ServiceDetailPage: React.FC = () => {
       setActiveModal(null);
       setEditingElement(null);
     } catch {
-      showToast(t("serviceDetailPage.serviceSaveError", { error: "Save error" }), "error");
+      showToast(
+        t("serviceDetailPage.serviceSaveError", { error: "Save error" }),
+        "error",
+      );
     }
   };
 
@@ -1426,13 +1408,13 @@ export const ServiceDetailPage: React.FC = () => {
         </div>
         <div className="flex items-center gap-2">
           <div
-            className="flex rounded-[var(--radius-md)] border border-m3-border bg-m3-card p-0.5"
+            className="flex rounded-md border border-m3-border bg-m3-card p-0.5"
             role="group"
             aria-label={t("serviceDetailPage.readingModeHint")}
           >
             <button
               type="button"
-              onClick={() => setReadingMode(false)}
+              onClick={() => { setReadingMode(false); setPreviewElement(null); }}
               className={`min-h-8 px-2.5 text-xs font-semibold rounded-[var(--radius-sm)] cursor-pointer transition-colors ${
                 readingMode
                   ? "text-m3-secondary hover:text-m3-text"
@@ -1571,327 +1553,359 @@ export const ServiceDetailPage: React.FC = () => {
           }`}
           aria-hidden={readingMode}
         >
-        {!showLibrary && (
-          <button
-            type="button"
-            onClick={handleOpenLibrary}
-            className="absolute left-0 top-1/2 -translate-y-1/2 z-20 w-9 h-16 flex items-center justify-center bg-m3-card border border-l-0 border-m3-border rounded-r-[var(--radius-xl)] shadow-[var(--shadow-md)] text-m3-primary hover:bg-m3-primary/10 hover:border-m3-primary/40 transition-colors group cursor-pointer"
-            title={t("serviceDetailPage.viewLibrary")}
-            aria-label={t("serviceDetailPage.viewLibrary")}
+          {!showLibrary && (
+            <button
+              type="button"
+              onClick={handleOpenLibrary}
+              className="absolute left-0 top-1/2 -translate-y-1/2 z-20 w-9 h-16 flex items-center justify-center bg-m3-card border border-l-0 border-m3-border rounded-r-[var(--radius-xl)] shadow-[var(--shadow-md)] text-m3-primary hover:bg-m3-primary/10 hover:border-m3-primary/40 transition-colors group cursor-pointer"
+              title={t("serviceDetailPage.viewLibrary")}
+              aria-label={t("serviceDetailPage.viewLibrary")}
+            >
+              <PanelLeftOpen className="w-4 h-4" />
+            </button>
+          )}
+          {/* Library Sidebar — width animates; never display:none */}
+          <div
+            className={`flex flex-col overflow-hidden shrink-0 min-w-0 bg-m3-sidebar/30 transition-[width,opacity] duration-300 ease-in-out ${
+              showLibrary && mobilePane === "library"
+                ? "max-md:w-full max-md:opacity-100"
+                : "max-md:w-0 max-md:opacity-0 max-md:pointer-events-none"
+            } ${
+              showLibrary
+                ? "md:w-80 lg:w-96 md:opacity-100 md:border-r md:border-m3-border"
+                : "md:w-0 md:opacity-0 md:pointer-events-none"
+            }`}
+            aria-hidden={!showLibrary}
           >
-            <PanelLeftOpen className="w-4 h-4" />
-          </button>
-        )}
-        {/* Library Sidebar — width animates; never display:none */}
-        <div
-          className={`flex flex-col overflow-hidden shrink-0 min-w-0 bg-m3-sidebar/30 transition-[width,opacity] duration-300 ease-in-out ${
-            showLibrary && mobilePane === "library"
-              ? "max-md:w-full max-md:opacity-100"
-              : "max-md:w-0 max-md:opacity-0 max-md:pointer-events-none"
-          } ${
-            showLibrary
-              ? "md:w-80 lg:w-96 md:opacity-100 md:border-r md:border-m3-border"
-              : "md:w-0 md:opacity-0 md:pointer-events-none"
-          }`}
-          aria-hidden={!showLibrary}
-        >
-          <div className="flex flex-col h-full min-h-0 w-full md:w-80 lg:w-96">
-          <div className="p-4 border-b border-m3-border bg-m3-card shrink-0">
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-sm font-bold text-m3-text flex items-center gap-2">
-                <BookOpen className="w-4 h-4 text-m3-primary" />
-                {t("serviceDetailPage.songsLibrary")}
-              </h2>
-              <button
-                type="button"
-                onClick={() => {
-                  setShowLibrary(false);
-                  setMobilePane("order");
-                }}
-                className="p-1.5 rounded-lg text-m3-secondary hover:text-m3-primary hover:bg-m3-primary/10 transition-colors cursor-pointer"
-                title={t("serviceDetailPage.hideLibrary")}
-                aria-label={t("serviceDetailPage.hideLibrary")}
-              >
-                <PanelLeftClose className="w-4 h-4" />
-              </button>
-            </div>
-            <div className="relative">
-              <Input
-                ref={searchInputRef}
-                placeholder={t("serviceDetailPage.searchSongsPlaceholder")}
-                value={librarySearch}
-                onChange={(e) => setLibrarySearch(e.target.value)}
-                icon={<Search className="w-4 h-4 text-m3-secondary" />}
-                className="pr-9"
-              />
-              {librarySearch && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setLibrarySearch("");
-                    searchInputRef.current?.focus();
-                  }}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-md text-m3-secondary hover:text-m3-text hover:bg-m3-hover transition-colors cursor-pointer"
-                  title={t("serviceDetailPage.clearSearch")}
-                  aria-label={t("serviceDetailPage.clearSearch")}
-                >
-                  <X className="w-3.5 h-3.5" />
-                </button>
-              )}
-            </div>
-            <div className="flex items-center justify-between mt-2.5">
-              <span className="text-label">
-                {filteredLibrarySongs.length}{" "}
-                {filteredLibrarySongs.length === 1
-                  ? t("serviceDetailPage.songSingular")
-                  : t("serviceDetailPage.songPlural")}
-              </span>
-              <span className="text-[10px] text-m3-secondary/70 hidden md:inline">
-                {t("serviceDetailPage.dragToList")}
-              </span>
-            </div>
-          </div>
-          <div className="flex-1 overflow-y-auto min-h-0 custom-scrollbar divide-y divide-m3-border/60">
-            {filteredLibrarySongs.length === 0 ? (
-              <div className="p-6 text-center text-xs text-m3-secondary">
-                {t("serviceDetailPage.noSongsFound")}
+            <div className="flex flex-col h-full min-h-0 w-full md:w-80 lg:w-96">
+              <div className="p-4 border-b border-m3-border bg-m3-card shrink-0">
+                <div className="flex items-center justify-between mb-3">
+                  <h2 className="text-sm font-bold text-m3-text flex items-center gap-2">
+                    <BookOpen className="w-4 h-4 text-m3-primary" />
+                    {t("serviceDetailPage.songsLibrary")}
+                  </h2>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowLibrary(false);
+                      setMobilePane("order");
+                    }}
+                    className="p-1.5 rounded-lg text-m3-secondary hover:text-m3-primary hover:bg-m3-primary/10 transition-colors cursor-pointer"
+                    title={t("serviceDetailPage.hideLibrary")}
+                    aria-label={t("serviceDetailPage.hideLibrary")}
+                  >
+                    <PanelLeftClose className="w-4 h-4" />
+                  </button>
+                </div>
+                <div className="relative">
+                  <Input
+                    ref={searchInputRef}
+                    placeholder={t("serviceDetailPage.searchSongsPlaceholder")}
+                    value={librarySearch}
+                    onChange={(e) => setLibrarySearch(e.target.value)}
+                    icon={<Search className="w-4 h-4 text-m3-secondary" />}
+                    className="pr-9"
+                  />
+                  {librarySearch && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setLibrarySearch("");
+                        searchInputRef.current?.focus();
+                      }}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-md text-m3-secondary hover:text-m3-text hover:bg-m3-hover transition-colors cursor-pointer"
+                      title={t("serviceDetailPage.clearSearch")}
+                      aria-label={t("serviceDetailPage.clearSearch")}
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
+                <div className="flex items-center justify-between mt-2.5">
+                  <span className="text-label">
+                    {filteredLibrarySongs.length}{" "}
+                    {filteredLibrarySongs.length === 1
+                      ? t("serviceDetailPage.songSingular")
+                      : t("serviceDetailPage.songPlural")}
+                  </span>
+                  <span className="text-[10px] text-m3-secondary/70 hidden md:inline">
+                    {t("serviceDetailPage.dragToList")}
+                  </span>
+                </div>
               </div>
-            ) : (
-              filteredLibrarySongs.map((s) => (
-                <LibrarySongItem
-                  key={s.id}
-                  song={s}
-                  countInService={songCountById[s.id] || 0}
-                  isPending={Boolean(pendingSongIds[s.id])}
-                  onAdd={handleAddSongToService}
-                />
-              ))
-            )}
+              <div className="flex-1 overflow-y-auto min-h-0 custom-scrollbar divide-y divide-m3-border/60">
+                {filteredLibrarySongs.length === 0 ? (
+                  <div className="p-6 text-center text-xs text-m3-secondary">
+                    {t("serviceDetailPage.noSongsFound")}
+                  </div>
+                ) : (
+                  filteredLibrarySongs.map((s) => (
+                    <LibrarySongItem
+                      key={s.id}
+                      song={s}
+                      countInService={songCountById[s.id] || 0}
+                      isPending={Boolean(pendingSongIds[s.id])}
+                      onAdd={handleAddSongToService}
+                    />
+                  ))
+                )}
+              </div>
+            </div>
           </div>
-          </div>
-        </div>
 
-        <div
-          className={`flex flex-col min-w-0 min-h-0 overflow-hidden bg-m3-background relative flex-1 transition-[width,opacity,padding,flex-grow] duration-300 ease-in-out ${
-            mobilePane === "library" && showLibrary
-              ? "max-md:grow-0 max-md:w-0 max-md:opacity-0 max-md:pointer-events-none max-md:p-0"
-              : ""
-          } ${!showLibrary && !previewElement ? "p-4 lg:p-6" : ""}`}
-        >
-          <div className="max-w-5xl w-full mx-auto flex flex-col h-full min-h-0">
-            <div
-              className={`flex-1 flex flex-col bg-m3-card overflow-hidden min-h-0
+          <div
+            className={`flex flex-col min-w-0 min-h-0 overflow-hidden bg-m3-background relative flex-1 transition-[width,opacity,padding,flex-grow] duration-300 ease-in-out ${
+              mobilePane === "library" && showLibrary
+                ? "max-md:grow-0 max-md:w-0 max-md:opacity-0 max-md:pointer-events-none max-md:p-0"
+                : ""
+            } ${!showLibrary && !previewElement ? "p-4 lg:p-6" : ""}`}
+          >
+            <div className="max-w-5xl w-full mx-auto flex flex-col h-full min-h-0">
+              <div
+                className={`flex-1 flex flex-col bg-m3-card overflow-hidden min-h-0
         transition-all duration-300 ease-out
         ${
           !showLibrary && !previewElement
             ? "rounded-[var(--radius-xl)] border border-m3-border shadow-[var(--shadow-sm)]"
             : ""
         }`}
-            >
-              <div className="flex flex-wrap items-center justify-between px-5 py-3 border-b border-m3-border shrink-0 bg-m3-sidebar/30 gap-3">
-                <div className="flex items-center gap-3">
-                  <h2 className="text-base font-bold text-m3-text">
-                    {t("serviceDetailPage.serviceOrder")}
-                  </h2>
-                  {orgSettings.services.showServiceDuration && (
-                    <span className="text-xs font-semibold text-m3-secondary bg-m3-background px-2.5 py-1 rounded-full border border-m3-border/50 shadow-[var(--shadow-sm)]">
-                      {t("serviceDetailPage.totalDuration")}:{" "}
-                      {formatDuration(totalDurationSeconds)}
-                    </span>
-                  )}
-                </div>
-                <div className="flex flex-wrap items-center gap-1.5">
-                  <button
-                    type="button"
-                    onClick={() => openAddModal("welcome")}
-                    className="px-2.5 py-1 text-caption font-semibold rounded-[var(--radius-md)] bg-m3-sidebar text-m3-secondary border border-m3-border hover:bg-m3-hover hover:text-m3-text transition-colors cursor-pointer"
-                  >
-                    + {t("serviceDetailPage.addWelcome")}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => openAddModal("scripture")}
-                    className="px-2.5 py-1 text-caption font-semibold rounded-[var(--radius-md)] bg-m3-sidebar text-m3-secondary border border-m3-border hover:bg-m3-hover hover:text-m3-text transition-colors cursor-pointer"
-                  >
-                    + {t("serviceDetailPage.addScripture")}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => openAddModal("message")}
-                    className="px-2.5 py-1 text-caption font-semibold rounded-[var(--radius-md)] bg-m3-sidebar text-m3-secondary border border-m3-border hover:bg-m3-hover hover:text-m3-text transition-colors cursor-pointer"
-                  >
-                    + {t("serviceDetailPage.addMessage")}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => openAddModal("announcement")}
-                    className="px-2.5 py-1 text-caption font-semibold rounded-[var(--radius-md)] bg-m3-sidebar text-m3-secondary border border-m3-border hover:bg-m3-hover hover:text-m3-text transition-colors cursor-pointer"
-                  >
-                    + {t("serviceDetailPage.addAnnouncement")}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => openAddModal("custom")}
-                    className="px-2.5 py-1 text-caption font-semibold rounded-[var(--radius-md)] bg-m3-sidebar text-m3-secondary border border-m3-border hover:bg-m3-hover hover:text-m3-text transition-colors cursor-pointer"
-                  >
-                    + {t("serviceDetailPage.addCustom")}
-                  </button>
-                </div>
-              </div>
-
-              {orgSettings.services.showNotes && (
-                <div className="px-5 py-2.5 border-b border-m3-border/40 shrink-0 bg-m3-background/30 flex flex-col justify-center min-h-11">
-                  {isEditingGeneralNotes ? (
-                    <div className="flex items-start gap-2">
-                      <textarea
-                        rows={1}
-                        value={generalNotes}
-                        onChange={(e) => setGeneralNotes(e.target.value)}
-                        placeholder={t(
-                          "serviceDetailPage.generalNotesPlaceholder",
-                        )}
-                        className="flex-1 text-xs rounded-lg border border-m3-border p-2 bg-m3-card focus:outline-none focus:ring-1 focus:ring-m3-primary text-m3-text resize-y min-h-9"
-                        autoFocus
-                      />
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => {
-                          setGeneralNotes(service?.notes || "");
-                          setIsEditingGeneralNotes(false);
-                        }}
-                        className="h-9 text-xs shrink-0"
-                      >
-                        {t("common.cancel")}
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="primary"
-                        onClick={async () => {
-                          await handleSaveGeneralNotes();
-                          setIsEditingGeneralNotes(false);
-                        }}
-                        className="h-9 text-xs shrink-0"
-                      >
-                        <Save className="w-3.5 h-3.5 mr-1" /> {t("common.save")}
-                      </Button>
-                    </div>
-                  ) : (
-                    <div
-                      className="flex items-center justify-between gap-4 group cursor-pointer"
-                      onClick={() => setIsEditingGeneralNotes(true)}
-                    >
-                      <div className="text-xs flex items-center gap-2 flex-1">
-                        <FileText className="w-3.5 h-3.5 text-m3-secondary shrink-0" />
-                        {generalNotes ? (
-                          <span className="text-m3-text line-clamp-1 group-hover:line-clamp-none">
-                            {generalNotes}
-                          </span>
-                        ) : (
-                          <span className="italic text-m3-secondary/70">
-                            {t("serviceDetailPage.noGeneralNotes")}
-                          </span>
-                        )}
-                      </div>
-                      <button
-                        type="button"
-                        className="text-m3-secondary hover:text-m3-primary opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-lg hover:bg-m3-primary/10 shrink-0 cursor-pointer"
-                        title={t("serviceDetailPage.editGeneralNotes")}
-                      >
-                        <Edit3 className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              <div
-                ref={dropContainerRef}
-                className={`flex-1 min-h-0 overflow-y-auto overscroll-contain p-4 flex flex-col gap-3 relative custom-scrollbar transition-colors ${isDropTargetActive ? "bg-m3-primary/5 ring-2 ring-m3-primary/20 rounded-[var(--radius-xl)]" : ""}`}
               >
-                {elements.length === 0 ? (
-                  <div className="m-auto text-center rounded-[var(--radius-xl)] border border-dashed border-m3-border flex flex-col items-center justify-center p-12 shrink-0">
-                    <div className="w-12 h-12 rounded-[var(--radius-xl)] flex items-center justify-center bg-m3-primary/10 text-m3-primary mb-3">
-                      <Music className="w-6 h-6" />
-                    </div>
-                    <h4 className="text-sm font-bold text-m3-text">
-                      {t("serviceDetailPage.emptyOutlineTitle")}
-                    </h4>
-                    <p className="text-xs text-m3-secondary mt-1 max-w-50">
-                      {t("serviceDetailPage.emptyOutlineDesc")}
-                    </p>
+                <div className="flex flex-wrap items-center justify-between px-5 py-3 border-b border-m3-border shrink-0 bg-m3-sidebar/30 gap-3">
+                  <div className="flex items-center gap-3">
+                    <h2 className="text-base font-bold text-m3-text">
+                      {t("serviceDetailPage.serviceOrder")}
+                    </h2>
+                    {orgSettings.services.showServiceDuration && (
+                      <span className="text-xs font-semibold text-m3-secondary bg-m3-background px-2.5 py-1 rounded-full border border-m3-border/50 shadow-[var(--shadow-sm)]">
+                        {t("serviceDetailPage.totalDuration")}:{" "}
+                        {formatDuration(totalDurationSeconds)}
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex flex-wrap items-center gap-1.5">
                     <button
                       type="button"
-                      onClick={handleOpenLibrary}
-                      className="mt-4 px-3 py-2 text-xs font-semibold rounded-[var(--radius-md)] border border-m3-primary/30 text-m3-primary hover:bg-m3-primary/5 transition-colors cursor-pointer"
+                      onClick={() => openAddModal("welcome")}
+                      className="px-2.5 py-1 text-caption font-semibold rounded-[var(--radius-md)] bg-m3-sidebar text-m3-secondary border border-m3-border hover:bg-m3-hover hover:text-m3-text transition-colors cursor-pointer"
                     >
-                      {t("serviceDetailPage.viewLibrary")}
+                      + {t("serviceDetailPage.addWelcome")}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => openAddModal("scripture")}
+                      className="px-2.5 py-1 text-caption font-semibold rounded-[var(--radius-md)] bg-m3-sidebar text-m3-secondary border border-m3-border hover:bg-m3-hover hover:text-m3-text transition-colors cursor-pointer"
+                    >
+                      + {t("serviceDetailPage.addScripture")}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => openAddModal("message")}
+                      className="px-2.5 py-1 text-caption font-semibold rounded-[var(--radius-md)] bg-m3-sidebar text-m3-secondary border border-m3-border hover:bg-m3-hover hover:text-m3-text transition-colors cursor-pointer"
+                    >
+                      + {t("serviceDetailPage.addMessage")}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => openAddModal("announcement")}
+                      className="px-2.5 py-1 text-caption font-semibold rounded-[var(--radius-md)] bg-m3-sidebar text-m3-secondary border border-m3-border hover:bg-m3-hover hover:text-m3-text transition-colors cursor-pointer"
+                    >
+                      + {t("serviceDetailPage.addAnnouncement")}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => openAddModal("custom")}
+                      className="px-2.5 py-1 text-caption font-semibold rounded-[var(--radius-md)] bg-m3-sidebar text-m3-secondary border border-m3-border hover:bg-m3-hover hover:text-m3-text transition-colors cursor-pointer"
+                    >
+                      + {t("serviceDetailPage.addCustom")}
                     </button>
                   </div>
-                ) : (
-                  <div className="flex flex-col rounded-[var(--radius-lg)] border border-m3-border divide-y divide-m3-border/70">
-                    {elements.map((el, i) => (
-                      <ServiceRow
-                        key={el.id}
-                        element={el}
-                        index={i}
-                        isPreviewed={previewElement?.id === el.id}
-                        canMoveUp={i > 0}
-                        canMoveDown={i < elements.length - 1}
-                        onMoveUp={() => handleMoveElement(el.id, -1)}
-                        onMoveDown={() => handleMoveElement(el.id, 1)}
-                        onTogglePreview={handleTogglePreview}
-                        onRemove={handleRemoveElement}
-                        onEdit={openEditModal}
-                        onNoteChange={handleNoteChange}
-                        showNotes={orgSettings.services.showNotes}
-                      />
-                    ))}
+                </div>
+
+                {orgSettings.services.showNotes && (
+                  <div className="px-5 py-2.5 border-b border-m3-border/40 shrink-0 bg-m3-background/30 flex flex-col justify-center min-h-11">
+                    {isEditingGeneralNotes ? (
+                      <div className="flex items-start gap-2">
+                        <textarea
+                          rows={1}
+                          value={generalNotes}
+                          onChange={(e) => setGeneralNotes(e.target.value)}
+                          placeholder={t(
+                            "serviceDetailPage.generalNotesPlaceholder",
+                          )}
+                          className="flex-1 text-xs rounded-lg border border-m3-border p-2 bg-m3-card focus:outline-none focus:ring-1 focus:ring-m3-primary text-m3-text resize-y min-h-9"
+                          autoFocus
+                        />
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => {
+                            setGeneralNotes(service?.notes || "");
+                            setIsEditingGeneralNotes(false);
+                          }}
+                          className="h-9 text-xs shrink-0"
+                        >
+                          {t("common.cancel")}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="primary"
+                          onClick={async () => {
+                            await handleSaveGeneralNotes();
+                            setIsEditingGeneralNotes(false);
+                          }}
+                          className="h-9 text-xs shrink-0"
+                        >
+                          <Save className="w-3.5 h-3.5 mr-1" />{" "}
+                          {t("common.save")}
+                        </Button>
+                      </div>
+                    ) : (
+                      <div
+                        className="flex items-center justify-between gap-4 group cursor-pointer"
+                        onClick={() => setIsEditingGeneralNotes(true)}
+                      >
+                        <div className="text-xs flex items-center gap-2 flex-1">
+                          <FileText className="w-3.5 h-3.5 text-m3-secondary shrink-0" />
+                          {generalNotes ? (
+                            <span className="text-m3-text line-clamp-1 group-hover:line-clamp-none">
+                              {generalNotes}
+                            </span>
+                          ) : (
+                            <span className="italic text-m3-secondary/70">
+                              {t("serviceDetailPage.noGeneralNotes")}
+                            </span>
+                          )}
+                        </div>
+                        <button
+                          type="button"
+                          className="text-m3-secondary hover:text-m3-primary opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-lg hover:bg-m3-primary/10 shrink-0 cursor-pointer"
+                          title={t("serviceDetailPage.editGeneralNotes")}
+                        >
+                          <Edit3 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    )}
                   </div>
                 )}
+
+                <div
+                  ref={dropContainerRef}
+                  className={`flex-1 min-h-0 overflow-y-auto overscroll-contain p-4 flex flex-col gap-3 relative custom-scrollbar transition-colors ${isDropTargetActive ? "bg-m3-primary/5 ring-2 ring-m3-primary/20 rounded-[var(--radius-xl)]" : ""}`}
+                >
+                  {elements.length === 0 ? (
+                    <div className="m-auto text-center rounded-[var(--radius-xl)] border border-dashed border-m3-border flex flex-col items-center justify-center p-12 shrink-0">
+                      <div className="w-12 h-12 rounded-[var(--radius-xl)] flex items-center justify-center bg-m3-primary/10 text-m3-primary mb-3">
+                        <Music className="w-6 h-6" />
+                      </div>
+                      <h4 className="text-sm font-bold text-m3-text">
+                        {t("serviceDetailPage.emptyOutlineTitle")}
+                      </h4>
+                      <p className="text-xs text-m3-secondary mt-1 max-w-50">
+                        {t("serviceDetailPage.emptyOutlineDesc")}
+                      </p>
+                      <button
+                        type="button"
+                        onClick={handleOpenLibrary}
+                        className="mt-4 px-3 py-2 text-xs font-semibold rounded-[var(--radius-md)] border border-m3-primary/30 text-m3-primary hover:bg-m3-primary/5 transition-colors cursor-pointer"
+                      >
+                        {t("serviceDetailPage.viewLibrary")}
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col rounded-[var(--radius-lg)] border border-m3-border divide-y divide-m3-border/70 overflow-hidden">
+                      {elements.map((el, i) => (
+                        <ServiceRow
+                          key={el.id}
+                          element={el}
+                          index={i}
+                          isPreviewed={previewElement?.id === el.id}
+                          canMoveUp={i > 0}
+                          canMoveDown={i < elements.length - 1}
+                          onMoveUp={() => handleMoveElement(el.id, -1)}
+                          onMoveDown={() => handleMoveElement(el.id, 1)}
+                          onTogglePreview={handleTogglePreview}
+                          onRemove={handleRemoveElement}
+                          onEdit={openEditModal}
+                          onNoteChange={handleNoteChange}
+                          showNotes={orgSettings.services.showNotes}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        <div
-          className={`flex flex-col overflow-hidden shrink-0 min-w-0 bg-m3-card transition-[width,opacity,transform] duration-300 ease-in-out max-md:absolute max-md:inset-y-0 max-md:right-0 max-md:z-20 ${
-            previewElement
-              ? "max-md:w-full max-md:translate-x-0 max-md:opacity-100 md:w-96 lg:w-md md:opacity-100 md:border-l md:border-m3-border"
-              : "max-md:w-full max-md:translate-x-full max-md:opacity-0 max-md:pointer-events-none md:w-0 md:opacity-0 md:pointer-events-none"
-          }`}
-          aria-hidden={!previewElement}
-        >
-          <div className="flex flex-col h-full min-h-0 w-full md:w-96 lg:w-md">
-          {previewContent && (
-            <>
-              <div className="p-4 border-b border-m3-border bg-m3-card shrink-0">
-                <div className="flex items-center justify-between gap-2">
-                  <h2 className="text-sm font-bold text-m3-text flex items-center gap-2 min-w-0">
-                    <Music className="w-4 h-4 text-m3-primary shrink-0" />
-                    <span className="truncate">{previewContent.title}</span>
-                  </h2>
-                  <button
-                    type="button"
-                    onClick={() => setPreviewElement(null)}
-                    className="min-h-11 min-w-11 inline-flex items-center justify-center rounded-lg text-m3-secondary hover:text-m3-primary hover:bg-m3-primary/10 transition-colors shrink-0 cursor-pointer"
-                    title={t("serviceDetailPage.closePreview")}
-                    aria-label={t("serviceDetailPage.closePreview")}
-                  >
-                    <PanelRightClose className="w-4 h-4" />
-                  </button>
-                </div>
-                <p className="text-xs text-m3-secondary truncate mt-0.5">
-                  {previewContent.content || "—"}
-                </p>
-              </div>
-              <div className="flex-1 overflow-hidden min-h-0">
-                <SongPreview element={previewContent} />
-              </div>
-            </>
-          )}
+          <div
+            className={`flex flex-col overflow-hidden shrink-0 min-w-0 bg-m3-card transition-[width,opacity,transform] duration-300 ease-in-out max-md:absolute max-md:inset-y-0 max-md:right-0 max-md:z-20 ${
+              previewElement
+                ? "max-md:w-full max-md:translate-x-0 max-md:opacity-100 md:w-96 lg:w-md md:opacity-100 md:border-l md:border-m3-border"
+                : "max-md:w-full max-md:translate-x-full max-md:opacity-0 max-md:pointer-events-none md:w-0 md:opacity-0 md:pointer-events-none"
+            }`}
+            aria-hidden={!previewElement}
+          >
+            <div className="flex flex-col h-full min-h-0 w-full md:w-96 lg:w-md">
+              {previewContent && (() => {
+                const badge = getElementBadge(previewContent.type, t);
+                const Icon = badge.icon;
+                return (
+                  <>
+                    <div className="p-4 border-b border-m3-border bg-m3-card shrink-0">
+                      <div className="flex items-center justify-between gap-2">
+                        <h2 className="text-sm font-bold text-m3-text flex items-center gap-2 min-w-0">
+                          <Icon className="w-4 h-4 text-m3-primary shrink-0" />
+                          <span className="truncate">{previewContent.title}</span>
+                        </h2>
+                        <button
+                          type="button"
+                          onClick={() => setPreviewElement(null)}
+                          className="min-h-11 min-w-11 inline-flex items-center justify-center rounded-lg text-m3-secondary hover:text-m3-primary hover:bg-m3-primary/10 transition-colors shrink-0 cursor-pointer"
+                          title={t("serviceDetailPage.closePreview")}
+                          aria-label={t("serviceDetailPage.closePreview")}
+                        >
+                          <PanelRightClose className="w-4 h-4" />
+                        </button>
+                      </div>
+                      <div className="flex items-center gap-2 mt-1.5">
+                        <span
+                          className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full shrink-0"
+                          style={{ backgroundColor: badge.bg, color: badge.color }}
+                        >
+                          {badge.label}
+                        </span>
+                        {previewContent.type === "song" && previewContent.content && (
+                          <p className="text-xs text-m3-secondary truncate">{previewContent.content}</p>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex-1 overflow-hidden min-h-0">
+                      {previewContent.type === "song" ? (
+                        <SongPreview element={previewContent} />
+                      ) : (
+                        <div className="h-full min-h-0 overflow-y-auto overscroll-contain px-5 sm:px-8 py-6 custom-scrollbar">
+                          {previewContent.passage && (
+                            <p className="text-sm font-semibold text-m3-primary mb-4">
+                              {previewContent.passage}
+                            </p>
+                          )}
+                          {previewContent.notes && (
+                            <div className="flex items-start gap-2 mb-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/50 rounded-lg px-3 py-2">
+                              <StickyNote className="w-3.5 h-3.5 shrink-0 text-amber-500 dark:text-amber-400 mt-0.5" />
+                              <p className="text-xs text-amber-700 dark:text-amber-300 italic">{previewContent.notes}</p>
+                            </div>
+                          )}
+                          <div className="font-lyric text-[1.25rem] sm:text-[1.5rem] leading-snug text-m3-text whitespace-pre-wrap max-w-2xl">
+                            {previewContent.content || t("serviceDetailPage.noContent")}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </>
+                );
+              })()}
+            </div>
           </div>
-        </div>
         </div>
       </div>
 
